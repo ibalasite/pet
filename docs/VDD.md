@@ -224,7 +224,7 @@ All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical 
 
 | Token Name | Hex | oklch | WCAG Contrast on `--color-surface-base` | Usage |
 |-----------|-----|-------|----------------------------------------|-------|
-| `--color-brand-primary` | `#6c5ce7` | `oklch(52% 0.24 280)` | 3.51:1 (AA non-text, WCAG 1.4.11) | Primary CTA buttons, active nav links, claim flow primary actions — UI component/surface color, not foreground text on dark base |
+| `--color-brand-primary` | `#6c5ce7` | `oklch(52% 0.22 280)` | 3.51:1 (AA non-text, WCAG 1.4.11) | Primary CTA buttons, active nav links, claim flow primary actions — UI component/surface color, not foreground text on dark base |
 | `--color-brand-secondary` | `#00b894` | `oklch(68% 0.19 164)` | 6.1:1 (AA) | Secondary actions, success states, training complete indicators |
 | `--color-brand-accent` | `#fdcb6e` | `oklch(85% 0.15 82)` | 8.4:1 (AAA) | Legendary highlights, attention elements, focus-draw on high-value actions |
 | `--color-surface-base` | `#1a1a2e` | `oklch(12% 0.04 280)` | N/A (background) | Page background, primary canvas surface |
@@ -574,7 +574,13 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    ============================================= */
 --color-brand-primary: var(--primitive-purple-500);       /* #6c5ce7 */
 --color-brand-primary-dark: color-mix(in oklch, var(--color-brand-primary), black 20%);
---color-brand-primary-light: var(--primitive-purple-300); /* #8b80ff — hover */
+--color-brand-primary-light: var(--primitive-purple-300); /* #c4b5fd — Hover/active accent */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-brand-primary: var(--primitive-purple-300); /* #c4b5fd — dark mode lightened */
+  }
+}
 --color-brand-secondary: var(--primitive-teal-400);       /* #00b894 */
 --color-brand-accent: var(--primitive-gold-300);          /* #fdcb6e */
 --color-brand-accent-bright: var(--primitive-purple-300); /* Hover state for accent buttons */
@@ -616,7 +622,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --color-border-default: oklch(32% 0.05 280);              /* #393966 */
 --color-border-focus: var(--color-focus);
 --color-border-strong: oklch(45% 0.06 280);               /* stronger border for hover/active */
---color-shadow-default: oklch(8% 0.02 280);               /* hard-offset shadow color */
+--color-shadow-default: var(--primitive-navy-shadow); /* #0d0d1a */
 --color-surface-elevated: var(--color-surface-raised);    /* alias for elevated surface */
 --color-brand-primary-muted: color-mix(in oklch, var(--color-brand-primary) 15%, var(--color-surface-base)); /* selected/muted bg */
 --color-feedback-error: var(--color-error);               /* alias for error feedback */
@@ -715,11 +721,12 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --text-stat-weight: 700;
 --text-stat-line-height: 1;
 --text-stat-letter-spacing: -0.01em;
+--text-stat-size: 1.5rem; /* Context-dependent — override per screen spec */
 ```
 
 ### §6.2.5 Typography Tokens
 
-All `--text-*` CSS custom properties declared above map directly to the §5.2 type scale. Each level exposes four sub-tokens: `-size`, `-family`, `-weight`, `-line-height`, and `-letter-spacing`. Component authors must use these tokens rather than hardcoding font values. The font families are also available via `--font-pixel`, `--font-body`, and `--font-mono` shorthand tokens.
+All `--text-*` CSS custom properties declared above map directly to the §5.2 type scale. Each level exposes five sub-tokens: `-size`, `-family`, `-weight`, `-line-height`, and `-letter-spacing`. Component authors must use these tokens rather than hardcoding font values. The font families are also available via `--font-pixel`, `--font-body`, and `--font-mono` shorthand tokens.
 
 ### §6.3 Layer 3 — Component Tokens
 
@@ -905,7 +912,7 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 | `--color-text-primary` | `#1a1a2e` | `#e8e8f0` | 12.4:1 dark / 14.1:1 light | AAA on both modes |
 | `--color-text-secondary` | `#4a4a7a` | `#9999cc` | 4.7:1 dark / 5.2:1 light | AA on both modes |
 | `--color-text-disabled` | `#7a7aaa` | `#5a5a8e` | 3.1:1 minimum | Meets AA large text only |
-| `--color-brand-primary` | `#4a3fd4` | `#8b80ff` | 5.8:1 dark / 4.6:1 light | AA on both modes |
+| `--color-brand-primary` | `#4a3fd4` | `#c4b5fd` | 5.8:1 dark / 4.6:1 light | AA on both modes |
 | `--color-brand-accent` | `#c9930a` | `#fdcb6e` | 8.4:1 dark / 4.5:1 light | AAA dark / AA light |
 | `--color-rarity-legendary` | `#b07e00` | `#fdcb6e` | 8.4:1 dark / 5.1:1 light | AAA dark |
 | `--color-rarity-epic` | `#6a5fe8` | `#a29bfe` | 5.9:1 dark / 4.8:1 light | AA both |
@@ -1455,7 +1462,7 @@ The admin portal uses a **distinct, professional color scheme** deliberately sep
 | `--admin-sidebar-text` | `#f9fafb` | **15.2:1 on sidebar** | AAA — sidebar navigation labels |
 | `--admin-sidebar-text-secondary` | `#d1d5db` | **9.6:1 on sidebar** | AAA — inactive nav item labels |
 | `--admin-sidebar-active-bg` | `#1f2937` | N/A | Active/hover sidebar item background |
-| `--admin-sidebar-active-indicator` | `#6c5ce7` | N/A (left border accent) | Active nav item left-border accent (inherits brand primary) |
+| `--admin-sidebar-active-indicator` | `var(--color-brand-primary)` | N/A (left border accent) | Active nav item left-border accent (inherits brand primary) |
 | `--admin-content-bg` | `#f9fafb` | N/A (background) | Main content area — light neutral |
 | `--admin-content-text` | `#111827` | **15.2:1 on content** | AAA — primary content text |
 | `--admin-content-text-secondary` | `#6b7280` | **4.6:1 on content** | AA — secondary labels, timestamps |
