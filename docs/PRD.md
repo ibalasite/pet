@@ -35,6 +35,7 @@
 | v1.1 | 2026-05-03 | PRD Editor (review-r1) | Fixed 15 review findings (F1–F15): scope reconciliation for US-RECORD-001 (F1), MAAPO as primary North Star (F2), arena battles target clarification (F3), US-PET-002 persona fix (F4), persona pain points and tech familiarity (F5), AC-006-4 daily-login-reward removed (F6), US-TRAIN-001 stat-max boundary AC added (F7), US-ARENA-001 rate-limit error AC added (F8), WCAG 2.1 AA NFR subsection added (F9), admin analytics events added (F10), RTM Priority column added + BRD cross-reference note (F11), AC-012-5 trade fee formula made concrete (F12), T-shirt estimates added to all USs (F13), §5 restructured into Epics (F14), ClaimToken and FoodBuff state machines added (F15) |
 | v1.2 | 2026-05-03 | PRD Editor (review-r2) | Fixed 10 review findings (F1–F10): §4.5 MoSCoW Battle Records promoted to Must Have (F1); FF_BATTLE_RECORDS set to P0/ON with kill-switch (F2); US-RECORD-001 heading corrected to P0 (F3); added AC-010-5 HTTP 404 error path and AC-010-6 <20 battles boundary to US-RECORD-001 (F4); added AC-004-5 invalid/revoked URL 404 error path to US-AUTH-002 (F5); second §7.8 renumbered to §7.9 Analytics Event Map (F6); `level` field added to §11.2 data dictionary (F7); BRD O3 added to US-AUTH-001, US-TRAIN-001, US-ARENA-001 RTM rows (F8); US-ADMIN-004/005/006 Estimate, Feature Flag, Test Type column added + all 3 added to §15 RTM (F9); US-FOOD-001 estimate corrected from S to M (F10) |
 | v1.3 | 2026-05-03 | PRD Editor (review-r3) | Fixed 6 review findings (F1–F6): RTM US-ADMIN-006 MoSCoW corrected from Must to Should (F1); RTM BRD Objective for US-ADMIN-004 corrected to O1 and US-ADMIN-005 to O2 (F2); §9.2 Guardrail Metrics added Leaderboard page UV/DAU ≥ 20% and Arena social share rate ≥ 5% (F3); AC-009-3 terminology changed from 'logged-in' to URL-token auth model (F4); AC-006-6 stat-cap boundary condition added to US-FOOD-001 (F5); battle_records_viewed analytics event added to §7.9 (F6) |
+| v1.4 | 2026-05-03 | PRD Editor (review-r4) | Fixed 5 review findings (F1–F5): EPIC-ADMIN 'US included' updated to include US-ADMIN-004/005/006 (F1); RTM US-ADMIN-006 BRD Objective corrected from O5 to O2 (F2); US-ADMIN-003 renamed to 'Runtime Parameter Tuning' (max battles/hour, rarity weights) and US-ADMIN-006 renamed to 'Game Economy Configuration' (food buff multipliers, arena entry cost/cooldown) with explicit scope separation and no overlapping AC fields (F3); §6.3 Arena Battle Flow diagram updated with rate-limit check node before arena mode selection (F4); §7.9 Analytics Event Map updated with gdpr_deletion_processed and suspicious_pet_flagged events for US-ADMIN-004 and US-ADMIN-005 (F5) |
 
 ---
 
@@ -662,7 +663,7 @@ graph TD
 ### EPIC-ADMIN — Admin & Moderation Portal
 **Description**: Covers all admin operator capabilities — pet management and banning, leaderboard moderation, and system configuration — required for platform integrity and game balance.
 **BRD Objective Link**: O2 (competitive integrity), O4 (leaderboard trust)
-**US included**: US-ADMIN-001, US-ADMIN-002, US-ADMIN-003
+**US included**: US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006
 
 ### US-ADMIN-001 — Admin Pet Management
 
@@ -705,9 +706,9 @@ graph TD
 
 ---
 
-### US-ADMIN-003 — Admin System Configuration
+### US-ADMIN-003 — Admin Runtime Parameter Tuning
 
-**Story**: As an admin, I want to configure system parameters (battle rate limits, food effects, rarity weights) so that I can tune the game balance without code deployments.
+**Story**: As an admin, I want to tune real-time operational safety parameters (max battles per hour, rarity weights) so that I can respond to live platform issues and balance concerns without code deployments.
 
 **REQ-ID**: US-ADMIN-003
 **Priority**: P1
@@ -719,7 +720,7 @@ graph TD
 
 | AC# | Criterion | Test Type |
 |-----|-----------|-----------|
-| AC-015-1 | Given the system configuration panel, an admin can adjust: max battles per hour per pet (default: 10), rarity weight percentages, food item stat bonuses | E2E |
+| AC-015-1 | Given the system configuration panel, an admin can adjust runtime operational safety levers only: max battles per hour per pet (integer 1–50, default: 10) and rarity weight percentages (four values that must sum to 100%) | E2E |
 | AC-015-2 | Given a configuration change, the change is saved and takes effect within 5 minutes via configuration cache refresh | Integration |
 | AC-015-3 | Given any configuration change, the action is logged to the audit trail with: admin ID, timestamp, field changed, old value, new value | Integration |
 
@@ -782,7 +783,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Pet owner clicks 'Enter Arena'] --> B[Select arena mode: Race or Sumo]
+    A[Pet owner clicks 'Enter Arena'] --> A1{Rate limit<br/>reached?}
+    A1 -->|Yes| A2[Show rate limit<br/>countdown message<br/>Disable button]
+    A1 -->|No| B[Select arena mode: Race or Sumo]
     B --> C[Pre-battle screen: pet stats, active food buffs shown]
     C --> D[System enters matchmaking queue]
     D --> E{Opponent found within 30s?}
@@ -1005,6 +1008,8 @@ All events must be captured in the analytics pipeline for funnel analysis and re
 | `admin_pet_banned` | Admin bans a pet from arena and leaderboard | admin_id_hash, pet_id, ban_reason_category (one of: bot_activity, cheating, inappropriate_content, other), is_permanent (boolean) | Admin moderation audit, bot infestation trending |
 | `admin_leaderboard_removal` | Admin removes a pet from the leaderboard | admin_id_hash, pet_id, action_type (one of: temporary_removal, permanent_ban, score_reset) | Leaderboard integrity monitoring |
 | `battle_records_viewed` | Visitor opens a pet's public battle records page | pet_id, is_owner_viewing, referrer_type (direct/share_url/leaderboard), battle_count | Virality measurement, k-factor tracking, share URL conversion |
+| `gdpr_deletion_processed` | Super Admin completes GDPR deletion request | admin_id_hash, pet_ids_affected_count, completion_time_hours | GDPR compliance monitoring, SLA tracking |
+| `suspicious_pet_flagged` | System auto-flags pet exceeding 50 battles in 60-min window | pet_id, battles_in_window, flag_type (auto_detection) | Bot infestation trending, moderation queue monitoring |
 
 ---
 
@@ -1322,7 +1327,7 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | US-ADMIN-003 | Admin system configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E |
 | US-ADMIN-004 | GDPR data deletion processing | P0 | O1 | Must | `FF_ADMIN_PORTAL` | GDPR non-compliance risk; legal liability | E2E + Integration |
 | US-ADMIN-005 | Suspicious battle detection | P0 | O2 | Must | `FF_ADMIN_PORTAL` | Automated bot detection absent; moderator workload unbounded | E2E + Integration |
-| US-ADMIN-006 | Game balance configuration | P1 | O5 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E + Integration |
+| US-ADMIN-006 | Game balance configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E + Integration |
 
 ---
 
@@ -1478,20 +1483,22 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 
 ---
 
-**US-ADMIN-006 — Game Balance Configuration**
+**US-ADMIN-006 — Game Economy Configuration**
 
-**Story**: As a Super Admin, I want to adjust game balance parameters through the admin portal so that I can tune gameplay without requiring an engineering deployment.
+**Story**: As a Super Admin, I want to adjust game economy design parameters (food buff multipliers, arena entry cost, cooldown periods) through the admin portal so that I can tune the player economy without requiring an engineering deployment.
 
 **REQ-ID**: US-ADMIN-006
 **Priority**: P1
 **Estimate**: M — 5 SP (T-shirt: M = 5–8 SP; lower end given config UI reuses audit infrastructure)
 **Feature Flag**: `FF_ADMIN_PORTAL`
 
+> **Scope note**: This story covers game economy design parameters only. Runtime operational safety levers (max battles/hour, rarity weights) are governed by US-ADMIN-003. Do not duplicate those fields here.
+
 **Acceptance Criteria**:
 
 | AC# | Criterion | Test Type |
 |-----|-----------|-----------|
-| AC-018-1 | Given the System Configuration module, a Super Admin can edit: max arena battles per hour (integer 1-50), rarity weights (four values summing to 100%), food buff multipliers (float 0.5-5.0x) | E2E |
+| AC-018-1 | Given the Game Economy Configuration module, a Super Admin can edit economy design parameters only: food buff multipliers (float 0.5–5.0x per food type), arena entry cooldown period (integer minutes, range 0–60), and arena entry cost in food credits (integer 0–10, default 0) | E2E |
 | AC-018-2 | Given a configuration change, the change is previewed (showing old value → new value) and requires confirmation before saving | E2E |
 | AC-018-3 | Given a saved configuration, it takes effect within 5 minutes via config cache refresh; no service restart required | Integration |
 | AC-018-4 | Given a configuration change, the audit log records the Super Admin ID, timestamp, field name, old value, new value | Integration |
