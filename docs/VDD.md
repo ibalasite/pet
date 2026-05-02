@@ -655,9 +655,9 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --button-primary-focus-offset: 2px;
 --button-border-radius: var(--primitive-radius-none);     /* Pixel art: sharp */
 --button-border: 2px solid var(--primitive-grey-600);
---button-shadow: 4px 4px 0px var(--primitive-shadow-default);   /* PDD §9.3 aligned: 4px hard-offset */
---button-shadow-hover: 6px 6px 0px var(--primitive-shadow-default);
---button-shadow-active: 2px 2px 0px var(--primitive-shadow-default);  /* compressed on press */
+--button-shadow: 4px 4px 0px var(--color-shadow-default);   /* PDD §9.3 aligned: 4px hard-offset */
+--button-shadow-hover: 6px 6px 0px var(--color-shadow-default);
+--button-shadow-active: 2px 2px 0px var(--color-shadow-default);  /* compressed on press */
 --button-padding-y: var(--primitive-space-3);             /* 12px */
 --button-padding-x: var(--primitive-space-6);             /* 24px */
 --button-min-height: 44px;                                /* WCAG 2.5.5 touch target */
