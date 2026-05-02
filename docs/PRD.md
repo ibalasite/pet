@@ -420,7 +420,7 @@ graph TD
 | AC-003-1 | Given a guest is interacting with a pet, a "Claim This Pet" CTA is visible without obscuring the main interaction area | Visual Regression |
 | AC-003-2 | Given the user submits a valid email address, the system sends a claim email within 60 seconds containing a 6-digit numeric password (not a clickable magic link) | Integration |
 | AC-003-3 | Given the user enters the 6-digit password on the claim page, the pet is permanently bound to their email and a unique pet URL is generated and displayed | E2E |
-| AC-003-4 | Given the claim password, it expires after 15 minutes from generation, and any attempt to use an expired password returns a clear error message | Unit + E2E |
+| AC-003-4 | Given the claim password, it expires after 15 minutes from generation, and any attempt to use an expired password causes the system to display the error message: "Claim code has expired. Please request a new claim link." and provides a button to trigger a new claim email | Unit + E2E |
 | AC-003-5 | Given a claim password is used successfully, it is immediately marked as used and cannot be reused (one-time token enforcement) | Unit |
 | AC-003-6 | Given any email address is submitted (whether it exists in the system or not), the API response is identical: "If this email is valid, you will receive a claim password" (prevents email enumeration attacks) | Security |
 | AC-003-7 | Given the user clicks the unique pet URL on any device or browser, they are taken directly to their pet page without needing to re-enter credentials | E2E |
@@ -786,7 +786,7 @@ flowchart TD
 flowchart TD
     A[Pet owner clicks 'Enter Arena'] --> A1{Rate limit<br/>reached?}
     A1 -->|Yes| A2[Show rate limit<br/>countdown message<br/>Disable button]
-    A2 --> P[Return to arena lobby]
+    A2 --> P2[Return to arena lobby]
     A1 -->|No| B[Select arena mode: Race or Sumo]
     B --> C[Pre-battle screen: pet stats, active food buffs shown]
     C --> D[System enters matchmaking queue]
@@ -1454,6 +1454,7 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 **Priority**: P0
 **Estimate**: M — 8 SP (T-shirt: M = 5–8 SP)
 **Feature Flag**: `FF_ADMIN_PORTAL`
+**Linked Feature**: Admin Backend
 
 **Acceptance Criteria**:
 
@@ -1474,6 +1475,7 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 **Priority**: P0
 **Estimate**: S — 3 SP (T-shirt: S = 1–3 SP)
 **Feature Flag**: `FF_ADMIN_PORTAL`
+**Linked Feature**: Admin Backend
 
 **Acceptance Criteria**:
 
@@ -1494,6 +1496,7 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 **Priority**: P1
 **Estimate**: M — 5 SP (T-shirt: M = 5–8 SP; lower end given config UI reuses audit infrastructure)
 **Feature Flag**: `FF_ADMIN_PORTAL`
+**Linked Feature**: Admin Backend
 
 > **Scope note**: This story covers game economy design parameters only. Runtime operational safety levers (max battles/hour, rarity weights) are governed by US-ADMIN-003. Do not duplicate those fields here.
 
