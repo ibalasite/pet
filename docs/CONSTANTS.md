@@ -29,7 +29,7 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | ARENA_MATCH_DURATION_MIN | 5 | seconds | PRD §5 US-ARENA-001 AC-007-3; PRD §6.3 | Battle animation minimum |
 | ARENA_MATCH_DURATION_MAX | 15 | seconds | PRD §5 US-ARENA-001 AC-007-3; PRD §6.3 | Battle animation maximum |
 | ARENA_MATCHMAKING_TIMEOUT | 30 | seconds | PRD §5 US-ARENA-001 AC-007-1 | Offer AI opponent if no match found |
-| ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER | 15 | percent (±) | PRD §5 US-ARENA-001 AC-007-2; PRD §6.3 | Seeded random modifier ±15% applied to Speed/Strength stat |
+| ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER | 15 | percent (±) | PRD §5 US-ARENA-001 AC-007-2; US-ARENA-002 AC-008-2; PRD §6.3 | Seeded random modifier ±15% applied to Speed stat (race) or Strength stat (sumo); single canonical value covering both battle types |
 | ARENA_BATTLE_RECORDS_DISPLAY | 20 | battles | PRD §5 US-RECORD-001 AC-010-1 | Last 20 battles shown on public page |
 | LEADERBOARD_TOP_DISPLAY | 100 | pets | PRD §5 US-BOARD-001 AC-009-1 | Top 100 displayed by default |
 | LEADERBOARD_ADMIN_VIEW | 500 | pets | PRD §5 US-ADMIN-002 AC-014-1; PRD §19.3 | Admin sees top 500 |
@@ -60,7 +60,6 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF | 100 | credits/level | PRD §5 US-TRADE-001 AC-012-5 | min_price = (pet_level × 100) + (rarity_multiplier × 500) |
 | TRADE_MIN_PRICE_FORMULA_RARITY_COEFF | 500 | credits | PRD §5 US-TRADE-001 AC-012-5 | min_price = (pet_level × 100) + (rarity_multiplier × 500) |
 | ARENA_SCORE_FORMULA | win_rate × battles_played × level_multiplier | formula | PRD §5 US-BOARD-001 AC-009-1 | Composite leaderboard score |
-| ARENA_BATTLE_SEEDED_MODIFIER_MAGNITUDE | 15 | percent | PRD §5 US-ARENA-001 AC-007-2; US-ARENA-002 AC-008-2 | Applied as ±15% on Speed (race) or Strength (sumo) stat |
 | FOOD_BUFF_EXAMPLE_TEMP_AMOUNT | 5 | stat points | PRD §5 US-FOOD-001 AC-006-1 | Example: "Speed Berry +5 Speed for 24h" |
 | FOOD_BUFF_EXAMPLE_TEMP_DURATION | 24 | hours | PRD §5 US-FOOD-001 AC-006-1 | Example temporary food buff duration |
 | FOOD_BUFF_EXAMPLE_PERM_AMOUNT | 3 | stat points | PRD §5 US-FOOD-001 AC-006-1 | Example: "Power Mushroom +3 Strength permanently" |
@@ -103,7 +102,6 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY | 2 | minutes | PRD §18 A11y-09 | Warn user 2 min before claim code expiry |
 | MARKETPLACE_TRADE_ANTIFLIP_PROTECTION | 7 | days | PRD §5 US-TRADE-001 AC-012-4 | Cooldown after trade before relisting same pet |
 | MARKETPLACE_ENABLE_DAU_THRESHOLD | 1000 | DAU | PRD §4.3; PRD §10.2 FF_MARKETPLACE | Feature flag enabled when DAU > 1,000 |
-| DB_CONNECTION_POOL_MIN | 20 | connections | PRD §7.1 capacity targets | PostgreSQL connection pool minimum |
 | DB_AUTOFAILOVER_TIME | 60 | seconds | PRD §7.3 NFR-AVAIL-03 | PostgreSQL automated failover target |
 | DB_MAINTENANCE_WINDOW_MAX | 2 | hours/month | PRD §7.3 NFR-AVAIL-02 | Maximum planned maintenance per month |
 | DB_MAINTENANCE_NOTICE | 48 | hours | PRD §7.3 NFR-AVAIL-02 | Advance notice required for maintenance window |
@@ -247,6 +245,9 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | MONTHLY_GMV_TARGET | 10000 | USD | BRD §3.1 O5 | Marketplace monthly GMV target at 12 months |
 | MONTHLY_FEE_REVENUE_TARGET | 500 | USD | BRD §3.1 O5; BRD §7.2 Outcome | Monthly transaction fee revenue at 12 months |
 | PII_EMAIL_RETENTION_POST_DELETE | 7 | days | PRD §11.4 PII inventory | Account lifetime + 7 days post-deletion; then hashed |
+| ANALYTICS_EVENT_HOT_RETENTION | 90 | days | PRD §11.1 data dictionary | Hot storage for analytics events — see §7 for full rule |
+| ANALYTICS_EVENT_COLD_ARCHIVE | 2 | years | PRD §11.1 data dictionary | Cold archive for analytics events — see §7 for full rule |
+| ADMIN_AUDIT_LOG_RETENTION | 2 | years | PRD §11.1 data dictionary; PRD §19.5 | Compliance requirement (GDPR Art. 30) — see §7 for full rule |
 | SERVER_COST_DAU5K_MONTHLY_MIN | 50 | USD/month | BRD §11.1 cost structure | Vercel + Supabase + Railway at DAU ≤ 5k |
 | SERVER_COST_DAU5K_MONTHLY_MAX | 200 | USD/month | BRD §11.1 cost structure | Vercel + Supabase + Railway at DAU ≤ 5k |
 | EMAIL_SENDGRID_MONTHLY_LIMIT | 10000 | emails | BRD §11.1 cost structure | ~$20/month |
