@@ -691,6 +691,19 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --card-transition: var(--primitive-duration-fast) var(--primitive-ease-standard);
 --card-padding: var(--primitive-space-6);
 
+/* Card — active/selected state */
+--card-border-active: var(--color-brand-primary);
+--card-shadow-active: 4px 4px 0px var(--color-brand-primary);
+--card-bg-active: var(--color-surface-raised);
+
+/* Card — disabled state */
+--card-opacity-disabled: 0.4;
+--card-cursor-disabled: not-allowed;
+
+/* Card — error state */
+--card-border-error: var(--color-feedback-error);
+--card-shadow-error: 4px 4px 0px var(--color-error);
+
 /* =============================================
    COMPONENT: Rarity Badge
    ============================================= */
@@ -1146,7 +1159,7 @@ This section provides visual design specifications for all P0 screens. Constants
 5. Rate limit banner (amber, slides in from top if limit reached)
 
 **Color usage**:
-- Mode card selected: `--color-brand-primary` border (3px pixel)
+- Mode card selected: `--card-border-active` border (3px pixel), `--card-shadow-active` shadow
 - "Enter Arena" button: `--button-primary-bg`
 - Rate limit banner: `--color-warning` background, `--color-text-primary` text
 - Active food buff indicators: `--color-brand-secondary` (teal) label
