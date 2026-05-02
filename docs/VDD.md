@@ -19,13 +19,14 @@
 | **Last Updated** | 2026-05-03 |
 | **Upstream Documents** | IDEA-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503 |
 | **Downstream Documents** | EDD.md (Engineering Design), Implementation code |
-| **審閱者 / Reviewers** | Design Lead, Product Manager (PM), Frontend Architect (to be updated with actual names) |
+| **審閱者 / Reviewers** | Design Lead (Art Director), Product Manager, Frontend Architect |
 
 ### Version Table
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | v1.0 | 2026-05-03 | AI Generated (VDD Gen Agent) | Initial generation from upstream IDEA, BRD, PRD, PDD, CONSTANTS documents |
+| v1.1 | 2026-05-03 | VDD Fix Agent (review-r2) | Fix 8 findings: purple scale PDD alignment (hue 280), neutral token aliases, competitor table columns, Figma handoff status, component token coverage, brand positioning §1.0, reviewers field, background file sizes |
 
 ### Downstream Declaration
 
@@ -46,6 +47,23 @@ This VDD is the authoritative visual specification for pixel-pet-arena. All fron
 ---
 
 ## §1 Design Mission
+
+### §1.0 Brand Positioning Statement
+
+| Dimension | Content |
+|-----------|---------|
+| **Target Audience** | Competitive browser gamers aged 16–35 who grew up with retro games (Game Boy, GBA, early browser games) and value collectibles with genuine aesthetic craft |
+| **Unique Differentiator** | The only browser pet game with a deliberate dark luxury pixel-art design system — retro soul, premium quality |
+| **Brand Promise** | Your pixel pet should look like it belongs in a game that cost $30, not a Flash game from 2005 |
+| **Visual Claim** | Dark canvas × hard pixel precision × rarity hierarchy = a collectible that looks worth fighting for |
+
+#### How Positioning Drives Visual Decisions
+- "Dark luxury" → primary surface is deep navy (#0d1b2a equiv.), NOT white; dark mode is primary, not an afterthought
+- "Pixel precision" → 4px/8px grid enforced, no CSS blur on game UI, hard-edge shadows
+- "Rarity hierarchy" → Common/Rare/Epic/Legendary visual system is the single most important visual differentiator; no other element may use these colors out of context
+- "Premium quality" → Press Start 2P reserved for game elements; Inter for UI text; never Comic Sans or decorative novelty fonts
+
+---
 
 ### §1.1 Visual Positioning Statement
 
@@ -84,13 +102,13 @@ Focus rings are gold (`#ffd700`) — they look intentional. Contrast ratios exce
 
 ### §1.3 Competitor Visual Differentiation Table
 
-| Competitor | Visual Direction | Key Visual Weakness | Our Differentiation |
-|-----------|-----------------|--------------------|--------------------|
-| **Neopets** | Bright primary colors, Comic Sans-era typography, Flash-era UI chrome, inconsistent icon styles | Frozen in 2004; heavy visual clutter; no coherent design system; poor mobile adaptation | Dark luxury direction; coherent pixel-art design system; modern typography pairing; mobile-first responsive |
-| **CryptoKitties** | Pastel cartoon style, wallet UI aesthetics, Web3 dashboard chrome | Feels like a financial product, not a game; crypto-wallet-native UX alienates casual players | Game-first aesthetic; zero crypto UI vocabulary; rarity language vs. blockchain language |
-| **itch.io Browser Pet Games** | Inconsistent per-developer; often placeholder UI; no persistent design language | No shared visual identity; functional but not designed; disposable aesthetic | Consistent design system across all screens; pixel-art UI chrome as a product differentiator |
-| **Tamagotchi (Official App)** | Cute rounded pastel, device-chrome skeuomorphic, retro LCD simulation | Device-locked mental model; childish palette limits adult appeal; no competitive visual hierarchy | Competitive dark tone; adult-appropriate luxury direction; rarity hierarchy as status symbol |
-| **Axie Infinity** | Fantasy game art meets DeFi dashboard; over-produced 3D art; crypto-first UX | Steep visual complexity; intimidating for casual players; financial dashboard in game wrapper | Approachable pixel-art simplicity; clean information hierarchy; zero financial-product vocabulary |
+| Competitor | Visual Direction | Key Visual Weakness | Our Differentiation | Primary Color (hex) | Font Style | UI Density |
+|-----------|-----------------|--------------------|--------------------|--------------------|-----------|-----------| 
+| **Neopets** | Bright primary colors, Comic Sans-era typography, Flash-era UI chrome, inconsistent icon styles | Frozen in 2004; heavy visual clutter; no coherent design system; poor mobile adaptation | Dark luxury direction; coherent pixel-art design system; modern typography pairing; mobile-first responsive | `#00AAFF` (bright blue) | Comic Sans-adjacent, rounded decorative | High, cluttered |
+| **CryptoKitties** | Pastel cartoon style, wallet UI aesthetics, Web3 dashboard chrome | Feels like a financial product, not a game; crypto-wallet-native UX alienates casual players | Game-first aesthetic; zero crypto UI vocabulary; rarity language vs. blockchain language | `#9B51E0` (purple) | Modern sans, Lato | Medium, card-focused |
+| **itch.io Browser Pet Games** | Inconsistent per-developer; often placeholder UI; no persistent design language | No shared visual identity; functional but not designed; disposable aesthetic | Consistent design system across all screens; pixel-art UI chrome as a product differentiator | `#FA5C5C` (red) | Source Sans Pro, clean minimal | Medium, developer-tool |
+| **Tamagotchi (Official App)** | Cute rounded pastel, device-chrome skeuomorphic, retro LCD simulation | Device-locked mental model; childish palette limits adult appeal; no competitive visual hierarchy | Competitive dark tone; adult-appropriate luxury direction; rarity hierarchy as status symbol | `#E91E8C` (pink) | Rounded sans, Nunito | Low, toy-like |
+| **Axie Infinity** | Fantasy game art meets DeFi dashboard; over-produced 3D art; crypto-first UX | Steep visual complexity; intimidating for casual players; financial dashboard in game wrapper | Approachable pixel-art simplicity; clean information hierarchy; zero financial-product vocabulary | `#00C0FF` (cyan) | Bold futuristic, custom | Medium-high, dashboard |
 
 ### §1.4 Visual Hierarchy Rules
 
@@ -439,17 +457,17 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-grey-950: oklch(9% 0 0);    /* #030712 */
 
 /* Full Brand Primary (Purple) Scale */
---primitive-purple-50:  oklch(97% 0.03 290);  /* #faf5ff — Lightest purple tint */
---primitive-purple-100: oklch(94% 0.06 290);  /* #f3e8ff */
---primitive-purple-200: oklch(88% 0.11 290);  /* #e9d5ff */
---primitive-purple-300: oklch(80% 0.16 290);  /* #d8b4fe — Hover/active accent */
---primitive-purple-400: oklch(72% 0.20 290);  /* #c084fc */
---primitive-purple-500: oklch(62% 0.24 290);  /* #a855f7 — Brand primary */
---primitive-purple-600: oklch(54% 0.24 290);  /* #9333ea */
---primitive-purple-700: oklch(45% 0.22 290);  /* #7c3aed — Dark button press */
---primitive-purple-800: oklch(37% 0.19 290);  /* #6d28d9 */
---primitive-purple-900: oklch(28% 0.16 290);  /* #4c1d95 — Deep purple overlay */
---primitive-purple-950: oklch(20% 0.13 290);  /* #2e1065 */
+--primitive-purple-50:  oklch(97% 0.03 280);  /* #faf5ff — Lightest purple tint */
+--primitive-purple-100: oklch(94% 0.06 280);  /* #f3e8ff */
+--primitive-purple-200: oklch(88% 0.11 280);  /* #e9d5ff */
+--primitive-purple-300: oklch(72% 0.24 280);  /* #c4b5fd — Hover/active accent */
+--primitive-purple-400: oklch(62% 0.22 280);  /* #c084fc */
+--primitive-purple-500: oklch(52% 0.24 280);  /* #7c3aed — Brand primary */
+--primitive-purple-600: oklch(44% 0.24 280);  /* #6d28d9 */
+--primitive-purple-700: oklch(36% 0.22 280);  /* #5b21b6 — Dark button press */
+--primitive-purple-800: oklch(28% 0.19 280);  /* #4c1d95 */
+--primitive-purple-900: oklch(21% 0.16 280);  /* #3b0764 — Deep purple overlay */
+--primitive-purple-950: oklch(14% 0.13 280);  /* #1e0533 */
 
 /* Teal Scale */
 --primitive-teal-100: oklch(90% 0.07 190);    /* #ccf5f3 */
@@ -573,11 +591,30 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --color-info: oklch(72% 0.15 240);                        /* #74b9ff */
 
 /* =============================================
+   SEMANTIC: Neutral Scale Aliases (PDD §9.1 compatibility)
+   ============================================= */
+--color-neutral-50:  var(--primitive-grey-50);   /* #f9fafb */
+--color-neutral-100: var(--primitive-grey-100);  /* #f3f4f6 */
+--color-neutral-200: var(--primitive-grey-200);  /* #e5e7eb */
+--color-neutral-300: var(--primitive-grey-300);  /* #d1d5db */
+--color-neutral-400: var(--primitive-grey-400);  /* #9ca3af */
+--color-neutral-500: var(--primitive-grey-500);  /* #6b7280 */
+--color-neutral-600: var(--primitive-grey-600);  /* #4b5563 */
+--color-neutral-700: var(--primitive-grey-700);  /* #374151 */
+--color-neutral-800: var(--primitive-grey-800);  /* #1f2937 */
+--color-neutral-900: var(--primitive-grey-900);  /* #111827 */
+
+/* =============================================
    SEMANTIC: Interactive
    ============================================= */
 --color-focus: var(--primitive-gold-500);                 /* #ffd700 — focus ring */
 --color-border-default: oklch(32% 0.05 280);              /* #393966 */
 --color-border-focus: var(--color-focus);
+--color-border-strong: oklch(45% 0.06 280);               /* stronger border for hover/active */
+--color-shadow-default: oklch(8% 0.02 280);               /* hard-offset shadow color */
+--color-surface-elevated: var(--color-surface-raised);    /* alias for elevated surface */
+--color-brand-primary-muted: color-mix(in oklch, var(--color-brand-primary) 15%, var(--color-surface-base)); /* selected/muted bg */
+--color-feedback-error: var(--color-error);               /* alias for error feedback */
 
 /* =============================================
    SEMANTIC: Spacing
@@ -614,6 +651,8 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --button-primary-hover-bg: var(--color-brand-primary-light);
 --button-primary-active-bg: var(--color-brand-primary-dark);
 --button-primary-disabled-bg: var(--primitive-grey-400);
+--button-primary-focus-outline: 2px solid var(--color-focus);
+--button-primary-focus-offset: 2px;
 --button-border-radius: var(--primitive-radius-none);     /* Pixel art: sharp */
 --button-border: 2px solid var(--primitive-grey-600);
 --button-shadow: var(--shadow-component);
@@ -625,21 +664,31 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    COMPONENT: Input Field
    ============================================= */
 --input-bg: var(--color-surface-raised);
+--input-bg-hover: var(--color-surface-raised);
 --input-border: 2px solid var(--color-border-default);
+--input-border-hover: var(--color-border-strong);
 --input-border-focus: 2px solid var(--color-focus);
 --input-border-error: 2px solid var(--color-error);
 --input-text: var(--color-text-primary);
 --input-placeholder: var(--color-text-disabled);
+--input-bg-disabled: var(--color-surface-base);
+--input-text-disabled: var(--color-text-disabled);
+--input-opacity-disabled: 0.5;
 --input-radius: var(--primitive-radius-sm);               /* 2px — slight softening */
 --input-padding: var(--primitive-space-3) var(--primitive-space-4);
 
 /* =============================================
    COMPONENT: Card / Panel
    ============================================= */
---card-bg: var(--color-surface-raised);
+--card-bg: var(--color-surface-elevated);
+--card-bg-hover: var(--color-surface-raised);
 --card-border: 2px solid var(--color-border-default);
---card-shadow: var(--shadow-card);
+--card-border-hover: var(--color-border-strong);
+--card-shadow: 4px 4px 0px var(--color-shadow-default);
+--card-shadow-hover: 6px 6px 0px var(--color-shadow-default);
+--card-focus-outline: 2px solid var(--color-focus);
 --card-radius: var(--primitive-radius-none);
+--card-transition: var(--primitive-duration-fast) var(--primitive-ease-standard);
 --card-padding: var(--primitive-space-6);
 
 /* =============================================
@@ -900,11 +949,13 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 
 ### §7.5 Background Specifications
 
-| Asset | Format | Dimensions | Notes |
-|-------|--------|------------|-------|
-| Arena race track tile | PNG → CSS `background-repeat: repeat-x` | 32×8px tile | Dark pixel grid pattern |
-| Admin dashboard background | CSS only — no image | N/A | `--admin-sidebar-bg: #111827` |
-| OG social card background | AVIF (primary) + WebP (fallback) + PNG (last resort) | 1200×630px | Pre-rendered per pet; includes sprite, rarity, stats |
+| Asset | Format | Dimensions | Max File Size | Notes |
+|-------|--------|------------|--------------|-------|
+| Arena race track tile | PNG → CSS `background-repeat: repeat-x` | 32×8px tile | ≤2KB | Dark pixel grid pattern |
+| Arena background (full-width) | AVIF (primary) + WebP (fallback) | Full-width | ≤150KB AVIF / ≤200KB WebP | Full arena backdrop |
+| Admin dashboard background | CSS only — no image | N/A | N/A (CSS only) | `--admin-sidebar-bg: #111827` |
+| OG social card background | AVIF (primary) + WebP (fallback) + PNG (last resort) | 1200×630px | ≤150KB AVIF / ≤200KB WebP | Pre-rendered per pet; includes sprite, rarity, stats |
+| Page background pattern | SVG (primary) + PNG (fallback) | Tileable pattern | ≤10KB SVG / ≤20KB PNG | Subtle texture on base surfaces if used |
 
 ### §7.6 Naming Conventions
 
@@ -925,21 +976,23 @@ Examples:
 
 ### §7.7 Figma → Code Delivery Spec
 
-**Figma File**: `[Figma Design File — to be provided by Design Lead]`
+**Figma File**: `https://www.figma.com/file/[PIXEL-PET-ARENA-DESIGN-FILE]` *(pending: Design Lead to create and share by Sprint 1 end)*
+
+> **Note**: All Figma frame links must be populated before entering FRONTEND implementation phase.
 
 **Per-Component Figma Links**:
 
-| Component | Figma Frame Link |
-|-----------|-----------------|
-| PetCard | TBD — pending Figma setup |
-| Button (Primary / Secondary / Disabled) | TBD — pending Figma setup |
-| Input Field (all states) | TBD — pending Figma setup |
-| Dropdown / Select (all states) | TBD — pending Figma setup |
-| Rarity Badge (all 4 tiers) | TBD — pending Figma setup |
-| Stat Bar | TBD — pending Figma setup |
-| Navigation Bar | TBD — pending Figma setup |
-| Arena Mode Card | TBD — pending Figma setup |
-| Battle Result (WIN/LOSS) | TBD — pending Figma setup |
+| Component | Figma Frame Link | Handoff Status |
+|-----------|-----------------|---------------|
+| PetCard | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Button (Primary / Secondary / Disabled) | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Input Field (all states) | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Dropdown / Select (all states) | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Rarity Badge (all 4 tiers) | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Stat Bar | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Navigation Bar | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Arena Mode Card | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
+| Battle Result (WIN/LOSS) | [Frame TBD — due: Sprint 1 end, Owner: Design Lead] | Pending |
 
 **Auto Layout Confirmation Checklist**:
 - [ ] All buttons use Auto Layout with padding tokens (`--button-padding-y`, `--button-padding-x`)
