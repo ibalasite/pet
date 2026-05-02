@@ -183,7 +183,6 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | GDPR_RESTRICT_PROCESSING_RESPONSE | 24 | hours | PRD §17.3 GDPR rights matrix | Right to Restrict Processing (Art. 18) |
 | GDPR_OBJECT_LEADERBOARD_RESPONSE | 5 | business days | PRD §17.3 GDPR rights matrix | Right to Object (Art. 21) |
 | GDPR_EMAIL_RECTIFICATION_RESPONSE | 24 | hours | PRD §17.3 GDPR rights matrix | Right to Rectification (Art. 16) |
-| LEADERBOARD_UPDATE_FREQUENCY | 30 | seconds | PRD §5 US-BOARD-001 AC-009-2; PRD §11.3 | Maximum lag from battle result to leaderboard |
 | LEADERBOARD_SNAPSHOT_RETENTION | 12 | months | PRD §11.1 data dictionary | Rolling retention; older snapshots purged |
 | ANALYTICS_EVENT_HOT_RETENTION | 90 | days | PRD §11.1 data dictionary | Hot storage for analytics events |
 | ANALYTICS_EVENT_COLD_ARCHIVE | 2 | years | PRD §11.1 data dictionary | Cold archive for analytics events |
@@ -245,11 +244,10 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | MONTHLY_GMV_TARGET | 10000 | USD | BRD §3.1 O5 | Marketplace monthly GMV target at 12 months |
 | MONTHLY_FEE_REVENUE_TARGET | 500 | USD | BRD §3.1 O5; BRD §7.2 Outcome | Monthly transaction fee revenue at 12 months |
 | PII_EMAIL_RETENTION_POST_DELETE | 7 | days | PRD §11.4 PII inventory | Account lifetime + 7 days post-deletion; then hashed |
-| ANALYTICS_EVENT_HOT_RETENTION | 90 | days | PRD §11.1 data dictionary | Hot storage for analytics events — see §7 for full rule |
-| ANALYTICS_EVENT_COLD_ARCHIVE | 2 | years | PRD §11.1 data dictionary | Cold archive for analytics events — see §7 for full rule |
-| ADMIN_AUDIT_LOG_RETENTION | 2 | years | PRD §11.1 data dictionary; PRD §19.5 | Compliance requirement (GDPR Art. 30) — see §7 for full rule |
 | SERVER_COST_DAU5K_MONTHLY_MIN | 50 | USD/month | BRD §11.1 cost structure | Vercel + Supabase + Railway at DAU ≤ 5k |
 | SERVER_COST_DAU5K_MONTHLY_MAX | 200 | USD/month | BRD §11.1 cost structure | Vercel + Supabase + Railway at DAU ≤ 5k |
 | EMAIL_SENDGRID_MONTHLY_LIMIT | 10000 | emails | BRD §11.1 cost structure | ~$20/month |
 | INFRA_COST_ANNUAL_BASE | 8000 | USD/year | BRD §3.3 base scenario | Server + maintenance labor |
 | VENDOR_MIGRATION_PLAN_DAYS | 14 | days | PRD §8.3; BRD §13.1 | SendGrid and PostgreSQL vendor migration plan window |
+
+> **Data retention constants** (ANALYTICS_EVENT_HOT_RETENTION, ANALYTICS_EVENT_COLD_ARCHIVE, ADMIN_AUDIT_LOG_RETENTION) are defined in §7 Business Rules.
