@@ -33,7 +33,7 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | ARENA_BATTLE_RECORDS_DISPLAY | 20 | battles | PRD §5 US-RECORD-001 AC-010-1 | Last 20 battles shown on public page |
 | LEADERBOARD_TOP_DISPLAY | 100 | pets | PRD §5 US-BOARD-001 AC-009-1 | Top 100 displayed by default |
 | LEADERBOARD_ADMIN_VIEW | 500 | pets | PRD §5 US-ADMIN-002 AC-014-1; PRD §19.3 | Admin sees top 500 |
-| LEADERBOARD_SNAPSHOT_RETENTION | 500 | pets | PRD §11.1 data dictionary | LeaderboardSnapshot tracks top 500 |
+| LEADERBOARD_SNAPSHOT_TOP_N | 500 | pets | PRD §11.1 data dictionary | LeaderboardSnapshot stores top 500 pets per snapshot |
 | CLAIM_CODE_DIGITS | 6 | digits | PRD §5 US-AUTH-001 AC-003-2; PRD §13 glossary | Numeric 6-digit one-time password |
 | CLAIM_CODE_EXPIRY | 15 | minutes | PRD §5 US-AUTH-001 AC-003-4; PRD §6.5 state machine | Expires T+15min from generation |
 | CLAIM_TOKEN_CLEANUP_TTL | 72 | hours | PRD §11.1 data dictionary; PRD §6.5 state machine | Deleted 72 hours after creation or first use |
