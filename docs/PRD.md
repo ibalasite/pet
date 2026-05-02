@@ -36,6 +36,7 @@
 | v1.2 | 2026-05-03 | PRD Editor (review-r2) | Fixed 10 review findings (F1–F10): §4.5 MoSCoW Battle Records promoted to Must Have (F1); FF_BATTLE_RECORDS set to P0/ON with kill-switch (F2); US-RECORD-001 heading corrected to P0 (F3); added AC-010-5 HTTP 404 error path and AC-010-6 <20 battles boundary to US-RECORD-001 (F4); added AC-004-5 invalid/revoked URL 404 error path to US-AUTH-002 (F5); second §7.8 renumbered to §7.9 Analytics Event Map (F6); `level` field added to §11.2 data dictionary (F7); BRD O3 added to US-AUTH-001, US-TRAIN-001, US-ARENA-001 RTM rows (F8); US-ADMIN-004/005/006 Estimate, Feature Flag, Test Type column added + all 3 added to §15 RTM (F9); US-FOOD-001 estimate corrected from S to M (F10) |
 | v1.3 | 2026-05-03 | PRD Editor (review-r3) | Fixed 6 review findings (F1–F6): RTM US-ADMIN-006 MoSCoW corrected from Must to Should (F1); RTM BRD Objective for US-ADMIN-004 corrected to O1 and US-ADMIN-005 to O2 (F2); §9.2 Guardrail Metrics added Leaderboard page UV/DAU ≥ 20% and Arena social share rate ≥ 5% (F3); AC-009-3 terminology changed from 'logged-in' to URL-token auth model (F4); AC-006-6 stat-cap boundary condition added to US-FOOD-001 (F5); battle_records_viewed analytics event added to §7.9 (F6) |
 | v1.4 | 2026-05-03 | PRD Editor (review-r4) | Fixed 5 review findings (F1–F5): EPIC-ADMIN 'US included' updated to include US-ADMIN-004/005/006 (F1); RTM US-ADMIN-006 BRD Objective corrected from O5 to O2 (F2); US-ADMIN-003 renamed to 'Runtime Parameter Tuning' (max battles/hour, rarity weights) and US-ADMIN-006 renamed to 'Game Economy Configuration' (food buff multipliers, arena entry cost/cooldown) with explicit scope separation and no overlapping AC fields (F3); §6.3 Arena Battle Flow diagram updated with rate-limit check node before arena mode selection (F4); §7.9 Analytics Event Map updated with gdpr_deletion_processed and suspicious_pet_flagged events for US-ADMIN-004 and US-ADMIN-005 (F5) |
+| v1.5 | 2026-05-03 | PRD Editor (review-r5) | Fixed 5 review findings (F1–F5): US-PET-002 story persona changed from 'product owner' to 'Collector' with uniqueness/keeper framing (F1); RTM US-ADMIN-003 Feature column updated from 'Admin system configuration' to 'Admin runtime parameter tuning' (F2); §19.3 System Configuration row split into 'Runtime Parameter Tuning' (US-ADMIN-003) and 'Game Economy Configuration' (US-ADMIN-006) (F3); §6.3 Arena Battle Flow A2 rate-limit node connected to 'Return to arena lobby' exit edge (F4); RTM Business Risk text differentiated for US-ADMIN-003 (platform safety/rate limits) and US-ADMIN-006 (economy balance/player churn) (F5) |
 
 ---
 
@@ -375,7 +376,7 @@ graph TD
 
 ### US-PET-002 — Procedural Pixel Pet Generation
 
-**Story**: As a product owner, I want the pet generation algorithm to produce over 1 billion unique visual combinations so that every claimed pet looks visually distinct to players.
+**Story**: As a collector, I want each pet to have over 1 billion possible visual combinations and a uniqueness guarantee, so that my pet is truly one-of-a-kind and worth keeping.
 
 **REQ-ID**: US-PET-002
 **Priority**: P0
@@ -785,6 +786,7 @@ flowchart TD
 flowchart TD
     A[Pet owner clicks 'Enter Arena'] --> A1{Rate limit<br/>reached?}
     A1 -->|Yes| A2[Show rate limit<br/>countdown message<br/>Disable button]
+    A2 --> P[Return to arena lobby]
     A1 -->|No| B[Select arena mode: Race or Sumo]
     B --> C[Pre-battle screen: pet stats, active food buffs shown]
     C --> D[System enters matchmaking queue]
@@ -1324,10 +1326,10 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | US-TRADE-001 | Pet trading marketplace | P2 | O5 | Could | `FF_MARKETPLACE` | Revenue model delayed (acceptable; requires DAU > 1,000) | E2E + Integration |
 | US-ADMIN-001 | Admin pet management | P0 | O2 | Must | `FF_ADMIN_PORTAL` | No moderation capability; bot infestation risk | E2E + Security |
 | US-ADMIN-002 | Admin leaderboard moderation | P0 | O2, O4 | Must | `FF_ADMIN_PORTAL` | Leaderboard integrity fails under bot attack | E2E + Integration |
-| US-ADMIN-003 | Admin system configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E |
+| US-ADMIN-003 | Admin runtime parameter tuning | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Platform safety parameters (rate limits, rarity weights) cannot be adjusted without code deployments; slow response to live bot attacks | E2E |
 | US-ADMIN-004 | GDPR data deletion processing | P0 | O1 | Must | `FF_ADMIN_PORTAL` | GDPR non-compliance risk; legal liability | E2E + Integration |
 | US-ADMIN-005 | Suspicious battle detection | P0 | O2 | Must | `FF_ADMIN_PORTAL` | Automated bot detection absent; moderator workload unbounded | E2E + Integration |
-| US-ADMIN-006 | Game balance configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E + Integration |
+| US-ADMIN-006 | Game balance configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game economy balance (food buffs, arena costs) cannot be tuned post-launch without engineering effort; misbalanced economy risks player churn | E2E + Integration |
 
 ---
 
@@ -1434,7 +1436,8 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 | **Leaderboard Management** | View top 500 ranking; detect suspicious activity (>50 battles/hour flagged automatically); remove entries; restore entries; view audit log of changes | P0 |
 | **User Management** | View user accounts (masked email); view owned pets; process GDPR deletion requests; resend access links | P0 |
 | **Battle Records** | View all battle records with filters (date range, mode, outcome, pet ID); identify bot-pattern battles (rapid sequential battles from same pet) | P0 |
-| **System Configuration** | Edit game balance parameters: max battles per hour (default 10), rarity weight percentages, food item stat bonuses, arena cooldown period | P1 |
+| **Runtime Parameter Tuning** | Adjust max battles per hour, rarity weight percentages (maps to US-ADMIN-003) | P1 |
+| **Game Economy Configuration** | Adjust food buff multipliers, arena entry cooldown, arena entry cost in food credits (maps to US-ADMIN-006) | P1 |
 | **Email Delivery Monitor** | View SendGrid delivery status, bounce rates, spam complaint rates; trigger manual resend for failed deliveries | P1 |
 | **Analytics Dashboard** | Real-time metrics: DAP, claim conversion funnel, arena daily battles, Day-7 retention cohort (read-only, pulls from analytics system) | P1 |
 | **Audit Log** | Immutable, searchable log of all admin actions: actor, timestamp, action type, target, change details | P0 |
