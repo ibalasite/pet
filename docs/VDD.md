@@ -132,7 +132,7 @@ Focus rings are gold (`#ffd700`) — they look intentional. Contrast ratios exce
 - NEVER use rarity colors (`--color-rarity-*`) for non-rarity contexts
 
 #### Whitespace Rhythm Rules
-- Page-level gaps: use `--space-section` (`--primitive-space-12`: 48px) or larger
+- Page-level gaps: use `--space-section` (`clamp(4rem, 3rem + 5vw, 10rem)` — see §6.2) or larger; `--primitive-space-12` (48px) is for component-level spacing, not page-level sections
 - Component-level gaps: use `--space-component-gap` (`--primitive-space-4`: 16px)
 - Within-component gaps: use `--primitive-space-2` (8px) or `--primitive-space-1` (4px)
 - Pixel art elements snap to 8px grid; use multiples of 8px for all game UI spacing
@@ -224,7 +224,7 @@ All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical 
 
 | Token Name | Hex | oklch | WCAG Contrast on `--color-surface-base` | Usage |
 |-----------|-----|-------|----------------------------------------|-------|
-| `--color-brand-primary` | `#6c5ce7` | `oklch(52% 0.24 280)` | 5.8:1 (AA) | Primary CTA buttons, active nav links, claim flow primary actions |
+| `--color-brand-primary` | `#6c5ce7` | `oklch(52% 0.24 280)` | 3.51:1 (AA non-text, WCAG 1.4.11) | Primary CTA buttons, active nav links, claim flow primary actions — UI component/surface color, not foreground text on dark base |
 | `--color-brand-secondary` | `#00b894` | `oklch(68% 0.19 164)` | 6.1:1 (AA) | Secondary actions, success states, training complete indicators |
 | `--color-brand-accent` | `#fdcb6e` | `oklch(85% 0.15 82)` | 8.4:1 (AAA) | Legendary highlights, attention elements, focus-draw on high-value actions |
 | `--color-surface-base` | `#1a1a2e` | `oklch(12% 0.04 280)` | N/A (background) | Page background, primary canvas surface |
@@ -408,7 +408,7 @@ Inherits from PDD §9.2. All values confirmed below:
 | **H3 — Subsection** | `--text-h3` | Press Start 2P | `clamp(1rem, 0.7rem + 1.5vw, 1.4rem)` | 400 | 1.5 | `0em` | Modal titles, card headings in game context |
 | **H4 — Card Title** | `--text-h4` | Inter | `1.125rem` (18px) | 600 | 1.5 | `0em` | Card headings, stat labels with emphasis |
 | **H5 — Table Header** | `--text-h5` | Inter | `1rem` (16px) | 600 | 1.5 | `0em` | Table column headers, leaderboard column labels |
-| **H6 — Small Label / Label** | `--text-label` | Press Start 2P | `0.875rem` (14px) | 600 | 1.5 | `0.05em` | Badge text, small status labels — slightly loose for pixel text legibility |
+| **H6 — Small Label / Label** | `--text-label` | Inter | `0.875rem` (14px) | 600 | 1.5 | `0.05em` | Badge text, small status labels — aligns with PDD §9.2 and §8.2 input labels |
 | **Body** | `--text-body` | Inter | `clamp(1rem, 0.92rem + 0.4vw, 1.125rem)` | 400 | 1.6 | `0em` | General body copy, descriptions, arena copy, tooltips |
 | **Small** | `--text-small` | Inter | `0.875rem` (14px) | 400 | 1.5 | `0.01em` | Secondary supporting text, compact labels |
 | **Caption** | `--text-caption` | Inter | `0.75rem` (12px) | 400 | 1.4 | `0.02em` | Timestamps, metadata, secondary labels, leaderboard footnotes |
@@ -445,8 +445,10 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 
 /* Full Grey / Neutral Scale */
 --primitive-grey-50:  oklch(98% 0 0);   /* #f9fafb */
+--primitive-grey-text-primary: oklch(93% 0.01 280); /* #e8e8f0 — Navy-tinted near-white (primary text) */
 --primitive-grey-100: oklch(95% 0 0);   /* #f3f4f6 */
 --primitive-grey-200: oklch(90% 0 0);   /* #e5e7eb */
+--primitive-grey-rarity-common: oklch(72% 0.01 0); /* #b2bec3 — Common rarity badge (PDD §9.1) */
 --primitive-grey-300: oklch(83% 0 0);   /* #d1d5db */
 --primitive-grey-400: oklch(70% 0 0);   /* #9ca3af */
 --primitive-grey-500: oklch(55% 0 0);   /* #6b7280 */
@@ -472,7 +474,8 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 /* Teal Scale */
 --primitive-teal-100: oklch(90% 0.07 190);    /* #ccf5f3 */
 --primitive-teal-300: oklch(78% 0.13 190);    /* #7de8e2 */
---primitive-teal-400: oklch(68% 0.19 164);    /* #00b894 — Brand secondary / Rare rarity */
+--primitive-teal-400: oklch(68% 0.19 164);    /* #00b894 — Brand secondary */
+--primitive-teal-rare: oklch(72% 0.13 190);   /* #4ecdc4 — Rare rarity canonical (PDD §9.1) */
 --primitive-teal-600: oklch(52% 0.17 164);    /* #008c72 */
 
 /* Gold Scale */
@@ -559,7 +562,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 /* =============================================
    SEMANTIC: Text Colors
    ============================================= */
---color-text-primary: var(--primitive-grey-50);           /* #e8e8f0 — 12.4:1 on base */
+--color-text-primary: var(--primitive-grey-text-primary);  /* #e8e8f0 — 12.4:1 on base */
 --color-text-secondary: oklch(60% 0.04 280);              /* #9999cc — 4.7:1 on base */
 --color-text-disabled: oklch(40% 0.04 280);               /* #5a5a8e — 3.1:1 minimum */
 --color-text-inverse: var(--primitive-navy-900);          /* On light surfaces */
@@ -577,8 +580,8 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 /* =============================================
    SEMANTIC: Rarity Colors
    ============================================= */
---color-rarity-common: var(--primitive-grey-200);         /* #b2bec3 */
---color-rarity-rare: var(--primitive-teal-400);           /* #4ecdc4 */
+--color-rarity-common: var(--primitive-grey-rarity-common); /* #b2bec3 */
+--color-rarity-rare: var(--primitive-teal-rare);           /* #4ecdc4 */
 --color-rarity-epic: oklch(75% 0.21 280);                 /* #a29bfe */
 --color-rarity-legendary: var(--primitive-gold-300);      /* #fdcb6e */
 
@@ -630,7 +633,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    ============================================= */
 --duration-interaction: var(--primitive-duration-fast);   /* 120ms */
 --duration-transition: var(--primitive-duration-normal);  /* 300ms */
---duration-celebration: var(--primitive-duration-slow);   /* 600ms */
+--duration-celebration: var(--primitive-duration-celebration); /* 1200ms */
 
 /* =============================================
    SEMANTIC: Shadows
@@ -903,7 +906,7 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 
 #### Spacing Token Scaling Per Breakpoint
 
-- `--space-section`: xs=24px / md=32px / xl=48px
+- `--space-section`: uses `clamp(4rem, 3rem + 5vw, 10rem)` — computed values approx. xs≈64px / md≈80px / xl=160px (max); see §6.2 canonical definition
 - `--space-page-padding`: xs=16px / md=24px / xl=32px
 - PetCanvas container: xs=48px / sm=64px / md=64px / lg=80px
 
@@ -1289,17 +1292,19 @@ Active only when `DAU_MARKETPLACE_TRIGGER = 1000` users sustained for 2 weeks (p
 | Body text | `--color-text-primary` on `--color-surface-base` | `#e8e8f0` | `#1a1a2e` | **12.4:1** | AAA | Primary reading text |
 | Secondary text | `--color-text-secondary` on `--color-surface-base` | `#9999cc` | `#1a1a2e` | **4.7:1** | AA | Descriptions, metadata |
 | Disabled text | `--color-text-disabled` on `--color-surface-base` | `#5a5a8e` | `#1a1a2e` | **3.1:1** | AA Large | Large text / non-text minimum |
-| Brand primary (button text) | `--color-text-primary` on `--color-brand-primary` | `#e8e8f0` | `#6c5ce7` | **5.4:1** | AA | Button label on purple |
+| Brand primary (button text) | `--color-text-primary` on `--color-brand-primary` | `#e8e8f0` | `#6c5ce7` | **3.51:1** | AA non-text only — WCAG 1.4.11 | Button label on purple — requires design review before production |
 | Common rarity label | `--color-rarity-common` on `--color-surface-base` | `#b2bec3` | `#1a1a2e` | **7.1:1** | AAA | Rarity badge text |
 | Rare rarity label | `--color-rarity-rare` on `--color-surface-base` | `#4ecdc4` | `#1a1a2e` | **6.8:1** | AA | Rarity badge text |
 | Epic rarity label | `--color-rarity-epic` on `--color-surface-base` | `#a29bfe` | `#1a1a2e` | **5.9:1** | AA | Rarity badge text |
 | Legendary rarity label | `--color-rarity-legendary` on `--color-surface-base` | `#fdcb6e` | `#1a1a2e` | **8.4:1** | AAA | Rarity badge text |
 | Error message | `--color-error` on `--color-surface-base` | `#ff7675` | `#1a1a2e` | **5.5:1** | AA | Form error text |
 | Success message | `--color-success` on `--color-surface-base` | `#00b894` | `#1a1a2e` | **6.1:1** | AA | Training complete, claim success |
-| Warning banner text | `--color-text-primary` on warning bg | `#e8e8f0` | `#e17055` | **4.8:1** | AA | Rate limit / expiry banners |
+| Warning banner text | `--color-text-primary` on warning bg | `#e8e8f0` | `#e17055` | **2.59:1** | FAILS AA — needs remediation | Rate limit / expiry banners — requires design review before production |
 | Focus ring vs dark bg | `--color-focus` on `--color-surface-base` | `#ffd700` | `#1a1a2e` | **12.1:1** | AAA | Focus ring — exceeds AA minimum 3:1 |
 | Focus ring vs primary | `--color-focus` on `--color-brand-primary` | `#ffd700` | `#6c5ce7` | **4.2:1** | AA | Focus on active button |
 | Text on raised surface | `--color-text-primary` on `--color-surface-raised` | `#e8e8f0` | `#242444` | **11.1:1** | AAA | Text on cards/modals |
+
+> **Design Review Required**: Two pairings in the table above have contrast ratios below WCAG AA (4.5:1 for normal text): "Brand primary (button text)" at 3.51:1 and "Warning banner text" at 2.59:1. Both must undergo design review and remediation before production launch.
 
 ### §9.2 Focus Style Specifications
 
