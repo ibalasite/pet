@@ -32,6 +32,7 @@
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc prd) | Initial draft generated from BRD-PIXEL-PET-ARENA-20260503 and IDEA-PIXEL-PET-ARENA-20260503 |
+| v1.1 | 2026-05-03 | PRD Editor (review-r1) | Fixed 15 review findings (F1–F15): scope reconciliation for US-RECORD-001 (F1), MAAPO as primary North Star (F2), arena battles target clarification (F3), US-PET-002 persona fix (F4), persona pain points and tech familiarity (F5), AC-006-4 daily-login-reward removed (F6), US-TRAIN-001 stat-max boundary AC added (F7), US-ARENA-001 rate-limit error AC added (F8), WCAG 2.1 AA NFR subsection added (F9), admin analytics events added (F10), RTM Priority column added + BRD cross-reference note (F11), AC-012-5 trade fee formula made concrete (F12), T-shirt estimates added to all USs (F13), §5 restructured into Epics (F14), ClaimToken and FoodBuff state machines added (F15) |
 
 ---
 
@@ -59,16 +60,20 @@ pixel-pet-arena occupies the unique position of **zero barrier + persistence + u
 
 | Priority | Features |
 |----------|---------|
-| **P0 (Must Have)** | Random pixel pet display + guest interaction; email claim flow (password email + unique URL); pet training/feeding system; arena racing competition; global leaderboard |
-| **P1 (Should Have)** | Battle records page (shareable URL); rarity scoring (Common/Rare/Epic/Legendary); sumo arena mode |
+| **P0 (Must Have)** | Random pixel pet display + guest interaction; email claim flow (password email + unique URL); pet training/feeding system; arena racing competition; global leaderboard; **battle records page (shareable URL)** |
+| **P1 (Should Have)** | Rarity scoring (Common/Rare/Epic/Legendary); sumo arena mode |
 | **P2 (Could Have)** | Pet trading marketplace; tournament system; seasonal competitions |
 | **Out of Scope** | Mobile native apps; real-money transactions; P2E blockchain mechanics; voice chat |
 
+> **Scope reconciliation note (F1)**: BRD §5.3 lists the battle records page as an MVP Must-Have In-Scope item. This PRD therefore promotes US-RECORD-001 (F-RECORD-01) from P1 to P0. The promotion is reflected in §4, §5, and §15. This overrides the initial draft's P1 classification.
+
 ### 1.4 North Star Metric
 
-**Daily Active Pets (DAP)**: Number of claimed pets that have at least 1 interaction (training, feeding, or arena battle) per day.
+**Monthly Active Arena Pet Owners (MAAPO)**: The number of claimed pet owners who completed at least 1 arena battle in the past 30 days. This is the primary North Star metric, aligned with BRD §7.1, as it captures both retention and the core competitive behavior that drives the product's long-term value.
 
-Secondary: **Monthly Active Arena Pet Owners (MAAPO)** — claimed pet owners who completed at least 1 arena battle in the past 30 days.
+**Leading / Input Metric: Daily Active Pets (DAP)** — The number of claimed pets with at least 1 interaction (training, feeding, or arena battle entry) per day. DAP is the leading indicator that feeds MAAPO: consistent daily pet activity is the precondition for monthly arena engagement. When DAP is healthy, MAAPO follows. Monitor both, but optimize decisions against MAAPO.
+
+> **Scope alignment note (F2)**: BRD §7.1 defines MAAPO as the primary business North Star. PRD §9.1 is updated accordingly. DAP is retained as the primary leading metric that operationally drives MAAPO growth.
 
 ---
 
@@ -203,7 +208,9 @@ graph TD
 | Discovery | Twitter link, itch.io homepage, friend share |
 | Behavior | Browses multiple tabs simultaneously; attention span 2-5 minutes per new site |
 | Goal | Quick entertainment without commitment; wants to see "what this does" immediately |
-| Frustration | "If I have to sign up, I'm gone. I just want to see the pet." |
+| Frustration 1 | "If I have to sign up, I'm gone. I just want to see the pet." |
+| Frustration 2 | "I found a cool game last week but I closed the tab and can't find it again — and my progress was gone anyway." |
+| Tech Familiarity | Medium — comfortable with browsers and social media; uses web apps daily but has no patience for multi-step onboarding flows or developer-oriented UX |
 | Current Alternative | itch.io single-session browser games — but forgets them after closing |
 | Success Criteria | Spends 3+ minutes interacting with the pet before deciding whether to claim |
 | Key Feature Needed | Instant pet interaction on page load; no gatekeeping before the fun starts |
@@ -220,7 +227,9 @@ graph TD
 | Discovery | Colleague shared their pet's battle record URL |
 | Behavior | Returns 3-5 times per week; builds attachment to specific pet; wants multi-device access |
 | Goal | Grow and develop "her" pet; see it improve over time; feel it's uniquely hers |
-| Frustration | "I hate losing progress when I switch computers. This pet needs to follow me around." |
+| Frustration 1 | "I hate losing progress when I switch computers. This pet needs to follow me around." |
+| Frustration 2 | "I can never tell if my pet is actually improving or if the stats are just random noise — I need clear feedback that training makes a difference." |
+| Tech Familiarity | Medium-High — daily SaaS user (Slack, Notion, Figma); comfortable with email-based auth flows and bookmarking URLs; unlikely to read documentation but will follow clear in-product guidance |
 | Current Alternative | Mobile Tamagotchi app — but too time-demanding and device-locked |
 | Success Criteria | Claims pet via email; returns on Day 7 and Day 30; recognizes pet improvements |
 | Key Feature Needed | Email claim + unique URL; persistent pet attributes; training feedback loop |
@@ -237,7 +246,9 @@ graph TD
 | Discovery | "Pixel pet game with arenas" mentioned on gaming Discord |
 | Behavior | Daily trainer; checks leaderboard frequently; shares screenshots of wins on Twitter |
 | Goal | Dominate the global leaderboard; have the most powerful, rarest pet; get social recognition |
-| Frustration | "Without a real ranking system, what's the point of training?" |
+| Frustration 1 | "Without a real ranking system, what's the point of training?" |
+| Frustration 2 | "I spend days grinding stats and then lose to someone who just started — I need to know the match-making is fair and that my investment matters." |
+| Tech Familiarity | High — power browser user; uses Discord, Twitch, Steam daily; comfortable with competitive game mechanics, stat systems, and sharing URLs; likely to find and test edge cases |
 | Current Alternative | Mobile competitive games — but slow progression, pay-to-win, and account-heavy |
 | Success Criteria | Enters arena within first week; reaches top 100 leaderboard within 30 days; shares battle URL at least once |
 | Key Feature Needed | Arena battles; visible stats growth from training; shareable battle records; leaderboard with real-time updates |
@@ -254,7 +265,9 @@ graph TD
 | Discovery | Reddit post about procedurally generated pixel art pets |
 | Behavior | Claims multiple pets to compare rarity; discusses rare pets in Discord; interested in trading |
 | Goal | Own Legendary or Epic rarity pets; trade commons for rares; build a collection |
-| Frustration | "If everyone's pet looks the same, there's nothing worth collecting." |
+| Frustration 1 | "If everyone's pet looks the same, there's nothing worth collecting." |
+| Frustration 2 | "I can't trust that the rarity system is real — I need to see the actual probability and verify that Legendary is genuinely rare, not just a marketing label." |
+| Tech Familiarity | High — software developer; will inspect network requests, read API docs if exposed, and scrutinize rarity math; appreciates transparency in generation algorithms and probability disclosures |
 | Current Alternative | CryptoKitties — but wallet/gas requirements are too tedious |
 | Success Criteria | Claims a Legendary pet; participates in trading marketplace when available |
 | Key Feature Needed | Visible rarity score; unique appearance guarantee; eventual trading marketplace |
@@ -273,14 +286,16 @@ graph TD
 | F-FOOD-01 | Special food items that boost pet stats temporarily or permanently | Adds depth to training; creates item economy foundation |
 | F-ARENA-01 | Arena racing competition (Race mode: deterministic stat-based outcome + animation) | Core competitive hook; drives social sharing and repeat visits |
 | F-BOARD-01 | Global leaderboard ranked by win count, pet level, and arena score | Social comparison engine; drives competitive motivation |
+| F-RECORD-01 | Per-pet battle records page with shareable URL | Promoted to P0 from P1 to align with BRD §5.3 In-Scope Must-Have; high-value viral sharing mechanism that is required to justify the arena investment |
 
 ### 4.2 P1 — Should Have
 
 | Feature ID | Feature | Business Justification |
 |------------|---------|----------------------|
-| F-RECORD-01 | Per-pet battle records page with shareable URL | High-value viral sharing mechanism; shareable URL drives k-factor |
 | F-RARITY-01 | Rarity scoring system (Common/Rare/Epic/Legendary) displayed on pet profile | Strengthens collection drive; increases perceived value of claimed pets |
 | F-ARENA-02 | Sumo arena mode (strength-based match with push-out mechanic) | Adds variety to competitive modes; reduces arena fatigue |
+
+> Note: F-RECORD-01 was moved to P0 (§4.1) to align with BRD §5.3. See scope reconciliation note in §1.3.
 
 ### 4.3 P2 — Could Have
 
@@ -323,12 +338,22 @@ graph TD
 
 ## §5 User Stories & Acceptance Criteria
 
+> User Stories are organized into Epics. Each Epic groups related stories, has a one-line description, and links to the BRD objective it addresses. T-shirt estimates are on individual US headers. Epic total estimates are the sum of contained stories.
+
+---
+
+### EPIC-PET — Pet Generation & Display
+**Description**: Covers all aspects of procedurally generating and rendering the pixel pet for both guests and owners.
+**BRD Objective Link**: O1 (zero-barrier acquisition), O4 (uniqueness and collectibility)
+**US included**: US-PET-001, US-PET-002
+
 ### US-PET-001 — Random Pet Display (Guest Mode)
 
 **Story**: As a guest visitor, I want to see an animated pixel pet immediately on page load so that I can interact with it without creating any account.
 
 **REQ-ID**: US-PET-001
 **Priority**: P0
+**Estimate**: S — 3 SP (T-shirt: S = 1–3 SP)
 **Linked Feature**: F-PET-01
 **Feature Flag**: `FF_GUEST_PET_DISPLAY`
 
@@ -347,10 +372,11 @@ graph TD
 
 ### US-PET-002 — Procedural Pixel Pet Generation
 
-**Story**: As the system, I want to generate each pixel pet from a seed with over 1 billion unique combinations so that every claimed pet looks visually distinct.
+**Story**: As a product owner, I want the pet generation algorithm to produce over 1 billion unique visual combinations so that every claimed pet looks visually distinct to players.
 
 **REQ-ID**: US-PET-002
 **Priority**: P0
+**Estimate**: M — 8 SP (T-shirt: M = 5–8 SP)
 **Linked Feature**: F-PET-01
 **Feature Flag**: `FF_PET_GENERATION`
 
@@ -366,12 +392,20 @@ graph TD
 
 ---
 
+---
+
+### EPIC-AUTH — Authentication & Identity
+**Description**: Covers the email-based claim flow and returning pet owner access — the lightweight identity layer that enables persistence without a traditional account.
+**BRD Objective Link**: O1 (zero-barrier persistence)
+**US included**: US-AUTH-001, US-AUTH-002
+
 ### US-AUTH-001 — Email Claim Flow
 
 **Story**: As a guest player who wants to keep my pet, I want to enter my email and receive a claim password and unique URL so that I can permanently own this pet and return to it from any device.
 
 **REQ-ID**: US-AUTH-001
 **Priority**: P0
+**Estimate**: L — 13 SP (T-shirt: L = 13 SP)
 **Linked Feature**: F-AUTH-01
 **Feature Flag**: `FF_EMAIL_CLAIM`
 
@@ -396,6 +430,7 @@ graph TD
 
 **REQ-ID**: US-AUTH-002
 **Priority**: P0
+**Estimate**: M — 8 SP (T-shirt: M = 5–8 SP)
 **Linked Feature**: F-AUTH-01
 **Feature Flag**: `FF_EMAIL_CLAIM`
 
@@ -410,12 +445,20 @@ graph TD
 
 ---
 
+---
+
+### EPIC-TRAINING — Training & Feeding System
+**Description**: Covers all pet development mechanics — daily training stat increases and special food items that provide temporary or permanent stat boosts.
+**BRD Objective Link**: O1 (engagement loop), O2 (competitive readiness)
+**US included**: US-TRAIN-001, US-FOOD-001
+
 ### US-TRAIN-001 — Pet Training System
 
 **Story**: As a pet owner, I want to train my pet daily so that its stats improve and it becomes stronger for arena competition.
 
 **REQ-ID**: US-TRAIN-001
 **Priority**: P0
+**Estimate**: M — 8 SP (T-shirt: M = 5–8 SP)
 **Linked Feature**: F-TRAIN-01
 **Feature Flag**: `FF_TRAINING_SYSTEM`
 
@@ -428,6 +471,7 @@ graph TD
 | AC-005-3 | Given a training action is completed, an animation plays on the pet sprite and a stat change indicator (+X Speed) is displayed for 2 seconds | E2E |
 | AC-005-4 | Given a pet's stats increase, the changes are persisted to the database immediately and reflected on all devices accessing the same pet URL | Integration |
 | AC-005-5 | Given a pet owner has not trained in 3 consecutive days, the pet displays a "hungry/neglected" visual state | Unit + Visual Regression |
+| AC-005-6 | Given a pet's stat is already at the maximum value (100), the training button for that stat is disabled with a 'Max' indicator shown inline, and attempting to train via API returns HTTP 400 with body: `{"error": "stat_at_maximum", "message": "This stat has reached the maximum value of 100"}` | Unit + E2E |
 
 ---
 
@@ -437,6 +481,7 @@ graph TD
 
 **REQ-ID**: US-FOOD-001
 **Priority**: P0
+**Estimate**: S — 5 SP (T-shirt: S = 1–3 SP baseline; 5 SP for food buff complexity)
 **Linked Feature**: F-FOOD-01
 **Feature Flag**: `FF_FOOD_SYSTEM`
 
@@ -447,10 +492,17 @@ graph TD
 | AC-006-1 | Given the pet management page, a food inventory section displays available food items with their stat effects (e.g., "Speed Berry +5 Speed for 24h", "Power Mushroom +3 Strength permanently") | E2E |
 | AC-006-2 | Given a food item is fed to the pet, the stat effect is applied immediately and persisted; temporary effects show a countdown timer; permanent effects increment the base stat | Integration |
 | AC-006-3 | Given a pet has been fed, a feeding animation plays on the pet sprite and the food item is removed from inventory | E2E |
-| AC-006-4 | Given the food inventory is empty, a "get more food" prompt is displayed pointing to ways to earn food (daily login reward, arena participation) | E2E |
+| AC-006-4 | Given the food inventory is empty, a "get more food" prompt is displayed pointing to defined ways to earn food items: participating in arena battles (food drop on battle completion) and completing training sessions (food reward on 3-session training streak) | E2E |
 | AC-006-5 | Given a temporary food buff is active during arena combat, the boosted stat is used in combat calculation and a buff indicator is shown on the pre-battle screen | Integration |
 
 ---
+
+---
+
+### EPIC-ARENA — Arena Battle System
+**Description**: Covers all competitive arena modes where pet owners battle other players' pets, including the race mode (P0) and sumo mode (P1).
+**BRD Objective Link**: O2 (competitive ecosystem), O4 (social sharing)
+**US included**: US-ARENA-001, US-ARENA-002
 
 ### US-ARENA-001 — Arena Racing Competition
 
@@ -458,6 +510,7 @@ graph TD
 
 **REQ-ID**: US-ARENA-001
 **Priority**: P0
+**Estimate**: L — 13 SP (T-shirt: L = 13 SP)
 **Linked Feature**: F-ARENA-01
 **Feature Flag**: `FF_ARENA_RACE`
 
@@ -472,6 +525,7 @@ graph TD
 | AC-007-5 | Given the result screen, a "Share Battle Result" button generates a unique shareable URL for the battle record | E2E |
 | AC-007-6 | Given rate limiting, a single pet can enter at most 10 battles per hour across all arena modes, preventing bot-driven record inflation | Unit + Security |
 | AC-007-7 | Given no opponent is available within 30 seconds, the system offers a "battle against AI opponent" option with clearly labeled AI status in the battle record | E2E |
+| AC-007-8 | Given a pet has already entered 10 battles in the current hour, when the owner attempts to enter another battle, the UI displays: "Arena rate limit reached. You can enter again in [X minutes]." with a live countdown timer, the Enter Arena button is disabled for the remainder of that hour, and the API returns HTTP 429 with a `Retry-After` header | E2E + Security |
 
 ---
 
@@ -481,6 +535,7 @@ graph TD
 
 **REQ-ID**: US-ARENA-002
 **Priority**: P1
+**Estimate**: M — 8 SP (T-shirt: M = 5–8 SP)
 **Linked Feature**: F-ARENA-02
 **Feature Flag**: `FF_ARENA_SUMO`
 
@@ -495,12 +550,20 @@ graph TD
 
 ---
 
+---
+
+### EPIC-RANKING — Rankings, Records & Rarity
+**Description**: Covers the global leaderboard, individual pet battle records pages (viral sharing), and rarity scoring display — the social and collectibility layer.
+**BRD Objective Link**: O2 (competitive motivation), O4 (social sharing, collectibility)
+**US included**: US-BOARD-001, US-RECORD-001, US-RARITY-001
+
 ### US-BOARD-001 — Global Leaderboard
 
 **Story**: As a competitive player, I want to view a global leaderboard ranking all pets by performance so that I have a clear goal to work toward.
 
 **REQ-ID**: US-BOARD-001
 **Priority**: P0
+**Estimate**: S — 5 SP (T-shirt: S = 1–3 SP baseline; 5 SP for Redis sorted set + update lag)
 **Linked Feature**: F-BOARD-01
 **Feature Flag**: `FF_LEADERBOARD`
 
@@ -522,7 +585,8 @@ graph TD
 **Story**: As a pet owner, I want to share my pet's battle records with friends via a public URL so that I can show off my wins and attract new players.
 
 **REQ-ID**: US-RECORD-001
-**Priority**: P1
+**Priority**: P0 *(promoted from P1; see §1.3 scope reconciliation note)*
+**Estimate**: M — 8 SP (T-shirt: M = 5–8 SP)
 **Linked Feature**: F-RECORD-01
 **Feature Flag**: `FF_BATTLE_RECORDS`
 
@@ -543,6 +607,7 @@ graph TD
 
 **REQ-ID**: US-RARITY-001
 **Priority**: P1
+**Estimate**: M — 5 SP (T-shirt: M = 5–8 SP; lower end given rarity is computed at generation time)
 **Linked Feature**: F-RARITY-01
 **Feature Flag**: `FF_RARITY_DISPLAY`
 
@@ -557,12 +622,20 @@ graph TD
 
 ---
 
+---
+
+### EPIC-MARKETPLACE — Pet Trading Marketplace
+**Description**: Covers the P2 peer-to-peer pet trading system, including listing, offer submission, atomic ownership transfer, and transaction fee collection.
+**BRD Objective Link**: O5 (marketplace revenue)
+**US included**: US-TRADE-001
+
 ### US-TRADE-001 — Pet Trading Marketplace (P2)
 
 **Story**: As a pet owner with surplus pets, I want to list my pet for trade and accept offers from other players so that I can exchange pets and build my ideal collection.
 
 **REQ-ID**: US-TRADE-001
 **Priority**: P2
+**Estimate**: L — 13 SP (T-shirt: L = 13 SP; atomic ownership transfer + anti-flip logic)
 **Linked Feature**: F-TRADE-01
 **Feature Flag**: `FF_MARKETPLACE` (disabled in v1; enabled when DAU > 1,000)
 
@@ -574,9 +647,16 @@ graph TD
 | AC-012-2 | Given a listed pet, other players can submit trade offers (offering their own pet in exchange) | E2E |
 | AC-012-3 | Given a trade offer is accepted by both parties, pet ownership is atomically transferred in a database transaction (no partial transfers) | Integration |
 | AC-012-4 | Given a completed trade, a 7-day cancellation protection period prevents the original owner from immediately relisting the same pet (anti-flip protection) | Integration |
-| AC-012-5 | Given a completed trade, the platform records a transaction fee of 5-10% of the estimated pet value for future monetization tracking | Integration |
+| AC-012-5 | Given a completed trade with an agreed trade credit price, the platform deducts a 5% transaction fee from the agreed price. The minimum suggested price is calculated as: `(pet_level × 100) + (rarity_multiplier × 500)`, where rarity_multiplier values are: Common=1, Rare=2, Epic=4, Legendary=8. The fee amount and net proceeds are displayed to the seller before confirmation, and the fee deduction is recorded in the trade transaction record for monetization tracking. | Integration |
 
 ---
+
+---
+
+### EPIC-ADMIN — Admin & Moderation Portal
+**Description**: Covers all admin operator capabilities — pet management and banning, leaderboard moderation, and system configuration — required for platform integrity and game balance.
+**BRD Objective Link**: O2 (competitive integrity), O4 (leaderboard trust)
+**US included**: US-ADMIN-001, US-ADMIN-002, US-ADMIN-003
 
 ### US-ADMIN-001 — Admin Pet Management
 
@@ -584,6 +664,7 @@ graph TD
 
 **REQ-ID**: US-ADMIN-001
 **Priority**: P0
+**Estimate**: M — 5 SP (T-shirt: M = 5–8 SP; lower end as it is primarily a data display + ban action)
 **Linked Feature**: Admin Backend
 **Feature Flag**: `FF_ADMIN_PORTAL`
 
@@ -604,6 +685,7 @@ graph TD
 
 **REQ-ID**: US-ADMIN-002
 **Priority**: P0
+**Estimate**: S — 3 SP (T-shirt: S = 1–3 SP; leaderboard removal reuses ban infrastructure from US-ADMIN-001)
 **Linked Feature**: Admin Backend
 **Feature Flag**: `FF_ADMIN_PORTAL`
 
@@ -623,6 +705,7 @@ graph TD
 
 **REQ-ID**: US-ADMIN-003
 **Priority**: P1
+**Estimate**: M — 8 SP (T-shirt: M = 5–8 SP; config cache invalidation + audit trail logic)
 **Linked Feature**: Admin Backend
 **Feature Flag**: `FF_ADMIN_PORTAL`
 
@@ -737,6 +820,35 @@ stateDiagram-v2
     Banned --> [*] : Pet removed from leaderboard and arena
 ```
 
+### 6.5 ClaimToken State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Generated : Guest clicks "Claim This Pet"; 6-digit code created + expiry set (T+15min)
+    Generated --> EmailSent : SendGrid/SMTP delivers claim email to guest
+    Generated --> EmailFailed : Email delivery fails (bounce or API error); token remains valid for retry
+    EmailFailed --> EmailSent : Guest retries after 60s cooldown; new delivery attempt succeeds
+    EmailSent --> Used : Guest enters correct 6-digit code within 15 minutes; pet ownership bound
+    EmailSent --> Expired : 15 minutes elapse without code entry; token invalidated
+    Generated --> Expired : 15 minutes elapse before email sent (rare edge case: generation without delivery)
+    Used --> Deleted : 72 hours after creation (scheduled cleanup job)
+    Expired --> Deleted : 72 hours after creation (scheduled cleanup job)
+```
+
+### 6.6 FoodBuff State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Inactive : FoodItem in pet inventory; not yet fed to pet
+    Inactive --> Active : Owner feeds food item to pet; stat effect applied; expiry timestamp set (for temporary buffs)
+    Inactive --> [*] : FoodItem removed from inventory (manual discard or admin action)
+    Active --> Expired : Buff expiry timestamp reached (temporary food items only); stat bonus removed from combat calculation
+    Active --> Consumed : Permanent food item fully applied; stat incremented on base stat; no expiry
+    Expired --> Deleted : 30 days after expiry (buff record retained for audit trail per §11.1)
+    Consumed --> Deleted : 30 days after consumption (record retained for audit trail per §11.1)
+    Active --> Expired : Arena battle completes while buff active (single-use arena buffs; buff consumed on use)
+```
+
 ---
 
 ## §7 Non-Functional Requirements
@@ -826,7 +938,20 @@ stateDiagram-v2
 | NFR-I18N-03 | Claim emails are sent in English for v1; email template system supports locale-specific variants |
 | NFR-I18N-04 | Date and time formats use UTC in the database; display layer converts to user's browser locale |
 
-### 7.7 Observability
+### 7.7 Accessibility (A11Y)
+
+**Conformance Target**: WCAG 2.1 Level AA across all P0 user-facing pages and flows.
+
+| NFR-ID | Requirement | Measurement Method |
+|--------|-------------|-------------------|
+| NFR-A11Y-01 | All interactive elements (buttons, links, form fields) must have clearly visible focus indicators with a minimum 3:1 contrast ratio against the surrounding background | Automated accessibility scan (axe-core) + manual keyboard test |
+| NFR-A11Y-02 | All pixel pet sprites, rarity badges, and food item icons must have descriptive `alt` text attributes (e.g., `alt="Legendary blue dragon pixel pet with fire accessory"`); decorative animations may use `alt=""` | Automated scan + manual audit |
+| NFR-A11Y-03 | All P0 user flows (guest pet interaction, email claim, training, arena entry, leaderboard view) must be fully operable via keyboard navigation alone (Tab, Enter, Space, Arrow keys) with logical focus order | Manual keyboard-only walkthrough on each P0 flow |
+| NFR-A11Y-04 | The platform must respect the `prefers-reduced-motion` media query: all non-essential animations (idle pet animations, victory effects, leaderboard transitions) must be suppressed or replaced with a static alternative when the user's OS reduced-motion preference is active | Playwright test with `--force-prefers-reduced-motion` flag; verified in AC-001-5 |
+
+**Exclusions**: The Phaser.js game canvas (racing/sumo battle animation) is exempt from WCAG 2.1 Level AA for the animation conformance criteria during the animated battle sequence only (battle duration 5-15 seconds). All pre-battle and post-battle screens remain fully conformant.
+
+### 7.8 Observability
 
 | NFR-ID | Requirement |
 |--------|-------------|
@@ -871,6 +996,8 @@ All events must be captured in the analytics pipeline for funnel analysis and re
 | `battle_shared` | Share URL generated | mode, outcome | Virality |
 | `leaderboard_viewed` | Leaderboard page opened | is_owner_viewing_own_rank | Retention signal |
 | `pet_url_accessed` | Unique URL used to access pet | days_since_claim, is_returning | Retention |
+| `admin_pet_banned` | Admin bans a pet from arena and leaderboard | admin_id_hash, pet_id, ban_reason_category (one of: bot_activity, cheating, inappropriate_content, other), is_permanent (boolean) | Admin moderation audit, bot infestation trending |
+| `admin_leaderboard_removal` | Admin removes a pet from the leaderboard | admin_id_hash, pet_id, action_type (one of: temporary_removal, permanent_ban, score_reset) | Leaderboard integrity monitoring |
 
 ---
 
@@ -932,14 +1059,25 @@ For v2 and beyond: all API changes must maintain backward compatibility for at l
 
 ### 9.1 North Star Metric
 
-**Daily Active Pets (DAP)**: The number of claimed pets that receive at least one interaction (training action, food feeding, or arena battle entry) in a given 24-hour UTC period.
+> **Alignment note (F2)**: The primary North Star is **MAAPO**, aligned with BRD §7.1. DAP is the primary *leading/input* metric. See §1.4 for the full rationale and the relationship between the two metrics.
 
-**Rationale**: DAP captures the health of the core engagement loop. A pet being interacted with means:
-1. The email claim conversion worked (pet is claimed, not just viewed)
-2. The owner has returned (retention)
-3. The pet economy is active (training/combat inputs)
+**Monthly Active Arena Pet Owners (MAAPO)**: The number of distinct claimed pet owners who completed at least 1 arena battle in the past 30 days.
 
-**Target trajectory**:
+**Rationale**: MAAPO captures the product's core competitive value loop at a meaningful time horizon. An owner counted in MAAPO has:
+1. Successfully claimed a pet (email claim conversion worked)
+2. Trained their pet enough to compete (training loop is active)
+3. Returned within 30 days to enter the arena (retention is working)
+4. Participated in the competitive ecosystem that drives leaderboard and social sharing
+
+**MAAPO Target trajectory**:
+- Month 1: MAAPO ≥ 50
+- Month 3: MAAPO ≥ 200
+- Month 6: MAAPO ≥ 500
+- Month 12: MAAPO ≥ 1,000
+
+**Leading Metric: Daily Active Pets (DAP)** — The number of claimed pets that receive at least one interaction (training action, food feeding, or arena battle entry) in a given 24-hour UTC period. DAP is the daily operational signal that predicts MAAPO trajectory.
+
+**DAP Target trajectory** (leading indicator):
 - Week 4: DAP ≥ 100
 - Month 3: DAP ≥ 500
 - Month 6: DAP ≥ 1,000
@@ -964,8 +1102,10 @@ Metrics that must not degrade while improving the North Star:
 | Alpha → Beta | Email claim conversion rate | ≥ 7% | < 3% | MVP launch + 4 weeks |
 | Alpha → Beta | Day-3 retention | ≥ 30% | < 10% | MVP launch + 4 weeks |
 | Beta → GA | Day-7 retention | ≥ 25% | < 10% | MVP launch + 6 weeks |
-| Beta → GA | Arena daily battles | ≥ 50 battles/day | < 20 battles/day | MVP launch + 8 weeks |
+| Beta → GA | Arena daily battles | ≥ 50 battles/day *(minimum Beta exit threshold; see note below)* | < 20 battles/day | MVP launch + 8 weeks |
 | GA → Marketplace launch | DAU | ≥ 1,000 sustained 2 weeks | — | Post-GA evaluation |
+
+> **Arena daily battles target clarification (F3)**: The ≥ 50 battles/day threshold in the Beta → GA row above is the *minimum Beta exit threshold*, measured at week 8 post-MVP-launch. This is distinct from BRD Objective O2's *sustained success target* of 100 arena battles/day at the 3-month mark post-GA. Both targets are valid at their respective measurement points: 50/day to graduate from Beta, 100/day to confirm the competitive loop is healthy at month 3.
 
 **Kill criteria** (from BRD §10.2):
 - K1: Claim conversion < 3% at week 4 despite UX optimization → evaluate Pivot to anonymous token or Kill
@@ -1116,8 +1256,8 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | **Rarity** | Tier classification of a pet's attribute combination: Common (60%), Rare (25%), Epic (12%), Legendary (3%); determined at generation time |
 | **Arena** | The competitive game mode section where pet owners can enter their pets in battle against other players' pets (Race mode, Sumo mode) |
 | **Battle Record** | An immutable record of a single arena match: pet IDs, mode, outcome, stats at time of battle, date, and whether the opponent was AI |
-| **DAP (Daily Active Pets)** | North Star Metric: number of claimed pets with at least 1 interaction (training, feeding, arena entry) in a 24-hour UTC period |
-| **MAAPO** | Monthly Active Arena Pet Owners: claimed pet owners who completed ≥ 1 arena battle in the past 30 days; secondary North Star |
+| **MAAPO** | Monthly Active Arena Pet Owners: claimed pet owners who completed ≥ 1 arena battle in the past 30 days. **Primary North Star Metric** (aligned with BRD §7.1). See §1.4 and §9.1. |
+| **DAP (Daily Active Pets)** | Leading/input metric: number of claimed pets with at least 1 interaction (training, feeding, arena entry) in a 24-hour UTC period. Drives MAAPO; monitored daily as the operational health signal. |
 | **Feature Flag** | A server-side configuration switch that enables or disables a feature without a code deployment; all P0 features have a kill switch feature flag |
 | **Bounded Context (BC)** | Architectural boundary unit (per BRD §5.5): `pet`, `auth`, `battle`, `ranking`, `marketplace`, `notification`; each BC owns its data and exposes a public API |
 | **Training Action** | A daily game action (run training, strength training, stamina training) that increments a pet's corresponding stat; limited to 3 per day |
@@ -1151,23 +1291,25 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 
 ## §15 Requirements Traceability Matrix (RTM)
 
-| User Story ID | Feature | BRD Objective | MoSCoW | Feature Flag | Business Risk if Missing | Test Coverage |
-|---|---------|:---:|:---:|---|---|---|
-| US-PET-001 | Random pixel pet display (guest) | O1 | Must | `FF_GUEST_PET_DISPLAY` | Acquisition funnel cannot start | E2E + Visual Regression |
-| US-PET-002 | Procedural generation (>1B combinations) | O1, O4 | Must | `FF_PET_GENERATION` | Uniqueness/rarity perception fails | Unit + Integration |
-| US-AUTH-001 | Email claim flow (password + URL) | O1 | Must | `FF_EMAIL_CLAIM` | Core identity layer absent; no persistence | E2E + Integration + Security |
-| US-AUTH-002 | Returning pet owner access | O1 | Must | `FF_EMAIL_CLAIM` | Claimed owners cannot return; Day-7 retention collapses | E2E |
-| US-TRAIN-001 | Pet training system | O1, O2 | Must | `FF_TRAINING_SYSTEM` | No Day-7 return motivation | E2E + Integration |
-| US-FOOD-001 | Special food items | O1, O2 | Must | `FF_FOOD_SYSTEM` | Reduced training depth; item economy absent | E2E + Integration |
-| US-ARENA-001 | Arena racing competition | O2 | Must | `FF_ARENA_RACE` | No competitive hook; leaderboard meaningless | E2E + Integration + Performance |
-| US-ARENA-002 | Sumo arena mode | O2 | Should | `FF_ARENA_SUMO` | Reduced arena variety (acceptable for v1) | E2E + Integration |
-| US-BOARD-001 | Global leaderboard | O2, O4 | Must | `FF_LEADERBOARD` | No social comparison; competitive motivation absent | E2E + Integration |
-| US-RECORD-001 | Battle records page (shareable URL) | O4 | Should | `FF_BATTLE_RECORDS` | Viral sharing mechanism absent; lower k-factor | E2E + Integration |
-| US-RARITY-001 | Rarity scoring display | O4 | Should | `FF_RARITY_DISPLAY` | Collection drive weaker; rarity value not communicated | Visual Regression + E2E |
-| US-TRADE-001 | Pet trading marketplace | O5 | Could | `FF_MARKETPLACE` | Revenue model delayed (acceptable; requires DAU > 1,000) | E2E + Integration |
-| US-ADMIN-001 | Admin pet management | O2 | Must | `FF_ADMIN_PORTAL` | No moderation capability; bot infestation risk | E2E + Security |
-| US-ADMIN-002 | Admin leaderboard moderation | O2, O4 | Must | `FF_ADMIN_PORTAL` | Leaderboard integrity fails under bot attack | E2E + Integration |
-| US-ADMIN-003 | Admin system configuration | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E |
+> **BRD RTM cross-reference note**: BRD §3.4 RTM should be updated with the US-IDs from this table as a follow-up action (post-PRD approval). The BRD RTM currently contains placeholder requirement references. Responsibility: PM, target completion within 1 week of PRD approval.
+
+| User Story ID | Feature | Priority | BRD Objective | MoSCoW | Feature Flag | Business Risk if Missing | Test Coverage |
+|---|---------|:---:|:---:|:---:|---|---|---|
+| US-PET-001 | Random pixel pet display (guest) | P0 | O1 | Must | `FF_GUEST_PET_DISPLAY` | Acquisition funnel cannot start | E2E + Visual Regression |
+| US-PET-002 | Procedural generation (>1B combinations) | P0 | O1, O4 | Must | `FF_PET_GENERATION` | Uniqueness/rarity perception fails | Unit + Integration |
+| US-AUTH-001 | Email claim flow (password + URL) | P0 | O1 | Must | `FF_EMAIL_CLAIM` | Core identity layer absent; no persistence | E2E + Integration + Security |
+| US-AUTH-002 | Returning pet owner access | P0 | O1 | Must | `FF_EMAIL_CLAIM` | Claimed owners cannot return; Day-7 retention collapses | E2E |
+| US-TRAIN-001 | Pet training system | P0 | O1, O2 | Must | `FF_TRAINING_SYSTEM` | No Day-7 return motivation | E2E + Integration |
+| US-FOOD-001 | Special food items | P0 | O1, O2 | Must | `FF_FOOD_SYSTEM` | Reduced training depth; item economy absent | E2E + Integration |
+| US-ARENA-001 | Arena racing competition | P0 | O2 | Must | `FF_ARENA_RACE` | No competitive hook; leaderboard meaningless | E2E + Integration + Performance |
+| US-ARENA-002 | Sumo arena mode | P1 | O2 | Should | `FF_ARENA_SUMO` | Reduced arena variety (acceptable for v1) | E2E + Integration |
+| US-BOARD-001 | Global leaderboard | P0 | O2, O4 | Must | `FF_LEADERBOARD` | No social comparison; competitive motivation absent | E2E + Integration |
+| US-RECORD-001 | Battle records page (shareable URL) | **P0** *(promoted from P1; see §1.3 note)* | O4 | Must | `FF_BATTLE_RECORDS` | Viral sharing mechanism absent; lower k-factor | E2E + Integration |
+| US-RARITY-001 | Rarity scoring display | P1 | O4 | Should | `FF_RARITY_DISPLAY` | Collection drive weaker; rarity value not communicated | Visual Regression + E2E |
+| US-TRADE-001 | Pet trading marketplace | P2 | O5 | Could | `FF_MARKETPLACE` | Revenue model delayed (acceptable; requires DAU > 1,000) | E2E + Integration |
+| US-ADMIN-001 | Admin pet management | P0 | O2 | Must | `FF_ADMIN_PORTAL` | No moderation capability; bot infestation risk | E2E + Security |
+| US-ADMIN-002 | Admin leaderboard moderation | P0 | O2, O4 | Must | `FF_ADMIN_PORTAL` | Leaderboard integrity fails under bot attack | E2E + Integration |
+| US-ADMIN-003 | Admin system configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E |
 
 ---
 
