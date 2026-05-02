@@ -359,7 +359,7 @@ User receives a shared battle URL → Opens `/pet/:petId/records` → Reads the 
 User enters wrong 6-digit code → Inline error: "Incorrect code. Check your email and try again." → Attempt counter decremented (max 10 attempts per session) → On 10th failed attempt: "Too many attempts. Please request a new claim code." → Form disables for 60 seconds → "Resend Code" button appears.
 
 **Rate Limit Hit (Arena)**:
-User clicks "Enter Arena" when hourly limit (10 battles/hour) is reached → Button is disabled; overlay message shows: "Arena rate limit reached. You can enter again in [X minutes]." → Live countdown timer updates every second → Arena entry re-enables automatically when timer expires.
+User clicks "Enter Arena" when hourly limit (10 battles/hour) (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10) is reached → Button is disabled; overlay message shows: "Arena rate limit reached. You can enter again in [X minutes]." → Live countdown timer updates every second → Arena entry re-enables automatically when timer expires.
 
 **Invalid / Revoked Pet URL**:
 User accesses a pet URL with an invalid, non-existent, or revoked token → HTTP 404 returned → Page renders: "This pet URL is not valid or has been revoked." with a friendly pixel-art illustration of an empty pet bed → "Find a New Pet" CTA links to `/`.
@@ -464,7 +464,7 @@ User's pet URL token has expired or has been revoked → API returns 401 or 403 
 | `TrainingEntry` | `actionsRemaining: number`, `nextResetIn: string` | Button shows "Train (3 remaining today)"; green indicator | Button brightens | Focus ring visible | If 0 remaining: gray; countdown timer shown inline | N/A | scale(0.97); background deepens to `--color-brand-primary-dark` | Pixel spinner replaces button text; pointer-events: none; aria-busy="true"; border color transitions to `--color-brand-primary-dark` at 200ms; opacity 0.7 |
 | `FoodInventory` | `items: FoodItem[]`, `onFeed: fn` | Grid of food item cards with stat icons | Item card elevates slightly on hover | Item "Use" button has focus ring | "Use" disabled if stat at max (100); tooltip explains | Empty state: "No food items — earn food by battling or training streaks" | "Use" button scale(0.97); border deepens | Pixel spinner in "Use" button; aria-busy="true"; pointer-events: none; opacity 0.7 |
 | `ArenaEntry` | `battlesRemaining: number`, `cooldownEnds: Date \| null` | Green button "Enter Arena"; battles remaining badge | Button brightens; tooltip shows remaining battles | Vivid focus ring | Rate limit reached: disabled + countdown timer | N/A | scale(0.97); background deepens to `--color-brand-primary-dark` | Pixel spinner replaces button text; pointer-events: none; aria-busy="true"; border color transitions to `--color-brand-primary-dark` at 200ms |
-| `NeglectedState` | `daysSinceTraining: number` | Hidden if trained within 3 days | N/A | N/A | N/A | Shows wilted-pet animation overlay if daysSinceTraining >= 3 | N/A | N/A |
+| `NeglectedState` | `daysSinceTraining: number` | Hidden if trained within 3 days (TRAINING_NEGLECT_THRESHOLD = 3 days) | N/A | N/A | N/A | Shows wilted-pet animation overlay if daysSinceTraining >= 3 | N/A | N/A |
 
 **Interaction Specifications — My Pet Page**
 
@@ -490,7 +490,7 @@ User's pet URL token has expired or has been revoked → API returns 401 or 403 
 
 | Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
 |-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
-| `TrainingActions` | `actions: TrainingAction[]`, `onTrain: fn` | Three action cards; each shows stat it trains and current stat value | Card elevates; "Train" button brightens with pixel-border animation | Card and button both have focus rings (tab order: card 1 → button 1 → card 2...) | If stat at 100: "MAX" badge replaces button; button disabled; API returns HTTP 400 if attempted | API failure: toast error "Training failed. Please try again." | Button scale(0.97); background deepens to `--color-brand-primary-dark`; card stays elevated | Pixel-art spinner replaces "Train" button text; aria-busy="true"; pointer-events: none; opacity 0.7; border color `--color-brand-primary-dark` |
+| `TrainingActions` | `actions: TrainingAction[]`, `onTrain: fn` | Three action cards; each shows stat it trains and current stat value | Card elevates; "Train" button brightens with pixel-border animation | Card and button both have focus rings (tab order: card 1 → button 1 → card 2...) | If stat at 100 (PET_STAT_MAX = 100): "MAX" badge replaces button; button disabled; API returns HTTP 400 if attempted | API failure: toast error "Training failed. Please try again." | Button scale(0.97); background deepens to `--color-brand-primary-dark`; card stays elevated | Pixel-art spinner replaces "Train" button text; aria-busy="true"; pointer-events: none; opacity 0.7; border color `--color-brand-primary-dark` |
 | `StatChangeIndicator` | `statName: string`, `delta: number` | Hidden; triggers on successful train action | N/A | N/A | N/A | N/A (errors handled by TrainingActions) | N/A | N/A |
 | `DailyResetTimer` | `resetAt: Date` | Shows "Resets in HH:MM:SS"; pixel clock icon | N/A | Timer text readable by screen reader; `aria-live="polite"` | N/A | N/A | N/A | N/A |
 | `TrainingStreak` | `streakDays: number` | Flame icon + "X day streak"; 0 = no streak shown | Tooltip: "Train 3 days in a row for a food reward" | Focusable; tooltip accessible | N/A | N/A | N/A | N/A |
@@ -634,7 +634,7 @@ User's pet URL token has expired or has been revoked → API returns 401 or 403 
 - `MarketplaceGrid` — Grid of listed pets with rarity, level, trade terms
 - `PetListingCard` — Individual listing with pet preview, owner's "looking for" description, offer button
 - `TradeOfferModal` — Select which of your own pets to offer in exchange
-- `TradeConfirmation` — 7-day anti-flip protection notice + fee disclosure (5% transaction fee)
+- `TradeConfirmation` — 7-day anti-flip protection notice (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION = 7 days) + fee disclosure (5% transaction fee) (TRADE_TRANSACTION_FEE = 5%)
 - `FeatureGateBanner` — Shown when `FF_MARKETPLACE` is OFF; "Marketplace coming soon — reach DAU 1,000 to unlock"
 
 | Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
@@ -796,6 +796,8 @@ N/A — pixel-pet-arena is a web browser application. The Web Vibration API has 
 | **StatsPanel** | Stacked vertical bars (full-width, each bar spans 100% of container) | Same as xs | 2-column grid of stat bars with labels | Horizontal grid with stat labels inline | Same as lg | Same as lg |
 | **Modal (AIOfferModal, TradeOfferModal)** | Full-screen bottom sheet (slides up from bottom, 100vw × ~70vh) | Same as xs | Centered dialog (480px wide, 60vh max) | Centered dialog (480px wide, 60vh max) | Same as md/lg | Same as md/lg |
 | **RarityBadge** | Compact colored dot + rarity letter (e.g., "L" for Legendary) | Same as xs | Full badge with rarity name and probability | Full badge with rarity name and probability | Same as md/lg | Same as md/lg |
+| **BattleResultCard** (Battle Result Page) | Stacked single-column; result card full-width; stat comparison stacked below action buttons; action buttons full-width | Same as xs | Centered card 480px max-width; stat comparison two-column table | Same as md | Same as md | Same as md |
+| **BattleHistoryTable** (Battle Records Page) | Card-list layout; each battle row becomes compact card showing date, outcome badge, opponent name | Same as xs | Full table with all columns visible | Same as md with wider row padding | Same as md | Max-width 1200px centered |
 
 ### §7.3 Mobile-First Declaration
 
@@ -825,6 +827,26 @@ This design system uses a **mobile-first** approach. Base styles target 320px vi
 ---
 
 ## §8 Accessibility Specifications
+
+### §8.3 Keyboard Navigation
+
+All player-facing P0 flows must be fully operable via keyboard alone. The following named flows document the required key sequences, components involved, and expected outcomes. These flows must pass manual keyboard-only walkthrough as part of Phase 3 validation (§11.2).
+
+| # | Flow Name | Page / Component | Key Sequence | Expected Outcome |
+|---|-----------|-----------------|--------------|-----------------|
+| KN-01 | Landing → Claim CTA | Landing Page / `ClaimCTA` | `Tab` to focus `ClaimCTA` button (may require multiple tabs through `NavBar` links first); `Enter` to activate | `ClaimCTA` activates; user is navigated to `/claim` (or claim modal opens); focus moves to first field in `ClaimEmailForm` |
+| KN-02 | Claim email form submission | Claim Pet Page / `ClaimEmailForm` | `Tab` to focus email input → type email address → `Tab` to age confirmation checkbox → `Space` to check checkbox → `Tab` to submit button → `Enter` to submit | Form submits; button enters loading state; on success, focus moves to first digit of `ClaimCodeForm`; screen reader announces "Check your email for your 6-digit claim code" |
+| KN-03 | Claim code entry | Claim Pet Page / `ClaimCodeForm` | `Tab` between each of the 6 digit inputs (or auto-advance on digit entry) → type each digit → `Tab` to Confirm button → `Enter` to confirm | Each digit box accepts one character and advances focus; Confirm button activates; on success, rarity badge and URL reveal animate in; screen reader announces pet claimed |
+| KN-04 | My Pet page navigation | My Pet Page / `TrainingEntry`, `FoodInventory`, `ArenaEntry`, `RecordsLink` | `Tab` through `TrainingEntry` button → `Tab` through each `FoodInventory` "Use" button (one per food item in tab order) → `Tab` to `ArenaEntry` button → `Tab` to `RecordsLink` → `Enter` on any target to activate | Each interactive element is reachable in document order; `Enter` on `TrainingEntry` navigates to `/pet/:petId/train`; `Enter` on a "Use" button triggers food consumption; `Enter` on `ArenaEntry` begins arena entry; `Enter` on `RecordsLink` navigates to `/pet/:petId/records` |
+| KN-05 | Arena mode selection | Arena Page / `ModeSelector`, Enter Arena button | `Tab` to first mode card (Race) → `Enter` to select mode → `Tab` to next mode card if desired → `Enter` to select → `Tab` to "Enter Arena" button → `Enter` to activate | Selected mode card receives active pixel-art border and focus ring; "Enter Arena" button becomes enabled; `Enter` on "Enter Arena" begins matchmaking; button enters loading/disabled state |
+| KN-06 | Modal focus trap — AIOfferModal / TradeOfferModal | Arena Page / `AIOfferModal`; Marketplace Page / `TradeOfferModal` | While modal is open: `Tab` cycles through modal interactive elements only (Accept/Decline buttons in `AIOfferModal`; pet selection cards and Confirm/Cancel in `TradeOfferModal`); `Shift+Tab` cycles in reverse; `Escape` closes modal and declines | Focus never leaves the modal while it is open; background page elements are not reachable via keyboard; `Escape` closes the modal, declines the offer (AI match or trade), and returns focus to the element that triggered the modal |
+
+**Implementation requirements**:
+- All `Tab` focus targets must have a visible focus ring meeting ≥ 3:1 contrast (WCAG 2.4.7), using `--color-focus` (#ffd700 on dark backgrounds).
+- `Enter` activates `<button>` and `<a>` elements; `Space` activates `<button>` elements and `<input type="checkbox">`.
+- `Arrow` keys navigate between `RarityFilter` tab options (ARIA `role="tablist"` pattern).
+- No keyboard trap exists outside of intentional modal focus traps; all modals close via `Escape`.
+- Focus management after async operations (form submit, training action, arena entry) must move focus to the relevant result or status region.
 
 ### §8.4 WCAG 2.1 AA Compliance Matrix
 
@@ -1350,6 +1372,49 @@ From PRD §9.4 AB-001:
 | **Rollout** | 50/50 split during Beta phase; winner rolled out at GA if statistically significant (p < 0.05, min 80% power) |
 | **Design Implication** | Variant B requires a redesigned landing page hero section with prominent rarity reveal animation and dynamic CTA copy — this must be built as a design variant, not just a copy change |
 
+### §13.4 State Management Approach
+
+The frontend uses four distinct state management tiers. Each Application Layer hook from §9.5 is assigned to exactly one tier:
+
+| Tier | Tooling | Scope | Configuration |
+|------|---------|-------|---------------|
+| **Server state** | TanStack Query | Remote data fetched from the API — cached, deduplicated, and automatically revalidated | `staleTime: 30_000` (30s) globally; individual query keys override as needed |
+| **Client state** | Zustand | Ephemeral UI state that does not belong in the URL and is not server-derived | Single store; slices for: selected arena mode, claim flow step, notification/toast queue |
+| **URL state** | `URLSearchParams` / route segments | Shareable or bookmark-able state | Leaderboard filter (rarity), leaderboard page number |
+| **Form state** | React Hook Form | Controlled form inputs with validation | Used for `ClaimEmailForm` and `ClaimCodeForm` |
+
+**Hook → State tier mapping** (Application Layer, §9.5):
+
+| Hook | State Tier | Notes |
+|------|-----------|-------|
+| `usePet` | Server state (TanStack Query) | GET `/api/pet/:petId`; cache 30s stale; invalidated on training or food action |
+| `useClaim` | Client state (Zustand) + Server state (TanStack Query) | Claim flow step held in Zustand; `submitClaim` and `validateCode` are TanStack Query mutations |
+| `useArena` | Server state (TanStack Query) | `enterArena` is a mutation; arena mode selection held in Zustand client state |
+| `useLeaderboard` | Server state (TanStack Query) + URL state | Filter and page in `URLSearchParams`; data fetched via TanStack Query with filter/page as query key |
+| `useTraining` | Server state (TanStack Query) | `submitTraining` is a mutation; invalidates `usePet` cache on success |
+| `useFood` | Server state (TanStack Query) | Food inventory fetched as part of `usePet`; `useFood` provides the mutation for food consumption |
+| `useMarketplace` | Server state (TanStack Query) | Listing data and trade offer mutations; enabled only when `FF_MARKETPLACE` is ON |
+| `useAdmin` | Server state (TanStack Query) | Admin-only; separate query client instance with no shared cache with player-facing queries |
+
+### §13.5 API Integration Points
+
+All API calls originate from the Infrastructure Layer (§9.5). The following table documents every hook-to-API function binding, including HTTP method, route, expected response shape, and error handling strategy:
+
+| Hook | API Function | HTTP Method | Route | Response Shape | Error Handling |
+|------|-------------|-------------|-------|---------------|---------------|
+| `usePet` | `fetchPet` | GET | `/api/pet/:petId` | `PetDTO { id, seed, rarity, stats { speed, strength, stamina, level }, ownerId, claimedAt }` | HTTP 404 → render empty/not-found state with "This pet could not be found" message and "Find a New Pet" CTA |
+| `useClaim` | `submitClaim` | POST | `/api/claim` | `{ claimId: string, expiresAt: ISO8601 }` | HTTP 429 → display rate limit error toast: "Too many claim attempts. Try again later." |
+| `useClaim` | `validateCode` | POST | `/api/claim/verify` | `{ petToken: string }` | HTTP 400 → display inline error on `ClaimCodeForm`: "Incorrect code. Check your email and try again."; decrement attempt counter |
+| `useArena` | `enterArena` | POST | `/api/arena/enter` | `{ matchId: string, result: 'WIN' \| 'LOSS', statDelta: number }` | HTTP 429 → display `RateLimitBanner` with countdown (ARENA_RATE_LIMIT = 10 battles/hr) |
+| `useTraining` | `submitTraining` | POST | `/api/pet/:petId/train` | `{ updatedStats: { speed, strength, stamina, level } }` | HTTP 400 → display toast error: "Training failed — max 3 training actions per day" (TRAINING_ACTIONS_PER_DAY = 3); re-enable training button |
+| `useLeaderboard` | `fetchLeaderboard` | GET | `/api/leaderboard` | `{ entries: LeaderboardEntry[100], lastUpdated: ISO8601 }` | Network error or HTTP 5xx → fall back to stale cached data (TanStack Query `staleTime`); show "Showing cached results" notice |
+
+**Error handling conventions**:
+- All mutations wrap calls in `try/catch`; on failure, the triggering button returns to its default (non-loading) state so users can retry without a page reload.
+- HTTP 401 / 403 from any endpoint triggers a redirect to Landing Page with `?reason=session_expired` query parameter.
+- HTTP 500 from any endpoint renders the generic error toast (§4.3 Generic API / Server Error).
+- Network / offline errors trigger the persistent offline banner (§4.3 Network / Offline Error).
+
 ---
 
 ## §14 References
@@ -1506,13 +1571,13 @@ Searchable, read-only log table. Search filters: date range picker, actor (admin
 **Business Pages**:
 
 **6. Leaderboard Management (`/admin/leaderboard`)**
-Top 500 leaderboard view with an added "Suspicious" column. Suspicious pets (>50 battles/hour in rolling 60-min window) are highlighted in amber with a "SUSPICIOUS" badge. Clicking a suspicious row opens a right-side panel showing: battle timeline for the suspicious window (timestamps, opponents, outcomes), bot-pattern score indicator, and three action buttons: "Dismiss Flag" / "Temporary Remove (Pending Review)" / "Permanent Ban". All actions require a reason text field (max 500 chars). Bulk selection for clearing multiple low-risk flags simultaneously.
+Top 500 leaderboard view with an added "Suspicious" column. Suspicious pets (>50 battles/hour in rolling 60-min window) (BOT_DETECTION_BATTLES_THRESHOLD = 50 / BOT_DETECTION_WINDOW = 60 min) are highlighted in amber with a "SUSPICIOUS" badge. Clicking a suspicious row opens a right-side panel showing: battle timeline for the suspicious window (timestamps, opponents, outcomes), bot-pattern score indicator, and three action buttons: "Dismiss Flag" / "Temporary Remove (Pending Review)" / "Permanent Ban". All actions require a reason text field (max 500 chars). Bulk selection for clearing multiple low-risk flags simultaneously.
 
 **7. Arena Rate Config (`/admin/config/runtime`)**
 Two-section form (separated clearly to avoid scope confusion with Economy Config). Section 1 — Rate Limit: "Max battles per hour per pet" — numeric input with slider, range 1-50, current value prominently displayed, default indicator. Section 2 — Rarity Weights: Four percentage inputs (Common, Rare, Epic, Legendary) with a live "Total: X%" display that turns red if sum ≠ 100%. Both sections have a "Preview Changes" button that shows a diff of current vs. proposed values before saving. "Apply Changes" button writes to config cache (effective within 5 minutes, shown as notice). Audit log notice: "This change will be recorded in the Audit Log."
 
 **8. Game Economy Config (`/admin/config/economy`)**
-Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary buff multiplier (0.5x-5.0x) and permanent buff multiplier (0.5x-5.0x) with current values displayed. Section 2 — Arena Entry Cooldown: Numeric input, range 0-60 minutes, default 0. Section 3 — Arena Entry Cost: Numeric input, range 0-10 food credits, default 0. All three sections include example calculations showing the player-facing effect (e.g., "At 2.0x multiplier, Speed Berry gives +10 Speed instead of +5"). Change preview modal before applying. 5-minute cache refresh notice.
+Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary buff multiplier (0.5x-5.0x) (FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5× / ADMIN_MAX = 5.0×) and permanent buff multiplier (0.5x-5.0x) with current values displayed. Section 2 — Arena Entry Cooldown: Numeric input, range 0-60 minutes (ARENA_ENTRY_COOLDOWN_ADMIN_MIN = 0 / MAX = 60 min), default 0. Section 3 — Arena Entry Cost: Numeric input, range 0-10 food credits, default 0. All three sections include example calculations showing the player-facing effect (e.g., "At 2.0x multiplier, Speed Berry gives +10 Speed instead of +5"). Change preview modal before applying. 5-minute cache refresh notice.
 
 ### §15.4 Admin UX Design Decisions
 
