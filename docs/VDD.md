@@ -655,10 +655,18 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --button-primary-focus-offset: 2px;
 --button-border-radius: var(--primitive-radius-none);     /* Pixel art: sharp */
 --button-border: 2px solid var(--primitive-grey-600);
---button-shadow: var(--shadow-component);
+--button-shadow: 4px 4px 0px var(--primitive-shadow-default);   /* PDD §9.3 aligned: 4px hard-offset */
+--button-shadow-hover: 6px 6px 0px var(--primitive-shadow-default);
+--button-shadow-active: 2px 2px 0px var(--primitive-shadow-default);  /* compressed on press */
 --button-padding-y: var(--primitive-space-3);             /* 12px */
 --button-padding-x: var(--primitive-space-6);             /* 24px */
 --button-min-height: 44px;                                /* WCAG 2.5.5 touch target */
+
+/* Button — error state (form submission failure, failed arena entry, failed claim) */
+--button-primary-error-bg: var(--color-error);
+--button-primary-error-border: 2px solid var(--color-feedback-error);
+--button-primary-error-text: var(--primitive-grey-50);  /* white text on red bg */
+--button-primary-error-shadow: 4px 4px 0px var(--color-error);
 
 /* =============================================
    COMPONENT: Input Field
@@ -784,6 +792,25 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 | Selected | `--dropdown-border-focus` | `--dropdown-option-bg-selected` | `--dropdown-text` |
 | Disabled | `--dropdown-border` | `--dropdown-bg` | `--dropdown-text` at `--dropdown-disabled-opacity` (0.4) |
 | Error | `--dropdown-error-border` | `--dropdown-bg` | `--dropdown-text` |
+
+### §6.x Token Name Changes from PDD §9.3
+
+The following component-level token names extend PDD §9.3. Where VDD uses a more specific name, the PDD name is shown for reference:
+
+| VDD Token Name | PDD §9.3 Token Name | Change Type | Rationale |
+|---------------|--------------------|-----------| ---------|
+| --badge-legendary-border | --badge-legendary-border-color | Shortening | Consistent with VDD §6.3 badge token naming convention |
+| --pet-canvas-border | --canvas-border | Specificity | Prefix 'pet-' added to distinguish pet canvas from admin panel canvases |
+| --pet-canvas-shadow-legendary | --canvas-shadow | Specificity | Added '-legendary' suffix to distinguish from standard canvas shadow |
+
+EDD authors must use the VDD token names in the left column. The PDD §9.3 names are deprecated at the component level and retained only as backward-compatible aliases.
+
+```css
+/* PDD §9.3 backward-compatible aliases */
+--badge-legendary-border-color: var(--badge-legendary-border);
+--canvas-border: var(--pet-canvas-border);
+--canvas-shadow: var(--pet-canvas-shadow-legendary);
+```
 
 ### §6.4 Dark Mode Token Mapping
 
