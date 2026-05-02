@@ -19,6 +19,7 @@
 | **Last Updated** | 2026-05-03 |
 | **Upstream Documents** | IDEA-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503 |
 | **Downstream Documents** | EDD.md (Engineering Design), Implementation code |
+| **審閱者 / Reviewers** | Design Lead, Product Manager (PM), Frontend Architect (to be updated with actual names) |
 
 ### Version Table
 
@@ -57,14 +58,26 @@ pixel-pet-arena is visually positioned as the **dark luxury pixel-art game** for
 **Principle 1 — Pixel Art Purity Without Compromise**
 Every UI element — buttons, cards, modals, stat bars, badges — must read as part of the pixel-art game world. No generic Material Design defaults, no unstyled Tailwind components, no antialiased rounded-corner SaaS chrome. Pixel borders are hard (`border-radius: 0px`). Shadows are hard-offset (`4px 4px 0px`). The UI must feel like the game spawned its own interface, not like a web app bolted onto a game.
 
+> **DO**: Use 4px grid snapping, hard 4px box-shadow offset on interactive elements, integer pixel values only.
+> **DON'T**: Apply CSS blur filters or fractional pixel values to game UI elements; never use box-shadow blur-radius > 0 on pixel-art elements.
+
 **Principle 2 — Rarity as Visual Hierarchy**
 The four rarity tiers (Common grey, Rare teal, Epic purple, Legendary gold) are the emotional vocabulary of the entire product. Every screen where a pet appears must communicate rarity through color, border treatment, and animation — without relying on text labels as the primary signal. A Legendary pet must look unmistakably more impressive than a Common pet at a glance.
+
+> **DO**: Let rarity color (grey/blue/purple/gold) be the primary differentiator; reinforce with border treatment and glow.
+> **DON'T**: Apply Legendary gold styling to non-pet elements; never use rainbow gradients (only single-hue rarity palettes).
 
 **Principle 3 — Dark Luxury as the Default Direction**
 The product leads with its dark mode (`--color-surface-base: #1a1a2e`) as the primary experience. This is intentional — the deep navy base makes rarity colors pop, creates a night-sky / retro CRT aesthetic, and positions the product as premium rather than casual. Light mode is a deliberate secondary variant, not an afterthought or auto-inversion.
 
+> **DO**: Design dark mode as primary (navy/dark-charcoal background); ensure all primary flows are validated in dark mode first.
+> **DON'T**: Start from a white/light design and invert; never use pure black (#000000) as background (use `--primitive-navy-900` instead).
+
 **Principle 4 — Shareability is a Design Constraint**
 Battle records, leaderboard ranks, and pet profiles are all designed with the assumption that they will be screenshot and posted to Twitter or Discord. Every pet-facing page must look compelling when extracted from context. Open Graph images, rarity glows, and win/loss celebrations are not decorative — they are growth mechanics.
+
+> **DO**: Use spring easing (`--primitive-ease-spring`) for positive game events (level up, rare discovery); use standard ease for navigation.
+> **DON'T**: Animate layout-affecting properties (width/height/position); reserve spring animations for delight, not all interactions.
 
 **Principle 5 — Accessibility as Competitive Advantage**
 Focus rings are gold (`#ffd700`) — they look intentional. Contrast ratios exceed minimums — `--color-text-primary` achieves 12.4:1 on the dark base. Reduced-motion fallbacks are designed, not omitted. Accessibility is not compliance; it is craftsmanship that signals product quality to the developer and enthusiast early-adopter community.
@@ -79,11 +92,58 @@ Focus rings are gold (`#ffd700`) — they look intentional. Contrast ratios exce
 | **Tamagotchi (Official App)** | Cute rounded pastel, device-chrome skeuomorphic, retro LCD simulation | Device-locked mental model; childish palette limits adult appeal; no competitive visual hierarchy | Competitive dark tone; adult-appropriate luxury direction; rarity hierarchy as status symbol |
 | **Axie Infinity** | Fantasy game art meets DeFi dashboard; over-produced 3D art; crypto-first UX | Steep visual complexity; intimidating for casual players; financial dashboard in game wrapper | Approachable pixel-art simplicity; clean information hierarchy; zero financial-product vocabulary |
 
+### §1.4 Visual Hierarchy Rules
+
+#### Scale Contrast Rules
+- H1 (`--text-h1`) must be ≥2× body text (`--text-body`) font size at any viewport width
+- H2 must be ≥1.5× body text font size
+- Caption/metadata text must be ≤0.875× body text (use `--text-small` or `--text-caption`)
+- Pixel art font (Press Start 2P) automatically enforces strong scale contrast due to its bold monospace nature
+
+#### Weight Contrast Rules
+- Use font-weight 700 (Bold) only for: H1, H2, CTA button labels, stat values (HP/ATK/DEF)
+- Use font-weight 600 (Semibold) for: H3, nav active state, rarity badge labels
+- Use font-weight 400 (Regular) for: all body copy, secondary labels, metadata
+- Pixel art headers (Press Start 2P) are always treated as Bold weight regardless of CSS weight setting
+
+#### Color Emphasis Rules
+- Primary emphasis: `--color-brand-primary` (purple) — used for interactive elements, active states, primary CTAs only
+- Secondary emphasis: `--color-brand-accent` (gold) — used for Legendary tier and premium actions only
+- Muted/secondary text: `--color-text-secondary` — all supporting text, timestamps, counts
+- Disabled/invisible: `--color-text-disabled` — 40% opacity, use for explicitly disabled UI elements only
+- NEVER use rarity colors (`--color-rarity-*`) for non-rarity contexts
+
+#### Whitespace Rhythm Rules
+- Page-level gaps: use `--space-section` (`--primitive-space-12`: 48px) or larger
+- Component-level gaps: use `--space-component-gap` (`--primitive-space-4`: 16px)
+- Within-component gaps: use `--primitive-space-2` (8px) or `--primitive-space-1` (4px)
+- Pixel art elements snap to 8px grid; use multiples of 8px for all game UI spacing
+
 ---
 
 ## §2 Art Direction
 
-### §2.1 Mood Board Keywords
+### §2.1 Visual References
+
+The following concrete references ground the visual direction. These are not mood keywords — they are specific products and specific design decisions we borrow or diverge from.
+
+| Reference | URL / Source | What we borrow | What we intentionally differ |
+|-----------|-------------|----------------|------------------------------|
+| **Stardew Valley UI** | https://store.steampowered.com/app/413150/Stardew_Valley/ | Pixel-grid border treatment on item cards; inventory grid 32px spacing; warm color palette approach | We use a darker navy base (not Stardew's warm beige); our rarity tier system is more formalized than Stardew's item system |
+| **Hearthstone card design** | https://hearthstone.blizzard.com | Golden Legendary card shimmer effect; card border glow hierarchy (common=none, rare=blue, epic=purple, legendary=gold) — our rarity visual language mirrors this exactly | We use pixel-art hard edges instead of Hearthstone's 3D rendered card frames; no physical card metaphor |
+| **Pokémon TCG Online** | https://tcgo.pokemon.com | Stat bar visual treatment; type icon pill design; versus screen layout; creature stat display conventions | We use Inter for all stat numbers (not serif); we don't use the energy/type icon system; layout is web-first not card-first |
+| **Dark Souls III UI** | HUD design philosophy reference — minimal, atmospheric, every element earns its presence | Health/stamina bar layout inspiration; text treatment at small sizes; philosophy of UI that doesn't overwhelm the game canvas | Our product is much lighter and more game-casual; we use bright rarity colors vs Dark Souls' muted palette; we have verbose labels where Souls uses iconography |
+| **GOG.com dark theme** | https://www.gog.com | Dark navy surface system; card hover glow effect; text hierarchy in dark mode; SaaS dark luxury baseline | We use pixel-art borders (0px radius) vs GOG's rounded cards; our primary font is Press Start 2P vs GOG's clean sans-serif; game-first vs store-first information hierarchy |
+
+### §2.2 Emotional Tone Map
+
+| Brand Emotion | Visual Expression | Key Design Decisions |
+|--------------|-------------------|---------------------|
+| **Competitive Excitement** | High contrast, spring easing, gold accents | `--primitive-ease-spring` for battle outcomes; `--color-brand-accent` (gold) for win states; stat bar animations use scale transform |
+| **Nostalgic Warmth** | Limited palettes, pixel precision, retro font | Press Start 2P as primary display font; max 16 colors per sprite; 0px border-radius on pixel-art elements |
+| **Premium Exclusivity** | Dark navy base, rarity glow hierarchy, CRT effect | Legendary tier uses CSS CRT shimmer animation; dark surface (`#0d1117` equivalent) as canvas; Epic+ items have drop-shadow glow |
+
+### §2.3 Mood Board Keywords
 
 1. **Pixel** — Hard edges, grid-snapped geometry, 8px/16px/32px multiples, `image-rendering: pixelated`, no antialiasing on sprite elements
 2. **Nostalgic** — NES/SNES color constraints (limited palettes per sprite), CRT glow effects on Legendary tier, scanline texture on selected surfaces, retro monospace display font (`Press Start 2P`)
@@ -91,7 +151,7 @@ Focus rings are gold (`#ffd700`) — they look intentional. Contrast ratios exce
 4. **Playful** — Spring easing on interactions (`cubic-bezier(0.34, 1.56, 0.64, 1)`), particle bursts on victories, stat indicators that float upward, rarity badges that overshoot on reveal
 5. **Collectible** — Rarity tier visual language borrows from physical trading cards: border treatments, holographic-inspired shimmer on Legendary, rarity probability disclosures, numbered editions aesthetic
 
-### §2.2 Visual Reference Sources
+### §2.4 Design Reference Sources (Category Breakdown)
 
 | Category | Reference Direction | Specific Influences |
 |----------|-------------------|-------------------|
@@ -101,7 +161,7 @@ Focus rings are gold (`#ffd700`) — they look intentional. Contrast ratios exce
 | **Illustration** | 64×64px pixel sprites with 4-8 frame idle animations; hard outlines, no antialiasing; 5+ attribute dimensions for procedural generation | itch.io pixel art game tradition; classic RPG monster sprite proportions; Pokémon-inspired rarity visual differentiation |
 | **Motion** | Purposeful animation that communicates game state: stat floats indicate gain, particle bursts signal victories, shimmer effects signal rarity | Spring easing for satisfaction on successful actions; expo-out for smooth page transitions; CRT scanline sweep for loading states |
 
-### §2.3 Light & Material Direction
+### §2.5 Light & Material Direction
 
 **Primary surface material**: Matte deep navy (`oklch(12% 0.04 280)`, `#1a1a2e`) — no gradients on base surfaces. Texture is achieved through hard-offset pixel shadows, not light simulation.
 
@@ -119,7 +179,7 @@ Focus rings are gold (`#ffd700`) — they look intentional. Contrast ratios exce
 - **Epic**: Purple animated shimmer border — `#a29bfe` border + shimmer sweep animation
 - **Legendary**: Gold CRT glow + animated shimmer — `#fdcb6e` border + `legendary-shimmer 2s ease-in-out infinite`
 
-### §2.4 World / Art Style Declaration
+### §2.6 World / Art Style Declaration
 
 pixel-pet-arena occupies the **Pixel Art Retro-Futurism** style direction: pixel aesthetics as the primary visual language, applied with modern color science (oklch), modern typography pairing, and modern interaction design principles.
 
@@ -213,11 +273,22 @@ The rarity color system is the core brand differentiator. Colors are selected fo
 - Inverted: `--color-surface-base` (`#1a1a2e`) on light surfaces
 - Accent: `--color-brand-accent` (`#fdcb6e`) for special promotional use only
 
+**Minimum digital size**:
+- Wordmark must not be rendered below **80px wide** — this maintains Press Start 2P legibility at pixel boundaries
+- Standalone mark (icon only): minimum **16px height**
+
+**Safe zone as ratio**:
+- Clear space = **100% of cap-height** (1× the height of the "P" glyph in "Pixel") on all four sides, in addition to the current 16px absolute minimum
+- Both rules apply simultaneously: take whichever is larger
+
+**Print usage note**: Print usage is out of scope for this digital product. If print materials are produced externally, minimum 25mm wide for wordmark.
+
 **What not to do**:
 - Do not apply the wordmark in any rarity color other than gold in non-Legendary contexts
 - Do not place the logo on surfaces below 4.5:1 contrast
 - Do not use a font other than `Press Start 2P` for the wordmark
 - Do not apply gradients to the wordmark
+- Do not render the wordmark below 80px wide in digital contexts
 
 ---
 
@@ -312,18 +383,19 @@ All spacing, sizing, and positioning of pixel art elements must snap to the pixe
 
 Inherits from PDD §9.2. All values confirmed below:
 
-| Level | Font Family | Size (clamp) | Weight | Line Height | Usage |
-|-------|------------|-------------|--------|-------------|-------|
-| **H1 — Hero** | Press Start 2P | `clamp(1.5rem, 1rem + 2.5vw, 2.5rem)` | 700 | 1.4 | Page titles, pet names in hero view, battle result WIN/LOSE |
-| **H2 — Section** | Press Start 2P | `clamp(1.2rem, 0.8rem + 2vw, 1.8rem)` | 700 | 1.4 | Section headings, rarity tier labels, arena mode titles |
-| **H3 — Subsection** | Press Start 2P | `clamp(1rem, 0.7rem + 1.5vw, 1.4rem)` | 400 | 1.5 | Modal titles, card headings in game context |
-| **H4 — Card Title** | Inter | `1.125rem` (18px) | 600 | 1.5 | Card headings, stat labels with emphasis |
-| **H5 — Table Header** | Inter | `1rem` (16px) | 600 | 1.5 | Table column headers, leaderboard column labels |
-| **H6 — Small Label** | Inter | `0.875rem` (14px) | 600 | 1.5 | Badge text, small status labels |
-| **Body** | Inter | `clamp(1rem, 0.92rem + 0.4vw, 1.125rem)` | 400 | 1.6 | General body copy, descriptions, arena copy, tooltips |
-| **Caption** | Inter | `0.75rem` (12px) | 400 | 1.4 | Timestamps, metadata, secondary labels, leaderboard footnotes |
-| **Code / URL** | System monospace | `0.875rem` (14px) | 400 | 1.5 | Unique URL display, 6-digit claim code input fields |
-| **Numeric / Stats** | Inter | Context-dependent | 700 | 1 | Stat values (speed/strength/stamina), leaderboard scores, countdown timers |
+| Level | Token | Font Family | Size (clamp) | Weight | Line Height | Letter Spacing | Usage |
+|-------|-------|------------|-------------|--------|-------------|----------------|-------|
+| **H1 — Hero** | `--text-h1` | Press Start 2P | `clamp(1.5rem, 1rem + 2.5vw, 2.5rem)` | 700 | 1.4 | `0em` | Page titles, pet names in hero view, battle result WIN/LOSE |
+| **H2 — Section** | `--text-h2` | Press Start 2P | `clamp(1.2rem, 0.8rem + 2vw, 1.8rem)` | 700 | 1.4 | `0em` | Section headings, rarity tier labels, arena mode titles |
+| **H3 — Subsection** | `--text-h3` | Press Start 2P | `clamp(1rem, 0.7rem + 1.5vw, 1.4rem)` | 400 | 1.5 | `0em` | Modal titles, card headings in game context |
+| **H4 — Card Title** | `--text-h4` | Inter | `1.125rem` (18px) | 600 | 1.5 | `0em` | Card headings, stat labels with emphasis |
+| **H5 — Table Header** | `--text-h5` | Inter | `1rem` (16px) | 600 | 1.5 | `0em` | Table column headers, leaderboard column labels |
+| **H6 — Small Label / Label** | `--text-label` | Press Start 2P | `0.875rem` (14px) | 600 | 1.5 | `0.05em` | Badge text, small status labels — slightly loose for pixel text legibility |
+| **Body** | `--text-body` | Inter | `clamp(1rem, 0.92rem + 0.4vw, 1.125rem)` | 400 | 1.6 | `0em` | General body copy, descriptions, arena copy, tooltips |
+| **Small** | `--text-small` | Inter | `0.875rem` (14px) | 400 | 1.5 | `0.01em` | Secondary supporting text, compact labels |
+| **Caption** | `--text-caption` | Inter | `0.75rem` (12px) | 400 | 1.4 | `0.02em` | Timestamps, metadata, secondary labels, leaderboard footnotes |
+| **Code / URL** | `--text-mono` | System monospace | `0.875rem` (14px) | 400 | 1.5 | `0em` | Unique URL display, 6-digit claim code input fields |
+| **Numeric / Stats** | `--text-stat` | Inter | Context-dependent | 700 | 1 | `-0.01em` | Stat values (speed/strength/stamina), leaderboard scores, countdown timers — tight for stat numbers |
 
 ### §5.3 Font Loading Strategy
 
@@ -352,31 +424,50 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 /* =============================================
    PRIMITIVE: Color Scales
    ============================================= */
---primitive-purple-100: oklch(92% 0.08 280);   /* Lightest purple tint */
---primitive-purple-300: oklch(72% 0.24 280);   /* Hover/active accent */
---primitive-purple-500: oklch(52% 0.24 280);   /* Brand primary */
---primitive-purple-700: oklch(38% 0.22 280);   /* Dark button press */
---primitive-purple-900: oklch(22% 0.12 280);   /* Deep purple overlay */
 
---primitive-teal-100: oklch(90% 0.07 190);
---primitive-teal-300: oklch(78% 0.13 190);
---primitive-teal-400: oklch(68% 0.19 164);     /* Brand secondary / Rare rarity */
---primitive-teal-600: oklch(52% 0.17 164);
+/* Full Grey / Neutral Scale */
+--primitive-grey-50:  oklch(98% 0 0);   /* #f9fafb */
+--primitive-grey-100: oklch(95% 0 0);   /* #f3f4f6 */
+--primitive-grey-200: oklch(90% 0 0);   /* #e5e7eb */
+--primitive-grey-300: oklch(83% 0 0);   /* #d1d5db */
+--primitive-grey-400: oklch(70% 0 0);   /* #9ca3af */
+--primitive-grey-500: oklch(55% 0 0);   /* #6b7280 */
+--primitive-grey-600: oklch(42% 0 0);   /* #4b5563 */
+--primitive-grey-700: oklch(32% 0 0);   /* #374151 */
+--primitive-grey-800: oklch(22% 0 0);   /* #1f2937 */
+--primitive-grey-900: oklch(14% 0 0);   /* #111827 */
+--primitive-grey-950: oklch(9% 0 0);    /* #030712 */
 
---primitive-gold-100: oklch(95% 0.07 82);
---primitive-gold-300: oklch(85% 0.15 82);      /* Brand accent / Legendary */
---primitive-gold-500: oklch(70% 0.17 82);
---primitive-gold-700: oklch(55% 0.17 82);
+/* Full Brand Primary (Purple) Scale */
+--primitive-purple-50:  oklch(97% 0.03 290);  /* #faf5ff — Lightest purple tint */
+--primitive-purple-100: oklch(94% 0.06 290);  /* #f3e8ff */
+--primitive-purple-200: oklch(88% 0.11 290);  /* #e9d5ff */
+--primitive-purple-300: oklch(80% 0.16 290);  /* #d8b4fe — Hover/active accent */
+--primitive-purple-400: oklch(72% 0.20 290);  /* #c084fc */
+--primitive-purple-500: oklch(62% 0.24 290);  /* #a855f7 — Brand primary */
+--primitive-purple-600: oklch(54% 0.24 290);  /* #9333ea */
+--primitive-purple-700: oklch(45% 0.22 290);  /* #7c3aed — Dark button press */
+--primitive-purple-800: oklch(37% 0.19 290);  /* #6d28d9 */
+--primitive-purple-900: oklch(28% 0.16 290);  /* #4c1d95 — Deep purple overlay */
+--primitive-purple-950: oklch(20% 0.13 290);  /* #2e1065 */
 
---primitive-navy-900: oklch(12% 0.04 280);     /* Surface base */
---primitive-navy-800: oklch(17% 0.05 280);     /* Surface raised */
---primitive-navy-700: oklch(22% 0.07 280);     /* Surface overlay */
---primitive-navy-600: oklch(28% 0.06 280);     /* Hover surfaces */
+/* Teal Scale */
+--primitive-teal-100: oklch(90% 0.07 190);    /* #ccf5f3 */
+--primitive-teal-300: oklch(78% 0.13 190);    /* #7de8e2 */
+--primitive-teal-400: oklch(68% 0.19 164);    /* #00b894 — Brand secondary / Rare rarity */
+--primitive-teal-600: oklch(52% 0.17 164);    /* #008c72 */
 
---primitive-grey-50: oklch(93% 0.01 280);      /* Primary text */
---primitive-grey-200: oklch(72% 0.01 0);       /* Common rarity / secondary text */
---primitive-grey-400: oklch(40% 0.04 280);     /* Disabled text */
---primitive-grey-600: oklch(22% 0.04 280);     /* Deep shadow */
+/* Gold Scale */
+--primitive-gold-100: oklch(95% 0.07 82);     /* #fff3cd */
+--primitive-gold-300: oklch(85% 0.15 82);     /* #fdcb6e — Brand accent / Legendary */
+--primitive-gold-500: oklch(70% 0.17 82);     /* #ffd700 — Focus ring */
+--primitive-gold-700: oklch(55% 0.17 82);     /* #c49900 */
+
+/* Navy Scale */
+--primitive-navy-900: oklch(12% 0.04 280);    /* #1a1a2e — Surface base */
+--primitive-navy-800: oklch(17% 0.05 280);    /* #242444 — Surface raised */
+--primitive-navy-700: oklch(22% 0.07 280);    /* #2d2d5a — Surface overlay */
+--primitive-navy-600: oklch(28% 0.06 280);    /* #3a3a6e — Hover surfaces */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -600,7 +691,37 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --nav-link-color: var(--color-text-secondary);
 --nav-link-active: var(--color-brand-primary);
 --nav-height: 56px;
+
+/* =============================================
+   COMPONENT: Dropdown / Select
+   State coverage: Default | Open/Active | Focus | Hover-Option | Selected | Disabled | Error
+   ============================================= */
+--dropdown-bg: var(--color-surface-raised);
+--dropdown-bg-hover: var(--color-surface-elevated);
+--dropdown-border: var(--color-border-default);
+--dropdown-border-focus: var(--color-brand-primary);
+--dropdown-text: var(--color-text-primary);
+--dropdown-text-placeholder: var(--color-text-secondary);
+--dropdown-option-bg-hover: var(--color-surface-base);
+--dropdown-option-bg-selected: var(--color-brand-primary-muted);
+--dropdown-disabled-opacity: 0.4;
+--dropdown-error-border: var(--color-feedback-error);
+--dropdown-radius: var(--primitive-radius-sm);
+--dropdown-padding-x: var(--primitive-space-3);
+--dropdown-padding-y: var(--primitive-space-2);
 ```
+
+**Dropdown state reference**:
+
+| State | Border | Background | Text |
+|-------|--------|-----------|------|
+| Default | `--dropdown-border` | `--dropdown-bg` | `--dropdown-text` |
+| Open/Active | `--dropdown-border-focus` | `--dropdown-bg` | `--dropdown-text` |
+| Focus | `--color-focus` (2px outline) | `--dropdown-bg` | `--dropdown-text` |
+| Hover-Option | `--dropdown-border` | `--dropdown-option-bg-hover` | `--dropdown-text` |
+| Selected | `--dropdown-border-focus` | `--dropdown-option-bg-selected` | `--dropdown-text` |
+| Disabled | `--dropdown-border` | `--dropdown-bg` | `--dropdown-text` at `--dropdown-disabled-opacity` (0.4) |
+| Error | `--dropdown-error-border` | `--dropdown-bg` | `--dropdown-text` |
 
 ### §6.4 Dark Mode Token Mapping
 
@@ -678,6 +799,38 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 }
 ```
 
+### §6.6 Responsive Visual Behavior Rules
+
+#### Per-Breakpoint Visual Density Strategy
+
+| Breakpoint | Width | Density | Strategy |
+|-----------|-------|---------|---------|
+| xs | 320px | Ultra-compact | Single column; PetCard reduced to 48px canvas; stats collapsed to icon-only |
+| sm | 375px | Compact | Single column; PetCard 64px canvas; 2-column stat grid |
+| md | 768px | Normal | 2-column layouts; full PetCard 64px; all stats visible |
+| lg | 1024px | Comfortable | 3-column pet grids; side-by-side battle layout |
+| xl | 1440px | Spacious | 4-column grids; expanded arena battle view |
+| 2xl | 1920px | Max-width capped | max-width: 1440px centered; no further layout changes |
+
+#### Spacing Token Scaling Per Breakpoint
+
+- `--space-section`: xs=24px / md=32px / xl=48px
+- `--space-page-padding`: xs=16px / md=24px / xl=32px
+- PetCanvas container: xs=48px / sm=64px / md=64px / lg=80px
+
+#### Sprite/Image Visual Focus Adaptation
+
+- At 48px display size: show only primary rarity border + base sprite, hide glow effects
+- At 64px display size: full sprite + rarity border + glow for Epic/Legendary
+- At 80px+ display size: full sprite + rarity border + glow + stat overlay on hover
+- Use CSS `image-rendering: pixelated` on all sprite images to prevent anti-aliasing blur at non-native sizes
+
+#### Type Scale Graceful Wrapping (Press Start 2P)
+
+- H1 at 320px: max 12 characters per line; longer names must use `word-break: break-all`
+- H2 at 320px: ≤14 characters; use `--text-h3` size as fallback at xs breakpoint if H2 would cause overflow
+- Body text (Inter): `word-break: break-word; hyphens: auto` at xs
+
 ---
 
 ## §7 Asset Pipeline
@@ -697,12 +850,55 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 
 ### §7.2 Icon Specifications
 
-- All icons use a pixel-art aesthetic: paths snapped to pixel grid, no rounded corners, 1px stroke width at 16px / 2px at 24px
+**Game UI Icons (custom pixel-art)**:
+- Type: Custom pixel-art icons — 24×24px at 2× = 48×48 source canvas, 2px stroke at 24px, 0px border-radius, hard pixel edges
 - SVG `viewBox` must be `"0 0 16 16"` or `"0 0 24 24"` — no non-standard viewBox dimensions
 - Icon colors are inherited via `currentColor` — no hard-coded fill/stroke colors in SVG source
 - Decorative icons use `aria-hidden="true"`; functional icons have `aria-label` on the parent interactive element
+- All paths snapped to pixel grid, no rounded corners
 
-### §7.3 Background Specifications
+**Non-Game UI Icons (forms, admin portal, navigation)**:
+- Library: Phosphor Icons v2.1 (https://phosphoricons.com) as the base library
+- Weight variant: "Bold" for consistency with pixel-art visual density
+- Customization: Adjusted to match pixel-art aesthetic where possible (hard edges, minimal curves)
+- Admin portal: Phosphor Icons Bold used exclusively (no custom pixel icons in admin context)
+
+### §7.3 Illustration Style
+
+**Pixel Sprites** (primary illustration type for all game elements):
+- Scope: pets, arena environment, items
+- Canvas: 64×64px base on 8px pixel grid
+- Color constraint: max 16 colors per sprite
+- Rendering: hard-edge, no anti-aliasing
+- CSS: `image-rendering: pixelated; image-rendering: crisp-edges;`
+
+**Non-Sprite Illustrations** (empty states, onboarding, error pages):
+- Style: 2D flat vector illustration with pixel-art-inspired edges
+- Technique: CSS `image-rendering: pixelated` on rasterized versions for pixelated look
+- Border radius: 4px maximum
+- Color palette: limited, matching brand tokens only
+
+**Admin Portal Illustrations**:
+- Style: Minimal line illustrations using Phosphor Icons extended
+- Pixel-art aesthetic is NOT used in admin contexts
+- Consistent with professional data-tool visual language
+
+### §7.4 Logo Asset Export Specifications
+
+| Version | Format | Size | Use Case |
+|---------|--------|------|---------|
+| Primary (dark bg) | SVG + PNG @2x | Nav: 160×32px; Header: 240×48px | Primary logo on dark surfaces |
+| Inverted (light bg) | SVG + PNG @2x | Same sizes | Light background contexts |
+| Monochrome | SVG + PNG @1x | 32×32px favicon, 64×64px icon | Favicons, PWA icons |
+| Wordmark only | SVG + PNG @2x | Min 80px wide, recommended 160px | Text-only contexts |
+| Mark only (pixel pet icon) | PNG @2x | 32×32, 64×64, 128×128 | App icons, social avatars |
+
+**Constraints**:
+- Maximum file sizes: SVG < 8KB, PNG @2x < 50KB
+- Optimization: SVGO for SVG, pngquant for PNG
+- Naming: `logo-primary-dark.svg`, `logo-inverted.png`, `mark-64.png`
+
+### §7.5 Background Specifications
 
 | Asset | Format | Dimensions | Notes |
 |-------|--------|------------|-------|
@@ -710,7 +906,7 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 | Admin dashboard background | CSS only — no image | N/A | `--admin-sidebar-bg: #111827` |
 | OG social card background | AVIF (primary) + WebP (fallback) + PNG (last resort) | 1200×630px | Pre-rendered per pet; includes sprite, rarity, stats |
 
-### §7.4 Naming Conventions
+### §7.6 Naming Conventions
 
 **General pattern**: `{context}-{descriptor}-{variant}-{size}.{ext}`
 
@@ -727,7 +923,39 @@ Examples:
 - No `final`, `final2`, `v2`, `new`, `temp` in production asset names
 - No spaces in filenames — use hyphens only
 
-### §7.5 Figma → Code Delivery Spec
+### §7.7 Figma → Code Delivery Spec
+
+**Figma File**: `[Figma Design File — to be provided by Design Lead]`
+
+**Per-Component Figma Links**:
+
+| Component | Figma Frame Link |
+|-----------|-----------------|
+| PetCard | TBD — pending Figma setup |
+| Button (Primary / Secondary / Disabled) | TBD — pending Figma setup |
+| Input Field (all states) | TBD — pending Figma setup |
+| Dropdown / Select (all states) | TBD — pending Figma setup |
+| Rarity Badge (all 4 tiers) | TBD — pending Figma setup |
+| Stat Bar | TBD — pending Figma setup |
+| Navigation Bar | TBD — pending Figma setup |
+| Arena Mode Card | TBD — pending Figma setup |
+| Battle Result (WIN/LOSS) | TBD — pending Figma setup |
+
+**Auto Layout Confirmation Checklist**:
+- [ ] All buttons use Auto Layout with padding tokens (`--button-padding-y`, `--button-padding-x`)
+- [ ] All card components use Auto Layout with gap tokens (`--card-padding`)
+- [ ] All form inputs use Auto Layout
+
+**Component Properties Configuration**:
+- Rarity tier = Variant property (Common / Rare / Epic / Legendary)
+- State = Variant property (Default / Hover / Focus / Active / Disabled / Error)
+- Interactive Components enabled for hover/focus states in Figma Dev Mode
+
+**Redline / Spec Delivery Method**:
+- Primary: Figma Dev Mode
+- Backup: Zeplin (if team prefers dedicated redline tooling)
+
+**Delivery Table**:
 
 | Deliverable | Format | Handoff Method |
 |------------|--------|---------------|
@@ -737,6 +965,10 @@ Examples:
 | Typography styles | Figma text styles → CSS font-size/weight/line-height | All text styles map to §5.2 type scale levels |
 | Pixel sprite exports | Figma → PNG export at 1x and 2x | `image-rendering: pixelated` annotation on all sprite frames |
 | Animation specs | Figma Prototype + PDD §6.1.1 motion spec table | Duration, easing, trigger, and reduced-motion fallback annotated per component |
+
+**Known Deviations (Figma vs. CSS)**:
+- Press Start 2P line-height in Figma may differ slightly from CSS due to pixel-grid snapping (expect ±2px differences in vertical rhythm)
+- CRT glow effects (`box-shadow` on Legendary tier) must be approximated in Figma using a glow layer effect — exact CSS rendering will differ
 
 ---
 
@@ -1192,6 +1424,45 @@ All role tag combinations are verified at minimum 4.5:1 contrast (AA) for their 
 | `ADMIN_SESSION_ABSOLUTE_EXPIRY` | 8h | §13.4 Admin Form F5 |
 | `ADMIN_MODERATION_REASON_MAX_CHARS` | 500 | §13.4 Admin Form F1 |
 | `GDPR_EMAIL_HASHING_INTERNAL_SLA` | 24h | §13.4 Admin Form F2 |
+
+---
+
+## §14 Seasonal & Event Visual Variants
+
+### Mutable Elements (can change for seasonal events)
+- Color scheme overlay (e.g., Halloween dark orange tint on `--color-surface-base`)
+- Event-specific pet background illustrations
+- Navigation banner background
+- Arena border treatment (alternative glow colors for event seasons)
+
+### Immutable Elements (core brand — never change)
+- Logo treatment and wordmark
+- `--color-brand-primary` (purple) and `--color-rarity-*` system
+- Press Start 2P as primary display font
+- Pixel grid alignment rules (4px/8px grid snap)
+- WCAG contrast requirements
+
+### Example: Winter Tournament Variant
+- `--color-surface-base` shifts to `oklch(8% 0.02 220)` — deep ice blue
+- Event accent: `oklch(90% 0.04 210)` — ice white
+- Snowflake particle system on arena background (CSS only, no layout impact)
+- Seasonal banner replaces standard nav background (same dimensions, different illustration)
+
+---
+
+## §15 Brand Extension Guidelines
+
+### Scenario 1: Seasonal Tournament Sub-brand (e.g., "Championship Edition")
+- **Logo**: Existing wordmark + "Championship" in `--text-small` Inter, positioned below in gold (`--color-brand-accent`)
+- **Color system**: All standard tokens maintained; add supplementary `--color-tournament-accent = oklch(72% 0.24 45)` (gold variant)
+- **Typography**: No change (Press Start 2P + Inter)
+- **Cannot**: change purple `--color-brand-primary` or rarity token values
+
+### Scenario 2: Community Partnership / Co-branding
+- **Logo placement**: Partner logo appears at same optical weight as Pixel Pet Arena logo; maximum 80% of PPA logo height
+- **Color hierarchy**: PPA `--color-brand-primary` takes precedence; partner primary color used as accent only
+- **Background**: PPA dark surface (`#0d1117` equiv.) is required; partner cannot mandate light background
+- **Required disclaimer text**: "Powered by Pixel Pet Arena" in `--text-caption` size
 
 ---
 
