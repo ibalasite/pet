@@ -34,6 +34,7 @@
 | v1.0 | 2026-05-03 | AI Generated (gendoc prd) | Initial draft generated from BRD-PIXEL-PET-ARENA-20260503 and IDEA-PIXEL-PET-ARENA-20260503 |
 | v1.1 | 2026-05-03 | PRD Editor (review-r1) | Fixed 15 review findings (F1–F15): scope reconciliation for US-RECORD-001 (F1), MAAPO as primary North Star (F2), arena battles target clarification (F3), US-PET-002 persona fix (F4), persona pain points and tech familiarity (F5), AC-006-4 daily-login-reward removed (F6), US-TRAIN-001 stat-max boundary AC added (F7), US-ARENA-001 rate-limit error AC added (F8), WCAG 2.1 AA NFR subsection added (F9), admin analytics events added (F10), RTM Priority column added + BRD cross-reference note (F11), AC-012-5 trade fee formula made concrete (F12), T-shirt estimates added to all USs (F13), §5 restructured into Epics (F14), ClaimToken and FoodBuff state machines added (F15) |
 | v1.2 | 2026-05-03 | PRD Editor (review-r2) | Fixed 10 review findings (F1–F10): §4.5 MoSCoW Battle Records promoted to Must Have (F1); FF_BATTLE_RECORDS set to P0/ON with kill-switch (F2); US-RECORD-001 heading corrected to P0 (F3); added AC-010-5 HTTP 404 error path and AC-010-6 <20 battles boundary to US-RECORD-001 (F4); added AC-004-5 invalid/revoked URL 404 error path to US-AUTH-002 (F5); second §7.8 renumbered to §7.9 Analytics Event Map (F6); `level` field added to §11.2 data dictionary (F7); BRD O3 added to US-AUTH-001, US-TRAIN-001, US-ARENA-001 RTM rows (F8); US-ADMIN-004/005/006 Estimate, Feature Flag, Test Type column added + all 3 added to §15 RTM (F9); US-FOOD-001 estimate corrected from S to M (F10) |
+| v1.3 | 2026-05-03 | PRD Editor (review-r3) | Fixed 6 review findings (F1–F6): RTM US-ADMIN-006 MoSCoW corrected from Must to Should (F1); RTM BRD Objective for US-ADMIN-004 corrected to O1 and US-ADMIN-005 to O2 (F2); §9.2 Guardrail Metrics added Leaderboard page UV/DAU ≥ 20% and Arena social share rate ≥ 5% (F3); AC-009-3 terminology changed from 'logged-in' to URL-token auth model (F4); AC-006-6 stat-cap boundary condition added to US-FOOD-001 (F5); battle_records_viewed analytics event added to §7.9 (F6) |
 
 ---
 
@@ -496,6 +497,7 @@ graph TD
 | AC-006-3 | Given a pet has been fed, a feeding animation plays on the pet sprite and the food item is removed from inventory | E2E |
 | AC-006-4 | Given the food inventory is empty, a "get more food" prompt is displayed pointing to defined ways to earn food items: participating in arena battles (food drop on battle completion) and completing training sessions (food reward on 3-session training streak) | E2E |
 | AC-006-5 | Given a temporary food buff is active during arena combat, the boosted stat is used in combat calculation and a buff indicator is shown on the pre-battle screen | Integration |
+| AC-006-6 | Given a pet owner attempts to feed a permanent stat-boosting food item to a pet whose target stat is already at 100, the feed action is blocked with an inline message 'This stat is already at maximum', the food item remains in inventory, and the API returns HTTP 400 with body `{"error": "stat_at_maximum", "stat": "<stat_name>"}` | Unit + E2E |
 
 ---
 
@@ -575,7 +577,7 @@ graph TD
 |-----|-----------|-----------|
 | AC-009-1 | Given the leaderboard page, the top 100 pets are displayed ranked by composite arena score (win rate × battles_played × level multiplier) | E2E |
 | AC-009-2 | Given leaderboard data, it is updated within 30 seconds of a battle result being recorded (eventual consistency with 30-second maximum lag) | Integration |
-| AC-009-3 | Given a logged-in pet owner views the leaderboard, their pet's current rank is highlighted and displayed even if outside the top 100 | E2E |
+| AC-009-3 | Given a pet owner accesses the leaderboard via their unique pet URL, their pet's current rank is highlighted and displayed even if outside the top 100 | E2E |
 | AC-009-4 | Given a leaderboard row is clicked, it links to that pet's public battle records page | E2E |
 | AC-009-5 | Given the leaderboard page, it is publicly accessible without claiming a pet (guests can view the leaderboard) | E2E |
 | AC-009-6 | Given a pet is banned by an admin for bot activity, it is removed from the leaderboard display within 5 minutes of the ban action | Integration |
@@ -1002,6 +1004,7 @@ All events must be captured in the analytics pipeline for funnel analysis and re
 | `pet_url_accessed` | Unique URL used to access pet | days_since_claim, is_returning | Retention |
 | `admin_pet_banned` | Admin bans a pet from arena and leaderboard | admin_id_hash, pet_id, ban_reason_category (one of: bot_activity, cheating, inappropriate_content, other), is_permanent (boolean) | Admin moderation audit, bot infestation trending |
 | `admin_leaderboard_removal` | Admin removes a pet from the leaderboard | admin_id_hash, pet_id, action_type (one of: temporary_removal, permanent_ban, score_reset) | Leaderboard integrity monitoring |
+| `battle_records_viewed` | Visitor opens a pet's public battle records page | pet_id, is_owner_viewing, referrer_type (direct/share_url/leaderboard), battle_count | Virality measurement, k-factor tracking, share URL conversion |
 
 ---
 
@@ -1098,6 +1101,8 @@ Metrics that must not degrade while improving the North Star:
 | Arena battle fair play rate | ≥ 95% non-bot battles | Bot infestation degrades competitive integrity and drives human players away |
 | P99 API latency | < 200ms | Slow API = poor game feel; players abandon laggy games |
 | Spam complaint rate (SendGrid) | < 0.1% | High spam rates trigger SendGrid IP throttling, killing email delivery |
+| Leaderboard page UV/DAU ratio | ≥ 20% | Measures social discovery and competitive motivation (BRD §7.2 O2) |
+| Arena social share rate | ≥ 5% | Measures virality and organic growth from battle result sharing (BRD §7.2 O4) |
 
 ### 9.3 Go / No-Go Criteria
 
@@ -1315,9 +1320,9 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | US-ADMIN-001 | Admin pet management | P0 | O2 | Must | `FF_ADMIN_PORTAL` | No moderation capability; bot infestation risk | E2E + Security |
 | US-ADMIN-002 | Admin leaderboard moderation | P0 | O2, O4 | Must | `FF_ADMIN_PORTAL` | Leaderboard integrity fails under bot attack | E2E + Integration |
 | US-ADMIN-003 | Admin system configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E |
-| US-ADMIN-004 | GDPR data deletion processing | P0 | O5 | Must | `FF_ADMIN_PORTAL` | GDPR non-compliance risk; legal liability | E2E + Integration |
-| US-ADMIN-005 | Suspicious battle detection | P0 | O5 | Must | `FF_ADMIN_PORTAL` | Automated bot detection absent; moderator workload unbounded | E2E + Integration |
-| US-ADMIN-006 | Game balance configuration | P1 | O5 | Must | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E + Integration |
+| US-ADMIN-004 | GDPR data deletion processing | P0 | O1 | Must | `FF_ADMIN_PORTAL` | GDPR non-compliance risk; legal liability | E2E + Integration |
+| US-ADMIN-005 | Suspicious battle detection | P0 | O2 | Must | `FF_ADMIN_PORTAL` | Automated bot detection absent; moderator workload unbounded | E2E + Integration |
+| US-ADMIN-006 | Game balance configuration | P1 | O5 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E + Integration |
 
 ---
 
