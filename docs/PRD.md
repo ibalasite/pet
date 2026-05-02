@@ -33,6 +33,7 @@
 |---------|------|--------|---------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc prd) | Initial draft generated from BRD-PIXEL-PET-ARENA-20260503 and IDEA-PIXEL-PET-ARENA-20260503 |
 | v1.1 | 2026-05-03 | PRD Editor (review-r1) | Fixed 15 review findings (F1–F15): scope reconciliation for US-RECORD-001 (F1), MAAPO as primary North Star (F2), arena battles target clarification (F3), US-PET-002 persona fix (F4), persona pain points and tech familiarity (F5), AC-006-4 daily-login-reward removed (F6), US-TRAIN-001 stat-max boundary AC added (F7), US-ARENA-001 rate-limit error AC added (F8), WCAG 2.1 AA NFR subsection added (F9), admin analytics events added (F10), RTM Priority column added + BRD cross-reference note (F11), AC-012-5 trade fee formula made concrete (F12), T-shirt estimates added to all USs (F13), §5 restructured into Epics (F14), ClaimToken and FoodBuff state machines added (F15) |
+| v1.2 | 2026-05-03 | PRD Editor (review-r2) | Fixed 10 review findings (F1–F10): §4.5 MoSCoW Battle Records promoted to Must Have (F1); FF_BATTLE_RECORDS set to P0/ON with kill-switch (F2); US-RECORD-001 heading corrected to P0 (F3); added AC-010-5 HTTP 404 error path and AC-010-6 <20 battles boundary to US-RECORD-001 (F4); added AC-004-5 invalid/revoked URL 404 error path to US-AUTH-002 (F5); second §7.8 renumbered to §7.9 Analytics Event Map (F6); `level` field added to §11.2 data dictionary (F7); BRD O3 added to US-AUTH-001, US-TRAIN-001, US-ARENA-001 RTM rows (F8); US-ADMIN-004/005/006 Estimate, Feature Flag, Test Type column added + all 3 added to §15 RTM (F9); US-FOOD-001 estimate corrected from S to M (F10) |
 
 ---
 
@@ -327,7 +328,7 @@ graph TD
 | Special food items | Must Have | O1, O2 | 1 sprint |
 | Arena racing competition | Must Have | O2 | 3 sprints |
 | Global leaderboard | Must Have | O2, O4 | 1 sprint |
-| Battle records page (shareable URL) | Should Have | O4 | 1 sprint |
+| Battle records page (shareable URL) | Must Have | O4 | 1 sprint |
 | Rarity scoring system | Should Have | O4 | 1 sprint |
 | Sumo arena mode | Could Have | O2 | 2 sprints |
 | Pet trading marketplace | Won't Have (v1) | O5 | — |
@@ -442,6 +443,7 @@ graph TD
 | AC-004-2 | Given the user wants to re-claim access after losing their URL, they can request a new access link to be sent to their registered email | E2E |
 | AC-004-3 | Given a request to re-send the access link, the system sends an email to the registered address within 60 seconds containing the unique URL | Integration |
 | AC-004-4 | Given the user requests deletion of their data (GDPR right to be forgotten), their email is replaced with a hashed value within 7 days, the unique URL continues to work, and the pet becomes "unclaimed" status | E2E |
+| AC-004-5 | Given a visitor accesses a pet URL with an invalid, non-existent, or revoked token, the system returns HTTP 404 with message "This pet URL is not valid or has been revoked" and a link to the home page | E2E + Security |
 
 ---
 
@@ -481,7 +483,7 @@ graph TD
 
 **REQ-ID**: US-FOOD-001
 **Priority**: P0
-**Estimate**: S — 5 SP (T-shirt: S = 1–3 SP baseline; 5 SP for food buff complexity)
+**Estimate**: M — 5 SP (T-shirt: M = 5–8 SP; lower end given food buff complexity is moderate)
 **Linked Feature**: F-FOOD-01
 **Feature Flag**: `FF_FOOD_SYSTEM`
 
@@ -580,7 +582,7 @@ graph TD
 
 ---
 
-### US-RECORD-001 — Battle Records Page (P1)
+### US-RECORD-001 — Battle Records Page (P0)
 
 **Story**: As a pet owner, I want to share my pet's battle records with friends via a public URL so that I can show off my wins and attract new players.
 
@@ -598,6 +600,8 @@ graph TD
 | AC-010-2 | Given the battle records page, each battle entry shows: date, mode (Race/Sumo), opponent pet name, outcome (Win/Loss), and stat comparison | E2E |
 | AC-010-3 | Given the battle records page URL, it renders correctly in social media link previews (Open Graph meta tags: pet name, rarity, win count as subtitle, pet sprite as image) | Integration |
 | AC-010-4 | Given a visitor accesses the battle records page, no authentication is required; the page is fully public | E2E |
+| AC-010-5 | Given a visitor accesses the battle records page with an invalid or non-existent pet ID, the system returns HTTP 404 with message "This pet could not be found" and a link to the home page | E2E |
+| AC-010-6 | Given a pet has fewer than 20 battles, the battle records page displays the available battles (1-19 entries) and shows a message "More battles coming — enter the arena to build your records!" beneath the last entry; no error state is shown | E2E |
 
 ---
 
@@ -974,7 +978,7 @@ stateDiagram-v2
 | `redis_memory_usage_percent` | Gauge | > 80% | Infrastructure |
 | `db_connection_pool_utilization` | Gauge | > 80% | Infrastructure |
 
-### 7.8 Analytics Event Map
+### 7.9 Analytics Event Map
 
 All events must be captured in the analytics pipeline for funnel analysis and retention tracking.
 
@@ -1171,7 +1175,7 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | `FF_LEADERBOARD` | Global leaderboard | **ON** | OFF: Leaderboard page shows "Leaderboard temporarily unavailable"; pet pages still accessible | Engineering |
 | `FF_ADMIN_PORTAL` | Admin backend portal | **ON** | OFF: Admin routes return 503; emergency direct DB access only | Engineering |
 | `FF_ARENA_SUMO` | Sumo arena mode (P1) | **OFF** (enabled when ready) | N/A — starts disabled | Engineering |
-| `FF_BATTLE_RECORDS` | Shareable battle records pages (P1) | **OFF** (enabled when ready) | N/A — starts disabled | Engineering |
+| `FF_BATTLE_RECORDS` | Shareable battle records pages (P0) | **ON** | OFF: Battle records pages return 503; existing records preserved; share URLs show "temporarily unavailable" message | Engineering |
 | `FF_RARITY_DISPLAY` | Rarity scoring display (P1) | **OFF** (enabled when ready) | N/A — starts disabled | Engineering |
 | `FF_MARKETPLACE` | Pet trading marketplace (P2) | **OFF** (enabled at DAU > 1,000) | OFF: Marketplace hidden entirely | Engineering |
 
@@ -1203,6 +1207,7 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | `stat_speed` | pets | SMALLINT | NOT NULL, DEFAULT 10, CHECK (1-100) | Base speed stat (training increases this) |
 | `stat_strength` | pets | SMALLINT | NOT NULL, DEFAULT 10, CHECK (1-100) | Base strength stat |
 | `stat_stamina` | pets | SMALLINT | NOT NULL, DEFAULT 10, CHECK (1-100) | Base stamina stat |
+| `level` | pets | SMALLINT | NOT NULL, DEFAULT 1, CHECK (1-100) | Derived from total training actions completed; formula: FLOOR(total_training_actions / 10) capped at 100; used in leaderboard composite score and trade price formula |
 | `owner_email_hash` | pets | VARCHAR(64) | NULLABLE | SHA-256 hash of owner email; NULL if unclaimed |
 | `access_token_hash` | pet_access_tokens | VARCHAR(64) | UNIQUE, NOT NULL | SHA-256 hash of the unique URL token |
 | `claim_code` | claim_tokens | VARCHAR(6) | NOT NULL | 6-digit numeric code |
@@ -1297,11 +1302,11 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 |---|---------|:---:|:---:|:---:|---|---|---|
 | US-PET-001 | Random pixel pet display (guest) | P0 | O1 | Must | `FF_GUEST_PET_DISPLAY` | Acquisition funnel cannot start | E2E + Visual Regression |
 | US-PET-002 | Procedural generation (>1B combinations) | P0 | O1, O4 | Must | `FF_PET_GENERATION` | Uniqueness/rarity perception fails | Unit + Integration |
-| US-AUTH-001 | Email claim flow (password + URL) | P0 | O1 | Must | `FF_EMAIL_CLAIM` | Core identity layer absent; no persistence | E2E + Integration + Security |
+| US-AUTH-001 | Email claim flow (password + URL) | P0 | O1, O3 | Must | `FF_EMAIL_CLAIM` | Core identity layer absent; no persistence | E2E + Integration + Security |
 | US-AUTH-002 | Returning pet owner access | P0 | O1 | Must | `FF_EMAIL_CLAIM` | Claimed owners cannot return; Day-7 retention collapses | E2E |
-| US-TRAIN-001 | Pet training system | P0 | O1, O2 | Must | `FF_TRAINING_SYSTEM` | No Day-7 return motivation | E2E + Integration |
+| US-TRAIN-001 | Pet training system | P0 | O1, O2, O3 | Must | `FF_TRAINING_SYSTEM` | No Day-7 return motivation | E2E + Integration |
 | US-FOOD-001 | Special food items | P0 | O1, O2 | Must | `FF_FOOD_SYSTEM` | Reduced training depth; item economy absent | E2E + Integration |
-| US-ARENA-001 | Arena racing competition | P0 | O2 | Must | `FF_ARENA_RACE` | No competitive hook; leaderboard meaningless | E2E + Integration + Performance |
+| US-ARENA-001 | Arena racing competition | P0 | O2, O3 | Must | `FF_ARENA_RACE` | No competitive hook; leaderboard meaningless | E2E + Integration + Performance |
 | US-ARENA-002 | Sumo arena mode | P1 | O2 | Should | `FF_ARENA_SUMO` | Reduced arena variety (acceptable for v1) | E2E + Integration |
 | US-BOARD-001 | Global leaderboard | P0 | O2, O4 | Must | `FF_LEADERBOARD` | No social comparison; competitive motivation absent | E2E + Integration |
 | US-RECORD-001 | Battle records page (shareable URL) | **P0** *(promoted from P1; see §1.3 note)* | O4 | Must | `FF_BATTLE_RECORDS` | Viral sharing mechanism absent; lower k-factor | E2E + Integration |
@@ -1310,6 +1315,9 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | US-ADMIN-001 | Admin pet management | P0 | O2 | Must | `FF_ADMIN_PORTAL` | No moderation capability; bot infestation risk | E2E + Security |
 | US-ADMIN-002 | Admin leaderboard moderation | P0 | O2, O4 | Must | `FF_ADMIN_PORTAL` | Leaderboard integrity fails under bot attack | E2E + Integration |
 | US-ADMIN-003 | Admin system configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E |
+| US-ADMIN-004 | GDPR data deletion processing | P0 | O5 | Must | `FF_ADMIN_PORTAL` | GDPR non-compliance risk; legal liability | E2E + Integration |
+| US-ADMIN-005 | Suspicious battle detection | P0 | O5 | Must | `FF_ADMIN_PORTAL` | Automated bot detection absent; moderator workload unbounded | E2E + Integration |
+| US-ADMIN-006 | Game balance configuration | P1 | O5 | Must | `FF_ADMIN_PORTAL` | Game balance changes require code deployments | E2E + Integration |
 
 ---
 
@@ -1431,15 +1439,17 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 
 **REQ-ID**: US-ADMIN-004
 **Priority**: P0
+**Estimate**: M — 8 SP (T-shirt: M = 5–8 SP)
+**Feature Flag**: `FF_ADMIN_PORTAL`
 
 **Acceptance Criteria**:
 
-| AC# | Criterion |
-|-----|-----------|
-| AC-016-1 | Given a deletion request in the User Management module, a Super Admin can trigger "Delete User Data" which replaces the email with a SHA-256 hash, revokes the PetAccessToken, and logs the action |
-| AC-016-2 | Given the deletion is triggered, the system completes the email hashing within 24 hours (not the full 7-day window — completed within 1 day, reported as compliant within 7 days) |
-| AC-016-3 | Given the deletion is complete, the pet becomes "unclaimed" and continues to display on the leaderboard with a pseudonymous identifier (no raw email exposed) |
-| AC-016-4 | Given the deletion, an audit log entry records: Super Admin ID, timestamp, action type "GDPR_DELETION", pet IDs affected, and the hashed email value |
+| AC# | Criterion | Test Type |
+|-----|-----------|-----------|
+| AC-016-1 | Given a deletion request in the User Management module, a Super Admin can trigger "Delete User Data" which replaces the email with a SHA-256 hash, revokes the PetAccessToken, and logs the action | E2E |
+| AC-016-2 | Given the deletion is triggered, the system completes the email hashing within 24 hours (not the full 7-day window — completed within 1 day, reported as compliant within 7 days) | Integration |
+| AC-016-3 | Given the deletion is complete, the pet becomes "unclaimed" and continues to display on the leaderboard with a pseudonymous identifier (no raw email exposed) | Integration |
+| AC-016-4 | Given the deletion, an audit log entry records: Super Admin ID, timestamp, action type "GDPR_DELETION", pet IDs affected, and the hashed email value | Integration |
 
 ---
 
@@ -1449,15 +1459,17 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 
 **REQ-ID**: US-ADMIN-005
 **Priority**: P0
+**Estimate**: S — 3 SP (T-shirt: S = 1–3 SP)
+**Feature Flag**: `FF_ADMIN_PORTAL`
 
 **Acceptance Criteria**:
 
-| AC# | Criterion |
-|-----|-----------|
-| AC-017-1 | Given the Battle Records module, any pet that completes more than 50 battles within any 60-minute window is automatically flagged with a "SUSPICIOUS" badge |
-| AC-017-2 | Given the flagged pets list, a Moderator can click a pet to view all its battles in the suspicious window (timestamps, opponents, outcomes) |
-| AC-017-3 | Given a reviewed suspicious pet, the Moderator can: (a) dismiss the flag, (b) ban the pet from arena only, or (c) ban the pet from the entire platform |
-| AC-017-4 | Given any moderation action taken, it is recorded in the audit log with the Moderator's ID, timestamp, action taken, and reason text (required field, max 500 chars) |
+| AC# | Criterion | Test Type |
+|-----|-----------|-----------|
+| AC-017-1 | Given the Battle Records module, any pet that completes more than 50 battles within any 60-minute window is automatically flagged with a "SUSPICIOUS" badge | Integration |
+| AC-017-2 | Given the flagged pets list, a Moderator can click a pet to view all its battles in the suspicious window (timestamps, opponents, outcomes) | E2E |
+| AC-017-3 | Given a reviewed suspicious pet, the Moderator can: (a) dismiss the flag, (b) ban the pet from arena only, or (c) ban the pet from the entire platform | E2E |
+| AC-017-4 | Given any moderation action taken, it is recorded in the audit log with the Moderator's ID, timestamp, action taken, and reason text (required field, max 500 chars) | Integration |
 
 ---
 
@@ -1467,15 +1479,17 @@ The pixel-pet-arena Admin Portal is a separate web application accessible at `/a
 
 **REQ-ID**: US-ADMIN-006
 **Priority**: P1
+**Estimate**: M — 5 SP (T-shirt: M = 5–8 SP; lower end given config UI reuses audit infrastructure)
+**Feature Flag**: `FF_ADMIN_PORTAL`
 
 **Acceptance Criteria**:
 
-| AC# | Criterion |
-|-----|-----------|
-| AC-018-1 | Given the System Configuration module, a Super Admin can edit: max arena battles per hour (integer 1-50), rarity weights (four values summing to 100%), food buff multipliers (float 0.5-5.0x) |
-| AC-018-2 | Given a configuration change, the change is previewed (showing old value → new value) and requires confirmation before saving |
-| AC-018-3 | Given a saved configuration, it takes effect within 5 minutes via config cache refresh; no service restart required |
-| AC-018-4 | Given a configuration change, the audit log records the Super Admin ID, timestamp, field name, old value, new value |
+| AC# | Criterion | Test Type |
+|-----|-----------|-----------|
+| AC-018-1 | Given the System Configuration module, a Super Admin can edit: max arena battles per hour (integer 1-50), rarity weights (four values summing to 100%), food buff multipliers (float 0.5-5.0x) | E2E |
+| AC-018-2 | Given a configuration change, the change is previewed (showing old value → new value) and requires confirmation before saving | E2E |
+| AC-018-3 | Given a saved configuration, it takes effect within 5 minutes via config cache refresh; no service restart required | Integration |
+| AC-018-4 | Given a configuration change, the audit log records the Super Admin ID, timestamp, field name, old value, new value | Integration |
 
 ---
 
