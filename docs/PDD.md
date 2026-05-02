@@ -370,6 +370,15 @@ User attempts to claim a pet that has already been claimed by another user (race
 **Email Delivery Failure**:
 User submits email → No claim email arrives within 60 seconds → User sees a countdown: "Email sending... check your spam folder too" → After 2 minutes, "Resend" button appears → If second delivery fails → Message: "Email delivery is experiencing delays. Try again in 5 minutes." → System queues 3 retries over 15 minutes.
 
+**Generic API / Server Error (500)**:
+User performs any action (claim submit, arena entry, training) → Server returns HTTP 500 → Toast notification appears: "Something went wrong. Please try again." (3-second auto-dismiss with a retry button). Page remains on the current screen. No navigation occurs. If the error occurs on the arena entry flow, the "Enter Arena" button returns to its default (non-loading) state so the user can retry without a page reload.
+
+**Network / Offline Error**:
+User loses network connectivity mid-interaction → Persistent "Offline" banner appears at the top of the page ("You're offline — check your internet connection and try again") with a "Retry" button. The banner remains until connectivity is restored and the retry succeeds. The banner uses the `error.network` i18n key defined in §10.3. All interactive buttons are disabled while offline to prevent queued failed requests.
+
+**Unauthorized / Session Expired (401 / 403)**:
+User's pet URL token has expired or has been revoked → API returns 401 or 403 → User is redirected to the Landing Page (`/`) with query parameter `?reason=session_expired` → A toast notification appears: "Your session has expired. Enter a new claim code to continue." The toast is persistent (no auto-dismiss) until the user interacts with the claim flow.
+
 ---
 
 ## §5 Screen Specifications
@@ -385,13 +394,23 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `NavBar` — Minimal nav with Leaderboard link
 - `SocialProofCounter` — "X pets claimed today" (animated counter)
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `PetCanvas` | `petSeed: number`, `onInteract: fn` | Pet idle animation loop at ≥30 FPS | Cursor changes to pointer; pet bounces on click | Canvas receives focus outline (3:1 contrast ratio) | Static sprite (prefers-reduced-motion) | Fallback static image if WebGL unavailable |
-| `ClaimCTA` | `visible: boolean`, `onClick: fn` | Hidden for first 30s; then appears with slide-in animation | Background shifts from `--color-accent` to `--color-accent-bright`; scale 1.03 | Visible pixel-art focus ring (3:1 contrast); ring color `--color-focus` | Gray background `--color-neutral-400`; cursor not-allowed | N/A (no error state; redirects to claim flow) |
-| `NavBar` | `hasPetToken: boolean` | Logo left; Leaderboard link center; "My Pet" hidden if no token | Links underline with pixel-art style | Tab focus outline on each link | N/A | N/A |
-| `SocialProofCounter` | `count: number` | Number animates up on page load; pixel font | No hover state | N/A | N/A | Hidden if analytics data unavailable |
-| `RarityHint` | `rarity: string` | Subtle shimmer hue on canvas border matching rarity color | N/A | N/A | N/A | N/A |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `PetCanvas` | `petSeed: number`, `onInteract: fn` | Pet idle animation loop at ≥30 FPS | Cursor changes to pointer; pet bounces on click | Canvas receives focus outline (3:1 contrast ratio) | Static sprite (prefers-reduced-motion) | Fallback static image if WebGL unavailable | Scale 0.97 on click; color deepened one step | N/A (canvas does not submit) |
+| `ClaimCTA` | `visible: boolean`, `onClick: fn` | Hidden for first 30s; then appears with slide-in animation | Background shifts from `--color-accent` to `--color-accent-bright`; scale 1.03 | Visible pixel-art focus ring (3:1 contrast); ring color `--color-focus` | Gray background `--color-neutral-400`; cursor not-allowed | N/A (no error state; redirects to claim flow) | scale(0.97); background deepened to `--color-brand-primary-dark` | Pixel-art spinner replaces label text; aria-busy="true"; pointer-events: none; opacity 0.7 |
+| `NavBar` | `hasPetToken: boolean` | Logo left; Leaderboard link center; "My Pet" hidden if no token | Links underline with pixel-art style | Tab focus outline on each link | N/A | N/A | Active link deepens color to `--color-brand-primary-dark` | N/A |
+| `SocialProofCounter` | `count: number` | Number animates up on page load; pixel font | No hover state | N/A | N/A | Hidden if analytics data unavailable | N/A | N/A |
+| `RarityHint` | `rarity: string` | Subtle shimmer hue on canvas border matching rarity color | N/A | N/A | N/A | N/A | N/A | N/A |
+
+**Interaction Specifications — Landing Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| User hovers over `ClaimCTA` | Glow pulse + scale 1.02 on button | ease-out-expo | 300ms |
+| User clicks pet canvas (`PetCanvas`) | Pet sprite scales to 1.15x, particle burst of 5 sparkles | spring `--primitive-ease-spring` | 200ms scale + 400ms particles |
+| `ClaimCTA` appears after 30s idle | Slide-in from bottom (translateY 20px → 0) + fade in | ease-out-expo | 300ms |
+| User focuses `ClaimCTA` via keyboard | Pixel-art focus ring appears (2px solid `--color-focus`, 2px offset) | Instant | 0ms |
+| User presses `ClaimCTA` (mouse down) | Button presses in scale(0.97); background deepens to `--color-brand-primary-dark` | `--primitive-ease-spring` | 120ms |
 
 ---
 
@@ -405,12 +424,22 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `URLReveal` — Unique pet URL display with copy button and "Go to My Pet" CTA
 - `ExpiryWarning` — Accessible timer warning at T-13 minutes (2 min before expiry per A11y-09)
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `ClaimEmailForm` | `onSubmit: fn`, `loading: boolean` | Empty input; age checkbox unchecked | Submit button brightens on hover | Input has visible pixel-art border focus ring | Submit button disabled (gray) until email + checkbox valid | Red border on input; inline error text below field; `aria-describedby` links error |
-| `ClaimCodeForm` | `expiresAt: Date`, `onSubmit: fn`, `attempts: number` | 6 empty digit inputs; countdown timer visible | Each digit box highlights on hover | Active digit box has vivid focus ring | All inputs disabled after max attempts | Incorrect code: red shake animation on digit boxes; error message shown |
-| `ExpiryWarning` | `minutesRemaining: number` | Hidden until 2 minutes remain | N/A | Alert role; screen reader announces remaining time | N/A | N/A |
-| `URLReveal` | `petUrl: string`, `onCopy: fn` | URL displayed in styled code block with copy icon | Copy icon animates on hover | Copy button has focus ring | N/A | Copy failed: fallback "Select and copy manually" message |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `ClaimEmailForm` | `onSubmit: fn`, `loading: boolean` | Empty input; age checkbox unchecked | Submit button brightens on hover | Input has visible pixel-art border focus ring | Submit button disabled (gray) until email + checkbox valid | Red border on input; inline error text below field; `aria-describedby` links error | Submit button scale(0.97); background deepens to `--color-brand-primary-dark` | Pixel-art spinner in submit button; aria-busy="true"; pointer-events: none; opacity 0.7 |
+| `ClaimCodeForm` | `expiresAt: Date`, `onSubmit: fn`, `attempts: number` | 6 empty digit inputs; countdown timer visible | Each digit box highlights on hover | Active digit box has vivid focus ring | All inputs disabled after max attempts | Incorrect code: red shake animation on digit boxes; error message shown | Confirm button scale(0.97); border color `--color-brand-primary-dark` | Confirm button spinner; all digit inputs disabled; aria-busy="true"; opacity 0.7 |
+| `ExpiryWarning` | `minutesRemaining: number` | Hidden until 2 minutes remain | N/A | Alert role; screen reader announces remaining time | N/A | N/A | N/A | N/A |
+| `URLReveal` | `petUrl: string`, `onCopy: fn` | URL displayed in styled code block with copy icon | Copy icon animates on hover | Copy button has focus ring | N/A | Copy failed: fallback "Select and copy manually" message | Copy button scale(0.97); border deepens to `--color-brand-primary-dark` | N/A (copy is instant) |
+
+**Interaction Specifications — Claim Pet Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| User submits email (clicks submit button) | Submit button enters loading state (spinner); claim code input area reveals with CSS scale-in | ease-out-expo + scale from 0.9 → 1.0 | 200ms reveal |
+| Correct 6-digit code entered | Rarity badge scales 0 → 1.2x → 1x with shimmer; URL reveal slides in | `--primitive-ease-spring` overshoot | 600ms |
+| Expiry warning triggers (T-2 min) | `role="alert"` warning fades in; aria-live announces remaining time | ease-out-expo fade | 250ms |
+| User copies unique URL | Copy icon swaps to checkmark; returns after 2s; toast "Copied!" slides in | `--primitive-ease-out-expo` | 150ms swap |
+| Invalid code entered | Digit boxes animate with red shake (translateX ±4px × 3) | ease-in-out | 300ms |
 
 ---
 
@@ -428,14 +457,24 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `RecordsLink` — Link to battle records page
 - `NeglectedState` — Visual overlay if no training in 3 days
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `RarityBadge` | `rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY'` | Color-coded badge with text; Legendary has animated gold border | Tooltip shows probability (e.g., "Legendary — 3% of all pets") | Focus ring visible; tooltip accessible | N/A | N/A |
-| `StatsPanel` | `speed: number`, `strength: number`, `stamina: number`, `level: number` | Pixel-bar graph for each stat (0-100 range) with numeric value | Individual stat bars have hover tooltip with training history | Panel focusable; stat values readable by screen reader | N/A | N/A |
-| `TrainingEntry` | `actionsRemaining: number`, `nextResetIn: string` | Button shows "Train (3 remaining today)"; green indicator | Button brightens | Focus ring visible | If 0 remaining: gray; countdown timer shown inline | N/A |
-| `FoodInventory` | `items: FoodItem[]`, `onFeed: fn` | Grid of food item cards with stat icons | Item card elevates slightly on hover | Item "Use" button has focus ring | "Use" disabled if stat at max (100); tooltip explains | Empty state: "No food items — earn food by battling or training streaks" |
-| `ArenaEntry` | `battlesRemaining: number`, `cooldownEnds: Date | null` | Green button "Enter Arena"; battles remaining badge | Button brightens; tooltip shows remaining battles | Vivid focus ring | Rate limit reached: disabled + countdown timer | N/A |
-| `NeglectedState` | `daysSinceTraining: number` | Hidden if trained within 3 days | N/A | N/A | N/A | Shows wilted-pet animation overlay if daysSinceTraining >= 3 |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `RarityBadge` | `rarity: 'COMMON' \| 'RARE' \| 'EPIC' \| 'LEGENDARY'` | Color-coded badge with text; Legendary has animated gold border | Tooltip shows probability (e.g., "Legendary — 3% of all pets") | Focus ring visible; tooltip accessible | N/A | N/A | N/A (display only) | N/A |
+| `StatsPanel` | `speed: number`, `strength: number`, `stamina: number`, `level: number` | Pixel-bar graph for each stat (0-100 range) with numeric value | Individual stat bars have hover tooltip with training history | Panel focusable; stat values readable by screen reader | N/A | N/A | N/A (display only) | N/A |
+| `TrainingEntry` | `actionsRemaining: number`, `nextResetIn: string` | Button shows "Train (3 remaining today)"; green indicator | Button brightens | Focus ring visible | If 0 remaining: gray; countdown timer shown inline | N/A | scale(0.97); background deepens to `--color-brand-primary-dark` | Pixel spinner replaces button text; pointer-events: none; aria-busy="true"; border color transitions to `--color-brand-primary-dark` at 200ms; opacity 0.7 |
+| `FoodInventory` | `items: FoodItem[]`, `onFeed: fn` | Grid of food item cards with stat icons | Item card elevates slightly on hover | Item "Use" button has focus ring | "Use" disabled if stat at max (100); tooltip explains | Empty state: "No food items — earn food by battling or training streaks" | "Use" button scale(0.97); border deepens | Pixel spinner in "Use" button; aria-busy="true"; pointer-events: none; opacity 0.7 |
+| `ArenaEntry` | `battlesRemaining: number`, `cooldownEnds: Date \| null` | Green button "Enter Arena"; battles remaining badge | Button brightens; tooltip shows remaining battles | Vivid focus ring | Rate limit reached: disabled + countdown timer | N/A | scale(0.97); background deepens to `--color-brand-primary-dark` | Pixel spinner replaces button text; pointer-events: none; aria-busy="true"; border color transitions to `--color-brand-primary-dark` at 200ms |
+| `NeglectedState` | `daysSinceTraining: number` | Hidden if trained within 3 days | N/A | N/A | N/A | Shows wilted-pet animation overlay if daysSinceTraining >= 3 | N/A | N/A |
+
+**Interaction Specifications — My Pet Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| User clicks `TrainingEntry` button | Button enters loading state (spinner); navigates to training page | scale(0.97) press + ease-out-expo | 200ms |
+| User clicks `ArenaEntry` button | Button enters loading state (spinner + disabled); matchmaking begins | scale(0.97) press; spinner appears | 200ms |
+| `NeglectedState` overlay triggers (3 days idle) | Wilted overlay fades in on pet canvas with grey desaturation | ease-in-out fade | 800ms |
+| User hovers `RarityBadge` | Tooltip reveals with rarity probability; badge brightens | ease-out-expo | 200ms |
+| Food item "Use" button clicked | Pet sprite blinks with warm glow; stat bar increments with animation | 400ms glow + stat bar ease-out | 400ms |
 
 ---
 
@@ -449,12 +488,22 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `DailyResetTimer` — Countdown to UTC 00:00 reset
 - `TrainingStreak` — Streak counter (motivates return; connects to food reward at 3-session streak)
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `TrainingActions` | `actions: TrainingAction[]`, `onTrain: fn` | Three action cards; each shows stat it trains and current stat value | Card elevates; "Train" button brightens with pixel-border animation | Card and button both have focus rings (tab order: card 1 → button 1 → card 2...) | If stat at 100: "MAX" badge replaces button; button disabled; API returns HTTP 400 if attempted | API failure: toast error "Training failed. Please try again." |
-| `StatChangeIndicator` | `statName: string`, `delta: number` | Hidden; triggers on successful train action | N/A | N/A | N/A | N/A (errors handled by TrainingActions) |
-| `DailyResetTimer` | `resetAt: Date` | Shows "Resets in HH:MM:SS"; pixel clock icon | N/A | Timer text readable by screen reader; `aria-live="polite"` | N/A | N/A |
-| `TrainingStreak` | `streakDays: number` | Flame icon + "X day streak"; 0 = no streak shown | Tooltip: "Train 3 days in a row for a food reward" | Focusable; tooltip accessible | N/A | N/A |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `TrainingActions` | `actions: TrainingAction[]`, `onTrain: fn` | Three action cards; each shows stat it trains and current stat value | Card elevates; "Train" button brightens with pixel-border animation | Card and button both have focus rings (tab order: card 1 → button 1 → card 2...) | If stat at 100: "MAX" badge replaces button; button disabled; API returns HTTP 400 if attempted | API failure: toast error "Training failed. Please try again." | Button scale(0.97); background deepens to `--color-brand-primary-dark`; card stays elevated | Pixel-art spinner replaces "Train" button text; aria-busy="true"; pointer-events: none; opacity 0.7; border color `--color-brand-primary-dark` |
+| `StatChangeIndicator` | `statName: string`, `delta: number` | Hidden; triggers on successful train action | N/A | N/A | N/A | N/A (errors handled by TrainingActions) | N/A | N/A |
+| `DailyResetTimer` | `resetAt: Date` | Shows "Resets in HH:MM:SS"; pixel clock icon | N/A | Timer text readable by screen reader; `aria-live="polite"` | N/A | N/A | N/A | N/A |
+| `TrainingStreak` | `streakDays: number` | Flame icon + "X day streak"; 0 = no streak shown | Tooltip: "Train 3 days in a row for a food reward" | Focusable; tooltip accessible | N/A | N/A | N/A | N/A |
+
+**Interaction Specifications — Training Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| User clicks "Train" button on an action card | Button enters loading state (spinner + disabled); on success, stat change indicator floats up from stat bar | scale(0.97) press + ease-out-expo | 80ms press + 120ms release; 200ms loading state entry |
+| Training succeeds (API returns 200) | "+X Stat" indicator floats upward from stat bar and fades out; stat bar animates to new value | ease-out rise + 2000ms hold | 400ms rise + 2000ms hold + 200ms fade |
+| Stat reaches MAX (100) | "MAX" badge appears with 2px bounce; stat bar fills completely; ARIA alert fires | `--primitive-ease-spring` bounce | 300ms |
+| Daily reset timer ticks | Timer text updates every second; aria-live="polite" announces changes | Instant text update | 0ms |
+| Training streak milestone (3 days) | Flame icon pulses and brightens; toast: "3-day streak! Food reward earned." | ease-out-expo pulse | 400ms |
 
 ---
 
@@ -469,13 +518,23 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `AIOfferModal` — Offered when no opponent found after 30s
 - `RateLimitBanner` — Rate limit warning with countdown
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `ModeSelector` | `modes: ArenaMode[]`, `selected: ArenaMode | null`, `onSelect: fn` | Mode cards displayed; Race always visible; Sumo conditional | Selected card gets pixel-art active border; hover brightens | Focus ring on card; Enter key selects | If rate limit reached: all mode cards disabled; RateLimitBanner shown | N/A |
-| `PreBattlePanel` | `pet: Pet`, `activeBuffs: FoodBuff[]` | Stats displayed with active buff indicators (e.g., "+5 Speed [24h]") | N/A | Panel is informational; keyboard focusable | N/A | N/A |
-| `MatchmakingStatus` | `waiting: boolean`, `waitSeconds: number` | "Finding opponent..." text + pixel animation dots | N/A | `aria-live="polite"` for status updates | N/A | N/A |
-| `AIOfferModal` | `onAccept: fn`, `onDecline: fn` | Modal with "No opponent found. Battle an AI?" copy | Buttons brighten on hover | Focus trap inside modal; Escape closes and declines | N/A | N/A |
-| `RateLimitBanner` | `battlesRemaining: number`, `cooldownEnds: Date` | Amber banner: "Arena rate limit reached. Enter again in [X minutes]." with countdown | N/A | Banner text is `role="alert"` | N/A | N/A |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `ModeSelector` | `modes: ArenaMode[]`, `selected: ArenaMode \| null`, `onSelect: fn` | Mode cards displayed; Race always visible; Sumo conditional | Selected card gets pixel-art active border; hover brightens | Focus ring on card; Enter key selects | If rate limit reached: all mode cards disabled; RateLimitBanner shown | N/A | Selected card scale(0.97); border deepens to `--color-brand-primary-dark` | N/A |
+| `PreBattlePanel` | `pet: Pet`, `activeBuffs: FoodBuff[]` | Stats displayed with active buff indicators (e.g., "+5 Speed [24h]") | N/A | Panel is informational; keyboard focusable | N/A | N/A | N/A | N/A |
+| `MatchmakingStatus` | `waiting: boolean`, `waitSeconds: number` | "Finding opponent..." text + pixel animation dots | N/A | `aria-live="polite"` for status updates | N/A | N/A | N/A | Pixel-art animated dots; aria-busy="true" on container; pointer-events: none on Enter button |
+| `AIOfferModal` | `onAccept: fn`, `onDecline: fn` | Modal with "No opponent found. Battle an AI?" copy | Buttons brighten on hover | Focus trap inside modal; Escape closes and declines | N/A | N/A | Accept button scale(0.97); background deepens to `--color-brand-primary-dark` | Accept button spinner; aria-busy="true"; pointer-events: none; opacity 0.7 |
+| `RateLimitBanner` | `battlesRemaining: number`, `cooldownEnds: Date` | Amber banner: "Arena rate limit reached. Enter again in [X minutes]." with countdown | N/A | Banner text is `role="alert"` | N/A | N/A | N/A | N/A |
+
+**Interaction Specifications — Arena Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| User selects a battle mode card | Card border brightens with pixel-art active border; "Enter Arena" button activates | ease-out-expo border transition | 200ms |
+| User clicks "Enter Arena" button | Button enters loading state (spinner + disabled); matchmaking begins | scale(0.97) press + spinner | 200ms |
+| Matchmaking finds opponent (< 30s) | 3-2-1 pixel countdown appears; transitions to battle animation | grow/shrink per digit, ease-out-expo | 300ms per digit |
+| No opponent after 30s | AI Offer Modal slides in from bottom (translateY 40px → 0) with focus trap | ease-out-expo | 200ms |
+| Rate limit banner appears | Amber banner slides in from top (translateY -40px → 0); aria-live="assertive" announces | ease-out-expo | 250ms |
 
 ---
 
@@ -489,12 +548,22 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `ShareBattleButton` — Copy shareable battle URL; Open Graph meta tags pre-set for social sharing
 - `ActionButtons` — "Enter Arena Again" / "Return to Pet" / "View Leaderboard"
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `BattleResultCard` | `outcome: 'WIN' | 'LOSS'`, `battleId: string` | Win: gold border, victory sprite animation; Loss: muted palette, "Train harder!" motivational message | N/A | Card is non-interactive (display only); surrounding buttons are focusable | N/A | N/A |
-| `StatComparison` | `myPet: Pet`, `opponent: Pet`, `outcome: string` | Two-column table; winning stat highlighted in winner's column | Row hover shows stat names as tooltips | Table has proper `<th scope="col">` headers; screen-reader navigable | N/A | N/A |
-| `ShareBattleButton` | `battleUrl: string`, `onCopy: fn` | "Share Result" button with share icon | Button brightens; tooltip: "Copy battle URL" | Visible focus ring | N/A | Copy failure: inline "Copy failed — select URL manually" with URL shown |
-| `ActionButtons` | `petId: string`, `onRematch: fn` | Three buttons in pixel-art style; "Enter Again" is primary action | Each button brightens | Tab order: Enter Again → Return to Pet → View Leaderboard; each has focus ring | "Enter Again" disabled if rate limit reached | N/A |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `BattleResultCard` | `outcome: 'WIN' \| 'LOSS'`, `battleId: string` | Win: gold border, victory sprite animation; Loss: muted palette, "Train harder!" motivational message | N/A | Card is non-interactive (display only); surrounding buttons are focusable | N/A | N/A | N/A (display only) | N/A |
+| `StatComparison` | `myPet: Pet`, `opponent: Pet`, `outcome: string` | Two-column table; winning stat highlighted in winner's column | Row hover shows stat names as tooltips | Table has proper `<th scope="col">` headers; screen-reader navigable | N/A | N/A | N/A (display only) | N/A |
+| `ShareBattleButton` | `battleUrl: string`, `onCopy: fn` | "Share Result" button with share icon | Button brightens; tooltip: "Copy battle URL" | Visible focus ring | N/A | Copy failure: inline "Copy failed — select URL manually" with URL shown | scale(0.97); background deepens to `--color-brand-primary-dark` | N/A (copy is instant) |
+| `ActionButtons` | `petId: string`, `onRematch: fn` | Three buttons in pixel-art style; "Enter Again" is primary action | Each button brightens | Tab order: Enter Again → Return to Pet → View Leaderboard; each has focus ring | "Enter Again" disabled if rate limit reached | N/A | Pressed button scale(0.97); background deepens to `--color-brand-primary-dark` | "Enter Again" spinner when clicked; aria-busy="true"; pointer-events: none; opacity 0.7 |
+
+**Interaction Specifications — Battle Result Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| Page loads after battle WIN | `BattleResultCard` reveals with gold particle burst (24 particles); gold border glows | ease-out-expo reveal + particle burst | 400ms reveal + 1200ms celebration |
+| Page loads after battle LOSS | `BattleResultCard` fades in with muted palette; motivational message appears | ease-out-expo fade | 400ms |
+| User clicks "Share Battle Result" | Share icon scales 1.2x + pixel sparkle (3 stars burst outward); copy toast slides in | ease-out-expo | 150ms icon swap + 400ms sparkle |
+| User clicks "Enter Arena Again" | Button loading state (spinner + disabled); navigates to arena lobby | scale(0.97) + ease-out-expo | 200ms |
+| Stat comparison rows render | Winning stat row highlights in accent color with 500ms transition | `--primitive-ease-standard` | 500ms highlight |
 
 ---
 
@@ -508,12 +577,22 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `OwnerRankBanner` — Highlighted banner showing the owner's current rank (if pet token present)
 - `LeaderboardRow` — Individual row component; links to battle records page
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `LeaderboardTable` | `entries: LeaderboardEntry[]`, `ownerPetId: string | null` | Top 100 rows; owner row highlighted in accent color if in top 100 | Row highlights on hover; cursor pointer | Row focusable; Enter navigates to pet's battle records | N/A | Loading skeleton rows while data fetches; error message if load fails |
-| `RarityFilter` | `selected: Rarity | null`, `onChange: fn` | "All" selected by default; filter tabs use rarity color coding | Tab brightens on hover | Focus ring on each tab; keyboard arrow navigation between tabs | N/A | N/A |
-| `OwnerRankBanner` | `rank: number | null`, `petName: string` | Shown above table if owner has a claimed pet with URL token; "Your pet [Name] is ranked #X" | N/A | Banner is `role="status"`; readable by screen reader | Hidden if no pet token in session | N/A |
-| `LeaderboardRow` | `rank: number`, `entry: LeaderboardEntry`, `isOwner: boolean` | Rank number, pet thumbnail, name, rarity badge, score, win rate; owner row uses distinct background | Row background shifts slightly; tooltip shows full pet name | Tab focusable; Enter activates link to battle records | N/A | N/A |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `LeaderboardTable` | `entries: LeaderboardEntry[]`, `ownerPetId: string \| null` | Top 100 rows; owner row highlighted in accent color if in top 100 | Row highlights on hover; cursor pointer | Row focusable; Enter navigates to pet's battle records | N/A | Loading skeleton rows while data fetches; error message if load fails | Clicked row scale(0.99); background deepens | Skeleton shimmer rows; aria-busy="true" on table; spinner at bottom on pagination |
+| `RarityFilter` | `selected: Rarity \| null`, `onChange: fn` | "All" selected by default; filter tabs use rarity color coding | Tab brightens on hover | Focus ring on each tab; keyboard arrow navigation between tabs | N/A | N/A | Active tab scale(0.97); background deepens | Inline spinner at filter tab while data fetches; pointer-events: none |
+| `OwnerRankBanner` | `rank: number \| null`, `petName: string` | Shown above table if owner has a claimed pet with URL token; "Your pet [Name] is ranked #X" | N/A | Banner is `role="status"`; readable by screen reader | Hidden if no pet token in session | N/A | N/A | N/A |
+| `LeaderboardRow` | `rank: number`, `entry: LeaderboardEntry`, `isOwner: boolean` | Rank number, pet thumbnail, name, rarity badge, score, win rate; owner row uses distinct background | Row background shifts slightly; tooltip shows full pet name | Tab focusable; Enter activates link to battle records | N/A | N/A | Row scale(0.99) on click | N/A |
+
+**Interaction Specifications — Leaderboard Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| User clicks a rarity filter tab | Table rows filter with inline spinner; filtered rows fade in | ease-out-expo | 200ms filter transition |
+| Leaderboard row rank updates (live) | Moved row highlights in accent color then fades back | `--primitive-ease-standard` | 500ms highlight + 2000ms fade |
+| User clicks a leaderboard row | Row navigates to battle records page; pressed scale animation | scale(0.99) + ease-out-expo | 200ms |
+| Owner rank banner loads | Banner slides in below nav (translateY -20px → 0) | ease-out-expo | 300ms |
+| Pagination scroll trigger | Inline spinner appears at bottom of list; new rows append | Intersection Observer + ease-out-expo | 250ms entry per row |
 
 ---
 
@@ -528,12 +607,22 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `SharePageButton` — Copy battle records URL button
 - `OpenGraphMeta` — OG tags: pet name, rarity, win count, pet sprite image (not a visible component; SEO/meta)
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `PetProfileCard` | `pet: Pet`, `record: WinLossRecord` | Pixel pet sprite prominently displayed; rarity badge with color; W/L ratio shown | N/A | Card is informational; individual links within are focusable | N/A | N/A |
-| `BattleHistoryTable` | `battles: BattleRecord[]` | Semantic `<table>` with `<th scope="col">` headers; date, mode, opponent, W/L, stat delta | Row hover highlights | Table navigable via keyboard; screen reader reads column headers | N/A | HTTP 404 if pet not found: "This pet could not be found." with link home |
-| `EmptyStateCTA` | `battleCount: number` | Hidden if ≥ 20 battles; below last entry shows "More battles coming — enter the arena to build your records!" | N/A | N/A | N/A | N/A |
-| `SharePageButton` | `pageUrl: string` | "Share This Pet" button; copies current URL | Brightens on hover | Focus ring | N/A | Fallback manual copy message |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `PetProfileCard` | `pet: Pet`, `record: WinLossRecord` | Pixel pet sprite prominently displayed; rarity badge with color; W/L ratio shown | N/A | Card is informational; individual links within are focusable | N/A | N/A | N/A (display only) | N/A |
+| `BattleHistoryTable` | `battles: BattleRecord[]` | Semantic `<table>` with `<th scope="col">` headers; date, mode, opponent, W/L, stat delta | Row hover highlights | Table navigable via keyboard; screen reader reads column headers | N/A | HTTP 404 if pet not found: "This pet could not be found." with link home | Clicked row scale(0.99) | Skeleton shimmer rows; aria-busy="true" on table |
+| `EmptyStateCTA` | `battleCount: number` | Hidden if ≥ 20 battles; below last entry shows "More battles coming — enter the arena to build your records!" | N/A | N/A | N/A | N/A | N/A | N/A |
+| `SharePageButton` | `pageUrl: string` | "Share This Pet" button; copies current URL | Brightens on hover | Focus ring | N/A | Fallback manual copy message | scale(0.97); background deepens to `--color-brand-primary-dark` | N/A (copy is instant) |
+
+**Interaction Specifications — Battle Records Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| Page loads for a public pet profile | `PetProfileCard` fades in; `BattleHistoryTable` rows animate in with stagger | ease-out-expo stagger (50ms per row) | 300ms total |
+| User clicks "Share This Pet" button | Share icon scales 1.2x; sparkle effect (3 pixel stars); copy toast slides in | ease-out-expo | 150ms icon + 400ms sparkle |
+| Battle history row hover | Row background highlights with subtle color shift | ease-out-expo | 200ms |
+| Empty state CTA shown (< 20 battles) | CTA fades in below last row | ease-out-expo | 300ms |
+| HTTP 404 error (pet not found) | Error state renders with friendly pixel-art illustration; "Find a New Pet" CTA visible | Instant render | 0ms |
 
 ---
 
@@ -548,13 +637,23 @@ User submits email → No claim email arrives within 60 seconds → User sees a 
 - `TradeConfirmation` — 7-day anti-flip protection notice + fee disclosure (5% transaction fee)
 - `FeatureGateBanner` — Shown when `FF_MARKETPLACE` is OFF; "Marketplace coming soon — reach DAU 1,000 to unlock"
 
-| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State |
-|-----------|-------|---------------|-------------|-------------|----------------|-------------|
-| `MarketplaceGrid` | `listings: PetListing[]` | Grid layout; sorted by recency by default | N/A | Grid items are focusable | Entire grid hidden if `FF_MARKETPLACE` OFF | Loading skeleton; empty state if no listings |
-| `PetListingCard` | `listing: PetListing`, `onOffer: fn` | Pet sprite, rarity badge, level, "Looking for:" description, min price | Card elevates on hover | Focus ring on card and "Make Offer" button | If viewing own listing: "Make Offer" hidden | N/A |
-| `TradeOfferModal` | `myPets: Pet[]`, `targetListing: PetListing`, `onSubmit: fn` | Modal with own pets listed for selection | Pet selection card highlights | Focus trap in modal | Confirm button disabled until pet selected | N/A |
-| `TradeConfirmation` | `myPet: Pet`, `theirPet: Pet`, `fee: number`, `netProceeds: number` | Shows min price calculation; fee amount; net proceeds; anti-flip warning | N/A | Confirm and Cancel buttons have focus rings | N/A | Trade conflict: "This pet was traded while you were reviewing. Refresh to see current listings." |
-| `FeatureGateBanner` | `currentDau: number` | Amber banner at page top; "Marketplace opens at 1,000 DAU — currently at X users" | N/A | N/A | N/A | N/A |
+| Component | Props | Default State | Hover State | Focus State | Disabled State | Error State | Active State | Loading State |
+|-----------|-------|---------------|-------------|-------------|----------------|-------------|--------------|---------------|
+| `MarketplaceGrid` | `listings: PetListing[]` | Grid layout; sorted by recency by default | N/A | Grid items are focusable | Entire grid hidden if `FF_MARKETPLACE` OFF | Loading skeleton; empty state if no listings | N/A | Skeleton shimmer grid; aria-busy="true" |
+| `PetListingCard` | `listing: PetListing`, `onOffer: fn` | Pet sprite, rarity badge, level, "Looking for:" description, min price | Card elevates on hover | Focus ring on card and "Make Offer" button | If viewing own listing: "Make Offer" hidden | N/A | Card scale(0.98) on click; border deepens | "Make Offer" button spinner; aria-busy="true"; pointer-events: none; opacity 0.7 |
+| `TradeOfferModal` | `myPets: Pet[]`, `targetListing: PetListing`, `onSubmit: fn` | Modal with own pets listed for selection | Pet selection card highlights | Focus trap in modal | Confirm button disabled until pet selected | N/A | Confirm button scale(0.97); background deepens to `--color-brand-primary-dark` | Confirm button spinner; aria-busy="true"; pointer-events: none; opacity 0.7 |
+| `TradeConfirmation` | `myPet: Pet`, `theirPet: Pet`, `fee: number`, `netProceeds: number` | Shows min price calculation; fee amount; net proceeds; anti-flip warning | N/A | Confirm and Cancel buttons have focus rings | N/A | Trade conflict: "This pet was traded while you were reviewing. Refresh to see current listings." | Confirm button scale(0.97); border deepens | Confirm button spinner; aria-busy="true"; pointer-events: none; opacity 0.7 |
+| `FeatureGateBanner` | `currentDau: number` | Amber banner at page top; "Marketplace opens at 1,000 DAU — currently at X users" | N/A | N/A | N/A | N/A | N/A | N/A |
+
+**Interaction Specifications — Marketplace Page**
+
+| Trigger | Action | Animation | Duration |
+|---------|--------|-----------|----------|
+| User clicks "Make Offer" on a listing | `TradeOfferModal` slides in from bottom (translateY 60px → 0) with focus trap | ease-out-expo | 300ms |
+| User selects own pet in `TradeOfferModal` | Pet selection card gets pixel-art active border; Confirm button activates | ease-out-expo border transition | 200ms |
+| User confirms trade | Confirm button loading state; success toast on completion | scale(0.97) + spinner + ease-out-expo | 200ms entry + async duration |
+| Trade conflict error | Error toast slides in: "This pet was just traded." with refresh CTA | ease-out-expo | 250ms |
+| `FeatureGateBanner` shown (`FF_MARKETPLACE` OFF) | Banner slides in from top with amber color | ease-out-expo | 250ms |
 
 ---
 
@@ -577,20 +676,57 @@ Covered fully in §15 Admin Portal Product Design.
 
 | Animation Type | Easing Function | Duration | `prefers-reduced-motion` Fallback |
 |---------------|----------------|----------|----------------------------------|
-| Button press feedback | `cubic-bezier(0.34, 1.56, 0.64, 1)` (spring-like bounce) | 120ms | No animation; immediate state change |
-| Page transition (slide) | `cubic-bezier(0.16, 1, 0.3, 1)` (ease-out-expo) | 300ms | Instant transition; no slide |
+| Button press feedback | `--primitive-ease-spring` (`cubic-bezier(0.34, 1.56, 0.64, 1)`) | 120ms | No animation; immediate state change |
+| Page transition (slide) | `--primitive-ease-out-expo` (`cubic-bezier(0.16, 1, 0.3, 1)`) | 300ms | Instant transition; no slide |
 | Pet idle animation (Phaser loop) | N/A — sprite animation at ≥30 FPS | Continuous loop | Suppress to static first-frame sprite |
-| Stat change indicator (+X Speed) | `cubic-bezier(0.22, 1, 0.36, 1)` (ease-out) | 400ms appear; holds 2000ms; 200ms fade-out | No animation; text appears and disappears statically |
-| Rarity badge reveal (claim flow) | `cubic-bezier(0.34, 1.56, 0.64, 1)` (overshoot spring) | 600ms | No animation; badge appears instantly |
-| Claim CTA pulse (after 30s) | `cubic-bezier(0.4, 0, 0.6, 1)` (ease-in-out) | 1200ms pulse cycle | No pulse; static button |
+| Stat change indicator (+X Speed) | `--primitive-ease-out-expo` (`cubic-bezier(0.16, 1, 0.3, 1)`) | 400ms appear; holds 2000ms; 200ms fade-out | No animation; text appears and disappears statically |
+| Rarity badge reveal (claim flow) | `--primitive-ease-spring` (`cubic-bezier(0.34, 1.56, 0.64, 1)`) | 600ms | No animation; badge appears instantly |
+| Claim CTA pulse (after 30s) | `--primitive-ease-in-out` (`cubic-bezier(0.4, 0, 0.6, 1)`) | 1200ms pulse cycle | No pulse; static button |
 | Battle animation sequence | Phaser.js sprite sheet animation | 5,000–15,000ms | Skip animation; jump directly to result (user notified "Animation skipped for accessibility") |
-| Victory/defeat result reveal | `cubic-bezier(0.16, 1, 0.3, 1)` (ease-out-expo) | 400ms | Instant reveal |
-| Leaderboard rank update (live) | `cubic-bezier(0.4, 0, 0.2, 1)` (material standard) | 500ms | Instant update; no transition |
-| Modal open/close | `cubic-bezier(0.16, 1, 0.3, 1)` (ease-out-expo) | 200ms | Instant show/hide |
-| Neglected pet overlay | `cubic-bezier(0.4, 0, 0.2, 1)` (fade-in) | 800ms | Instant opacity change |
-| Toast notification slide-in | `cubic-bezier(0.16, 1, 0.3, 1)` (ease-out-expo) | 250ms | Instant appear |
+| Victory/defeat result reveal | `--primitive-ease-out-expo` (`cubic-bezier(0.16, 1, 0.3, 1)`) | 400ms | Instant reveal |
+| Leaderboard rank update (live) | `--primitive-ease-standard` (`cubic-bezier(0.4, 0, 0.2, 1)`) | 500ms | Instant update; no transition |
+| Modal open/close | `--primitive-ease-out-expo` (`cubic-bezier(0.16, 1, 0.3, 1)`) | 200ms | Instant show/hide |
+| Neglected pet overlay | `--primitive-ease-standard` (`cubic-bezier(0.4, 0, 0.2, 1)`) | 800ms | Instant opacity change |
+| Toast notification slide-in | `--primitive-ease-out-expo` (`cubic-bezier(0.16, 1, 0.3, 1)`) | 250ms | Instant appear |
 
 **Global Motion Rule**: All animation durations < 500ms for transitions; < 2000ms for celebration effects; loop animations respect `prefers-reduced-motion: reduce` via CSS media query and Phaser.js `game.scene.pause()` on the animation scenes.
+
+### §6.2 Feedback Mechanisms (Three Timing Tiers)
+
+Every user action falls into one of four feedback timing tiers. Design decisions must map to the correct tier to avoid perceived lag or unnecessary loading indicators.
+
+| Tier | Duration | Pattern | Example |
+|------|----------|---------|---------|
+| Instant | 0–100ms | Visual state change only (hover, press) | Button active state |
+| Short-async | 100ms–1s | Optimistic UI + inline spinner | Code entry validation |
+| Long-async | 1s–3s | Button loading state + skeleton | Arena battle calculation |
+| Extended | >3s | Progress indicator + cancel option | Pet generation (N/A — <2s per NFR) |
+
+**Implementation notes**: The Instant tier is handled entirely in CSS (`:active`, `:hover`, `:focus` pseudo-classes). Short-async uses React state toggling with optimistic updates. Long-async requires `aria-busy="true"` on the triggering control and a visible spinner. Extended tier (>3s) must also provide a cancel affordance — not currently required for pixel-pet-arena MVP as pet generation is confirmed < 2s per NFR-PERF.
+
+### §6.3 Empty State Design
+
+Empty states must follow the pixel-art tone-of-voice from §10.1: encourage, don't guilt-trip. Each empty state has a consistent structure: illustration, heading, body copy, and one primary CTA.
+
+| Scenario | Illustration | Heading | Body | CTA |
+|----------|-------------|---------|------|-----|
+| First-use (no battles yet) | Pixel sword × 2 crossed (16px style, accent color) | "No battles yet" | "Enter the arena to start your legend!" | "Enter Arena" button (primary, links to `/arena`) |
+| No search results (leaderboard filter) | Empty trophy pixel art (desaturated gold) | "No pets found" | "Try a different filter or search term." | "Clear filters" link (ghost style, resets `RarityFilter` to All) |
+| Offline / Network error | Pixel disconnected plug (gray, animated flicker) | "Connection lost" | "Check your internet connection and try again." | "Retry" button (primary, re-fires last request) |
+| Data error (API 500) | Pixel exploding star / error burst (red accent) | "Something went wrong" | "We're on it. Refresh to try again." | "Refresh page" button (ghost style, calls `window.location.reload()`) |
+
+**Empty state accessibility**: All illustrations are decorative (`aria-hidden="true"` or `alt=""`). The heading uses an `<h2>` or appropriate level for page context. The body uses `<p>`. The CTA is a semantic `<button>` or `<a>` with a descriptive label.
+
+### §6.4 Loading States
+
+Loading states must be context-appropriate — global spinners are only acceptable during full page-level transitions. Within components, use skeleton screens or inline spinners.
+
+| Context | Pattern | Duration trigger | Implementation |
+|---------|---------|-----------------|----------------|
+| Page initial load | Skeleton screen matching content layout (matching card shapes, bar widths, avatar circles) | Immediate on mount | CSS skeleton shimmer animation (background linear-gradient slide at 1.5s infinite) |
+| Leaderboard pagination | Inline spinner at bottom of list | On scroll trigger (Intersection Observer fires) | Intersection Observer threshold 0.8; spinner auto-hides when no more data |
+| Form submission (claim, arena) | Button loading state (pixel-art spinner replaces label + button disabled) | On submit event | `aria-busy="true"` on button; `pointer-events: none`; opacity 0.7; spinner via CSS animation |
+| Pet canvas render | Progressive pixel-art reveal (scanline effect — rows reveal top-to-bottom) | Immediate; completes < 2s per NFR-PERF | Canvas `requestAnimationFrame` loop; each row reveals at 16ms intervals |
 
 ### §6.5 Micro-interaction Catalog
 
@@ -608,6 +744,10 @@ Covered fully in §15 Admin Portal Product Design.
 | MI-10 | Food item consumption | Food "Use" button clicked | Pet sprite blinks with warm glow (matching food type color); stat bar increments | 400ms glow + stat bar animates | Instant stat increment; no glow |
 | MI-11 | Copy URL success | Share URL button clicked | Button icon swaps from "copy" to "checkmark"; returns to "copy" after 2s | 150ms swap + 2000ms hold | Instant icon swap |
 | MI-12 | Neglected pet state entry | 3 consecutive days without training | Wilted overlay fades in on pet canvas; subtle grey desaturation of pet sprite | 800ms fade-in | Instant overlay; no fade |
+| MI-13 | Claim form submission | User clicks claim submit button | Form submit button enters loading state (spinner); claim code entry area reveals with CSS scale-in animation (scale 0.9 → 1.0, opacity 0 → 1) | 200ms scale-in reveal | No scale; area appears instantly; button shows static "Sending..." text |
+| MI-14 | Leaderboard bookmark/share | Share icon clicked on leaderboard row | Share icon scales 1.2x + pixel sparkle effect (3 pixel-art stars burst outward); copy toast slides in from bottom-right | 150ms icon scale + 400ms sparkle burst | Icon swaps to checkmark instantly; no sparkle; toast appears without slide |
+| MI-15 | Stat reaches MAX (100) | Training action pushes stat to 100 | Stat bar fills completely; "MAX" pixel badge appears with 2px bounce animation (`--primitive-ease-spring`); ARIA alert fires "Stat at maximum" | 300ms bounce | MAX badge appears instantly; no bounce; ARIA alert still fires |
+| MI-16 | Admin toggle (feature flag / rate limit switch) | Toggle switch clicked in admin config UI | Instant toggle state flip with 150ms slide animation on toggle track; visual ripple effect on track background (expanding circle, 200ms fade); tooltip/note: "Takes effect in 5 min (config cache TTL)" | 150ms slide + 200ms ripple | Toggle flips instantly; no slide; no ripple; note still shown |
 
 ### §6.6 Gesture & Touch Design (Mobile Browser)
 
@@ -631,7 +771,7 @@ N/A — pixel-pet-arena is a web browser application. The Web Vibration API has 
 
 ## §7 Responsive & Adaptive Design
 
-### Breakpoints
+### §7.1 Breakpoints
 
 | Breakpoint Name | Width | Description |
 |----------------|-------|-------------|
@@ -640,18 +780,47 @@ N/A — pixel-pet-arena is a web browser application. The Web Vibration API has 
 | `md` | 768px | Tablet / large mobile landscape |
 | `lg` | 1024px | Small desktop / tablet landscape |
 | `xl` | 1440px | Standard desktop |
+| `2xl` | 1920px | Large / ultrawide desktop |
 
-### Component Behavior Matrix
+### §7.2 Component Behavior Matrix
 
-| Component | 320px (xs) | 375px (sm) | 768px (md) | 1024px (lg) | 1440px (xl) |
-|-----------|-----------|-----------|-----------|------------|------------|
-| **Pet Canvas** | Full-width; 280px height; pixel art scales to fill | Full-width; 320px height | Full-width; 480px height; pet centered with padding | 50vw left column; right column shows stats | 50% of content max-width (640px max canvas) |
-| **Navigation Bar** | Hamburger menu; links in slide-in drawer | Same as xs | Hamburger on tablet; links in drawer | Full horizontal nav bar; all links visible | Full horizontal nav bar; with expanded labels |
-| **Arena Battle View** | Full-screen canvas during battle animation; stats hidden during animation | Full-screen canvas | Canvas 70% width; stat comparison panel right sidebar | Two-panel layout: canvas left, stats right | Same as lg; wider canvas |
-| **Leaderboard Table** | Columns reduced: rank, name, score only; rarity badge as colored dot | Rank, name (truncated), rarity dot, score | Rank, pet sprite, name, rarity badge, score, win rate | All columns visible; pet sprite column added | All columns; wider row; larger sprite thumbnails |
-| **Claim Form** | Single column; full-width inputs; submit button full-width | Same as xs | Centered card (480px max-width) | Centered card (480px max-width) | Same as lg |
-| **Training Actions** | Swipeable horizontal carousel; one action card visible at a time | Same as xs; 1.5 cards visible (hint of next) | Two-column grid of action cards | Three-column grid of action cards | Same as lg |
-| **Food Inventory** | Two-column grid; item cards compact | Same as xs | Three-column grid | Four-column grid; item details expanded | Five-column grid |
+| Component | 320px (xs) | 375px (sm) | 768px (md) | 1024px (lg) | 1440px (xl) | 1920px (2xl) |
+|-----------|-----------|-----------|-----------|------------|------------|--------------|
+| **Pet Canvas** | Full-width; 280px height; pixel art scales to fill | Full-width; 320px height | Full-width; 480px height; pet centered with padding | 50vw left column; right column shows stats | 50% of content max-width (640px max canvas) | max-width 480px centered; no change from 1440 |
+| **Navigation Bar** | Hamburger menu; links in slide-in drawer | Same as xs | Hamburger on tablet; links in drawer | Full horizontal nav bar; all links visible | Full horizontal nav bar; with expanded labels | No change from 1440; max-width container centers |
+| **Arena Battle View** | Full-screen canvas during battle animation; stats hidden during animation | Full-screen canvas | Canvas 70% width; stat comparison panel right sidebar | Two-panel layout: canvas left, stats right | Same as lg; wider canvas | Centered battle canvas; max-width 800px |
+| **Leaderboard Table** | Columns reduced: rank, name, score only; rarity badge as colored dot | Rank, name (truncated), rarity dot, score | Rank, pet sprite, name, rarity badge, score, win rate | All columns visible; pet sprite column added | All columns; wider row; larger sprite thumbnails | max-width 1200px centered; no layout change |
+| **Claim Form** | Single column; full-width inputs; submit button full-width | Same as xs | Centered card (480px max-width) | Centered card (480px max-width) | Same as lg | Same as lg |
+| **Training Actions** | Swipeable horizontal carousel; one action card visible at a time | Same as xs; 1.5 cards visible (hint of next) | Two-column grid of action cards | Three-column grid of action cards | Same as lg | Same as lg |
+| **Food Inventory** | Two-column grid; item cards compact | Same as xs | Three-column grid | Four-column grid; item details expanded | Five-column grid | Five-column grid; wider item cards |
+| **StatsPanel** | Stacked vertical bars (full-width, each bar spans 100% of container) | Same as xs | 2-column grid of stat bars with labels | Horizontal grid with stat labels inline | Same as lg | Same as lg |
+| **Modal (AIOfferModal, TradeOfferModal)** | Full-screen bottom sheet (slides up from bottom, 100vw × ~70vh) | Same as xs | Centered dialog (480px wide, 60vh max) | Centered dialog (480px wide, 60vh max) | Same as md/lg | Same as md/lg |
+| **RarityBadge** | Compact colored dot + rarity letter (e.g., "L" for Legendary) | Same as xs | Full badge with rarity name and probability | Full badge with rarity name and probability | Same as md/lg | Same as md/lg |
+
+### §7.3 Mobile-First Declaration
+
+This design system uses a **mobile-first** approach. Base styles target 320px viewport width. Larger breakpoints are applied via `min-width` media queries that progressively enhance layout, typography, and component density. No styles are written in a desktop-first (max-width) pattern except where explicitly noted.
+
+```css
+/* Mobile-first example */
+.stats-panel {
+  display: flex;
+  flex-direction: column; /* 320px: stacked vertical */
+}
+
+@media (min-width: 768px) {
+  .stats-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 768px: 2-column grid */
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-panel {
+    grid-template-columns: repeat(4, 1fr); /* 1024px+: horizontal grid */
+  }
+}
+```
 
 ---
 
@@ -757,6 +926,7 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 ```css
 /* Primitive: Color */
 --primitive-purple-500: oklch(52% 0.24 280);
+--primitive-purple-300: oklch(72% 0.24 280); /* hover state for accent buttons */
 --primitive-teal-400: oklch(68% 0.19 164);
 --primitive-gold-300: oklch(85% 0.15 82);
 --primitive-navy-900: oklch(12% 0.04 280);
@@ -767,12 +937,24 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 --primitive-space-4: 16px;
 --primitive-space-6: 24px;
 --primitive-space-8: 32px;
+--primitive-space-12: 48px;
 --primitive-space-16: 64px;
 
 /* Primitive: Duration */
 --primitive-duration-fast: 120ms;
 --primitive-duration-normal: 300ms;
 --primitive-duration-slow: 600ms;
+
+/* Primitive: Shadow (pixel-art offset shadows) */
+--primitive-shadow-sm: 2px 2px 0px var(--color-neutral-900);
+--primitive-shadow-md: 4px 4px 0px var(--color-neutral-900);
+--primitive-shadow-lg: 6px 6px 0px var(--color-neutral-900);
+
+/* Primitive: Easing */
+--primitive-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+--primitive-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+--primitive-ease-in-out: cubic-bezier(0.4, 0, 0.6, 1);
+--primitive-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 ```
 
 **Layer 2 — Semantic Tokens** (purpose-driven aliases):
@@ -781,18 +963,26 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 /* Semantic: Color */
 --color-surface-base: var(--primitive-navy-900);
 --color-brand-primary: var(--primitive-purple-500);
+--color-brand-primary-dark: color-mix(in oklch, var(--color-brand-primary), black 20%); /* active/loading deepened state */
 --color-brand-accent: var(--primitive-gold-300);
+--color-brand-accent-bright: var(--primitive-purple-300); /* Light: #D8B4FE, Dark: #E9D5FF — hover state for accent buttons */
 --color-rarity-legendary: var(--primitive-gold-300);
 --color-success: var(--primitive-teal-400);
 
 /* Semantic: Space */
 --space-component-padding: var(--primitive-space-4);
 --space-section: clamp(4rem, 3rem + 5vw, 10rem);
+--space-section-inner: var(--primitive-space-12); /* 48px — inner section padding */
 
 /* Semantic: Duration */
 --duration-interaction: var(--primitive-duration-fast);
 --duration-transition: var(--primitive-duration-normal);
 --duration-celebration: var(--primitive-duration-slow);
+
+/* Semantic: Shadow */
+--shadow-component: var(--primitive-shadow-sm); /* 2px 2px — buttons, badges */
+--shadow-card: var(--primitive-shadow-md);       /* 4px 4px — cards, panels */
+--shadow-modal: var(--primitive-shadow-lg);      /* 6px 6px — modals, overlays */
 ```
 
 **Layer 3 — Component Tokens** (component-specific, consumes semantic):
@@ -842,7 +1032,48 @@ pixel-pet-arena uses a single **dark-first** design direction as primary. The "l
 | `--color-border-default` | `oklch(70% 0.04 280)` (#9999bb) | `oklch(32% 0.05 280)` (#393966) | N/A (border) |
 | `--color-border-focus` | `var(--color-focus)` | `var(--color-focus)` | N/A |
 
-### §9.5 Component Class Diagram
+### §9.5 Web Clean Architecture Diagram
+
+The pixel-pet-arena frontend follows a 4-layer clean architecture. Dependencies flow inward only — the Presentation Layer knows about the Application Layer; the Application Layer knows about the Domain Layer; the Infrastructure Layer implements Domain interfaces.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Presentation Layer                                                     │
+│  React components: PetCanvas, ClaimFlow, ArenaPage,                    │
+│  LeaderboardTable, TrainingActions, StatsPanel, RarityBadge,           │
+│  BattleResultCard, MarketplaceGrid                                     │
+│                      ↓ calls (via props / context)                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Application Layer                                                      │
+│  Custom hooks: usePet, useClaim, useArena, useLeaderboard,             │
+│  useTraining, useFood, useMarketplace, useAdmin                        │
+│                      ↓ uses                                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Domain Layer                                                           │
+│  Entities & interfaces:                                                 │
+│    Pet { id, seed, rarity, stats, ownerId }                            │
+│    Battle { id, mode, winnerId, loserId, statDelta }                   │
+│    LeaderboardEntry { rank, petId, score, winRate }                    │
+│    ClaimToken { email, code, expiresAt, petId }                        │
+│    TrainingSession { petId, action, statDelta, completedAt }           │
+│    FoodItem { id, type, buffStat, magnitude, duration }                │
+│                      ↑ implemented by                                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Infrastructure Layer                                                   │
+│  API client: fetchPet(), enterArena(), submitTraining(),               │
+│  fetchLeaderboard(), submitClaim(), validateCode(), fetchMarketplace() │
+│  localStorage: tokenStore (pet URL token), claimSessionStore          │
+│  Phaser.js: PetCanvasEngine (sprite rendering, animation)              │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key architectural rules**:
+- Custom hooks in the Application Layer manage all side effects (fetch, cache, optimistic updates). Components are purely presentational.
+- Domain entities are plain TypeScript interfaces — no framework imports.
+- The Infrastructure Layer is the only layer that imports API client libraries or reads/writes localStorage.
+- Phaser.js is isolated in `PetCanvasEngine` — no other component or hook imports Phaser directly.
+
+### §9.5.1 Component Class Diagram
 
 ```
 BaseButton
@@ -1322,9 +1553,13 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 | US-TRAIN-001 | AC-005-1 through AC-005-6 | §5.4, §6.5 (MI-03, MI-04, MI-12) |
 | US-FOOD-001 | AC-006-1 through AC-006-6 | §5.3 (FoodInventory), §6.5 (MI-10) |
 | US-ARENA-001 | AC-007-1 through AC-007-8 | §5.5, §5.6, §4.1, §6.5 (MI-07, MI-08) |
+| US-ARENA-002 | AC-008-1 through AC-008-4 | §5.5 ModeSelector, §6.5 MI-battle-start |
 | US-BOARD-001 | AC-009-1 through AC-009-6 | §5.7, §3.3 |
 | US-RECORD-001 | AC-010-1 through AC-010-6 | §5.8, §10.2 |
+| US-RARITY-001 / US-PET-002 rarity | AC-002-5 | §9.1 Rarity Colors, §5.3 RarityBadge, §5.7 RarityFilter |
 | US-ADMIN-001 | AC-013-1 through AC-013-4 | §15.3 (Pet Management) |
+| US-ADMIN-002 | AC-014-1 through AC-014-3 | §15.3 Leaderboard Management, §15.4 |
+| US-ADMIN-003 | AC-015-1 through AC-015-3 | §15.3 Arena Rate Config, §15.4 |
 | US-ADMIN-004 | AC-016-1 through AC-016-4 | §15.3 (User Management), §15.4 |
 | US-ADMIN-005 | AC-017-1 through AC-017-4 | §15.3 (Leaderboard Management), §15.4 |
 | US-ADMIN-006 | AC-018-1 through AC-018-3 | §15.3 (Economy Config), §15.4 |
