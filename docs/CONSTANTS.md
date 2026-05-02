@@ -101,7 +101,6 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | A11Y_TEXT_CONTRAST_LARGE | 3 | :1 | PRD §18 A11y-06 | Large text minimum contrast |
 | A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY | 2 | minutes | PRD §18 A11y-09 | Warn user 2 min before claim code expiry |
 | MARKETPLACE_TRADE_ANTIFLIP_PROTECTION | 7 | days | PRD §5 US-TRADE-001 AC-012-4 | Cooldown after trade before relisting same pet |
-| MARKETPLACE_ENABLE_DAU_THRESHOLD | 1000 | DAU | PRD §4.3; PRD §10.2 FF_MARKETPLACE | Feature flag enabled when DAU > 1,000 |
 | DB_AUTOFAILOVER_TIME | 60 | seconds | PRD §7.3 NFR-AVAIL-03 | PostgreSQL automated failover target |
 | DB_MAINTENANCE_WINDOW_MAX | 2 | hours/month | PRD §7.3 NFR-AVAIL-02 | Maximum planned maintenance per month |
 | DB_MAINTENANCE_NOTICE | 48 | hours | PRD §7.3 NFR-AVAIL-02 | Advance notice required for maintenance window |
@@ -217,9 +216,9 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | LEADERBOARD_UV_DAU_RATIO_TARGET | 20 | percent | PRD §9.2 guardrails; BRD §3.1 O2; BRD §7.2 | Leaderboard page UV / DAU |
 | ORGANIC_TRAFFIC_TARGET | 30 | percent | BRD §3.1 O4 | Natural traffic as percent of total visits at 6 months |
 | ARENA_FAIR_PLAY_RATE_TARGET | 95 | percent | PRD §9.2 guardrail metrics | Non-bot battles minimum |
-| CLAIM_EMAIL_DELIVERY_RATE_TARGET | 98 | percent | PRD §9.2 guardrail metrics; BRD §8.3 vendor SLA | SendGrid delivery success rate |
+| CLAIM_EMAIL_DELIVERY_RATE_TARGET | 98 | percent | PRD §9.2 guardrail metrics; BRD §8.3 vendor SLA | Operational guardrail — alerts and remediation trigger if below 98%; see also SENDGRID_DELIVERY_RATE_ASSUMPTION (same value, planning assumption) |
 | CLAIM_FORM_ERROR_RATE_MAX | 2 | percent | PRD §9.2 guardrail metrics | Upper bound for claim form errors |
-| SENDGRID_DELIVERY_RATE_ASSUMPTION | 98 | percent | PRD §8.4 assumption A5 | With proper SPF/DKIM setup |
+| SENDGRID_DELIVERY_RATE_ASSUMPTION | 98 | percent | PRD §8.4 assumption A5 | BRD cost/revenue planning assumption with proper SPF/DKIM setup; see also CLAIM_EMAIL_DELIVERY_RATE_TARGET (same value, operational guardrail) |
 | MVP_BUDGET | 40000 | USD | PRD §8.1; BRD §8.1; BRD §3.3 base scenario | Hard budget constraint |
 | AB_TEST_SAMPLE_SIZE_001_002 | 1000 | visitors/arm | PRD §9.4 | AB-001, AB-002 sample size |
 | AB_TEST_SAMPLE_SIZE_003_004 | 500 | sessions or battles/arm | PRD §9.4 | AB-003, AB-004 sample size |

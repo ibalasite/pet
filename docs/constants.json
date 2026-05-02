@@ -92,7 +92,6 @@
     "a11y_text_contrast_large": "3:1",
     "a11y_claim_code_warning_before_expiry_minutes": 2,
     "marketplace_trade_antiflip_protection_days": 7,
-    "marketplace_enable_dau_threshold": 1000,
     "db_autofailover_time_seconds": 60,
     "db_maintenance_window_max_hours_per_month": 2,
     "db_maintenance_notice_hours": 48,
