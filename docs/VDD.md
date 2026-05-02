@@ -464,12 +464,13 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-purple-200: oklch(88% 0.11 280);  /* #e9d5ff */
 --primitive-purple-300: oklch(72% 0.24 280);  /* #c4b5fd — Hover/active accent */
 --primitive-purple-400: oklch(62% 0.22 280);  /* #c084fc */
---primitive-purple-500: oklch(52% 0.24 280);  /* #7c3aed — Brand primary */
+--primitive-purple-500: oklch(52% 0.22 280);  /* #6c5ce7 — Brand primary */
 --primitive-purple-600: oklch(44% 0.24 280);  /* #6d28d9 */
 --primitive-purple-700: oklch(36% 0.22 280);  /* #5b21b6 — Dark button press */
 --primitive-purple-800: oklch(28% 0.19 280);  /* #4c1d95 */
 --primitive-purple-900: oklch(21% 0.16 280);  /* #3b0764 — Deep purple overlay */
 --primitive-purple-950: oklch(14% 0.13 280);  /* #1e0533 */
+--primitive-purple-epic: oklch(75% 0.21 280); /* #a29bfe — Epic rarity */
 
 /* Teal Scale */
 --primitive-teal-100: oklch(90% 0.07 190);    /* #ccf5f3 */
@@ -489,6 +490,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-navy-800: oklch(17% 0.05 280);    /* #242444 — Surface raised */
 --primitive-navy-700: oklch(22% 0.07 280);    /* #2d2d5a — Surface overlay */
 --primitive-navy-600: oklch(28% 0.06 280);    /* #3a3a6e — Hover surfaces */
+--primitive-navy-shadow: oklch(8% 0.02 280);  /* #0d0d1a — deep shadow / near-black navy (PDD §9.1) */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -582,7 +584,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    ============================================= */
 --color-rarity-common: var(--primitive-grey-rarity-common); /* #b2bec3 */
 --color-rarity-rare: var(--primitive-teal-rare);           /* #4ecdc4 */
---color-rarity-epic: oklch(75% 0.21 280);                 /* #a29bfe */
+--color-rarity-epic: var(--primitive-purple-epic);        /* #a29bfe */
 --color-rarity-legendary: var(--primitive-gold-300);      /* #fdcb6e */
 
 /* =============================================
@@ -605,7 +607,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --color-neutral-600: var(--primitive-grey-600);  /* #4b5563 */
 --color-neutral-700: var(--primitive-grey-700);  /* #374151 */
 --color-neutral-800: var(--primitive-grey-800);  /* #1f2937 */
---color-neutral-900: var(--primitive-grey-900);  /* #111827 */
+--color-neutral-900: var(--primitive-navy-shadow); /* #0d0d1a — PDD §9.1 canonical near-black */
 
 /* =============================================
    SEMANTIC: Interactive
@@ -641,7 +643,83 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --shadow-component: var(--primitive-shadow-sm);           /* buttons, badges */
 --shadow-card: var(--primitive-shadow-md);                /* cards, panels */
 --shadow-modal: var(--primitive-shadow-lg);               /* modals, overlays */
+
+/* =============================================
+   SEMANTIC: Typography Tokens
+   ============================================= */
+--font-pixel: 'Press Start 2P', 'Courier New', Courier, monospace;
+--font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+--font-mono: 'Courier New', Courier, monospace;
+
+--text-h1-size: clamp(1.5rem, 1rem + 2.5vw, 2.5rem);
+--text-h1-family: var(--font-pixel);
+--text-h1-weight: 700;
+--text-h1-line-height: 1.4;
+--text-h1-letter-spacing: 0em;
+
+--text-h2-size: clamp(1.2rem, 0.8rem + 2vw, 1.8rem);
+--text-h2-family: var(--font-pixel);
+--text-h2-weight: 700;
+--text-h2-line-height: 1.4;
+--text-h2-letter-spacing: 0em;
+
+--text-h3-size: clamp(1rem, 0.7rem + 1.5vw, 1.4rem);
+--text-h3-family: var(--font-pixel);
+--text-h3-weight: 400;
+--text-h3-line-height: 1.5;
+--text-h3-letter-spacing: 0em;
+
+--text-h4-size: 1.125rem;
+--text-h4-family: var(--font-body);
+--text-h4-weight: 600;
+--text-h4-line-height: 1.5;
+--text-h4-letter-spacing: 0em;
+
+--text-h5-size: 1rem;
+--text-h5-family: var(--font-body);
+--text-h5-weight: 600;
+--text-h5-line-height: 1.5;
+--text-h5-letter-spacing: 0em;
+
+--text-label-size: 0.875rem;
+--text-label-family: var(--font-body);
+--text-label-weight: 600;
+--text-label-line-height: 1.5;
+--text-label-letter-spacing: 0.05em;
+
+--text-body-size: clamp(1rem, 0.92rem + 0.4vw, 1.125rem);
+--text-body-family: var(--font-body);
+--text-body-weight: 400;
+--text-body-line-height: 1.6;
+--text-body-letter-spacing: 0em;
+
+--text-small-size: 0.875rem;
+--text-small-family: var(--font-body);
+--text-small-weight: 400;
+--text-small-line-height: 1.5;
+--text-small-letter-spacing: 0.01em;
+
+--text-caption-size: 0.75rem;
+--text-caption-family: var(--font-body);
+--text-caption-weight: 400;
+--text-caption-line-height: 1.4;
+--text-caption-letter-spacing: 0.02em;
+
+--text-mono-size: 0.875rem;
+--text-mono-family: var(--font-mono);
+--text-mono-weight: 400;
+--text-mono-line-height: 1.5;
+--text-mono-letter-spacing: 0em;
+
+--text-stat-family: var(--font-body);
+--text-stat-weight: 700;
+--text-stat-line-height: 1;
+--text-stat-letter-spacing: -0.01em;
 ```
+
+### §6.2.5 Typography Tokens
+
+All `--text-*` CSS custom properties declared above map directly to the §5.2 type scale. Each level exposes four sub-tokens: `-size`, `-family`, `-weight`, `-line-height`, and `-letter-spacing`. Component authors must use these tokens rather than hardcoding font values. The font families are also available via `--font-pixel`, `--font-body`, and `--font-mono` shorthand tokens.
 
 ### §6.3 Layer 3 — Component Tokens
 
