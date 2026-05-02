@@ -233,12 +233,12 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | Parameter | Value | Unit | PRD Source | Notes |
 |---|---|---|---|---|
 | NORMAL_OPERATION_RPS | 100 | RPS | PRD §7.1 capacity targets | Sustained normal operation |
-| NORMAL_OPERATION_DAU_MIN | 2000 | DAU | PRD §7.1 capacity targets; BRD §3.1 O3 | Normal DAU range lower bound |
+| NORMAL_OPERATION_DAU_MIN | 2000 | DAU | PRD §7.1 capacity targets; BRD §3.1 O3 | Normal DAU range lower bound; intentionally equal to DAU_12_MONTH_TARGET — infrastructure sized to meet 12-month business objective |
 | NORMAL_OPERATION_DAU_MAX | 5000 | DAU | PRD §7.1 capacity targets; BRD §3.1 O3 | Normal DAU range upper bound |
 | PEAK_OPERATION_RPS | 500 | RPS | PRD §7.1 capacity targets | Viral event peak |
 | PEAK_CONCURRENT_USERS | 2000 | PCU | PRD §7.1 capacity targets; PRD §13 glossary | Peak Concurrent Users during arena events |
 | DB_CONNECTION_POOL_MIN_CONNECTIONS | 20 | connections | PRD §7.1 capacity targets | PostgreSQL connection pool minimum |
-| DAU_12_MONTH_TARGET | 2000 | DAU | BRD §3.1 O3; PRD §9.1 DAP targets | 12-month DAU objective |
+| DAU_12_MONTH_TARGET | 2000 | DAU | BRD §3.1 O3; PRD §9.1 DAP targets | 12-month DAU success objective; intentionally equal to NORMAL_OPERATION_DAU_MIN — represents the infrastructure sizing target |
 | CLAIMED_PETS_6_WEEK_TARGET | 500 | pets | BRD §7.2; BRD §3.5 | 6-week total claimed pets target |
 | MONTHLY_GMV_TARGET | 10000 | USD | BRD §3.1 O5 | Marketplace monthly GMV target at 12 months |
 | MONTHLY_FEE_REVENUE_TARGET | 500 | USD | BRD §3.1 O5; BRD §7.2 Outcome | Monthly transaction fee revenue at 12 months |
