@@ -1329,7 +1329,7 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | US-ADMIN-003 | Admin runtime parameter tuning | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Platform safety parameters (rate limits, rarity weights) cannot be adjusted without code deployments; slow response to live bot attacks | E2E |
 | US-ADMIN-004 | GDPR data deletion processing | P0 | O1 | Must | `FF_ADMIN_PORTAL` | GDPR non-compliance risk; legal liability | E2E + Integration |
 | US-ADMIN-005 | Suspicious battle detection | P0 | O2 | Must | `FF_ADMIN_PORTAL` | Automated bot detection absent; moderator workload unbounded | E2E + Integration |
-| US-ADMIN-006 | Game balance configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game economy balance (food buffs, arena costs) cannot be tuned post-launch without engineering effort; misbalanced economy risks player churn | E2E + Integration |
+| US-ADMIN-006 | Game Economy Configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game economy balance (food buffs, arena costs) cannot be tuned post-launch without engineering effort; misbalanced economy risks player churn | E2E + Integration |
 
 ---
 
