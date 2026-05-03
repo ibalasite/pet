@@ -79,7 +79,7 @@ sequenceDiagram
 
             API->>PG: BEGIN TRANSACTION<br/>INSERT INTO arena_matches<br/>(pet_a_id, pet_b_id, is_ai_opponent, mode,<br/>winner_pet_id, random_seed, stat_delta_a,<br/>stat_delta_b, duration_seconds, battle_log)<br/>COMMIT
             PG-->>API: matchId
-            API->>Redis: INCR rl:arena:{pet_id} EX 3600<br/>(record battle consumption)
+            API->>Redis: INCR rl:arena:{pet_id} EX 3600<br/>(record battle consumption;<br/>TTL = 3600 s — arena_rate_limit_counter_window_hours = 1)
             API->>Redis: ZADD leaderboard:global<br/>score=newLeaderboardScore member=petId
             Note right of Redis: Update lag ≤ 30 s<br/>(leaderboard_update_lag_max_seconds = 30)
 

@@ -229,8 +229,11 @@ All enums are created as PostgreSQL `ENUM` types before any table DDL.
 |---|---|---|
 | `rl:claim:{email_hash}` | 3600 s | Claim attempt counter (limit: 5/hr — `auth_rate_limit_claim_attempts_per_hour = 5`) |
 | `rl:claim:cooldown:{email_hash}` | 60 s | Post-limit cooldown (`claim_email_retry_cooldown_seconds = 60`) |
-| `rl:arena:{pet_id}` | 3600 s | Arena battle counter (default 10/hr) |
+| `rl:arena:{pet_id}` | 3600 s | Arena battle counter (default 10/hr — `arena_battles_per_pet_per_hour_default = 10`; TTL = 3600 s — `arena_rate_limit_counter_window_hours = 1`) |
 | `rl:code_entry:{session_id}` | 900 s | OTP attempt counter (limit: 10 — `auth_rate_limit_code_entry_attempts_per_session = 10`) |
+| `rl:code_entry:cooldown:{session_id}` | 60 s | Post-limit code-entry cooldown (`claim_email_retry_cooldown_seconds = 60`) |
+| `rl:admin_login:{ip_hash}` | 900 s | Admin login IP rate limit (`admin_login_ip_rate_limit_attempts = 10`, `admin_login_ip_rate_limit_window_seconds = 900`) |
+| `rl:admin:{admin_id}` | 60 s | Per-admin request rate limit (100/min — `admin_portal_requests_per_minute_per_account = 100`) |
 | `leaderboard:global` | no TTL | Sorted set; score = arena_score; member = petId |
 | `matchmaking:queue:{mode}` | no TTL | Sorted set; score = enqueue epoch |
 | `session:admin:{session_id}` | 14400 s | Admin session JSON (`admin_session_inactivity_expiry_hours = 4`) |

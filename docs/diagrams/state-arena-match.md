@@ -44,7 +44,7 @@ stateDiagram-v2
 
     BattleComputing --> BattleResolved : Apply ±15% seeded modifier\n(arena_battle_outcome_random_modifier_percent = 15)\nCompute winner\nTie-break: earlier enqueue epoch\nGenerate battle_log JSONB\nDuration = random[5,15] s
 
-    BattleResolved --> Persisted : BEGIN TRANSACTION\nINSERT INTO arena_matches\n  (pet_a_id, pet_b_id, is_ai_opponent,\n   mode, winner_pet_id, random_seed,\n   stat_delta_a, stat_delta_b,\n   duration_seconds, battle_log)\nCOMMIT\nINCR rl:arena:{pet_id} EX 3600
+    BattleResolved --> Persisted : BEGIN TRANSACTION\nINSERT INTO arena_matches\n  (pet_a_id, pet_b_id, is_ai_opponent,\n   mode, winner_pet_id, random_seed,\n   stat_delta_a, stat_delta_b,\n   duration_seconds, battle_log)\nCOMMIT\nINCR rl:arena:{pet_id} EX 3600\n(TTL = 3600 s — arena_rate_limit_counter_window_hours = 1)
 
     Persisted --> LeaderboardUpdated : ZADD leaderboard:global\nscore = newLeaderboardScore\nmember = petId\n(lag ≤ 30 s — leaderboard_update_lag_max_seconds = 30)
 

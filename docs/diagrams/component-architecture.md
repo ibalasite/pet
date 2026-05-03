@@ -26,7 +26,7 @@ graph TB
     end
 
     subgraph CDN["CDN / Edge — Vercel"]
-        PlayerApp["Player App\nReact 18 + Phaser.js 3\nVite 5 / TypeScript 5\nBundle ≤ 300 KB gzipped"]
+        PlayerApp["Player App\nReact 18 + Phaser.js 3\nVite 5 / TypeScript 5\nJS ≤ 300 KB gzipped (total_js_bundle_gzipped_kb = 300)"]
         AdminPortal["Admin Portal\nVue 3 + Element Plus\nVite 5 / TypeScript 5"]
     end
 
@@ -117,7 +117,8 @@ graph TB
 - **Redis degradation posture**: If Upstash Redis is unavailable, the leaderboard falls back to a
   direct PostgreSQL read (degraded, not outage — ARCH P2, NFR-AVAIL-05). Rate-limit counters are
   fail-open (logged as alert) except OTP code entry, which is fail-closed.
-- **Bundle budgets**: Player App JS ≤ 300 KB gzipped, CSS ≤ 50 KB gzipped. Phaser.js is
+- **Bundle budgets**: Player App JS ≤ 300 KB gzipped (`total_js_bundle_gzipped_kb = 300`),
+  CSS ≤ 50 KB gzipped (`total_css_bundle_gzipped_kb = 50`). Phaser.js is
   dynamically imported to avoid blocking the initial claim-flow bundle.
 - **Peak capacity**: 500 RPS (`peak_operation_rps = 500`), 2,000 PCU
   (`peak_concurrent_users = 2,000`). Normal operation: 100 RPS
