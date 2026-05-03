@@ -446,9 +446,9 @@ Generates a new unclaimed random pet for guest display. No authentication requir
     "generationMeta": {
       "body": "lizard",
       "head": "horned",
-      "color_palette": "crimson_gold",
+      "colorPalette": "crimson_gold",
       "accessory": "cape",
-      "rarity_trait": "shimmering_scales",
+      "rarityTrait": "shimmering_scales",
       "pattern": "diagonal_stripe"
     },
     "reservedUntil": "2026-05-04T12:00:00Z"
@@ -1154,7 +1154,7 @@ Authenticates an admin with username, password, and TOTP code. On success, sets 
 {
   "success": true,
   "data": {
-    "adminId": "admin-uuid-here",
+    "adminId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "role": "moderator",
     "sessionExpiresAt": "2026-05-03T16:00:00Z"
   },
@@ -1307,7 +1307,7 @@ Lists all admin users and their roles.
   "data": {
     "admins": [
       {
-        "adminId": "uuid",
+        "adminId": "b2c3d4e5-f6a7-8901-bcde-fa2345678901",
         "username": "moderator_alice",
         "role": "moderator",
         "lastLoginAt": "2026-05-02T09:00:00Z",
@@ -1353,7 +1353,7 @@ Creates a new admin account.
 {
   "success": true,
   "data": {
-    "adminId": "new-uuid",
+    "adminId": "c3d4e5f6-a7b8-9012-cdef-ab3456789012",
     "username": "new_moderator",
     "role": "moderator",
     "auditLogId": "12344"
@@ -2140,7 +2140,7 @@ Initiates an admin-triggered erasure request (e.g. for a support ticket). Email 
 {
   "success": true,
   "data": {
-    "jobId": "new-gdpr-uuid",
+    "jobId": "d4e5f6a7-b8c9-0123-defa-bc4567890123",
     "estimatedCompletion": "2026-05-10T09:00:00Z"
   },
   "error": null
@@ -2234,7 +2234,7 @@ Returns audit log entries. Search any 12-month window in ≤ 3 seconds (`admin_a
     "entries": [
       {
         "id": "987654",
-        "adminId": "admin-uuid",
+        "adminId": "b2c3d4e5-f6a7-8901-bcde-fa2345678901",
         "adminUsername": "moderator_alice",
         "action": "pet.ban",
         "targetType": "pet",
