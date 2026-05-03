@@ -238,9 +238,9 @@ All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical 
 | Token | Light Hex | Dark Hex | Usage |
 |-------|-----------|----------|-------|
 | `--color-success` | `#00836b` | `#00b894` | Training complete, claim success, pet ownership confirmed |
-| `--color-warning` | `#cc5a00` | `#e17055` | Rate limit banners, claim code expiry warnings, arena cooldown |
-| `--color-error` | `#cc3333` | `#ff7675` | Form validation errors, invalid code entry, API failures |
-| `--color-info` | `#4a80cc` | `#74b9ff` | Informational tips, probability disclosures, AI opponent labels |
+| `--color-warning` | `#cc5a00` | `#e8a87c` | Rate limit banners, claim code expiry warnings, arena cooldown |
+| `--color-error` | `#cc3333` | `#e87c7c` | Form validation errors, invalid code entry, API failures |
+| `--color-info` | `#4a80cc` | `#7cb4e8` | Informational tips, probability disclosures, AI opponent labels |
 
 ### §3.3 Rarity Color System
 
@@ -512,6 +512,14 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-light-border-default: #9999bb;  /* use §6.4 canonical value */
 --primitive-light-border-strong: #9898c0;
 --primitive-light-brand-accent: #c9930a;    /* Dark gold for light bg — Legendary on light mode */
+--primitive-light-rarity-legendary: #b07e00;   /* §6.4 Legendary on light bg */
+--primitive-light-rarity-epic: #6a5fe8;        /* §6.4 Epic on light bg */
+--primitive-light-rarity-rare: #009688;        /* §6.4 Rare on light bg */
+--primitive-light-rarity-common: #636b72;      /* §6.4 Common on light bg */
+--primitive-light-error: #cc3333;             /* §6.4 Error on light bg */
+--primitive-light-success: #00836b;           /* §6.4 Success on light bg */
+--primitive-light-warning: #cc5a00;           /* §6.4 Warning on light bg */
+--primitive-light-focus: #c49900;             /* §6.4 Focus on light bg */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -616,6 +624,14 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
     --color-border-default: var(--primitive-light-border-default);
     --color-border-strong: var(--primitive-light-border-strong);
     --color-brand-accent: var(--primitive-light-brand-accent);
+    --color-rarity-legendary: var(--primitive-light-rarity-legendary);
+    --color-rarity-epic: var(--primitive-light-rarity-epic);
+    --color-rarity-rare: var(--primitive-light-rarity-rare);
+    --color-rarity-common: var(--primitive-light-rarity-common);
+    --color-error: var(--primitive-light-error);
+    --color-success: var(--primitive-light-success);
+    --color-warning: var(--primitive-light-warning);
+    --color-focus: var(--primitive-light-focus);
   }
 }
 
@@ -1238,8 +1254,8 @@ This section provides visual design specifications for all P0 screens. Constants
 **Color usage**:
 - Form card: `--card-bg` (#242444) with `--card-border`
 - Submit button: `--button-primary-bg`
-- Error states: `--color-error` (#ff7675) on input border + error text below
-- Expiry warning: `--color-warning` (#e17055) in amber alert box
+- Error states: `--color-error` (#e87c7c) on input border + error text below
+- Expiry warning: `--color-warning` (#e8a87c) in amber alert box
 - URL reveal: `--color-success` border + green accent on "Go to My Pet" CTA
 
 **Typography**:
@@ -1292,7 +1308,7 @@ This section provides visual design specifications for all P0 screens. Constants
 - Card backgrounds: `--card-bg` with `--card-border`
 - Train button: `--button-primary-bg`; disabled grey with "MAX" badge when stat = `PET_STAT_MAX = 100`
 - Stat change indicator: `--color-brand-accent` text (gold "+3 Speed")
-- Streak flame: `--color-warning` (#e17055) for the flame icon
+- Streak flame: `--color-warning` (#e8a87c) for the flame icon
 
 **Key numbers** (from CONSTANTS):
 - `TRAINING_ACTIONS_PER_DAY = 3` — shown as "X actions remaining today"
@@ -1317,7 +1333,7 @@ This section provides visual design specifications for all P0 screens. Constants
 - "Enter Arena" button: `--button-primary-bg`
 - Rate limit banner: `--color-warning` background, `--color-text-primary` text
 - Active food buff indicators: `--color-brand-secondary` (teal) label
-- AI opponent label: `--color-info` (#74b9ff) text — clearly differentiated
+- AI opponent label: `--color-info` (#7cb4e8) text — clearly differentiated
 
 **Key numbers** (from CONSTANTS):
 - `ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10` — shown in countdown when exhausted
