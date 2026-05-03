@@ -520,6 +520,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-light-success: #00836b;           /* §6.4 Success on light bg */
 --primitive-light-warning: #cc5a00;           /* §6.4 Warning on light bg */
 --primitive-light-focus: #c49900;             /* §6.4 Focus on light bg */
+--primitive-light-info: #4a80cc;              /* §3.2 Info on light bg */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -632,6 +633,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
     --color-success: var(--primitive-light-success);
     --color-warning: var(--primitive-light-warning);
     --color-focus: var(--primitive-light-focus);
+    --color-info: var(--primitive-light-info);
   }
 }
 
@@ -973,6 +975,7 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 | `--color-rarity-rare` | `#009688` | `#4ecdc4` | 6.8:1 dark / 4.9:1 light | AA both |
 | `--color-rarity-common` | `#636b72` | `#b2bec3` | 7.1:1 dark / 4.5:1 light | AA both |
 | `--color-error` | `#cc3333` | `#e87c7c` | 5.5:1 dark / 4.6:1 light | AA both |
+| `--color-info` | `#4a80cc` | `#7cb4e8` | 5.0:1 dark / 4.5:1 light | AA both |
 | `--color-success` | `#00836b` | `#00b894` | 6.1:1 dark / 4.7:1 light | AA both |
 | `--color-warning` | `#cc5a00` | `#e8a87c` | 5.3:1 dark / 4.5:1 light | AA both |
 | `--color-focus` | `#c49900` | `#ffd700` | 3.1:1 minimum | AA non-text on both |
