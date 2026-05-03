@@ -78,9 +78,10 @@ graph TB
     %% API Servers → Data Layer
     GameAPI -->|reads + writes| PGPrimary
     GameAPI -->|reads| PGReplica
-    GameAPI -->|rate limits, leaderboard,\nmatchmaking, token BL| RLCounters
+    GameAPI -->|rate limits| RLCounters
     GameAPI -->|ZADD / ZRANGEBYSCORE| Leaderboard
     GameAPI -->|ZADD / ZRANGEBYSCORE| Matchmaking
+    GameAPI -->|token blacklist check| TokenBL
     GameAPI -->|GET config| ConfigCache
 
     AdminAPI -->|reads + writes| PGPrimary

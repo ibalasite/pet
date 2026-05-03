@@ -55,6 +55,8 @@ sequenceDiagram
         else Pet unclaimed
             PG-->>API: owner_token_hash IS NULL
             API->>API: code = crypto.randomInt(100000, 1000000)<br/>code_hash = SHA-256(code)<br/>expires_at = NOW() + 15 min (claim_code_expiry_minutes = 15)
+            API->>PG: INSERT INTO claim_identities (email_hash, email_encrypted)<br/>ON CONFLICT (email_hash) DO NOTHING<br/>RETURNING id (or SELECT id WHERE email_hash = ?)
+            PG-->>API: identityId
             API->>PG: INSERT INTO claim_codes<br/>(pet_id, email_hash, code_hash, expires_at)
             PG-->>API: claimId
             API->>Email: sendClaimCode(to: email, code, petName)

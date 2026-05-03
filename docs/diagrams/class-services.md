@@ -139,9 +139,8 @@ classDiagram
     %% Dependencies
     ClaimService --> PetService : resolves pet ownership
     ClaimService --> EmailService : sends OTP emails
-    ArenaService --> PetService : loads pet stats
+    ArenaService --> PetService : loads pet stats + active food buffs
     ArenaService --> LeaderboardService : updates scores after match
-    ArenaService --> TrainingService : reads active food buffs (stat_delta)
     AdminService --> AuditService : writes every mutation
     AdminService --> LeaderboardService : removes banned pet entries
     ConfigService --> AuditService : logs config changes
