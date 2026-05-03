@@ -6,7 +6,7 @@ upstream-docs:
   - docs/EDD.md    # Tech stack: Web / Phaser.js / React, asset pipeline
   - docs/FRONTEND.md  # Asset usage, loading strategy, directory structure
   - docs/CLIENT_IMPL.md  # Asset budgets, naming conventions, loading constraints
-version: "1.0.6"
+version: "1.0.7"
 last-updated: "2026-05-04"
 ---
 
@@ -34,6 +34,7 @@ last-updated: "2026-05-04"
 | 1.0.4 | 2026-05-04 | Review Agent R9 | Fix §1.2 section header wrong citation (VDD §4→§8.3 — VDD §4 is "Character & World Design" with no food item specs; VDD §8.3 is "My Pet Page" which includes food inventory); add missing §4 checklist entry for §1.2 food item sprites coverage |
 | 1.0.5 | 2026-05-04 | Review Agent R10 | Fix RES-ANIM-001 description inaccurate wording: "recommended maximum" → "8 frames recommended" to match VDD §4.2 which sets 4 as minimum and 8 as recommended (not as a maximum cap) |
 | 1.0.6 | 2026-05-04 | Review Agent R11 | Add RES-IMG-046 og-default-1200x630.png and RES-IMG-047 og-battle-result-1200x630.png (missing PNG last-resort fallbacks for OG social card backgrounds — VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort); renumber RES-IMG-046/047→048/049 (bg-landing-hero, bg-leaderboard); update §4 checklist OG entry to include PNG last resort; update §5 license table |
+| 1.0.7 | 2026-05-04 | Review Agent R12 | Add RES-IMG-050–061 — PNG fallback exports for all 12 SVG game UI icons (VDD §7.1 requires PNG-24 fallbacks for all SVG icons; §1.4 preamble acknowledged the requirement but no rows existed); update §1.4 preamble, §4 checklist, §5 license table |
 
 ---
 
@@ -100,7 +101,7 @@ last-updated: "2026-05-04"
 
 ### §1.4 UI Icons (VDD §7.2)
 
-> Game UI icons: 24×24px custom pixel-art action icons + 16×16px rarity badge icons. SVG primary with `viewBox="0 0 24 24"` or `viewBox="0 0 16 16"` (VDD §7.2). Colors via `currentColor`. PNG fallback at corresponding pixel size. 12 custom pixel-art icons total: 8 at 24×24px for game interactions (RES-IMG-020–021, RES-IMG-026–031) and 4 at 16×16px for rarity badges (RES-IMG-022–025). Non-game navigation icons use Phosphor Icons v2.1 (Bold) — not listed here as they are an npm dependency, not a production asset.
+> Game UI icons: 24×24px custom pixel-art action icons + 16×16px rarity badge icons. SVG primary with `viewBox="0 0 24 24"` or `viewBox="0 0 16 16"` (VDD §7.2). Colors via `currentColor`. PNG fallback at corresponding pixel size per VDD §7.1 (RES-IMG-050–061). 12 custom pixel-art icons total: 8 at 24×24px for game interactions (RES-IMG-020–021, RES-IMG-026–031) and 4 at 16×16px for rarity badges (RES-IMG-022–025). Corresponding PNG fallbacks: RES-IMG-050–057 at 24×24px and RES-IMG-058–061 at 16×16px. Non-game navigation icons use Phosphor Icons v2.1 (Bold) — not listed here as they are an npm dependency, not a production asset.
 
 | ID | filename | type | source_tool | prompt | dimensions | file_size_budget | status | output_path | description |
 |----|----------|------|-------------|--------|-----------|-----------------|--------|-------------|-------------|
@@ -116,6 +117,18 @@ last-updated: "2026-05-04"
 | RES-IMG-029 | icon-food-24.svg | image | Aseprite / hand-crafted SVG | pixel art food bowl or apple icon, food inventory action, 24x24px viewBox, grid-snapped paths, monochrome currentColor, clear readable silhouette | 24×24px (SVG) | ≤ 2 KB | needed | public/assets/icons/icon-food-24.svg | Food inventory icon — used in FoodInventory component header and NavBar. |
 | RES-IMG-030 | icon-share-24.svg | image | Aseprite / hand-crafted SVG | pixel art share or link arrow icon, social share action, 24x24px viewBox, grid-snapped paths, monochrome currentColor, bold pixel art style share symbol | 24×24px (SVG) | ≤ 2 KB | needed | public/assets/icons/icon-share-24.svg | Share battle / pet page icon — used in ShareBattleButton and BattleRecordsPage. |
 | RES-IMG-031 | icon-copy-24.svg | image | Aseprite / hand-crafted SVG | pixel art clipboard copy icon, 24x24px viewBox, grid-snapped paths, monochrome currentColor, two overlapping rectangles pixel style | 24×24px (SVG) | ≤ 2 KB | needed | public/assets/icons/icon-copy-24.svg | Copy to clipboard icon — used in URLReveal (claim pet URL copy button). |
+| RES-IMG-050 | icon-arena-race-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-arena-race-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-arena-race-24.png | PNG fallback for icon-arena-race-24.svg (VDD §7.1 — for browsers without reliable SVG support). |
+| RES-IMG-051 | icon-arena-sumo-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-arena-sumo-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-arena-sumo-24.png | PNG fallback for icon-arena-sumo-24.svg (VDD §7.1). Behind FF_ARENA_SUMO feature flag. |
+| RES-IMG-052 | icon-training-run-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-training-run-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-training-run-24.png | PNG fallback for icon-training-run-24.svg (VDD §7.1). |
+| RES-IMG-053 | icon-training-strength-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-training-strength-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-training-strength-24.png | PNG fallback for icon-training-strength-24.svg (VDD §7.1). |
+| RES-IMG-054 | icon-training-stamina-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-training-stamina-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-training-stamina-24.png | PNG fallback for icon-training-stamina-24.svg (VDD §7.1). |
+| RES-IMG-055 | icon-food-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-food-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-food-24.png | PNG fallback for icon-food-24.svg (VDD §7.1). |
+| RES-IMG-056 | icon-share-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-share-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-share-24.png | PNG fallback for icon-share-24.svg (VDD §7.1). |
+| RES-IMG-057 | icon-copy-24.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-copy-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback | 24×24px | ≤ 2 KB | needed | public/assets/icons/icon-copy-24.png | PNG fallback for icon-copy-24.svg (VDD §7.1). |
+| RES-IMG-058 | icon-rarity-common-16.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-rarity-common-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#b2bec3` (Common rarity) for fallback | 16×16px | ≤ 1 KB | needed | public/assets/icons/icon-rarity-common-16.png | PNG fallback for icon-rarity-common-16.svg (VDD §7.1). Color baked to `--color-rarity-common` (#b2bec3). |
+| RES-IMG-059 | icon-rarity-rare-16.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-rarity-rare-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#4ecdc4` (Rare rarity) for fallback | 16×16px | ≤ 1 KB | needed | public/assets/icons/icon-rarity-rare-16.png | PNG fallback for icon-rarity-rare-16.svg (VDD §7.1). Color baked to `--color-rarity-rare` (#4ecdc4). |
+| RES-IMG-060 | icon-rarity-epic-16.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-rarity-epic-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#a29bfe` (Epic rarity) for fallback | 16×16px | ≤ 1 KB | needed | public/assets/icons/icon-rarity-epic-16.png | PNG fallback for icon-rarity-epic-16.svg (VDD §7.1). Color baked to `--color-rarity-epic` (#a29bfe). |
+| RES-IMG-061 | icon-rarity-legendary-16.png | image | Aseprite / hand-crafted PNG export | PNG-24 rasterized export of icon-rarity-legendary-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#fdcb6e` (Legendary rarity) for fallback | 16×16px | ≤ 1 KB | needed | public/assets/icons/icon-rarity-legendary-16.png | PNG fallback for icon-rarity-legendary-16.svg (VDD §7.1). Color baked to `--color-rarity-legendary` (#fdcb6e). |
 
 ### §1.5 Logo & Brand Assets (VDD §3.4 / §7.4)
 
@@ -194,6 +207,7 @@ last-updated: "2026-05-04"
 - [x] §1 VDD Visual Assets: VDD.md §4 neglected state sprite overlay covered (RES-IMG-006)
 - [x] §1 VDD Visual Assets: VDD.md §8.3 food item sprites covered (RES-IMG-009 to RES-IMG-012) — 4 food buff icon types (speed, strength, stamina, all-stats) at 32×32px per FoodInventory component
 - [x] §1 VDD Visual Assets: VDD.md §7.2 UI icon set covered (RES-IMG-020 to RES-IMG-031) — 12 custom pixel-art icons: 8 at 24×24px SVG (game interactions) + 4 at 16×16px SVG (rarity badges)
+- [x] §1 VDD Visual Assets: VDD.md §7.1 PNG fallback exports covered for all 12 SVG game UI icons (RES-IMG-050 to RES-IMG-061) — 8 at 24×24px PNG (RES-IMG-050–057) + 4 at 16×16px PNG (RES-IMG-058–061)
 - [x] §1 VDD Visual Assets: VDD.md §7.4 logo/brand assets covered (RES-IMG-032 to RES-IMG-041) — logo primary/inverted, favicon, PWA icons
 - [x] §1 VDD Visual Assets: VDD.md §8.1 landing page hero background covered (RES-IMG-048)
 - [x] §1 VDD Visual Assets: VDD.md §8.7 leaderboard background covered (RES-IMG-049)
@@ -207,7 +221,7 @@ last-updated: "2026-05-04"
 - [x] All `prompt` fields are filled with ready-to-use English prompts
 - [x] All `output_path` values are consistent with CLIENT_IMPL.md §4.1 directory structure (`public/assets/`, `apps/player/src/assets/` conventions)
 - [x] No bare `{{...}}` placeholders remaining (excluding template example rows)
-- [x] No duplicate IDs within same prefix (RES-IMG-001 through RES-IMG-049, RES-ANIM-001 through RES-ANIM-006, RES-SFX-001 through RES-SFX-005, RES-BGM-001)
+- [x] No duplicate IDs within same prefix (RES-IMG-001 through RES-IMG-061, RES-ANIM-001 through RES-ANIM-006, RES-SFX-001 through RES-SFX-005, RES-BGM-001)
 - [x] §5 License Management: all §1/§2/§3 asset IDs have corresponding license records
 
 ---
@@ -268,6 +282,18 @@ last-updated: "2026-05-04"
 | RES-IMG-047 | og-battle-result-1200x630.png | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.6 Battle result OG card PNG last-resort fallback — Midjourney v6 (same source as RES-IMG-044, re-exported) |
 | RES-IMG-048 | bg-landing-hero.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.7 Landing hero background — Midjourney v6 |
 | RES-IMG-049 | bg-leaderboard.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.7 Leaderboard background — Midjourney v6 |
+| RES-IMG-050 | icon-arena-race-24.png | internal | N/A | §1.4 Race icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-051 | icon-arena-sumo-24.png | internal | N/A | §1.4 Sumo icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-052 | icon-training-run-24.png | internal | N/A | §1.4 Run training icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-053 | icon-training-strength-24.png | internal | N/A | §1.4 Strength training icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-054 | icon-training-stamina-24.png | internal | N/A | §1.4 Stamina training icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-055 | icon-food-24.png | internal | N/A | §1.4 Food icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-056 | icon-share-24.png | internal | N/A | §1.4 Share icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-057 | icon-copy-24.png | internal | N/A | §1.4 Copy icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-058 | icon-rarity-common-16.png | internal | N/A | §1.4 Common rarity icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-059 | icon-rarity-rare-16.png | internal | N/A | §1.4 Rare rarity icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-060 | icon-rarity-epic-16.png | internal | N/A | §1.4 Epic rarity icon PNG fallback — exported from SVG (VDD §7.1) |
+| RES-IMG-061 | icon-rarity-legendary-16.png | internal | N/A | §1.4 Legendary rarity icon PNG fallback — exported from SVG (VDD §7.1) |
 | RES-ANIM-001 | pet-idle-sheet-ref-256x32.png | internal | N/A | §2 Idle animation reference sheet — hand-crafted in Aseprite |
 | RES-ANIM-002 | pet-bounce-sheet-ref-64x32.png | internal | N/A | §2 Bounce animation reference sheet — hand-crafted in Aseprite |
 | RES-ANIM-003 | pet-effort-sheet-ref-96x32.png | internal | N/A | §2 Training effort animation reference sheet — hand-crafted in Aseprite |
