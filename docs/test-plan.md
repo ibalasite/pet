@@ -24,6 +24,7 @@
 10. [Accessibility Tests](#10-accessibility-tests)
 11. [BDD Scenario Coverage](#11-bdd-scenario-coverage)
 12. [CI/CD Integration](#12-cicd-integration)
+13. [Test Cases](#13-test-cases)
 
 ---
 
@@ -754,6 +755,13 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | Then | Feeding animation plays; item removed from inventory; buff visible on stats panel |
 | Linked AC | AC-006-1, AC-006-3 |
 
+| TC-E2E-025 | Food inventory empty — get more food prompt |
+|---|---|
+| Given | A pet owner whose food inventory is empty |
+| When | Owner views the food inventory section |
+| Then | "Get more food" prompt is visible with two earning mechanisms highlighted: (a) arena battle food drop on battle completion, (b) food reward on (training_actions_per_day = 3)-session training streak; no error or broken state shown |
+| Linked AC | AC-006-4 |
+
 ### 7.5 Arena E2E Tests (US-ARENA-001, US-ARENA-002)
 
 **File**: `packages/player-app/tests/e2e/arena.spec.ts`
@@ -779,7 +787,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | Then | Message "Arena rate limit reached. You can enter again in X minutes" displayed; Enter Arena button is disabled; API returns HTTP 429 with `Retry-After` header |
 | Linked AC | AC-007-8 |
 
-### 7.6 Leaderboard and Battle Records E2E Tests (US-BOARD-001, US-RECORD-001)
+### 7.6 Leaderboard, Battle Records, and Rarity E2E Tests (US-BOARD-001, US-RECORD-001, US-RARITY-001)
 
 **File**: `packages/player-app/tests/e2e/leaderboard.spec.ts`
 
@@ -797,11 +805,25 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | Then | Their pet's rank (250) is highlighted in an OwnerRankBanner below the top 100 table |
 | Linked AC | AC-009-3 |
 
-| TC-E2E-017 | Battle records page — public access and structure |
+| TC-E2E-026 | Rarity badge shows occurrence rate |
 |---|---|
-| Given | A pet with 15 battle records |
+| Given | A pet page for a Legendary pet |
+| When | The page loads |
+| Then | Rarity badge text reads "Legendary — (rarity_legendary_percent = 3)% of all pets" |
+| Linked AC | AC-011-2 |
+
+| TC-E2E-027 | Leaderboard filterable by rarity tier |
+|---|---|
+| Given | The leaderboard page with pets of all four rarity tiers present |
+| When | User selects the "Epic" rarity filter |
+| Then | Only Epic-rarity pets are shown in the filtered results; pets of other rarities are hidden |
+| Linked AC | AC-011-3 |
+
+| TC-E2E-017 | Battle records page — public access and display cap |
+|---|---|
+| Given | A pet with 25 battle records (exceeds (arena_battle_records_display_count = 20) cap) |
 | When | Guest navigates to `/pet/:petId/records` |
-| Then | 15 battles displayed; each shows date, mode (Race/Sumo), opponent name, Win/Loss outcome; no auth prompt |
+| Then | Exactly (arena_battle_records_display_count = 20) battles displayed (oldest omitted); each shows date, mode (Race/Sumo), opponent name, Win/Loss outcome; no auth prompt |
 | Linked AC | AC-010-1, AC-010-2, AC-010-4 |
 
 | TC-E2E-018 | Battle records page — fewer than 20 battles prompt |
@@ -817,6 +839,13 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | When | Page attempts to load |
 | Then | HTTP 404 with message "This pet could not be found" and home page link |
 | Linked AC | AC-010-5 |
+
+| TC-E2E-024 | Battle records page Open Graph meta tags |
+|---|---|
+| Given | A pet with a completed battle record |
+| When | The battle records page HTML `<head>` is inspected |
+| Then | Open Graph meta tags are present: `og:title` = pet name, `og:description` contains rarity and win count, `og:image` = pet sprite URL |
+| Linked AC | AC-010-3 |
 
 ### 7.7 Admin Portal E2E Tests (US-ADMIN-001 through US-ADMIN-006)
 
@@ -1031,7 +1060,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 | TC-SEC-010 | Arena rate limit not incremented on matchmaking timeout |
 |---|---|
-| Given | A pet enters arena and times out (no opponent in 30 seconds), `acceptAI = false` |
+| Given | A pet enters arena and times out (no opponent in (arena_matchmaking_timeout_seconds = 30) seconds), `acceptAI = false` |
 | When | HTTP 408 `MATCHMAKING_TIMEOUT` is returned |
 | Then | `rl:arena:{pet_id}` counter is NOT incremented |
 | Linked AC | ARCH §4.2 arena battle flow |
@@ -1159,7 +1188,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 | TC-A11Y-011 | Expiry warning at 2 minutes remaining |
 |---|---|
-| Given | A claim code created at T=0 expires at T+15 minutes |
+| Given | A claim code created at T=0 expires at T+(claim_code_expiry_minutes = 15) minutes |
 | When | The time remaining reaches (a11y_claim_code_warning_before_expiry_minutes = 2) minutes |
 | Then | An `aria-live="assertive"` warning region becomes visible: "Your claim code expires in 2 minutes. Enter it now or request a new one." |
 | Linked NFR | ARCH §2.1 accessibility claim warning |
@@ -1194,19 +1223,19 @@ Scenario: Guest successfully claims a pet via email OTP
   Given a guest has viewed a randomly generated pet
   And the pet is not yet claimed
   When the guest submits a valid email and checks the age confirmation
-  And the guest enters the correct 6-digit OTP within 15 minutes
+  And the guest enters the correct 6-digit OTP within (claim_code_expiry_minutes = 15) minutes
   Then the pet's owner_token_hash is stored in the database
-  And a unique pet URL is returned containing a 32-byte token
+  And a unique pet URL is returned containing a (pet_access_token_min_bytes = 32)-byte token
   And the claim code is marked as used and cannot be reused
 
-Scenario: Claim code expires after 15 minutes
-  Given a claim code was created more than 15 minutes ago
+Scenario: Claim code expires after (claim_code_expiry_minutes = 15) minutes
+  Given a claim code was created more than (claim_code_expiry_minutes = 15) minutes ago
   When the guest submits that code
   Then the system returns HTTP 400 with error code CODE_EXPIRED
   And a new claim email can be requested
 
-Scenario: Claim rate limit blocks after 5 attempts per hour
-  Given the email address has been used for 5 claim attempts in the past hour
+Scenario: Claim rate limit blocks after (auth_rate_limit_claim_attempts_per_hour = 5) attempts per hour
+  Given the email address has been used for (auth_rate_limit_claim_attempts_per_hour = 5) claim attempts in the past hour
   When a 6th claim attempt is submitted for the same email
   Then HTTP 429 is returned with a Retry-After header
   And the counter is not incremented further
@@ -1218,21 +1247,21 @@ Scenario: Claim rate limit blocks after 5 attempts per hour
 Scenario: Two pets match and complete a race battle
   Given two claimed pets both enter Race arena mode
   And both pets are in the matchmaking queue
-  When a match is found within 30 seconds
+  When a match is found within (arena_matchmaking_timeout_seconds = 30) seconds
   Then the battle outcome is calculated deterministically from speed stats and a seeded modifier
   And the result is stored in arena_matches for both pets
-  And the leaderboard sorted set is updated within 30 seconds
+  And the leaderboard sorted set is updated within (leaderboard_update_lag_max_seconds = 30) seconds
 
 Scenario: AI fallback when no opponent available
   Given a pet enters Race arena mode
-  And no real opponent joins within 30 seconds
+  And no real opponent joins within (arena_matchmaking_timeout_seconds = 30) seconds
   When the player accepts the AI opponent offer
   Then a battle result is recorded with is_ai_opponent = true
   And the player pet's arena score is updated in the leaderboard
   And no leaderboard entry is created for the AI synthetic pet
 
 Scenario: Arena rate limit prevents excessive battles
-  Given a pet has completed 10 battles in the current hour
+  Given a pet has completed (arena_rate_limit_battles_per_hour_default = 10) battles in the current hour
   When the pet owner attempts to enter another arena battle
   Then HTTP 429 is returned with a Retry-After header
   And the arena rate limit counter is not incremented on matchmaking timeout
@@ -1245,7 +1274,7 @@ Scenario: Player requests email erasure
   Given a pet owner with a linked claim identity
   When the owner submits a GDPR erasure request
   Then HTTP 202 is returned with a job ID
-  And within 24 hours the email_encrypted column is nulled
+  And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column is nulled
   And the email_hash is retained for anti-re-registration
   And the pet is removed from the public leaderboard
 
@@ -1266,14 +1295,14 @@ Scenario: Leaderboard falls back to PostgreSQL when Redis unavailable
   When a player requests the leaderboard
   Then HTTP 200 is returned with degraded: true
   And data is sourced from the PostgreSQL snapshot
-  And the response time is within 500ms
+  And the response time is within (health_check_response_time_ms = 500) ms
 ```
 
 **Feature: Admin Suspicious Battle Detection** (US-ADMIN-005)
 
 ```gherkin
 Scenario: Pet auto-flagged after exceeding battle threshold
-  Given a pet completes more than 50 battles within a 60-minute rolling window
+  Given a pet completes more than (bot_detection_battles_threshold = 50) battles within a (bot_detection_window_minutes = 60)-minute rolling window
   When the bot detection check runs
   Then the pet is marked SUSPICIOUS in the admin suspicious activity feed
   And a suspicious_pet_flagged analytics event is emitted
@@ -1281,8 +1310,8 @@ Scenario: Pet auto-flagged after exceeding battle threshold
 Scenario: Moderator reviews and bans suspicious pet
   Given a SUSPICIOUS-flagged pet in the admin portal
   When the moderator selects the pet and submits a ban with reason text
-  Then the pet is removed from the leaderboard within 5 minutes
-  And the ban reason is persisted in the audit log (max 500 characters)
+  Then the pet is removed from the leaderboard within (leaderboard_ban_reflection_time_minutes = 5) minutes
+  And the ban reason is persisted in the audit log (max (admin_moderation_reason_max_chars = 500) characters)
   And the pet cannot enter future arena matches
 ```
 
@@ -1294,14 +1323,14 @@ Scenario: Moderator reviews and bans suspicious pet
 Scenario: Guest sees animated pet on first visit
   Given a new guest browser session
   When the guest navigates to the root URL
-  Then a pixel pet canvas is visible within 2 seconds
+  Then a pixel pet canvas is visible within (pet_render_on_load_seconds = 2) seconds
   And no login prompt is shown
   And the pet plays an idle animation
 
-Scenario: Pet interaction animates within 200ms
+Scenario: Pet interaction animates within (pet_interaction_response_ms = 200) ms
   Given a loaded pet canvas
   When the guest clicks or taps the pet canvas
-  Then an interaction animation begins within 200 milliseconds
+  Then an interaction animation begins within (pet_interaction_response_ms = 200) milliseconds
   And the interaction is accessible via keyboard (Enter key on focused canvas)
 ```
 
@@ -1313,11 +1342,11 @@ Scenario: Owner trains pet and sees stat change indicator
   And the pet has at least one training action available today
   When the owner clicks "Speed Training"
   Then a stat change indicator "+X Speed" appears on screen
-  And the indicator disappears after 2 seconds
+  And the indicator disappears after (training_stat_display_duration_seconds = 2) seconds
   And the updated stat is reflected in the stats panel
 
-Scenario: Training disabled after 3 daily actions
-  Given a pet owner has completed 3 training actions today
+Scenario: Training disabled after (training_actions_per_day = 3) daily actions
+  Given a pet owner has completed (training_actions_per_day = 3) training actions today
   When the owner views the training page
   Then all training buttons are disabled
   And a countdown timer shows time until UTC midnight reset
@@ -1455,6 +1484,167 @@ Coverage exemptions (excluded from threshold calculation):
 - Auto-generated files (Vite build outputs, type stubs)
 - `packages/api/src/migrations/` (SQL migration files — covered by integration tests, not unit tests)
 - Phaser.js `PetCanvasEngine` class internals (covered by E2E and visual regression tests)
+
+---
+
+## 13. Test Cases
+
+This section provides a consolidated index of all test case identifiers defined in this plan, organized by test type. Full test case details are in their respective sections above.
+
+### 13.1 Unit Test Cases (TC-UNIT-*)
+
+| ID | Title | Section |
+|---|---|---|
+| TC-UNIT-001 | Combination space exceeds minimum | §5.2 |
+| TC-UNIT-002 | Deterministic generation from seed | §5.2 |
+| TC-UNIT-003 | Rarity distribution matches probability weights | §5.2 |
+| TC-UNIT-004 | Default stat values | §5.2 |
+| TC-UNIT-005 | OTP code expiry enforcement | §5.3 |
+| TC-UNIT-006 | OTP code one-time-use enforcement | §5.3 |
+| TC-UNIT-007 | Pet access token minimum entropy | §5.3 |
+| TC-UNIT-008 | Token stored as SHA-256 hash only | §5.3 |
+| TC-UNIT-009 | Stat increment range | §5.4 |
+| TC-UNIT-010 | Stat cap enforcement — training blocked at maximum | §5.4 |
+| TC-UNIT-011 | Stat cap enforcement — food feed blocked at maximum | §5.4 |
+| TC-UNIT-012 | Neglected state threshold | §5.4 |
+| TC-UNIT-013 | Daily training action limit | §5.4 |
+| TC-UNIT-014 | Race outcome determinism with seed | §5.5 |
+| TC-UNIT-015 | Random modifier bounds | §5.5 |
+| TC-UNIT-016 | Sumo mode uses strength stat | §5.5 |
+| TC-UNIT-017 | Arena score formula | §5.5 |
+| TC-UNIT-018 | Level formula derivation | §5.6 |
+| TC-UNIT-019 | Level cap enforcement | §5.6 |
+| TC-UNIT-020 | Email enumeration prevention | §5.7 |
+| TC-UNIT-021 | Recovery endpoint anti-enumeration | §5.7 |
+| TC-UNIT-022 | Error sanitization in production mode | §5.7 |
+
+### 13.2 Integration Test Cases (TC-INT-*)
+
+| ID | Title | Section |
+|---|---|---|
+| TC-INT-001 | Full claim flow persists ownership | §6.1 |
+| TC-INT-002 | Claim rate limit enforced via Redis | §6.1 |
+| TC-INT-003 | Seed collision retry mechanism | §6.1 |
+| TC-INT-004 | Seed collision max retries exceeded | §6.1 |
+| TC-INT-005 | OTP code entry fail-closed on Redis unavailability | §6.1 |
+| TC-INT-006 | Training stat persisted across reads | §6.2 |
+| TC-INT-007 | Food buff active during arena combat | §6.2 |
+| TC-INT-008 | Permanent food buff increments base stat | §6.2 |
+| TC-INT-009 | Battle record saved for both pets | §6.3 |
+| TC-INT-010 | Leaderboard updated within update lag | §6.3 |
+| TC-INT-011 | Arena rate limit enforced per pet per hour | §6.3 |
+| TC-INT-012 | AI opponent fallback after matchmaking timeout | §6.3 |
+| TC-INT-013 | Leaderboard fallback to PostgreSQL snapshot when Redis unavailable | §6.3 |
+| TC-INT-014 | Erasure request nulls email within internal SLA | §6.4 |
+| TC-INT-015 | Erased pet removed from Redis leaderboard | §6.4 |
+| TC-INT-016 | Email hash retained for anti-re-registration | §6.4 |
+| TC-INT-017 | Admin pet ban removes from leaderboard within SLA | §6.5 |
+| TC-INT-018 | Config change propagates within cache TTL | §6.5 |
+| TC-INT-019 | Audit log written for every admin mutation | §6.5 |
+| TC-INT-020 | Suspicious pet auto-flagged at threshold | §6.5 |
+| TC-INT-021 | Economy config applied within cache TTL | §6.5 |
+| TC-INT-022 | SendGrid failover after consecutive failures | §6.6 |
+| TC-INT-023 | Claim email contains 6-digit code, no URL | §6.6 |
+
+### 13.3 End-to-End Test Cases (TC-E2E-*)
+
+| ID | Title | Section |
+|---|---|---|
+| TC-E2E-001 | Pet renders within SLO on page load | §7.2 |
+| TC-E2E-002 | Pet interaction response time | §7.2 |
+| TC-E2E-003 | Page refresh generates a different pet | §7.2 |
+| TC-E2E-004 | Complete claim flow — happy path | §7.3 |
+| TC-E2E-005 | COPPA age confirmation prevents submit | §7.3 |
+| TC-E2E-006 | Expired claim code shows correct error | §7.3 |
+| TC-E2E-007 | Invalid pet URL returns 404 | §7.3 |
+| TC-E2E-008 | Pet URL works cross-device (multi-context test) | §7.3 |
+| TC-E2E-009 | Three training actions per day | §7.4 |
+| TC-E2E-010 | Stat change indicator displays for correct duration | §7.4 |
+| TC-E2E-011 | Food inventory and feed animation | §7.4 |
+| TC-E2E-012 | Arena battle complete cycle | §7.5 |
+| TC-E2E-013 | Share battle result URL generated | §7.5 |
+| TC-E2E-014 | Rate limit UI — countdown and disabled button | §7.5 |
+| TC-E2E-015 | Leaderboard publicly accessible without login | §7.6 |
+| TC-E2E-016 | Owner rank banner visible outside top 100 | §7.6 |
+| TC-E2E-017 | Battle records page — public access and display cap | §7.6 |
+| TC-E2E-018 | Battle records page — fewer than 20 battles prompt | §7.6 |
+| TC-E2E-019 | Battle records page invalid pet ID | §7.6 |
+| TC-E2E-020 | Admin TOTP login flow | §7.7 |
+| TC-E2E-021 | Admin pet search within SLA | §7.7 |
+| TC-E2E-022 | Admin ban + leaderboard removal | §7.7 |
+| TC-E2E-023 | GDPR deletion E2E | §7.7 |
+| TC-E2E-024 | Battle records page Open Graph meta tags | §7.6 |
+| TC-E2E-025 | Food inventory empty — get more food prompt | §7.4 |
+| TC-E2E-026 | Rarity badge shows occurrence rate | §7.6 |
+| TC-E2E-027 | Leaderboard filterable by rarity tier | §7.6 |
+
+### 13.4 Performance Test Cases (TC-PERF-*)
+
+| ID | Title | Section |
+|---|---|---|
+| TC-PERF-001 | P99 read latency under sustained load | §8.1 |
+| TC-PERF-002 | P99 write latency under sustained load | §8.1 |
+| TC-PERF-003 | Peak viral load — 500 RPS | §8.1 |
+| TC-PERF-004 | Matchmaking concurrent entries | §8.1 |
+| TC-PERF-005 | Pet generation batch concurrency | §8.1 |
+| TC-PERF-006 | Core Web Vitals — Landing Page | §8.2 |
+| TC-PERF-007 | JS bundle size within budget | §8.2 |
+| TC-PERF-008 | Pet canvas animation FPS | §8.2 |
+| TC-PERF-009 | Pet render on load within SLO | §8.2 |
+| TC-PERF-010 | Admin pet search with 1M records | §8.3 |
+| TC-PERF-011 | Admin page load SLO | §8.3 |
+| TC-PERF-012 | Audit log search across 12-month window | §8.3 |
+| TC-PERF-013 | PostgreSQL autofailover recovery | §8.4 |
+| TC-PERF-014 | Health check response time | §8.4 |
+
+### 13.5 Security Test Cases (TC-SEC-*)
+
+| ID | Title | Section |
+|---|---|---|
+| TC-SEC-001 | Pet token minimum entropy | §9.1 |
+| TC-SEC-002 | Token revocation via blacklist | §9.1 |
+| TC-SEC-003 | Admin TOTP required — no bypass | §9.1 |
+| TC-SEC-004 | Admin session absolute expiry | §9.1 |
+| TC-SEC-005 | Admin IP allowlist enforcement | §9.1 |
+| TC-SEC-006 | Claim rate limit enforced per email hash | §9.2 |
+| TC-SEC-007 | OTP code entry fail-closed | §9.2 |
+| TC-SEC-008 | Admin login IP rate limit | §9.2 |
+| TC-SEC-009 | Admin account lockout | §9.2 |
+| TC-SEC-010 | Arena rate limit not incremented on matchmaking timeout | §9.2 |
+| TC-SEC-011 | Email never logged in plaintext | §9.3 |
+| TC-SEC-012 | Raw IP never written to database | §9.3 |
+| TC-SEC-013 | SQL injection prevention — parameterized queries | §9.3 |
+| TC-SEC-014 | Security headers present on all responses | §9.3 |
+| TC-SEC-015 | Pet tokens absent from all log output | §9.3 |
+
+### 13.6 Accessibility Test Cases (TC-A11Y-*)
+
+| ID | Title | Section |
+|---|---|---|
+| TC-A11Y-001 | axe-core: no violations on landing page | §10.1 |
+| TC-A11Y-002 | axe-core: no violations on claim flow | §10.1 |
+| TC-A11Y-003 | Focus indicator contrast ratio | §10.1 |
+| TC-A11Y-004 | Normal text contrast ratio | §10.1 |
+| TC-A11Y-005 | Alt text on pixel pet sprites | §10.1 |
+| TC-A11Y-006 | Full claim flow keyboard-only navigation | §10.2 |
+| TC-A11Y-007 | Arena entry keyboard operable | §10.2 |
+| TC-A11Y-008 | Leaderboard keyboard navigation | §10.2 |
+| TC-A11Y-009 | Prefers-reduced-motion suppresses idle animation | §10.3 |
+| TC-A11Y-010 | Leaderboard transitions suppressed with reduced motion | §10.3 |
+| TC-A11Y-011 | Expiry warning at 2 minutes remaining | §10.4 |
+
+### 13.7 Visual Regression Test Cases (TC-VR-*)
+
+| ID | Title | Section |
+|---|---|---|
+| TC-VR-001 | Landing page — all 4 breakpoints | §10.5 |
+| TC-VR-002 | Claim flow 3 steps — all 4 breakpoints | §10.5 |
+| TC-VR-003 | Pet page with active food buffs — all 4 breakpoints | §10.5 |
+| TC-VR-004 | Arena page mode selector — all 4 breakpoints | §10.5 |
+| TC-VR-005 | Leaderboard top 100 table — all 4 breakpoints | §10.5 |
+| TC-VR-006 | Battle records page — all 4 breakpoints | §10.5 |
+| TC-VR-007 | Legendary pet with animated border effect — 1024px, 1440px | §10.5 |
+| TC-VR-008 | Rarity badge variants (Common / Rare / Epic / Legendary) — 1024px | §10.5 |
 
 ---
 
