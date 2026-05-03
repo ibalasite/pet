@@ -11,7 +11,7 @@
 |-------|---------|
 | **DOC-ID** | ADMIN_IMPL-PIXEL-PET-ARENA-20260503 |
 | **Project Name** | pixel-pet-arena |
-| **Admin Tech Stack** | Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5 (FRONTEND.md §3.7) |
+| **Admin Tech Stack** | Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5 (FRONTEND.md §3) |
 | **Document Version** | v1.0 |
 | **Status** | DRAFT |
 | **Author** | AI Generated (gendoc ADMIN_IMPL) |
@@ -427,7 +427,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 - IP-level pre-auth rate limit: 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10; admin_login_ip_rate_limit_window_seconds = 900)
 - `TOTP_SETUP_REQUIRED` response → extract `error.details.setupToken`, navigate to `/admin/totp/setup`
 
-**APIs required**: `POST /admin/api/auth/login`, `POST /admin/api/auth/totp/setup`
+**APIs required**: `POST /admin/api/auth/login`
 
 ### §7.2 Dashboard (`/admin/dashboard`)
 
@@ -557,7 +557,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 
 **Purpose**: Monitor SendGrid delivery health
 
-**Displayed info**: Emails Sent (24h), Delivery Success Rate (target ≥ 98%; sendgrid_delivery_rate_assumption_percent = 98), Bounce Rate, Spam Complaint Rate (target < 0.1%; spam_complaint_rate_max_percent = 0.1), Failover Active (boolean)
+**Displayed info**: Emails Sent (24h), Delivery Success Rate (target ≥ 98%; claim_email_delivery_rate_target_percent = 98), Bounce Rate, Spam Complaint Rate (target < 0.1%; spam_complaint_rate_max_percent = 0.1), Failover Active (boolean)
 
 **Required API**: `GET /admin/api/email/monitor`
 
@@ -1481,7 +1481,7 @@ All CUD operations write to `admin_audit_log`:
 | 4 | §5.2 Permission Guard: `hasPermission()` (role hierarchy) + route guard + button-level permission examples | ✅ |
 | 5 | §7 Page specs: Login / Dashboard / Pet / Battle / Suspicious / Leaderboard / Analytics / Email / Config (Runtime/Economy/Flags) / GDPR / Roles / Audit — all have column and action descriptions | ✅ |
 | 6 | §8.1 Axios config: baseURL + request interceptor (CSRF token injection) + response interceptor (401/403 handling) | ✅ |
-| 7 | §8.4 `/admin/api/*` endpoint mapping complete (31 endpoints, covering API.md §6.1–§6.9) | ✅ |
+| 7 | §8.4 `/admin/api/*` endpoint mapping complete (32 endpoints, covering API.md §6.1–§6.9) | ✅ |
 | 8 | §9 Three Pinia stores (authStore / permissionStore / configStore) with full state + actions | ✅ |
 | 9a | §15.1 Vite build: `base='/admin/'`, `outDir='dist/admin'`, `manualChunks` vendor splitting, `server.proxy` for `/admin/api` | ✅ |
 | 9b | §15.2/§15.3 Env vars: `VITE_API_BASE_URL` filled; Nginx `/admin/` `try_files` configured | ✅ |
