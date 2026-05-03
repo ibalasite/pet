@@ -425,7 +425,7 @@ INDEXES:
 **Illustrative buff magnitudes** (from CONSTANTS multipliers section, for UI/doc purposes):
 - Temporary buff example: +5 stat points for 24 hours (FOOD_BUFF_EXAMPLE_TEMP_AMOUNT_STAT_POINTS = 5; FOOD_BUFF_EXAMPLE_TEMP_DURATION_HOURS = 24)
 - Permanent buff example: +3 stat points permanently (FOOD_BUFF_EXAMPLE_PERM_AMOUNT_STAT_POINTS = 3)
-These are illustrative defaults — actual magnitudes are configurable via POST /api/v1/pet/:petId/feed request body.
+These are illustrative defaults — actual magnitudes are configurable via POST /api/v1/pets/:petId/feed request body.
 
 ### §4.8 Redis Key Patterns
 
@@ -550,7 +550,7 @@ HTTP status codes: 200 (success), 201 (created), 202 (async job accepted, return
 
 **Global error defaults (applies to ALL endpoints unless overridden)**: All authenticated endpoints return HTTP 401 `UNAUTHORIZED` for missing/invalid tokens. All write endpoints return HTTP 404 `NOT_FOUND` for unknown resource IDs. All endpoints return HTTP 400 `VALIDATION_ERROR` for schema violations. Admin mutation endpoints return HTTP 403 `FORBIDDEN` for insufficient role. Admin config write endpoints return HTTP 400 `OUT_OF_RANGE` when a parameter exceeds the CONSTANTS-defined admin-tunable range. `POST /admin/api/roles` returns HTTP 409 `CONFLICT` on duplicate username. Admin login returns HTTP 403 `ACCOUNT_LOCKED` when `locked_until > NOW()`.
 
-**Player-facing endpoints — additional error defaults**: `POST /api/v1/claim` returns HTTP 404 `PET_NOT_FOUND` for unknown petId and HTTP 400 `AGE_CONFIRMATION_REQUIRED` if `ageConfirmed` is false. `POST /api/v1/pet/:petId/train` returns HTTP 403 `NOT_OWNER` for non-owner token. `POST /api/v1/arena/enter` returns HTTP 403 `PET_BANNED` for banned pets.
+**Player-facing endpoints — additional error defaults**: `POST /api/v1/claim` returns HTTP 404 `PET_NOT_FOUND` for unknown petId and HTTP 400 `AGE_CONFIRMATION_REQUIRED` if `ageConfirmed` is false. `POST /api/v1/pets/:petId/train` returns HTTP 403 `NOT_OWNER` for non-owner token. `POST /api/v1/arena/enter` returns HTTP 403 `PET_BANNED` for banned pets.
 
 ### §5.1 Auth / Claim Flow Endpoints
 
@@ -588,19 +588,19 @@ Request: `{}` (no body)
 Response: `{ petId, seed, rarity, petName, stats: {speed, strength, stamina, level}, generationMeta, reservedUntil: ISO8601 }`
 Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset. `reservedUntil` = `NOW() + 24h` (PET_RESERVATION_TTL_HOURS = 24) — client should display countdown to encourage timely claiming.
 
-#### GET /api/v1/pet/:petId
+#### GET /api/v1/pets/:petId
 Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
 Description: Fetch pet data including stats, rarity, and level.
 Response: `{ id, seed, rarity, petName, stats: {speed, strength, stamina, level}, isOwner: boolean, claimedAt, isNeglected: boolean }`
 Notes: `isNeglected` is true if `pets.last_trained_at IS NULL OR NOW() - pets.last_trained_at > INTERVAL '3 days'` (TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days). Computed from the denormalized `last_trained_at` column on the pets row (no JOIN required).
 
-#### POST /api/v1/pet/:petId/train
+#### POST /api/v1/pets/:petId/train
 Auth: Required (pet owner token)
 Request: `{ trainingType: 'RUN' | 'STRENGTH' | 'STAMINA' }`
 Response: `{ updatedStats: {speed, strength, stamina, level}, statDelta: number, actionsRemainingToday: number }`
 Errors: HTTP 400 if 3 actions already used today; HTTP 400 with `STAT_AT_MAXIMUM` if target stat = 100 (PET_STAT_MAX = 100).
 
-#### POST /api/v1/pet/:petId/feed
+#### POST /api/v1/pets/:petId/feed
 Auth: Required (pet owner token)
 Request: `{ buffType: string, stat: 'speed' | 'strength' | 'stamina', magnitude: number, isPermanent?: boolean }`
 Response: `{ updatedStats: {speed, strength, stamina}, buffApplied: { stat, magnitude, isPermanent, expiresAt } }`
@@ -1286,7 +1286,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Scope**:
 - Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
 - PostgreSQL schema: `pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_logs`, `gdpr_requests` tables (GDPR compliance is a legal obligation from Phase 1, not a GA feature)
-- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pet/:petId`, `GET /api/v1/leaderboard` (Phase 1 implementation: direct PostgreSQL query on pets/arena_matches; Redis sorted set deferred to Phase 2)
+- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pets/:petId`, `GET /api/v1/leaderboard` (Phase 1 implementation: direct PostgreSQL query on pets/arena_matches; Redis sorted set deferred to Phase 2)
 - Email delivery: SendGrid integration + Nodemailer SMTP fallback
 - Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
 - Rate limiting: Redis-backed claim attempts (5/hr) and code entry (10/session)
@@ -1306,8 +1306,8 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 **Scope**:
 - PostgreSQL schema: `training_logs`, `arena_matches`, `food_buffs`, `leaderboard_snapshots` tables
-- Training system: `POST /api/v1/pet/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)
-- Food buff system: FoodBuff table; `/api/v1/pet/:petId/feed`
+- Training system: `POST /api/v1/pets/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)
+- Food buff system: FoodBuff table; `/api/v1/pets/:petId/feed`
 - Arena matchmaking: Redis queue; 30-second timeout; AI fallback; battle calculation with seeded ±15% modifier
 - Arena API: `POST /api/v1/arena/enter`, `GET /api/v1/arena/match/:id`, `GET /api/v1/arena/history/:petId`
 - Leaderboard: Redis sorted set (authoritative) + PostgreSQL snapshots; `GET /api/v1/leaderboard`; ≤30s update lag

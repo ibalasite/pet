@@ -100,7 +100,7 @@ Alternatively, the token may be passed as a query parameter `?token=<petToken>` 
 
 **Token lifecycle:**
 - Tokens do not expire automatically.
-- A token is invalidated immediately if an admin revokes it (sets `owner_token_hash = NULL`) or if a recovery flow issues a replacement. Replaced tokens are added to a Redis blacklist (`token:blacklist:{token_hash}`) with a 72-hour TTL (`claim_token_cleanup_ttl_hours = 72`).
+- A token is invalidated immediately if an admin revokes it (sets `owner_token_hash = NULL`) or if a recovery flow issues a replacement. Replaced tokens are added to a Redis blacklist (`token:blacklist:{token_hash}`) with a 72-hour TTL (`claim_token_cleanup_ttl_hours = 72` — this constant governs both claim_codes row cleanup and token blacklist TTL by design; both use the same 72-hour window per EDD §4.3 and §4.8).
 
 **Token recovery:**
 
@@ -516,7 +516,7 @@ Fetches public pet data. Optionally authenticates to determine ownership.
 
 #### `GET /api/v1/pets/:petId/stats`
 
-Returns the full stats panel for a pet including training history summary.
+Returns the full stats panel for a pet including training history summary. *(EDD extension — not individually enumerated in EDD §5.2; the core stats are available on `GET /api/v1/pets/:petId` but this endpoint provides the training-history summary fields.)*
 
 **Auth**: Optional
 
@@ -668,7 +668,7 @@ Illustrative buff values: temporary +5 points for 24 hours (`food_buff_example_t
 | 400 | `STAT_AT_MAXIMUM` | Target stat is already at 100 |
 | 401 | `UNAUTHORIZED` | Missing or invalid token |
 | 403 | `NOT_OWNER` | Token does not belong to this pet's owner |
-| 422 | `VALIDATION_ERROR` | `magnitude` or `buffType` fails admin-configured range validation |
+| 400 | `VALIDATION_ERROR` | `magnitude` or `buffType` fails admin-configured range validation |
 
 ---
 
@@ -881,8 +881,7 @@ Returns the global leaderboard. Source: Redis sorted set (`leaderboard:global`).
         "winRate": 0.706
       }
     ],
-    "lastUpdated": "2026-05-03T11:41:30Z",
-    "total": 100
+    "lastUpdated": "2026-05-03T11:41:30Z"
   },
   "error": null,
   "meta": {
@@ -967,7 +966,7 @@ Submits a GDPR request (erasure, data access, restrict processing, object leader
 | Request Type | SLA | Constant |
 |--------------|-----|----------|
 | Erasure | 7 days | `gdpr_email_deletion_window_days = 7` |
-| Data access / portability | 30 days | `gdpr_data_access_response_days = 30` |
+| Data access / portability | 30 days | `gdpr_data_access_response_days = 30`; `gdpr_data_portability_response_days = 30` |
 | Restrict processing | 24 hours | `gdpr_restrict_processing_response_hours = 24` |
 | Object leaderboard | 5 business days | `gdpr_object_leaderboard_response_business_days = 5` |
 | Rectification | 24 hours | `gdpr_email_rectification_response_hours = 24` |
@@ -1052,7 +1051,7 @@ Returns trade history for a pet. **Private** — only the pet's current owner ca
 |------|------|-----------|
 | 403 | `FEATURE_DISABLED` | `FF_MARKETPLACE` feature flag is off |
 | 403 | `NOT_OWNER` | Token does not own the relevant pet |
-| 422 | `VALIDATION_ERROR` | Price below minimum or anti-flip protection active |
+| 400 | `VALIDATION_ERROR` | Price below minimum or anti-flip protection active |
 
 ---
 
@@ -1191,7 +1190,7 @@ Invalidates the current admin session. Writes a logout event to the audit log.
 
 #### `POST /admin/api/auth/totp/verify`
 
-Verifies a TOTP code against the current admin's secret. Used for step-up authentication before sensitive operations.
+Verifies a TOTP code against the current admin's secret. Used for step-up authentication before sensitive operations. *(EDD extension — not enumerated in EDD §5.5; complements the TOTP setup flow in EDD §6.3; required for Super Admin sensitive write operations.)*
 
 **Auth**: Admin session
 
@@ -1372,11 +1371,13 @@ Lists pets with optional search and filtering. Supports up to 1 million records 
 }
 ```
 
+> **`ownerEmailMasked`**: The server decrypts `claim_identities.email_encrypted` (AES-256-GCM, key from environment variable `EMAIL_ENCRYPTION_KEY`) and masks the plaintext for admin display (format: `p***@example.com`). The raw email is never returned. Decryption occurs server-side only; no decryption key is exposed to the admin portal frontend (EDD §4.2).
+
 ---
 
 #### `GET /admin/api/pets/:petId`
 
-Returns full pet details including owner info and ban history.
+Returns full pet details including owner info and ban history. *(EDD extension — implied by ARCH §2.2 admin pet management; not individually enumerated in EDD §5.5 but required for the admin pet detail view.)*
 
 **Auth**: Admin session — Moderator+ or Read Only
 
@@ -1386,7 +1387,7 @@ Returns full pet details including owner info and ban history.
 
 #### `PUT /admin/api/pets/:petId`
 
-Updates administrative fields on a pet (e.g. correcting `petName` after content moderation review).
+Updates administrative fields on a pet (e.g. correcting `petName` after content moderation review). *(EDD extension — not enumerated in EDD §5.5; scoped to Super Admin only for content moderation corrections; audit-logged.)*
 
 **Auth**: Admin session — Super Admin only
 
@@ -1878,14 +1879,6 @@ Lists all GDPR requests with optional status and type filtering. For Super Admin
 
 ---
 
-#### `GET /admin/api/gdpr/requests`
-
-Alias for `GET /admin/api/gdpr` — returns the same GDPR request list. Provided for semantic clarity in admin portal routing.
-
-**Auth**: Admin session — Super Admin only
-
----
-
 #### `POST /admin/api/gdpr/delete`
 
 Initiates an admin-triggered erasure request (e.g. for a support ticket). Email hash is converted to SHA-256 within 24 hours (`gdpr_email_hashing_internal_sla_hours = 24`) and reported compliant within 7 days (`gdpr_email_deletion_window_days = 7`).
@@ -1918,7 +1911,7 @@ Initiates an admin-triggered erasure request (e.g. for a support ticket). Email 
 
 ---
 
-#### `PUT /admin/api/gdpr/requests/:requestId`
+#### `PATCH /admin/api/gdpr/:requestId`
 
 Updates the status of a non-erasure GDPR request (data_access, restrict_processing, object_leaderboard, rectification). Erasure requests are managed exclusively via `POST /admin/api/gdpr/delete`.
 
@@ -2117,6 +2110,48 @@ Targets: delivery rate ≥ 98% (`claim_email_delivery_rate_target_percent = 98`)
 | Pet stats after training | Invalidated by TanStack Query on mutation | Immediate cache invalidation on `POST /train` success |
 
 **WebSocket consideration for Phase 2+**: If live leaderboard push, arena spectator mode, or real-time battle animations are added in a future phase, a WebSocket endpoint at `wss://api.pixel-pet-arena.com/ws` may be introduced. This will be documented as an addendum to v1 API.
+
+---
+
+## 7.5 Health Check
+
+#### `GET /health`
+
+Returns platform health status. Required by PRD NFR-AVAIL-06.
+
+**Auth**: None
+
+**Rate Limit**: None
+
+**Response time**: ≤ 500 ms (`health_check_response_time_ms = 500`)
+
+**Response (HTTP 200 — healthy):**
+
+```json
+{
+  "status": "healthy",
+  "checks": {
+    "database": "ok",
+    "redis": "ok"
+  },
+  "timestamp": "2026-05-03T12:00:00Z"
+}
+```
+
+**Response (HTTP 503 — degraded or down):**
+
+```json
+{
+  "status": "degraded",
+  "checks": {
+    "database": "ok",
+    "redis": "unavailable"
+  },
+  "timestamp": "2026-05-03T12:00:00Z"
+}
+```
+
+`status` values: `healthy` (all checks pass), `degraded` (partial failure), `down` (critical failure).
 
 ---
 
