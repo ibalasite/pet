@@ -302,7 +302,7 @@ Table: arena_matches
 ──────────────────────────────────────────────────────
 id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
 pet_a_id         UUID         NOT NULL REFERENCES pets(id)
-pet_b_id         UUID         NOT NULL REFERENCES pets(id)  -- NULL if AI opponent
+pet_b_id         UUID         NULL REFERENCES pets(id) -- NULL if AI opponent
 is_ai_opponent   BOOLEAN      NOT NULL DEFAULT FALSE
 mode             VARCHAR(10)  NOT NULL CHECK (mode IN ('RACE','SUMO'))
 winner_pet_id    UUID         NULL REFERENCES pets(id)
@@ -318,6 +318,8 @@ INDEXES:
   idx_arena_matches_pet_b_id      ON arena_matches(pet_b_id)
   idx_arena_matches_completed_at  ON arena_matches(completed_at)
   idx_arena_matches_winner        ON arena_matches(winner_pet_id)
+  idx_arena_matches_pet_a_history ON arena_matches(pet_a_id, completed_at DESC)
+  idx_arena_matches_pet_b_history ON arena_matches(pet_b_id, completed_at DESC)
 ```
 
 Notes:
@@ -546,9 +548,30 @@ Auth: Admin session (Super Admin)
 Query: `?page=1&limit=50&from=ISO8601&to=ISO8601&actorId=&action=`
 Response: Audit log entries; search any 12-month window in ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME = 3s).
 
-### §5.6 Marketplace Endpoints (Phase 3 — FF_MARKETPLACE required)
+### §5.6 GDPR Self-Service Endpoints
 
-All endpoints require pet access token auth. Active only when `FF_MARKETPLACE=true`.
+No persistent accounts exist — players identify via pet token. GDPR requests are submitted via the pet token endpoint.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/api/v1/gdpr/request` | Pet token | Submit a GDPR request (erasure / data-access / restrict-processing) |
+| `GET` | `/api/v1/gdpr/request/status` | Pet token | Check status of a pending GDPR request |
+
+**Request body** (`POST /api/v1/gdpr/request`):
+```json
+{ "type": "erasure" | "data_access" | "restrict_processing", "petToken": "<token>" }
+```
+
+**SLAs** (from CONSTANTS):
+- Erasure: `GDPR_EMAIL_DELETION_WINDOW = 7 days`
+- Data access/portability: `GDPR_DATA_ACCESS_RESPONSE_DAYS = 30`
+- Restrict processing: `GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24`
+
+Requests are queued and processed by the admin portal GDPR module. Confirmation sent to the email on file (if not yet erased).
+
+### §5.7 Marketplace Endpoints (Phase 3 — FF_MARKETPLACE required)
+
+Write endpoints require pet access token auth. `GET /listings` is public (unauthenticated browsing). Active only when `FF_MARKETPLACE=true`.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -576,11 +599,11 @@ The pet access token is a 32-byte cryptographically random value encoded as URL-
 - Verified by hashing the received value and comparing to `owner_token_hash`
 - Revocable by admin: setting `owner_token_hash = NULL` immediately invalidates access
 
-Token recovery: Users who lose their URL may request a new access link via POST `/api/claim/recover`. A new 6-digit claim code is sent; on verification, a new 32-byte token is issued and the old hash is replaced atomically.
+Token recovery: Users who lose their URL may request a new access link via POST `/api/v1/claim/recover`. A new 6-digit claim code is sent; on verification, a new 32-byte token is issued and the old hash is replaced atomically.
 
 ### §6.2 Claim Code Flow
 
-1. User submits email and pet ID to `POST /api/claim`
+1. User submits email and pet ID to `POST /api/v1/claim`
 2. System checks rate limit: ≤5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5)
 3. 6-digit numeric OTP generated with `crypto.randomInt(100000, 999999)`
 4. OTP hash (SHA-256) stored in `claim_codes` with `expires_at = NOW() + 15min` (CLAIM_CODE_EXPIRY = 15 min)
@@ -916,6 +939,8 @@ Standard error codes: `VALIDATION_ERROR`, `NOT_FOUND`, `ALREADY_CLAIMED`, `INVAL
 
 Error messages follow the PDD §10.1 tone of voice — specific and actionable, never generic.
 
+**Production error sanitization**: In production (`NODE_ENV=production`), the Fastify error handler must strip `stack`, `code` (internal), and any internal path/detail fields from HTTP 500 responses before serialization. Only `code` (public error code), `message` (user-safe), and optional `retryAfter` are returned.
+
 ### §11.2 Logging Strategy
 
 - **Structured logging**: All logs emitted as JSON via `pino` (Fastify's native logger)
@@ -956,8 +981,8 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 | Test Area | Approach | Tools |
 |---|---|---|
 | API route handlers | Fastify `inject()` for in-process HTTP testing against test PostgreSQL instance | Vitest + `@fastify/inject` |
-| Claim flow end-to-end | POST /api/claim → verify email send → POST /api/claim/verify → assert token | Vitest + Nodemailer test inbox |
-| Arena battle calculation | Submit two pets to `/api/arena/enter`; assert winner determinism for same seeds | Vitest |
+| Claim flow end-to-end | POST /api/v1/claim → verify email send → POST /api/v1/claim/verify → assert token | Vitest + Nodemailer test inbox |
+| Arena battle calculation | Submit two pets to `/api/v1/arena/enter`; assert winner determinism for same seeds | Vitest |
 | Rate limiting | Exceed limit, assert HTTP 429 + Retry-After; assert counter resets after TTL | Vitest + Redis test instance |
 | GDPR deletion | Trigger deletion, run background job, assert email_encrypted = NULL | Vitest + test PostgreSQL |
 | Leaderboard consistency | Update pet stats, run arena, assert leaderboard rank updated within 30s | Vitest + Redis test instance |
@@ -990,25 +1015,30 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Scope**:
 - Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
 - PostgreSQL schema: `pets`, `claim_identities`, `claim_codes` tables
-- API endpoints: `POST /api/pets/random`, `POST /api/claim`, `POST /api/claim/verify`, `GET /api/pet/:petId`
+- API endpoints: `POST /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `GET /api/v1/pet/:petId`
 - Email delivery: SendGrid integration + Nodemailer SMTP fallback
 - Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
 - Rate limiting: Redis-backed claim attempts (5/hr) and code entry (10/session)
 - Basic leaderboard: PostgreSQL-only (Redis sorted set deferred to Phase 2)
 - Admin portal: Login + basic pet list view (Moderator role only)
 
-**Exit criteria**: 20 invited alpha testers successfully claim and access their pets. Claim conversion rate ≥7% (CLAIM_CONVERSION_ALPHA_GO = 7%).
+**Exit criteria**:
+- 20 invited alpha testers successfully claim and access their pets. Claim conversion rate ≥7% (CLAIM_CONVERSION_ALPHA_GO = 7%).
+- Core pet display: PetCanvas renders claimed pet with correct sprite, stats, and level.
+- Basic leaderboard: Top 100 leaderboard returns correct data within 30s of battle completion.
+
+> **Note**: Basic arena is Phase 2 scope — Phase 1 validates claim flow, pet display, and leaderboard data pipeline only.
 
 ### §13.2 Phase 2 — Arena + Leaderboard (Beta)
 
 **Goal**: Validate competitive engagement loop. Corresponds to Beta milestone.
 
 **Scope**:
-- Training system: `POST /api/pet/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD = 3 days)
-- Food buff system: FoodBuff table; `/api/pet/:petId/feed`
+- Training system: `POST /api/v1/pet/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD = 3 days)
+- Food buff system: FoodBuff table; `/api/v1/pet/:petId/feed`
 - Arena matchmaking: Redis queue; 30-second timeout; AI fallback; battle calculation with seeded ±15% modifier
-- Arena API: `POST /api/arena/enter`, `GET /api/arena/match/:id`, `GET /api/arena/history/:petToken`
-- Leaderboard: Redis sorted set (authoritative) + PostgreSQL snapshots; `GET /api/leaderboard`; ≤30s update lag
+- Arena API: `POST /api/v1/arena/enter`, `GET /api/v1/arena/match/:id`, `GET /api/v1/arena/history/:petToken`
+- Leaderboard: Redis sorted set (authoritative) + PostgreSQL snapshots; `GET /api/v1/leaderboard`; ≤30s update lag
 - Arena rate limiting: Redis counter 10 battles/hr per pet (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10)
 - Bot detection: Auto-flag pets >50 battles/60-min rolling window (BOT_DETECTION_BATTLES_THRESHOLD = 50)
 - Frontend: Arena page, Battle result page, Leaderboard page, Battle records page, Training page
@@ -1022,7 +1052,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 **Scope**:
 - Marketplace: Feature flag `FF_MARKETPLACE` enabled when DAU sustains >1,000 for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000)
-- Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION = 7 days)
+- Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days)
 - Admin portal: Full GDPR deletion workflow, game economy configuration (food buff multipliers 0.5×–5.0×, arena entry cost/cooldown), email delivery monitor, analytics dashboard, audit log, role management
 - Performance hardening: Lighthouse CI gate (LCP <2.5s, FCP <1.5s, CLS <0.1); load testing at 500 RPS
 - Security hardening: CSP header with nonce-based script policy; full OWASP Top 10 review
