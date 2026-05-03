@@ -142,7 +142,9 @@ CREATE TABLE claim_codes (
 
     CONSTRAINT pk_claim_codes PRIMARY KEY (id),
     CONSTRAINT fk_claim_codes_pet
-        FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
+        FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
+    CONSTRAINT chk_claim_codes_attempts_nonneg
+        CHECK (attempts >= 0)
 );
 
 COMMENT ON COLUMN claim_codes.code_hash IS 'SHA-256 of the 6-digit numeric OTP (claim_code_digits = 6). Plaintext OTP is never stored.';
@@ -197,6 +199,11 @@ CREATE TABLE arena_matches (
         CHECK (
             (is_flagged = FALSE AND flagged_at IS NULL) OR
             (is_flagged = TRUE  AND flagged_at IS NOT NULL)
+        ),
+    CONSTRAINT chk_arena_match_ai_opponent_consistency
+        CHECK (
+            (is_ai_opponent = FALSE) OR
+            (is_ai_opponent = TRUE AND pet_b_id IS NULL)
         )
 );
 
@@ -366,6 +373,12 @@ CREATE INDEX idx_marketplace_listings_listed_at ON marketplace_listings (listed_
 CREATE UNIQUE INDEX idx_marketplace_listings_active_pet
     ON marketplace_listings (pet_id)
     WHERE status = 'active';
+
+-- Background job target: transitions active listings whose expires_at has passed to cancelled.
+-- Only rows with a non-NULL expires_at can expire; rows with NULL expires_at never expire.
+CREATE INDEX idx_marketplace_listings_expires_at
+    ON marketplace_listings (expires_at)
+    WHERE status = 'active' AND expires_at IS NOT NULL;
 ```
 
 ---
@@ -692,6 +705,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_arena_matches_is_flagged` — `WHERE is_flagged = TRUE`: nearly all matches are unflagged; partial index stays tiny and serves `GET /admin/api/battles?flagged=true` efficiently.
 - `idx_gdpr_requests_initiating_pet` — `WHERE initiating_pet_id IS NOT NULL`: supports FK cascade integrity check and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.
 - `idx_claim_codes_created_at` and `idx_claim_codes_used_at` — support the 72-hour background cleanup job which must find rows by creation time or first-use time (whichever is later).
+- `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
 
 ### 6.2 Composite Indexes for History Queries
 
