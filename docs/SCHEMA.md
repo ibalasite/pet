@@ -116,10 +116,6 @@ COMMENT ON COLUMN claim_identities.email_encrypted IS 'AES-256-GCM encrypted raw
 COMMENT ON COLUMN claim_identities.deletion_requested_at IS 'Set when a GDPR erasure request is initiated. Triggers background erasure job.';
 ```
 
-```sql
-CREATE UNIQUE INDEX idx_claim_identities_email_hash ON claim_identities (email_hash);
-```
-
 ---
 
 ### 2.3 `claim_codes`
@@ -229,7 +225,44 @@ CREATE INDEX idx_leaderboard_snapshots_time ON leaderboard_snapshots (snapshot_t
 
 ---
 
-### 2.6 `food_buffs`
+### 2.6 `training_logs`
+
+One row per completed training action. Enables per-pet daily action counting and the cumulative `total_training_actions` aggregate that feeds the level formula. Rows are retained indefinitely as a behavioral audit trail (referenced by `GET /api/v1/pets/:petId/stats`).
+
+```sql
+CREATE TABLE training_logs (
+    id            UUID        NOT NULL DEFAULT gen_random_uuid(),
+    pet_id        UUID        NOT NULL,
+    training_type VARCHAR(10) NOT NULL,
+    stat_delta    SMALLINT    NOT NULL,
+    stat_after    SMALLINT    NOT NULL,
+    completed_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT pk_training_logs PRIMARY KEY (id),
+    CONSTRAINT fk_training_logs_pet
+        FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
+    CONSTRAINT chk_training_type_values
+        CHECK (training_type IN ('RUN', 'STRENGTH', 'STAMINA')),
+    CONSTRAINT chk_training_stat_delta_range
+        CHECK (stat_delta BETWEEN 1 AND 3),
+    CONSTRAINT chk_training_stat_after_range
+        CHECK (stat_after BETWEEN 1 AND 100)
+);
+
+COMMENT ON COLUMN training_logs.training_type IS 'RUN → speed, STRENGTH → strength, STAMINA → stamina. Values match EDD §4.5 CHECK constraint.';
+COMMENT ON COLUMN training_logs.stat_delta IS 'Stat points gained this action: random integer in [1, 3] (training_stat_points_min = 1, training_stat_points_max = 3).';
+COMMENT ON COLUMN training_logs.stat_after IS 'Absolute stat value after this action is applied. Range: 1–100 (pet_stat_min/max).';
+COMMENT ON COLUMN training_logs.completed_at IS 'UTC timestamp of the action. Daily action limit (training_actions_per_day = 3) is enforced by counting rows WHERE pet_id = ? AND completed_at >= UTC_DATE.';
+```
+
+```sql
+CREATE INDEX idx_training_logs_pet_id       ON training_logs (pet_id);
+CREATE INDEX idx_training_logs_completed_at ON training_logs (pet_id, completed_at DESC);
+```
+
+---
+
+### 2.7 `food_buffs`
 
 Active and historical food buff records per pet. Permanent buffs have `expires_at = NULL`. Record rows are cleaned up 30 days after consumption (`food_buff_record_retention_days = 30`).
 
@@ -249,7 +282,12 @@ CREATE TABLE food_buffs (
     CONSTRAINT fk_food_buffs_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
     CONSTRAINT chk_food_buff_magnitude_positive
-        CHECK (magnitude > 0)
+        CHECK (magnitude > 0),
+    CONSTRAINT chk_food_buff_expires_at_permanent
+        CHECK (
+            (is_permanent = TRUE  AND expires_at IS NULL) OR
+            (is_permanent = FALSE AND expires_at IS NOT NULL)
+        )
 );
 
 COMMENT ON COLUMN food_buffs.buff_stat IS 'Stat affected: speed, strength, or stamina.';
@@ -265,7 +303,7 @@ CREATE INDEX idx_food_buffs_record_expires ON food_buffs (record_expires_at);
 
 ---
 
-### 2.7 `marketplace_listings`
+### 2.8 `marketplace_listings`
 
 Active and historical pet trade listings. Phase 3 feature, gated by `FF_MARKETPLACE`. A partial unique index prevents duplicate active listings per pet at the database level.
 
@@ -273,7 +311,7 @@ Active and historical pet trade listings. Phase 3 feature, gated by `FF_MARKETPL
 CREATE TABLE marketplace_listings (
     id                UUID         NOT NULL DEFAULT gen_random_uuid(),
     pet_id            UUID         NOT NULL,
-    seller_token_hash TEXT         NOT NULL,
+    seller_token_hash VARCHAR(64)  NOT NULL,
     price_credits     INTEGER      NOT NULL,
     status            listing_status_enum NOT NULL DEFAULT 'active',
     listed_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
@@ -307,7 +345,7 @@ CREATE UNIQUE INDEX idx_marketplace_listings_active_pet
 
 ---
 
-### 2.8 `marketplace_transactions`
+### 2.9 `marketplace_transactions`
 
 Immutable completed trade records. `listing_id` uses `ON DELETE RESTRICT` to ensure the originating listing row is never deleted while a transaction references it.
 
@@ -316,8 +354,8 @@ CREATE TABLE marketplace_transactions (
     id                UUID        NOT NULL DEFAULT gen_random_uuid(),
     listing_id        UUID        NOT NULL,
     pet_id            UUID        NOT NULL,
-    seller_token_hash TEXT        NOT NULL,
-    buyer_token_hash  TEXT        NOT NULL,
+    seller_token_hash VARCHAR(64) NOT NULL,
+    buyer_token_hash  VARCHAR(64) NOT NULL,
     price_credits     INTEGER     NOT NULL,
     fee_credits       INTEGER     NOT NULL,
     listed_at         TIMESTAMPTZ NOT NULL,
@@ -349,7 +387,7 @@ CREATE INDEX idx_marketplace_transactions_completed ON marketplace_transactions 
 
 ---
 
-### 2.9 `admin_accounts`
+### 2.10 `admin_accounts`
 
 Admin operator credentials. Accounts are never hard-deleted — deactivation is a soft-delete via `deactivated_at`. The audit log holds a FK to this table, requiring row retention.
 
@@ -386,7 +424,7 @@ CREATE INDEX idx_admin_accounts_username ON admin_accounts (username);
 
 ---
 
-### 2.10 `admin_audit_log`
+### 2.11 `admin_audit_log`
 
 Immutable audit trail of all admin actions. Uses `BIGSERIAL` for sequential ordering. Retention: 2 years (`admin_audit_log_retention_years = 2`).
 
@@ -421,7 +459,7 @@ CREATE INDEX idx_admin_audit_log_admin_id   ON admin_audit_log (admin_id, create
 
 ---
 
-### 2.11 `gdpr_requests`
+### 2.12 `gdpr_requests`
 
 Job queue for all GDPR data subject requests. `claim_identity_id` uses `ON DELETE RESTRICT` to prevent an identity row from being removed while open GDPR requests reference it.
 
@@ -440,7 +478,9 @@ CREATE TABLE gdpr_requests (
     CONSTRAINT fk_gdpr_requests_identity
         FOREIGN KEY (claim_identity_id) REFERENCES claim_identities(id) ON DELETE RESTRICT,
     CONSTRAINT fk_gdpr_requests_initiating_pet
-        FOREIGN KEY (initiating_pet_id) REFERENCES pets(id) ON DELETE SET NULL
+        FOREIGN KEY (initiating_pet_id) REFERENCES pets(id) ON DELETE SET NULL,
+    CONSTRAINT chk_gdpr_request_admin_notes_length
+        CHECK (char_length(admin_notes) <= 500)
 );
 
 COMMENT ON COLUMN gdpr_requests.claim_identity_id IS 'Data subject. A single erasure covers all pets under this identity.';
@@ -573,6 +613,7 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 | `claim_identities` | Indefinite; `email_encrypted` nulled within 7 days of erasure request | `gdpr_email_deletion_window_days = 7` |
 | `claim_codes` | Deleted 72 hours after row creation or `used_at`, whichever is later | `claim_token_cleanup_ttl_hours = 72` |
 | `arena_matches` | Indefinite (audit immutability; last 20 per pet shown publicly) | `arena_battle_records_display_count = 20` |
+| `training_logs` | Indefinite (behavioral audit trail; feeds `total_training_actions` aggregate) | — |
 | `leaderboard_snapshots` | Rolling 12 months | `leaderboard_snapshot_retention_months = 12` |
 | `food_buffs` | 30 days after `consumed_at` (`record_expires_at` column; cleaned by background job) | `food_buff_record_retention_days = 30` |
 | `marketplace_listings` | Indefinite (referenced by transactions; `ON DELETE RESTRICT`) | — |
@@ -605,6 +646,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 ### 6.2 Composite Indexes for History Queries
 
 - `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort.
+- `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. Covering the `pet_id` prefix avoids a separate lookup.
 - `idx_admin_audit_log_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor within a 12-month window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`).
 
 ### 6.3 Leaderboard Query Pattern
