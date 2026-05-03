@@ -33,6 +33,7 @@
    - 6.8 [Admin Audit Log](#68-admin-audit-log)
    - 6.9 [Admin Dashboard, Analytics & Email Monitor](#69-admin-dashboard-analytics--email-monitor)
 7. [WebSocket / Real-Time](#7-websocket--real-time)
+   - 7.5 [Health Check](#75-health-check)
 8. [Pagination](#8-pagination)
 9. [Changelog / Versioning](#9-changelog--versioning)
 
@@ -225,7 +226,7 @@ The `details` field is optional and only populated when additional structured co
 | 404 | Not Found |
 | 408 | Request Timeout (matchmaking timeout) |
 | 409 | Conflict (duplicate resource) |
-| 422 | Unprocessable Entity (semantic validation failure) |
+| 422 | Unprocessable Entity (reserved — not currently emitted by any v1 endpoint; all validation failures use 400) |
 | 429 | Too Many Requests (rate limit exceeded) |
 | 500 | Internal Server Error |
 
@@ -253,9 +254,9 @@ The `details` field is optional and only populated when additional structured co
 | `NOT_FOUND` | 404 | Generic resource not found |
 | `CONFLICT` | 409 | Resource already exists (e.g. duplicate admin username) |
 | `MATCHMAKING_TIMEOUT` | 408 | No opponent found within the 30-second matchmaking window (`arena_matchmaking_timeout_seconds = 30`) |
-| `RATE_LIMITED` | 429 | Generic rate limit exceeded (see specific limit in `Retry-After` header) |
+| `RATE_LIMIT_EXCEEDED` | 429 | Generic rate limit exceeded (see specific limit in `Retry-After` header) |
 | `FEATURE_DISABLED` | 403 | The requested feature is behind a feature flag that is currently off |
-| `SERVER_ERROR` | 500 | Unexpected internal server error; `stack` and internal details are stripped from production responses |
+| `INTERNAL_SERVER_ERROR` | 500 | Unexpected internal server error; `stack` and internal details are stripped from production responses |
 
 ---
 
@@ -319,7 +320,7 @@ Initiates the email claim flow. Sends a 6-digit OTP to the provided email addres
 | 400 | `AGE_CONFIRMATION_REQUIRED` | `ageConfirmed` is `false` or missing |
 | 400 | `ALREADY_CLAIMED` | The pet with `petId` is already owned |
 | 404 | `PET_NOT_FOUND` | No pet found with the given `petId` |
-| 429 | `RATE_LIMITED` | Hourly claim attempt limit exceeded |
+| 429 | `RATE_LIMIT_EXCEEDED` | Hourly claim attempt limit exceeded |
 
 ---
 
@@ -730,7 +731,7 @@ Enters the authenticated pet into the matchmaking queue for an arena battle. Use
 | 403 | `NOT_OWNER` | Token does not own the given `petId` |
 | 403 | `PET_BANNED` | Pet is banned and cannot enter the arena |
 | 408 | `MATCHMAKING_TIMEOUT` | No opponent found within 30 seconds and `acceptAI` was not `true` |
-| 429 | `RATE_LIMITED` | Hourly battle limit exceeded |
+| 429 | `RATE_LIMIT_EXCEEDED` | Hourly battle limit exceeded |
 
 **HTTP 408 body:**
 
@@ -1125,7 +1126,7 @@ Session: 4-hour inactivity timeout (`admin_session_inactivity_expiry_hours = 4`)
 | 401 | `UNAUTHORIZED` | Invalid username or password |
 | 403 | `ACCOUNT_LOCKED` | Account locked after repeated failures; `locked_until` in response |
 | 403 | `TOTP_SETUP_REQUIRED` | First login; TOTP not yet enrolled |
-| 429 | `RATE_LIMITED` | IP pre-auth rate limit exceeded |
+| 429 | `RATE_LIMIT_EXCEEDED` | IP pre-auth rate limit exceeded |
 
 ---
 
@@ -1598,6 +1599,8 @@ Removes a flag from a battle record.
 
 Returns the top **500** pets (`leaderboard_admin_view = 500`), with suspicious-flag annotations for pets exceeding the battles-per-hour threshold (`leaderboard_admin_suspicious_flag_battles_per_hour = 50`).
 
+> **Pagination**: This endpoint is a **hard-capped list**, not paginated. It always returns up to 500 entries in a single response. The standard `page`/`limit` pagination parameters (§8) do not apply here. The `meta` envelope is omitted; total entry count is implicitly bounded by `leaderboard_admin_view = 500`.
+
 **Auth**: Admin session — Moderator+ or Read Only
 
 **Response (HTTP 200):**
@@ -1688,6 +1691,7 @@ Updates runtime configuration values. Changes take effect within 5 minutes (`con
 ```json
 {
   "arenaRateLimitBattlesPerHour": 15,
+  "arenaMatchmakingTimeoutSeconds": 30,
   "rarityWeights": {
     "common": 55,
     "rare": 28,
@@ -1699,6 +1703,7 @@ Updates runtime configuration values. Changes take effect within 5 minutes (`con
 
 Tunable ranges:
 - `arenaRateLimitBattlesPerHour`: `[1, 50]` (`arena_rate_limit_admin_min = 1`, `arena_rate_limit_admin_max = 50`)
+- `arenaMatchmakingTimeoutSeconds`: runtime-tunable (default `arena_matchmaking_timeout_seconds = 30`; no CONSTANTS-defined min/max — operator judgement required; values outside `[5, 120]` are not recommended)
 - `rarityWeights`: four values must sum to 100% (admin-tunable, `admin_tunable = true` in `constants.json`)
 
 **Response (HTTP 200):**

@@ -604,7 +604,7 @@ Errors: HTTP 400 if 3 actions already used today; HTTP 400 with `STAT_AT_MAXIMUM
 Auth: Required (pet owner token)
 Request: `{ buffType: string, stat: 'speed' | 'strength' | 'stamina', magnitude: number, isPermanent?: boolean }`
 Response: `{ updatedStats: {speed, strength, stamina}, buffApplied: { stat, magnitude, isPermanent, expiresAt } }`
-Errors: HTTP 400 if stat already at maximum; HTTP 422 if magnitude or buffType fails validation against admin-configured ranges.
+Errors: HTTP 400 if stat already at maximum; HTTP 400 VALIDATION_ERROR if magnitude or buffType fails validation against admin-configured ranges.
 
 ### §5.3 Arena Endpoints
 
