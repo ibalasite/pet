@@ -21,10 +21,11 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | PET_LEVEL_DEFAULT / MAX | 1 / 100 | level | FLOOR(training_actions / 10) |
 | TRAINING_ACTIONS_PER_DAY | 3 | actions/day | Reset UTC 00:00 |
 | TRAINING_NEGLECT_THRESHOLD_DAYS | 3 | days | Triggers visual neglect state |
-| ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT | 10 | battles/hr (default) | Admin-tunable 1–50 |
+| ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT | 10 | battles/hr (default) | Admin-tunable; ARENA_RATE_LIMIT_ADMIN_MIN = 1; ARENA_RATE_LIMIT_ADMIN_MAX = 50 |
 | ARENA_MATCHMAKING_TIMEOUT_SECONDS | 30 | seconds | AI fallback offered |
-| ARENA_MATCH_DURATION | 5–15 | seconds | Animation window |
-| ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER | ±15 | percent | Seeded random applied to Speed/Strength |
+| ARENA_MATCH_DURATION_MIN_SECONDS | 5 | seconds | Animation window minimum |
+| ARENA_MATCH_DURATION_MAX_SECONDS | 15 | seconds | Animation window maximum |
+| ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT | ±15 | percent | Seeded random applied to Speed/Strength |
 | ARENA_BATTLE_RECORDS_DISPLAY_COUNT | 20 | battles | Last 20 shown publicly |
 | LEADERBOARD_TOP_DISPLAY | 100 | pets | Public; admin sees 500 |
 | LEADERBOARD_UPDATE_LAG_MAX_SECONDS | 30 | seconds | Redis → consistent |
@@ -32,11 +33,11 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | CLAIM_CODE_EXPIRY_MINUTES | 15 | minutes | After generation |
 | CLAIM_TOKEN_CLEANUP_TTL_HOURS | 72 | hours | After creation or first use |
 | PET_ACCESS_TOKEN_MIN_BYTES | 32 | bytes | URL-safe base64 random |
-| CLAIM_TOKEN_MIN_ENTROPY | 32 | bytes | Cryptographically random |
+| CLAIM_TOKEN_MIN_ENTROPY_BYTES | 32 | bytes | Cryptographically random |
 | AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR | 5 | attempts/hr | Per email address |
-| AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS | 10 | attempts/session | Per session |
-| ADMIN_SESSION_INACTIVITY_EXPIRY | 4 | hours | Inactivity timeout |
-| ADMIN_SESSION_ABSOLUTE_EXPIRY | 8 | hours | Regardless of activity |
+| AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION | 10 | attempts/session | Per session |
+| ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS | 4 | hours | Inactivity timeout |
+| ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS | 8 | hours | Regardless of activity |
 | ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE | 100 | req/min | Per admin account |
 | ADMIN_AUDIT_LOG_RETENTION_YEARS | 2 | years | GDPR Art. 30 compliance |
 | BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window (arena bot-detection system); BOT_DETECTION_WINDOW_MINUTES = 60 |
@@ -53,16 +54,22 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | DB_CONNECTION_POOL_MIN_CONNECTIONS | 20 | connections | PostgreSQL pool floor |
 | CODE_MODULE_MAX_LINES | 800 | lines | Hard limit per module |
 | CODE_FUNCTION_MAX_LINES | 50 | lines | Hard limit per function |
-| AVAILABILITY | 99.9% | monthly | ≤43.8 min downtime/month |
-| P99_API_LATENCY_READ | <200 | ms at 100 RPS | All read endpoints |
-| P99_API_LATENCY_WRITE | <500 | ms at 100 RPS | Training, arena write endpoints |
+| AVAILABILITY_MONTHLY_PERCENT | 99.9% | monthly | ≤43.8 min downtime/month (AVAILABILITY_MAX_DOWNTIME_MINUTES_PER_MONTH = 43.8) |
+| P99_API_LATENCY_READ_MS_AT_100_RPS | <200 | ms at 100 RPS | All read endpoints |
+| P99_API_LATENCY_WRITE_MS_AT_100_RPS | <500 | ms at 100 RPS | Training, arena write endpoints |
 | GDPR_EMAIL_DELETION_WINDOW_DAYS | 7 | days | Email → SHA-256 hash |
 | GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS | 24 | hours | Internal SLA for email hash completion |
-| RARITY_COMMON_PERCENT / RARE / EPIC / LEGENDARY | 60 / 25 / 12 / 3 | percent | Default rarity drop weights; admin-tunable; four values must always sum to 100% |
-| RARITY_MULTIPLIER_COMMON / RARE / EPIC / LEGENDARY | 1 / 2 / 4 / 8 | × | Applied in trade min-price formula: (pet_level × 100) + (rarity_multiplier × 500) |
-| TRADE_TRANSACTION_FEE | 5 | percent | Platform fee on trades; within BRD-defined range of 5–10% (TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5, TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10) |
+| RARITY_COMMON_PERCENT | 60 | percent | Default rarity drop weight; admin-tunable; all four must sum to 100% |
+| RARITY_RARE_PERCENT | 25 | percent | Default rarity drop weight |
+| RARITY_EPIC_PERCENT | 12 | percent | Default rarity drop weight |
+| RARITY_LEGENDARY_PERCENT | 3 | percent | Default rarity drop weight |
+| RARITY_MULTIPLIER_COMMON | 1 | × | Applied in trade min-price formula: (pet_level × 100) + (rarity_multiplier × 500) |
+| RARITY_MULTIPLIER_RARE | 2 | × | Applied in trade min-price formula |
+| RARITY_MULTIPLIER_EPIC | 4 | × | Applied in trade min-price formula |
+| RARITY_MULTIPLIER_LEGENDARY | 8 | × | Applied in trade min-price formula |
+| TRADE_TRANSACTION_FEE_PERCENT | 5 | percent | Platform fee on trades; within BRD-defined range of 5–10% (TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5, TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10) |
 | FOOD_BUFF_RECORD_RETENTION_DAYS | 30 | days | After expiry/consumption |
-| MVP_BUDGET | 40,000 | USD | Hard constraint |
+| MVP_BUDGET_USD | 40,000 | USD | Hard constraint |
 | PET_RESERVATION_TTL_HOURS | 24 | hours | Guest preview reservation window before unclaimed pet cleanup |
 | SPRITE_RESOLUTION_PX | 32 | px | Sprite frame size; provisional Phase 1 resolution (see §14 OQ-E01) |
 | ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS | 10 | attempts | Pre-auth IP rate limit for admin login endpoint |
@@ -79,7 +86,7 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 **Tech Stack Decision**: The backend is Node.js with Fastify, chosen for its excellent TypeScript integration, schema-based validation via JSON Schema / Zod, and a plugin ecosystem well-suited to real-time concerns (WebSocket support, Redis adapters). Go (Fiber) was considered for the arena service due to higher concurrent goroutines, but at the projected peak of 500 RPS and 2,000 PCU the event loop model of Node.js with async/await is sufficient, and a single-language codebase reduces operational overhead within the MVP budget of $40,000. The frontend uses React + Vite + TypeScript. The admin portal uses Vue 3 + Element Plus + Vite — a deliberate stack separation that keeps the data-dense admin UI from coupling to the pixel-art game design system.
 
 **Key Constraints**:
-- Budget hard cap: $40,000 MVP (CONSTANTS MVP_BUDGET)
+- Budget hard cap: $40,000 MVP (CONSTANTS MVP_BUDGET_USD)
 - No traditional user accounts — all identity through email OTP + URL token
 - Phaser.js for game canvas rendering; React for UI chrome
 - Availability SLO 99.9% monthly; peak 500 RPS; 2,000 PCU
@@ -216,7 +223,7 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 | CI/CD | GitHub Actions | Test → build → deploy pipeline |
 | Container registry | GitHub Container Registry (ghcr.io) | Docker images for API servers |
 
-Monthly cost at DAU ≤5,000: $50–$200 (SERVER_COST_DAU5K_MONTHLY range from CONSTANTS). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000 from CONSTANTS).
+Monthly cost at DAU ≤5,000: $50–$200 (SERVER_COST_DAU5K_MONTHLY_MIN_USD = 50; SERVER_COST_DAU5K_MONTHLY_MAX_USD = 200). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000).
 
 ### §3.7 Admin Portal Stack
 
@@ -348,7 +355,7 @@ INDEXES:
 ```
 
 Notes:
-- Battle outcome uses a seeded random modifier ±15% (ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER = 15%). The `random_seed` field enables deterministic replay.
+- Battle outcome uses a seeded random modifier ±15% (ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT = 15%). The `random_seed` field enables deterministic replay.
 - The last 20 battles per pet are shown publicly (ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20); query uses `ORDER BY completed_at DESC LIMIT 20`.
 
 ### §4.5 TrainingLog
@@ -424,7 +431,7 @@ redis_key: rl:claim:{email_hash}         TTL: 3600s   Value: attempt count (≤5
 redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set when MAX_ATTEMPTS_REACHED (count = AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5); CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
 redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10 default); TTL = ARENA_RATE_LIMIT_COUNTER_WINDOW_HOURS × 3600 = 3600s (ARENA_RATE_LIMIT_COUNTER_WINDOW_HOURS = 1)
 redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤10)
-redis_key: rl:code_entry:cooldown:{session_id} TTL: 60s  Value: "1"; set when MAX_ATTEMPTS_REACHED (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); HTTP 429 with Retry-After: 60 while key exists
+redis_key: rl:code_entry:cooldown:{session_id} TTL: 60s  Value: "1"; set when MAX_ATTEMPTS_REACHED (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10); HTTP 429 with Retry-After: 60 while key exists
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
 redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
 redis_key: matchmaking:queue:{mode}      NO TTL       Redis Sorted Set (ZADD score=enqueue_epoch; ZRANGEBYSCORE for stale entry cleanup); entries older than ARENA_MATCHMAKING_TIMEOUT_SECONDS+15s (≈45s) are considered stale and skipped by the consumer. Entry format: `"{petId}:{enqueue_epoch_ms}"`. Consumer validates entry age before pairing and discards stale entries silently.
@@ -502,7 +509,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 
 **Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `completed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in trade_records before accepting a new listing. `completed_at` (purchase timestamp) is used — not `listed_at` — because the protection window begins when the buyer takes ownership.
 
-**Min-price formula**: `price_credits ≥ (pet_level × TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF) + (rarity_multiplier × TRADE_MIN_PRICE_FORMULA_RARITY_COEFF)` where TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF = 100, TRADE_MIN_PRICE_FORMULA_RARITY_COEFF = 500, and rarity_multiplier values are: Common = 1, Rare = 2, Epic = 4, Legendary = 8 (RARITY_MULTIPLIER_COMMON/RARE/EPIC/LEGENDARY).
+**Min-price formula**: `price_credits ≥ (pet_level × TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF) + (rarity_multiplier × TRADE_MIN_PRICE_FORMULA_RARITY_COEFF)` where TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF = 100, TRADE_MIN_PRICE_FORMULA_RARITY_COEFF = 500, and rarity_multiplier values are: Common = 1 (RARITY_MULTIPLIER_COMMON), Rare = 2 (RARITY_MULTIPLIER_RARE), Epic = 4 (RARITY_MULTIPLIER_EPIC), Legendary = 8 (RARITY_MULTIPLIER_LEGENDARY).
 
 ### §4.13 GdprRequest
 
@@ -555,7 +562,7 @@ Auth: None (rate-limited by session)
 Description: Verify 6-digit OTP and return the pet access token.
 Request: `{ claimId: string, code: string }`
 Response: `{ petToken: string, petId: string, petUrl: string }`
-Rate limit: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10). HTTP 429 after breach; 60-second cooldown.
+Rate limit: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10). HTTP 429 after breach; 60-second cooldown.
 Error codes: `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`.
 
 #### POST /api/v1/claim/recover
@@ -637,7 +644,7 @@ All admin endpoints require admin session cookie (httpOnly, SameSite=Strict). Ra
 #### POST /admin/api/auth/login
 Auth: None (TOTP + password)
 Request: `{ username: string, password: string, totpCode?: string }`
-Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY / ADMIN_SESSION_ABSOLUTE_EXPIRY)
+Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS / ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS)
 
 #### POST /admin/api/auth/totp/setup
 Auth: Setup token (see enrollment flow below)
@@ -703,7 +710,7 @@ Response: `{ foodBuffMultiplierMin, foodBuffMultiplierMax, arenaEntryCostDefault
 
 #### PUT /admin/api/config/economy
 Auth: Admin session (Super Admin)
-Request: Economy parameter updates (food buff multiplier range 0.5×–5.0× — FOOD_BUFF_MULTIPLIER_ADMIN_MIN/MAX; arena entry cost 0–10 credits — ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT/ADMIN_MAX; arena entry cooldown 0–60 min — ARENA_ENTRY_COOLDOWN_ADMIN_MIN/MAX_MINUTES)
+Request: Economy parameter updates (food buff multiplier range 0.5×–5.0× — FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5; FOOD_BUFF_MULTIPLIER_ADMIN_MAX = 5.0; arena entry cost 0–10 credits — ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT = 0; ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX = 10; arena entry cooldown 0–60 min — ARENA_ENTRY_COOLDOWN_ADMIN_MIN_MINUTES = 0; ARENA_ENTRY_COOLDOWN_ADMIN_MAX_MINUTES = 60)
 Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 min).
 
 #### GET /admin/api/dashboard
@@ -807,7 +814,7 @@ Write endpoints require pet access token auth. `GET /listings` is public (unauth
 | `POST` | `/api/v1/marketplace/listings/:listingId/buy` | Pet token | Purchase listing; 5% fee deducted from seller proceeds |
 | `GET` | `/api/v1/marketplace/history/:petId` | Pet token | Trade history for a pet (private — trade prices are commercial-in-confidence; intentionally differs from public arena battle history) |
 
-**Fee**: TRADE_TRANSACTION_FEE = 5% deducted from seller, credited to platform. This rate is within the BRD-defined acceptable range: TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5% to TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10%. Future fee adjustments must remain within this range.
+**Fee**: TRADE_TRANSACTION_FEE_PERCENT = 5% deducted from seller, credited to platform. This rate is within the BRD-defined acceptable range: TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5% to TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10%. Future fee adjustments must remain within this range.
 **Anti-flip**: MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days between purchase and re-listing.
 **Rate limit**: Inherits arena/pet rate limits; no separate marketplace rate limit in CONSTANTS.
 
@@ -837,14 +844,14 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 6. User manually enters code in browser; verified against hash
 7. On valid entry: atomic DB transaction — (a) upsert `claim_identities` row for the email_hash (creating if first claim, matching if re-claiming same email), (b) set `pets.claim_identity_id = claim_identities.id`, (c) generate 32-byte pet access token, store SHA-256 hash in `pets.owner_token_hash`, (d) set `pets.claimed_at = NOW()`, (e) mark claim code `used_at`, (f) set `pets.reserved_until = NULL`
 8. Claim code records deleted by background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours)
-9. Rate limit on code entry: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); 60-second cooldown on breach
+9. Rate limit on code entry: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10); 60-second cooldown on breach
 
 ### §6.3 Admin Authentication
 
 - Credentials: username + bcrypt password hash (work factor ≥12) + TOTP (RFC 6238, 6-digit, 30-second window)
 - Session: server-side Redis session with httpOnly + SameSite=Strict cookie
-- Inactivity expiry: 4 hours (ADMIN_SESSION_INACTIVITY_EXPIRY = 4h)
-- Absolute expiry: 8 hours regardless of activity (ADMIN_SESSION_ABSOLUTE_EXPIRY = 8h)
+- Inactivity expiry: 4 hours (ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4h)
+- Absolute expiry: 8 hours regardless of activity (ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8h)
 - Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100) — applies to authenticated sessions only
 - **Pre-authentication rate limit**: `POST /admin/api/auth/login` is rate-limited by IP address: 10 attempts per 15 minutes (ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS = 10; ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS = 900); HTTP 429 on breach. Redis key: `rl:admin_login:{ip_hash}` TTL 900s.
 - **Account lockout**: After 10 consecutive `failed_attempts` on a valid username (ADMIN_LOGIN_LOCKOUT_THRESHOLD = 10), the account is locked for 30 minutes (ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES = 30) (`deactivated_at` is NOT used for lockout — a separate `locked_until TIMESTAMPTZ NULL` column is set). Login returns HTTP 403 `{ code: "ACCOUNT_LOCKED", unlockedAt: ISO8601 }`. Lockout resets on successful login.
@@ -863,6 +870,8 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 | Health endpoint | No limit | — | N/A | 200 always |
 
 All rate limit keys are stored in Redis. The Redis counter TTL equals the window duration. On TTL expiry the counter resets automatically. If Redis is unavailable, rate limiting degrades gracefully (counters not enforced — logged as an alert).
+
+**constants.json rate_limits section aliases**: The `rate_limits` section defines canonical names for the same values used above: ARENA_BATTLES_PER_PET_PER_HOUR_DEFAULT = 10 (alias for ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT), ARENA_BATTLES_PER_PET_PER_HOUR_ADMIN_MIN = 1, ARENA_BATTLES_PER_PET_PER_HOUR_ADMIN_MAX = 50, EMAIL_CLAIM_ATTEMPTS_PER_HOUR_PER_EMAIL = 5, CLAIM_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10, ADMIN_PORTAL_REQUESTS_PER_MINUTE_PER_ACCOUNT = 100.
 
 ### §6.5 GDPR / Data Handling Summary
 
@@ -886,7 +895,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 
 | Metric | Target | Source |
 |---|---|---|
-| Availability | 99.9% monthly (≤43.8 min downtime) | AVAILABILITY_MONTHLY_PERCENT |
+| Availability | 99.9% monthly (≤43.8 min downtime) | AVAILABILITY_MONTHLY_PERCENT; AVAILABILITY_MAX_DOWNTIME_MINUTES_PER_MONTH = 43.8 |
 | P99 API Latency (read) | <200 ms at 100 RPS | P99_API_LATENCY_READ_MS_AT_100_RPS |
 | P99 API Latency (write) | <500 ms at 100 RPS | P99_API_LATENCY_WRITE_MS_AT_100_RPS |
 | FCP | <1.5 seconds | FCP_SECONDS |
@@ -933,7 +942,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 - **Peak load**: 500 RPS sustained, 2,000 PCU arena events (PEAK_OPERATION_RPS / PEAK_CONCURRENT_USERS from CONSTANTS).
 - **Arena matchmaking**: Redis Sorted Set queue (score = enqueue epoch); consumer uses ZRANGEBYSCORE to pop the oldest eligible entry. Stale entries (>45s old = ARENA_MATCHMAKING_TIMEOUT_SECONDS + 15s buffer) are discarded before pairing to prevent ghost matches from abandoned connections. Supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
 - **Leaderboard**: Redis sorted set as authoritative real-time source; PostgreSQL snapshot as durable backup. Update lag ≤30 seconds.
-- **Pet generation concurrency**: 1,000 concurrent pet generations complete within 10 seconds (PET_GENERATION_CONCURRENT_BATCH = 1,000; PET_GENERATION_CONCURRENT_BATCH_TIME = 10s).
+- **Pet generation concurrency**: 1,000 concurrent pet generations complete within 10 seconds (PET_GENERATION_CONCURRENT_BATCH = 1,000; PET_GENERATION_CONCURRENT_BATCH_TIME_SECONDS = 10s).
 - **Database**: Primary writer handles all mutations. Read replica handles leaderboard, public pet pages, and admin list views. Connection pool allows burst to 50 connections.
 
 ---
@@ -1211,7 +1220,7 @@ Error messages follow the PDD §10.1 tone of voice — specific and actionable, 
 | Alert | Threshold | Window | Channel | Source |
 |---|---|---|---|---|
 | API error rate | >1% of requests | 5 minutes | PagerDuty + Slack | CONSTANTS OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES |
-| P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD (= OBSERVABILITY_P99_ALERT_MS = 1,000ms; both constants are equivalent aliases) |
+| P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD_MS (= OBSERVABILITY_P99_ALERT_MS = 1,000ms; both constants are equivalent aliases) |
 | Email delivery failure | >2% SendGrid failure | 30 minutes | PagerDuty | OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES (window); EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT (2% threshold) |
 | Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT_SECONDS (note: constant value is 60s; SLO target is 30s — alert fires after 2× SLO breach; recommend aligning constant to 30s in a future CONSTANTS revision) |
 | Pet claim rate drop | <5 claims/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD_PER_HOUR |
@@ -1311,7 +1320,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Scope**:
 - PostgreSQL schema: `trade_records`, `marketplace_listings` tables
 - Marketplace: Feature flag `FF_MARKETPLACE` enabled when DAU sustains >1,000 for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000)
-- Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days)
+- Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE_PERCENT = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days)
 - Admin portal: Full GDPR deletion workflow, game economy configuration (food buff multipliers 0.5×–5.0×, arena entry cost/cooldown), email delivery monitor, analytics dashboard, audit log, role management
 - Performance hardening: Lighthouse CI gate (LCP <2.5s, FCP <1.5s, CLS <0.1); load testing at 500 RPS
 - Security hardening: CSP header with nonce-based script policy; full OWASP Top 10 review
@@ -1358,7 +1367,7 @@ For claim flow optimization (tests 001–002) and arena engagement tests (003–
 | OQ-E05 | Battle result Open Graph card generation: Static HTML page as OG preview (simpler) vs. server-rendered image (requires Puppeteer/Cloudflare browser, better social preview)? (PDD OQ-D06) | Infrastructure, performance | Engineering + Design | OPEN |
 | OQ-E06 | Redis persistence strategy: Upstash provides durability by default. If leaderboard Redis is flushed, full rebuild from PostgreSQL snapshots could take >30 seconds during peak load. Define an explicit rebuild SLA and test it. | Availability | Engineering | OPEN |
 | OQ-E07 | Feature flag implementation: Simple environment-variable-based flags sufficient for MVP (`FF_MARKETPLACE`, `FF_ARENA_SUMO`, `FF_ADMIN_PORTAL`)? Or invest in a LaunchDarkly/Flagsmith integration for runtime toggles? | Operations | Engineering + PM | OPEN |
-| OQ-E08 | Sumo arena mode battle calculation: The CONSTANTS define `ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER` as covering both Race (Speed-based) and Sumo (Strength-based). Confirm the stat selection logic: Race uses Speed, Sumo uses Strength, modifier ±15% applied to selected stat. Document edge cases when both stats are equal. | Domain logic | Engineering | OPEN |
+| OQ-E08 | Sumo arena mode battle calculation: The CONSTANTS define `ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT` as covering both Race (Speed-based) and Sumo (Strength-based). Confirm the stat selection logic: Race uses Speed, Sumo uses Strength, modifier ±15% applied to selected stat. Document edge cases when both stats are equal. | Domain logic | Engineering | OPEN |
 
 ---
 
