@@ -56,7 +56,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
 
   Scenario: Rate limit countdown expires — Enter Arena button re-enabled
     Given the RateLimitBanner is visible with a countdown timer
-    When the Retry-After duration elapses and the Zustand arena slice rate limit state is cleared
+    When the Retry-After duration elapses
     Then the RateLimitBanner component disappears
     And the "Enter Arena" button becomes enabled again
 

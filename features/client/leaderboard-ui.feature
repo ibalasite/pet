@@ -28,7 +28,6 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
     Then the browser URL changes to "/leaderboard?rarity=EPIC"
     And GET /api/v1/leaderboard?rarity=EPIC&page=1&limit=100 is called
     And only EPIC rarity pets are shown in the LeaderboardTable
-    And the RarityFilter tabs support arrow-key navigation between options
 
   Scenario: Rarity filter selection is preserved on page refresh
     Given the user is on "/leaderboard?rarity=RARE"

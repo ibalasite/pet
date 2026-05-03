@@ -69,6 +69,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
 
   Scenario: Admin bans a pet with a reason
     Given the admin is on "/admin/pets" and can see a pet with petId "bad-pet-001"
+    And POST /admin/api/pets/bad-pet-001/ban responds HTTP 200
     When the admin clicks the "Ban" button on the pet row
     And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters in the PetBanModal.vue reason field
     And the admin clicks "Confirm Ban"
