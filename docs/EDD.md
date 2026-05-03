@@ -224,6 +224,7 @@ Table: pets
 id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
 seed             BIGINT       NOT NULL UNIQUE  -- procedural generation seed; globally unique
 rarity           VARCHAR(10)  NOT NULL  CHECK (rarity IN ('COMMON','RARE','EPIC','LEGENDARY'))
+pet_name         VARCHAR(64)  NOT NULL  -- Auto-generated from species + color combination at claim time
 stat_speed       SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_speed BETWEEN 1 AND 100)
 stat_strength    SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_strength BETWEEN 1 AND 100)
 stat_stamina     SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_stamina BETWEEN 1 AND 100)
@@ -271,7 +272,7 @@ INDEXES:
 Notes:
 - Raw email is only held in memory during the claim transaction and in SendGrid delivery. The database stores only the encrypted form and the hash for lookup.
 - On GDPR deletion request: `email_encrypted` is set to NULL, `deletion_requested_at` recorded. Background job replaces with hash-only record within 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days; system completes within 24 hours per GDPR_EMAIL_HASHING_INTERNAL_SLA).
-- IP addresses are never stored raw; hashed IP retained 90 days for abuse monitoring (IP_ADDRESS_LOG_RETENTION = 90 days).
+- IP addresses are never stored raw; hashed IP retained 90 days for abuse monitoring (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 
 ### §4.3 ClaimCode (OTP Token)
 
@@ -363,7 +364,7 @@ INDEXES:
 ```
 
 Notes:
-- Snapshot stores top 500 pets (LEADERBOARD_SNAPSHOT_TOP_N = 500). Retention is rolling 12 months (LEADERBOARD_SNAPSHOT_RETENTION = 12 months).
+- Snapshot stores top 500 pets (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500). Retention is rolling 12 months (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12 months).
 - Live leaderboard is authoritative from Redis sorted set. Snapshots are the durable backup used for historical reporting.
 - Score formula: `win_rate × battles_played × level_multiplier` (ARENA_SCORE_FORMULA from CONSTANTS).
 
@@ -398,7 +399,7 @@ redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤1
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
 redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
 redis_key: matchmaking:queue:{mode}      NO TTL       Redis List (LPUSH / BRPOP)
-redis_key: session:admin:{session_id}    TTL: 14400s  Value: admin user info JSON
+redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, role, createdAt (ISO), absExpiry: createdAt+28800s }; TTL=14400s enforces inactivity; absExpiry field validated on each request for 8h absolute cap
 ```
 
 ### §4.9 AdminUser
@@ -408,7 +409,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: admin user info JSO
 | id | UUID | PK DEFAULT gen_random_uuid() | |
 | username | VARCHAR(64) | NOT NULL UNIQUE | Display name for audit log |
 | password_hash | TEXT | NOT NULL | bcrypt, min 12 rounds |
-| totp_secret_encrypted | TEXT | NULL | Encrypted TOTP secret (set at first login) |
+| totp_secret_encrypted | TEXT | NULL | Encrypted TOTP secret (set via POST /admin/api/auth/totp/setup before first authenticated login) |
 | role | VARCHAR(32) | NOT NULL DEFAULT 'moderator' | 'super_admin' \| 'moderator' \| 'read_only' |
 | last_login_at | TIMESTAMPTZ | NULL | |
 | failed_attempts | SMALLINT | NOT NULL DEFAULT 0 | Reset on success |
@@ -447,6 +448,20 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: admin user info JSO
 
 **Indexes**: idx_trade_records_listing_pet ON trade_records(listing_pet_id); idx_trade_records_completed ON trade_records(completed_at DESC)
 
+### §4.12 GdprRequest
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| id | UUID | PK DEFAULT gen_random_uuid() | Returned as jobId in API response |
+| pet_id | UUID | NOT NULL REFERENCES pets(id) | Requesting pet |
+| request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' |
+| status | VARCHAR(32) | NOT NULL DEFAULT 'pending' | 'pending' \| 'processing' \| 'completed' \| 'failed' |
+| submitted_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+| completed_at | TIMESTAMPTZ | NULL | |
+| admin_notes | TEXT | NULL | Filled by admin on completion |
+
+**Indexes**: idx_gdpr_requests_pet_id ON gdpr_requests(pet_id); idx_gdpr_requests_status ON gdpr_requests(status, submitted_at)
+
 ---
 
 ## §5. API Design
@@ -462,7 +477,7 @@ All player-facing API routes use `/api/v1/` prefix. Backward compatibility maint
 }
 ```
 
-HTTP status codes: 200 (success), 201 (created), 400 (bad request), 401 (unauthenticated), 403 (forbidden), 404 (not found), 409 (conflict), 429 (rate limited), 500 (server error).
+HTTP status codes: 200 (success), 201 (created), 202 (async job accepted, returns jobId), 400 (bad request), 401 (unauthenticated), 403 (forbidden), 404 (not found), 409 (conflict), 429 (rate limited), 500 (server error).
 
 ### §5.1 Auth / Claim Flow Endpoints
 
@@ -528,8 +543,8 @@ Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOU
 Auth: None (public battle record)
 Response: `{ matchId, mode, petA: PetSummary, petB: PetSummary, winnerId, battleLog, completedAt }`
 
-#### GET /api/v1/arena/history/:petToken
-Auth: Required (pet owner token) or public via petId
+#### GET /api/v1/arena/history/:petId
+Auth: Pet token (via header/query)
 Description: Last 20 battles for a pet (ARENA_BATTLE_RECORDS_DISPLAY = 20).
 Response: `{ petId, battles: [{matchId, mode, opponentId, result, completedAt}], summary: {wins, losses, winRate} }`
 
@@ -552,8 +567,8 @@ All admin endpoints require admin session cookie (httpOnly, SameSite=Strict). Ra
 
 #### POST /admin/api/auth/login
 Auth: None (TOTP + password)
-Request: `{ username: string, password: string, totpCode: string }`
-Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY / ABSOLUTE_EXPIRY)
+Request: `{ username: string, password: string, totpCode?: string }`
+Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY / ADMIN_SESSION_ABSOLUTE_EXPIRY)
 
 #### POST /admin/api/auth/totp/setup
 Auth: Admin session (first-login or TOTP-not-yet-enrolled)
@@ -614,11 +629,11 @@ Response: `{ jobId: string, estimatedCompletion: ISO8601 }`
 Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW).
 
 #### POST /admin/api/battles/:matchId/flag
-Auth: Admin session (Moderator)
+Auth: Admin session (Moderator+)
 Description: Flag a battle as suspicious; writes to audit log; increments bot_detection counter
 
 #### DELETE /admin/api/battles/:matchId/flag
-Auth: Admin session (Moderator)
+Auth: Admin session (Moderator+)
 Description: Remove a flag from a battle
 
 #### GET /admin/api/audit
@@ -639,6 +654,8 @@ No persistent accounts exist — players identify via pet token. GDPR requests a
 ```json
 { "type": "erasure" | "data_access" | "restrict_processing", "petToken": "<token>" }
 ```
+
+**Response** (`POST /api/v1/gdpr/request`): HTTP 202 `{ jobId: string, message: string }`
 
 **SLAs** (from CONSTANTS):
 - Erasure: `GDPR_EMAIL_DELETION_WINDOW = 7 days`
@@ -717,9 +734,9 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 
 - **Data minimization**: Only email hash + encrypted email stored. Raw email never written to database or logs.
 - **Right to erasure**: Email encrypted field nulled within 24 hours of request; SHA-256 hash retained for anti-re-registration. Full compliance SLA: 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days).
-- **Right of access / portability**: JSON export of pet data, battle records, training logs delivered within 30 days (GDPR_DATA_ACCESS_RESPONSE / PORTABILITY_RESPONSE = 30 days).
-- **Right to restrict processing**: Applied within 24 hours (GDPR_RESTRICT_PROCESSING_RESPONSE = 24 hours).
-- **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION = 90 days).
+- **Right of access / portability**: JSON export of pet data, battle records, training logs delivered within 30 days (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 / GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30).
+- **Right to restrict processing**: Applied within 24 hours (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24).
+- **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 - **COPPA**: Age-13 confirmation checkbox required on claim form; label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
 - **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years).
 - **CAN-SPAM**: All emails are transactional; no marketing email without separate opt-in consent.
@@ -912,7 +929,7 @@ The admin portal is deployed as a separate Vite application. It shares backend A
 - **Moderation reason field**: Max 500 characters, required for all ban/unban/flag actions (ADMIN_MODERATION_REASON_MAX_CHARS = 500)
 - **TOTP**: RFC 6238 required for admin login; 6-digit, 30-second window; backup codes generated on setup
 - **IP allowlist**: Admin portal optionally restricted to operator IP ranges via environment variable configuration
-- **Performance**: Pages load in ≤3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME = 3s); single moderator can handle 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS = 100)
+- **Performance**: Pages load in ≤3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME = 3s); single moderator can handle 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100)
 
 ---
 
@@ -1104,7 +1121,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Admin portal: Login + basic pet list view (Moderator role only)
 
 **Exit criteria**:
-- 20 invited alpha testers successfully claim and access their pets. Claim conversion rate ≥7% (CLAIM_CONVERSION_ALPHA_GO = 7%).
+- 20 invited alpha testers successfully claim and access their pets. Claim conversion rate ≥7% (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%).
 - Core pet display: PetCanvas renders claimed pet with correct sprite, stats, and level.
 - Basic leaderboard: Top 100 leaderboard returns correct data from seeded test data (no live battles required in Phase 1 — arena is Phase 2 scope).
 
@@ -1118,14 +1135,14 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Training system: `POST /api/v1/pet/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD = 3 days)
 - Food buff system: FoodBuff table; `/api/v1/pet/:petId/feed`
 - Arena matchmaking: Redis queue; 30-second timeout; AI fallback; battle calculation with seeded ±15% modifier
-- Arena API: `POST /api/v1/arena/enter`, `GET /api/v1/arena/match/:id`, `GET /api/v1/arena/history/:petToken`
+- Arena API: `POST /api/v1/arena/enter`, `GET /api/v1/arena/match/:id`, `GET /api/v1/arena/history/:petId`
 - Leaderboard: Redis sorted set (authoritative) + PostgreSQL snapshots; `GET /api/v1/leaderboard`; ≤30s update lag
 - Arena rate limiting: Redis counter 10 battles/hr per pet (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10)
 - Bot detection: Auto-flag pets >50 battles/60-min rolling window (BOT_DETECTION_BATTLES_THRESHOLD = 50)
 - Frontend: Arena page, Battle result page, Leaderboard page, Battle records page, Training page
 - Admin portal: Leaderboard management, suspicious activity dashboard, runtime config tuning
 
-**Exit criteria**: 50 daily arena battles (ARENA_BATTLES_BETA_GA_MIN = 50 battles/day). Day-7 retention ≥25% (DAY_7_RETENTION_TARGET = 25%). 500 beta users via itch.io + Discord rollout (BETA_AUDIENCE = 500).
+**Exit criteria**: 50 daily arena battles (ARENA_BATTLES_BETA_GA_MIN_PER_DAY = 50 battles/day). Day-7 retention ≥25% (DAY_7_RETENTION_TARGET_PERCENT = 25%). 500 beta users via itch.io + Discord rollout (BETA_AUDIENCE_APPROX = 500).
 
 ### §13.3 Phase 3 — Marketplace + Admin Full Feature (GA)
 
@@ -1138,7 +1155,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Performance hardening: Lighthouse CI gate (LCP <2.5s, FCP <1.5s, CLS <0.1); load testing at 500 RPS
 - Security hardening: CSP header with nonce-based script policy; full OWASP Top 10 review
 
-**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET = 10,000). All admin GDPR workflows operational.
+**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). All admin GDPR workflows operational.
 
 ---
 
