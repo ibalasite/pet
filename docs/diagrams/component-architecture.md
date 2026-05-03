@@ -46,7 +46,7 @@ graph TB
         end
         subgraph RedisStore["Redis 7+ — Upstash (serverless)"]
             RLCounters["Rate-limit counters\nrl:claim:{email_hash}\nrl:arena:{pet_id}\nrl:code_entry:{session_id}\nrl:admin:{admin_id}"]
-            Leaderboard["Leaderboard sorted set\nleaderboard:global\n(ZADD / ZRANGEBYSCORE)"]
+            Leaderboard["Leaderboard sorted set\nleaderboard:global\n(ZADD / ZRANGE REV LIMIT)"]
             Matchmaking["Matchmaking queue\nmatchmaking:queue:RACE\nmatchmaking:queue:SUMO"]
             Sessions["Admin sessions\nsession:admin:{session_id}\nTTL 14400 s (4 h — admin_session_inactivity_expiry_hours = 4)"]
             TokenBL["Token blacklist\ntoken:blacklist:{token_hash}\nTTL 259200 s (72 h — claim_token_cleanup_ttl_hours = 72)"]
@@ -79,7 +79,7 @@ graph TB
     GameAPI -->|reads + writes| PGPrimary
     GameAPI -->|reads| PGReplica
     GameAPI -->|rate limits| RLCounters
-    GameAPI -->|ZADD / ZRANGEBYSCORE| Leaderboard
+    GameAPI -->|ZADD / ZRANGE REV LIMIT| Leaderboard
     GameAPI -->|ZADD / ZRANGEBYSCORE| Matchmaking
     GameAPI -->|token blacklist check| TokenBL
     GameAPI -->|GET config| ConfigCache
