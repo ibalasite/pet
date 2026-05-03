@@ -133,7 +133,7 @@ COMMENT ON COLUMN pets.claimed_at IS 'UTC timestamp when the email-OTP claim flo
 COMMENT ON COLUMN pets.owner_token_hash IS 'SHA-256 hash of the pet access token (minimum pet_access_token_min_bytes = 32 bytes). NULL = unclaimed. Raw token is never stored.';
 COMMENT ON COLUMN pets.claim_identity_id IS 'Set at claim time. Enables GDPR erasure lookup after claim_codes rows are purged.';
 COMMENT ON COLUMN pets.reserved_until IS 'Set to NOW() + pet_reservation_ttl_hours hours (pet_reservation_ttl_hours = 24) when pet is generated for guest preview. NULL for claimed pets. Cleanup job target.';
-COMMENT ON COLUMN pets.generation_meta IS 'JSONB vector: {body, head, color_palette, accessory, rarity_trait, pattern} — 6 dimensions per pet_generation_dimensions.';
+COMMENT ON COLUMN pets.generation_meta IS 'JSONB vector: {body, head, color_palette, accessory, rarity_trait, pattern} — 6 dimensions (pet_generation_dimensions = 6).';
 COMMENT ON COLUMN pets.is_banned IS 'TRUE = pet is banned from arena and removed from leaderboard:global via ZREM (reflected within leaderboard_ban_reflection_time_minutes = 5 minutes). Paired with banned_at and banned_reason (enforced by chk_pet_banned_at_consistency and chk_pet_banned_reason_consistency).';
 COMMENT ON COLUMN pets.banned_at IS 'UTC timestamp when the ban was applied. NULL iff is_banned = FALSE (enforced by chk_pet_banned_at_consistency). Immutable after ban — not reset if a ban is reviewed or overridden via a future unban flow.';
 COMMENT ON COLUMN pets.banned_reason IS 'Admin-supplied ban reason. Max 500 characters (admin_moderation_reason_max_chars).';
@@ -634,7 +634,7 @@ COMMENT ON COLUMN gdpr_requests.status IS 'pending | processing | completed | fa
 COMMENT ON COLUMN gdpr_requests.submitted_at IS 'UTC timestamp when the request was submitted. Doubles as the row creation timestamp (this table has no separate created_at). Defaults to NOW(). FIFO sort key for the admin work queue (idx_gdpr_requests_status ORDER BY submitted_at).';
 COMMENT ON COLUMN gdpr_requests.completed_at IS 'Set when status transitions to completed or failed. NULL while status is pending or processing (enforced by chk_gdpr_request_completed_at_consistency).';
 COMMENT ON COLUMN gdpr_requests.updated_at IS 'Timestamp of the last status transition or admin_notes update. Required to populate the updatedAt field in PATCH /admin/api/gdpr/:requestId response. Updated by application on every status change.';
-COMMENT ON COLUMN gdpr_requests.admin_notes IS 'Filled by admin on completion or status update. Also used for admin-initiated erasure reason (max 500 chars per admin_moderation_reason_max_chars).';
+COMMENT ON COLUMN gdpr_requests.admin_notes IS 'Filled by admin on completion or status update. Also used for admin-initiated erasure reason (max 500 chars; admin_moderation_reason_max_chars = 500).';
 ```
 
 ```sql
@@ -840,7 +840,7 @@ The `pets.claim_identity_id` FK enables the erasure job to find all pets belongi
 SELECT id FROM pets WHERE claim_identity_id = $1;
 ```
 
-This avoids depending on the ephemeral `claim_codes` table, which is purged 72 hours after use. The partial index `idx_pets_claim_identity` supports this scan efficiently.
+This avoids depending on the ephemeral `claim_codes` table, which is purged 72 hours after creation or first use, whichever is later (`claim_token_cleanup_ttl_hours = 72`). The partial index `idx_pets_claim_identity` supports this scan efficiently.
 
 ### 6.6 Single-Column Support Indexes
 
