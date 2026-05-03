@@ -691,10 +691,10 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 
 | Key Pattern | TTL | Value | Notes |
 |-------------|-----|-------|-------|
-| `rl:claim:{email_hash}` | 3600 s | Integer attempt count | Email claim initiation. Limit: 5/hr per email (`email_claim_attempts_per_hour_per_email = 5`). Fail-open if Redis unavailable. |
+| `rl:claim:{email_hash}` | 3600 s | Integer attempt count | Email claim initiation. Limit: 5/hr per email (`email_claim_attempts_per_hour_per_email = 5`). Window = 1 h = 3600 s (implicit: no separate window-seconds constant; derived from `email_claim_attempts_per_hour_per_email`). Fail-open if Redis unavailable. |
 | `rl:claim:cooldown:{email_hash}` | 60 s | `"1"` | Set when limit is reached. Blocks further attempts during cooldown. TTL = `claim_email_retry_cooldown_seconds = 60`. Returns HTTP 429 with `Retry-After: 60`. |
-| `rl:arena:{pet_id}` | 3600 s | Integer battle count | Arena battles per pet. Default limit: 10/hr (`arena_battles_per_pet_per_hour_default = 10`); admin-tunable 1–50. Fail-open. |
-| `rl:code_entry:{session_id}` | 900 s | Integer attempt count | OTP code entry. Limit: 10/session (`claim_code_entry_attempts_per_session = 10`). **Fail-closed** — code entry is blocked if Redis is unavailable. |
+| `rl:arena:{pet_id}` | 3600 s | Integer battle count | Arena battles per pet. Default limit: 10/hr (`arena_battles_per_pet_per_hour_default = 10`); admin-tunable 1–50 (`arena_battles_per_pet_per_hour_admin_min = 1`, `arena_battles_per_pet_per_hour_admin_max = 50`). Window = 1 h = 3600 s (`arena_rate_limit_counter_window_hours = 1`). Fail-open. |
+| `rl:code_entry:{session_id}` | 900 s | Integer attempt count | OTP code entry. Limit: 10/session (`claim_code_entry_attempts_per_session = 10`). Window = 15 min = 900 s (`claim_code_expiry_minutes = 15`; the code-entry window matches the OTP validity window). **Fail-closed** — code entry is blocked if Redis is unavailable. |
 | `rl:code_entry:cooldown:{session_id}` | 60 s | `"1"` | Set when code entry limit is reached. TTL matches `claim_email_retry_cooldown_seconds = 60` (no separate constant defined for code-entry cooldown). HTTP 429 with `Retry-After: 60`. |
 | `rl:admin_login:{ip_hash}` | 900 s | Integer attempt count | Pre-auth admin login IP rate limit. Limit: 10 attempts per 15 min (`admin_login_ip_rate_limit_attempts = 10`, `admin_login_ip_rate_limit_window_seconds = 900`). |
 | `rl:admin:{admin_id}` | 60 s | Integer request count | Per-authenticated-admin request rate limit. Limit: 100/min (`admin_portal_requests_per_minute_per_account = 100`). |
