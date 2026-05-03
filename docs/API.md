@@ -219,7 +219,7 @@ The `details` field is optional and only populated when additional structured co
 |-------------|---------|
 | 200 | Success |
 | 201 | Created |
-| 202 | Accepted (async job queued; `jobId` returned) |
+| 202 | Accepted (async job queued; player endpoints return `jobId`; admin GDPR delete returns `requestId`) |
 | 400 | Bad Request (validation error, business rule violation) |
 | 401 | Unauthenticated (missing or invalid token/session) |
 | 403 | Forbidden (insufficient permissions, account locked, pet banned) |
@@ -2172,7 +2172,7 @@ Initiates an admin-triggered erasure request (e.g. for a support ticket). Email 
 {
   "success": true,
   "data": {
-    "jobId": "d4e5f6a7-b8c9-0123-defa-bc4567890123",
+    "requestId": "d4e5f6a7-b8c9-0123-defa-bc4567890123",
     "estimatedCompletion": "2026-05-10T09:00:00Z"
   },
   "error": null
