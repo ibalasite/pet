@@ -434,7 +434,7 @@ Generates a new unclaimed random pet for guest display. No authentication requir
 {
   "success": true,
   "data": {
-    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "seed": 7381923847561029,
     "rarity": "RARE",
     "petName": "Crimson Vexor",
@@ -561,7 +561,11 @@ Returns the full stats panel for a pet including training history summary. *(EDD
 
 | Field | Description |
 |-------|-------------|
-| `actionsRemainingToday` | Max 3 actions per UTC day (`training_actions_per_day = 3`). Resets at UTC 00:00. |
+| `totalTrainingActions` | Cumulative count of all training actions performed on this pet. |
+| `trainingActionsToday` | Number of training actions used today (UTC day). Max 3 per day (`training_actions_per_day = 3`). |
+| `actionsRemainingToday` | Remaining training actions for the current UTC day. Resets at UTC 00:00. |
+| `lastTrainedAt` | ISO 8601 timestamp of the most recent training action. `null` if never trained. |
+| `isNeglected` | `true` if the pet has never been trained or was last trained more than 3 days ago (`training_neglect_threshold_days = 3`). |
 | `level` | `FLOOR(total_training_actions / 10)` capped at 100 (`pet_level_formula_divisor = 10`, `pet_level_max = 100`). |
 | `activeFoodBuffs` | Temporary food buffs currently active on this pet. |
 
@@ -2108,7 +2112,7 @@ Lists all GDPR requests with optional status and type filtering. For Super Admin
   "data": {
     "requests": [
       {
-        "id": "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8",
+        "requestId": "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8",
         "requestType": "erasure",
         "status": "pending",
         "submittedAt": "2026-05-01T09:00:00Z",
