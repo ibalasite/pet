@@ -488,7 +488,7 @@ CREATE TABLE marketplace_transactions (
 
 COMMENT ON COLUMN marketplace_transactions.listing_id IS 'FK to marketplace_listings (ON DELETE RESTRICT). uq_marketplace_transactions_listing UNIQUE constraint enforces exactly one completed transaction per listing. The RESTRICT prevents the listing row from being hard-deleted while a transaction references it.';
 COMMENT ON COLUMN marketplace_transactions.price_credits IS 'Sale price in food credits. Denormalized from marketplace_listings.price_credits at transaction time for financial audit immutability — the listing price could be amended before expiry but the transaction records the actual agreed price.';
-COMMENT ON COLUMN marketplace_transactions.pet_id IS 'Denormalised from listing for fast anti-flip queries. Anti-flip window: 7 days (marketplace_trade_antiflip_protection_days).';
+COMMENT ON COLUMN marketplace_transactions.pet_id IS 'Denormalized from listing for fast anti-flip queries. Anti-flip window: 7 days (marketplace_trade_antiflip_protection_days).';
 COMMENT ON COLUMN marketplace_transactions.seller_token_hash IS 'SHA-256 hash of the seller pet access token at time of sale.';
 COMMENT ON COLUMN marketplace_transactions.buyer_token_hash IS 'SHA-256 hash of the buyer pet access token at time of purchase.';
 COMMENT ON COLUMN marketplace_transactions.fee_credits IS '5% platform fee: FLOOR(price_credits * 0.05) — trade_transaction_fee_percent = 5. May be 0 for price_credits < 20.';
@@ -572,7 +572,7 @@ CREATE TABLE admin_audit_log (
 );
 
 COMMENT ON COLUMN admin_audit_log.id IS 'BIGSERIAL for monotonic log ordering.';
-COMMENT ON COLUMN admin_audit_log.admin_id IS 'Actor admin account. NULL for failed logins with an unrecognised username.';
+COMMENT ON COLUMN admin_audit_log.admin_id IS 'Actor admin account. NULL for failed logins with an unrecognized username.';
 COMMENT ON COLUMN admin_audit_log.action IS 'Dot-namespaced action string, e.g. pet.ban, config.arena_rate_limit, admin_user.deactivate.';
 COMMENT ON COLUMN admin_audit_log.target_type IS 'pet | arena_match | leaderboard_entry | config_runtime | config_economy | gdpr_request | admin_user.';
 COMMENT ON COLUMN admin_audit_log.target_id IS 'UUID or key of the affected entity.';
@@ -751,7 +751,7 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 
 | Key | TTL | Type | Notes |
 |-----|-----|------|-------|
-| `leaderboard:global` | None | Redis Sorted Set | Score = arena score (`win_rate × battles_played × level_multiplier`). Member = `pet_id`. Authoritative real-time source; PostgreSQL `leaderboard_snapshots` is the durable backup. Update lag target ≤ 30 s (`leaderboard_update_lag_max_seconds = 30`). Banned pets are removed via `ZREM` immediately on ban (reflected within 5 min; `leaderboard_ban_reflection_time_minutes = 5`). |
+| `leaderboard:global` | None | Redis Sorted Set | Score = arena score (`win_rate × battles_played × level_multiplier`). Member = `pet_id`. Authoritative real-time source; PostgreSQL `leaderboard_snapshots` is the durable backup. Update lag target ≤ 30 s (`leaderboard_update_lag_max_seconds = 30`). Banned pets are removed via `ZREM` immediately on ban (reflected within 5 min; `leaderboard_ban_reflection_time_minutes = 5`). Pet entries are also removed via `ZREM` during GDPR erasure processing. |
 
 ### 4.5 Config Cache
 
@@ -818,7 +818,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 
 ### 6.3 Leaderboard Query Pattern
 
-The live leaderboard is served exclusively from the Redis `leaderboard:global` sorted set (`ZRANGEBYSCORE`, `ZRANK` — O(log N)). The `leaderboard_snapshots` table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.
+The live leaderboard is served exclusively from the Redis `leaderboard:global` sorted set (`ZREVRANGE` for top-N retrieval, `ZREVRANK` for a pet's rank — both O(log N)). The `leaderboard_snapshots` table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.
 
 ### 6.4 Token Lookup Path
 
