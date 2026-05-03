@@ -522,6 +522,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-light-focus: #c49900;             /* §6.4 Focus on light bg */
 --primitive-light-info: #4a80cc;              /* §3.2 Info on light bg */
 --primitive-light-surface-hover: #d4d4e8;     /* Light hover surface — navy tint on light bg */
+--primitive-light-brand-secondary: #007a5e;   /* Darker teal for contrast on light bg */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -636,6 +637,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
     --color-focus: var(--primitive-light-focus);
     --color-info: var(--primitive-light-info);
     --color-surface-hover: var(--primitive-light-surface-hover);
+    --color-brand-secondary: var(--primitive-light-brand-secondary);
   }
 }
 
@@ -972,6 +974,7 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 | `--color-text-secondary` | `#4a4a7a` | `#6c6c9a` | 4.7:1 dark / 5.2:1 light | AA on both modes |
 | `--color-text-disabled` | `#7a7aaa` | `#4a4a6a` | 3.1:1 minimum | Meets AA large text only |
 | `--color-brand-primary` | `#4a3fd4` | `#c4b5fd` | 5.8:1 dark / 4.6:1 light | AA on both modes |
+| `--color-brand-secondary` | `#007a5e` | `#00b894` | 5.2:1 dark / 4.5:1 light | AA on both modes |
 | `--color-brand-accent` | `#c9930a` | `#fdcb6e` | 8.4:1 dark / 4.5:1 light | AAA dark / AA light |
 | `--color-rarity-legendary` | `#b07e00` | `#fdcb6e` | 8.4:1 dark / 5.1:1 light | AAA dark |
 | `--color-rarity-epic` | `#6a5fe8` | `#a29bfe` | 5.9:1 dark / 4.8:1 light | AA both |
@@ -989,6 +992,11 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 ### §6.5 Motion Tokens
 
 ```css
+/* =============================================
+   MOTION: Semantic Easing Aliases
+   ============================================= */
+--motion-ease-spring: var(--primitive-ease-spring);       /* Semantic alias — use for bouncy interactions */
+
 /* =============================================
    MOTION: Standard Interaction Tokens
    ============================================= */
