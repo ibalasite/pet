@@ -511,6 +511,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-light-brand-primary: #4a3fd4;
 --primitive-light-border-default: #9999bb;  /* use §6.4 canonical value */
 --primitive-light-border-strong: #9898c0;
+--primitive-light-brand-accent: #c9930a;    /* Dark gold for light bg — Legendary on light mode */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -614,6 +615,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
     --color-brand-primary: var(--primitive-light-brand-primary);
     --color-border-default: var(--primitive-light-border-default);
     --color-border-strong: var(--primitive-light-border-strong);
+    --color-brand-accent: var(--primitive-light-brand-accent);
   }
 }
 
