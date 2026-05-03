@@ -266,7 +266,7 @@ CREATE INDEX idx_arena_matches_winner        ON arena_matches (winner_pet_id);
 -- Leading pet_a_id / pet_b_id column also serves FK integrity scans (ON DELETE RESTRICT / SET NULL).
 CREATE INDEX idx_arena_matches_pet_a_history ON arena_matches (pet_a_id, completed_at DESC);
 CREATE INDEX idx_arena_matches_pet_b_history ON arena_matches (pet_b_id, completed_at DESC);
--- Supports GET /admin/api/battles?flagged=true and POST /admin/api/battles/:matchId/flag queries.
+-- Supports GET /admin/api/battles?flagged=true (filters WHERE is_flagged = TRUE). Flag/unflag mutations use the PK, not this index.
 CREATE INDEX idx_arena_matches_is_flagged    ON arena_matches (is_flagged) WHERE is_flagged = TRUE;
 ```
 
@@ -827,7 +827,7 @@ These full-table indexes cover FK scans, sort-only queries, and background job t
 - `idx_claim_codes_expires_at (expires_at)` — supports OTP verification filtering for unexpired codes (`WHERE expires_at > NOW()`) and the background job that identifies stale unverified codes. Not partial because all rows have a non-NULL `expires_at`.
 - `idx_claim_codes_created_at (created_at)` — supports the 72-hour background cleanup job which finds rows by creation time (`WHERE created_at < NOW() - INTERVAL '72 hours'`). Not partial because all rows have a non-NULL `created_at`.
 - `idx_arena_matches_completed_at (completed_at)` — supports admin list queries ordered by recency and serves as the sort key for leaderboard-adjacent analytics. Not partial because all rows have a non-NULL `completed_at`.
-- `idx_arena_matches_winner (winner_pet_id)` — supports the FK integrity scan for `winner_pet_id ON DELETE SET NULL`. Required because PostgreSQL needs an index on the referencing column when the referenced row is deleted.
+- `idx_arena_matches_winner (winner_pet_id)` — supports the FK integrity scan for `winner_pet_id ON DELETE SET NULL`. PostgreSQL does not require an index on the referencing column, but without one it falls back to a sequential scan of `arena_matches` whenever a `pets` row is deleted; the index prevents that O(N) scan at low cost given the low cardinality of `winner_pet_id` updates.
 - `idx_claim_codes_pet_id (pet_id)` — supports the FK CASCADE scan when a `pets` row is deleted (`ON DELETE CASCADE`). Also used by the OTP verification query `WHERE pet_id = $1 AND expires_at > NOW() AND used_at IS NULL`.
 - `idx_claim_codes_email_hash (email_hash)` — supports the OTP lookup query `WHERE email_hash = $1` to retrieve pending codes for a given email.
 - `idx_food_buffs_pet_id (pet_id)` — supports the FK CASCADE scan and the active-buff query `WHERE pet_id = $1 AND (expires_at IS NULL OR expires_at > NOW())`.
