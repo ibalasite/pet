@@ -746,7 +746,7 @@ Enters the authenticated pet into the matchmaking queue for an arena battle. Use
 | `opponentPetId` | UUID of the opponent pet. `null` when `isAiOpponent` is `true`. |
 | `isAiOpponent` | `true` when matched against the AI fallback. |
 | `statDelta` | Net stat value applied after buffs and the random modifier. |
-| `newLeaderboardScore` | Updated leaderboard score after this battle. Score formula: `win_rate × battles_played × level_multiplier`. |
+| `newLeaderboardScore` | Updated leaderboard score after this battle. Score formula: `win_rate * battles_played * level_multiplier`. |
 
 **Rate limit**: Default 10 battles/hour per pet (`arena_battles_per_pet_per_hour_default = 10`); range `[1, 50]` (`arena_rate_limit_admin_min = 1`, `arena_rate_limit_admin_max = 50`). HTTP 429 with `Retry-After` header on breach. The rate-limit counter is **not** incremented on a matchmaking timeout.
 
@@ -934,7 +934,7 @@ Returns the global leaderboard. Source: Redis sorted set (`leaderboard:global`).
 }
 ```
 
-Score formula: `win_rate × battles_played × level_multiplier` (`arena_score_formula` from `constants.json`).
+Score formula: `win_rate * battles_played * level_multiplier` (`arena_score_formula` from `constants.json`).
 
 **Error responses:**
 
@@ -1093,7 +1093,7 @@ Browse active marketplace listings.
 
 #### `POST /api/v1/marketplace/listings`
 
-Create a new listing. Min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`. Rarity multipliers: Common = 1, Rare = 2, Epic = 4, Legendary = 8 (`trade_min_price_formula_level_coeff = 100`, `trade_min_price_formula_rarity_coeff = 500`, `rarity_multiplier_*` values from `constants.json`). Anti-flip: Pet cannot be re-listed within **7 days** of its last completed purchase (`marketplace_trade_antiflip_protection_days = 7`).
+Create a new listing. Min price formula: `(pet_level * 100) + (rarity_multiplier * 500)`. Rarity multipliers: Common = 1, Rare = 2, Epic = 4, Legendary = 8 (`trade_min_price_formula_level_coeff = 100`, `trade_min_price_formula_rarity_coeff = 500`, `rarity_multiplier_*` values from `constants.json`). Anti-flip: Pet cannot be re-listed within **7 days** of its last completed purchase (`marketplace_trade_antiflip_protection_days = 7`).
 
 **Auth**: Required (pet owner token)
 
@@ -2441,7 +2441,7 @@ All paginated responses include a `meta` field in the envelope:
 }
 ```
 
-`total` is the count of all matching records (before pagination). Clients should use `Math.ceil(total / limit)` to determine the total number of pages. When `page × limit >= total`, the response `data` array will be empty (not an error).
+`total` is the count of all matching records (before pagination). Clients should use `Math.ceil(total / limit)` to determine the total number of pages. When `page * limit >= total`, the response `data` array will be empty (not an error).
 
 **Admin pet search**: Supports returning up to 1 million records efficiently, with response time ≤ 2 seconds (`admin_search_response_time_seconds = 2`).
 
