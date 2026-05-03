@@ -697,7 +697,11 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
      │                               │ [Battle animation: ARENA_MATCH_DURATION_MIN_SECONDS = 5 s
      │                               │  to ARENA_MATCH_DURATION_MAX_SECONDS = 15 s]
      │                               │ ZADD leaderboard:global  │               │
-     │                               │   score=arena_score member=pet_id        │
+     │                               │   score=arena_score member=winnerPetId   │
+     │                               │ ZADD leaderboard:global  │               │
+     │                               │   score=arena_score member=loserPetId    │
+     │                               │ [Both ZADDs in MULTI/EXEC pipeline for atomicity │
+     │                               │  — see §4.3 for full leaderboard update flow]    │
      │                               │─────────────────────────────────────────>│
      │  {matchId, result, ...}       │                          │               │
      │<──────────────────────────────│                          │               │
