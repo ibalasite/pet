@@ -917,6 +917,12 @@ Returns the global leaderboard. Source: Redis sorted set (`leaderboard:global`).
 
 Score formula: `win_rate × battles_played × level_multiplier` (`arena_score_formula` from `constants.json`).
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Invalid `rarity` value or non-integer `page`/`limit` |
+
 ---
 
 #### `GET /api/v1/leaderboard/rank/:petId`
@@ -1646,6 +1652,7 @@ Lists arena battles with optional filters.
 
 | HTTP | Code | Condition |
 |------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Malformed `from`/`to` ISO 8601 date, invalid `petId` UUID, or invalid `flagged` value |
 | 401 | `UNAUTHORIZED` | Admin session missing or invalid |
 
 ---
@@ -2328,6 +2335,7 @@ Returns product analytics time-series data.
 
 | HTTP | Code | Condition |
 |------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `from`/`to` (required) or unrecognised `metric` value |
 | 401 | `UNAUTHORIZED` | Admin session missing or invalid |
 
 ---
