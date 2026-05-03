@@ -574,7 +574,7 @@ Phase 1-2: Environment variable-based feature flags sufficient for MVP. Complete
 | `FF_TRAINING_SYSTEM` | `true` | Disable training actions |
 | `FF_FOOD_SYSTEM` | `true` | Disable food buff endpoints |
 | `FF_ARENA_RACE` | `true` | Disable Race arena mode |
-| `FF_ARENA_SUMO` | `false` | Enable/disable SUMO arena mode (Phase 1 gate) |
+| `FF_ARENA_SUMO` | `false` | Enable/disable SUMO arena mode (P1 gate — EDD Phase 2) |
 | `FF_LEADERBOARD` | `true` | Disable public leaderboard |
 | `FF_BATTLE_RECORDS` | `true` | Disable battle history endpoints |
 | `FF_RARITY_DISPLAY` | `false` | Enable rarity UI elements when ready (P1 gate) |
@@ -741,7 +741,7 @@ Arena Match Completion         Game API                    Redis            Post
      │                               │ ZADD leaderboard:global score member=loserPetId
      │                               │─────────────────────────>│               │
      │                               │ [Both ZADDs wrapped in Redis MULTI/EXEC pipeline for atomicity]
-     │                               │ [Update lag ≤30s per LEADERBOARD_UPDATE_LAG_SECONDS]
+     │                               │ [Update lag ≤30s per LEADERBOARD_UPDATE_LAG_MAX_SECONDS]
      │                               │                          │               │
      │                               │ [Every hour: snapshot job]               │
      │                               │ ZRANGEBYSCORE leaderboard:global (top 500)
@@ -818,14 +818,15 @@ Token revocation: Admin sets `owner_token_hash = NULL`. Recovery: new 32-byte to
 
 **Admin Identity Layer**:
 
-Three-factor admin authentication:
+Two-factor admin authentication (2FA per PRD NFR-SEC-11):
 - Factor 1: Username + bcrypt password hash (minimum 12 rounds work factor)
 - Factor 2: RFC 6238 TOTP (6-digit, 30-second window); mandatory — no session without TOTP enrollment
-- Factor 3: Server-side Redis session (httpOnly + SameSite=Strict cookie)
+
+Session management (post-2FA): Server-side Redis session issued after successful 2FA (httpOnly + SameSite=Strict cookie). The Redis session is the session management mechanism, not a third authentication factor.
 
 TOTP enrollment is enforced at first login: `TOTP_SETUP_REQUIRED` error with a short-lived setup token (HS256 JWT, 15-minute TTL) is returned when `totp_secret_encrypted IS NULL`. No authenticated session can be established until TOTP setup is complete.
 
-**Optional IP Allowlist**: The admin portal supports optional restriction to operator IP ranges via `ADMIN_ALLOWED_IPS` environment variable (comma-separated CIDR list). When set, requests from IPs outside the allowlist receive HTTP 403 `FORBIDDEN` before credential check. When unset, IP restriction is disabled (default). Documented in EDD §9.3.
+**IP Allowlist**: The admin portal supports restriction to operator IP ranges via `ADMIN_ALLOWED_IPS` environment variable (comma-separated CIDR list). When set, requests from IPs outside the allowlist receive HTTP 403 `FORBIDDEN` before credential check. **Accepted deviation from PRD NFR-ADMIN-07**: NFR-ADMIN-07 mandates IP allowlist in production; the implementation keeps it optional (default disabled) to allow flexible deployment environments. This deviation is accepted risk — teams deploying to production are expected to set `ADMIN_ALLOWED_IPS`. Documented in EDD §9.3.
 
 **Role Model**:
 
@@ -1156,7 +1157,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard: 
 | Pet canvas render | ≤ 2 s on load | PET_RENDER_ON_LOAD_SECONDS |
 | Pet interaction response | ≤ 200 ms | PET_INTERACTION_RESPONSE_MS |
 | Arena battle E2E | < 2 s | ARENA_BATTLE_E2E_SECONDS |
-| Leaderboard update | ≤ 30 s | LEADERBOARD_UPDATE_LAG_SECONDS |
+| Leaderboard update | ≤ 30 s | LEADERBOARD_UPDATE_LAG_MAX_SECONDS |
 | Email delivery P90 | ≤ 60 s | EMAIL_DELIVERY_P90_SECONDS |
 | Error rate | < 1% | ERROR_RATE_MAX_PERCENT |
 | Email delivery failure rate | < 2% | EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT |
