@@ -8,10 +8,10 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
 
   Scenario: Admin submits valid credentials with TOTP code and is redirected to dashboard
     Given the LoginPage.vue renders an ElForm with an email input, password input, and TOTP code input
+    And POST /admin/api/auth/login responds HTTP 200 with Set-Cookie: session=<id>; HttpOnly; SameSite=Strict; Secure; Path=/admin
     When the admin enters valid "email", "password", and a current "totpCode"
     And clicks the "Login" button
     Then POST /admin/api/auth/login is called with body {"email": "...", "password": "...", "totpCode": "..."}
-    And the server responds HTTP 200 with Set-Cookie: session=<id>; HttpOnly; SameSite=Strict; Secure; Path=/admin
     And the Pinia useAdminAuthStore sets isAuthenticated = true and the role field
     And Vue Router navigates to "/admin/dashboard"
     And the totpCode value is cleared from the Vue component state immediately after submission
@@ -27,18 +27,21 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: Invalid admin credentials return inline error
     Given the admin has entered an incorrect password
     And POST /admin/api/auth/login responds HTTP 401 with error code "UNAUTHORIZED"
+    When the admin clicks the "Login" button
     Then an inline error message "Invalid credentials." is shown on the LoginPage ElForm
     And the user remains on "/admin/login"
 
   Scenario: Account locked after repeated failed logins — lock message displayed
     Given the admin has made (admin_login_lockout_threshold = 10) consecutive failed login attempts
     And POST /admin/api/auth/login responds HTTP 403 with error code "ACCOUNT_LOCKED" and "unlockedAt"
+    When the admin clicks the "Login" button
     Then the LoginPage shows the account is locked and displays the unlock time from the "unlockedAt" field
     And the lock lasts (admin_login_lockout_duration_minutes = 30) minutes
 
   Scenario: IP rate limit on login — 15-minute countdown shown
     Given the IP address has made (admin_login_ip_rate_limit_attempts = 10) requests within (admin_login_ip_rate_limit_window_seconds = 900) seconds (15 minutes)
     And POST /admin/api/auth/login responds HTTP 429
+    When the admin submits the login form
     Then a rate-limit message is displayed with a countdown of up to 900 seconds
 
   Scenario: Unauthenticated access to admin route redirects to login

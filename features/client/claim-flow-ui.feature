@@ -9,11 +9,11 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
 
   Scenario: Guest submits valid email and age confirmation — advances to OTP step
     Given the ClaimEmailForm shows an email input field and an age confirmation checkbox "I am at least 13 years old"
+    And POST /api/v1/claim/request responds HTTP 200 with "claimId" and "expiresAt"
     When the guest enters a valid email "player@example.com"
     And the guest checks the age confirmation checkbox
     And the guest clicks "Send Claim Code"
     Then POST /api/v1/claim/request is called with body {"email": "player@example.com", "petId": "<petId>", "ageConfirmed": true}
-    And the server responds HTTP 200 with "claimId" and "expiresAt"
     And the Zustand claim slice stores the claimId via setClaimId()
     And the ClaimFlow advances to step "code" rendering the ClaimCodeForm
 
@@ -27,7 +27,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
   Scenario: Already-claimed pet shows inline error
     Given the pet being claimed already has an owner
     And POST /api/v1/claim/request responds HTTP 400 with error code "ALREADY_CLAIMED"
-    When the response is received
+    When the guest submits the claim email form
     Then an inline error message "This pet is already owned." is shown on the ClaimEmailForm
     And the user remains on step "email"
 
@@ -43,10 +43,10 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
   Scenario: Guest enters correct 6-digit OTP within expiry window — advances to reveal
     Given the ClaimCodeForm is visible (step "code")
     And the OTP "123456" is valid and was issued within (claim_code_expiry_minutes = 15) minutes
+    And POST /api/v1/claim/verify responds HTTP 200 with "petToken", "petId", and "petUrl"
     When the guest enters "123456" in the (claim_code_digits = 6)-digit OTP input
     And the guest clicks "Verify Code"
     Then POST /api/v1/claim/verify is called with body {"claimId": "<claimId>", "code": "123456"}
-    And the server responds HTTP 200 with "petToken", "petId", and "petUrl"
     And setPetToken(petToken) writes the token to localStorage under key "pet_token"
     And the Zustand claim slice advances to step "reveal" via setClaimStep('reveal')
 

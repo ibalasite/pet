@@ -11,10 +11,10 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
   Scenario: Owner performs a RUN training action and StatChangeIndicator appears
     Given the TrainingPage renders three TrainingActionCard components labeled "RUN", "STRENGTH", and "STAMINA"
     And the "actionsRemainingToday" value is 3 (training_actions_per_day = 3)
+    And POST /api/v1/training responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
     When the owner clicks the "Train" button on the "RUN" action card
     Then POST /api/v1/training is called with body {"training_type": "RUN"}
     And the Authorization header contains the Bearer token from localStorage
-    And the server responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
     And the StatChangeIndicator component appears showing "+X Speed"
     And the StatChangeIndicator is visible for (training_stat_display_duration_seconds = 2) seconds then disappears
     And the Speed StatBar in StatsPanel animates to the new speed value
@@ -67,6 +67,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   Scenario: HTTP 401 during training clears token and redirects to home
     Given the owner is on the TrainingPage
-    When POST /api/v1/training responds HTTP 401
+    And POST /api/v1/training responds HTTP 401
+    When the owner clicks the "Train" button on any action card
     Then the "pet_token" key is removed from localStorage via clearPetToken()
     And the app navigates to "/"
