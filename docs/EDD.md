@@ -53,7 +53,7 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | P99_API_LATENCY_WRITE | <500 | ms at 100 RPS | Training, arena write endpoints |
 | GDPR_EMAIL_DELETION_WINDOW | 7 | days | Email → SHA-256 hash |
 | GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS | 24 | hours | Internal SLA for email hash completion |
-| TRADE_TRANSACTION_FEE | 5 | percent | Platform fee on trades |
+| TRADE_TRANSACTION_FEE | 5 | percent | Platform fee on trades; within BRD-defined range of 5–10% (TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5, TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10) |
 | FOOD_BUFF_RECORD_RETENTION | 30 | days | After expiry/consumption |
 | MVP_BUDGET | 40,000 | USD | Hard constraint |
 
@@ -311,11 +311,11 @@ Notes:
 Table: arena_matches
 ──────────────────────────────────────────────────────
 id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-pet_a_id         UUID         NOT NULL REFERENCES pets(id)
-pet_b_id         UUID         NULL REFERENCES pets(id) -- NULL if AI opponent
+pet_a_id         UUID         NOT NULL REFERENCES pets(id) ON DELETE RESTRICT  -- challenger; pet row retained for audit integrity
+pet_b_id         UUID         NULL REFERENCES pets(id) ON DELETE SET NULL  -- NULL if AI opponent or if pet row removed
 is_ai_opponent   BOOLEAN      NOT NULL DEFAULT FALSE
 mode             VARCHAR(10)  NOT NULL CHECK (mode IN ('RACE','SUMO'))
-winner_pet_id    UUID         NULL REFERENCES pets(id)
+winner_pet_id    UUID         NULL REFERENCES pets(id) ON DELETE SET NULL  -- NULL if draw (tie-break prevents this) or pet removed
 random_seed      BIGINT       NOT NULL  -- seeded random for ±15% modifier reproducibility
 stat_delta_a     SMALLINT     NOT NULL DEFAULT 0  -- net stat value used for pet_a after buff
 stat_delta_b     SMALLINT     NOT NULL DEFAULT 0
@@ -400,7 +400,8 @@ INDEXES:
 The following are Redis key patterns (not PostgreSQL tables):
 
 ```
-redis_key: rl:claim:{email_hash}         TTL: 3600s   Value: attempt count (≤5)
+redis_key: rl:claim:{email_hash}         TTL: 3600s   Value: attempt count (≤5); enforces AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5
+redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set on 5th failed attempt; CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
 redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10 default)
 redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤10)
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
@@ -450,8 +451,8 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | id | UUID | PK DEFAULT gen_random_uuid() | |
-| listing_id | UUID | NOT NULL REFERENCES marketplace_listings(id) | Originating listing (canonical FK; enables audit trail and dispute resolution) |
-| pet_id | UUID | NOT NULL REFERENCES pets(id) | Pet traded (denormalised from listing for fast anti-flip queries) |
+| listing_id | UUID | NOT NULL REFERENCES marketplace_listings(id) ON DELETE RESTRICT | Originating listing; immutable audit trail — listing row must be retained |
+| pet_id | UUID | NOT NULL REFERENCES pets(id) ON DELETE RESTRICT | Pet traded (denormalised from listing for fast anti-flip queries) |
 | seller_token_hash | TEXT | NOT NULL | Hashed access token of seller |
 | buyer_token_hash | TEXT | NOT NULL | Hashed access token of buyer |
 | price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Food credits |
@@ -466,7 +467,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | id | UUID | PK DEFAULT gen_random_uuid() | Used as listingId in API |
-| pet_id | UUID | NOT NULL REFERENCES pets(id) | Pet being listed |
+| pet_id | UUID | NOT NULL REFERENCES pets(id) ON DELETE RESTRICT | Pet being listed; a listed pet cannot be deleted while an active listing exists |
 | seller_token_hash | TEXT | NOT NULL | Hashed seller access token (ownership verification) |
 | price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Asking price in food credits |
 | status | VARCHAR(16) | NOT NULL DEFAULT 'active' | 'active' \| 'cancelled' \| 'sold' |
@@ -483,9 +484,9 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | id | UUID | PK DEFAULT gen_random_uuid() | Returned as jobId in API response |
-| claim_identity_id | UUID | NOT NULL REFERENCES claim_identities(id) | Data subject (email identity); a single erasure covers all pets under this identity |
+| claim_identity_id | UUID | NOT NULL REFERENCES claim_identities(id) ON DELETE RESTRICT | Data subject (email identity); a single erasure covers all pets under this identity; RESTRICT prevents identity deletion before all GDPR requests are resolved |
 | initiating_pet_id | UUID | NULL REFERENCES pets(id) ON DELETE SET NULL | Pet whose token authenticated the self-service submission; NULL for admin-initiated requests |
-| request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' |
+| request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' \| 'object_leaderboard' — CHECK (request_type IN ('erasure','data_access','restrict_processing','object_leaderboard')) |
 | status | VARCHAR(32) | NOT NULL DEFAULT 'pending' | 'pending' \| 'processing' \| 'completed' \| 'failed' |
 | submitted_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 | completed_at | TIMESTAMPTZ | NULL | |
@@ -508,7 +509,11 @@ All player-facing API routes use `/api/v1/` prefix. Backward compatibility maint
 }
 ```
 
-HTTP status codes: 200 (success), 201 (created), 202 (async job accepted, returns jobId), 400 (bad request), 401 (unauthenticated), 403 (forbidden), 404 (not found), 409 (conflict), 429 (rate limited), 500 (server error).
+HTTP status codes: 200 (success), 201 (created), 202 (async job accepted, returns jobId), 400 (bad request), 401 (unauthenticated), 403 (forbidden), 404 (not found), 408 (request timeout — matchmaking), 409 (conflict), 429 (rate limited), 500 (server error).
+
+**Global error defaults (applies to ALL endpoints unless overridden)**: All authenticated endpoints return HTTP 401 `UNAUTHORIZED` for missing/invalid tokens. All write endpoints return HTTP 404 `NOT_FOUND` for unknown resource IDs. All endpoints return HTTP 400 `VALIDATION_ERROR` for schema violations. Admin mutation endpoints return HTTP 403 `FORBIDDEN` for insufficient role. Admin config write endpoints return HTTP 400 `OUT_OF_RANGE` when a parameter exceeds the CONSTANTS-defined admin-tunable range. `POST /admin/api/roles` returns HTTP 409 `CONFLICT` on duplicate username. Admin login returns HTTP 403 `ACCOUNT_LOCKED` when `locked_until > NOW()`.
+
+**Player-facing endpoints — additional error defaults**: `POST /api/v1/claim` returns HTTP 404 `PET_NOT_FOUND` for unknown petId and HTTP 400 `AGE_CONFIRMATION_REQUIRED` if `ageConfirmed` is false. `POST /api/v1/pet/:petId/train` returns HTTP 403 `NOT_OWNER` for non-owner token. `POST /api/v1/arena/enter` returns HTTP 403 `PET_BANNED` for banned pets.
 
 ### §5.1 Auth / Claim Flow Endpoints
 
@@ -517,7 +522,7 @@ Auth: None (rate-limited by email)
 Description: Initiate the claim flow — sends 6-digit code to email.
 Request: `{ email: string, petId: string, ageConfirmed: boolean }`
 Response: `{ claimId: string, expiresAt: ISO8601 }`
-Rate limit: 5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5). Returns HTTP 429 on breach.
+Rate limit: 5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5). On breach: HTTP 429 with `Retry-After: 60` (CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60); Redis key `rl:claim:cooldown:{email_hash}` TTL 60s blocks further attempts during cooldown window.
 Error: `{ code: "ALREADY_CLAIMED" }` if pet is already owned.
 
 #### POST /api/v1/claim/verify
@@ -530,9 +535,11 @@ Error codes: `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`.
 
 #### POST /api/v1/claim/recover
 Auth: None
-Description: Send a recovery 6-digit code to a previously claimed pet's email address. On successful code verification via POST /api/v1/claim/verify, a new 32-byte access token is issued and the old token hash is atomically replaced.
+Description: Send a recovery 6-digit code to a previously claimed pet's email address. On successful code verification via POST /api/v1/claim/verify (recovery path), the following atomic transaction executes: (i) generate new 32-byte `owner_token_hash`; (ii) write old hash to Redis `token:blacklist:{old_token_hash}` TTL=259200s (72h); (iii) replace `pets.owner_token_hash` with new hash; (iv) mark claim code `used_at`. The blacklist write ensures in-flight requests using the old token are rejected even if they arrive at the auth middleware concurrently.
 Request: `{ email: string, petId: string }`
 Response: `{ claimId: string, expiresAt: ISO8601 }` — always returned regardless of whether email/petId combination is found (prevents enumeration); the claimId is functional only when the email matches a claimed pet.
+HTTP Response: 200 (always, including no-match case for anti-enumeration)
+Errors: HTTP 400 `VALIDATION_ERROR` for malformed `email` or `petId` UUID.
 Rate limit: Inherits AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5 per email.
 
 ### §5.2 Pet Endpoints
@@ -576,6 +583,7 @@ Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOU
 #### GET /api/v1/arena/match/:matchId
 Auth: None (public battle record)
 Response: `{ matchId, mode, petA: PetSummary, petB: PetSummary, winnerId, battleLog, completedAt }`
+Note: `winnerId` maps to `arena_matches.winner_pet_id`; null when no winner (should not occur after tie-break rule is applied).
 
 #### GET /api/v1/arena/history/:petId
 Auth: None (public — last 20 battles per pet are shown publicly per CONSTANTS ARENA_BATTLE_RECORDS_DISPLAY = 20)
@@ -675,7 +683,7 @@ Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_RE
 
 #### GET /admin/api/gdpr
 Auth: Admin session (Super Admin)
-Query: `?page=1&limit=20&status=pending|processing|completed|failed&type=erasure|data_access|restrict_processing`
+Query: `?page=1&limit=20&status=pending|processing|completed|failed&type=erasure|data_access|restrict_processing|object_leaderboard`
 Response: `{ requests: [{id, requestType, status, submittedAt, completedAt, adminNotes}], total, page, limit }`
 Description: List all GDPR requests in the gdpr_requests table for the admin GDPR Queue module.
 
@@ -711,7 +719,7 @@ No persistent accounts exist — players identify via pet token. GDPR requests a
 
 **Request body** (`POST /api/v1/gdpr/request`):
 ```json
-{ "type": "erasure" | "data_access" | "restrict_processing" }
+{ "type": "erasure" | "data_access" | "restrict_processing" | "object_leaderboard" }
 ```
 Auth: `Authorization: Bearer <petToken>` header (same pattern as all other authenticated player endpoints). The server resolves the token hash to the `pets` row, then reads `pets.claim_identity_id` to identify the GDPR data subject and create a `gdpr_requests` row scoped to that `claim_identities` record.
 
@@ -723,6 +731,7 @@ Auth: `Authorization: Bearer <petToken>` header (same pattern as all other authe
 - Erasure: `GDPR_EMAIL_DELETION_WINDOW = 7 days`
 - Data access/portability: `GDPR_DATA_ACCESS_RESPONSE_DAYS = 30`
 - Restrict processing: `GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24`
+- Object leaderboard: `GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5` — the subject's pet entries are removed from the public leaderboard within 5 business days of request (admin-reviewed; the leaderboard objection right is not absolute under GDPR Art. 21 but is resolved in 5 business days as policy)
 
 Requests are queued and processed by the admin portal GDPR module. Confirmation sent to the email on file (if not yet erased).
 
@@ -738,7 +747,7 @@ Write endpoints require pet access token auth. `GET /listings` is public (unauth
 | `POST` | `/api/v1/marketplace/listings/:listingId/buy` | Pet token | Purchase listing; 5% fee deducted from seller proceeds |
 | `GET` | `/api/v1/marketplace/history/:petId` | Pet token | Trade history for a pet (private — trade prices are commercial-in-confidence; intentionally differs from public arena battle history) |
 
-**Fee**: TRADE_TRANSACTION_FEE = 5% deducted from seller, credited to platform.
+**Fee**: TRADE_TRANSACTION_FEE = 5% deducted from seller, credited to platform. This rate is within the BRD-defined acceptable range: TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5% to TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10%. Future fee adjustments must remain within this range.
 **Anti-flip**: MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days between purchase and re-listing.
 **Rate limit**: Inherits arena/pet rate limits; no separate marketplace rate limit in CONSTANTS.
 
@@ -798,9 +807,10 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 ### §6.5 GDPR / Data Handling Summary
 
 - **Data minimization**: Only email hash + encrypted email stored. Raw email never written to database or logs.
-- **Right to erasure**: Email encrypted field nulled within 24 hours of request; SHA-256 hash retained for anti-re-registration. Full compliance SLA: 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days).
+- **Right to erasure**: Email encrypted field nulled within 24 hours of request; SHA-256 hash retained for anti-re-registration. All pets belonging to the erased identity are removed from the `leaderboard:global` Redis sorted set (`ZREM leaderboard:global <pet_id>` for each pet) as part of the erasure job. Full compliance SLA: 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days).
 - **Right of access / portability**: JSON export of pet data, battle records, training logs delivered within 30 days (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 / GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30).
 - **Right to restrict processing**: Applied within 24 hours (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24).
+- **Right to object (leaderboard)**: Pet entries removed from public leaderboard within 5 business days of request (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5). Admin-reviewed; objection is not absolute under GDPR Art. 21 but resolved as policy.
 - **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 - **COPPA**: Age-13 confirmation checkbox required on claim form; label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
 - **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years).
@@ -1180,7 +1190,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 **Scope**:
 - Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
-- PostgreSQL schema: `pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_log` tables
+- PostgreSQL schema: `pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_log`, `gdpr_requests` tables (GDPR compliance is a legal obligation from Phase 1, not a GA feature)
 - API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pet/:petId`
 - Email delivery: SendGrid integration + Nodemailer SMTP fallback
 - Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
@@ -1218,7 +1228,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Goal**: Enable P2P pet trading and complete admin portal. Corresponds to General Availability milestone.
 
 **Scope**:
-- PostgreSQL schema: `trade_records`, `marketplace_listings`, `gdpr_requests` tables
+- PostgreSQL schema: `trade_records`, `marketplace_listings` tables
 - Marketplace: Feature flag `FF_MARKETPLACE` enabled when DAU sustains >1,000 for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000)
 - Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days)
 - Admin portal: Full GDPR deletion workflow, game economy configuration (food buff multipliers 0.5×–5.0×, arena entry cost/cooldown), email delivery monitor, analytics dashboard, audit log, role management
