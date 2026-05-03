@@ -80,7 +80,11 @@ sequenceDiagram
             API->>PG: BEGIN TRANSACTION<br/>INSERT INTO arena_matches<br/>(pet_a_id, pet_b_id, is_ai_opponent, mode,<br/>winner_pet_id, random_seed, stat_delta_a,<br/>stat_delta_b, duration_seconds, battle_log)<br/>COMMIT
             PG-->>API: matchId
             API->>Redis: INCR rl:arena:{pet_id} EX 3600<br/>(record battle consumption;<br/>TTL = 3600 s — arena_rate_limit_counter_window_hours = 1)
-            API->>Redis: ZADD leaderboard:global<br/>score=newLeaderboardScore member=petId
+            alt PvP match (is_ai_opponent = false)
+                API->>Redis: MULTI<br/>ZADD leaderboard:global score=winnerNewScore member=winnerPetId<br/>ZADD leaderboard:global score=loserNewScore member=loserPetId<br/>EXEC<br/>(both ZADDs in MULTI/EXEC pipeline for atomicity)
+            else AI match (is_ai_opponent = true)
+                API->>Redis: ZADD leaderboard:global<br/>score=newLeaderboardScore member=petId<br/>(player's pet only — no AI synthetic entry)
+            end
             Note right of Redis: Update lag ≤ 30 s<br/>(leaderboard_update_lag_max_seconds = 30)
 
             Note over Player,PG: Animate & Display Result
@@ -108,6 +112,11 @@ sequenceDiagram
 - **AI opponent**: When `acceptAI: true` and no human is found, the AI opponent is synthesized in
   memory; no `pet_b_id` row is written — `is_ai_opponent = TRUE` and `pet_b_id = NULL` in
   `arena_matches`.
+- **Dual leaderboard ZADD for PvP**: After a human-vs-human battle, both winner and loser scores
+  are updated via a Redis MULTI/EXEC pipeline (`ZADD leaderboard:global score=winnerNewScore
+  member=winnerPetId` + `ZADD leaderboard:global score=loserNewScore member=loserPetId`) for
+  atomicity. For AI matches (`is_ai_opponent = true`), only the requesting player's pet receives a
+  ZADD — no synthetic AI entry is written.
 - **Leaderboard score formula**: `win_rate × battles_played × level_multiplier` (ARCH P2). The
   Redis sorted set (`leaderboard:global`) is authoritative; PostgreSQL `leaderboard_snapshots` is
   the durable backup, retaining top 500 entries (`leaderboard_snapshot_retention_top_n = 500`).

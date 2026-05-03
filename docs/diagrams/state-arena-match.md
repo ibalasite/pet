@@ -46,7 +46,7 @@ stateDiagram-v2
 
     BattleResolved --> Persisted : BEGIN TRANSACTION\nINSERT INTO arena_matches\n  (pet_a_id, pet_b_id, is_ai_opponent,\n   mode, winner_pet_id, random_seed,\n   stat_delta_a, stat_delta_b,\n   duration_seconds, battle_log)\nCOMMIT\nINCR rl:arena:{pet_id} EX 3600\n(TTL = 3600 s — arena_rate_limit_counter_window_hours = 1)
 
-    Persisted --> LeaderboardUpdated : ZADD leaderboard:global\nscore = newLeaderboardScore\nmember = petId\n(lag ≤ 30 s — leaderboard_update_lag_max_seconds = 30)
+    Persisted --> LeaderboardUpdated : PvP: MULTI ZADD leaderboard:global winnerPetId\n+ ZADD leaderboard:global loserPetId EXEC\n(both ZADDs in MULTI/EXEC pipeline for atomicity)\nAI match: single ZADD for player's pet only\n(lag ≤ 30 s — leaderboard_update_lag_max_seconds = 30)
 
     LeaderboardUpdated --> AnimationPlaying : HTTP 200 response sent\n{ matchId, result, opponentPetId,\n  isAiOpponent, statDelta,\n  newLeaderboardScore }\nPhaser.js BattleAnimation starts
 
@@ -86,7 +86,7 @@ stateDiagram-v2
 | BattleComputing | Outcome calculation in memory | — |
 | BattleResolved | Winner determined, log built | — |
 | Persisted | `arena_matches` row inserted; rate counter incremented | `rl:arena:{pet_id}` incremented |
-| LeaderboardUpdated | Redis sorted set updated | `leaderboard:global` updated |
+| LeaderboardUpdated | PvP: both winner and loser Redis sorted set entries updated via MULTI/EXEC; AI: player's pet only | `leaderboard:global` updated (1 or 2 entries) |
 | AnimationPlaying | Client animating battle | — |
 | Completed | Result shown; history updated | — |
 
