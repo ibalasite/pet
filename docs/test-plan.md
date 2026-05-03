@@ -559,7 +559,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 |---|---|
 | Given | A battle completes and both pets' arena scores are recalculated |
 | When | Redis `leaderboard:global` ZADD is executed |
-| Then | Updated scores are visible in `ZRANGEBYSCORE` within (leaderboard_update_lag_max_seconds = 30) seconds |
+| Then | Updated scores are visible via `ZRANGE leaderboard:global 0 99 REV WITHSCORES` within (leaderboard_update_lag_max_seconds = 30) seconds |
 | Linked AC | AC-009-2 |
 
 | TC-INT-011 | Arena rate limit enforced per pet per hour |
@@ -592,7 +592,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 | Given | A claimed pet with a linked `claim_identity_id` |
 | When | `POST /api/v1/gdpr/request` with `type: "erasure"` is processed by the background job |
 | Then | `claim_identities.email_encrypted` is NULL within (gdpr_email_hashing_internal_sla_hours = 24) hours; `email_hash` retained; `pets` rows retained |
-| Linked AC | AC-004-4, AC-016-1, ARCH §4.4 |
+| Linked AC | AC-004-4, AC-016-1, AC-016-2, ARCH §4.4 |
 
 | TC-INT-015 | Erased pet removed from Redis leaderboard |
 |---|---|
@@ -1105,7 +1105,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | TC-SEC-012 | Raw IP never written to database |
 |---|---|
 | Given | A request that triggers an audit log entry |
-| When | `audit_logs.ip_hash` is inspected |
+| When | `admin_audit_log.ip_address_hash` is inspected |
 | Then | Value is a 64-character hex string (SHA-256 hash); no dotted-decimal or IPv6 literal |
 | Linked NFR | ARCH §8.1 PII rules |
 
