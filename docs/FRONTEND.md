@@ -835,7 +835,7 @@ TrainingPage /pet/:petId/train
   │    usePet cache is invalidated → PetPage re-fetches
   │
   ├─ Error states:
-  │    HTTP 400 VALIDATION_ERROR → toast: "Invalid training type." (should not occur in normal flow)
+  │    HTTP 400 VALIDATION_ERROR → toast: "Invalid training type. Please try again."
   │    HTTP 400 TRAINING_LIMIT_REACHED → all action cards disabled; DailyResetTimer shown
   │    HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (pet_stat_max = 100)"; card remains
   │                                enabled for other stats not yet at max
@@ -923,6 +923,12 @@ ArenaPage /arena
        BattleResultPage shows WIN/LOSS card
        ShareBattleButton copies public URL
        Leaderboard score updated within leaderboard_update_lag_max_seconds = 30s
+
+  Error states:
+       HTTP 400 VALIDATION_ERROR → toast: "Invalid request. Please try again."
+       HTTP 401 UNAUTHORIZED → redirect to /claim
+       HTTP 403 NOT_OWNER → toast: "You do not own this pet."
+       HTTP 429 RATE_LIMIT_EXCEEDED → show cooldown timer (arena_rate_limit_battles_per_hour_default = 10 battles/hour)
 ```
 
 ### 5.5 Marketplace Browse / List / Buy (FF_MARKETPLACE)
@@ -954,11 +960,11 @@ MarketplacePage /marketplace
   │    Trade history: GET /api/v1/marketplace/history/:petId (authenticated, private)
   │
   └─ Error states (all marketplace endpoints):
-       HTTP 400 VALIDATION_ERROR → inline error: price below minimum or anti-flip protection active
-       HTTP 401 UNAUTHORIZED → handled globally: clearPetToken() + redirect to /
-       HTTP 403 FEATURE_DISABLED → "Marketplace is not currently available." (FF_MARKETPLACE off)
+       HTTP 400 VALIDATION_ERROR → toast: "Invalid request. Please check your input."
+       HTTP 401 UNAUTHORIZED → redirect to /claim
+       HTTP 403 FEATURE_DISABLED → show "Marketplace is not yet available" banner
        HTTP 403 NOT_OWNER → toast: "You do not own this pet."
-       HTTP 404 NOT_FOUND → toast: "Listing or pet not found."
+       HTTP 404 NOT_FOUND → toast: "Listing not found. It may have been removed."
 ```
 
 ### 5.6 Leaderboard View
@@ -1008,7 +1014,7 @@ GdprPage /gdpr
   │      rectification → "Processed within 24 hours (gdpr_email_rectification_response_hours = 24)"
   │
   └─ Error states:
-       HTTP 400 VALIDATION_ERROR → inline error: missing or invalid request type / malformed jobId
+       HTTP 400 VALIDATION_ERROR → inline form error: "Please select a valid request type."
        HTTP 401 → redirect to / (token cleared)
        HTTP 403 FORBIDDEN → "Your account is not authorized to view this request."
        HTTP 404 NOT_FOUND → "Request not found."
@@ -1044,9 +1050,9 @@ AdminLoginPage /admin/login
   │    Lockout duration: admin_login_lockout_duration_minutes = 30 min
   │
   ├─ Error states:
-  │    HTTP 400 VALIDATION_ERROR → inline field error: missing or malformed username/password/totpCode
-  │    HTTP 401 UNAUTHORIZED → "Invalid username or password." error shown on form
-  │    HTTP 429 RATE_LIMIT_EXCEEDED → "Too many login attempts. Please wait." with Retry-After countdown
+  │    HTTP 400 VALIDATION_ERROR → inline form error: "Please enter a valid email and password."
+  │    HTTP 401 UNAUTHORIZED → inline form error: "Invalid credentials."
+  │    HTTP 429 RATE_LIMIT_EXCEEDED → show lockout message with (admin_login_lockout_duration_minutes = 30) minute countdown
   │
   └─ All auth events written to audit log (admin_audit_log_retention_years = 2 years)
 ```
