@@ -8,7 +8,8 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
 
   Scenario: Public leaderboard loads top 100 pets without authentication
     Given no "pet_token" is present in localStorage
-    When GET /api/v1/leaderboard?page=1&limit=100 responds HTTP 200 with an array of up to (leaderboard_top_display = 100) pet entries
+    And GET /api/v1/leaderboard?page=1&limit=100 responds HTTP 200 with an array of up to (leaderboard_top_display = 100) pet entries
+    When the LeaderboardPage renders
     Then the LeaderboardTable renders with up to 100 LeaderboardRow components
     And the table has semantic markup with "<table>" containing "<th scope="col">" column headers
     And no login prompt or token is required to view the page
@@ -67,6 +68,6 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
 
   Scenario: Banned pet removed from leaderboard within 5 minutes of admin ban
     Given a pet with petId "bad123" is visible at rank 12 in the LeaderboardTable
-    And an admin bans "bad123" in the admin portal
+    And the pet "bad123" has been banned by an admin
     When (leaderboard_ban_reflection_time_minutes = 5) minutes have elapsed and the leaderboard auto-refresh fires
     Then "bad123" no longer appears in any LeaderboardRow in the LeaderboardTable

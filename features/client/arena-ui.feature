@@ -37,14 +37,15 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
   Scenario: User accepts AI opponent from AIOfferModal — battle proceeds
     Given the AIOfferModal is visible after a matchmaking timeout
     When the owner clicks the "Accept AI Opponent" button inside the modal
-    Then POST /api/v1/arena/enter is re-called with body {"petId": "<petId>", "mode": "RACE", "acceptAI": true}
+    Then POST /api/v1/arena/enter is re-called with body {"petId": "<petId>", "mode": "RACE", "acceptAI": true} to signal AI opponent acceptance
     And the battle animation plays and the result page is shown at "/arena/result/:matchId"
 
   # --- Rate limit UI ---
 
   Scenario: Arena rate limit reached — RateLimitBanner shown and Enter Arena disabled
     Given the owner has already entered (arena_rate_limit_battles_per_hour_default = 10) arena battles in the current hour
-    When POST /api/v1/arena/enter responds HTTP 429 with a "Retry-After" header
+    And POST /api/v1/arena/enter responds HTTP 429 with a "Retry-After" header
+    When the owner clicks the "Enter Arena" button in PreBattlePanel
     Then the Zustand arena slice stores the rate limit state
     And the RateLimitBanner component renders with role="alert" and aria-live="assertive"
     And the RateLimitBanner displays a countdown timer showing the remaining time until the rate limit resets
@@ -58,7 +59,8 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
 
   Scenario: Banned pet cannot enter arena
     Given the player's pet has been banned by an admin
-    When POST /api/v1/arena/enter responds HTTP 403 with error code "PET_BANNED"
+    And POST /api/v1/arena/enter responds HTTP 403 with error code "PET_BANNED"
+    When the owner clicks the "Enter Arena" button in PreBattlePanel
     Then a ban notice is displayed on the ArenaPage
     And the "Enter Arena" button remains disabled
     And the user is not navigated away from "/arena"
@@ -68,7 +70,8 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
   Scenario: Battle result page shows WIN card with stat comparison and share button
     Given the match is complete and the player's pet won
     And the app has navigated to "/arena/result/:matchId"
-    When GET /api/v1/arena/match/:matchId responds HTTP 200 with "result": "WIN"
+    And GET /api/v1/arena/match/:matchId responds HTTP 200 with "result": "WIN"
+    When the ResultPage renders
     Then the BattleResultCard displays in "WIN" variant with the pet's name and win indicator
     And the StatComparison component shows both pets' stats side by side
     And the ShareBattleButton component is visible and copies the public "/arena/result/:matchId" URL when clicked
@@ -76,11 +79,12 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
   Scenario: Battle result page shows LOSS card
     Given the match is complete and the player's pet lost
     And the app has navigated to "/arena/result/:matchId"
-    When GET /api/v1/arena/match/:matchId responds HTTP 200 with "result": "LOSS"
+    And GET /api/v1/arena/match/:matchId responds HTTP 200 with "result": "LOSS"
+    When the ResultPage renders
     Then the BattleResultCard displays in "LOSS" variant
 
   Scenario: SUMO mode is available alongside RACE in the ModeSelector
     Given the ArenaPage loads with the FF_ARENA_SUMO feature flag enabled
     When the ModeSelector renders
     Then both "RACE" and "SUMO" option buttons are visible and focusable
-    And selecting "SUMO" and clicking Enter Arena sends POST /api/v1/arena/enter with body {"mode": "SUMO"}
+    And selecting "SUMO" and clicking Enter Arena sends POST /api/v1/arena/enter with body {"petId": "<petId>", "mode": "SUMO"}

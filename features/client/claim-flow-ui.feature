@@ -33,8 +33,8 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
 
   Scenario: Email claim rate limit — cooldown banner shown
     Given the guest has already made (auth_rate_limit_claim_attempts_per_hour = 5) claim requests in the current hour
-    When the guest submits another email claim request
     And POST /api/v1/claim/request responds HTTP 429 with a "Retry-After" header
+    When the guest submits another email claim request
     Then a cooldown banner is shown indicating the user must wait (claim_email_retry_cooldown_seconds = 60) seconds
     And the email input and submit button are disabled during the cooldown
 
@@ -52,15 +52,16 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
 
   Scenario: Invalid OTP — shake animation and error message shown
     Given the ClaimCodeForm is visible (step "code")
-    When the guest enters the wrong 6-digit code and clicks "Verify Code"
     And POST /api/v1/claim/verify responds HTTP 400 with error code "INVALID_CODE"
+    When the guest enters the wrong 6-digit code and clicks "Verify Code"
     Then the OTP digit input boxes play a red shake animation
     And an error message is displayed below the input
     And the OTP inputs remain enabled for retry
 
   Scenario: Expired OTP — re-request button shown
     Given the ClaimCodeForm is visible and the OTP has expired after (claim_code_expiry_minutes = 15) minutes
-    When the guest submits the code and POST /api/v1/claim/verify responds HTTP 400 with error code "CODE_EXPIRED"
+    And POST /api/v1/claim/verify responds HTTP 400 with error code "CODE_EXPIRED"
+    When the guest submits the expired code
     Then the error message "Claim code has expired. Please request a new one." is shown
     And a "Request a new code" button is visible that re-initiates POST /api/v1/claim/request
 
@@ -72,7 +73,8 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
 
   Scenario: Max OTP attempts reached — all inputs disabled with Retry-After countdown
     Given the guest has made (auth_rate_limit_code_entry_attempts_per_session = 10) failed OTP attempts in this session
-    When POST /api/v1/claim/verify responds HTTP 429 with error code "MAX_ATTEMPTS_REACHED"
+    And POST /api/v1/claim/verify responds HTTP 429 with error code "MAX_ATTEMPTS_REACHED"
+    When the guest enters another OTP code and clicks "Verify Code"
     Then all OTP digit inputs are disabled
     And the submit button is disabled
     And a Retry-After countdown is displayed and announced via aria-live="assertive"

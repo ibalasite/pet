@@ -53,8 +53,8 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   Scenario: Stat already at maximum — toast shown and that stat card stays disabled
     Given the pet's speed stat is already at (pet_stat_max = 100)
-    When the owner clicks the "Train" button on the "RUN" action card
     And POST /api/v1/training responds HTTP 400 with error code "STAT_AT_MAXIMUM"
+    When the owner clicks the "Train" button on the "RUN" action card
     Then a toast notification appears with message "Stat is already at maximum"
     And the "RUN" action card "Train" button is disabled with a "Max" indicator
     And the "STRENGTH" and "STAMINA" action card buttons remain enabled
