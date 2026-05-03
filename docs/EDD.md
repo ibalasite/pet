@@ -17,8 +17,11 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 |---|---|---|---|
 | PET_GENERATION_COMBINATIONS_MIN | 1,000,000,000 | combinations | Minimum unique pet generation combinations |
 | PET_GENERATION_DIMENSIONS | 6 | dimensions | Attribute vector dimensions: body, head, color_palette, accessory, rarity_trait, pattern |
-| PET_STAT_DEFAULT / MIN / MAX | 10 / 1 / 100 | points | speed, strength, stamina |
-| PET_LEVEL_DEFAULT / MAX | 1 / 100 | level | FLOOR(training_actions / 10) |
+| PET_STAT_DEFAULT | 10 | points | Default stat value for speed, strength, stamina |
+| PET_STAT_MIN | 1 | points | Minimum stat value |
+| PET_STAT_MAX | 100 | points | Maximum stat value |
+| PET_LEVEL_DEFAULT | 1 | level | Starting level |
+| PET_LEVEL_MAX | 100 | level | Max level cap; FLOOR(training_actions / PET_LEVEL_FORMULA_DIVISOR) |
 | TRAINING_ACTIONS_PER_DAY | 3 | actions/day | Reset UTC 00:00 |
 | TRAINING_NEGLECT_THRESHOLD_DAYS | 3 | days | Triggers visual neglect state |
 | ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT | 10 | battles/hr (default) | Admin-tunable; ARENA_RATE_LIMIT_ADMIN_MIN = 1; ARENA_RATE_LIMIT_ADMIN_MAX = 50 |
@@ -1236,7 +1239,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 ### §12.1 Unit Test Targets
 
-- Minimum coverage: 80% of all business logic modules (CONSTANTS `unit_test_coverage_min_percent` = 80%)
+- Minimum coverage: 80% of all business logic modules (UNIT_TEST_COVERAGE_MIN_PERCENT = 80%)
 - Test framework: Vitest (shared between player app and API server)
 - No module exceeds 800 lines (CODE_MODULE_MAX_LINES = 800); no function exceeds 50 lines (CODE_FUNCTION_MAX_LINES = 50) — enforced via ESLint `max-lines` and `max-lines-per-function` rules
 - Priority modules for unit testing: pet generation algorithm (seed → attributes), battle outcome calculation (seeded ±15% modifier), claim code OTP generation/verification, rate-limit logic, GDPR email hashing workflow
