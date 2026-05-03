@@ -807,7 +807,10 @@ ClaimPage renders ClaimFlow
 - `ALREADY_CLAIMED` (HTTP 400): "This pet is already owned."
 - `CODE_EXPIRED` (HTTP 400): "Claim code has expired. Please request a new one." + re-request button
 - `INVALID_CODE` (HTTP 400): Red shake animation on digit boxes + error message
-- `MAX_ATTEMPTS_REACHED` (HTTP 429): All inputs disabled; 60-second cooldown countdown shown
+- `VALIDATION_ERROR` (HTTP 400): Inline field error shown (malformed email, invalid UUID for `petId`)
+- `AGE_CONFIRMATION_REQUIRED` (HTTP 400): Checkbox re-highlighted with error message "Age confirmation required"
+- `PET_NOT_FOUND` (HTTP 404): "Pet not found. Please reload and try again."
+- `MAX_ATTEMPTS_REACHED` (HTTP 429): All inputs disabled; `claim_email_retry_cooldown_seconds = 60` second cooldown countdown shown
 - Rate limit (HTTP 429): `Retry-After` header value displayed as countdown
 
 ### 5.2 Training Interaction
@@ -833,7 +836,7 @@ TrainingPage /pet/:petId/train
   │
   ├─ Error states:
   │    HTTP 400 TRAINING_LIMIT_REACHED → all action cards disabled; DailyResetTimer shown
-  │    HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (100)"; card remains
+  │    HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (pet_stat_max = 100)"; card remains
   │                                enabled for other stats not yet at max
   │    HTTP 401 → handled globally: clearPetToken() + redirect to /
   │    HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
@@ -902,6 +905,7 @@ MarketplacePage /marketplace
   │    → POST /api/v1/marketplace/listings
   │       { petId, priceCredits }
   │    Min price enforced: (pet_level × 100) + (rarity_multiplier × 500)
+  │       (trade_min_price_formula_level_coeff = 100; trade_min_price_formula_rarity_coeff = 500)
   │    Anti-flip: marketplace_trade_antiflip_protection_days = 7 days
   │       since last purchase before re-listing is allowed
   │    Platform fee: trade_transaction_fee_percent = 5%
