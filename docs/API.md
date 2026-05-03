@@ -248,7 +248,7 @@ The `details` field is optional and only populated when additional structured co
 | `NOT_OWNER` | 403 | The authenticated pet token does not own the target pet |
 | `PET_BANNED` | 403 | Pet has been banned by an admin and cannot perform arena operations |
 | `FORBIDDEN` | 403 | Admin role is insufficient for this operation |
-| `ACCOUNT_LOCKED` | 403 | Admin account is temporarily locked after repeated failed login attempts |
+| `ACCOUNT_LOCKED` | 403 | Admin account is temporarily locked after repeated failed login attempts; error response includes `unlockedAt` (ISO 8601) |
 | `TOTP_SETUP_REQUIRED` | 403 | Admin account has not completed TOTP enrollment |
 | `PET_NOT_FOUND` | 404 | No pet found with the given ID |
 | `NOT_FOUND` | 404 | Generic resource not found |
