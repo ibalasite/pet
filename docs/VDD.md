@@ -521,6 +521,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-light-warning: #cc5a00;           /* §6.4 Warning on light bg */
 --primitive-light-focus: #c49900;             /* §6.4 Focus on light bg */
 --primitive-light-info: #4a80cc;              /* §3.2 Info on light bg */
+--primitive-light-surface-hover: #d4d4e8;     /* Light hover surface — navy tint on light bg */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -634,6 +635,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
     --color-warning: var(--primitive-light-warning);
     --color-focus: var(--primitive-light-focus);
     --color-info: var(--primitive-light-info);
+    --color-surface-hover: var(--primitive-light-surface-hover);
   }
 }
 
@@ -965,6 +967,7 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 | `--color-surface-base` | `#f8f8fc` | `#1a1a2e` | N/A (background) | Dark is primary default |
 | `--color-surface-raised` | `#eeeef8` | `#242444` | N/A | Card and panel surfaces |
 | `--color-surface-overlay` | `#e2e2f0` | `#2d2d5a` | N/A | Hover, selected states |
+| `--color-surface-hover` | `#d4d4e8` | `#3a3a6e` | N/A | Row hover, interactive surface highlight |
 | `--color-text-primary` | `#1a1a2e` | `#e8e8f0` | 12.4:1 dark / 14.1:1 light | AAA on both modes |
 | `--color-text-secondary` | `#4a4a7a` | `#6c6c9a` | 4.7:1 dark / 5.2:1 light | AA on both modes |
 | `--color-text-disabled` | `#7a7aaa` | `#4a4a6a` | 3.1:1 minimum | Meets AA large text only |
