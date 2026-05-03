@@ -51,7 +51,7 @@
 
 React 18 handles all UI chrome — accessible forms (claim, GDPR), stat tables, navigation, leaderboard, and route-level code splitting. Phaser.js 3 handles the HTML5 Canvas game surface — per-frame sprite animation, WebGL rendering, interaction physics, and the arena battle animation. Dynamic `import()` of Phaser ensures it never enters the initial JS bundle, keeping FCP inside the ≤ 1.5 s target (`FCP_SECONDS = 1.5`) even though Phaser itself is ~1 MB minified.
 
-The pixel-art design system (dark navy, rarity color tiers, `Press Start 2P` font, 8px grid) is implemented entirely in CSS custom properties (`tokens.css`). All rarity shimmers and glow effects run as CSS animations on compositor-friendly properties (`box-shadow`, `border-color`, `opacity`) — no Phaser involvement for purely decorative effects.
+The pixel-art design system (dark navy, rarity color tiers, `Press Start 2P` font, 8px grid) is implemented entirely in CSS custom properties (`tokens.css`). All rarity shimmers and glow effects run as CSS animations on paint-only properties (`box-shadow`, `border-color`) and compositor properties (`opacity`) — no layout reflow and no Phaser involvement for purely decorative effects.
 
 The admin portal (Vue 3 + Element Plus) is a completely separate Vite application. No code from the player app leaks into the admin portal build. Both apps are served from Vercel CDN as independent SPA deployments.
 
@@ -441,7 +441,7 @@ ArenaBattleScene states:
 | Rule | Limit | Notes |
 |------|-------|-------|
 | Simultaneous Phaser animations on screen | ≤ 20 (React / web target) | Typically 1–2 sprites active; arena scene adds 2 |
-| Simultaneous CSS animations | ≤ 20 | Rarity shimmers are compositor-only properties; no layout reflow |
+| Simultaneous CSS animations | ≤ 20 | Rarity shimmers animate paint-only properties (`box-shadow`, `border-color`); no layout reflow |
 | Particle count per burst | ≤ 200 | Victory burst is 24 particles — well within budget (Phaser `GameObjects.Particles` built-in system; no tsparticles dependency) |
 | Animation clip max duration | 15 s | Arena match max is `ARENA_MATCH_DURATION_MAX_SECONDS = 15 s` |
 | `prefers-reduced-motion: reduce` | Pause all Phaser loops; suppress CSS shimmers | `useReducedMotion()` hook; `@media (prefers-reduced-motion: reduce) { .rarity-legendary, .rarity-epic { animation: none; } }` |
