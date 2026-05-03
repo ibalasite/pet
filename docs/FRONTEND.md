@@ -652,7 +652,7 @@ adminApiClient.interceptors.response.use(
 );
 ```
 
-**CSRF handling**: The admin API is served under `/admin/api` with `SameSite=Strict` cookie policy. All state-mutating requests are POST/PUT/DELETE. Because the cookie is `SameSite=Strict`, cross-site form submissions cannot forge admin actions. No additional CSRF token is required given this configuration; if the deployment adds cross-origin scenarios, a `X-CSRF-Token` header must be implemented.
+**CSRF handling**: The admin API is served under `/admin/api` with `SameSite=Strict` cookie policy. All state-mutating requests are POST/PUT/DELETE. Because the cookie is `SameSite=Strict`, cross-site form submissions cannot forge admin actions. No additional CSRF token is required given this configuration; if the deployment adds cross-origin scenarios, an `X-CSRF-Token` header must be implemented.
 
 ---
 
@@ -681,7 +681,7 @@ class PetIdleScene extends Phaser.Scene {
 
   preload(): void {
     // Sprite sheet: frameWidth = frameHeight = SPRITE_RESOLUTION_PX
-    this.load.spritesheet('pet', `/sprites/pet_${this.seed.toString()}.png`, {
+    this.load.spritesheet('pet', `/sprites/pet-${this.seed.toString()}-sheet.png`, {
       frameWidth: SPRITE_RESOLUTION_PX,   // 32
       frameHeight: SPRITE_RESOLUTION_PX,  // 32
     });
@@ -956,7 +956,7 @@ GdprPage /gdpr
   │    Displays current status: pending | processing | completed | failed
   │    SLA copy displayed per request type:
   │      erasure → "Processed within 7 days (gdpr_email_deletion_window_days = 7)"
-  │      data_access / portability → "Processed within 30 days (gdpr_data_access_response_days = 30)"
+  │      data_access / portability → "Processed within 30 days (gdpr_data_access_response_days = 30; gdpr_data_portability_response_days = 30)"
   │      restrict_processing → "Processed within 24 hours (gdpr_restrict_processing_response_hours = 24)"
   │      object_leaderboard → "Processed within 5 business days (gdpr_object_leaderboard_response_business_days = 5)"
   │      rectification → "Processed within 24 hours (gdpr_email_rectification_response_hours = 24)"
