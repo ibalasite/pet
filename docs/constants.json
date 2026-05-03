@@ -43,7 +43,9 @@
     "arena_entry_cooldown_admin_min_minutes": 0,
     "arena_entry_cooldown_admin_max_minutes": 60,
     "arena_entry_cost_food_credits_default": 0,
-    "arena_entry_cost_food_credits_admin_max": 10
+    "arena_entry_cost_food_credits_admin_max": 10,
+    "pet_reservation_ttl_hours": 24,
+    "sprite_resolution_px": 32
   },
 
   "multipliers": {
@@ -104,7 +106,9 @@
     "code_module_max_lines": 800,
     "code_function_max_lines": 50,
     "api_backward_compat_versions": 1,
-    "api_deprecation_notice_days": 90
+    "api_deprecation_notice_days": 90,
+    "admin_login_lockout_threshold": 10,
+    "admin_login_lockout_duration_minutes": 30
   },
 
   "slo": {
@@ -150,7 +154,9 @@
     "claim_email_retry_cooldown_seconds": 60,
     "email_delivery_failure_retries": 3,
     "email_delivery_retry_window_minutes": 15,
-    "admin_portal_requests_per_minute_per_account": 100
+    "admin_portal_requests_per_minute_per_account": 100,
+    "admin_login_ip_rate_limit_attempts": 10,
+    "admin_login_ip_rate_limit_window_seconds": 900
   },
 
   "business_rules": {

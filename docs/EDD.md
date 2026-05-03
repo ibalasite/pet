@@ -44,6 +44,8 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | HORIZONTAL_SCALE_CPU_THRESHOLD | 70 | percent | HPA scale-out trigger |
 | DB_AUTOFAILOVER_TIME | 60 | seconds | PostgreSQL automated failover |
 | SENDGRID_FAILOVER_CONSECUTIVE_FAILURES | 3 | failures | Switch to Nodemailer SMTP |
+| CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT | 98 | percent | Minimum email delivery success rate target |
+| SENDGRID_DELIVERY_RATE_ASSUMPTION_PERCENT | 98 | percent | Capacity planning assumption for SendGrid delivery rate |
 | NORMAL_OPERATION_RPS | 100 | RPS | Sustained |
 | NORMAL_OPERATION_DAU_MIN / MAX | 2,000 / 5,000 | DAU | Expected daily active user range at normal operation |
 | PEAK_OPERATION_RPS | 500 | RPS | Viral peak |
@@ -61,6 +63,12 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | TRADE_TRANSACTION_FEE | 5 | percent | Platform fee on trades; within BRD-defined range of 5–10% (TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5, TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10) |
 | FOOD_BUFF_RECORD_RETENTION | 30 | days | After expiry/consumption |
 | MVP_BUDGET | 40,000 | USD | Hard constraint |
+| PET_RESERVATION_TTL_HOURS | 24 | hours | Guest preview reservation window before unclaimed pet cleanup |
+| SPRITE_RESOLUTION_PX | 32 | px | Sprite frame size; provisional Phase 1 resolution (see §14 OQ-E01) |
+| ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS | 10 | attempts | Pre-auth IP rate limit for admin login endpoint |
+| ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS | 900 | seconds | Rolling window for admin login IP rate limit (15 min) |
+| ADMIN_LOGIN_LOCKOUT_THRESHOLD | 10 | consecutive failures | Account lockout trigger after N failed attempts |
+| ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES | 30 | minutes | Duration of admin account lockout |
 
 ---
 
@@ -186,7 +194,8 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 
 **Primary**: SendGrid API v3
 - Transactional email only: claim password delivery, access-link recovery
-- SPF + DKIM configured; spam complaint rate target <0.1% (CONSTANTS)
+- SPF + DKIM configured; spam complaint rate target <0.1% (SPAM_COMPLAINT_RATE_MAX_PERCENT = 0.1%)
+- Delivery target ≥98% (CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98%); capacity planning assumption 98% (SENDGRID_DELIVERY_RATE_ASSUMPTION_PERCENT = 98%)
 - Delivery SLO P90 ≤60 seconds (NFR-PERF-10)
 - Retry queue: 3 retries over 15 minutes on delivery failure (EMAIL_DELIVERY_FAILURE_RETRIES = 3; EMAIL_DELIVERY_RETRY_WINDOW_MINUTES = 15)
 - Plan ceiling: 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000); upgrade trigger if projected monthly volume approaches this cap
@@ -264,7 +273,7 @@ Notes:
 - The raw pet access token (32-byte base64 string) is NEVER stored; only the SHA-256 hash is stored. The token is transmitted once at claim time via URL.
 - `level` is derived from `FLOOR(total_training_actions / PET_LEVEL_FORMULA_DIVISOR)` capped at 100; the column is updated on each training action commit.
 - Seed collision on generation: application retries up to 3 times (PET_SEED_COLLISION_MAX_RETRIES = 3) before returning an error.
-- **Unclaimed pet cleanup**: A background job (scheduled every 6 hours) deletes pets where `reserved_until < NOW() AND owner_token_hash IS NULL`. The 24-hour reservation window is pending CONSTANTS addition (TBD: `PET_RESERVATION_TTL_HOURS`). On claim, `reserved_until` is set to NULL.
+- **Unclaimed pet cleanup**: A background job (scheduled every 6 hours) deletes pets where `reserved_until < NOW() AND owner_token_hash IS NULL`. The 24-hour reservation window is defined by `PET_RESERVATION_TTL_HOURS = 24` (CONSTANTS core). On claim, `reserved_until` is set to NULL.
 
 ### §4.2 User / Email (ClaimIdentity)
 
@@ -565,7 +574,7 @@ Auth: None
 Description: Generate a new unclaimed random pet for guest display. Public endpoint — no authentication required; generates a guest-preview pet for display.
 Request: `{}` (no body)
 Response: `{ petId, seed, rarity, petName, stats: {speed, strength, stamina, level}, generationMeta, reservedUntil: ISO8601 }`
-Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset. `reservedUntil` = `NOW() + 24h` (TBD: `PET_RESERVATION_TTL_HOURS` constant) — client should display countdown to encourage timely claiming.
+Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset. `reservedUntil` = `NOW() + 24h` (PET_RESERVATION_TTL_HOURS = 24) — client should display countdown to encourage timely claiming.
 
 #### GET /api/v1/pet/:petId
 Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
@@ -837,8 +846,8 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 - Inactivity expiry: 4 hours (ADMIN_SESSION_INACTIVITY_EXPIRY = 4h)
 - Absolute expiry: 8 hours regardless of activity (ADMIN_SESSION_ABSOLUTE_EXPIRY = 8h)
 - Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100) — applies to authenticated sessions only
-- **Pre-authentication rate limit**: `POST /admin/api/auth/login` is rate-limited by IP address: 10 attempts per 15 minutes; HTTP 429 on breach. Redis key: `rl:admin_login:{ip_hash}` TTL 900s. (Constants TBD: `ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS`, `ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS`)
-- **Account lockout**: After 10 consecutive `failed_attempts` on a valid username, the account is locked for 30 minutes (`deactivated_at` is NOT used for lockout — a separate `locked_until TIMESTAMPTZ NULL` column is set). Login returns HTTP 403 `{ code: "ACCOUNT_LOCKED", unlockedAt: ISO8601 }`. Lockout resets on successful login. (Constants TBD: `ADMIN_LOGIN_LOCKOUT_THRESHOLD`, `ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES`)
+- **Pre-authentication rate limit**: `POST /admin/api/auth/login` is rate-limited by IP address: 10 attempts per 15 minutes (ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS = 10; ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS = 900); HTTP 429 on breach. Redis key: `rl:admin_login:{ip_hash}` TTL 900s.
+- **Account lockout**: After 10 consecutive `failed_attempts` on a valid username (ADMIN_LOGIN_LOCKOUT_THRESHOLD = 10), the account is locked for 30 minutes (ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES = 30) (`deactivated_at` is NOT used for lockout — a separate `locked_until TIMESTAMPTZ NULL` column is set). Login returns HTTP 403 `{ code: "ACCOUNT_LOCKED", unlockedAt: ISO8601 }`. Lockout resets on successful login.
 - All admin auth events (login, logout, failed attempt) written to audit log
 - **First-login TOTP enrollment**: New admin accounts have `totp_secret_encrypted = NULL`. On first login attempt (correct username+password but no TOTP secret), the login endpoint returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED", setupToken: "<signed-short-lived-JWT>" }`. The admin client uses this `setupToken` to call `POST /admin/api/auth/totp/setup` (no session exists yet — setup token is the auth mechanism). After TOTP setup, the admin performs a standard login with `totpCode` to establish a session. All subsequent logins require a valid `totpCode`. There is no path to an authenticated session without completing TOTP enrollment.
 
@@ -877,20 +886,22 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 
 | Metric | Target | Source |
 |---|---|---|
-| Availability | 99.9% monthly (≤43.8 min downtime) | CONSTANTS §4 |
-| P99 API Latency (read) | <200 ms at 100 RPS | CONSTANTS §4 |
-| P99 API Latency (write) | <500 ms at 100 RPS | CONSTANTS §4 |
-| FCP | <1.5 seconds | CONSTANTS §4 |
-| LCP | <2.5 seconds | CONSTANTS §4 |
-| CLS | <0.1 | CONSTANTS §4 |
-| INP | <200 ms | CONSTANTS §4 |
-| Pet animation frame rate | ≥30 FPS sustained | CONSTANTS §4 |
-| Pet canvas render on load | ≤2 seconds | CONSTANTS §4 |
-| Pet interaction response | ≤200 ms | CONSTANTS §4 |
-| Arena battle result E2E | <2 seconds | CONSTANTS §4 |
-| Leaderboard update lag | ≤30 seconds | CONSTANTS §4 |
-| Email delivery P90 | ≤60 seconds | CONSTANTS §4 |
-| Error rate | <1% per 5-minute window | CONSTANTS §4 |
+| Availability | 99.9% monthly (≤43.8 min downtime) | AVAILABILITY_MONTHLY_PERCENT |
+| P99 API Latency (read) | <200 ms at 100 RPS | P99_API_LATENCY_READ_MS_AT_100_RPS |
+| P99 API Latency (write) | <500 ms at 100 RPS | P99_API_LATENCY_WRITE_MS_AT_100_RPS |
+| FCP | <1.5 seconds | FCP_SECONDS |
+| LCP | <2.5 seconds | LCP_SECONDS |
+| CLS | <0.1 | CLS_SCORE |
+| INP | <200 ms | INP_MS |
+| Pet animation frame rate | ≥30 FPS sustained | PET_ANIMATION_FPS_MIN |
+| Pet canvas render on load | ≤2 seconds | PET_RENDER_ON_LOAD_SECONDS |
+| Pet interaction response | ≤200 ms | PET_INTERACTION_RESPONSE_MS |
+| Arena battle result E2E | <2 seconds | ARENA_BATTLE_E2E_SECONDS |
+| Leaderboard update lag | ≤30 seconds | LEADERBOARD_UPDATE_LAG_SECONDS |
+| Email delivery P90 | ≤60 seconds | EMAIL_DELIVERY_P90_SECONDS |
+| Error rate | <1% per 5-minute window | ERROR_RATE_MAX_PERCENT |
+| Email delivery failure rate | <2% | EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT |
+| Spam complaint rate | <0.1% | SPAM_COMPLAINT_RATE_MAX_PERCENT |
 
 ### §7.2 Performance Strategy
 
@@ -904,7 +915,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 **CDN / Frontend**:
 - Vite code splitting: Phaser.js dynamically imported to avoid blocking the claim flow bundle
 - JS bundle budget: <300 KB gzipped (CONSTANTS §4 bundle limit — App page type)
-- CSS bundle budget: <50 KB gzipped
+- CSS bundle budget: <50 KB gzipped (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50)
 - `font-display: swap` for both fonts (Press Start 2P + Inter)
 - Preload only Press Start 2P (above-fold); Inter loads async
 - `image-rendering: pixelated` on sprite canvas; no oversized source images
@@ -1201,7 +1212,7 @@ Error messages follow the PDD §10.1 tone of voice — specific and actionable, 
 |---|---|---|---|---|
 | API error rate | >1% of requests | 5 minutes | PagerDuty + Slack | CONSTANTS OBSERVABILITY_ERROR_RATE_ALERT_WINDOW |
 | P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD (= OBSERVABILITY_P99_ALERT_MS = 1,000ms; both constants are equivalent aliases) |
-| Email delivery failure | >2% SendGrid failure | 30 minutes | PagerDuty | CONSTANTS OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW |
+| Email delivery failure | >2% SendGrid failure | 30 minutes | PagerDuty | OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES (window); EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT (2% threshold) |
 | Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT (note: constant value is 60s; SLO target is 30s — alert fires after 2× SLO breach; recommend aligning constant to 30s in a future CONSTANTS revision) |
 | Pet claim rate drop | <5 claims/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD |
 | Arena battle rate drop | <10 battles/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD |
@@ -1269,7 +1280,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Admin portal: Login + basic pet list view (Moderator role only)
 
 **Exit criteria**:
-- 20 invited alpha testers successfully claim and access their pets (ALPHA_BETA_TESTERS = 20). Claim conversion rate ≥7% go (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%); <3% triggers pivot (CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3%). Day-1 return rate ≥50% (DAY_1_RETURN_RATE_TARGET_PERCENT = 50%). Day-3 retention ≥30% to proceed (DAY_3_RETENTION_ALPHA_GO_PERCENT = 30%); <10% is no-go (DAY_3_RETENTION_NOGO_PERCENT = 10%). Claim form error rate ≤2% (CLAIM_FORM_ERROR_RATE_MAX_PERCENT = 2%).
+- 20 invited alpha testers successfully claim and access their pets (ALPHA_BETA_TESTERS = 20). Claim conversion rate ≥7% go (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%); <3% triggers pivot (CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3%). Day-1 return rate ≥50% (DAY_1_RETURN_RATE_TARGET_PERCENT = 50%). Day-3 retention ≥30% to proceed (DAY_3_RETENTION_ALPHA_GO_PERCENT = 30%); <10% is no-go (DAY_3_RETENTION_NOGO_PERCENT = 10%). Claim form error rate ≤2% (CLAIM_FORM_ERROR_RATE_MAX_PERCENT = 2%). Claimed pets within 6 weeks: ≥500 (CLAIMED_PETS_6_WEEK_TARGET = 500).
 - Core pet display: PetCanvas renders claimed pet with correct sprite, stats, and level.
 - Basic leaderboard: Top 100 leaderboard returns correct data from seeded test data (no live battles required in Phase 1 — arena is Phase 2 scope).
 
@@ -1305,7 +1316,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Performance hardening: Lighthouse CI gate (LCP <2.5s, FCP <1.5s, CLS <0.1); load testing at 500 RPS
 - Security hardening: CSP header with nonce-based script policy; full OWASP Top 10 review
 
-**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). ≥100 daily arena battles (ARENA_BATTLES_GA_SUCCESS_PER_DAY = 100). Day-30 retention ≥15% (DAY_30_RETENTION_TARGET_PERCENT = 15%). Arena social share rate ≥5% (ARENA_SOCIAL_SHARE_RATE_TARGET_PERCENT = 5%). Organic traffic ≥30% of sessions (ORGANIC_TRAFFIC_TARGET_PERCENT = 30%). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). All admin GDPR workflows operational.
+**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). ≥100 daily arena battles (ARENA_BATTLES_GA_SUCCESS_PER_DAY = 100). Day-30 retention ≥15% (DAY_30_RETENTION_TARGET_PERCENT = 15%). Arena social share rate ≥5% (ARENA_SOCIAL_SHARE_RATE_TARGET_PERCENT = 5%). Organic traffic ≥30% of sessions (ORGANIC_TRAFFIC_TARGET_PERCENT = 30%). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). Marketplace monthly fee revenue ≥$500 (MONTHLY_FEE_REVENUE_TARGET_USD = 500). All admin GDPR workflows operational.
 
 ### §13.4 Product KPI Targets (Cross-Phase)
 
@@ -1325,6 +1336,7 @@ The following KPI targets from CONSTANTS apply across all phases:
 | Arena fair-play rate | ≥95% | ARENA_FAIR_PLAY_RATE_TARGET_PERCENT | Phase 2+ |
 | Claim form error rate | ≤2% | CLAIM_FORM_ERROR_RATE_MAX_PERCENT | Phase 1+ |
 | Leaderboard UV/DAU ratio | ≥20% | LEADERBOARD_UV_DAU_RATIO_TARGET_PERCENT | Phase 2+ |
+| Claim conversion (steady-state) | ≥10% | CLAIM_CONVERSION_TARGET_PERCENT | Phase 2+ |
 
 ### §13.5 A/B Testing Parameters
 
