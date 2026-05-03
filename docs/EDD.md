@@ -271,7 +271,7 @@ INDEXES:
 
 Notes:
 - Raw email is only held in memory during the claim transaction and in SendGrid delivery. The database stores only the encrypted form and the hash for lookup.
-- On GDPR deletion request: `email_encrypted` is set to NULL, `deletion_requested_at` recorded. Background job replaces with hash-only record within 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days; system completes within 24 hours per GDPR_EMAIL_HASHING_INTERNAL_SLA).
+- On GDPR deletion request: `email_encrypted` is set to NULL, `deletion_requested_at` recorded. Background job replaces with hash-only record within 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days; system completes within 24 hours per GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS).
 - IP addresses are never stored raw; hashed IP retained 90 days for abuse monitoring (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 
 ### §4.3 ClaimCode (OTP Token)
@@ -357,7 +357,7 @@ Table: leaderboard_snapshots
 ──────────────────────────────────────────────────────
 id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
 snapshot_time    TIMESTAMPTZ  NOT NULL
-entries          JSONB        NOT NULL  -- array of top 500 entries: [{rank, pet_id, score, win_rate, rarity, level}]
+entries          JSONB        NOT NULL  -- array of top 500 entries: [{rank, pet_id, pet_name, score, win_rate, rarity, level}]
 ──────────────────────────────────────────────────────
 INDEXES:
   idx_leaderboard_snapshots_time  ON leaderboard_snapshots(snapshot_time DESC)
@@ -410,6 +410,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, rol
 | username | VARCHAR(64) | NOT NULL UNIQUE | Display name for audit log |
 | password_hash | TEXT | NOT NULL | bcrypt, min 12 rounds |
 | totp_secret_encrypted | TEXT | NULL | Encrypted TOTP secret (set via POST /admin/api/auth/totp/setup before first authenticated login) |
+| totp_backup_codes_hash | JSONB | NULL | Array of SHA-256 hashes of the 10 single-use backup codes; entry removed on use; NULL until TOTP enrollment |
 | role | VARCHAR(32) | NOT NULL DEFAULT 'moderator' | 'super_admin' \| 'moderator' \| 'read_only' |
 | last_login_at | TIMESTAMPTZ | NULL | |
 | failed_attempts | SMALLINT | NOT NULL DEFAULT 0 | Reset on success |
@@ -448,19 +449,37 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, rol
 
 **Indexes**: idx_trade_records_listing_pet ON trade_records(listing_pet_id); idx_trade_records_completed ON trade_records(completed_at DESC)
 
-### §4.12 GdprRequest
+### §4.12 MarketplaceListing (Phase 3 — FF_MARKETPLACE)
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| id | UUID | PK DEFAULT gen_random_uuid() | Used as listingId in API |
+| pet_id | UUID | NOT NULL REFERENCES pets(id) | Pet being listed |
+| seller_token_hash | TEXT | NOT NULL | Hashed seller access token (ownership verification) |
+| price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Asking price in food credits |
+| status | VARCHAR(16) | NOT NULL DEFAULT 'active' | 'active' \| 'cancelled' \| 'sold' |
+| listed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | Start of anti-flip window |
+| expires_at | TIMESTAMPTZ | NULL | Optional expiry; NULL = no expiry |
+| completed_at | TIMESTAMPTZ | NULL | Set when status transitions to 'sold' or 'cancelled' |
+
+**Indexes**: idx_marketplace_listings_status ON marketplace_listings(status) WHERE status = 'active'; idx_marketplace_listings_pet ON marketplace_listings(pet_id); idx_marketplace_listings_listed_at ON marketplace_listings(listed_at DESC)
+
+**Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `listed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in trade_records before accepting a new listing.
+
+### §4.13 GdprRequest
 
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | id | UUID | PK DEFAULT gen_random_uuid() | Returned as jobId in API response |
-| pet_id | UUID | NOT NULL REFERENCES pets(id) | Requesting pet |
+| claim_identity_id | UUID | NOT NULL REFERENCES claim_identities(id) | Data subject (email identity); a single erasure covers all pets under this identity |
+| initiating_pet_id | UUID | NULL REFERENCES pets(id) | Pet whose token authenticated the self-service submission; NULL for admin-initiated requests |
 | request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' |
 | status | VARCHAR(32) | NOT NULL DEFAULT 'pending' | 'pending' \| 'processing' \| 'completed' \| 'failed' |
 | submitted_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 | completed_at | TIMESTAMPTZ | NULL | |
 | admin_notes | TEXT | NULL | Filled by admin on completion |
 
-**Indexes**: idx_gdpr_requests_pet_id ON gdpr_requests(pet_id); idx_gdpr_requests_status ON gdpr_requests(status, submitted_at)
+**Indexes**: idx_gdpr_requests_identity ON gdpr_requests(claim_identity_id, submitted_at DESC); idx_gdpr_requests_status ON gdpr_requests(status, submitted_at)
 
 ---
 
@@ -515,7 +534,7 @@ Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unse
 #### GET /api/v1/pet/:petId
 Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
 Description: Fetch pet data including stats, rarity, and level.
-Response: `{ id, seed, rarity, stats: {speed, strength, stamina, level}, isOwner: boolean, claimedAt, isNeglected: boolean }`
+Response: `{ id, seed, rarity, petName, stats: {speed, strength, stamina, level}, isOwner: boolean, claimedAt, isNeglected: boolean }`
 Notes: `isNeglected` is true if `NOW() - last_training_action > 3 days` (TRAINING_NEGLECT_THRESHOLD = 3 days).
 
 #### POST /api/v1/pet/:petId/train
@@ -544,8 +563,8 @@ Auth: None (public battle record)
 Response: `{ matchId, mode, petA: PetSummary, petB: PetSummary, winnerId, battleLog, completedAt }`
 
 #### GET /api/v1/arena/history/:petId
-Auth: Pet token (via header/query)
-Description: Last 20 battles for a pet (ARENA_BATTLE_RECORDS_DISPLAY = 20).
+Auth: None (public — last 20 battles per pet are shown publicly per CONSTANTS ARENA_BATTLE_RECORDS_DISPLAY = 20)
+Description: Last 20 battles for a pet.
 Response: `{ petId, battles: [{matchId, mode, opponentId, result, completedAt}], summary: {wins, losses, winRate} }`
 
 ### §5.4 Leaderboard Endpoints
@@ -626,7 +645,7 @@ Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_RE
 Auth: Admin session (Super Admin)
 Request: `{ emailHash: string, reason: string }`
 Response: `{ jobId: string, estimatedCompletion: ISO8601 }`
-Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW).
+Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW).
 
 #### POST /admin/api/battles/:matchId/flag
 Auth: Admin session (Moderator+)
@@ -648,7 +667,7 @@ No persistent accounts exist — players identify via pet token. GDPR requests a
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `POST` | `/api/v1/gdpr/request` | Pet token | Submit a GDPR request (erasure / data-access / restrict-processing) |
-| `GET` | `/api/v1/gdpr/request/status` | Pet token | Check status of a pending GDPR request |
+| `GET` | `/api/v1/gdpr/request/status?jobId=<uuid>` | Pet token | Check status of a specific GDPR request by jobId |
 
 **Request body** (`POST /api/v1/gdpr/request`):
 ```json
