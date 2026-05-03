@@ -664,7 +664,7 @@ Response: `{ success: true, auditLogId: string }`
 
 #### GET /admin/api/leaderboard
 Auth: Admin session (Moderator+ or Read Only)
-Response: Top 500 pets (LEADERBOARD_ADMIN_VIEW = 500) with suspicious flags for pets >50 battles/hour (BOT_DETECTION_BATTLES_THRESHOLD = 50).
+Response: Top 500 pets (LEADERBOARD_ADMIN_VIEW = 500) with suspicious flags for pets exceeding the leaderboard suspicious-flag threshold (LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR = 50 battles/hr).
 
 #### GET /admin/api/config/runtime
 Auth: Admin session (Super Admin)
@@ -692,7 +692,7 @@ Description: Real-time dashboard summary — all values from Redis counters and 
 #### GET /admin/api/battles
 Auth: Admin session (Moderator+ or Read Only)
 Query: `?page=1&limit=20&from=ISO8601&to=ISO8601&petId=&flagged=true|false`
-Response: `{ battles: [{matchId, petAId, petBId, winnerId, outcome, duration, createdAt, isFlagged}], total, page, limit }`
+Response: `{ battles: [{matchId, petAId, petBId, winnerId, outcome, duration, completedAt, isFlagged}], total, page, limit }`
 Description: Battle Records list view — paginated; last ARENA_BATTLE_RECORDS_DISPLAY = 20 shown by default.
 
 #### GET /admin/api/suspicious
@@ -725,7 +725,7 @@ Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_H
 
 #### PATCH /admin/api/gdpr/:requestId
 Auth: Admin session (Super Admin)
-Description: Update the status of a non-erasure GDPR request (data_access, restrict_processing, object_leaderboard). Used by the admin GDPR Queue module to transition requests through their lifecycle.
+Description: Update the status of a non-erasure GDPR request (data_access, restrict_processing, object_leaderboard, rectification). Used by the admin GDPR Queue module to transition requests through their lifecycle. For rectification, admin fulfills by updating the subject's claim_identities.email_encrypted field, then marks status completed.
 Request: `{ status: "processing" | "completed" | "failed", adminNotes?: string (max 500 chars) }`
 Response: `{ success: true, requestId: string, status: string, updatedAt: ISO8601 }`
 Notes: `admin_notes` is written to `gdpr_requests.admin_notes`. Audit log entry created on each transition. Erasure requests are processed via POST /admin/api/gdpr/delete, not this endpoint.
@@ -1022,16 +1022,16 @@ The admin portal is deployed as a separate Vite application. It shares backend A
 
 | Module | Route | Key Functionality | Role Required |
 |---|---|---|---|
-| Dashboard | /admin/dashboard | Real-time DAP, battles/hour, claim funnel, GDPR queue | Moderator+ |
-| Pet Management | /admin/pets | Paginated list, search by ID/email, ban/unban with reason | Moderator+ |
-| Leaderboard | /admin/leaderboard | Top 500 view, suspicious flag indicators, remove/restore | Moderator+ |
-| Battle Records | /admin/battles | Flag suspicious matches, view battle logs | Moderator+ |
+| Dashboard | /admin/dashboard | Real-time DAP, battles/hour, claim funnel, GDPR queue | Moderator+ / Read Only |
+| Pet Management | /admin/pets | Paginated list, search by ID/email, ban/unban with reason | Moderator+ / Read Only (GET only) |
+| Leaderboard | /admin/leaderboard | Top 500 view, suspicious flag indicators, remove/restore | Moderator+ / Read Only (GET only) |
+| Battle Records | /admin/battles | Flag suspicious matches, view battle logs | Moderator+ / Read Only (GET only) |
 | Suspicious Activity | /admin/suspicious | Auto-flagged pets (>50 battles/60min), triage queue | Moderator+ |
-| GDPR Queue | /admin/gdpr | Process all GDPR requests (erasure, data access, restrict processing, object leaderboard), audit trail | Super Admin |
+| GDPR Queue | /admin/gdpr | Process all GDPR requests (erasure, data access, restrict processing, object leaderboard, rectification), audit trail | Super Admin |
 | Runtime Config | /admin/config/runtime | Arena rate limits, rarity weights, matchmaking timeout | Super Admin |
 | Economy Config | /admin/config/economy | Food buff multipliers (0.5×–5.0×), arena entry cost/cooldown | Super Admin |
-| Email Monitor | /admin/email | SendGrid delivery status, bounce rates, spam complaints | Moderator+ |
-| Analytics | /admin/analytics | DAP trend, claim conversion, retention cohorts | Moderator+ |
+| Email Monitor | /admin/email | SendGrid delivery status, bounce rates, spam complaints | Moderator+ / Read Only |
+| Analytics | /admin/analytics | DAP trend, claim conversion, retention cohorts | Moderator+ / Read Only |
 | Audit Log | /admin/audit | Full immutable audit trail, 2-year retention | Super Admin |
 | Roles | /admin/roles | Admin account management, TOTP reset | Super Admin |
 
