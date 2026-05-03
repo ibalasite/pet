@@ -239,7 +239,7 @@ Two Fastify processes share the same codebase and database credentials via envir
 - **Game API Server**: ≥ 2 replicas on Railway; handles all `/api/v1/*` player-facing routes.
 - **Admin API Server**: 1 replica; handles all `/admin/api/*` routes via a dedicated Fastify plugin registered under the `/admin` prefix.
 
-**Horizontal Autoscale**: CPU threshold 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70). Railway autoscaling or Kubernetes HPA. Baseline resource limits: 512 MB RAM, 0.5 CPU per replica; burst ceiling: 2 GB / 2 CPU.
+**Horizontal Autoscale**: CPU threshold 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70). Railway autoscaling or Kubernetes HPA. Baseline resource limits: 512 MB RAM, 0.5 CPU per replica; burst ceiling: 2 GB / 2 CPU (EDD §8.3 infrastructure constraints).
 
 **Request Handling**:
 - JSON Schema / Zod validation on all routes (schema-based validation built into Fastify — no extra middleware dependency)
@@ -266,7 +266,7 @@ Two Fastify processes share the same codebase and database credentials via envir
 | Normal operation | 100 RPS sustained (NORMAL_OPERATION_RPS) | 2,000–5,000 (NORMAL_OPERATION_DAU_MIN / MAX) |
 | Peak (viral) | 500 RPS (PEAK_OPERATION_RPS) | 2,000 PCU arena (PEAK_CONCURRENT_USERS) |
 
-**Containerization**: Multi-stage Docker build (`node:20-alpine`), non-root user, < 150 MB image target. Health check: `GET /health` ≤ 500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500). Images stored in GitHub Container Registry (ghcr.io).
+**Containerization**: Multi-stage Docker build (`node:20-alpine`), non-root user, < 150 MB image target (EDD §8.3 infrastructure constraint). Health check: `GET /health` ≤ 500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500). Images stored in GitHub Container Registry (ghcr.io).
 
 ---
 
@@ -353,7 +353,7 @@ Rate limiting is fail-open for operational traffic (counters not enforced on Red
 ```
 Key:   session:admin:{session_id}
 TTL:   14400s (inactivity: ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4h)
-Value: JSON { adminId, role, createdAt, absExpiry: createdAt+28800s }
+Value: JSON { adminId, role, createdAt, absExpiry: createdAt+(ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS×3600)s }
 ```
 
 Absolute expiry (ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8 hours) enforced via `absExpiry` field check on every request.
@@ -367,7 +367,7 @@ Score:  enqueue epoch (ms)
 Member: "{petId}:{enqueue_epoch_ms}"
 ```
 
-Consumer uses `ZRANGEBYSCORE` for FIFO pairing. Stale entries older than ARENA_MATCHMAKING_TIMEOUT_SECONDS + 15s buffer (≈ 45s) are discarded before pairing. Supports 100 concurrent entries (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
+Consumer uses `ZRANGEBYSCORE` for FIFO pairing. Stale entries older than ARENA_MATCHMAKING_TIMEOUT_SECONDS + 15s buffer (≈ 45s — EDD §7.2 operational margin) are discarded before pairing. Supports 100 concurrent entries (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
 
 **5. Config Cache**
 
@@ -700,9 +700,9 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
      │                               │   score=arena_score member=winnerPetId   │
      │                               │ ZADD leaderboard:global  │               │
      │                               │   score=arena_score member=loserPetId    │
+     │                               │─────────────────────────────────────────>│
      │                               │ [Both ZADDs in MULTI/EXEC pipeline for atomicity │
      │                               │  — see §4.3 for full leaderboard update flow]    │
-     │                               │─────────────────────────────────────────>│
      │  {matchId, result, ...}       │                          │               │
      │<──────────────────────────────│                          │               │
      │                               │                          │               │
@@ -822,7 +822,7 @@ Token revocation: Admin sets `owner_token_hash = NULL`. Recovery: new 32-byte to
 **Admin Identity Layer**:
 
 Two-factor admin authentication (2FA per PRD NFR-SEC-11):
-- Factor 1: Username + bcrypt password hash (minimum 12 rounds work factor)
+- Factor 1: Username + bcrypt password hash (minimum 12 rounds work factor — EDD §9.1 implementation constraint)
 - Factor 2: RFC 6238 TOTP (6-digit, 30-second window); mandatory — no session without TOTP enrollment
 
 Session management (post-2FA): Server-side Redis session issued after successful 2FA (httpOnly + SameSite=Strict cookie). The Redis session is the session management mechanism, not a third authentication factor.
@@ -932,7 +932,7 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 **API Layer**:
 - Game API: minimum 2 replicas at all times (HA), autoscale on CPU ≥ 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70)
 - Railway autoscaling or Kubernetes HPA handles scale-out
-- Baseline per-replica: 512 MB RAM, 0.5 CPU; burst ceiling: 2 GB RAM, 2 CPU
+- Baseline per-replica: 512 MB RAM, 0.5 CPU; burst ceiling: 2 GB RAM, 2 CPU (EDD §8.3 infrastructure constraints)
 - All replicas are stateless (no in-process session state; all state in Redis or PostgreSQL)
 
 **Statelessness Guarantee**:
