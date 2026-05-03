@@ -249,13 +249,13 @@ export function setupRouterGuards(router: Router) {
 
     // Not authenticated → redirect to login, preserve destination path
     if (!authStore.isAuthenticated) {
-      return next({ path: '/admin/login', query: { redirect: to.fullPath } })
+      return next({ path: '/login', query: { redirect: to.fullPath } })
     }
 
     // Permission check (meta.permission = required role level)
     const required = to.meta.permission as string | undefined
     if (required && !permStore.hasPermission(required)) {
-      return next('/admin/403')
+      return next('/403')
     }
 
     next()
@@ -480,7 +480,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 - Basic info: ID, Pet Name, Seed, Rarity, Level, Generation Meta (6 dimensions)
 - Stats: speed / strength / stamina, Total Training Actions, Last Trained At, isNeglected
 - Owner: Owner Email (masked), Claimed At
-- Ban status: is_banned, Banned Reason (max 500 chars), Banned At
+- Ban status: isBanned, Banned Reason (max 500 chars), Banned At
 - Last 20 arena battle records (arena_battle_records_display_count = 20)
 
 **Actions**: Ban / Unban (`moderator+`), Edit Pet Name (`super_admin`, `PUT /admin/api/pets/:petId`)
@@ -692,9 +692,9 @@ http.interceptors.response.use(
       // Session expired → clear auth state → redirect to login
       const authStore = useAuthStore()
       authStore.clearSession()
-      await router.push('/admin/login')
+      await router.push('/login')
     } else if (status === 403) {
-      await router.push('/admin/403')
+      await router.push('/403')
     }
     return Promise.reject(error)
   }
@@ -808,7 +808,7 @@ export const useAuthStore = defineStore('auth', () => {
       await authApi.logout()
     } finally {
       clearSession()
-      await router.push('/admin/login')
+      await router.push('/login')
     }
   }
 
@@ -918,19 +918,36 @@ export const useConfigStore = defineStore('config', () => {
     await fetchRuntimeConfig() // refresh cache
   }
 
+  async function fetchEconomyConfig() {
+    loading.value = true
+    try {
+      const res = await configApi.getEconomyConfig()
+      economyConfig.value = res.data.data
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateEconomyConfig(patch: Partial<EconomyConfig>) {
+    await configApi.putEconomyConfig(patch)
+    await fetchEconomyConfig() // refresh cache
+  }
+
   async function fetchFeatureFlags() {
     const res = await configApi.getFeatureFlags()
     featureFlags.value = res.data.data.flags
   }
 
-  async function toggleFlag(flag: string, enabled: boolean) {
+  async function updateFeatureFlag(flag: string, enabled: boolean) {
     await configApi.putFeatureFlag(flag, enabled)
     await fetchFeatureFlags()
   }
 
   return {
     runtimeConfig, economyConfig, featureFlags, loading,
-    fetchRuntimeConfig, updateRuntimeConfig, fetchFeatureFlags, toggleFlag,
+    fetchRuntimeConfig, updateRuntimeConfig,
+    fetchEconomyConfig, updateEconomyConfig,
+    fetchFeatureFlags, updateFeatureFlag,
   }
 })
 ```
@@ -1206,74 +1223,88 @@ The Admin Portal is single-language (English). No multi-locale configuration is 
 
 ```typescript
 // router/routes.ts
+// Note: createRouter uses createWebHistory('/admin') base — all paths below are
+// relative to that base (FRONTEND.md §3.5). The browser URL for path '/login' is
+// /admin/login; for child path 'dashboard' under '/' it is /admin/dashboard.
 const routes = [
   {
-    path: '/admin/login',
+    path: '/login',
     component: () => import('@/views/auth/LoginView.vue'),
     meta: { public: true },
   },
   {
-    path: '/admin/dashboard',
-    component: () => import('@/views/dashboard/DashboardView.vue'),
+    path: '/totp-setup',
+    component: () => import('@/views/auth/TotpSetupView.vue'),
+    meta: { public: true },
   },
   {
-    path: '/admin/pets',
-    component: () => import('@/views/pets/PetListView.vue'),
-  },
-  {
-    path: '/admin/pets/:petId',
-    component: () => import('@/views/pets/PetDetailView.vue'),
-  },
-  {
-    path: '/admin/battles',
-    component: () => import('@/views/battles/BattleListView.vue'),
-  },
-  {
-    path: '/admin/suspicious',
-    component: () => import('@/views/battles/SuspiciousView.vue'),
-    meta: { permission: 'moderator' },
-  },
-  {
-    path: '/admin/leaderboard',
-    component: () => import('@/views/leaderboard/LeaderboardView.vue'),
-  },
-  {
-    path: '/admin/analytics',
-    component: () => import('@/views/analytics/AnalyticsView.vue'),
-  },
-  {
-    path: '/admin/email',
-    component: () => import('@/views/analytics/EmailMonitorView.vue'),
-  },
-  {
-    path: '/admin/config/runtime',
-    component: () => import('@/views/config/RuntimeConfigView.vue'),
-    meta: { permission: 'super_admin' },
-  },
-  {
-    path: '/admin/config/economy',
-    component: () => import('@/views/config/EconomyConfigView.vue'),
-    meta: { permission: 'super_admin' },
-  },
-  {
-    path: '/admin/config/flags',
-    component: () => import('@/views/config/FeatureFlagsView.vue'),
-    meta: { permission: 'super_admin' },
-  },
-  {
-    path: '/admin/gdpr',
-    component: () => import('@/views/gdpr/GdprQueueView.vue'),
-    meta: { permission: 'super_admin' },
-  },
-  {
-    path: '/admin/roles',
-    component: () => import('@/views/roles/RoleManagementView.vue'),
-    meta: { permission: 'super_admin' },
-  },
-  {
-    path: '/admin/audit',
-    component: () => import('@/views/audit/AuditLogView.vue'),
-    meta: { permission: 'super_admin' },
+    path: '/',
+    component: () => import('@/layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/DashboardView.vue'),
+      },
+      {
+        path: 'pets',
+        component: () => import('@/views/pets/PetListView.vue'),
+      },
+      {
+        path: 'pets/:petId',
+        component: () => import('@/views/pets/PetDetailView.vue'),
+      },
+      {
+        path: 'battles',
+        component: () => import('@/views/battles/BattleListView.vue'),
+      },
+      {
+        path: 'suspicious',
+        component: () => import('@/views/battles/SuspiciousView.vue'),
+        meta: { permission: 'moderator' },
+      },
+      {
+        path: 'leaderboard',
+        component: () => import('@/views/leaderboard/LeaderboardView.vue'),
+      },
+      {
+        path: 'analytics',
+        component: () => import('@/views/analytics/AnalyticsView.vue'),
+      },
+      {
+        path: 'email',
+        component: () => import('@/views/analytics/EmailMonitorView.vue'),
+      },
+      {
+        path: 'config/runtime',
+        component: () => import('@/views/config/RuntimeConfigView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'config/economy',
+        component: () => import('@/views/config/EconomyConfigView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'config/flags',
+        component: () => import('@/views/config/FeatureFlagsView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'gdpr',
+        component: () => import('@/views/gdpr/GdprQueueView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'roles',
+        component: () => import('@/views/roles/RoleManagementView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'audit',
+        component: () => import('@/views/audit/AuditLogView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+    ],
   },
 ]
 ```
