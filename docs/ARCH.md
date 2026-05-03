@@ -294,7 +294,7 @@ Two Fastify processes share the same codebase and database credentials via envir
 **Access Patterns**:
 - All writes go to the primary writer
 - Leaderboard, public pet page, and admin list views route to the read replica (NFR-SCALE-03)
-- Connection pool: minimum 20 connections (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst to 50
+- Connection pool: minimum 20 connections (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst to 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS = 50)
 
 **Key Index Strategies**:
 - `idx_pets_owner_token_hash` — partial index (WHERE NOT NULL) — auth on every authenticated request
@@ -734,14 +734,13 @@ Arena Match Completion         Game API                    Redis            Post
 (Post-battle write path)            │                          │               │
      │                               │                          │               │
      │  Arena match completed        │                          │               │
-     │  (winner_pet_id determined)   │                          │               │
+     │  (winnerPetId determined)     │                          │               │
      │──────────────────────────────>│                          │               │
      │                               │ Recalculate arena_score for WINNER       │
      │                               │   formula: win_rate × battles × level_mult
-     │                               │ ZADD leaderboard:global score member=winnerPetId
-     │                               │─────────────────────────>│               │
      │                               │ Recalculate arena_score for LOSER        │
      │                               │   (battles_played increases; win_rate drops)
+     │                               │ ZADD leaderboard:global score member=winnerPetId
      │                               │ ZADD leaderboard:global score member=loserPetId
      │                               │─────────────────────────>│               │
      │                               │ [Both ZADDs wrapped in Redis MULTI/EXEC pipeline for atomicity]
@@ -830,7 +829,7 @@ Session management (post-2FA): Server-side Redis session issued after successful
 
 TOTP enrollment is enforced at first login: `TOTP_SETUP_REQUIRED` error with a short-lived setup token (HS256 JWT, 15-minute TTL) is returned when `totp_secret_encrypted IS NULL`. No authenticated session can be established until TOTP setup is complete.
 
-**IP Allowlist**: The admin portal supports restriction to operator IP ranges via `ADMIN_ALLOWED_IPS` environment variable (comma-separated CIDR list). When set, requests from IPs outside the allowlist receive HTTP 403 `FORBIDDEN` before credential check. **Accepted deviation from PRD NFR-ADMIN-07**: NFR-ADMIN-07 mandates IP allowlist in production; the implementation keeps it optional (default disabled) to allow flexible deployment environments. This deviation is accepted risk — teams deploying to production are expected to set `ADMIN_ALLOWED_IPS`. Documented in EDD §9.3.
+**IP Allowlist**: The admin portal supports restriction to operator IP ranges via `ADMIN_ALLOWED_IPS` environment variable (comma-separated CIDR list). When set, requests from IPs outside the allowlist receive HTTP 403 `FORBIDDEN` before credential check. **Accepted deviation from PRD NFR-ADMIN-07**: NFR-ADMIN-07 mandates IP allowlist in production; the implementation keeps it optional (default disabled) to allow flexible deployment environments. This deviation is accepted risk — teams deploying to production are expected to set `ADMIN_ALLOWED_IPS`. Deviation accepted in ARCH §5.1; EDD §9.3 reflects the optional implementation choice.
 
 **Role Model**:
 
@@ -946,7 +945,7 @@ No replica-local state. Pet access tokens are verified by hashing (no replica-sh
 Redis Sorted Set queue supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100). ZADD is O(log N); ZRANGEBYSCORE for consumer is O(log N + M).
 
 **Database Read Scaling**:
-Read replica handles: leaderboard queries, public pet page reads, admin list views. Primary writer handles: all inserts and updates. Connection pool: minimum 20 (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst maximum 50.
+Read replica handles: leaderboard queries, public pet page reads, admin list views. Primary writer handles: all inserts and updates. Connection pool: minimum 20 (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst maximum 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS = 50).
 
 ---
 

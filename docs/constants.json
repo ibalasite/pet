@@ -220,6 +220,7 @@
     "peak_operation_rps": 500,
     "peak_concurrent_users": 2000,
     "db_connection_pool_min_connections": 20,
+    "db_connection_pool_max_connections": 50,
     "dau_12_month_target": 2000,
     "claimed_pets_6_week_target": 500,
     "monthly_gmv_target_usd": 10000,
