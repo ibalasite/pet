@@ -886,6 +886,27 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | Then | `email_encrypted` becomes NULL; pet page still loads with pseudonymous owner; audit log shows `GDPR_DELETION` action |
 | Linked AC | AC-016-1, AC-016-3 |
 
+| TC-E2E-028 | Admin runtime parameter tuning — arena rate limit update |
+|---|---|
+| Given | A super_admin authenticated in the admin portal and the System Config page |
+| When | Admin sets max battles per hour to a new value in the allowed range [(arena_rate_limit_admin_min = 1), (arena_rate_limit_admin_max = 50)] and clicks Save |
+| Then | Success toast displayed; updated value is visible in the config panel; audit log contains a record with `action = CONFIG_UPDATE`, the old value, and the new value |
+| Linked AC | AC-015-1, AC-015-3 |
+
+| TC-E2E-029 | Admin suspicious activity — flagged pet review and moderation |
+|---|---|
+| Given | A pet that has been auto-flagged SUSPICIOUS (more than (bot_detection_battles_threshold = 50) battles in a (bot_detection_window_minutes = 60)-minute window) |
+| When | Moderator navigates to the Suspicious Activity page, clicks the flagged pet, reviews its battle timeline, and selects "Ban from Arena" with a reason |
+| Then | SUSPICIOUS badge visible in the list; battle timeline for the suspicious window is displayed; ban action succeeds; pet removed from arena queue; audit log records moderator ID, timestamp, action, and reason (max (admin_moderation_reason_max_chars = 500) chars) |
+| Linked AC | AC-017-2, AC-017-3, AC-017-4 |
+
+| TC-E2E-030 | Admin game economy config — food buff multiplier update with preview |
+|---|---|
+| Given | A super_admin authenticated in the admin portal and the Game Economy Config page |
+| When | Admin changes a food buff multiplier to a value in the allowed range [(food_buff_multiplier_admin_min = 0.5), (food_buff_multiplier_admin_max = 5.0)], reviews the old-value → new-value preview, and confirms save |
+| Then | Preview dialog shows old and new values before save; after confirmation, updated multiplier visible in config panel; audit log records Super Admin ID, field name, old value, and new value |
+| Linked AC | AC-018-1, AC-018-2, AC-018-4 |
+
 ---
 
 ## 8. Performance Tests
@@ -1584,6 +1605,9 @@ This section provides a consolidated index of all test case identifiers defined 
 | TC-E2E-025 | Food inventory empty — get more food prompt | §7.4 |
 | TC-E2E-026 | Rarity badge shows occurrence rate | §7.6 |
 | TC-E2E-027 | Leaderboard filterable by rarity tier | §7.6 |
+| TC-E2E-028 | Admin runtime parameter tuning — arena rate limit update | §7.7 |
+| TC-E2E-029 | Admin suspicious activity — flagged pet review and moderation | §7.7 |
+| TC-E2E-030 | Admin game economy config — food buff multiplier update with preview | §7.7 |
 
 ### 13.4 Performance Test Cases (TC-PERF-*)
 
