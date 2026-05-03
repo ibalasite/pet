@@ -2,7 +2,7 @@
 
 ## Overview
 
-This diagram covers all 13 domain entities defined in EDD §4 and SCHEMA.md §2. It models the
+This diagram covers all 12 domain entities defined in EDD §4 and SCHEMA.md §2. It models the
 structural relationships between pets, identities, claims, training, arena matches, leaderboard
 snapshots, food buffs, marketplace tables, admin accounts, audit log, and GDPR requests.
 

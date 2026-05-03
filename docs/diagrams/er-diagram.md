@@ -2,7 +2,7 @@
 
 ## Overview
 
-This ER diagram covers all 13 PostgreSQL tables defined in SCHEMA.md §2, plus the Redis key-space
+This ER diagram covers all 12 PostgreSQL tables defined in SCHEMA.md §2, plus the Redis key-space
 structures defined in EDD §4.8 (shown as notes). Tables are grouped by domain:
 
 - **Identity & Auth**: `claim_identities`, `claim_codes`, `admin_accounts`
@@ -122,7 +122,7 @@ erDiagram
 
     marketplace_transactions {
         UUID id PK
-        UUID listing_id FK
+        UUID listing_id FK, UK
         UUID pet_id FK
         VARCHAR_64 seller_token_hash
         VARCHAR_64 buyer_token_hash

@@ -36,7 +36,7 @@ graph TB
 
     subgraph APILayer["API Layer — Railway (autoscale HPA at 70% CPU)"]
         GameAPI["Game API Server\nNode.js 20 LTS / Fastify 4\n≥ 2 replicas\n/api/v1/* routes\nPlugins: pets, claim, arena,\nleaderboard, marketplace, gdpr"]
-        AdminAPI["Admin API Server\nNode.js 20 LTS / Fastify 4\n1 replica\n/admin/api/* routes\nPlugins: auth, roles, pets,\nbattles, config, gdpr, audit"]
+        AdminAPI["Admin API Server\nNode.js 20 LTS / Fastify 4\n1 replica\n/admin/api/* routes\nPlugins: auth, roles, pets,\nbattles, leaderboard, config,\ngdpr, audit, dashboard"]
     end
 
     subgraph DataLayer["Data Layer"]
