@@ -54,6 +54,8 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | P99_API_LATENCY_WRITE | <500 | ms at 100 RPS | Training, arena write endpoints |
 | GDPR_EMAIL_DELETION_WINDOW | 7 | days | Email → SHA-256 hash |
 | GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS | 24 | hours | Internal SLA for email hash completion |
+| RARITY_COMMON_PERCENT / RARE / EPIC / LEGENDARY | 60 / 25 / 12 / 3 | percent | Default rarity drop weights; admin-tunable; four values must always sum to 100% |
+| RARITY_MULTIPLIER_COMMON / RARE / EPIC / LEGENDARY | 1 / 2 / 4 / 8 | × | Applied in trade min-price formula: (pet_level × 100) + (rarity_multiplier × 500) |
 | TRADE_TRANSACTION_FEE | 5 | percent | Platform fee on trades; within BRD-defined range of 5–10% (TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5, TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10) |
 | FOOD_BUFF_RECORD_RETENTION | 30 | days | After expiry/consumption |
 | MVP_BUDGET | 40,000 | USD | Hard constraint |
@@ -483,6 +485,8 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 
 **Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `completed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in trade_records before accepting a new listing. `completed_at` (purchase timestamp) is used — not `listed_at` — because the protection window begins when the buyer takes ownership.
 
+**Min-price formula**: `price_credits ≥ (pet_level × TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF) + (rarity_multiplier × TRADE_MIN_PRICE_FORMULA_RARITY_COEFF)` where TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF = 100, TRADE_MIN_PRICE_FORMULA_RARITY_COEFF = 500, and rarity_multiplier values are: Common = 1, Rare = 2, Epic = 4, Legendary = 8 (RARITY_MULTIPLIER_COMMON/RARE/EPIC/LEGENDARY).
+
 ### §4.13 GdprRequest
 
 | Column | Type | Constraints | Notes |
@@ -502,7 +506,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 
 ## §5. API Design
 
-All player-facing API routes use `/api/v1/` prefix. Backward compatibility maintained for at least 1 major version per PRD NFR-MAINT-06. Admin routes are prefixed `/admin/api`. All responses use the envelope format:
+All player-facing API routes use `/api/v1/` prefix. Backward compatibility maintained for at least 1 major version (API_BACKWARD_COMPAT_VERSIONS = 1) per PRD NFR-MAINT-06. Deprecated API versions receive 90-day advance notice before removal (API_DEPRECATION_NOTICE_DAYS = 90). Admin routes are prefixed `/admin/api`. All responses use the envelope format:
 
 ```json
 {
@@ -878,7 +882,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 | Arena battle result E2E | <2 seconds | CONSTANTS §4 |
 | Leaderboard update lag | ≤30 seconds | CONSTANTS §4 |
 | Email delivery P90 | ≤60 seconds | CONSTANTS §4 |
-| Error rate | <1% per 5-minute window | CONSTANTS §3 |
+| Error rate | <1% per 5-minute window | CONSTANTS §4 |
 
 ### §7.2 Performance Strategy
 
@@ -984,12 +988,25 @@ Cache invalidation rules:
 - **Canvas API**: `image-rendering: pixelated` + `image-rendering: crisp-edges` CSS applied to the canvas element
 - **Sprite sheets**: 32×32px per frame (provisional — see §14 OQ-E01 for resolution; implementation passes `SPRITE_RESOLUTION_PX` as a config constant to avoid hard-coding), PNG format with transparency.
 - **Animation loop**: `requestAnimationFrame` via Phaser's internal scene update; target ≥30 FPS sustained on mid-range devices (NFR-PERF-07)
-- **Procedural generation**: Pet seed → 6-dimension attribute vector (body, head, color_palette, accessory, rarity_trait, pattern) → sprite sheet frame selection. Seed is stored in `pets.seed`; rendering is deterministic from seed. Combination space ≥1,000,000,000 (PET_GENERATION_COMBINATIONS_MIN).
+- **Procedural generation**: Pet seed → 6-dimension attribute vector (body, head, color_palette, accessory, rarity_trait, pattern) → sprite sheet frame selection. Seed is stored in `pets.seed`; rendering is deterministic from seed. Combination space ≥1,000,000,000 (PET_GENERATION_COMBINATIONS_MIN). Rarity is assigned via weighted random at generation time: Common 60%, Rare 25%, Epic 12%, Legendary 3% (RARITY_COMMON/RARE/EPIC/LEGENDARY_PERCENT); weights are admin-tunable via runtime config but must always sum to 100%.
 - **Reduced motion**: `prefers-reduced-motion: reduce` detection — static sprite replaces animation loop; no particle effects.
 - **Fallback**: If WebGL unavailable, Canvas 2D fallback rendering with static sprite image.
 - **Phaser.js isolation**: Only `PetCanvasEngine` imports Phaser. No other component or hook may import Phaser directly.
 
-### §8.4 Build Toolchain
+### §8.4 Accessibility Requirements
+
+WCAG 2.1 AA compliance enforced in the player app:
+
+| Requirement | Target | Constant |
+|---|---|---|
+| Focus indicator contrast | ≥3:1 | A11Y_FOCUS_CONTRAST_RATIO = 3:1 |
+| Normal text contrast | ≥4.5:1 | A11Y_TEXT_CONTRAST_NORMAL = 4.5:1 |
+| Large text contrast (≥18pt or bold ≥14pt) | ≥3:1 | A11Y_TEXT_CONTRAST_LARGE = 3:1 |
+| OTP countdown warning | Display when ≤2 minutes remain | A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES = 2 |
+
+The claim flow displays a visible warning with sufficient contrast when the 6-digit OTP has ≤2 minutes remaining (A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES). Reduced-motion media query respected in §8.3. All interactive elements have ARIA labels.
+
+### §8.5 Build Toolchain
 
 | Tool | Version | Role |
 |---|---|---|
