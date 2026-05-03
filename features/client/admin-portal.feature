@@ -70,8 +70,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: Admin bans a pet with a reason and the ban is logged
     Given the admin is on "/admin/pets" and can see a pet with petId "bad-pet-001"
     When the admin clicks the "Ban" button on the pet row
-    And the PetBanModal.vue (ElDialog) opens with a reason text area
-    And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters
+    And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters in the PetBanModal.vue reason field
     And the admin clicks "Confirm Ban"
     Then POST /admin/api/pets/bad-pet-001/ban is called with body {"reason": "<reason>"}
     And the server records the ban with admin ID, timestamp, and reason
@@ -101,7 +100,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
 
   Scenario: Admin adjusts max battles per hour via runtime config panel
     Given the admin is authenticated as a super_admin and has navigated to "/admin/config/runtime"
-    And the RuntimeConfigPage.vue renders an ElForm with an ElInputNumber for "Max Battles Per Hour"
+    And the RuntimeConfigPage.vue is showing an ElForm with an ElInputNumber for "Max Battles Per Hour"
     When the admin changes the value to 15 (within the allowed range of 1 to 50)
     And clicks "Save"
     Then PUT /admin/api/config/runtime is called with the updated value

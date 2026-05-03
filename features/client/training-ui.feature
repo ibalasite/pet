@@ -37,7 +37,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   Scenario: All training actions exhausted — cards disabled and DailyResetTimer appears
     Given the owner has already used all (training_actions_per_day = 3) daily training actions
-    And POST /api/v1/training responds HTTP 400 with error code "TRAINING_LIMIT_REACHED"
+    And GET /api/v1/pets/:petId responds HTTP 200 with "actionsRemainingToday": 0
     When the owner navigates to the TrainingPage
     Then all three TrainingActionCard "Train" buttons are disabled
     And the DailyResetTimer component is visible showing a countdown to UTC 00:00
@@ -46,8 +46,9 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   Scenario: Daily reset at UTC 00:00 re-enables training cards
     Given all (training_actions_per_day = 3) training actions were exhausted and the DailyResetTimer is showing
+    And GET /api/v1/pets/:petId responds HTTP 200 with "actionsRemainingToday": 3
     When the UTC clock reaches 00:00 and the usePet query cache is invalidated
-    Then GET /api/v1/pets/:petId is re-fetched and returns "actionsRemainingToday": 3
+    Then GET /api/v1/pets/:petId is re-fetched
     And the three TrainingActionCard "Train" buttons become enabled again
     And the DailyResetTimer component disappears from the page
 
