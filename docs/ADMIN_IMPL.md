@@ -1,68 +1,88 @@
-# Admin Portal 實作規格書
-
-## §0 文件資訊
-
-| 欄位 | 說明 |
-|------|------|
-| DOC-ID | ADMIN-pixel-pet-arena-20260503 |
-| Admin 技術棧 | Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5（來自 EDD §3.7） |
-| 上游 EDD | [EDD.md](EDD.md) §3.3 + §5.5-A |
-| 上游 API | [API.md](API.md) /admin/api/* 章節 |
-| 上游 SCHEMA | [SCHEMA.md](SCHEMA.md) admin_accounts + admin_audit_log 資料表章節 |
-| 上游 ARCH | [ARCH.md](ARCH.md) Admin Portal 容器（部署位置 + 技術棧） |
-| 上游 CONSTANTS | [CONSTANTS.md](CONSTANTS.md) Token TTL + API Timeout + pageSize 等常數 |
+# ADMIN_IMPL — Admin Portal Implementation Specification
+<!-- SDLC Layer 4: Implementation Engineering -->
+<!-- Upstream: EDD.md (tech stack §3.7) + FRONTEND.md §3 (admin portal design) + API.md §6 (/admin/api/* endpoints) + SCHEMA.md (admin_accounts + admin_audit_log tables) + constants.json -->
+<!-- Scope: Admin Portal (Vue 3 + Element Plus + TypeScript + Vite). Player App (React 18 + Phaser 3) is excluded — see CLIENT_IMPL.md. -->
 
 ---
 
-## §1 Admin Portal 概覽
+## Document Control
 
-### §1.1 系統定位
-
-pixel-pet-arena Admin Portal 是一套供平台運營人員使用的後台管理系統，主要目標用戶為：
-- **Super Admin（超級管理員）**：負責帳號管理、GDPR 合規、系統配置、稽核追蹤
-- **Moderator（版主）**：負責寵物管理（封禁/解封）、可疑活動審查、戰鬥記錄查閱
-- **Read Only（唯讀角色）**：監控 Dashboard、查看排行榜與分析數據，無任何寫入權限
-
-核心解決的運維問題：
-1. 寵物封禁/解封 — 處理 Bot 行為偵測結果（50 battles/hr 閾值觸發）
-2. 排行榜管理 — 管理員可查看 Top 500，公開僅顯示 Top 100
-3. GDPR 合規佇列 — 處理 erasure / data_access / restrict_processing 等 5 種請求
-4. 系統配置 — 運行時參數（arena rate limit、rarity weights）和經濟參數（food buff multiplier）
-5. 稽核日誌 — 所有 CUD 操作追蹤，保留 2 年
-
-### §1.2 設計原則
-
-- **安全第一**：RBAC 最小權限；httpOnly + SameSite=Strict Session Cookie；所有操作留稽核日誌
-- **操作效率**：批量操作 + 智慧搜尋（ pet ID / email hash）
-- **資料一致性**：與主系統同一資料庫；Admin 透過 Redis 快取讀取配置（TTL 300s）
-- **可審計性**：所有 CUD 操作寫入 `admin_audit_log`，保留 2 年（ADMIN_AUDIT_LOG_RETENTION_YEARS = 2）
-
-### §1.3 使用者角色（來自 EDD §3.7 + ARCH §5.1）
-
-| 角色 | 說明 | 可存取功能 |
-|------|------|-----------|
-| `super_admin` | 超級管理員 | 全部：GDPR、config、roles、audit log + 所有 moderator 功能 |
-| `moderator` | 版主 | 寵物管理（ban/unban）、戰鬥管理（flag/unflag）、leaderboard 查看、可疑活動、email monitor、analytics、dashboard |
-| `read_only` | 唯讀角色 | GET-only：dashboard、pet list、leaderboard、battle records、email monitor、analytics |
+| Field | Content |
+|-------|---------|
+| **DOC-ID** | ADMIN_IMPL-PIXEL-PET-ARENA-20260503 |
+| **Project Name** | pixel-pet-arena |
+| **Admin Tech Stack** | Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5 (FRONTEND.md §3.7) |
+| **Document Version** | v1.0 |
+| **Status** | DRAFT |
+| **Author** | AI Generated (gendoc ADMIN_IMPL) |
+| **Date** | 2026-05-03 |
+| **Upstream EDD** | [EDD.md](EDD.md) §3.3 + §5.5-A |
+| **Upstream API** | [API.md](API.md) §6 — `/admin/api/*` endpoints |
+| **Upstream SCHEMA** | [SCHEMA.md](SCHEMA.md) — `admin_accounts` + `admin_audit_log` tables |
+| **Upstream ARCH** | [ARCH.md](ARCH.md) — Admin Portal container (deployment + tech stack) |
+| **Upstream CONSTANTS** | [constants.json](constants.json) — session TTLs, page sizes, rate limits |
 
 ---
 
-## §2 技術棧決策
+## Change Log
 
-### §2.1 框架選型
+| Version | Date | Author | Change Summary |
+|---------|------|--------|----------------|
+| v1.0 | 2026-05-03 | AI Generated (gendoc ADMIN_IMPL) | Initial draft |
 
-| 技術 | 選型 | 決策理由 |
-|------|------|---------|
-| 前端框架 | Vue 3.4+ (Composition API) | `<script setup>` 語法 + Composition API 與 Element Plus 2.x 完整相容；Vue 3 reactivity 系統適合 form-heavy admin CRUD 介面 |
-| UI Component | Element Plus 2.7+ | 企業級元件庫，內建 sorting/filtering/pagination 的 ElTable 可直接處理 Admin 的資料密集需求 |
-| Build Tool | Vite 5.x | HMR 快速 + 生產 bundle 優化；與 monorepo pnpm workspaces 無縫整合 |
-| 狀態管理 | Pinia 2.x | 模組化 Store，Vue 3 原生型別友善；取代 Vuex 成為官方推薦 |
-| 路由 | Vue Router 4.x | History 模式 + 動態路由 + beforeEach 路由守衛（RBAC 驗證） |
-| HTTP Client | Axios 1.x | Request/Response Interceptors 處理 session 過期與 CSRF token 注入 |
-| 圖表 | ECharts 5.x（via vue-echarts 6.x） | Analytics Dashboard 折線圖需求；按需引入控制 bundle size |
-| 國際化 | 無（本專案單語言，見 §13） | Admin 為內部工具，英文介面即可 |
+---
 
-### §2.2 依賴版本清單
+## §1 Admin Portal Overview
+
+### §1.1 System Purpose
+
+The pixel-pet-arena Admin Portal is an internal operations platform used exclusively by platform staff. Primary user groups:
+
+- **Super Admin**: Full access — account management, GDPR compliance, system configuration, audit log review
+- **Moderator**: Pet management (ban/unban), suspicious activity review, battle record inspection, leaderboard view
+- **Read Only**: Monitoring dashboard, leaderboard and analytics read access, no write permissions
+
+Core operations problems the portal solves:
+
+1. **Pet ban/unban** — Processes automated bot detection results (threshold: > 50 battles/hr rolling window; `bot_detection_battles_threshold = 50`)
+2. **Leaderboard management** — Admins view Top 500; public shows only Top 100 (`leaderboard_admin_view = 500`, `leaderboard_top_display = 100`)
+3. **GDPR compliance queue** — Handles erasure / data_access / restrict_processing / object_leaderboard / rectification requests across 5 request types
+4. **System configuration** — Runtime parameters (arena rate limit, rarity weights) and economy parameters (food buff multiplier) cached in Redis (TTL: `config_cache_refresh_time_minutes = 5`)
+5. **Audit log** — All CUD operations recorded, retained 2 years (`admin_audit_log_retention_years = 2`)
+
+### §1.2 Design Principles
+
+- **Security-first**: RBAC minimum privilege; httpOnly + SameSite=Strict session cookie; every operation produces an audit log entry
+- **Operational efficiency**: Bulk operations + smart search (pet ID / email hash)
+- **Data consistency**: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s)
+- **Auditability**: All CUD operations write to `admin_audit_log`, retained 2 years (`admin_audit_log_retention_years = 2`)
+
+### §1.3 User Roles (from EDD §3.7 + ARCH §5.1)
+
+| Role | Display Name | Accessible Features |
+|------|-------------|---------------------|
+| `super_admin` | Super Admin | All: GDPR, config, roles, audit log + all moderator features |
+| `moderator` | Moderator | Pet management (ban/unban), battle management (flag/unflag), leaderboard view, suspicious activity, email monitor, analytics, dashboard |
+| `read_only` | Read Only | GET-only: dashboard, pet list, leaderboard, battle records, email monitor, analytics |
+
+---
+
+## §2 Technology Stack Decisions
+
+### §2.1 Framework Selection
+
+| Technology | Choice | Rationale |
+|-----------|--------|-----------|
+| Frontend Framework | Vue 3.4+ (Composition API) | `<script setup>` syntax + Composition API fully compatible with Element Plus 2.x; Vue 3 reactivity system well-suited for form-heavy admin CRUD interfaces |
+| UI Component Library | Element Plus 2.7+ | Enterprise-grade component library; `ElTable` with built-in sorting/filtering/pagination handles admin data-intensive requirements out of the box |
+| Build Tool | Vite 5.x | Fast HMR + optimized production bundle; seamless integration with monorepo pnpm workspaces |
+| State Management | Pinia 2.x | Modular stores; Vue 3 native TypeScript-friendly; official replacement for Vuex |
+| Routing | Vue Router 4.x | History mode + dynamic routing + `beforeEach` route guards (RBAC validation) |
+| HTTP Client | Axios 1.x | Request/response interceptors for session expiry handling and CSRF token injection |
+| Charts | ECharts 5.x (via vue-echarts 6.x) | Analytics dashboard line chart requirements; tree-shakeable on-demand imports control bundle size |
+| i18n | None (single-language — English only) | Admin is an internal tool; English-only interface is sufficient |
+
+### §2.2 Dependency Version Manifest
 
 ```json
 {
@@ -83,20 +103,22 @@ pixel-pet-arena Admin Portal 是一套供平台運營人員使用的後台管理
     "vue-tsc": "^2.0.0",
     "@types/node": "^20.0.0",
     "vitest": "^1.4.0",
-    "@vue/test-utils": "^2.4.0"
+    "@vue/test-utils": "^2.4.0",
+    "unplugin-auto-import": "^0.17.0",
+    "unplugin-vue-components": "^0.26.0"
   }
 }
 ```
 
 ---
 
-## §3 目錄結構
+## §3 Directory Structure
 
 ```
-packages/admin-app/                   ← Admin Portal 根目錄（pnpm workspace）
+packages/admin-app/                   ← Admin Portal root (pnpm workspace)
 ├── src/
-│   ├── api/                          ← API 呼叫封裝（對應 API.md /admin/api/* 路由）
-│   │   ├── http.ts                   ← Axios instance + interceptors（CSRF + session）
+│   ├── api/                          ← API call wrappers (maps to API.md /admin/api/* routes)
+│   │   ├── http.ts                   ← Axios instance + interceptors (CSRF + session handling)
 │   │   ├── auth.ts                   ← login / logout / totp/setup / totp/verify
 │   │   ├── pets.ts                   ← GET /pets, GET /pets/:id, ban, unban
 │   │   ├── battles.ts                ← GET /battles, GET /suspicious, flag, unflag
@@ -106,74 +128,74 @@ packages/admin-app/                   ← Admin Portal 根目錄（pnpm workspac
 │   │   ├── audit.ts                  ← GET /admin/api/audit
 │   │   ├── roles.ts                  ← GET/POST /roles, DELETE /roles/:id, TOTP reset
 │   │   ├── analytics.ts              ← GET /analytics, GET /dashboard, GET /email/monitor
-│   │   └── types.ts                  ← API response types（與 packages/shared 同步）
+│   │   └── types.ts                  ← API response types (synchronized with packages/shared)
 │   ├── components/
-│   │   ├── common/                   ← 通用組件
-│   │   │   ├── SearchableTable.vue   ← Table + Pagination + 搜尋欄複合組件
-│   │   │   ├── ConfirmDialog.vue     ← ElMessageBox 包裝（危險操作確認）
-│   │   │   ├── AuditLogDetail.vue    ← 稽核日誌詳情 Drawer
-│   │   │   └── StatusBadge.vue       ← 狀態徽章（banned / active / pending）
-│   │   └── business/                 ← 業務組件
-│   │       ├── PetBanForm.vue        ← 封禁/解封 Dialog（reason 欄位，max 500 chars）
-│   │       ├── BattleFlagForm.vue    ← 旗標 Battle Dialog
-│   │       └── GdprStatusForm.vue    ← GDPR 狀態更新 Dialog
-│   ├── composables/                  ← 可重用邏輯（Vue Composition API）
+│   │   ├── common/                   ← Shared components
+│   │   │   ├── SearchableTable.vue   ← Table + Pagination + Search bar composite component
+│   │   │   ├── ConfirmDialog.vue     ← ElMessageBox wrapper (dangerous action confirmation)
+│   │   │   ├── AuditLogDetail.vue    ← Audit log detail Drawer
+│   │   │   └── StatusBadge.vue       ← Status badge (banned / active / pending)
+│   │   └── business/                 ← Domain-specific components
+│   │       ├── PetBanForm.vue        ← Ban/unban Dialog (reason field, max 500 chars)
+│   │       ├── BattleFlagForm.vue    ← Flag battle Dialog
+│   │       └── GdprStatusForm.vue    ← GDPR status update Dialog
+│   ├── composables/                  ← Reusable logic (Vue Composition API)
 │   │   ├── usePermission.ts          ← hasPermission() + v-permission directive
-│   │   ├── usePagination.ts          ← 分頁狀態管理
-│   │   ├── useTable.ts               ← Table loading/error/data 三狀態
-│   │   └── useSessionTimer.ts        ← 4h inactivity + 8h absolute expiry 監控
+│   │   ├── usePagination.ts          ← Pagination state management
+│   │   ├── useTable.ts               ← Table loading / error / data three-state pattern
+│   │   └── useSessionTimer.ts        ← 4h inactivity + 8h absolute expiry monitoring
 │   ├── layouts/
-│   │   └── AdminLayout.vue           ← HeaderBar + SidebarMenu + Content 主佈局
+│   │   └── AdminLayout.vue           ← HeaderBar + SidebarMenu + Content main layout
 │   ├── router/
-│   │   ├── index.ts                  ← 路由定義 + createRouter
-│   │   ├── guards.ts                 ← beforeEach 路由守衛（session + role 驗證）
-│   │   └── routes.ts                 ← 路由清單（含 meta.permission）
+│   │   ├── index.ts                  ← Route definitions + createRouter
+│   │   ├── guards.ts                 ← beforeEach route guards (session + role validation)
+│   │   └── routes.ts                 ← Route list (includes meta.permission)
 │   ├── stores/                       ← Pinia stores
 │   │   ├── auth.ts                   ← session + adminUser + login/logout
-│   │   ├── permission.ts             ← role + hasPermission + menuTree
-│   │   └── config.ts                 ← runtime config + economy config cache
-│   ├── types/                        ← TypeScript 型別定義
+│   │   ├── permission.ts             ← role + hasPermission() + menuTree
+│   │   └── config.ts                 ← runtime config + economy config frontend cache
+│   ├── types/                        ← TypeScript type definitions
 │   │   ├── admin.ts                  ← AdminUser, AuditLogEntry, GdprRequest
 │   │   ├── pet.ts                    ← Pet, BanStatus, ModerationReason
 │   │   ├── config.ts                 ← RuntimeConfig, EconomyConfig, FeatureFlag
 │   │   └── api.ts                    ← ApiEnvelope, PagedResponse, Meta
-│   ├── utils/                        ← 工具函式
-│   │   ├── format.ts                 ← 日期格式、email mask、reason truncate
-│   │   ├── csrf.ts                   ← X-CSRF-Token 讀取與注入
-│   │   └── session.ts                ← Session expiry 計算工具
-│   ├── styles/                       ← 樣式
-│   │   ├── variables.css             ← CSS Custom Properties（色彩 / 間距 token）
+│   ├── utils/                        ← Utility functions
+│   │   ├── format.ts                 ← Date format, email mask, reason truncate
+│   │   ├── csrf.ts                   ← X-CSRF-Token read and injection
+│   │   └── session.ts                ← Session expiry calculation utilities
+│   ├── styles/                       ← Styles
+│   │   ├── variables.css             ← CSS Custom Properties (color / spacing tokens)
 │   │   └── global.css                ← Reset + Element Plus theme overrides
 │   └── views/
 │       ├── auth/
-│       │   ├── LoginView.vue         ← 登入表單（username + password + TOTP）
-│       │   └── TotpSetupView.vue     ← 首次登入 TOTP 設定頁
+│       │   ├── LoginView.vue         ← Login form (username + password + TOTP)
+│       │   └── TotpSetupView.vue     ← First-login TOTP setup page
 │       ├── dashboard/
-│       │   └── DashboardView.vue     ← KPI Cards + system status
+│       │   └── DashboardView.vue     ← KPI cards + system status
 │       ├── pets/
-│       │   ├── PetListView.vue       ← 寵物列表（搜尋 / 篩選 / 封禁操作）
-│       │   └── PetDetailView.vue     ← 寵物詳情（ban history + stats + battles）
+│       │   ├── PetListView.vue       ← Pet list (search / filter / ban actions)
+│       │   └── PetDetailView.vue     ← Pet detail (ban history + stats + battles)
 │       ├── battles/
-│       │   ├── BattleListView.vue    ← 戰鬥記錄列表（flag/unflag）
-│       │   └── SuspiciousView.vue    ← 可疑活動清單
+│       │   ├── BattleListView.vue    ← Battle records list (flag/unflag)
+│       │   └── SuspiciousView.vue    ← Suspicious activity list
 │       ├── leaderboard/
-│       │   └── LeaderboardView.vue   ← Top 500 admin view（suspicious 標記）
+│       │   └── LeaderboardView.vue   ← Top 500 admin view (suspicious flags)
 │       ├── analytics/
-│       │   ├── AnalyticsView.vue     ← 時序圖表（DAU / claims / battles）
-│       │   └── EmailMonitorView.vue  ← Email 交付率監控
+│       │   ├── AnalyticsView.vue     ← Time-series charts (DAU / claims / battles)
+│       │   └── EmailMonitorView.vue  ← Email delivery rate monitoring
 │       ├── config/
-│       │   ├── RuntimeConfigView.vue ← arena rate limit / rarity weights
-│       │   ├── EconomyConfigView.vue ← food buff multiplier / arena entry cost
-│       │   └── FeatureFlagsView.vue  ← FF_MARKETPLACE 等 Feature Flag 管理
+│       │   ├── RuntimeConfigView.vue ← Arena rate limit / rarity weights
+│       │   ├── EconomyConfigView.vue ← Food buff multiplier / arena entry cost
+│       │   └── FeatureFlagsView.vue  ← Feature flag management (FF_MARKETPLACE, etc.)
 │       ├── gdpr/
-│       │   └── GdprQueueView.vue     ← GDPR 請求佇列（status filter / update）
+│       │   └── GdprQueueView.vue     ← GDPR request queue (status filter / update)
 │       ├── roles/
-│       │   └── RoleManagementView.vue ← Admin 帳號清單（新增 / 停用 / TOTP reset）
+│       │   └── RoleManagementView.vue ← Admin account list (create / deactivate / TOTP reset)
 │       ├── audit/
-│       │   └── AuditLogView.vue      ← 稽核日誌（actor / action / time range filter）
+│       │   └── AuditLogView.vue      ← Audit log (actor / action / time range filter)
 │       └── errors/
-│           ├── 403View.vue           ← 無權限頁面
-│           └── 404View.vue           ← 找不到頁面
+│           ├── 403View.vue           ← Forbidden page
+│           └── 404View.vue           ← Not found page
 ├── public/
 │   └── favicon.ico
 ├── .env.development
@@ -185,32 +207,32 @@ packages/admin-app/                   ← Admin Portal 根目錄（pnpm workspac
 
 ---
 
-## §4 路由設計
+## §4 Routing Design
 
-### §4.1 路由清單
+### §4.1 Route Table
 
-| 路徑 | 組件 | 需求權限 | 說明 |
-|------|------|---------|------|
-| `/admin/login` | `LoginView` | 公開 | Admin 登入頁（username + password + TOTP） |
-| `/admin/totp/setup` | `TotpSetupView` | 公開（需 setupToken） | 首次登入 TOTP 設定 |
-| `/admin/dashboard` | `DashboardView` | 所有已驗證角色 | KPI Dashboard |
-| `/admin/pets` | `PetListView` | `read_only+` | 寵物列表 + 搜尋 + 篩選 |
-| `/admin/pets/:petId` | `PetDetailView` | `read_only+` | 寵物詳情 + 封禁歷史 |
-| `/admin/battles` | `BattleListView` | `read_only+` | 戰鬥記錄列表 |
-| `/admin/suspicious` | `SuspiciousView` | `moderator+` | Bot 偵測可疑寵物清單 |
-| `/admin/leaderboard` | `LeaderboardView` | `read_only+` | Top 500 排行榜 Admin 視圖 |
-| `/admin/analytics` | `AnalyticsView` | `read_only+` | 產品分析圖表（DAU / claims / battles） |
-| `/admin/email` | `EmailMonitorView` | `read_only+` | Email 交付率監控 |
+| Path | Component | Required Permission | Description |
+|------|-----------|--------------------|----|
+| `/admin/login` | `LoginView` | Public | Admin login page (username + password + TOTP) |
+| `/admin/totp/setup` | `TotpSetupView` | Public (requires setupToken) | First-login TOTP enrollment |
+| `/admin/dashboard` | `DashboardView` | All authenticated roles | KPI Dashboard |
+| `/admin/pets` | `PetListView` | `read_only+` | Pet list + search + filter |
+| `/admin/pets/:petId` | `PetDetailView` | `read_only+` | Pet detail + ban history |
+| `/admin/battles` | `BattleListView` | `read_only+` | Battle records list |
+| `/admin/suspicious` | `SuspiciousView` | `moderator+` | Bot-detected suspicious pets list |
+| `/admin/leaderboard` | `LeaderboardView` | `read_only+` | Top 500 leaderboard admin view |
+| `/admin/analytics` | `AnalyticsView` | `read_only+` | Product analytics charts (DAU / claims / battles) |
+| `/admin/email` | `EmailMonitorView` | `read_only+` | Email delivery rate monitoring |
 | `/admin/config/runtime` | `RuntimeConfigView` | `super_admin` | Arena rate limit / rarity weights |
-| `/admin/config/economy` | `EconomyConfigView` | `super_admin` | Food buff / arena entry cost |
-| `/admin/config/flags` | `FeatureFlagsView` | `super_admin` | Feature Flag 管理 |
-| `/admin/gdpr` | `GdprQueueView` | `super_admin` | GDPR 請求佇列 |
-| `/admin/roles` | `RoleManagementView` | `super_admin` | Admin 帳號與角色管理 |
-| `/admin/audit` | `AuditLogView` | `super_admin` | 稽核日誌查閱 |
-| `/admin/403` | `403View` | 公開 | 無權限錯誤頁 |
-| `/admin/:pathMatch(.*)` | `404View` | 公開 | 404 錯誤頁 |
+| `/admin/config/economy` | `EconomyConfigView` | `super_admin` | Food buff multiplier / arena entry cost |
+| `/admin/config/flags` | `FeatureFlagsView` | `super_admin` | Feature flag management |
+| `/admin/gdpr` | `GdprQueueView` | `super_admin` | GDPR request queue |
+| `/admin/roles` | `RoleManagementView` | `super_admin` | Admin account and role management |
+| `/admin/audit` | `AuditLogView` | `super_admin` | Audit log review |
+| `/admin/403` | `403View` | Public | Forbidden error page |
+| `/admin/:pathMatch(.*)` | `404View` | Public | 404 error page |
 
-### §4.2 動態路由守衛
+### §4.2 Route Guards
 
 ```typescript
 // router/guards.ts
@@ -223,15 +245,15 @@ export function setupRouterGuards(router: Router) {
     const authStore = useAuthStore()
     const permStore = usePermissionStore()
 
-    // 公開頁面（login / totp/setup / error pages）直接放行
+    // Public pages (login / totp/setup / error pages) — pass through
     if (to.meta.public) return next()
 
-    // 未登入 → 重導登入頁，保留目標路徑
+    // Not authenticated → redirect to login, preserve destination path
     if (!authStore.isAuthenticated) {
       return next({ path: '/admin/login', query: { redirect: to.fullPath } })
     }
 
-    // 驗證 Permission（meta.permission = required role level）
+    // Permission check (meta.permission = required role level)
     const required = to.meta.permission as string | undefined
     if (required && !permStore.hasPermission(required)) {
       return next('/admin/403')
@@ -242,25 +264,25 @@ export function setupRouterGuards(router: Router) {
 }
 ```
 
-### §4.3 動態側邊欄生成規則
+### §4.3 Dynamic Sidebar Generation Strategy
 
-採用 **client-filtered** 策略：角色定義在部署時固定（`super_admin` / `moderator` / `read_only`），前端依用戶 role 過濾靜態選單配置。無權限的選單項目完全不顯示（非僅 disabled），防止資訊洩露。
+The portal uses a **client-filtered** strategy: roles are fixed at deploy time (`super_admin` / `moderator` / `read_only`); the frontend filters a static menu config based on the current user's role. Menu items without permission are removed entirely (not just disabled) to prevent information leakage.
 
-理由：EDD §3.7 和 ARCH §5.1 的三個 Admin 角色在 EDD Phase 1 已固定，不需後端動態下發選單結構。
+Rationale: EDD §3.7 and ARCH §5.1 define three admin roles that are fixed for EDD Phase 1 — no need for server-side dynamic menu delivery.
 
 ---
 
-## §5 RBAC 實作規格
+## §5 RBAC Implementation
 
-### §5.1 角色定義（來自 EDD §3.7 + ARCH §5.1 + SCHEMA admin_role_enum）
+### §5.1 Role Definitions (from EDD §3.7 + ARCH §5.1 + SCHEMA admin_role_enum)
 
-| 角色 key | 顯示名稱 | 是否系統角色 | Permission 層級 |
-|---------|---------|-----------|----------------|
-| `super_admin` | Super Admin | ✅ 是 | 全部（含 config / GDPR / roles / audit）|
-| `moderator` | Moderator | ✅ 是 | pet ban/unban, battle flag/unflag, leaderboard, suspicious, analytics, dashboard, email monitor |
-| `read_only` | Read Only | ✅ 是 | GET-only：dashboard, pets, leaderboard, battles, analytics, email monitor |
+| Role Key | Display Name | System Role | Permission Level |
+|---------|-------------|------------|-----------------|
+| `super_admin` | Super Admin | Yes | All (config / GDPR / roles / audit log) |
+| `moderator` | Moderator | Yes | pet ban/unban, battle flag/unflag, leaderboard, suspicious, analytics, dashboard, email monitor |
+| `read_only` | Read Only | Yes | GET-only: dashboard, pets, leaderboard, battles, analytics, email monitor |
 
-Permission 對應 API.md §6 各 endpoint 的 Role Access：
+Permission mapping to API.md §6 endpoint Role Access:
 
 | Resource | Action | Required Role |
 |----------|--------|--------------|
@@ -281,7 +303,7 @@ Permission 對應 API.md §6 各 endpoint 的 Role Access：
 | roles | view / manage | super_admin |
 | audit | view | super_admin |
 
-### §5.2 Permission Guard 實作
+### §5.2 Permission Guard Implementation
 
 ```typescript
 // composables/usePermission.ts
@@ -301,10 +323,9 @@ export function usePermission() {
   return { hasPermission }
 }
 
-// v-permission directive — 掛載於 main.ts
+// v-permission directive — registered in main.ts
 export const permissionDirective = {
   mounted(el: HTMLElement, binding: DirectiveBinding<string>) {
-    const permStore = usePermissionStore()
     const { hasPermission } = usePermission()
     if (!hasPermission(binding.value as 'read_only' | 'moderator' | 'super_admin')) {
       el.parentNode?.removeChild(el)
@@ -314,7 +335,7 @@ export const permissionDirective = {
 ```
 
 ```vue
-<!-- 按鈕層級 Permission 控制範例 -->
+<!-- Button-level permission control example -->
 <template>
   <el-button
     v-permission="'moderator'"
@@ -326,39 +347,39 @@ export const permissionDirective = {
 </template>
 ```
 
-### §5.3 動態選單策略
+### §5.3 Dynamic Menu Strategy
 
-選擇：**client-filtered**
+Choice: **client-filtered**
 
-實作：`router/routes.ts` 的每個路由帶有 `meta.permission`，`AdminLayout.vue` 中的 `SidebarMenu` 遍歷路由配置，使用 `usePermission().hasPermission(route.meta.permission)` 過濾掉無存取權的選單項。
+Implementation: Each route in `router/routes.ts` carries `meta.permission`. `SidebarMenu` in `AdminLayout.vue` iterates the route config and applies `usePermission().hasPermission(route.meta.permission)` to filter out inaccessible menu items. Items without access are removed from the DOM entirely — not just visually hidden.
 
-### §5.4 Token / Session 管理
+### §5.4 Session Management
 
-| 項目 | 規格 |
-|------|------|
-| Session 存儲位置 | HttpOnly Cookie（`session=<session_id>; HttpOnly; SameSite=Strict; Secure; Path=/admin`） |
-| Inactivity Timeout | 4 小時（ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4） |
-| Absolute Expiry | 8 小時（ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8） |
-| Session 識別 | 前端不存放 token 字串；`isAuthenticated` 由 `GET /admin/api/dashboard`（或任意需驗證 API）的 401 / 200 回應判斷 |
-| Refresh 策略 | Axios Response Interceptor 攔截 401 → 清除 auth state → 重導登入頁 |
-| CSRF 保護 | `X-CSRF-Token` header（見 §8.1 + §8.3） |
+| Item | Specification |
+|------|--------------|
+| Session storage location | HttpOnly Cookie (`session=<session_id>; HttpOnly; SameSite=Strict; Secure; Path=/admin`) |
+| Inactivity timeout | 4 hours (admin_session_inactivity_expiry_hours = 4) |
+| Absolute expiry | 8 hours (admin_session_absolute_expiry_hours = 8) |
+| Session identity | Frontend stores no token string; `isAuthenticated` is inferred from 401 / 200 responses on any authenticated API call |
+| Refresh strategy | Axios Response Interceptor intercepts 401 → clears auth state → redirects to login page |
+| CSRF protection | `X-CSRF-Token` header (see §8.2 + §8.3) |
 
 ---
 
-## §6 Layout 系統
+## §6 Layout System
 
-### §6.1 主 Layout 結構
+### §6.1 Main Layout Structure
 
 ```
 ┌───────────────────────────────────────────────────────────┐
-│  HeaderBar（Logo + Admin Username + Role Badge + Logout）  │
+│  HeaderBar (Logo + Admin Username + Role Badge + Logout)   │
 ├──────────────┬────────────────────────────────────────────┤
 │  SidebarMenu │  Content Area                              │
 │  (260px)     │  ┌──────────────────────────────────────┐  │
-│  Dashboard   │  │  BreadCrumb（自動依路由生成）          │  │
+│  Dashboard   │  │  BreadCrumb (auto-generated by route) │  │
 │  Pet Mgmt    │  ├──────────────────────────────────────┤  │
 │  Battles     │  │  Page Content                        │  │
-│  Leaderboard │  │  （max-width: 1400px; padding: 24px）  │  │
+│  Leaderboard │  │  (max-width: 1400px; padding: 24px)  │  │
 │  Analytics   │  │                                      │  │
 │  Config ▾    │  └──────────────────────────────────────┘  │
 │  GDPR        │                                            │
@@ -367,278 +388,284 @@ export const permissionDirective = {
 └──────────────┴────────────────────────────────────────────┘
 ```
 
-**§6.1 功能子項說明：**
+**Layout sub-components:**
 
-- **HeaderBar**：左側 pixel-pet-arena Logo（文字）+ Admin Portal 標籤；右側顯示已登入管理員的 username + role badge（`el-tag`）+ Session 剩餘時間提示（距 inactivity 過期）+ 登出按鈕。按下登出呼叫 `POST /admin/api/auth/logout` 並清除 auth state。
+- **HeaderBar**: Left side shows pixel-pet-arena logo (text) + "Admin Portal" label; right side shows the logged-in admin's username + role badge (`el-tag`) + session inactivity countdown + logout button. Logout calls `POST /admin/api/auth/logout` and clears auth state.
 
-- **SidebarMenu**：使用 Element Plus `el-menu`，展開寬度 260px / 收合寬度 64px（icon-only + Tooltip 顯示名稱）。依當前使用者 role 動態過濾選單項（client-filtered，無權限項目完全不顯示）。選中路由以左邊框 accent 色（`--el-color-primary`）+ 淡背景色標示。Config 選單為巢狀群組（Runtime / Economy / Feature Flags）。
+- **SidebarMenu**: Uses Element Plus `el-menu`. Expanded width: 260px / collapsed width: 64px (icon-only + tooltip). Menu items are dynamically filtered by current user role (client-filtered; items without access are never rendered). Active route is highlighted with a left-border accent color (`--el-color-primary`) + light background. Config is a nested group (Runtime / Economy / Feature Flags).
 
-- **BreadCrumb**：Content Area 頂部，使用 `el-breadcrumb`，依 `route.matched` 自動生成層級路徑（如 Pet Management > Pet Detail）。
+- **BreadCrumb**: Placed at the top of the Content Area using `el-breadcrumb`, auto-generated from `route.matched` hierarchy (e.g. "Pet Management > Pet Detail").
 
-- **Content 區域**：`max-width: 1400px`；`padding: 24px`；使用 `<RouterView />` 渲染各功能頁。Scroll 僅在 Content 區發生，Sidebar 和 Header 固定不捲動。
+- **Content Area**: `max-width: 1400px`; `padding: 24px`; renders page content via `<RouterView />`. Scroll occurs only in the Content Area — Sidebar and Header are fixed.
 
-### §6.2 Sidebar 規格
+### §6.2 Sidebar Specification
 
-| 屬性 | 值 |
-|------|-----|
-| 展開寬度 | 260px |
-| 收合寬度 | 64px（icon only） |
-| 收合後行為 | 僅顯示 icon，`:collapse-transition="false"` 防止動畫卡頓；Tooltip 顯示選單名稱 |
-| 選中樣式 | 左邊框 3px 實線 `var(--el-color-primary)` + 背景 `var(--el-color-primary-light-9)` |
+| Property | Value |
+|----------|-------|
+| Expanded width | 260px |
+| Collapsed width | 64px (icon only) |
+| Collapsed behavior | Icons only; `:collapse-transition="false"` prevents animation stutter; tooltip shows menu name |
+| Active item style | 3px solid left border `var(--el-color-primary)` + background `var(--el-color-primary-light-9)` |
 
 ---
 
-## §7 主要頁面規格
+## §7 Page Specifications
 
-### §7.1 登入頁（/admin/login）
+### §7.1 Login Page (`/admin/login`)
 
-**頁面用途**：Admin 身份驗證（username + password + TOTP 6-digit code）
+**Purpose**: Admin authentication (username + password + 6-digit TOTP code)
 
-**表單欄位**：
-- `username`：string，必填（不使用 email，防止暴露使用者存在）
-- `password`：string，必填，type="password"
-- `totpCode`：string，選填（首次登入時不填，系統返回 TOTP_SETUP_REQUIRED 後導向設定頁）
+**Form fields**:
+- `username`: string, required (not email — avoids exposing user existence)
+- `password`: string, required, type="password"
+- `totpCode`: string, optional on first login (server returns `TOTP_SETUP_REQUIRED` and redirects to setup page)
 
-**交互規則**：
-- 提交前執行 `formRef.validate()`
-- 成功 → 儲存 adminId + role 至 `authStore`，重導 `redirect` query 或預設 `/admin/dashboard`
-- 失敗 10 次 → 帳號鎖定（ADMIN_LOGIN_LOCKOUT_THRESHOLD = 10；ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES = 30），顯示 `unlockedAt` 剩餘時間
-- IP 層級：10 次/15 分鐘（ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS = 10）
-- 返回 `TOTP_SETUP_REQUIRED` → 取出 `error.details.setupToken`，攜帶導向 `/admin/totp/setup`
+**Interaction rules**:
+- Pre-submit `formRef.validate()` call
+- Success → store adminId + role in `authStore`, redirect to `redirect` query param or default `/admin/dashboard`
+- 10 consecutive failures → account locked (admin_login_lockout_threshold = 10; admin_login_lockout_duration_minutes = 30), display `unlockedAt` remaining time
+- IP-level pre-auth rate limit: 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10; admin_login_ip_rate_limit_window_seconds = 900)
+- `TOTP_SETUP_REQUIRED` response → extract `error.details.setupToken`, navigate to `/admin/totp/setup`
 
-**所需 API**：`POST /admin/api/auth/login`、`POST /admin/api/auth/totp/setup`
+**APIs required**: `POST /admin/api/auth/login`, `POST /admin/api/auth/totp/setup`
 
-### §7.2 Dashboard（/admin/dashboard）
+### §7.2 Dashboard (`/admin/dashboard`)
 
-**頁面用途**：平台運行健康狀態一覽，頁面載入 ≤ 3 秒（ADMIN_PAGE_LOAD_TIME = 3s）
+**Purpose**: Platform health at a glance; page load target ≤ 3 seconds (admin_page_load_time_seconds = 3)
 
-**KPI Cards（統計卡）**：
+**KPI Cards**:
 
-| 卡片 | 資料來源 | 更新策略 |
-|------|---------|---------|
-| Claimed Pets Today | `GET /admin/api/dashboard → claimedPetsToday` | 頁面載入時 + 手動刷新按鈕 |
-| Active Battles Today | `GET /admin/api/dashboard → activeBattlesToday` | 頁面載入時 + 手動刷新按鈕 |
-| Pending GDPR Requests | `GET /admin/api/dashboard → pendingGdprRequests` | 頁面載入時（super_admin 顯示，其餘隱藏） |
-| Daily Active Users | `GET /admin/api/dashboard → dailyActiveUsers` | 頁面載入時 |
-| Error Rate (5min) | `GET /admin/api/dashboard → errorRateLast5Min` | 頁面載入時 + 30s 輪詢 |
-| Email Delivery Rate | `GET /admin/api/dashboard → emailDeliveryRate` | 頁面載入時 |
-| System Status | `GET /admin/api/dashboard → systemStatus` | 頁面載入時 + 30s 輪詢 |
+| Card | Data Source | Update Strategy |
+|------|-------------|-----------------|
+| Claimed Pets Today | `GET /admin/api/dashboard → claimedPetsToday` | On page load + manual refresh |
+| Active Battles Today | `GET /admin/api/dashboard → activeBattlesToday` | On page load + manual refresh |
+| Pending GDPR Requests | `GET /admin/api/dashboard → pendingGdprRequests` | On page load (super_admin only; hidden for others) |
+| Daily Active Users | `GET /admin/api/dashboard → dailyActiveUsers` | On page load |
+| Error Rate (5 min) | `GET /admin/api/dashboard → errorRateLast5Min` | On page load + 30 s polling |
+| Email Delivery Rate | `GET /admin/api/dashboard → emailDeliveryRate` | On page load |
+| System Status | `GET /admin/api/dashboard → systemStatus` | On page load + 30 s polling |
 
-**System Status 顯示規則**：`healthy` → 綠色 `el-tag`；`degraded` → 橘色；`down` → 紅色 + 通知 ElNotification
+**System Status display**: `healthy` → green `el-tag`; `degraded` → orange; `down` → red + `ElNotification` alert
 
-**圖表**：本專案 Dashboard KPI 卡片資料來自 `GET /admin/api/dashboard` 聚合端點，不在 Dashboard 頁面顯示時序圖表（時序圖表置於 /admin/analytics 專頁）。本節無獨立 ECharts 圖表需求。
+**Charts**: Dashboard KPI data comes from the `GET /admin/api/dashboard` aggregated endpoint. Time-series charts are on `/admin/analytics` only — no ECharts instances on the Dashboard page.
 
-**所需 API**：`GET /admin/api/dashboard`
+**Required API**: `GET /admin/api/dashboard`
 
-**所需 Permission**：所有已驗證角色（`read_only+`）
+**Required permission**: All authenticated roles (`read_only+`)
 
-### §7.3 寵物管理 — 列表頁（/admin/pets）
+### §7.3 Pet Management — List (`/admin/pets`)
 
-**頁面用途**：搜尋、篩選、管理平台所有寵物，支援 100 萬筆記錄下 ≤ 2 秒搜尋（ADMIN_SEARCH_RESPONSE_TIME = 2s）
+**Purpose**: Search, filter, and manage all platform pets; supports ≤ 2 s search across 1 million records (admin_search_response_time_seconds = 2)
 
-**列表欄位**：Pet ID（truncate）、Owner Email（masked：`p***@example.com`）、Rarity、Level、Win Rate、Battles Played、Ban Status、Created At
+**Table columns**: Pet ID (truncated), Owner Email (masked: `p***@example.com`), Rarity, Level, Win Rate, Battles Played, Ban Status, Created At
 
-**搜尋 / 篩選**：
-- 搜尋：Pet UUID（完整）或 Email Hash（SHA-256，64-char hex）
-- 篩選：Rarity（`COMMON/RARE/EPIC/LEGENDARY`）/ Ban Status（All / Banned / Active）
-- 分頁：每頁 20 筆（預設）
+**Search / filter**:
+- Search: Exact pet UUID or SHA-256 email hash (64-char hex)
+- Filter: Rarity (`COMMON/RARE/EPIC/LEGENDARY`) / Ban Status (All / Banned / Active)
+- Pagination: 20 rows per page default
 
-**操作按鈕**（條件顯示）：
-- Ban（`v-permission="'moderator'"`）→ 開啟 `PetBanForm.vue` Dialog
-- Unban（`v-permission="'moderator'"`，僅 banned 寵物顯示）→ 開啟 `PetBanForm.vue` Dialog（reason 必填）
-- View Detail → 導向 `/admin/pets/:petId`
+**Action buttons** (conditionally shown):
+- Ban (`v-permission="'moderator'"`) → opens `PetBanForm.vue` dialog
+- Unban (`v-permission="'moderator'"`, shown only for banned pets) → opens `PetBanForm.vue` dialog (reason required)
+- View Detail → navigates to `/admin/pets/:petId`
 
-**所需 API**：`GET /admin/api/pets`、`POST /admin/api/pets/:petId/ban`、`POST /admin/api/pets/:petId/unban`
+**Required APIs**: `GET /admin/api/pets`, `POST /admin/api/pets/:petId/ban`, `POST /admin/api/pets/:petId/unban`
 
-**所需 Permission**：`read_only+`（GET）/ `moderator+`（ban/unban）
+**Required permission**: `read_only+` (GET) / `moderator+` (ban/unban)
 
-### §7.4 寵物管理 — 詳情頁（/admin/pets/:petId）
+### §7.4 Pet Management — Detail (`/admin/pets/:petId`)
 
-**頁面用途**：查看單一寵物完整資訊，含封禁歷史與戰鬥記錄
+**Purpose**: View a single pet's full information including ban history and battle records
 
-**顯示資訊**：
-- 基本資料：ID、Pet Name、Seed、Rarity、Level、Generation Meta（6 dimensions）
-- 統計：speed / strength / stamina、Total Training Actions、Last Trained At、is_neglected
-- Owner：Owner Email Masked、Claimed At
-- Ban 狀態：is_banned、Banned Reason（max 500 chars）、Banned At
-- 最近 20 場戰鬥記錄（Arena Battle Records）
+**Displayed information**:
+- Basic info: ID, Pet Name, Seed, Rarity, Level, Generation Meta (6 dimensions)
+- Stats: speed / strength / stamina, Total Training Actions, Last Trained At, is_neglected
+- Owner: Owner Email (masked), Claimed At
+- Ban status: is_banned, Banned Reason (max 500 chars), Banned At
+- Last 20 arena battle records (arena_battle_records_display_count = 20)
 
-**操作**：Ban / Unban（`moderator+`）、Edit Pet Name（`super_admin`，`PUT /admin/api/pets/:petId`）
+**Actions**: Ban / Unban (`moderator+`), Edit Pet Name (`super_admin`, `PUT /admin/api/pets/:petId`)
 
-**所需 API**：`GET /admin/api/pets/:petId`
+**Required API**: `GET /admin/api/pets/:petId`
 
-### §7.5 戰鬥記錄（/admin/battles）
+### §7.5 Battle Records (`/admin/battles`)
 
-**頁面用途**：查閱所有 arena 戰鬥記錄，支援 flag/unflag 操作
+**Purpose**: Review all arena battle records; supports flag/unflag operations
 
-**列表欄位**：Match ID、Mode（RACE/SUMO）、Pet A、Pet B（null if AI）、Winner、Duration、Flagged、Completed At
+**Table columns**: Match ID, Mode (RACE/SUMO), Pet A, Pet B (null if AI), Winner, Duration, Flagged, Completed At
 
-**篩選**：Date Range（from/to）/ Pet ID / Flagged（All / Flagged Only）
+**Filters**: Date range (from/to) / Pet ID / Flagged (All / Flagged Only)
 
-**操作**：
-- Flag Battle（`moderator+`）→ `POST /admin/api/battles/:matchId/flag`（reason 必填，max 500 chars）
-- Unflag Battle（`moderator+`）→ `DELETE /admin/api/battles/:matchId/flag`（reason 必填）
+**Actions**:
+- Flag Battle (`moderator+`) → `POST /admin/api/battles/:matchId/flag` (reason required, max 500 chars)
+- Unflag Battle (`moderator+`) → `DELETE /admin/api/battles/:matchId/flag` (reason required)
 
-**所需 API**：`GET /admin/api/battles`、`POST /admin/api/battles/:matchId/flag`、`DELETE /admin/api/battles/:matchId/flag`
+**Required APIs**: `GET /admin/api/battles`, `POST /admin/api/battles/:matchId/flag`, `DELETE /admin/api/battles/:matchId/flag`
 
-**所需 Permission**：`read_only+`（GET）/ `moderator+`（flag/unflag）
+**Required permission**: `read_only+` (GET) / `moderator+` (flag/unflag)
 
-### §7.6 可疑活動（/admin/suspicious）
+### §7.6 Suspicious Activity (`/admin/suspicious`)
 
-**頁面用途**：列出 Bot 偵測系統自動標記的寵物（> 50 battles/hr rolling window）
+**Purpose**: List pets automatically flagged by the bot detection system (> 50 battles/hr rolling window)
 
-**列表欄位**：Pet ID、Battles Last Hour、Win Rate、Flag Count、Last Flagged At
+**Table columns**: Pet ID, Battles Last Hour, Win Rate, Flag Count, Last Flagged At
 
-**操作**：前往 Pet Detail（Ban 操作在詳情頁執行）
+**Actions**: Navigate to Pet Detail (ban actions performed on the detail page)
 
-**閾值說明**：BOT_DETECTION_BATTLES_THRESHOLD = 50 / BOT_DETECTION_WINDOW = 60 分鐘
+**Threshold**: bot_detection_battles_threshold = 50 / bot_detection_window_minutes = 60
 
-**所需 API**：`GET /admin/api/suspicious`
+**Required API**: `GET /admin/api/suspicious`
 
-**所需 Permission**：`moderator+`
+**Required permission**: `moderator+`
 
-### §7.7 排行榜管理（/admin/leaderboard）
+### §7.7 Leaderboard Management (`/admin/leaderboard`)
 
-**頁面用途**：查看 Top 500 排行榜（公開版僅 Top 100），可疑寵物帶有 suspicious 標記
+**Purpose**: View Top 500 leaderboard (public version shows only Top 100); suspicious pets display a warning badge
 
-**列表欄位**：Rank、Pet Name、Rarity、Level、Score、Win Rate、Battles Last Hour、Suspicious（⚠️ icon if `isSuspicious`）、Banned
+**Table columns**: Rank, Pet Name, Rarity, Level, Score, Win Rate, Battles Last Hour, Suspicious (warning icon when `isSuspicious`), Banned
 
-**硬上限**：500 筆（LEADERBOARD_ADMIN_VIEW = 500），單次回應，不分頁
+**Hard cap**: 500 entries (leaderboard_admin_view = 500), single response, no pagination
 
-**操作**：
-- Remove from Leaderboard（`moderator+`）→ `DELETE /admin/api/leaderboard/:petId`
-- View Pet Detail → 導向 `/admin/pets/:petId`
+**Actions**:
+- Remove from Leaderboard (`moderator+`) → `DELETE /admin/api/leaderboard/:petId`
+- View Pet Detail → navigate to `/admin/pets/:petId`
 
-**所需 API**：`GET /admin/api/leaderboard`、`DELETE /admin/api/leaderboard/:petId`
+**Required APIs**: `GET /admin/api/leaderboard`, `DELETE /admin/api/leaderboard/:petId`
 
-**所需 Permission**：`read_only+`（GET）/ `moderator+`（DELETE）
+**Required permission**: `read_only+` (GET) / `moderator+` (DELETE)
 
-### §7.8 Analytics（/admin/analytics）
+### §7.8 Analytics (`/admin/analytics`)
 
-**頁面用途**：平台時序分析圖表
+**Purpose**: Platform time-series analysis charts
 
-**圖表**：
-| 圖表 | 類型 | 資料來源 |
-|------|------|---------|
-| Daily Active Users | ECharts 折線圖 | `GET /admin/api/analytics?metric=dau` |
-| New Claims | ECharts 折線圖 | `GET /admin/api/analytics?metric=claims` |
-| Arena Battles | ECharts 柱狀圖 | `GET /admin/api/analytics?metric=arena_battles` |
-| Leaderboard UVs | ECharts 折線圖 | `GET /admin/api/analytics?metric=leaderboard_uvs` |
+**Charts**:
 
-**操作**：Date Range 選擇器（from / to，必填），手動刷新
+| Chart | Type | Data Source |
+|-------|------|-------------|
+| Daily Active Users | ECharts Line | `GET /admin/api/analytics?metric=dau` |
+| New Claims Per Day | ECharts Line | `GET /admin/api/analytics?metric=claims` |
+| Arena Battles Per Day | ECharts Bar | `GET /admin/api/analytics?metric=arena_battles` |
+| Leaderboard UVs | ECharts Line | `GET /admin/api/analytics?metric=leaderboard_uvs` |
 
-**所需 API**：`GET /admin/api/analytics`
+**Controls**: Date range picker (from / to, required), manual refresh button
 
-**所需 Permission**：`read_only+`
+**Required API**: `GET /admin/api/analytics`
 
-### §7.9 Email Monitor（/admin/email）
+**Required permission**: `read_only+`
 
-**頁面用途**：監控 SendGrid 交付健康狀況
+### §7.9 Email Monitor (`/admin/email`)
 
-**顯示資訊**：Emails Sent (24h)、Delivery Success Rate（目標 ≥ 98%）、Bounce Rate、Spam Complaint Rate（目標 < 0.1%）、Failover Active（boolean）
+**Purpose**: Monitor SendGrid delivery health
 
-**所需 API**：`GET /admin/api/email/monitor`
+**Displayed info**: Emails Sent (24h), Delivery Success Rate (target ≥ 98%; sendgrid_delivery_rate_assumption_percent = 98), Bounce Rate, Spam Complaint Rate (target < 0.1%; spam_complaint_rate_max_percent = 0.1), Failover Active (boolean)
 
-**所需 Permission**：`read_only+`
+**Required API**: `GET /admin/api/email/monitor`
 
-### §7.10 系統配置（/admin/config/runtime）
+**Required permission**: `read_only+`
 
-**頁面用途**：運行時參數調整，配置變更 5 分鐘內生效（CONFIG_CACHE_REFRESH_TIME = 5 min）
+### §7.10 Runtime Config (`/admin/config/runtime`)
 
-**表單欄位**：
-- `arenaRateLimitBattlesPerHour`：integer，範圍 `[1, 50]`（ARENA_RATE_LIMIT_ADMIN_MIN / MAX）
-- `arenaMatchmakingTimeoutSeconds`：integer，建議範圍 5–120
-- `rarityWeights.common`：integer
-- `rarityWeights.rare`：integer
-- `rarityWeights.epic`：integer
-- `rarityWeights.legendary`：integer（四項必須合計 = 100%）
+**Purpose**: Runtime parameter adjustment; config changes take effect within 5 minutes (config_cache_refresh_time_minutes = 5)
 
-**所需 API**：`GET /admin/api/config/runtime`、`PUT /admin/api/config/runtime`
+**Form fields**:
+- `arenaRateLimitBattlesPerHour`: integer, range `[1, 50]` (arena_rate_limit_admin_min = 1, arena_rate_limit_admin_max = 50)
+- `arenaMatchmakingTimeoutSeconds`: integer, recommended range 5–120
+- `rarityWeights.common`: integer
+- `rarityWeights.rare`: integer
+- `rarityWeights.epic`: integer
+- `rarityWeights.legendary`: integer (all four must sum to 100%)
 
-**所需 Permission**：`super_admin`
+**Required APIs**: `GET /admin/api/config/runtime`, `PUT /admin/api/config/runtime`
 
-### §7.11 經濟配置（/admin/config/economy）
+**Required permission**: `super_admin`
 
-**頁面用途**：Food Buff 倍率與 Arena 進入費用設定
+### §7.11 Economy Config (`/admin/config/economy`)
 
-**表單欄位**：
-- `foodBuffMultiplierMin`：0.5–5.0（FOOD_BUFF_MULTIPLIER_ADMIN_MIN / MAX）
-- `foodBuffMultiplierMax`：0.5–5.0
-- `arenaEntryCostFoodCreditsDefault`：0–10（ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT / ADMIN_MAX）
-- `arenaEntryCooldownMaxMinutes`：0–60（ARENA_ENTRY_COOLDOWN_ADMIN_MIN / MAX）
+**Purpose**: Food buff multiplier and arena entry cost configuration
 
-**所需 API**：`GET /admin/api/config/economy`、`PUT /admin/api/config/economy`
+**Form fields**:
+- `foodBuffMultiplierMin`: 0.5–5.0 (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0)
+- `foodBuffMultiplierMax`: 0.5–5.0
+- `arenaEntryCostFoodCreditsDefault`: 0–10 (arena_entry_cost_food_credits_default = 0, arena_entry_cost_food_credits_admin_max = 10)
+- `arenaEntryCooldownMaxMinutes`: 0–60 (arena_entry_cooldown_admin_min_minutes = 0, arena_entry_cooldown_admin_max_minutes = 60)
 
-**所需 Permission**：`super_admin`
+**Required APIs**: `GET /admin/api/config/economy`, `PUT /admin/api/config/economy`
 
-### §7.12 Feature Flags（/admin/config/flags）
+**Required permission**: `super_admin`
 
-**頁面用途**：控制 FF_MARKETPLACE 等功能開關
+### §7.12 Feature Flags (`/admin/config/flags`)
 
-**列表欄位**：Flag Name、Enabled（`el-switch`）、Description
+**Purpose**: Control feature switches such as `FF_MARKETPLACE`
 
-**操作**：Toggle → `PUT /admin/api/config/flags/:flag`（需二次確認對 `FF_MARKETPLACE` 等影響重大的 flag）
+**Table columns**: Flag Name, Enabled (`el-switch`), Description
 
-**所需 API**：`GET /admin/api/config/flags`、`PUT /admin/api/config/flags/:flag`
+**Actions**: Toggle → `PUT /admin/api/config/flags/:flag` (secondary confirmation required for high-impact flags such as `FF_MARKETPLACE`)
 
-**所需 Permission**：`super_admin`
+**Required APIs**: `GET /admin/api/config/flags`, `PUT /admin/api/config/flags/:flag`
 
-### §7.13 GDPR 佇列（/admin/gdpr）
+**Required permission**: `super_admin`
 
-**頁面用途**：處理 5 種 GDPR 請求（erasure / data_access / restrict_processing / object_leaderboard / rectification）
+### §7.13 GDPR Queue (`/admin/gdpr`)
 
-**列表欄位**：Request ID、Request Type、Status、Submitted At、Completed At、Admin Notes
+**Purpose**: Process 5 types of GDPR requests (erasure / data_access / restrict_processing / object_leaderboard / rectification)
 
-**篩選**：Status / Type
+**Table columns**: Request ID, Request Type, Status, Submitted At, Completed At, Admin Notes
 
-**操作**：
-- Update Status（non-erasure requests）→ `PATCH /admin/api/gdpr/:requestId`（status + adminNotes，max 500 chars）
-- Initiate Admin Erasure → `POST /admin/api/gdpr/delete`（emailHash + reason，max 500 chars）
+**Filters**: Status / Type
 
-**SLA 顯示**：每行顯示距 SLA deadline 的剩餘時間（erasure: 7 天；data_access: 30 天；restrict_processing: 24h；object_leaderboard: 5 business days；rectification: 24h）
+**Actions**:
+- Update Status (non-erasure requests) → `PATCH /admin/api/gdpr/:requestId` (status + adminNotes, max 500 chars)
+- Initiate Admin Erasure → `POST /admin/api/gdpr/delete` (emailHash + reason, max 500 chars)
 
-**所需 API**：`GET /admin/api/gdpr`、`PATCH /admin/api/gdpr/:requestId`、`POST /admin/api/gdpr/delete`
+**SLA display**: Each row shows remaining time before SLA deadline:
+- erasure: 7 days (gdpr_email_deletion_window_days = 7)
+- data_access: 30 days (gdpr_data_access_response_days = 30)
+- restrict_processing: 24 h (gdpr_restrict_processing_response_hours = 24)
+- object_leaderboard: 5 business days (gdpr_object_leaderboard_response_business_days = 5)
+- rectification: 24 h (gdpr_email_rectification_response_hours = 24)
 
-**所需 Permission**：`super_admin`
+**Required APIs**: `GET /admin/api/gdpr`, `PATCH /admin/api/gdpr/:requestId`, `POST /admin/api/gdpr/delete`
 
-### §7.14 角色管理（/admin/roles）
+**Required permission**: `super_admin`
 
-**頁面用途**：管理 Admin 帳號（新增 / 停用 / TOTP 重置）
+### §7.14 Role Management (`/admin/roles`)
 
-**列表欄位**：Admin ID、Username、Role、Last Login At、Status（Active / Deactivated）
+**Purpose**: Manage admin accounts (create / deactivate / reset TOTP)
 
-**操作**：
-- Create Admin → `POST /admin/api/roles`（username + role + temporaryPassword）
-- Deactivate Admin → `DELETE /admin/api/roles/:adminId`（需二次確認）
-- Reset TOTP → `POST /admin/api/roles/:adminId/totp/reset`（需二次確認）
+**Table columns**: Admin ID, Username, Role, Last Login At, Status (Active / Deactivated)
 
-**約束**：Admin 帳號僅 soft-delete（`deactivated_at`），不可硬刪除
+**Actions**:
+- Create Admin → `POST /admin/api/roles` (username + role + temporaryPassword)
+- Deactivate Admin → `DELETE /admin/api/roles/:adminId` (secondary confirmation required)
+- Reset TOTP → `POST /admin/api/roles/:adminId/totp/reset` (secondary confirmation required)
 
-**所需 API**：`GET /admin/api/roles`、`POST /admin/api/roles`、`DELETE /admin/api/roles/:adminId`、`POST /admin/api/roles/:adminId/totp/reset`
+**Constraint**: Admin accounts are soft-deleted only (`deactivated_at` set); hard deletion is not permitted
 
-**所需 Permission**：`super_admin`
+**Required APIs**: `GET /admin/api/roles`, `POST /admin/api/roles`, `DELETE /admin/api/roles/:adminId`, `POST /admin/api/roles/:adminId/totp/reset`
 
-### §7.15 稽核日誌（/admin/audit）
+**Required permission**: `super_admin`
 
-**頁面用途**：查閱所有 Admin CUD 操作記錄，任意 12 個月視窗搜尋 ≤ 3 秒（ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME = 3s）
+### §7.15 Audit Log (`/admin/audit`)
 
-**列表欄位**：Log ID、Admin Username、Action、Target Type、Target ID、Detail（JSONB 摘要）、Created At
+**Purpose**: Review all admin CUD operation records; any 12-month window search ≤ 3 s (admin_audit_log_search_response_time_seconds = 3)
 
-**篩選**：Actor（actorId UUID）/ Action Type（如 `pet.ban`）/ Date Range（from / to）
+**Table columns**: Log ID, Admin Username, Action, Target Type, Target ID, Detail (JSONB summary), Created At
 
-**唯讀**：不可刪除、不可修改；Detail 欄位可展開查看完整 JSONB（`AuditLogDetail.vue`）
+**Filters**: Actor (actorId UUID) / Action Type (e.g. `pet.ban`) / Date Range (from / to)
 
-**IP 說明**：IP 地址以 SHA-256 hash 存儲，原始 IP 不顯示；保留 90 天（IP_ADDRESS_LOG_RETENTION_DAYS = 90）後設為 NULL
+**Read-only**: No deletion or modification; Detail column is expandable to show full JSONB (`AuditLogDetail.vue`)
 
-**所需 API**：`GET /admin/api/audit`
+**IP note**: IP addresses are stored as SHA-256 hash; raw IPs are never displayed; nulled after 90 days (ip_address_log_retention_days = 90)
 
-**所需 Permission**：`super_admin`
+**Required API**: `GET /admin/api/audit`
+
+**Required permission**: `super_admin`
 
 ---
 
-## §8 API 串接規格
+## §8 API Integration
 
-### §8.1 Axios 配置
+### §8.1 Axios Configuration
 
 ```typescript
 // api/http.ts
@@ -646,16 +673,16 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
-// 來自 CONSTANTS.md：admin_page_load_time = 3s，取 10s 作為 API 逾時
-const ADMIN_API_TIMEOUT_MS = 10_000 // 預設 10000ms，CONSTANTS.md 無 ADMIN_API_TIMEOUT_MS 欄位
+// API timeout — page load target 3 s (admin_page_load_time_seconds = 3); use 10 s as API call timeout
+const ADMIN_API_TIMEOUT_MS = 10_000
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: ADMIN_API_TIMEOUT_MS,
-  withCredentials: true, // 攜帶 httpOnly session cookie
+  withCredentials: true, // carry httpOnly session cookie
 })
 
-// Request Interceptor：注入 X-CSRF-Token header（API.md §2.2）
+// Request interceptor: inject X-CSRF-Token header (API.md §2.2)
 http.interceptors.request.use(config => {
   const csrfToken = document.cookie
     .split('; ')
@@ -667,13 +694,13 @@ http.interceptors.request.use(config => {
   return config
 })
 
-// Response Interceptor：session 過期處理
+// Response interceptor: session expiry handling
 http.interceptors.response.use(
   res => res,
   async error => {
     const status = error.response?.status
     if (status === 401) {
-      // Session 過期 → 清除 auth state → 重導登入頁
+      // Session expired → clear auth state → redirect to login
       const authStore = useAuthStore()
       authStore.clearSession()
       await router.push('/admin/login')
@@ -687,72 +714,74 @@ http.interceptors.response.use(
 export default http
 ```
 
-### §8.2 CSRF 保護（API.md §2.2）
+### §8.2 CSRF Protection (API.md §2.2)
 
-Admin API 使用 `X-CSRF-Token` header 保護 state-changing 請求：
-1. Server 在 session 建立後，以 `csrf_token=<token>` 設置為 SameSite=Strict Cookie（非 httpOnly，供 JS 讀取）
-2. 前端 Axios request interceptor（見 §8.1）從 Cookie 讀取並附加為 `X-CSRF-Token` header
-3. Server 驗證 header 與 session 綁定的 CSRF token 一致
+Admin API uses the `X-CSRF-Token` header to protect state-changing requests:
 
-### §8.3 Admin Session 處理
+1. After session creation, the server sets `csrf_token=<token>` as a SameSite=Strict cookie (not httpOnly, so JS can read it)
+2. The Axios request interceptor (see §8.1) reads the cookie and attaches it as the `X-CSRF-Token` header
+3. The server validates the header matches the CSRF token bound to the session
 
-Admin session 使用 server-side Redis session（`session:admin:{session_id}`）：
-- **Inactivity TTL**：14400s（ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4h）— 每次請求由 server 自動 renew TTL
-- **Absolute Expiry**：28800s（ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8h）— server 在 session JSON 中以 `absExpiry` 欄位檢查
-- **前端監控**：`useSessionTimer.ts` composable 在 login 時啟動計時，距 inactivity 5 分鐘前提示 toast；達 absolute expiry 強制導向登入
+### §8.3 Admin Session Handling
 
-### §8.4 API Endpoints 對應表（API.md §6 全部 /admin/api/* 路由）
+Admin sessions use server-side Redis sessions (`session:admin:{session_id}`):
 
-| 功能 | Method | Path | 所需 Permission | 對應頁面 |
-|------|--------|------|----------------|---------|
-| Admin 登入 | POST | `/admin/api/auth/login` | 公開 | `/admin/login` |
-| TOTP 設定 | POST | `/admin/api/auth/totp/setup` | setupToken | `/admin/totp/setup` |
-| 登出 | POST | `/admin/api/auth/logout` | 已驗證 | — |
-| TOTP 驗證（step-up） | POST | `/admin/api/auth/totp/verify` | 已驗證 | — |
-| Admin 帳號列表 | GET | `/admin/api/roles` | super_admin | `/admin/roles` |
-| 新增 Admin 帳號 | POST | `/admin/api/roles` | super_admin | `/admin/roles` |
-| 停用 Admin 帳號 | DELETE | `/admin/api/roles/:adminId` | super_admin | `/admin/roles` |
-| 重置 TOTP | POST | `/admin/api/roles/:adminId/totp/reset` | super_admin | `/admin/roles` |
-| 寵物列表 | GET | `/admin/api/pets` | read_only+ | `/admin/pets` |
-| 寵物詳情 | GET | `/admin/api/pets/:petId` | read_only+ | `/admin/pets/:petId` |
-| 更新寵物（petName） | PUT | `/admin/api/pets/:petId` | super_admin | `/admin/pets/:petId` |
-| 封禁寵物 | POST | `/admin/api/pets/:petId/ban` | moderator+ | `/admin/pets` |
-| 解封寵物 | POST | `/admin/api/pets/:petId/unban` | moderator+ | `/admin/pets` |
-| 戰鬥記錄列表 | GET | `/admin/api/battles` | read_only+ | `/admin/battles` |
-| 可疑活動列表 | GET | `/admin/api/suspicious` | moderator+ | `/admin/suspicious` |
-| 旗標戰鬥 | POST | `/admin/api/battles/:matchId/flag` | moderator+ | `/admin/battles` |
-| 移除旗標 | DELETE | `/admin/api/battles/:matchId/flag` | moderator+ | `/admin/battles` |
-| 排行榜（Top 500） | GET | `/admin/api/leaderboard` | read_only+ | `/admin/leaderboard` |
-| 移除排行榜條目 | DELETE | `/admin/api/leaderboard/:petId` | moderator+ | `/admin/leaderboard` |
-| 讀取 Runtime Config | GET | `/admin/api/config/runtime` | super_admin | `/admin/config/runtime` |
-| 更新 Runtime Config | PUT | `/admin/api/config/runtime` | super_admin | `/admin/config/runtime` |
-| 讀取 Economy Config | GET | `/admin/api/config/economy` | super_admin | `/admin/config/economy` |
-| 更新 Economy Config | PUT | `/admin/api/config/economy` | super_admin | `/admin/config/economy` |
-| 讀取 Feature Flags | GET | `/admin/api/config/flags` | super_admin | `/admin/config/flags` |
-| 更新 Feature Flag | PUT | `/admin/api/config/flags/:flag` | super_admin | `/admin/config/flags` |
-| GDPR 佇列列表 | GET | `/admin/api/gdpr` | super_admin | `/admin/gdpr` |
-| Admin 發起刪除請求 | POST | `/admin/api/gdpr/delete` | super_admin | `/admin/gdpr` |
-| 更新 GDPR 狀態 | PATCH | `/admin/api/gdpr/:requestId` | super_admin | `/admin/gdpr` |
-| 稽核日誌 | GET | `/admin/api/audit` | super_admin | `/admin/audit` |
+- **Inactivity TTL**: 14400 s (admin_session_inactivity_expiry_hours = 4) — automatically renewed by the server on each request
+- **Absolute expiry**: 28800 s (admin_session_absolute_expiry_hours = 8) — server enforces via `absExpiry` field in the session JSON
+- **Frontend monitoring**: `useSessionTimer.ts` composable starts a timer at login; shows a toast 5 minutes before inactivity expiry; forces redirect to login at absolute expiry
+
+### §8.4 API Endpoint Mapping (all `/admin/api/*` routes from API.md §6)
+
+| Feature | Method | Path | Required Permission | Page |
+|---------|--------|------|--------------------|----|
+| Admin login | POST | `/admin/api/auth/login` | Public | `/admin/login` |
+| TOTP setup | POST | `/admin/api/auth/totp/setup` | setupToken | `/admin/totp/setup` |
+| Logout | POST | `/admin/api/auth/logout` | Authenticated | — |
+| TOTP verify (step-up) | POST | `/admin/api/auth/totp/verify` | Authenticated | — |
+| List admin accounts | GET | `/admin/api/roles` | super_admin | `/admin/roles` |
+| Create admin account | POST | `/admin/api/roles` | super_admin | `/admin/roles` |
+| Deactivate admin account | DELETE | `/admin/api/roles/:adminId` | super_admin | `/admin/roles` |
+| Reset TOTP | POST | `/admin/api/roles/:adminId/totp/reset` | super_admin | `/admin/roles` |
+| Pet list | GET | `/admin/api/pets` | read_only+ | `/admin/pets` |
+| Pet detail | GET | `/admin/api/pets/:petId` | read_only+ | `/admin/pets/:petId` |
+| Update pet (petName) | PUT | `/admin/api/pets/:petId` | super_admin | `/admin/pets/:petId` |
+| Ban pet | POST | `/admin/api/pets/:petId/ban` | moderator+ | `/admin/pets` |
+| Unban pet | POST | `/admin/api/pets/:petId/unban` | moderator+ | `/admin/pets` |
+| Battle records list | GET | `/admin/api/battles` | read_only+ | `/admin/battles` |
+| Suspicious activity list | GET | `/admin/api/suspicious` | moderator+ | `/admin/suspicious` |
+| Flag battle | POST | `/admin/api/battles/:matchId/flag` | moderator+ | `/admin/battles` |
+| Unflag battle | DELETE | `/admin/api/battles/:matchId/flag` | moderator+ | `/admin/battles` |
+| Leaderboard (Top 500) | GET | `/admin/api/leaderboard` | read_only+ | `/admin/leaderboard` |
+| Remove leaderboard entry | DELETE | `/admin/api/leaderboard/:petId` | moderator+ | `/admin/leaderboard` |
+| Read runtime config | GET | `/admin/api/config/runtime` | super_admin | `/admin/config/runtime` |
+| Update runtime config | PUT | `/admin/api/config/runtime` | super_admin | `/admin/config/runtime` |
+| Read economy config | GET | `/admin/api/config/economy` | super_admin | `/admin/config/economy` |
+| Update economy config | PUT | `/admin/api/config/economy` | super_admin | `/admin/config/economy` |
+| Read feature flags | GET | `/admin/api/config/flags` | super_admin | `/admin/config/flags` |
+| Update feature flag | PUT | `/admin/api/config/flags/:flag` | super_admin | `/admin/config/flags` |
+| GDPR queue list | GET | `/admin/api/gdpr` | super_admin | `/admin/gdpr` |
+| Admin-initiated erasure | POST | `/admin/api/gdpr/delete` | super_admin | `/admin/gdpr` |
+| Update GDPR status | PATCH | `/admin/api/gdpr/:requestId` | super_admin | `/admin/gdpr` |
+| Audit log | GET | `/admin/api/audit` | super_admin | `/admin/audit` |
 | Dashboard | GET | `/admin/api/dashboard` | read_only+ | `/admin/dashboard` |
 | Analytics | GET | `/admin/api/analytics` | read_only+ | `/admin/analytics` |
-| Email Monitor | GET | `/admin/api/email/monitor` | read_only+ | `/admin/email` |
+| Email monitor | GET | `/admin/api/email/monitor` | read_only+ | `/admin/email` |
 
 ---
 
-## §9 Pinia Store 架構
+## §9 Pinia Store Architecture
 
-### §9.1 Store 清單
+### §9.1 Store Summary
 
-| Store | 職責 | 主要狀態 |
-|-------|------|---------|
-| `authStore` | 認證狀態 / Session 管理 | `adminId`, `role`, `username`, `sessionExpiresAt`, `isAuthenticated` |
-| `permissionStore` | 當前使用者 Role + Permission 查詢 | `role`, `hasPermission()` |
-| `configStore` | Runtime Config + Economy Config + Feature Flags 的前端快取 | `runtimeConfig`, `economyConfig`, `featureFlags` |
+| Store | Responsibility | Primary State |
+|-------|----------------|---------------|
+| `authStore` | Authentication state / session management | `adminId`, `role`, `username`, `sessionExpiresAt`, `isAuthenticated` |
+| `permissionStore` | Current user role + permission queries | `role`, `hasPermission()` |
+| `configStore` | Frontend cache for runtime config, economy config, and feature flags | `runtimeConfig`, `economyConfig`, `featureFlags` |
 
-### §9.2 authStore 關鍵邏輯
+### §9.2 authStore — Key Logic
 
-本專案採用 **HttpOnly Cookie** session 機制，`authStore` 不存放 token 字串。`isAuthenticated` 依登入 API 成功回應後設定的 flag 判斷；頁面刷新後若 session 仍有效，Axios 自動攜帶 cookie，第一個需驗證的 API 呼叫若回傳 200 則維持登入態，若 401 則重導登入頁。
+This project uses an **HttpOnly Cookie** session mechanism. `authStore` stores no token string. `isAuthenticated` is derived from whether `adminUser` is non-null. After page refresh, if the session is still valid, Axios automatically carries the cookie — the first authenticated API call returning 200 maintains the logged-in state; a 401 redirects to login.
 
 ```typescript
 // stores/auth.ts
@@ -773,7 +802,7 @@ export const useAuthStore = defineStore('auth', () => {
   const adminUser = ref<AdminUser | null>(null)
   const loginAt = ref<number | null>(null)
 
-  // HttpOnly Cookie session：isAuthenticated 由 adminUser 是否存在判斷
+  // HttpOnly Cookie session: isAuthenticated derived from adminUser presence
   const isAuthenticated = computed(() => adminUser.value !== null)
 
   async function login(credentials: { username: string; password: string; totpCode?: string }) {
@@ -809,7 +838,7 @@ export const useAuthStore = defineStore('auth', () => {
 })
 ```
 
-### §9.3 permissionStore 關鍵邏輯
+### §9.3 permissionStore — Key Logic
 
 ```typescript
 // stores/permission.ts
@@ -840,7 +869,7 @@ export const usePermissionStore = defineStore('permission', () => {
     return (ROLE_HIERARCHY[role.value] ?? -1) >= (ROLE_HIERARCHY[requiredRole] ?? 99)
   }
 
-  // 依 role 生成有權限的 sidebar menu keys
+  // Generate accessible sidebar menu keys by role
   const accessibleMenuKeys = () => {
     if (!role.value) return []
     const all = ['dashboard', 'pets', 'battles', 'suspicious', 'leaderboard', 'analytics', 'email']
@@ -854,7 +883,7 @@ export const usePermissionStore = defineStore('permission', () => {
 })
 ```
 
-### §9.4 configStore 關鍵邏輯
+### §9.4 configStore — Key Logic
 
 ```typescript
 // stores/config.ts
@@ -863,18 +892,18 @@ import { ref } from 'vue'
 import { configApi } from '@/api/config'
 
 interface RuntimeConfig {
-  arenaRateLimitBattlesPerHour: number
+  arenaRateLimitBattlesPerHour: number        // range [1, 50] (arena_rate_limit_admin_min/max)
   arenaMatchmakingTimeoutSeconds: number
   rarityWeights: { common: number; rare: number; epic: number; legendary: number }
 }
 
 interface EconomyConfig {
-  foodBuffMultiplierMin: number
-  foodBuffMultiplierMax: number
-  arenaEntryCostFoodCreditsDefault: number
-  arenaEntryCostFoodCreditsMax: number
-  arenaEntryCooldownMinMinutes: number
-  arenaEntryCooldownMaxMinutes: number
+  foodBuffMultiplierMin: number               // 0.5 (food_buff_multiplier_admin_min)
+  foodBuffMultiplierMax: number               // 5.0 (food_buff_multiplier_admin_max)
+  arenaEntryCostFoodCreditsDefault: number    // 0 (arena_entry_cost_food_credits_default)
+  arenaEntryCostFoodCreditsMax: number        // 10 (arena_entry_cost_food_credits_admin_max)
+  arenaEntryCooldownMinMinutes: number        // 0 (arena_entry_cooldown_admin_min_minutes)
+  arenaEntryCooldownMaxMinutes: number        // 60 (arena_entry_cooldown_admin_max_minutes)
 }
 
 interface FeatureFlag {
@@ -901,7 +930,7 @@ export const useConfigStore = defineStore('config', () => {
 
   async function updateRuntimeConfig(patch: Partial<RuntimeConfig>) {
     await configApi.putRuntimeConfig(patch)
-    await fetchRuntimeConfig() // 刷新快取
+    await fetchRuntimeConfig() // refresh cache
   }
 
   async function fetchFeatureFlags() {
@@ -923,28 +952,27 @@ export const useConfigStore = defineStore('config', () => {
 
 ---
 
-## §10 Element Plus 組件規範
+## §10 Element Plus Component Standards
 
-### §10.1 Table 組件標準（通用）
+### §10.1 Table Component Standard (Universal)
 
-所有 Admin Table 必須實作三狀態：
+All admin tables must implement three states:
 
 ```vue
 <template>
   <div>
-    <!-- Loading 狀態 -->
+    <!-- Loading state -->
     <el-table v-loading="loading" :data="tableData">
       <el-table-column prop="id" label="ID" />
       <!-- ... -->
+
+      <!-- Empty state (el-table built-in empty slot) -->
+      <template #empty>
+        <el-empty description="No records found" />
+      </template>
     </el-table>
 
-    <!-- Empty 狀態（el-table 內建 empty-text） -->
-    <!-- el-table 空資料時自動顯示 empty slot -->
-    <template #empty>
-      <el-empty description="No records found" />
-    </template>
-
-    <!-- Error 狀態 -->
+    <!-- Error state -->
     <el-alert
       v-if="error"
       :title="error"
@@ -956,7 +984,7 @@ export const useConfigStore = defineStore('config', () => {
       </template>
     </el-alert>
 
-    <!-- 分頁 -->
+    <!-- Pagination -->
     <el-pagination
       v-model:current-page="currentPage"
       v-model:page-size="pageSize"
@@ -969,7 +997,7 @@ export const useConfigStore = defineStore('config', () => {
 </template>
 ```
 
-### §10.2 Form 組件標準
+### §10.2 Form Component Standard
 
 ```vue
 <template>
@@ -978,7 +1006,7 @@ export const useConfigStore = defineStore('config', () => {
       <el-input
         v-model="form.reason"
         type="textarea"
-        :maxlength="500"
+        :maxlength="ADMIN_MODERATION_REASON_MAX_CHARS"
         show-word-limit
         :rows="4"
         placeholder="Enter moderation reason (max 500 characters)"
@@ -998,7 +1026,8 @@ import { ref } from 'vue'
 import type { FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
 
-const ADMIN_MODERATION_REASON_MAX_CHARS = 500 // 來自 CONSTANTS.md
+// admin_moderation_reason_max_chars = 500
+const ADMIN_MODERATION_REASON_MAX_CHARS = 500
 
 const formRef = ref<FormInstance>()
 const form = ref({ reason: '' })
@@ -1024,16 +1053,16 @@ async function handleSubmit() {
 </script>
 ```
 
-### §10.3 確認危險操作（ElMessageBox）
+### §10.3 Dangerous Action Confirmation (ElMessageBox)
 
-所有 ban / deactivate / delete / feature flag toggle 等危險操作：
+All ban / deactivate / delete / feature flag toggle operations must confirm before executing:
 
 ```typescript
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 async function handleBanPet(petId: string) {
   await ElMessageBox.confirm(
-    `Are you sure you want to ban this pet? It will be removed from the leaderboard within 5 minutes.`,
+    'Are you sure you want to ban this pet? It will be removed from the leaderboard within 5 minutes.',
     'Confirm Ban',
     {
       type: 'warning',
@@ -1042,33 +1071,33 @@ async function handleBanPet(petId: string) {
       confirmButtonClass: 'el-button--danger',
     }
   )
-  // 確認後執行操作
+  // Proceed after confirmation
   await petsApi.ban(petId, { reason: moderationReason.value })
   ElMessage.success('Pet banned successfully. Leaderboard removal in progress.')
 }
 ```
 
-### §10.4 全局 Message 提示標準
+### §10.4 Global Message Notification Standards
 
 ```typescript
-// 操作成功
+// Operation success
 ElMessage({ type: 'success', message: 'Changes saved', duration: 3000 })
 
-// 操作失敗（API error）
+// Operation failure (API error)
 ElMessage({ type: 'error', message: `Error: ${err.response?.data?.error?.message ?? 'Unknown error'}`, duration: 5000 })
 
-// 警告（如 GDPR SLA 即將到期）
+// Warning (e.g. GDPR SLA approaching deadline)
 ElNotification({ type: 'warning', title: 'GDPR SLA Alert', message: 'Request #xxx expires in 2 hours', duration: 0 })
 ```
 
 ---
 
-## §11 通用組件規格
+## §11 Shared Component Specifications
 
-### §11.1 SearchableTable 組件
+### §11.1 SearchableTable Component
 
 ```typescript
-// 型別定義
+// Type definitions
 interface TableColumn {
   prop: string
   label: string
@@ -1076,7 +1105,7 @@ interface TableColumn {
   minWidth?: number | string
   sortable?: boolean
   formatter?: (row: unknown, column: unknown, value: unknown) => string
-  slot?: string // 自訂渲染 slot name
+  slot?: string // custom render slot name
 }
 
 interface SearchField {
@@ -1096,13 +1125,13 @@ interface SearchableTableProps {
   columns: TableColumn[]
   fetchFn: (params: Record<string, unknown>) => Promise<PagedResponse<unknown>>
   searchFields?: SearchField[]
-  defaultPageSize?: number // 預設 20
+  defaultPageSize?: number  // default: 20
   selectable?: boolean
-  rowKey?: string // 預設 'id'
+  rowKey?: string           // default: 'id'
 }
 ```
 
-**使用範例**：
+**Usage example**:
 
 ```vue
 <SearchableTable
@@ -1119,9 +1148,9 @@ interface SearchableTableProps {
 </SearchableTable>
 ```
 
-### §11.2 AuditLogDetail 組件
+### §11.2 AuditLogDetail Component
 
-顯示 `admin_audit_log.detail` JSONB 的格式化內容，支援 key-value 高亮顯示 `reason`、`previous_value`、`new_value` 等欄位。
+Renders the `admin_audit_log.detail` JSONB column with formatted key-value display; highlights `reason`, `previous_value`, `new_value`, and similar fields.
 
 ```typescript
 interface AuditLogDetailProps {
@@ -1132,11 +1161,11 @@ interface AuditLogDetailProps {
   targetId: string
   detail: Record<string, unknown> | null
   createdAt: string             // ISO 8601
-  visible: boolean              // 控制 Drawer 開關
+  visible: boolean              // controls Drawer open/close
 }
 ```
 
-**使用範例**：
+**Usage example**:
 
 ```vue
 <AuditLogDetail
@@ -1148,18 +1177,18 @@ interface AuditLogDetailProps {
 
 ---
 
-## §12 圖表整合規格
+## §12 Chart Integration
 
-本專案 Admin Analytics 頁面使用 ECharts 5.x（via vue-echarts 6.x）顯示時序數據。
+The admin analytics page uses ECharts 5.x (via vue-echarts 6.x) for time-series data visualization.
 
-| 圖表 | 類型 | 更新策略 |
-|------|------|---------|
-| Daily Active Users | ECharts 折線圖（LineChart） | 手動刷新（Date Range 變更） |
-| New Claims Per Day | ECharts 折線圖（LineChart） | 手動刷新 |
-| Arena Battles Per Day | ECharts 柱狀圖（BarChart） | 手動刷新 |
-| Leaderboard UVs | ECharts 折線圖（LineChart） | 手動刷新 |
+| Chart | Type | Update Strategy |
+|-------|------|-----------------|
+| Daily Active Users | ECharts LineChart | Manual refresh (Date Range change) |
+| New Claims Per Day | ECharts LineChart | Manual refresh |
+| Arena Battles Per Day | ECharts BarChart | Manual refresh |
+| Leaderboard UVs | ECharts LineChart | Manual refresh |
 
-**ECharts 按需引入範例**：
+**On-demand ECharts import example**:
 
 ```typescript
 // views/analytics/AnalyticsView.vue
@@ -1172,7 +1201,7 @@ import VChart from 'vue-echarts'
 use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent])
 ```
 
-**響應式尺寸**：使用 `v-chart` 的 `autoresize` prop 自動適應容器寬度：
+**Responsive sizing**: Use the `autoresize` prop on `v-chart` to automatically adapt to container width:
 
 ```vue
 <v-chart :option="chartOption" autoresize style="height: 320px" />
@@ -1180,15 +1209,15 @@ use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, Legen
 
 ---
 
-## §13 國際化（i18n）
+## §13 Internationalization (i18n)
 
-本專案 Admin Portal 為單語言（English），略過多語言配置。Element Plus locale 使用預設 `en` locale 即可。
+The Admin Portal is single-language (English). No multi-locale configuration is required. Element Plus locale uses the default `en` locale.
 
 ---
 
-## §14 效能優化
+## §14 Performance
 
-### §14.1 Lazy Loading（路由層）
+### §14.1 Route-Level Lazy Loading
 
 ```typescript
 // router/routes.ts
@@ -1264,27 +1293,28 @@ const routes = [
 ]
 ```
 
-### §14.2 Bundle 分析
+### §14.2 Bundle Analysis
 
 ```bash
-# 執行 bundle 分析
+# Run bundle analysis
 npx vite-bundle-visualizer
 ```
 
-目標：Element Plus 使用自動按需引入（unplugin-auto-import + unplugin-vue-components），主 bundle **< 150 KB gzipped**。
+Target: Element Plus uses automatic on-demand import (unplugin-auto-import + unplugin-vue-components). Main bundle target: **< 150 KB gzipped** (total_js_bundle_gzipped_kb = 300 for full stack reference).
 
-### §14.3 首屏時間目標
+### §14.3 Performance Targets
 
-| 目標 | 數值 | 來源 |
-|------|------|------|
-| 關鍵頁面首屏時間（FCP） | < 2000ms | 預設值（CONSTANTS.md 無 ADMIN_FCP_TARGET_MS 欄位）；Admin 頁面載入目標 3s (ADMIN_PAGE_LOAD_TIME = 3s) 對應 FCP < 2s |
-| Admin 頁面載入（含資料） | < 3000ms | ADMIN_PAGE_LOAD_TIME = 3（CONSTANTS.md）|
-| Pet 搜尋回應 | < 2000ms | ADMIN_SEARCH_RESPONSE_TIME = 2（CONSTANTS.md）|
+| Metric | Target | Source |
+|--------|--------|--------|
+| Admin page load (including data) | < 3000 ms | admin_page_load_time_seconds = 3 |
+| Pet search response time | < 2000 ms | admin_search_response_time_seconds = 2 |
+| Audit log search (any 12-month window) | < 3000 ms | admin_audit_log_search_response_time_seconds = 3 |
+| FCP (First Contentful Paint) | < 2000 ms | Derived from admin page load target |
 
-### §14.4 Element Plus 按需引入配置
+### §14.4 Element Plus On-Demand Import Configuration
 
 ```typescript
-// vite.config.ts（unplugin 配置）
+// vite.config.ts (unplugin configuration)
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
@@ -1297,9 +1327,9 @@ plugins: [
 
 ---
 
-## §15 部署配置
+## §15 Deployment Configuration
 
-### §15.1 Vite 設定（Build + Dev Proxy）
+### §15.1 Vite Configuration (Build + Dev Proxy)
 
 ```typescript
 // vite.config.ts
@@ -1335,10 +1365,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-vue': ['vue', 'vue-router', 'pinia'],
+          'vendor-vue':     ['vue', 'vue-router', 'pinia'],
           'vendor-element': ['element-plus', '@element-plus/icons-vue'],
-          'vendor-charts': ['echarts', 'vue-echarts'],
-          'vendor-axios': ['axios'],
+          'vendor-charts':  ['echarts', 'vue-echarts'],
+          'vendor-axios':   ['axios'],
         },
       },
     },
@@ -1346,26 +1376,26 @@ export default defineConfig({
 })
 ```
 
-### §15.2 環境變數
+### §15.2 Environment Variables
 
-| 變數 | Development | Production |
-|------|-------------|-----------|
-| `VITE_API_BASE_URL` | `http://localhost:3000` | `https://api.pixel-pet-arena.com`（Nginx 反代）|
+| Variable | Development | Production |
+|----------|-------------|-----------|
+| `VITE_API_BASE_URL` | `http://localhost:3000` | `https://api.pixel-pet-arena.com` (via Nginx proxy) |
 | `VITE_ADMIN_PATH` | `/admin` | `/admin` |
 
-`.env.development`：
+`.env.development`:
 ```
 VITE_API_BASE_URL=http://localhost:3000
 VITE_ADMIN_PATH=/admin
 ```
 
-`.env.production`：
+`.env.production`:
 ```
 VITE_API_BASE_URL=https://api.pixel-pet-arena.com
 VITE_ADMIN_PATH=/admin
 ```
 
-### §15.3 Nginx 路由配置
+### §15.3 Nginx Routing Configuration
 
 ```nginx
 # Admin Portal SPA routing
@@ -1374,19 +1404,19 @@ location /admin/ {
     try_files $uri $uri/ /admin/index.html;
 }
 
-# Admin API proxy（對應 ARCH §1.2 Admin Portal → Admin API Server 連線路徑）
+# Admin API proxy (ARCH §1.2: Admin Portal → Admin API Server)
 location /admin/api/ {
     proxy_pass http://backend:3000/admin/api/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # 傳遞 CSRF token cookie
+    # Pass CSRF token cookie
     proxy_pass_header Set-Cookie;
 }
 ```
 
-**Vercel 部署**（替代 Nginx）：
+**Vercel deployment** (alternative to Nginx):
 
 `packages/admin-app/vercel.json`:
 ```json
@@ -1400,21 +1430,63 @@ location /admin/api/ {
 
 ---
 
-## §16 Self-Check Checklist（開發者交付前驗收）
+## §16 Security Hardening
 
-| # | 檢查項目 | 狀態 |
-|---|----------|------|
-| 1 | §3 目錄結構完整，含 views/stores/router/api/composables/components | ✅ |
-| 2 | §4 路由表覆蓋所有 Admin 功能頁面，含 meta.permission 欄位 | ✅ |
-| 3 | §5 RBAC：三個 Role 定義完整 + PermissionGuard composable + v-permission directive | ✅ |
-| 4 | §5.2 Permission Guard：hasPermission() 實作（role hierarchy）+ 路由守衛 + 按鈕層級控制說明 | ✅ |
-| 5 | §7 頁面規格：Login / Dashboard / Pet / Battle / Suspicious / Leaderboard / Analytics / Email / Config (Runtime/Economy/Flags) / GDPR / Roles / Audit 全部有欄位與操作說明 | ✅ |
-| 6 | §8 Axios 配置有 baseURL + request interceptor（CSRF token 注入）+ response interceptor（401/403 處理）說明 | ✅ |
-| 7 | §8 /admin/api/* endpoint 對應表完整（31 個端點，含 API.md §6.1–§6.9 全部路徑）| ✅ |
-| 8 | §9 三個 Pinia Store（authStore / permissionStore / configStore）有完整 state + actions | ✅ |
-| 9a | §15.1 Vite Build：`base='/admin/'`、`outDir='dist/admin'` 已填入、`manualChunks` vendor 切割已設定、`server.proxy` 代理 `/admin/api` 已設定 | ✅ |
-| 9b | §15.2/§15.3 環境變數：`VITE_API_BASE_URL` 已填入；Nginx `/admin/` `try_files` 已設定 | ✅ |
-| 10 | 全文無 `{{PLACEHOLDER}}` / TODO 空欄 | ✅ |
-| 11 | §1 Admin Portal 概覽：系統定位已填入；§1.3 角色表格已依 EDD §3.7 + ARCH §5.1 完整填入三個角色，無 placeholder | ✅ |
-| 12 | §6.1 主 Layout 結構：ASCII 框線圖維持三區（Header / Sidebar / Content Area）；§6.1 文字說明涵蓋 HeaderBar / SidebarMenu / BreadCrumb / Content 四個功能子項 | ✅ |
-| 13 | §5.1 Permission 清單與 API.md §6 /admin/api/* endpoint 的 Role Access 一對一對應 | ✅ |
+### §16.1 Authentication Security
+
+| Control | Implementation |
+|---------|----------------|
+| TOTP enforcement | Every admin login requires TOTP after enrollment; `TOTP_SETUP_REQUIRED` returned on first login |
+| Account lockout | 10 consecutive failures trigger 30-minute lockout (admin_login_lockout_threshold = 10, admin_login_lockout_duration_minutes = 30) |
+| IP rate limiting | 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10, admin_login_ip_rate_limit_window_seconds = 900) |
+| Password hashing | bcrypt, minimum work factor 12 (SCHEMA.md §2.10 comment) |
+| TOTP secret storage | AES-256-GCM encrypted in `admin_accounts.totp_secret_encrypted` |
+| Backup codes | 10 single-use codes; SHA-256 hashes stored in `totp_backup_codes_hash` array |
+
+### §16.2 Session Security
+
+| Control | Value |
+|---------|-------|
+| Cookie flags | `HttpOnly; SameSite=Strict; Secure; Path=/admin` |
+| Inactivity timeout | 4 hours (admin_session_inactivity_expiry_hours = 4) |
+| Absolute timeout | 8 hours (admin_session_absolute_expiry_hours = 8) |
+| CSRF protection | `X-CSRF-Token` header double-submit pattern |
+| Session store | Redis server-side (`session:admin:{session_id}`) |
+
+### §16.3 RBAC Security
+
+- Every route in Vue Router carries a `meta.permission` value
+- The `beforeEach` guard validates session and role on every navigation
+- The `v-permission` directive removes unauthorized DOM elements entirely
+- Sidebar menu items for unauthorized routes are never rendered
+- Server-side authorization is always authoritative; frontend guards are defense-in-depth only
+
+### §16.4 Audit Trail
+
+All CUD operations write to `admin_audit_log`:
+- Actor (`admin_id`), action, target type, target ID, detail (JSONB), IP hash, created at
+- Retained 2 years (admin_audit_log_retention_years = 2)
+- IP addresses nulled after 90 days (ip_address_log_retention_days = 90)
+- Immutable — no delete or update operations are permitted
+
+---
+
+## §17 Pre-Delivery Checklist
+
+| # | Check Item | Status |
+|---|------------|--------|
+| 1 | §3 directory structure complete — views / stores / router / api / composables / components all present | ✅ |
+| 2 | §4 route table covers all admin feature pages with `meta.permission` fields | ✅ |
+| 3 | §5 RBAC: three roles fully defined + PermissionGuard composable + `v-permission` directive | ✅ |
+| 4 | §5.2 Permission Guard: `hasPermission()` (role hierarchy) + route guard + button-level permission examples | ✅ |
+| 5 | §7 Page specs: Login / Dashboard / Pet / Battle / Suspicious / Leaderboard / Analytics / Email / Config (Runtime/Economy/Flags) / GDPR / Roles / Audit — all have column and action descriptions | ✅ |
+| 6 | §8.1 Axios config: baseURL + request interceptor (CSRF token injection) + response interceptor (401/403 handling) | ✅ |
+| 7 | §8.4 `/admin/api/*` endpoint mapping complete (31 endpoints, covering API.md §6.1–§6.9) | ✅ |
+| 8 | §9 Three Pinia stores (authStore / permissionStore / configStore) with full state + actions | ✅ |
+| 9a | §15.1 Vite build: `base='/admin/'`, `outDir='dist/admin'`, `manualChunks` vendor splitting, `server.proxy` for `/admin/api` | ✅ |
+| 9b | §15.2/§15.3 Env vars: `VITE_API_BASE_URL` filled; Nginx `/admin/` `try_files` configured | ✅ |
+| 10 | No placeholder text or empty TODO fields anywhere in document | ✅ |
+| 11 | §1 Admin Portal overview: system purpose filled; §1.3 role table complete per EDD §3.7 + ARCH §5.1 | ✅ |
+| 12 | §6.1 main layout: ASCII diagram maintains three-zone structure (Header / Sidebar / Content); §6.1 narrative covers HeaderBar / SidebarMenu / BreadCrumb / Content | ✅ |
+| 13 | §5.1 permission table one-to-one maps to API.md §6 `/admin/api/*` endpoint Role Access | ✅ |
+| 14 | All constants cited in `(constant_name = value)` format consistent with CLIENT_IMPL.md style | ✅ |
