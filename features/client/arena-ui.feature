@@ -20,7 +20,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
   Scenario: Opponent found within matchmaking timeout — battle animation plays
     Given the MatchmakingStatus is showing "Finding opponent..."
     And POST /api/v1/arena/enter responds HTTP 200 with "matchId", "result", and "opponentPetId" before (arena_matchmaking_timeout_seconds = 30) seconds
-    When the match response is received
+    When the matchmaking completes successfully before the timeout
     Then a 3-2-1 pre-battle countdown animation plays in the ArenaPage
     And the ArenaScene Phaser component loads and plays the battle animation
     And the battle animation lasts between (arena_match_duration_min_seconds = 5) and (arena_match_duration_max_seconds = 15) seconds
