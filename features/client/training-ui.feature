@@ -22,6 +22,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   Scenario: STRENGTH training action increments strength stat
     Given "actionsRemainingToday" is 2
+    And POST /api/v1/training responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
     When the owner clicks the "Train" button on the "STRENGTH" action card
     Then POST /api/v1/training is called with body {"training_type": "STRENGTH"}
     And the StatChangeIndicator shows "+X Strength" for (training_stat_display_duration_seconds = 2) seconds
@@ -29,6 +30,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   Scenario: STAMINA training action increments stamina stat
     Given "actionsRemainingToday" is 1
+    And POST /api/v1/training responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
     When the owner clicks the "Train" button on the "STAMINA" action card
     Then POST /api/v1/training is called with body {"training_type": "STAMINA"}
     And the StatChangeIndicator shows "+X Stamina" for (training_stat_display_duration_seconds = 2) seconds
@@ -38,7 +40,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
   Scenario: All training actions exhausted — cards disabled and DailyResetTimer appears
     Given the owner has already used all (training_actions_per_day = 3) daily training actions
     And GET /api/v1/pets/:petId responds HTTP 200 with "actionsRemainingToday": 0
-    When the owner navigates to the TrainingPage
+    When the TrainingPage renders
     Then all three TrainingActionCard "Train" buttons are disabled
     And the DailyResetTimer component is visible showing a countdown to UTC 00:00
     And the DailyResetTimer has aria-live="polite" and announces the remaining time throttled at 60-second intervals and at ≤ 5 minutes remaining

@@ -19,6 +19,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: First-time admin login without TOTP enrolled — redirected to TOTP setup
     Given the admin has not enrolled a TOTP device
     And POST /admin/api/auth/login responds HTTP 403 with error code "TOTP_SETUP_REQUIRED" and a "setupToken"
+    And POST /admin/api/auth/totp/setup responds HTTP 200 with a QR code URL and backup codes
     When the admin submits credentials without a TOTP code
     Then Vue Router navigates to "/admin/totp-setup"
     And the TotpSetupPage.vue renders a QR code and calls POST /admin/api/auth/totp/setup with {"setupToken": "..."}
