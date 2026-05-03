@@ -110,6 +110,7 @@ Every feature flag has a dedicated test that validates the kill-switch behavior 
 | Feature Flag | Kill-Switch Test | Live-Path Test |
 |---|---|---|
 | FF_GUEST_PET_DISPLAY | Static placeholder rendered when disabled | Random pet rendered on load |
+| FF_PET_GENERATION | Pet generation pipeline disabled; random-pet endpoint returns 503 | Procedural pet generated on demand |
 | FF_EMAIL_CLAIM | Claim button shows "Feature temporarily unavailable" | Full claim flow succeeds |
 | FF_TRAINING_SYSTEM | Training buttons disabled with tooltip | Training stat increments correctly |
 | FF_FOOD_SYSTEM | Food inventory hidden; existing buffs still calculated | Feed action applies stat buff |
@@ -117,6 +118,7 @@ Every feature flag has a dedicated test that validates the kill-switch behavior 
 | FF_ARENA_SUMO | Mode not available in UI | Sumo match completes (when FF_ARENA_SUMO = true) |
 | FF_LEADERBOARD | Leaderboard page shows unavailable message | Top 100 renders with correct ranks |
 | FF_BATTLE_RECORDS | Battle records page returns 503 | Public page renders without auth |
+| FF_RARITY_DISPLAY | Rarity badge and animated border hidden; no rarity metadata in pet API response | Rarity badge and tier-specific effects visible |
 | FF_ADMIN_PORTAL | Admin routes return 503 | Admin login + dashboard accessible |
 | FF_MARKETPLACE | Marketplace hidden from nav and routes | Listing page accessible (FF = true, staging only) |
 
@@ -1367,7 +1369,7 @@ Feature: Training System (US-TRAIN-001)
 Scenario: Owner trains pet and sees stat change indicator
   Given a pet owner on the training page
   And the pet has at least one training action available today
-  When the owner clicks "Speed Training"
+  When the owner clicks "Run Training"
   Then a stat change indicator "+X Speed" appears on screen
   And the indicator disappears after (training_stat_display_duration_seconds = 2) seconds
   And the updated stat is reflected in the stats panel
