@@ -93,9 +93,9 @@ COMMENT ON COLUMN pets.stat_stamina IS 'Stamina stat. Range: 1–100 (pet_stat_m
 COMMENT ON COLUMN pets.level IS 'Derived: FLOOR(total_training_actions / pet_level_formula_divisor) capped at pet_level_max (pet_level_formula_divisor = 10, pet_level_max = 100). Updated on every training commit.';
 COMMENT ON COLUMN pets.total_training_actions IS 'Cumulative count of training actions; feeds the level formula.';
 COMMENT ON COLUMN pets.last_trained_at IS 'Timestamp of the most recent training action. NULL if never trained. Used to compute neglect state (threshold: 3 days; training_neglect_threshold_days = 3).';
-COMMENT ON COLUMN pets.owner_token_hash IS 'SHA-256 hash of the 32-byte pet access token. NULL = unclaimed. Raw token is never stored.';
+COMMENT ON COLUMN pets.owner_token_hash IS 'SHA-256 hash of the pet access token (minimum pet_access_token_min_bytes = 32 bytes). NULL = unclaimed. Raw token is never stored.';
 COMMENT ON COLUMN pets.claim_identity_id IS 'Set at claim time. Enables GDPR erasure lookup after claim_codes rows are purged.';
-COMMENT ON COLUMN pets.reserved_until IS 'Set to NOW()+24h when pet is generated for guest preview. NULL for claimed pets. Cleanup job target.';
+COMMENT ON COLUMN pets.reserved_until IS 'Set to NOW() + pet_reservation_ttl_hours hours (pet_reservation_ttl_hours = 24) when pet is generated for guest preview. NULL for claimed pets. Cleanup job target.';
 COMMENT ON COLUMN pets.generation_meta IS 'JSONB vector: {body, head, color_palette, accessory, rarity_trait, pattern} — 6 dimensions per pet_generation_dimensions.';
 COMMENT ON COLUMN pets.banned_reason IS 'Admin-supplied ban reason. Max 500 characters (admin_moderation_reason_max_chars).';
 ```
@@ -130,7 +130,7 @@ CREATE TABLE claim_identities (
 );
 
 COMMENT ON COLUMN claim_identities.email_hash IS 'SHA-256 of lowercase email. Used for lookups. Never decryptable from this column alone.';
-COMMENT ON COLUMN claim_identities.email_encrypted IS 'AES-256-GCM encrypted raw email. Set to NULL within 24 hours of a GDPR erasure request (internal SLA) and fully NULL within 7 days (gdpr_email_deletion_window_days).';
+COMMENT ON COLUMN claim_identities.email_encrypted IS 'AES-256-GCM encrypted raw email. Set to NULL within gdpr_email_hashing_internal_sla_hours hours (gdpr_email_hashing_internal_sla_hours = 24) of a GDPR erasure request (internal SLA) and fully NULL within 7 days (gdpr_email_deletion_window_days = 7).';
 COMMENT ON COLUMN claim_identities.deletion_requested_at IS 'Set when a GDPR erasure request is initiated. Triggers background erasure job.';
 COMMENT ON COLUMN claim_identities.updated_at IS 'Updated by the application on every mutation: when deletion_requested_at is set and when email_encrypted is nulled by the GDPR erasure job.';
 ```
@@ -692,10 +692,10 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 | Key Pattern | TTL | Value | Notes |
 |-------------|-----|-------|-------|
 | `rl:claim:{email_hash}` | 3600 s | Integer attempt count | Email claim initiation. Limit: 5/hr per email (`email_claim_attempts_per_hour_per_email = 5`). Fail-open if Redis unavailable. |
-| `rl:claim:cooldown:{email_hash}` | 60 s | `"1"` | Set when limit is reached. Blocks further attempts during cooldown. Returns HTTP 429 with `Retry-After: 60`. |
+| `rl:claim:cooldown:{email_hash}` | 60 s | `"1"` | Set when limit is reached. Blocks further attempts during cooldown. TTL = `claim_email_retry_cooldown_seconds = 60`. Returns HTTP 429 with `Retry-After: 60`. |
 | `rl:arena:{pet_id}` | 3600 s | Integer battle count | Arena battles per pet. Default limit: 10/hr (`arena_battles_per_pet_per_hour_default = 10`); admin-tunable 1–50. Fail-open. |
 | `rl:code_entry:{session_id}` | 900 s | Integer attempt count | OTP code entry. Limit: 10/session (`claim_code_entry_attempts_per_session = 10`). **Fail-closed** — code entry is blocked if Redis is unavailable. |
-| `rl:code_entry:cooldown:{session_id}` | 60 s | `"1"` | Set when code entry limit is reached. HTTP 429 with `Retry-After: 60`. |
+| `rl:code_entry:cooldown:{session_id}` | 60 s | `"1"` | Set when code entry limit is reached. TTL matches `claim_email_retry_cooldown_seconds = 60` (no separate constant defined for code-entry cooldown). HTTP 429 with `Retry-After: 60`. |
 | `rl:admin_login:{ip_hash}` | 900 s | Integer attempt count | Pre-auth admin login IP rate limit. Limit: 10 attempts per 15 min (`admin_login_ip_rate_limit_attempts = 10`, `admin_login_ip_rate_limit_window_seconds = 900`). |
 | `rl:admin:{admin_id}` | 60 s | Integer request count | Per-authenticated-admin request rate limit. Limit: 100/min (`admin_portal_requests_per_minute_per_account = 100`). |
 
@@ -703,7 +703,7 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 
 | Key Pattern | TTL | Type | Notes |
 |-------------|-----|------|-------|
-| `matchmaking:queue:{mode}` | None | Redis Sorted Set | Score = enqueue epoch (ms). Member format: `"{petId}:{enqueue_epoch_ms}"`. Consumer pops oldest eligible entry via `ZRANGEBYSCORE`. Entries older than ~45 s (timeout 30 s + 15 s buffer; `arena_matchmaking_timeout_seconds = 30`) are considered stale and discarded silently. |
+| `matchmaking:queue:{mode}` | None | Redis Sorted Set | Score = enqueue epoch (ms). Member format: `"{petId}:{enqueue_epoch_ms}"`. Consumer pops oldest eligible entry via `ZRANGEBYSCORE`. Entries older than `arena_matchmaking_timeout_seconds = 30` seconds plus an implementation-defined grace buffer (~15 s; no constant) are considered stale and discarded silently. |
 
 ### 4.3 Session Storage
 
