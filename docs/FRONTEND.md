@@ -849,7 +849,34 @@ TrainingPage /pet/:petId/train
     → NeglectedState overlay renders on PetCanvas
 ```
 
-### 5.3 Arena Battle Flow
+### 5.3 Feed Interaction
+
+```
+PetPage (owner authenticated via Bearer token)
+  ↓ selects FoodItem in FoodInventory
+  │
+  ├─ User taps/clicks food item in FoodInventory
+  │    FoodItem shows stat targeted, magnitude, and buff duration
+  │    → POST /api/v1/pets/:petId/feed
+  │       { buffType, stat, magnitude, isPermanent }
+  │    ← { updatedStats, buffApplied }
+  │       updatedStats: { speed, strength, stamina }  (level excluded — level is training-derived)
+  │       buffApplied: { stat, magnitude, isPermanent, expiresAt }
+  │           expiresAt is null when isPermanent is true
+  │
+  ├─ On success:
+  │    Stat bar for the targeted stat animates to new value
+  │    If temporary buff: buff badge appears on stat bar with remaining duration
+  │    usePet cache is invalidated → PetPage re-fetches
+  │
+  └─ Error states:
+       HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (pet_stat_max = 100)"
+       HTTP 400 VALIDATION_ERROR → inline error (magnitude or buffType out of configured range)
+       HTTP 401 → handled globally: clearPetToken() + redirect to /
+       HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
+```
+
+### 5.4 Arena Battle Flow
 
 ```
 PetPage
@@ -890,7 +917,7 @@ ArenaPage /arena
        Leaderboard score updated within leaderboard_update_lag_max_seconds = 30s
 ```
 
-### 5.4 Marketplace Browse / List / Buy (FF_MARKETPLACE)
+### 5.5 Marketplace Browse / List / Buy (FF_MARKETPLACE)
 
 This flow is only active when the `FF_MARKETPLACE` feature flag is `true`.
 
@@ -919,7 +946,7 @@ MarketplacePage /marketplace
        Trade history: GET /api/v1/marketplace/history/:petId (authenticated, private)
 ```
 
-### 5.5 Leaderboard View
+### 5.6 Leaderboard View
 
 ```
 LeaderboardPage /leaderboard
@@ -941,7 +968,7 @@ LeaderboardPage /leaderboard
        BattleHistoryTable shows last arena_battle_records_display_count = 20 battles
 ```
 
-### 5.6 GDPR Self-Service Flow (Player)
+### 5.7 GDPR Self-Service Flow (Player)
 
 ```
 PetPage (owner authenticated via Bearer token)
@@ -971,7 +998,7 @@ GdprPage /gdpr
        HTTP 404 NOT_FOUND → "Request not found."
 ```
 
-### 5.7 Admin Login (TOTP)
+### 5.8 Admin Login (TOTP)
 
 ```
 AdminLoginPage /admin/login
