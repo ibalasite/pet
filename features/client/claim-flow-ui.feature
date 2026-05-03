@@ -67,7 +67,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
 
   Scenario: ExpiryWarning activates when 2 minutes or fewer remain before OTP expiry
     Given the ClaimCodeForm is visible and (a11y_claim_code_warning_before_expiry_minutes = 2) minutes or fewer remain before OTP expiry
-    When the OTP countdown timer ticks and 2 or fewer minutes remain
+    When the OTP countdown timer ticks
     Then the ExpiryWarning renders with role="alert" and aria-live="assertive"
     And the warning text includes the remaining minutes as a countdown
 

@@ -17,12 +17,14 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
   Scenario: Leaderboard auto-refreshes every 30 seconds via TanStack Query
     Given the LeaderboardPage is mounted
     And (leaderboard_update_lag_max_seconds = 30) seconds have elapsed since the last fetch
+    And GET /api/v1/leaderboard responds HTTP 200 with refreshed pet entries
     When the TanStack Query stale timer fires a background refetch
     Then the useLeaderboard hook triggers a new GET /api/v1/leaderboard request automatically
     And the LeaderboardTable updates to reflect the refreshed data without a full page reload
 
   Scenario: Rarity filter updates URL and refetches leaderboard
     Given the LeaderboardPage is loaded showing all rarities
+    And GET /api/v1/leaderboard?rarity=EPIC&page=1&limit=100 responds HTTP 200 with EPIC rarity pet entries
     When the owner clicks the "Epic" tab in the RarityFilter component
     Then the browser URL changes to "/leaderboard?rarity=EPIC"
     And GET /api/v1/leaderboard?rarity=EPIC&page=1&limit=100 is called
@@ -31,6 +33,7 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
 
   Scenario: Rarity filter selection is preserved on page refresh
     Given the user is on "/leaderboard?rarity=RARE"
+    And GET /api/v1/leaderboard?rarity=RARE&page=1&limit=100 responds HTTP 200 with RARE rarity pet entries
     When the page is refreshed
     Then the "Rare" tab is active in RarityFilter
     And GET /api/v1/leaderboard?rarity=RARE&page=1&limit=100 is called on mount

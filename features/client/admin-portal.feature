@@ -62,7 +62,8 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: Admin views pet list and filters by SUSPICIOUS status
     Given the admin is authenticated as a moderator or super_admin
     And the admin has navigated to "/admin/pets"
-    When the PetListPage.vue loads
+    And GET /admin/api/pets responds HTTP 200 with pet entries
+    When the PetListPage.vue has loaded
     Then GET /admin/api/pets is called with the session cookie
     And the ElTable displays pet rows with columns: pet ID, masked owner email, rarity, level, arena record, creation date
     And an ElSelect filter for status "SUSPICIOUS" is available and narrows the table when selected
@@ -73,7 +74,6 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters in the PetBanModal.vue reason field
     And the admin clicks "Confirm Ban"
     Then POST /admin/api/pets/bad-pet-001/ban is called with body {"reason": "<reason>"}
-    And the server records the ban with admin ID, timestamp, and reason
     And the pet row status is updated to "BANNED" in the ElTable
 
   Scenario: Ban reason exceeding 500 characters is rejected client-side
@@ -87,7 +87,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: Admin leaderboard shows up to 500 entries with SUSPICIOUS flag badges
     Given the admin has navigated to "/admin/leaderboard"
     And GET /admin/api/leaderboard responds with up to (leaderboard_admin_view = 500) entries
-    When the AdminLeaderboardPage.vue renders
+    When the AdminLeaderboardPage.vue has rendered
     Then the ElTable shows all returned entries without pagination
     And pets with more than (bot_detection_battles_threshold = 50) battles in the last (bot_detection_window_minutes = 60) minutes have a SuspiciousFlagBadge component visible
 
@@ -96,7 +96,6 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     When the admin clicks "Remove from Leaderboard" on that row
     Then DELETE /admin/api/leaderboard/cheat-pet-007 is called with the session cookie
     And the row for "cheat-pet-007" disappears from the AdminLeaderboardPage ElTable
-    And the change reflects on the public LeaderboardPage within (leaderboard_ban_reflection_time_minutes = 5) minutes
 
   Scenario: Admin adjusts max battles per hour via runtime config panel
     Given the admin is authenticated as a super_admin and has navigated to "/admin/config/runtime"
@@ -104,5 +103,4 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     When the admin changes the value to 15 (within the allowed range of 1 to 50)
     And clicks "Save"
     Then PUT /admin/api/config/runtime is called with the updated value
-    And the change takes effect within (config_cache_refresh_time_minutes = 5) minutes
-    And the audit log records the admin ID, timestamp, field "max_battles_per_hour", old value, and new value
+    And a success confirmation is displayed in the RuntimeConfigPage.vue

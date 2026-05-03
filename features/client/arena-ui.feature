@@ -28,7 +28,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     And the app navigates to "/arena/result/:matchId" after the animation completes
 
   Scenario: No opponent found — AIOfferModal is shown after 30-second timeout
-    Given POST /api/v1/arena/enter responds HTTP 408 with error code "MATCHMAKING_TIMEOUT" when no opponent is found within (arena_matchmaking_timeout_seconds = 30) seconds
+    Given POST /api/v1/arena/enter responds HTTP 408 with error code "MATCHMAKING_TIMEOUT" after the (arena_matchmaking_timeout_seconds = 30)-second timeout elapses
     When the matchmaking timeout fires
     Then the MatchmakingStatus text changes to "No opponent found"
     And the AIOfferModal appears with role="dialog" and aria-modal="true"
@@ -86,6 +86,6 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
 
   Scenario: SUMO mode is available alongside RACE in the ModeSelector
     Given the ArenaPage is loaded with the FF_ARENA_SUMO feature flag enabled
+    And both "RACE" and "SUMO" option buttons are visible and focusable
     When the owner selects "SUMO" in the ModeSelector and clicks the "Enter Arena" button
-    Then both "RACE" and "SUMO" option buttons are visible and focusable
-    And POST /api/v1/arena/enter is called with body {"petId": "<petId>", "mode": "SUMO"}
+    Then POST /api/v1/arena/enter is called with body {"petId": "<petId>", "mode": "SUMO"}
