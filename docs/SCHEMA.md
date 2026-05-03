@@ -781,6 +781,8 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 | `session:admin:*` | 14400 s inactivity / absolute 28800 s | `admin_session_inactivity_expiry_hours = 4`, `admin_session_absolute_expiry_hours = 8` |
 | `token:blacklist:*` | 259200 s (72 h) | `claim_token_cleanup_ttl_hours = 72` |
 | `leaderboard:global` | No expiry; entries removed on ban or GDPR erasure | — |
+| `matchmaking:queue:*` | No key-level TTL; stale entries (older than `arena_matchmaking_timeout_seconds = 30` s plus grace) are discarded by the consumer | `arena_matchmaking_timeout_seconds = 30` |
+| `config:runtime` | 300 s rolling TTL; re-populated by next admin config write or cache-refresh cycle | `config_cache_refresh_time_minutes = 5` |
 | `admin_audit_log.ip_address_hash` | 90 days (column is set to NULL after 90 d by background job) | `ip_address_log_retention_days = 90` |
 | Unclaimed `pets` (guest preview) | Background job deletes `reserved_until < NOW() AND owner_token_hash IS NULL` on an implementation-defined schedule (no constant; run frequency is an operational decision) | `pet_reservation_ttl_hours = 24` |
 
@@ -811,10 +813,12 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 
 - `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort. The leading column of each index also serves PostgreSQL's FK integrity scan for `ON DELETE RESTRICT` (pet_a_id) and `ON DELETE SET NULL` (pet_b_id), eliminating the need for separate single-column indexes.
 - `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. The leading `pet_id` column also serves the FK CASCADE scan (`ON DELETE CASCADE`), making a separate `idx_training_logs_pet_id` unnecessary.
-- `idx_admin_audit_log_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor within a 12-month window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`).
+- `idx_admin_audit_log_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor across the full 2-year retention window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`, `admin_audit_log_retention_years = 2`).
 - `idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)` — supports the anti-flip eligibility check (`marketplace_trade_antiflip_protection_days = 7`). The query `SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1` is fully served by the composite index without a separate heap sort. The leading `pet_id` column also covers the FK RESTRICT scan (`ON DELETE RESTRICT`), eliminating the need for a separate single-column `idx_marketplace_transactions_pet` index.
 - `idx_leaderboard_snapshots_time (snapshot_time DESC)` — supports both the historical reporting query (`SELECT ... ORDER BY snapshot_time DESC LIMIT 1`) and the 12-month rolling retention DELETE (`WHERE snapshot_time < NOW() - INTERVAL '12 months'`; `leaderboard_snapshot_retention_months = 12`).
 - `idx_admin_audit_log_created_at (created_at DESC)` — supports audit log search queries and the 2-year row retention DELETE (`WHERE created_at < NOW() - INTERVAL '2 years'`; `admin_audit_log_retention_years = 2`). The composite `idx_admin_audit_log_admin_id` additionally covers filtered searches by actor.
+- `idx_gdpr_requests_identity (claim_identity_id, submitted_at DESC)` — supports the query `WHERE claim_identity_id = $1 ORDER BY submitted_at DESC` for listing all requests by a data subject. The leading column also serves the FK RESTRICT scan (`ON DELETE RESTRICT`).
+- `idx_gdpr_requests_status (status, submitted_at)` — supports the admin work queue query `WHERE status IN ('pending', 'processing') ORDER BY submitted_at` for processing requests in FIFO order.
 
 ### 6.3 Leaderboard Query Pattern
 
@@ -858,8 +862,6 @@ These full-table indexes cover FK scans, sort-only queries, and background job t
 - `idx_marketplace_listings_pet (pet_id)` — supports the FK RESTRICT scan and seller-facing queries `WHERE pet_id = $1`.
 - `idx_marketplace_listings_listed_at (listed_at DESC)` — supports the admin and public marketplace browse query `ORDER BY listed_at DESC`.
 - `idx_marketplace_transactions_completed (completed_at DESC)` — supports admin transaction audit queries ordered by recency.
-- `idx_gdpr_requests_identity (claim_identity_id, submitted_at DESC)` — composite: supports the query `WHERE claim_identity_id = $1 ORDER BY submitted_at DESC` for listing all requests by a data subject. The leading column also serves the FK RESTRICT scan (`ON DELETE RESTRICT`).
-- `idx_gdpr_requests_status (status, submitted_at)` — supports the admin work queue query `WHERE status IN ('pending', 'processing') ORDER BY submitted_at` for processing requests in FIFO order.
 
 ### 6.7 Connection Pool Sizing
 
