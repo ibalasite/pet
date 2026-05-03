@@ -129,6 +129,10 @@ apps/player/
 │   │   │   ├── BattleRecordsPage.tsx
 │   │   │   ├── PetSummaryCard.tsx
 │   │   │   └── BattleHistoryTable.tsx
+│   │   ├── gdpr/
+│   │   │   ├── GdprPage.tsx
+│   │   │   ├── GdprRequestForm.tsx
+│   │   │   └── GdprStatusBanner.tsx
 │   │   ├── marketplace/               # FF_MARKETPLACE only
 │   │   │   └── MarketplacePage.tsx
 │   │   └── canvas/
@@ -210,6 +214,9 @@ App
 │       │   ├── RarityFilter
 │       │   ├── LeaderboardTable → LeaderboardRow × 100
 │       │   └── OwnerRankBanner     (if pet token present)
+│       ├── GdprPage                /gdpr        (owner auth required)
+│       │   ├── GdprRequestForm     (type selector: erasure / data_access / restrict_processing / object_leaderboard / rectification)
+│       │   └── GdprStatusBanner    (polls GET /api/v1/gdpr/request/status by jobId)
 │       └── MarketplacePage         /marketplace  (FF_MARKETPLACE only)
 ```
 
@@ -351,6 +358,8 @@ const router = createBrowserRouter([
       { path: 'arena', lazy: () => import('./components/arena/ArenaPage') },
       { path: 'arena/result/:battleId', lazy: () => import('./components/arena/BattleResultPage') },
       { path: 'leaderboard', lazy: () => import('./components/leaderboard/LeaderboardPage') },
+      // GDPR self-service: owner token required; accessible at /gdpr
+      { path: 'gdpr', lazy: () => import('./components/gdpr/GdprPage') },
       // Marketplace: only rendered when FF_MARKETPLACE feature flag is active
       { path: 'marketplace', lazy: () => import('./components/marketplace/MarketplacePage') },
     ],
@@ -548,8 +557,8 @@ export const useConfigStore = defineStore('config', () => {
   const economyConfig = ref<EconomyConfig | null>(null);
 
   // config_cache_refresh_time_minutes = 5; local cache mirrors backend TTL
-  async function fetchRuntimeConfig() { /* PUT /admin/api/config/runtime */ }
-  async function fetchEconomyConfig() { /* PUT /admin/api/config/economy */ }
+  async function fetchRuntimeConfig() { /* GET /admin/api/config/runtime */ }
+  async function fetchEconomyConfig() { /* GET /admin/api/config/economy */ }
 
   return { runtimeConfig, economyConfig, fetchRuntimeConfig, fetchEconomyConfig };
 });
@@ -675,7 +684,7 @@ class PetIdleScene extends Phaser.Scene {
 
 | Context | Sprite size | Display size |
 |---------|-------------|--------------|
-| Hero canvas (Landing, My Pet, Battle Result) | 32×32 px base | 128×128 px @ 4× scale |
+| Hero canvas (Landing, My Pet, Battle Result) | 64×64 px @ 1× | 128×128 px @ 2× (retina) |
 | Leaderboard thumbnail | 32×32 px | 32×32 px @ 1×, 64×64 px @2× |
 | Trade card (Marketplace) | 32×32 px | 48×48 px |
 | OG social share card | 32×32 px | 128×128 px rendered on 1200×630 card |
@@ -765,7 +774,7 @@ ClaimPage renders ClaimFlow
 ```
 
 **Error states handled in UI**:
-- `ALREADY_CLAIMED` (HTTP 409): "This pet is already owned."
+- `ALREADY_CLAIMED` (HTTP 400): "This pet is already owned."
 - `CODE_EXPIRED` (HTTP 400): "Claim code has expired. Please request a new one." + re-request button
 - `INVALID_CODE` (HTTP 400): Red shake animation on digit boxes + error message
 - `MAX_ATTEMPTS_REACHED` (HTTP 429): All inputs disabled; 60-second cooldown countdown shown
@@ -890,7 +899,37 @@ LeaderboardPage /leaderboard
        BattleHistoryTable shows last arena_battle_records_display_count = 20 battles
 ```
 
-### 5.6 Admin Login (TOTP)
+### 5.6 GDPR Self-Service Flow (Player)
+
+```
+PetPage (owner authenticated via Bearer token)
+  ↓ clicks "Data Rights" / GDPR link
+GdprPage /gdpr
+  │
+  ├─ GdprRequestForm
+  │    Type selector (radio / dropdown):
+  │      erasure | data_access | restrict_processing | object_leaderboard | rectification
+  │    → POST /api/v1/gdpr/request  { type: "erasure" | ... }   (auth: Bearer token)
+  │    ← { jobId, message }  HTTP 202 Accepted
+  │    jobId stored in component state; GdprStatusBanner activates
+  │
+  ├─ GdprStatusBanner (after submission)
+  │    Polls GET /api/v1/gdpr/request/status?jobId=<jobId>  (auth: Bearer token)
+  │    Displays current status: pending | processing | completed | failed
+  │    SLA copy displayed per request type:
+  │      erasure → "Processed within 7 days (gdpr_email_deletion_window_days = 7)"
+  │      data_access / portability → "Processed within 30 days"
+  │      restrict_processing → "Processed within 24 hours"
+  │      object_leaderboard → "Processed within 5 business days"
+  │      rectification → "Processed within 24 hours"
+  │
+  └─ Error states:
+       HTTP 401 → redirect to / (token cleared)
+       HTTP 403 FORBIDDEN → "Your account is not authorized to view this request."
+       HTTP 404 NOT_FOUND → "Request not found."
+```
+
+### 5.7 Admin Login (TOTP)
 
 ```
 AdminLoginPage /admin/login
@@ -1113,7 +1152,7 @@ The `pet_access_token` is stored in `localStorage` under the key `pet_access_tok
 
 | Storage | XSS risk | CSRF risk | Persistence across tabs | Decision |
 |---------|----------|-----------|------------------------|---------|
-| `localStorage` | Yes — accessible via `document.cookie`-free JS | None — not sent automatically | Yes | **Selected** |
+| `localStorage` | Yes — accessible via JavaScript (`window.localStorage`) | None — not sent automatically | Yes | **Selected** |
 | `sessionStorage` | Yes | None | No (tab-scoped) | Rejected: breaks multi-device / multi-tab use case |
 | httpOnly cookie | None | Yes (mitigated by `SameSite`) | Yes | Rejected for player token: requires server-side session, contradicts token URL model |
 
