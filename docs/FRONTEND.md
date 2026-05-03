@@ -332,6 +332,7 @@ interface AppStore {
   claimStep: 'email' | 'code' | 'reveal';
   claimId: string | null;
   setClaimStep: (step: ClaimStep) => void;
+  setClaimId: (id: string | null) => void;
 
   // Toast slice
   toasts: Toast[];
@@ -699,6 +700,7 @@ class PetIdleScene extends Phaser.Scene {
       this.cameras.main.height / 2,
       'pet'
     );
+    sprite.setScale(2); // scale 32px frame to fill 64px canvas (sprite_resolution_px × 2)
     sprite.play('idle');
   }
 }
@@ -719,7 +721,7 @@ class PetIdleScene extends Phaser.Scene {
 
 ### 4.3 Animation
 
-- **Minimum frame rate**: `pet_animation_fps_min = 30` FPS sustained (from `constants.json` slo section). This is the `frameRate` value passed to `Phaser.Animations.create()`.
+- **Minimum frame rate**: `pet_animation_fps_min = 30` FPS sustained (from `constants.json` slo section). This is the `frameRate` value passed to `this.anims.create()` inside a Phaser Scene.
 - **Idle animation**: 4-frame minimum, 8-frame recommended loop.
 - **Interaction response**: 2-frame "bounce" sequence — scale 1.15× frame 1, return to 1× frame 2; 200ms total (`pet_interaction_response_ms = 200` from constants.json).
 - **Training animation**: 3-frame "effort" sequence, 400ms.
@@ -1124,6 +1126,8 @@ The `useReducedMotion()` hook wraps `window.matchMedia('(prefers-reduced-motion:
 
 ```typescript
 // src/hooks/useReducedMotion.ts
+import { useState, useEffect } from 'react';
+
 export function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -1200,7 +1204,7 @@ The `pet_access_token` is stored in `localStorage` under the key `pet_access_tok
 
 ### 8.3 Content Security Policy
 
-The following CSP is applied as a response header on all player app and admin portal responses. Adjust trusted origins before production deployment.
+**Phase 1/2 CSP** (current): The following CSP is applied as a response header on all player app and admin portal responses. Adjust trusted origins before production deployment. A nonce-based `script-src` policy (replacing the CDN allowlist) is scheduled as a Phase 3 security hardening item per EDD §13.3.
 
 ```
 Content-Security-Policy:
