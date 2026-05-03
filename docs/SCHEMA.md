@@ -24,7 +24,40 @@ All column names use `snake_case`. All IDs are `UUID` (generated via `gen_random
 
 ## 2. Tables
 
-### 2.1 `pets`
+### 2.1 `claim_identities`
+
+One row per unique email address. Implements PII minimization: only the SHA-256 hash is indexed; the raw email is stored only as AES-256-GCM ciphertext. Defined before `pets` because `pets.claim_identity_id` carries a foreign key to this table.
+
+```sql
+CREATE TABLE claim_identities (
+    id                    UUID        NOT NULL DEFAULT gen_random_uuid(),
+    email_hash            VARCHAR(64) NOT NULL,
+    email_encrypted       BYTEA       NULL,
+    deletion_requested_at TIMESTAMPTZ NULL,
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT pk_claim_identities PRIMARY KEY (id),
+    CONSTRAINT uq_claim_identities_email_hash UNIQUE (email_hash)
+);
+
+COMMENT ON COLUMN claim_identities.email_hash IS 'SHA-256 of lowercase email. Used for lookups. Never decryptable from this column alone.';
+COMMENT ON COLUMN claim_identities.email_encrypted IS 'AES-256-GCM encrypted raw email. Set to NULL within gdpr_email_hashing_internal_sla_hours hours (gdpr_email_hashing_internal_sla_hours = 24) of a GDPR erasure request (internal SLA) and fully NULL within 7 days (gdpr_email_deletion_window_days = 7).';
+COMMENT ON COLUMN claim_identities.deletion_requested_at IS 'Set when a GDPR erasure request is initiated. Triggers background erasure job.';
+COMMENT ON COLUMN claim_identities.updated_at IS 'Updated by the application on every mutation: when deletion_requested_at is set and when email_encrypted is nulled by the GDPR erasure job.';
+```
+
+```sql
+-- GDPR erasure background job: finds rows pending email encryption removal.
+-- Query: WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL
+CREATE INDEX idx_claim_identities_deletion
+    ON claim_identities (deletion_requested_at)
+    WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL;
+```
+
+---
+
+### 2.2 `pets`
 
 Stores every generated pet — unclaimed guests, claimed pets, and banned pets.
 
@@ -108,39 +141,6 @@ CREATE INDEX idx_pets_owner_token_hash ON pets (owner_token_hash)  WHERE owner_t
 CREATE INDEX idx_pets_last_trained_at  ON pets (last_trained_at)   WHERE last_trained_at IS NOT NULL;
 CREATE INDEX idx_pets_claim_identity   ON pets (claim_identity_id) WHERE claim_identity_id IS NOT NULL;
 CREATE INDEX idx_pets_reserved_until   ON pets (reserved_until)    WHERE reserved_until IS NOT NULL;
-```
-
----
-
-### 2.2 `claim_identities`
-
-One row per unique email address. Implements PII minimization: only the SHA-256 hash is indexed; the raw email is stored only as AES-256-GCM ciphertext.
-
-```sql
-CREATE TABLE claim_identities (
-    id                    UUID        NOT NULL DEFAULT gen_random_uuid(),
-    email_hash            VARCHAR(64) NOT NULL,
-    email_encrypted       BYTEA       NULL,
-    deletion_requested_at TIMESTAMPTZ NULL,
-    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-    CONSTRAINT pk_claim_identities PRIMARY KEY (id),
-    CONSTRAINT uq_claim_identities_email_hash UNIQUE (email_hash)
-);
-
-COMMENT ON COLUMN claim_identities.email_hash IS 'SHA-256 of lowercase email. Used for lookups. Never decryptable from this column alone.';
-COMMENT ON COLUMN claim_identities.email_encrypted IS 'AES-256-GCM encrypted raw email. Set to NULL within gdpr_email_hashing_internal_sla_hours hours (gdpr_email_hashing_internal_sla_hours = 24) of a GDPR erasure request (internal SLA) and fully NULL within 7 days (gdpr_email_deletion_window_days = 7).';
-COMMENT ON COLUMN claim_identities.deletion_requested_at IS 'Set when a GDPR erasure request is initiated. Triggers background erasure job.';
-COMMENT ON COLUMN claim_identities.updated_at IS 'Updated by the application on every mutation: when deletion_requested_at is set and when email_encrypted is nulled by the GDPR erasure job.';
-```
-
-```sql
--- GDPR erasure background job: finds rows pending email encryption removal.
--- Query: WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL
-CREATE INDEX idx_claim_identities_deletion
-    ON claim_identities (deletion_requested_at)
-    WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL;
 ```
 
 ---
