@@ -528,7 +528,7 @@ Audio is not part of Phase 1 scope. No background music or SFX library is includ
 |------|-------|-------|
 | Simultaneous CSS / Canvas effects | ≤ 10 on screen | Rarity effects are one per visible pet |
 | Particle count per burst | ≤ 200 | Victory burst = 24 particles (well below limit) |
-| CSS animation properties | `box-shadow`, `border-color`, `opacity`, `transform` only | No layout-affecting properties — VDD §1.2 Principle 1 |
+| CSS animation properties | `box-shadow`, `border-color`, `opacity`, `transform` only | No layout-affecting properties — VDD §1.2 Principle 4 |
 
 ---
 
