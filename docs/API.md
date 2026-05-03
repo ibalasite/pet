@@ -462,7 +462,7 @@ Generates a new unclaimed random pet for guest display. No authentication requir
 |-------|-------------|
 | `rarity` | One of `COMMON`, `RARE`, `EPIC`, `LEGENDARY`. Drop weights: Common 60%, Rare 25%, Epic 12%, Legendary 3% (`rarity_common_percent`, `rarity_rare_percent`, `rarity_epic_percent`, `rarity_legendary_percent` from `constants.json`). |
 | `stats` | All stats start at 10 (`pet_stat_default = 10`), range 1–100 (`pet_stat_min = 1`, `pet_stat_max = 100`). |
-| `generationMeta` | The 6 procedural generation dimensions (`pet_generation_dimensions = 6`). Total unique combinations exceed 1 billion (`pet_generation_combinations_min = 1,000,000,000`). |
+| `generationMeta` | The 6 procedural generation dimensions (`pet_generation_dimensions = 6`). Total unique combinations exceed 1 billion (`pet_generation_combinations_min = 1000000000`). |
 | `reservedUntil` | The pet is reserved for 24 hours (`pet_reservation_ttl_hours = 24`). Client should display a countdown to encourage claiming. |
 
 ---
@@ -566,7 +566,7 @@ Returns the full stats panel for a pet including training history summary. *(EDD
 | `actionsRemainingToday` | Remaining training actions for the current UTC day. Resets at UTC 00:00. |
 | `lastTrainedAt` | ISO 8601 timestamp of the most recent training action. `null` if never trained. |
 | `isNeglected` | `true` if the pet has never been trained or was last trained more than 3 days ago (`training_neglect_threshold_days = 3`). |
-| `level` | `FLOOR(total_training_actions / 10)` capped at 100 (`pet_level_formula_divisor = 10`, `pet_level_max = 100`). |
+| `stats.level` | `FLOOR(total_training_actions / 10)` capped at 100 (`pet_level_formula_divisor = 10`, `pet_level_max = 100`). |
 | `activeFoodBuffs` | Temporary food buffs currently active on this pet. |
 
 **Error responses:**
@@ -616,6 +616,7 @@ Performs one training action on the authenticated player's pet, incrementing a s
 
 | Field | Description |
 |-------|-------------|
+| `updatedStats` | Full updated stat values (`speed`, `strength`, `stamina`, `level`) after this training action. |
 | `statDelta` | The number of stat points gained this action: random integer in [1, 3] (`training_stat_points_min = 1`, `training_stat_points_max = 3`). |
 | `actionsRemainingToday` | Remaining training actions today. Starts at 3 (`training_actions_per_day = 3`) and resets at UTC 00:00. |
 
@@ -678,6 +679,11 @@ Applies a food buff to the authenticated player's pet, granting a temporary or p
 }
 ```
 
+| Field | Description |
+|-------|-------------|
+| `updatedStats` | Updated stat values (`speed`, `strength`, `stamina`) after the buff is applied. Does not include `level` — level is derived from total training actions, not food buffs. |
+| `buffApplied` | The buff record that was applied. Contains `stat`, `magnitude`, `isPermanent`, and `expiresAt` (ISO 8601; `null` when `isPermanent` is `true`). |
+
 Illustrative buff values: temporary +5 points for 24 hours (`food_buff_example_temp_amount_stat_points = 5`, `food_buff_example_temp_duration_hours = 24`); permanent +3 points (`food_buff_example_perm_amount_stat_points = 3`). Actual values are admin-configurable.
 
 **Error responses:**
@@ -735,7 +741,9 @@ Enters the authenticated pet into the matchmaking queue for an arena battle. Use
 
 | Field | Description |
 |-------|-------------|
+| `matchId` | UUID of the completed arena match. Use with `GET /api/v1/arena/match/:matchId` to fetch the full battle record. |
 | `result` | `WIN` or `LOSS`. Tie-breaking: if both pets have equal effective stats after the ±15% modifier (`arena_battle_outcome_random_modifier_percent = 15`), the challenger (earlier enqueue timestamp) wins — deterministic, reproducible via `random_seed`. |
+| `opponentPetId` | UUID of the opponent pet. `null` when `isAiOpponent` is `true`. |
 | `isAiOpponent` | `true` when matched against the AI fallback. |
 | `statDelta` | Net stat value applied after buffs and the random modifier. |
 | `newLeaderboardScore` | Updated leaderboard score after this battle. Score formula: `win_rate × battles_played × level_multiplier`. |
@@ -2392,7 +2400,7 @@ Targets: delivery rate ≥ 98% (`claim_email_delivery_rate_target_percent = 98`)
 
 ## 7. WebSocket / Real-Time
 
-**Scope note**: Per the EDD and ARCH, the arena battle resolution uses **HTTP long-polling** on `POST /api/v1/arena/enter` (waiting up to 30 seconds — `arena_matchmaking_timeout_seconds = 30`) rather than a WebSocket connection. This is sufficient for the MVP load profile (500 RPS peak, 2,000 PCU — `peak_operation_rps = 500`, `peak_concurrent_users = 2000`) and avoids the operational complexity of a persistent WebSocket server within the MVP budget (`mvp_budget_usd = 40,000`).
+**Scope note**: Per the EDD and ARCH, the arena battle resolution uses **HTTP long-polling** on `POST /api/v1/arena/enter` (waiting up to 30 seconds — `arena_matchmaking_timeout_seconds = 30`) rather than a WebSocket connection. This is sufficient for the MVP load profile (500 RPS peak, 2,000 PCU — `peak_operation_rps = 500`, `peak_concurrent_users = 2000`) and avoids the operational complexity of a persistent WebSocket server within the MVP budget (`mvp_budget_usd = 40000`).
 
 **Real-time updates** currently handled by client-side polling:
 
