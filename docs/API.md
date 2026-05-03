@@ -860,6 +860,7 @@ Returns the last 20 arena battles for a pet. Public endpoint.
         "matchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "mode": "RACE",
         "opponentPetId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        "isAiOpponent": false,
         "result": "WIN",
         "completedAt": "2026-05-03T11:42:00Z"
       }
@@ -873,6 +874,11 @@ Returns the last 20 arena battles for a pet. Public endpoint.
   "error": null
 }
 ```
+
+| Field | Description |
+|-------|-------------|
+| `opponentPetId` | UUID of the opponent pet. `null` when `isAiOpponent` is `true`. |
+| `isAiOpponent` | `true` when this battle was resolved against an AI fallback opponent. |
 
 The last **20 battles** are shown publicly (`arena_battle_records_display_count = 20`).
 
