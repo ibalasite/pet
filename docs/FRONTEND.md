@@ -331,7 +331,7 @@ interface AppStore {
   // Claim flow slice
   claimStep: 'email' | 'code' | 'reveal';
   claimId: string | null;
-  setClaimStep: (step: ClaimStep) => void;
+  setClaimStep: (step: 'email' | 'code' | 'reveal') => void;
   setClaimId: (id: string | null) => void;
 
   // Toast slice
@@ -926,7 +926,7 @@ ArenaPage /arena
 
   Error states:
        HTTP 400 VALIDATION_ERROR → toast: "Invalid request. Please try again."
-       HTTP 401 UNAUTHORIZED → redirect to /claim
+       HTTP 401 UNAUTHORIZED → clearPetToken() + redirect to /
        HTTP 403 NOT_OWNER → toast: "You do not own this pet."
        HTTP 429 RATE_LIMIT_EXCEEDED → show cooldown timer (arena_rate_limit_battles_per_hour_default = 10 battles/hour)
 ```
@@ -961,7 +961,7 @@ MarketplacePage /marketplace
   │
   └─ Error states (all marketplace endpoints):
        HTTP 400 VALIDATION_ERROR → toast: "Invalid request. Please check your input."
-       HTTP 401 UNAUTHORIZED → redirect to /claim
+       HTTP 401 UNAUTHORIZED → clearPetToken() + redirect to /
        HTTP 403 FEATURE_DISABLED → show "Marketplace is not yet available" banner
        HTTP 403 NOT_OWNER → toast: "You do not own this pet."
        HTTP 404 NOT_FOUND → toast: "Listing not found. It may have been removed."
@@ -1050,7 +1050,7 @@ AdminLoginPage /admin/login
   │    Lockout duration: admin_login_lockout_duration_minutes = 30 min
   │
   ├─ Error states:
-  │    HTTP 400 VALIDATION_ERROR → inline form error: "Please enter a valid email and password."
+  │    HTTP 400 VALIDATION_ERROR → inline form error: "Please enter a valid username and password."
   │    HTTP 401 UNAUTHORIZED → inline form error: "Invalid credentials."
   │    HTTP 429 RATE_LIMIT_EXCEEDED → show lockout message with (admin_login_lockout_duration_minutes = 30) minute countdown
   │
