@@ -33,7 +33,7 @@
    - 6.8 [Admin Audit Log](#68-admin-audit-log)
    - 6.9 [Admin Dashboard, Analytics & Email Monitor](#69-admin-dashboard-analytics--email-monitor)
 7. [WebSocket / Real-Time](#7-websocket--real-time)
-   - 7.5 [Health Check](#75-health-check)
+10. [Health Check](#10-health-check)
 8. [Pagination](#8-pagination)
 9. [Changelog / Versioning](#9-changelog--versioning)
 
@@ -1276,7 +1276,8 @@ Creates a new admin account.
   "data": {
     "adminId": "new-uuid",
     "username": "new_moderator",
-    "role": "moderator"
+    "role": "moderator",
+    "auditLogId": "12344"
   },
   "error": null
 }
@@ -2118,7 +2119,7 @@ Targets: delivery rate ≥ 98% (`claim_email_delivery_rate_target_percent = 98`)
 
 ---
 
-## 7.5 Health Check
+## 10. Health Check
 
 #### `GET /health`
 
