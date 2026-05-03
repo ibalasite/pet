@@ -4,7 +4,7 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     Given pet "alpha-token-abc" and pet "beta-token-xyz" are both in the matchmaking queue
     And both pets have valid speed stats recorded in the database
     When the matchmaking service pairs the two pets via ZPOPMIN from the Redis queue
-    Then a Race battle record is created with status "IN_PROGRESS"
+    Then a Race battle record is created with status "IN_PROGRESS" and mode "RACE"
     And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
     And the pet with the higher effective speed (base stat plus up to ±15% random modifier) is recorded as the winner
     And both pets receive updated win/loss counts in their profiles

@@ -2,12 +2,12 @@ Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
 
   Scenario: Training action increments a stat within bounds and enforces the daily action cap
     Given pet "trainee-token-001" has used 0 training actions today
-    When the owner submits a training request with type "STRENGTH" for "trainee-token-001"
+    When the owner submits a training request via POST /api/v1/training with body { "training_type": "STRENGTH" } for "trainee-token-001"
     Then the server increments the strength stat by a value between (training_stat_points_min = 1) and (training_stat_points_max = 3) points
     And a training_logs row is written for "trainee-token-001" bringing today's training log count to 1
-    When the owner submits two more valid training requests for "trainee-token-001" on the same day
+    When the owner submits two more valid POST /api/v1/training requests for "trainee-token-001" on the same day
     Then the count of training_logs rows today for "trainee-token-001" reaches (training_actions_per_day = 3)
-    When the owner submits a fourth training request for "trainee-token-001" on the same day
+    When the owner submits a fourth POST /api/v1/training request for "trainee-token-001" on the same day
     Then the server responds with HTTP 429 and error code "TRAINING_DAILY_LIMIT_REACHED"
 
   Scenario: Temporary food buff applies bonus stat during an arena battle and expires after duration
