@@ -637,7 +637,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 | TC-INT-020 | Suspicious pet auto-flagged at threshold |
 |---|---|
-| Given | A pet that has completed (bot_detection_battles_threshold = 50) battles within a (bot_detection_window_minutes = 60)-minute rolling window |
+| Given | A pet that has completed more than (bot_detection_battles_threshold = 50) battles within a (bot_detection_window_minutes = 60)-minute rolling window |
 | When | The detection job or inline check runs |
 | Then | Pet appears in `GET /admin/api/suspicious` with a `SUSPICIOUS` badge |
 | Linked AC | AC-017-1 |
