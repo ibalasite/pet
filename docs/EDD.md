@@ -15,7 +15,8 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 
 | Constant | Value | Unit | Notes |
 |---|---|---|---|
-| PET_GENERATION_COMBINATIONS_MIN | 1,000,000,000 | combinations | 6-dimension procedural generation |
+| PET_GENERATION_COMBINATIONS_MIN | 1,000,000,000 | combinations | Minimum unique pet generation combinations |
+| PET_GENERATION_DIMENSIONS | 6 | dimensions | Attribute vector dimensions: body, head, color_palette, accessory, rarity_trait, pattern |
 | PET_STAT_DEFAULT / MIN / MAX | 10 / 1 / 100 | points | speed, strength, stamina |
 | PET_LEVEL_DEFAULT / MAX | 1 / 100 | level | FLOOR(training_actions / 10) |
 | TRAINING_ACTIONS_PER_DAY | 3 | actions/day | Reset UTC 00:00 |
@@ -38,7 +39,7 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | ADMIN_SESSION_ABSOLUTE_EXPIRY | 8 | hours | Regardless of activity |
 | ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE | 100 | req/min | Per admin account |
 | ADMIN_AUDIT_LOG_RETENTION | 2 | years | GDPR Art. 30 compliance |
-| BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window (arena bot-detection system) |
+| BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window (arena bot-detection system); BOT_DETECTION_WINDOW_MINUTES = 60 |
 | LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR | 50 | battles/hr | Admin leaderboard UI suspicious-flag indicator (distinct purpose from bot detection) |
 | HORIZONTAL_SCALE_CPU_THRESHOLD | 70 | percent | HPA scale-out trigger |
 | DB_AUTOFAILOVER_TIME | 60 | seconds | PostgreSQL automated failover |
@@ -186,10 +187,10 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 - Transactional email only: claim password delivery, access-link recovery
 - SPF + DKIM configured; spam complaint rate target <0.1% (CONSTANTS)
 - Delivery SLO P90 ≤60 seconds (NFR-PERF-10)
-- Retry queue: 3 retries over 15 minutes on delivery failure
+- Retry queue: 3 retries over 15 minutes on delivery failure (EMAIL_DELIVERY_FAILURE_RETRIES = 3; EMAIL_DELIVERY_RETRY_WINDOW_MINUTES = 15)
 
 **Fallback**: Nodemailer + SMTP
-- Activates automatically after 3 consecutive SendGrid failures
+- Activates automatically after 3 consecutive SendGrid failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3)
 - Pre-configured SMTP credentials stored in environment variables
 - Vendor migration window: 14 days (VENDOR_MIGRATION_PLAN_DAYS = 14)
 
@@ -398,6 +399,11 @@ INDEXES:
   idx_food_buffs_record_expires ON food_buffs(record_expires_at)  -- for cleanup job
 ```
 
+**Illustrative buff magnitudes** (from CONSTANTS multipliers section, for UI/doc purposes):
+- Temporary buff example: +5 stat points for 24 hours (FOOD_BUFF_EXAMPLE_TEMP_AMOUNT_STAT_POINTS = 5; FOOD_BUFF_EXAMPLE_TEMP_DURATION_HOURS = 24)
+- Permanent buff example: +3 stat points permanently (FOOD_BUFF_EXAMPLE_PERM_AMOUNT_STAT_POINTS = 3)
+These are illustrative defaults — actual magnitudes are configurable via POST /api/v1/pet/:petId/feed request body.
+
 ### §4.8 Redis Key Patterns
 
 The following are Redis key patterns (not PostgreSQL tables):
@@ -405,7 +411,7 @@ The following are Redis key patterns (not PostgreSQL tables):
 ```
 redis_key: rl:claim:{email_hash}         TTL: 3600s   Value: attempt count (≤5); enforces AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5
 redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set when MAX_ATTEMPTS_REACHED (count = AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5); CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
-redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10 default)
+redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10 default); TTL = ARENA_RATE_LIMIT_COUNTER_WINDOW_HOURS × 3600 = 3600s (ARENA_RATE_LIMIT_COUNTER_WINDOW_HOURS = 1)
 redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤10)
 redis_key: rl:code_entry:cooldown:{session_id} TTL: 60s  Value: "1"; set when MAX_ATTEMPTS_REACHED (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); HTTP 429 with Retry-After: 60 while key exists
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
@@ -1182,7 +1188,9 @@ Error messages follow the PDD §10.1 tone of voice — specific and actionable, 
 - **Correlation ID**: `X-Request-Id` header generated at API gateway; threaded through all log entries for a request
 - **PII in logs**: Email addresses NEVER written to logs; only email_hash may appear. IP addresses written as hashed values only.
 - **Log shipping**: Structured JSON logs → Railway log drain → external log aggregator (Datadog or equivalent)
-- **Retention**: Hot storage 90 days; cold archive 2 years for audit trail
+- **Log retention**: Hot storage 90 days; cold archive 2 years for audit trail (IP_ADDRESS_LOG_RETENTION_DAYS = 90 for IP log data; ADMIN_AUDIT_LOG_RETENTION = 2 years for audit log data)
+- **Analytics event retention**: Analytics events hot tier: 90 days (ANALYTICS_EVENT_HOT_RETENTION_DAYS = 90); cold archive: 2 years (ANALYTICS_EVENT_COLD_ARCHIVE_YEARS = 2). Analytics events are distinct from operational logs — they capture product behavioral data for the GET /admin/api/analytics dashboard.
+- **PII email retention after deletion**: After a GDPR erasure request, email encrypted field is nulled within 24 hours; SHA-256 hash retained for anti-re-registration (PII_EMAIL_RETENTION_POST_DELETE_DAYS = 7 aligns with GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 — these two constants represent the same policy, with the latter being the primary reference)
 
 ### §11.3 Alert Thresholds
 
