@@ -367,7 +367,7 @@ Sprite sheets are served from Vercel's CDN `/public/sprites/` directory and are 
 | Type | Limit | Notes |
 |------|-------|-------|
 | Single sprite sheet | ≤ 1920 px wide (WebP/PNG) | 32 px frame grid; ≤ 16 colors per frame (pixel art constraint — VDD §4.2) |
-| Audio SFX (single file) | ≤ 200 KB | OGG format preferred (引擎預設值) |
+| Audio SFX (single file) | ≤ 200 KB | OGG format preferred (engine default) |
 | Background music | ≤ 5 MB per track | Streamed; not used in Phase 1 |
 | Entry bundle (eager JS, gzipped) | ≤ 150 KB | React + Router + TanStack Query + Zustand + Zod |
 | Total JS bundle (gzipped) | ≤ 300 KB | `TOTAL_JS_BUNDLE_GZIPPED_KB = 300` from CONSTANTS |
@@ -614,7 +614,7 @@ Audio is not part of Phase 1 scope. No background music or SFX library is includ
 |-----------|-------------|-------------------|------------------|
 | Pet stats | TanStack Query `staleTime: 30_000` | On mount + `invalidateQueries` on train/feed mutations | Server wins; optimistic update not used (stat deltas are server-computed) |
 | Leaderboard | TanStack Query `refetchInterval: 30_000` | Every 30 s + on mount | Latest response replaces cache; no merge |
-| Arena rate-limit state | Zustand `arenaRateLimit` slice | Set on 429 response; cleared on timer expiry | Client-side countdown; server is authoritative on next request |
+| Arena rate-limit state | Zustand `arena` slice | Set on 429 response; cleared on timer expiry | Client-side countdown; server is authoritative on next request |
 | Claim flow step | Zustand `claimStep` | Mutation success callbacks | No conflict — linear state machine |
 | Token | `localStorage` via `tokenStorage.ts` | Written on verify success; cleared on 401 | No conflict — single token per browser |
 | Feature flags | Environment variable at build time (`import.meta.env.VITE_FF_*`) | Build-time; no runtime hot-swap in Phase 1 | N/A — static per build |
@@ -666,7 +666,11 @@ Audio is not part of Phase 1 scope. No background music or SFX library is includ
 
 ```typescript
 // apps/player/vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
 export default defineConfig({
+  plugins: [react()],
   build: {
     rollupOptions: {
       output: {
@@ -695,7 +699,7 @@ All page components use React Router v6 `lazy()` — one chunk per route, handle
 | `petGeneration.ts` | `buildAttributeVector(seed)` determinism; all 6 dimensions; boundary seeds (0n, BigInt max) | 100% |
 | `tokenStorage.ts` | `getPetToken`, `setPetToken`, `clearPetToken`; `localStorage` mock | 100% |
 | `apiClient.ts` | Token attachment interceptor; error normalization (`AppError`); 401 → token clear | 90% |
-| `useAppStore.ts` (Zustand) | All slice actions: `setSelectedMode`, `setClaimStep`, `pushToast`, `dismissToast` | 90% |
+| `useAppStore.ts` (Zustand) | All slice actions: `setSelectedMode`, `setClaimStep`, `setClaimId`, `pushToast`, `dismissToast` | 90% |
 | Zod schemas (`schemas/*.ts`) | Valid / invalid API response shapes; parse error messages | 90% |
 | `useReducedMotion.ts` | `matchMedia` mock: `true` / `false` / change event | 100% |
 | `ClaimEmailForm.tsx` | Email validation, age confirmation required; form submission with mock mutation | 85% |
