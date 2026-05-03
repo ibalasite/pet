@@ -12,7 +12,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
     When the guest enters a valid email "player@example.com"
     And the guest checks the age confirmation checkbox
     And the guest clicks "Send Claim Code"
-    Then POST /api/v1/claim is called with body {"email": "player@example.com", "petId": "<petId>", "ageConfirmed": true}
+    Then POST /api/v1/claim/request is called with body {"email": "player@example.com", "petId": "<petId>", "ageConfirmed": true}
     And the server responds HTTP 200 with "claimId" and "expiresAt"
     And the Zustand claim slice stores the claimId via setClaimId()
     And the ClaimFlow advances to step "code" rendering the ClaimCodeForm
@@ -21,7 +21,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
     Given the ClaimEmailForm is visible
     When the guest enters a valid email but leaves the age confirmation checkbox unchecked
     And the guest clicks "Send Claim Code"
-    Then POST /api/v1/claim is NOT called
+    Then POST /api/v1/claim/request is NOT called
     And an inline error "Age confirmation required" is shown and the checkbox is re-highlighted
 
   Scenario: Already-claimed pet shows inline error
@@ -34,7 +34,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
   Scenario: Email claim rate limit — cooldown banner shown
     Given the guest has already made (auth_rate_limit_claim_attempts_per_hour = 5) claim requests in the current hour
     When the guest submits another email claim request
-    And POST /api/v1/claim responds HTTP 429 with a "Retry-After" header
+    And POST /api/v1/claim/request responds HTTP 429 with a "Retry-After" header
     Then a cooldown banner is shown indicating the user must wait (claim_email_retry_cooldown_seconds = 60) seconds
     And the email input and submit button are disabled during the cooldown
 
@@ -62,7 +62,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
     Given the ClaimCodeForm is visible and the OTP has expired after (claim_code_expiry_minutes = 15) minutes
     When the guest submits the code and POST /api/v1/claim/verify responds HTTP 400 with error code "CODE_EXPIRED"
     Then the error message "Claim code has expired. Please request a new one." is shown
-    And a "Request a new code" button is visible that re-initiates POST /api/v1/claim
+    And a "Request a new code" button is visible that re-initiates POST /api/v1/claim/request
 
   Scenario: ExpiryWarning activates when 2 minutes or fewer remain before OTP expiry
     Given the ClaimCodeForm is visible and (a11y_claim_code_warning_before_expiry_minutes = 2) minutes or fewer remain before OTP expiry
@@ -72,7 +72,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
 
   Scenario: Max OTP attempts reached — all inputs disabled with Retry-After countdown
     Given the guest has made (auth_rate_limit_code_entry_attempts_per_session = 10) failed OTP attempts in this session
-    When POST /api/v1/claim/verify responds HTTP 429
+    When POST /api/v1/claim/verify responds HTTP 429 with error code "MAX_ATTEMPTS_REACHED"
     Then all OTP digit inputs are disabled
     And the submit button is disabled
     And a Retry-After countdown is displayed and announced via aria-live="assertive"

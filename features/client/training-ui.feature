@@ -12,7 +12,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     Given the TrainingPage renders three TrainingActionCard components labeled "RUN", "STRENGTH", and "STAMINA"
     And the "actionsRemainingToday" value is 3 (training_actions_per_day = 3)
     When the owner clicks the "Train" button on the "RUN" action card
-    Then POST /api/v1/pets/:petId/train is called with body {"trainingType": "RUN"}
+    Then POST /api/v1/training is called with body {"training_type": "RUN"}
     And the Authorization header contains the Bearer token from localStorage
     And the server responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
     And the StatChangeIndicator component appears showing "+X Speed"
@@ -23,21 +23,21 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
   Scenario: STRENGTH training action increments strength stat
     Given "actionsRemainingToday" is 2
     When the owner clicks the "Train" button on the "STRENGTH" action card
-    Then POST /api/v1/pets/:petId/train is called with body {"trainingType": "STRENGTH"}
+    Then POST /api/v1/training is called with body {"training_type": "STRENGTH"}
     And the StatChangeIndicator shows "+X Strength" for (training_stat_display_duration_seconds = 2) seconds
     And the Strength StatBar animates to the updated value
 
   Scenario: STAMINA training action increments stamina stat
     Given "actionsRemainingToday" is 1
     When the owner clicks the "Train" button on the "STAMINA" action card
-    Then POST /api/v1/pets/:petId/train is called with body {"trainingType": "STAMINA"}
+    Then POST /api/v1/training is called with body {"training_type": "STAMINA"}
     And the StatChangeIndicator shows "+X Stamina" for (training_stat_display_duration_seconds = 2) seconds
 
   # --- Daily cap enforcement ---
 
   Scenario: All training actions exhausted — cards disabled and DailyResetTimer appears
     Given the owner has already used all (training_actions_per_day = 3) daily training actions
-    And POST /api/v1/pets/:petId/train responds HTTP 400 with error code "TRAINING_LIMIT_REACHED"
+    And POST /api/v1/training responds HTTP 400 with error code "TRAINING_LIMIT_REACHED"
     When the TrainingPage renders
     Then all three TrainingActionCard "Train" buttons are disabled
     And the DailyResetTimer component is visible showing a countdown to UTC 00:00
@@ -54,7 +54,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
   Scenario: Stat already at maximum — toast shown and that stat card stays disabled
     Given the pet's speed stat is already at (pet_stat_max = 100)
     When the owner clicks the "Train" button on the "RUN" action card
-    And POST /api/v1/pets/:petId/train responds HTTP 400 with error code "STAT_AT_MAXIMUM"
+    And POST /api/v1/training responds HTTP 400 with error code "STAT_AT_MAXIMUM"
     Then a toast notification appears with message "Stat is already at maximum"
     And the "RUN" action card "Train" button is disabled with a "Max" indicator
     And the "STRENGTH" and "STAMINA" action card buttons remain enabled
@@ -67,6 +67,6 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   Scenario: HTTP 401 during training clears token and redirects to home
     Given the owner is on the TrainingPage
-    When POST /api/v1/pets/:petId/train responds HTTP 401
+    When POST /api/v1/training responds HTTP 401
     Then the "pet_token" key is removed from localStorage via clearPetToken()
     And the app navigates to "/"

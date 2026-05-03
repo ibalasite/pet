@@ -10,7 +10,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     Given the LoginPage.vue renders an ElForm with a username input, password input, and TOTP code input
     When the admin enters valid "username", "password", and a current "totpCode"
     And clicks the "Login" button
-    Then POST /admin/api/auth/login is called with body {"username": "...", "password": "...", "totpCode": "..."}
+    Then POST /admin/api/auth/login is called with body {"email": "...", "password": "...", "totpCode": "..."}
     And the server responds HTTP 200 with Set-Cookie: session=<id>; HttpOnly; SameSite=Strict; Secure; Path=/admin
     And the Pinia useAdminAuthStore sets isAuthenticated = true and the role field
     And Vue Router navigates to "/admin/dashboard"
@@ -70,7 +70,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     Then the PetBanModal.vue (ElDialog) opens with a reason text area
     And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters
     And the admin clicks "Confirm Ban"
-    Then PUT /admin/api/pets/bad-pet-001/ban is called with body {"reason": "<reason>"}
+    Then POST /admin/api/pets/bad-pet-001/ban is called with body {"reason": "<reason>"}
     And the server records the ban with admin ID, timestamp, and reason
     And the pet row status is updated to "BANNED" in the ElTable
 
@@ -78,7 +78,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     Given the PetBanModal is open for petId "bad-pet-001"
     When the admin types a reason of 501 or more characters in the reason field
     Then the "Confirm Ban" button remains disabled or an inline validation error is shown
-    And PUT /admin/api/pets/bad-pet-001/ban is NOT called
+    And POST /admin/api/pets/bad-pet-001/ban is NOT called
 
   # --- Admin leaderboard moderation ---
 

@@ -60,7 +60,7 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
   # --- Degraded leaderboard state ---
 
   Scenario: Degraded leaderboard banner shown when Redis is unavailable
-    Given GET /api/v1/leaderboard responds HTTP 200 but with a response header or payload indicating stale/cached data from a degraded Redis backend
+    Given GET /api/v1/leaderboard responds HTTP 200 but with response body field "degraded": true indicating stale/cached data from a degraded Redis backend
     When the LeaderboardPage renders the response
     Then an orange "Live data temporarily unavailable" banner is visible above the LeaderboardTable
     And the banner has a color that meets 4.5:1 contrast ratio against its background

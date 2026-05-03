@@ -51,7 +51,7 @@ Feature: Pet Display — Token Generation, Stat Bars, and Food Buff Indicator (U
 
   Scenario: Temporary food buff indicator shown on StatsPanel with countdown timer
     Given a claimed pet has an active temporary food buff on the "speed" stat
-    And the buff was applied via POST /api/v1/pets/:petId/feed and the response "buffApplied.isPermanent" is false
+    And the buff was applied via POST /api/v1/food/apply and the response "buffApplied.isPermanent" is false
     And the response "buffApplied.expiresAt" is a future timestamp
     When the PetPage at "/pet/:petId" renders the StatsPanel
     Then a buff badge is visible on the Speed StatBar
