@@ -64,7 +64,7 @@ The admin portal (Vue 3 + Element Plus) is a completely separate Vite applicatio
 | Admin auth | httpOnly session cookie (`SameSite=Strict`) — not applicable to player app |
 | Leaderboard polling | TanStack Query `refetchInterval: 30_000` ms mirrors `LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30` |
 | Arena matchmaking | HTTP long-poll on `POST /api/v1/arena/enter` — server holds connection ≤ 30 s |
-| Feature flags | Runtime config cache (`config:runtime` Redis key, TTL 300 s) — fetched via `/api/v1/config` |
+| Feature flags | Build-time environment variables (`import.meta.env.VITE_FF_*`) — no runtime API fetch in Phase 1; `config:runtime` Redis key (TTL 300 s) is a server-side cache used only by the API server |
 
 ---
 
@@ -566,7 +566,7 @@ Audio is not part of Phase 1 scope. No background music or SFX library is includ
 | UI-04 | Navigate after reveal | UI-05 | `navigate('/pet/:petId')` |
 | UI-05 | Click TrainingEntry | UI-06 | `navigate('/pet/:petId/train')` |
 | UI-06 | All actions exhausted | UI-07 | Action cards disabled; `DailyResetTimer` activates |
-| UI-07 | UTC 00:00 reset | UI-06 | `usePet` cache invalidated; `actionsRemainingToday = 3` |
+| UI-07 | UTC 00:00 reset | UI-06 | `usePet` cache invalidated; `actionsRemainingToday = TRAINING_ACTIONS_PER_DAY = 3` |
 | UI-05 | Click ArenaEntry | UI-08 | `navigate('/arena')`; POST /api/v1/arena/enter begins |
 | UI-08 | Opponent found | UI-09 | 3-2-1 countdown → `ArenaScene` mounts |
 | UI-08 | 30 s timeout, no AI | UI-08 | `AIOfferModal` shown; `MATCHMAKING_TIMEOUT` handled |
