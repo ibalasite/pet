@@ -9,7 +9,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
   # --- Happy path training ---
 
   Scenario: Owner performs a RUN training action and StatChangeIndicator appears
-    Given the TrainingPage renders three TrainingActionCard components labeled "RUN", "STRENGTH", and "STAMINA"
+    Given the TrainingPage is showing three TrainingActionCard components labeled "RUN", "STRENGTH", and "STAMINA"
     And the "actionsRemainingToday" value is 3 (training_actions_per_day = 3)
     And POST /api/v1/training responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
     When the owner clicks the "Train" button on the "RUN" action card
@@ -18,7 +18,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     And the StatChangeIndicator component appears showing "+X Speed"
     And the StatChangeIndicator is visible for (training_stat_display_duration_seconds = 2) seconds then disappears
     And the Speed StatBar in StatsPanel animates to the new speed value
-    And the usePet TanStack Query cache is invalidated triggering a re-fetch of GET /api/v1/pets/:petId
+    And GET /api/v1/pets/:petId is re-fetched
 
   Scenario: STRENGTH training action increments strength stat
     Given "actionsRemainingToday" is 2
@@ -47,7 +47,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
   Scenario: Daily reset at UTC 00:00 re-enables training cards
     Given all (training_actions_per_day = 3) training actions were exhausted and the DailyResetTimer is showing
     And GET /api/v1/pets/:petId responds HTTP 200 with "actionsRemainingToday": 3
-    When the UTC clock reaches 00:00 and the usePet query cache is invalidated
+    When the UTC clock reaches 00:00
     Then GET /api/v1/pets/:petId is re-fetched
     And the three TrainingActionCard "Train" buttons become enabled again
     And the DailyResetTimer component disappears from the page

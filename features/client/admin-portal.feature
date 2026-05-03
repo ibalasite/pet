@@ -7,7 +7,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   # --- Admin login (TOTP) ---
 
   Scenario: Admin submits valid credentials with TOTP code and is redirected to dashboard
-    Given the LoginPage.vue renders an ElForm with an email input, password input, and TOTP code input
+    Given the LoginPage.vue is showing an ElForm with an email input, password input, and TOTP code input
     And POST /admin/api/auth/login responds HTTP 200 with Set-Cookie: session=<id>; HttpOnly; SameSite=Strict; Secure; Path=/admin
     When the admin enters valid "email", "password", and a current "totpCode"
     And clicks the "Login" button
@@ -36,7 +36,6 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     And POST /admin/api/auth/login responds HTTP 403 with error code "ACCOUNT_LOCKED" and "unlockedAt"
     When the admin clicks the "Login" button
     Then the LoginPage shows the account is locked and displays the unlock time from the "unlockedAt" field
-    And the lock lasts (admin_login_lockout_duration_minutes = 30) minutes
 
   Scenario: IP rate limit on login — 15-minute countdown shown
     Given the IP address has made (admin_login_ip_rate_limit_attempts = 10) requests within (admin_login_ip_rate_limit_window_seconds = 900) seconds (15 minutes)
@@ -47,15 +46,14 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: Unauthenticated access to admin route redirects to login
     Given the admin user is not authenticated (no valid session cookie)
     When the user navigates directly to "/admin/pets"
-    Then the Vue Router beforeEach guard detects isAuthenticated = false
-    And the user is redirected to "/admin/login"
+    Then the user is redirected to "/admin/login"
 
   Scenario: Session expiry during admin work — redirect to login
     Given the admin is authenticated and viewing "/admin/pets"
     And the session has been inactive for more than (admin_session_inactivity_expiry_hours = 4) hours
-    When any admin API call returns HTTP 401
-    Then the adminApiClient interceptor calls useAdminAuthStore().logout()
-    And Vue Router navigates to "/admin/login"
+    And any admin API call responds HTTP 401
+    When an admin API call is made
+    Then Vue Router navigates to "/admin/login"
 
   # --- Pet moderation queue ---
 

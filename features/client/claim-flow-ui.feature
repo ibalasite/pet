@@ -3,7 +3,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
   Background:
     Given the player app is loaded
     And the user has navigated to the ClaimPage at "/claim"
-    And the ClaimFlow compound component renders in step "email" (step 1 of email_claim_flow_steps_max = 3)
+    And the ClaimFlow compound component is showing step "email" (step 1 of email_claim_flow_steps_max = 3)
 
   # --- Step 1: Email entry ---
 

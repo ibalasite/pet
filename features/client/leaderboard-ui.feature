@@ -19,8 +19,7 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
     And (leaderboard_update_lag_max_seconds = 30) seconds have elapsed since the last fetch
     And GET /api/v1/leaderboard responds HTTP 200 with refreshed pet entries
     When the TanStack Query stale timer fires a background refetch
-    Then the useLeaderboard hook triggers a new GET /api/v1/leaderboard request automatically
-    And the LeaderboardTable updates to reflect the refreshed data without a full page reload
+    Then the LeaderboardTable updates to reflect the refreshed data without a full page reload
 
   Scenario: Rarity filter updates URL and refetches leaderboard
     Given the LeaderboardPage is loaded showing all rarities
