@@ -230,7 +230,7 @@ Phaser.js is integrated as a side-effectful singleton managed inside a dedicated
 ```tsx
 // src/components/canvas/PetCanvas.tsx
 import { useEffect, useRef } from 'react';
-import { PetCanvasEngine } from './PetCanvasEngine';
+import type { PetCanvasEngine } from './PetCanvasEngine';
 
 interface PetCanvasProps {
   seed: bigint;  // API returns seed as a JSON number; callers must convert: BigInt(apiResponse.seed)
@@ -853,7 +853,7 @@ PetPage
   ↓ clicks ArenaEntry (battles remaining > 0)
 ArenaPage /arena
   │
-  ├─ A1: Rate limit check (client-side from cached pet data)
+  ├─ A1: Rate limit check (client-side from Zustand store — state set on prior HTTP 429 response)
   │    If arena rate limit reached: RateLimitBanner shown; flow blocked
   │    arena_rate_limit_battles_per_hour_default = 10
   │
