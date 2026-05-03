@@ -171,7 +171,7 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 **Redis 7+** (Upstash or Railway)
 - Leaderboard sorted sets (ZRANGEBYSCORE, ZADD operations); authoritative source, PostgreSQL is durable backup
 - Rate-limit counters: arena battles per pet per hour (TTL = 1 hour); email claim attempts per email per hour
-- Claim token blacklist (used/expired tokens; TTL = 72 hours per CLAIM_TOKEN_CLEANUP_TTL)
+- Pet access token blacklist (replaced pet access tokens — e.g. after recovery flow; TTL = 72 hours per CLAIM_TOKEN_CLEANUP_TTL)
 - Arena matchmaking queue (Redis List or Pub/Sub)
 - Config cache: runtime parameter values refreshed every 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min)
 - Fallback: if Redis unavailable, leaderboard falls back to direct PostgreSQL read (degraded, not outage — NFR-AVAIL-05)
@@ -427,7 +427,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | id | BIGSERIAL | PK | Sequential for log ordering |
-| admin_id | UUID | NOT NULL REFERENCES admin_users(id) | Actor |
+| admin_id | UUID | NULL REFERENCES admin_users(id) | Actor; NULL for failed logins with unknown username |
 | action | VARCHAR(128) | NOT NULL | e.g., 'pet.ban', 'config.arena_rate_limit' |
 | target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config_runtime' \| 'config_economy' \| 'gdpr_request' \| 'admin_user' |
 | target_id | TEXT | NULL | UUID or key of affected entity |
@@ -550,9 +550,9 @@ Errors: HTTP 400 if 3 actions already used today; HTTP 400 with `STAT_AT_MAXIMUM
 
 #### POST /api/v1/pet/:petId/feed
 Auth: Required (pet owner token)
-Request: `{ foodBuffId: string }`
+Request: `{ buffType: string, stat: 'speed' | 'strength' | 'stamina', magnitude: number, isPermanent?: boolean }`
 Response: `{ updatedStats: {speed, strength, stamina}, buffApplied: { stat, magnitude, isPermanent, expiresAt } }`
-Errors: HTTP 400 if food item not owned; HTTP 400 if stat already at maximum.
+Errors: HTTP 400 if stat already at maximum; HTTP 422 if magnitude or buffType fails validation against admin-configured ranges.
 
 ### §5.3 Arena Endpoints
 
@@ -625,9 +625,9 @@ Response: `{ success: true, auditLogId: string }`
 
 #### GET /admin/api/pets
 Auth: Admin session (Moderator+ or Read Only)
-Query: `?page=1&limit=20&search=<petId|emailFragment>&rarity=&isBanned=`
+Query: `?page=1&limit=20&search=<petId|emailHash>&rarity=&isBanned=`
 Response: `{ pets: [{id, ownerEmailMasked, rarity, level, battlesPlayed, winRate, isBanned, createdAt}], total, page, limit }`
-Notes: Search by pet ID or email fragment up to 1 million records in ≤2 seconds (ADMIN_SEARCH_RESPONSE_TIME = 2s).
+Notes: Search by pet ID or exact SHA-256 email hash (fragment search is not possible — emails are stored as AES-256-GCM ciphertext; only hash-indexed lookup is supported). Returns up to 1 million records in ≤2 seconds (ADMIN_SEARCH_RESPONSE_TIME = 2s).
 
 #### POST /admin/api/pets/:petId/ban
 Auth: Admin session (Moderator+)
@@ -676,11 +676,13 @@ Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_H
 
 #### POST /admin/api/battles/:matchId/flag
 Auth: Admin session (Moderator+)
+Request: `{ reason: string (max 500 chars) }`
 Description: Flag a battle as suspicious; writes to audit log; increments bot_detection counter
 
 #### DELETE /admin/api/battles/:matchId/flag
 Auth: Admin session (Moderator+)
-Description: Remove a flag from a battle
+Request: `{ reason: string (max 500 chars) }`
+Description: Remove a flag from a battle; reason recorded in audit log
 
 #### GET /admin/api/audit
 Auth: Admin session (Super Admin)
@@ -754,7 +756,7 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 5. Email dispatched via SendGrid containing ONLY the 6-digit code — no clickable URLs (mitigates email client pre-scanning attacks documented in IDEA.md §8.1 R1)
 6. User manually enters code in browser; verified against hash
 7. On valid entry: atomic DB transaction — (a) upsert `claim_identities` row for the email_hash (creating if first claim, matching if re-claiming same email), (b) set `pets.claim_identity_id = claim_identities.id`, (c) generate 32-byte pet access token, store SHA-256 hash in `pets.owner_token_hash`, (d) set `pets.claimed_at = NOW()`, (e) mark claim code `used_at`
-8. Claim code records deleted after 72 hours (CLAIM_TOKEN_CLEANUP_TTL = 72 hours)
+8. Claim code records deleted by background job 72 hours after creation or first use, whichever is earlier (CLAIM_TOKEN_CLEANUP_TTL = 72 hours)
 9. Rate limit on code entry: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); 60-second cooldown on breach
 
 ### §6.3 Admin Authentication
@@ -908,7 +910,7 @@ Per PDD §13.4, the frontend uses four tiers:
 Cache invalidation rules:
 - `usePet` cache invalidated on successful `submitTraining` or `useFood` mutation
 - `useLeaderboard` refetches every 30 seconds via TanStack Query `refetchInterval`
-- Admin portal uses a separate TanStack Query client instance with no shared cache
+- Admin portal (Vue 3) uses Pinia for state management — see §9.1; no cache is shared between player app and admin portal
 
 ### §8.3 Pixel Art Rendering
 
@@ -1001,7 +1003,7 @@ Environment variables managed via Vercel environment settings and Railway secret
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --production
+RUN npm ci
 COPY . .
 RUN npm run build
 
@@ -1010,6 +1012,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 EXPOSE 3000
+USER node
 CMD ["node", "dist/server.js"]
 ```
 
@@ -1163,7 +1166,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 **Scope**:
 - Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
-- PostgreSQL schema: `pets`, `claim_identities`, `claim_codes` tables
+- PostgreSQL schema: `pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_log` tables
 - API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pet/:petId`
 - Email delivery: SendGrid integration + Nodemailer SMTP fallback
 - Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
@@ -1201,6 +1204,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Goal**: Enable P2P pet trading and complete admin portal. Corresponds to General Availability milestone.
 
 **Scope**:
+- PostgreSQL schema: `trade_records`, `marketplace_listings`, `gdpr_requests` tables
 - Marketplace: Feature flag `FF_MARKETPLACE` enabled when DAU sustains >1,000 for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000)
 - Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days)
 - Admin portal: Full GDPR deletion workflow, game economy configuration (food buff multipliers 0.5×–5.0×, arena entry cost/cooldown), email delivery monitor, analytics dashboard, audit log, role management
