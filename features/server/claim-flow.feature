@@ -28,4 +28,4 @@ Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
     And the guest successfully verified the OTP on the first attempt
     When the guest POSTs the same OTP a second time via POST /api/v1/claim/verify
     Then the server responds with HTTP 400
-    And the response body contains error code "CLAIM_CODE_ALREADY_USED"
+    And the response body contains error code "INVALID_CODE"

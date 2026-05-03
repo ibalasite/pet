@@ -9,7 +9,7 @@ Feature: GDPR Data Erasure (US-AUTH-002, US-ADMIN-004)
   Scenario: Super admin processes GDPR deletion via the admin portal
     Given a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
     And a GDPR deletion request exists for pet token "owner-token-gdpr-admin"
-    When the admin submits a deletion action via POST /admin/api/gdpr/process with the pet token
-    Then the server nulls email_encrypted for "owner-token-gdpr-admin" immediately
+    When the admin submits a deletion action via POST /admin/api/gdpr/delete with the email hash and a reason
+    Then the server enqueues an erasure job and responds with HTTP 202
+    And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column for "owner-token-gdpr-admin" is set to NULL
     And an entry is written to admin_audit_log with action "GDPR_DELETE" and the admin_id and ip_address_hash populated
-    And the response returns HTTP 200 with confirmation payload
