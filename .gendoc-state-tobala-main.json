@@ -51,7 +51,8 @@
     "RESOURCE",
     "UML",
     "test-plan",
-    "BDD-server"
+    "BDD-server",
+    "BDD-client"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
