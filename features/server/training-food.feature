@@ -12,7 +12,7 @@ Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
 
   Scenario: Temporary food buff applies bonus stat during an arena battle and expires after duration
     Given pet "buffed-pet-token" has a base speed stat of 50
-    And the owner calls POST /api/v1/food/apply with a food item granting a temporary speed buff of (food_buff_example_temp_amount_stat_points = 5) points for (food_buff_example_temp_duration_hours = 24) hours
+    And a food buff of (food_buff_example_temp_amount_stat_points = 5) speed points has been applied to "buffed-pet-token" via POST /api/v1/food/apply with the food_buffs row recording expires_at (food_buff_example_temp_duration_hours = 24) hours from now
     When a Race battle begins for "buffed-pet-token" within the buff duration window
     Then the battle engine reads "buffed-pet-token" effective speed as 55 for the duration of that match
     And the opponent pet's stats are read without any buff modifier
