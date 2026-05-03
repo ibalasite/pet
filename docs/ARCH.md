@@ -32,7 +32,7 @@ The player app (React 18 + Phaser.js 3) and the admin portal (Vue 3 + Element Pl
 Every authentication boundary is fail-closed: if Redis is unavailable, OTP code entry is blocked (not allowed through). If a rate-limit counter cannot be checked, player-facing rate limits degrade gracefully (fail-open, logged as alert); only OTP code entry is fail-closed (blocked). Admin sessions use httpOnly + SameSite=Strict cookies; pet tokens are transmitted once over HTTPS and stored only as SHA-256 hashes in the database.
 
 **P6 — GDPR by Architecture**
-Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash. Raw email is never written to logs, databases, or analytics events. All GDPR SLAs (erasure: GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days; restrict processing: GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 hours; data access: GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 days) are implemented as first-class data-pipeline concerns, not post-hoc compliance patches.
+Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash. Raw email is never written to logs, databases, or analytics events. All five GDPR SLAs are first-class data-pipeline concerns: erasure (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days), restrict processing (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 hours), data access (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 days), object leaderboard (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5 business days), and rectification (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24 hours). See §5.4 for the complete SLA table.
 
 ---
 
@@ -131,21 +131,37 @@ App
 ├── Layout (NavBar, Router)
 │   ├── LandingPage (/)
 │   │   ├── PetCanvas          ← Phaser.js instance (PetCanvasEngine — sole Phaser import boundary)
-│   │   └── ClaimCTA
+│   │   ├── ClaimCTA
+│   │   ├── RarityHint
+│   │   └── SocialProofCounter
 │   ├── ClaimPage (/claim)
 │   │   └── ClaimFlow (3-step compound — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+│   │       ├── ClaimEmailForm
+│   │       ├── ClaimCodeForm
+│   │       └── URLReveal
 │   ├── PetPage (/pet/:petId)
 │   │   ├── PetCanvas, StatsPanel, TrainingEntry, ArenaEntry
+│   │   ├── RarityBadge
+│   │   ├── FoodInventory → FoodItem ×N
 │   │   └── NeglectedState (if last_trained_at > 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)
 │   ├── TrainingPage (/pet/:petId/train)
+│   │   ├── TrainingActions → TrainingActionCard ×3 (TRAINING_ACTIONS_PER_DAY = 3)
+│   │   ├── StatChangeIndicator (visible TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s)
+│   │   ├── DailyResetTimer
+│   │   └── TrainingStreak
 │   ├── BattleRecordsPage (/pet/:petId/records)
 │   │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
 │   ├── ArenaPage (/arena)
-│   │   └── BattleAnimation (Phaser.js scene)
+│   │   ├── ModeSelector (RACE / SUMO)
+│   │   ├── MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)
+│   │   └── BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)
 │   ├── BattleResultPage (/arena/result/:battleId)
 │   │   └── BattleResultCard (WIN/LOSS variants)
 │   ├── LeaderboardPage (/leaderboard)
-│   │   └── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100)
+│   │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100)
+│   │   ├── LeaderboardRow ×100
+│   │   ├── RarityFilter
+│   │   └── OwnerRankBanner
 │   └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only
 ```
 
@@ -196,7 +212,7 @@ The admin portal is a separate Vite application, deployed to Vercel independentl
 
 **State**: Pinia (Vue-native) for local portal state. Axios with request/response interceptors for session expiry (4h inactivity — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4; 8h absolute — ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8).
 
-**Performance**: Pages load ≤ 3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3). Single moderator handles 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100).
+**Performance**: Pages load ≤ 3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3). Pet search returns up to 1 million records in ≤ 2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2). Single moderator handles 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100).
 
 ---
 
@@ -257,7 +273,7 @@ Two Fastify processes share the same codebase and database credentials via envir
 | `training_logs` | Per-pet training event log | P2 |
 | `arena_matches` | Battle records with seeded random | P2 |
 | `food_buffs` | Temporary and permanent stat buffs | P2 |
-| `leaderboard_snapshots` | Hourly PostgreSQL backups of Redis sorted set | P2 |
+| `leaderboard_snapshots` | Hourly PostgreSQL backups of Redis sorted set; top 500 entries per snapshot (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500); rolling 12-month retention (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12) | P2 |
 | `marketplace_listings` | Active trade listings (FF_MARKETPLACE) | P3 |
 | `trade_records` | Completed trade history (FF_MARKETPLACE) | P3 |
 
@@ -510,7 +526,7 @@ Single-language monorepo (TypeScript throughout) reduces cognitive overhead and 
 Two data access patterns exist with conflicting requirements: (1) Leaderboard reads must be O(log N) sorted-set operations at ≤ 30-second update lag (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30) with sub-millisecond ranking queries. (2) Pet ownership, battle history, GDPR compliance, and audit logging require ACID transactions, foreign key integrity, and point-in-time recovery.
 
 **Decision**:
-Redis Sorted Set is the authoritative real-time leaderboard source. PostgreSQL `leaderboard_snapshots` table is the durable backup, written hourly. Arena rate-limiting, claim rate-limiting, admin sessions, and matchmaking queue also reside in Redis (dedicated key patterns with explicit TTLs — see §2.5).
+Redis Sorted Set is the authoritative real-time leaderboard source. PostgreSQL `leaderboard_snapshots` table is the durable backup, written hourly. Arena rate-limiting, claim rate-limiting, admin sessions, and matchmaking queue also reside in Redis (dedicated key patterns with TTL discipline — rate-limit and session keys use explicit TTLs; leaderboard and matchmaking queue keys are persistent — see §2.5).
 
 All durable business data (pets, claims, matches, training, food buffs, GDPR records, audit logs) lives exclusively in PostgreSQL.
 
@@ -563,6 +579,7 @@ Guest Browser                  Game API (Fastify)          PostgreSQL       Redi
      │                               │ Check seed uniqueness    │               │               │
      │                               │─────────────────────────>│               │               │
      │                               │ INSERT pets(seed, rarity, reserved_until=NOW()+24h)       │
+     │                               │   [PET_RESERVATION_TTL_HOURS = 24]                        │
      │                               │<─────────────────────────│               │               │
      │  {petId, seed, rarity, ...}   │                          │               │               │
      │<──────────────────────────────│                          │               │               │
@@ -645,6 +662,8 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
      │                               │   tie-break: earlier enqueue wins        │
      │                               │ INSERT arena_matches(...)│               │
      │                               │─────────────────────────>│               │
+     │                               │ [Battle animation: ARENA_MATCH_DURATION_MIN_SECONDS = 5 s
+     │                               │  to ARENA_MATCH_DURATION_MAX_SECONDS = 15 s]
      │                               │ ZADD leaderboard:global  │               │
      │                               │   score=arena_score member=pet_id        │
      │                               │─────────────────────────────────────────>│
@@ -807,6 +826,10 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 **Admin Account Lockout**: After ADMIN_LOGIN_LOCKOUT_THRESHOLD = 10 consecutive failed login attempts, the account is locked for ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES = 30 minutes (`locked_until` timestamp set in `admin_users`). Lockout is distinct from `deactivated_at` (permanent deactivation).
 
 **Bot Detection**: Pets exceeding BOT_DETECTION_BATTLES_THRESHOLD = 50 battles in a BOT_DETECTION_WINDOW_MINUTES = 60-minute rolling window are auto-flagged and appear in the `/admin/api/suspicious` endpoint. The admin leaderboard UI marks pets exceeding LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR = 50 battles/hr with a suspicious indicator (distinct visual flag, same threshold value but different architectural purpose from bot detection).
+
+**Leaderboard Ban Reflection**: When a ban is applied via `POST /admin/api/pets/:petId/ban`, the banned pet must be removed from `leaderboard:global` (ZREM) within 5 minutes (LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5). This SLA is enforced as a synchronous ZREM in the ban transaction, not a background job.
+
+**Moderation Reason**: All admin ban/unban/flag operations require a reason field with a maximum of 500 characters (ADMIN_MODERATION_REASON_MAX_CHARS = 500). The reason is stored in `audit_logs.reason` and validated at the API boundary.
 
 ---
 
@@ -1086,7 +1109,7 @@ All API errors return a consistent envelope:
 **Production Error Sanitization**:
 In `NODE_ENV=production`, the Fastify global error handler strips `stack`, internal `code`, and path/detail fields from all HTTP 500 responses before serialization. Only public `code`, user-safe `message`, and optional `retryAfter` are returned.
 
-**Standard Error Codes**: `VALIDATION_ERROR`, `NOT_FOUND`, `ALREADY_CLAIMED`, `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`, `STAT_AT_MAXIMUM`, `RATE_LIMIT_EXCEEDED`, `UNAUTHORIZED`, `FORBIDDEN`, `PET_BANNED`, `NOT_OWNER`, `MATCHMAKING_TIMEOUT`, `INTERNAL_SERVER_ERROR`, `ACCOUNT_LOCKED`, `WRONG_REQUEST_TYPE`, `OUT_OF_RANGE`, `CONFLICT`, `PET_NOT_FOUND`, `AGE_CONFIRMATION_REQUIRED`.
+**Standard Error Codes**: `VALIDATION_ERROR`, `NOT_FOUND`, `ALREADY_CLAIMED`, `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`, `STAT_AT_MAXIMUM`, `RATE_LIMIT_EXCEEDED`, `UNAUTHORIZED`, `FORBIDDEN`, `PET_BANNED`, `NOT_OWNER`, `MATCHMAKING_TIMEOUT`, `INTERNAL_SERVER_ERROR`, `ACCOUNT_LOCKED`, `WRONG_REQUEST_TYPE`, `OUT_OF_RANGE`, `CONFLICT`, `PET_NOT_FOUND`, `AGE_CONFIRMATION_REQUIRED`, `TOTP_SETUP_REQUIRED`.
 
 **Global Defaults**:
 - All authenticated endpoints: HTTP 401 `UNAUTHORIZED` for missing/invalid tokens
