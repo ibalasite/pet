@@ -258,7 +258,7 @@ COMMENT ON COLUMN arena_matches.mode IS 'Battle mode. RACE = speed-based contest
 COMMENT ON COLUMN arena_matches.pet_a_id IS 'Challenger pet. ON DELETE RESTRICT: pet row is retained for audit integrity.';
 COMMENT ON COLUMN arena_matches.pet_b_id IS 'Opponent pet. NULL if AI opponent (is_ai_opponent = TRUE) or if the pet row has been administratively removed after match completion (ON DELETE SET NULL). Non-null at insert time for human-vs-human matches; enforced by application, not a CHECK constraint (ON DELETE SET NULL would violate a database-level NOT NULL check).';
 COMMENT ON COLUMN arena_matches.is_ai_opponent IS 'TRUE = pet_a fought an AI-controlled opponent; pet_b_id is always NULL for AI matches (enforced by chk_arena_match_ai_opponent_consistency). FALSE = human-vs-human match.';
-COMMENT ON COLUMN arena_matches.winner_pet_id IS 'pet_id of the winning pet. NULL when the AI opponent wins (is_ai_opponent = TRUE and the player lost); never NULL for human-vs-human matches. ON DELETE SET NULL retains the row if the winning pet is later removed. Constrained to be pet_a_id or pet_b_id (chk_arena_match_winner_is_combatant).';
+COMMENT ON COLUMN arena_matches.winner_pet_id IS 'pet_id of the winning pet. NULL at insert time only when the AI opponent wins (is_ai_opponent = TRUE and the player lost); non-NULL at insert time for all human-vs-human matches. May subsequently become NULL via ON DELETE SET NULL if the winning pet row is later administratively removed. Constrained to be pet_a_id or pet_b_id (chk_arena_match_winner_is_combatant).';
 COMMENT ON COLUMN arena_matches.completed_at IS 'UTC timestamp when the battle result was committed. Doubles as the row creation timestamp (immutable after insert except for is_flagged/flagged_at mutations).';
 COMMENT ON COLUMN arena_matches.random_seed IS 'Seeded random value used for the ±15% outcome modifier (arena_battle_outcome_random_modifier_percent = 15). Enables deterministic replay.';
 COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Food buff bonus (delta) added to pet_a''s base stat for this match. 0 = no active buff. Always >= 0 (chk_arena_match_stat_delta_a_nonneg); food buff magnitude is strictly positive.';
@@ -738,7 +738,7 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 
 | Key Pattern | TTL | Type | Notes |
 |-------------|-----|------|-------|
-| `matchmaking:queue:{mode}` | None | Redis Sorted Set | Score = enqueue epoch (ms). Member format: `"{petId}:{enqueue_epoch_ms}"`. Consumer pops oldest eligible entry via `ZRANGEBYSCORE`. Entries older than `arena_matchmaking_timeout_seconds = 30` seconds plus an implementation-defined grace buffer (~15 s; no constant) are considered stale and discarded silently. |
+| `matchmaking:queue:{mode}` | None | Redis Sorted Set | Score = enqueue epoch (ms). Member format: `"{petId}:{enqueue_epoch_ms}"`. Consumer pops oldest eligible entry via `ZPOPMIN` (atomic read-and-remove; Upstash Redis 7+ supported). Entries older than `arena_matchmaking_timeout_seconds = 30` seconds plus an implementation-defined grace buffer (~15 s; no constant) are considered stale and discarded silently. |
 
 ### 4.3 Session Storage
 
@@ -820,7 +820,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 
 ### 6.3 Leaderboard Query Pattern
 
-The live leaderboard is served exclusively from the Redis `leaderboard:global` sorted set (`ZREVRANGE` for top-N retrieval — O(log N + M) where M is the number of elements returned; `ZREVRANK` for a pet's rank — O(log N)). The `leaderboard_snapshots` table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.
+The live leaderboard is served exclusively from the Redis `leaderboard:global` sorted set (`ZRANGE … REV LIMIT` for top-N retrieval — O(log N + M) where M is the number of elements returned; `ZREVRANK` for a pet's rank — O(log N)). (`ZREVRANGE` is deprecated since Redis 6.2; `ZRANGE … REV LIMIT` is the idiomatic equivalent on Upstash Redis 7+.) The `leaderboard_snapshots` table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.
 
 ### 6.4 Token Lookup Path
 
