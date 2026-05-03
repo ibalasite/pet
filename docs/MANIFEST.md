@@ -62,10 +62,10 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 10 | API | API | docs/API.md | ✅ COMPLETE |
 | 11 | SCHEMA | Schema | docs/SCHEMA.md | ✅ COMPLETE |
 | 12 | FRONTEND | Frontend | docs/FRONTEND.md | ✅ COMPLETE |
-| 13 | CLIENT_IMPL | Implementation | docs/CLIENT_IMPL.md | PENDING |
-| 14 | ADMIN_IMPL | Implementation | docs/ADMIN_IMPL.md | PENDING |
-| 15 | RESOURCE | Infrastructure | docs/RESOURCE.md | PENDING |
-| 16 | UML | Diagrams | docs/diagrams/ (≥9 files) | PENDING |
+| 13 | CLIENT_IMPL | Implementation | docs/CLIENT_IMPL.md | ✅ COMPLETE |
+| 14 | ADMIN_IMPL | Implementation | docs/ADMIN_IMPL.md | ✅ COMPLETE |
+| 15 | RESOURCE | Infrastructure | docs/RESOURCE.md | ✅ COMPLETE |
+| 16 | UML | Diagrams | docs/diagrams/ (≥9 files) | ✅ COMPLETE |
 | 17 | test-plan | Testing | docs/test-plan.md | ✅ COMPLETE |
 | 18 | BDD-server | features/server/ (6 files, 18 scenarios) | ✅ COMPLETE |
 | 19 | BDD-client | BDD | features/client/ (≥15 scenarios) | ✅ COMPLETE |
