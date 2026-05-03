@@ -67,7 +67,7 @@ All requests and responses use:
 Content-Type: application/json
 ```
 
-Request bodies must be JSON-encoded. Endpoints that accept no body (GET, DELETE) must not include a `Content-Type` request header.
+Request bodies must be JSON-encoded. Endpoints that accept no body (GET and body-less DELETE) must not include a `Content-Type` request header. DELETE endpoints that carry a request body (e.g. `DELETE /admin/api/battles/:matchId/flag`) must include `Content-Type: application/json` like any other body-bearing request.
 
 ### 1.4 HTTPS
 
@@ -229,6 +229,7 @@ The `details` field is optional and only populated when additional structured co
 | 422 | Unprocessable Entity (reserved — not currently emitted by any v1 endpoint; all validation failures use 400) |
 | 429 | Too Many Requests (rate limit exceeded) |
 | 500 | Internal Server Error |
+| 503 | Service Unavailable (health check: one or more dependency checks failed) |
 
 ### 4.3 Error Code Reference
 
@@ -1292,7 +1293,7 @@ Verifies a TOTP code against the current admin's secret. Used for step-up authen
 | HTTP | Code | Condition |
 |------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Missing or invalid `totpCode` field |
-| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid, or TOTP code does not match |
 
 ---
 
