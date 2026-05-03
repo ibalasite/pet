@@ -429,7 +429,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: admin user info JSO
 | ip_address | INET | NULL | Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
 | created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
-**Retention**: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years.
+**Retention**: ADMIN_AUDIT_LOG_RETENTION = 2 years.
 **Indexes**: idx_audit_log_created_at ON audit_log(created_at DESC); idx_audit_log_admin_id ON audit_log(admin_id, created_at DESC)
 
 ### §4.11 TradeRecord (Phase 3 — FF_MARKETPLACE)

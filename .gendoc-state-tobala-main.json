@@ -47,5 +47,7 @@
   "brd_review_passed": true,
   "handoff": true,
   "handoff_source": "gendoc-auto",
-  "pipeline_hash": "d2e551157c0da496"
+  "pipeline_hash": "d2e551157c0da496",
+  "lang_stack": "Node.js 20 LTS + Fastify 4",
+  "lang_stack_locked": true
 }
