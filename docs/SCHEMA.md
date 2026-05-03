@@ -90,7 +90,7 @@ COMMENT ON COLUMN pets.pet_name IS 'Auto-generated from species + color combinat
 COMMENT ON COLUMN pets.stat_speed IS 'Speed stat. Range: 1–100 (pet_stat_min / pet_stat_max). Default: 10 (pet_stat_default).';
 COMMENT ON COLUMN pets.stat_strength IS 'Strength stat. Range: 1–100 (pet_stat_min / pet_stat_max). Default: 10 (pet_stat_default).';
 COMMENT ON COLUMN pets.stat_stamina IS 'Stamina stat. Range: 1–100 (pet_stat_min / pet_stat_max). Default: 10 (pet_stat_default).';
-COMMENT ON COLUMN pets.level IS 'Derived: FLOOR(total_training_actions / pet_level_formula_divisor) capped at pet_level_max (pet_level_formula_divisor = 10, pet_level_max = 100). Updated on every training commit.';
+COMMENT ON COLUMN pets.level IS 'Derived: MAX(pet_level_default, FLOOR(total_training_actions / pet_level_formula_divisor)) capped at pet_level_max (pet_level_default = 1, pet_level_formula_divisor = 10, pet_level_max = 100). At 0 training actions the formula yields 0, so the lower bound clamps it to pet_level_default = 1. Updated on every training commit.';
 COMMENT ON COLUMN pets.total_training_actions IS 'Cumulative count of training actions; feeds the level formula.';
 COMMENT ON COLUMN pets.last_trained_at IS 'Timestamp of the most recent training action. NULL if never trained. Used to compute neglect state (threshold: 3 days; training_neglect_threshold_days = 3).';
 COMMENT ON COLUMN pets.owner_token_hash IS 'SHA-256 hash of the pet access token (minimum pet_access_token_min_bytes = 32 bytes). NULL = unclaimed. Raw token is never stored.';
