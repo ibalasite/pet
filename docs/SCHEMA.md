@@ -178,7 +178,7 @@ CREATE TABLE claim_codes (
         CHECK (used_at IS NULL OR used_at >= created_at)
 );
 
-COMMENT ON COLUMN claim_codes.email_hash IS 'SHA-256 of lowercase email supplied during the claim flow. Must match claim_identities.email_hash for the OTP to be accepted. Indexes idx_claim_codes_email_hash supports the OTP lookup query WHERE email_hash = $1.';
+COMMENT ON COLUMN claim_codes.email_hash IS 'SHA-256 of lowercase email supplied during the claim flow. Must match claim_identities.email_hash for the OTP to be accepted. Index idx_claim_codes_email_hash supports the OTP lookup query WHERE email_hash = $1.';
 COMMENT ON COLUMN claim_codes.code_hash IS 'SHA-256 of the 6-digit numeric OTP (claim_code_digits = 6). Plaintext OTP is never stored.';
 COMMENT ON COLUMN claim_codes.expires_at IS 'NOW() + 15 minutes at creation (claim_code_expiry_minutes = 15).';
 COMMENT ON COLUMN claim_codes.attempts IS 'Informational counter incremented on each verify call. Enforcement is in Redis (rl:code_entry:{session_id}), not this column.';
@@ -426,6 +426,7 @@ CREATE TABLE marketplace_listings (
         CHECK (completed_at IS NULL OR completed_at >= listed_at)
 );
 
+COMMENT ON COLUMN marketplace_listings.pet_id IS 'The pet being listed for trade. ON DELETE RESTRICT: prevents hard-deleting a pet while it has any listing row (active, sold, or cancelled).';
 COMMENT ON COLUMN marketplace_listings.seller_token_hash IS 'SHA-256 hash of the seller pet access token. Used for ownership verification.';
 COMMENT ON COLUMN marketplace_listings.price_credits IS 'Asking price in food credits. Minimum enforced by application: (pet_level × trade_min_price_formula_level_coeff) + (rarity_multiplier × trade_min_price_formula_rarity_coeff) (trade_min_price_formula_level_coeff = 100, trade_min_price_formula_rarity_coeff = 500).';
 COMMENT ON COLUMN marketplace_listings.listed_at IS 'UTC timestamp when the listing was created. Defaults to NOW(). Copied verbatim into marketplace_transactions.listed_at at sale time for financial audit traceability. Sort key for idx_marketplace_listings_listed_at (public/admin browse query ORDER BY listed_at DESC).';
@@ -532,6 +533,7 @@ CREATE TABLE admin_accounts (
         CHECK (failed_attempts >= 0)
 );
 
+COMMENT ON COLUMN admin_accounts.username IS 'Login identifier. Unique (uq_admin_accounts_username). Max 64 characters (VARCHAR(64)). Used as the login credential alongside password and TOTP.';
 COMMENT ON COLUMN admin_accounts.password_hash IS 'bcrypt hash. Minimum work factor: 12.';
 COMMENT ON COLUMN admin_accounts.totp_secret_encrypted IS 'AES-256-GCM encrypted TOTP secret. NULL until TOTP enrollment is completed. First login returns TOTP_SETUP_REQUIRED until this is set.';
 COMMENT ON COLUMN admin_accounts.totp_backup_codes_hash IS 'Array of SHA-256 hashes of the 10 single-use backup codes. Consumed entry is removed from array on use. NULL until enrollment.';
