@@ -14,7 +14,7 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
     And the guest checks the age confirmation checkbox
     And the guest clicks "Send Claim Code"
     Then POST /api/v1/claim/request is called with body {"email": "player@example.com", "petId": "<petId>", "ageConfirmed": true}
-    And the Zustand claim slice stores the claimId via setClaimId()
+    And the Zustand claim slice stores the claimId
     And the ClaimFlow advances to step "code" rendering the ClaimCodeForm
 
   Scenario: Email form blocks submission without age confirmation
@@ -47,8 +47,8 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
     When the guest enters "123456" in the (claim_code_digits = 6)-digit OTP input
     And the guest clicks "Verify Code"
     Then POST /api/v1/claim/verify is called with body {"claimId": "<claimId>", "code": "123456"}
-    And setPetToken(petToken) writes the token to localStorage under key "pet_token"
-    And the Zustand claim slice advances to step "reveal" via setClaimStep('reveal')
+    And the pet_token key is written to localStorage
+    And the Zustand claim slice advances to step "reveal"
 
   Scenario: Invalid OTP — shake animation and error message shown
     Given the ClaimCodeForm is visible (step "code")

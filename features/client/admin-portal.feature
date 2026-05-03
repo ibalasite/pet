@@ -14,7 +14,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     Then POST /admin/api/auth/login is called with body {"email": "...", "password": "...", "totpCode": "..."}
     And the Pinia useAdminAuthStore sets isAuthenticated = true and the role field
     And Vue Router navigates to "/admin/dashboard"
-    And the totpCode value is cleared from the Vue component state immediately after submission
+    And the TOTP code input field is cleared immediately after submission
 
   Scenario: First-time admin login without TOTP enrolled — redirected to TOTP setup
     Given the admin has not enrolled a TOTP device
@@ -61,7 +61,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     Given the admin is authenticated as a moderator or super_admin
     And the admin has navigated to "/admin/pets"
     And GET /admin/api/pets responds HTTP 200 with pet entries
-    When the PetListPage.vue has loaded
+    When the PetListPage.vue loads
     Then GET /admin/api/pets is called with the session cookie
     And the ElTable displays pet rows with columns: pet ID, masked owner email, rarity, level, arena record, creation date
     And an ElSelect filter for status "SUSPICIOUS" is available and narrows the table when selected
@@ -85,7 +85,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: Admin leaderboard shows up to 500 entries with SUSPICIOUS flag badges
     Given the admin has navigated to "/admin/leaderboard"
     And GET /admin/api/leaderboard responds with up to (leaderboard_admin_view = 500) entries
-    When the AdminLeaderboardPage.vue has rendered
+    When the AdminLeaderboardPage.vue renders
     Then the ElTable shows all returned entries without pagination
     And pets with more than (bot_detection_battles_threshold = 50) battles in the last (bot_detection_window_minutes = 60) minutes have a SuspiciousFlagBadge component visible
 

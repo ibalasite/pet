@@ -70,5 +70,5 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     Given the owner is on the TrainingPage
     And POST /api/v1/training responds HTTP 401
     When the owner clicks the "Train" button on any action card
-    Then the "pet_token" key is removed from localStorage via clearPetToken()
+    Then the "pet_token" key is removed from localStorage
     And the app navigates to "/"
