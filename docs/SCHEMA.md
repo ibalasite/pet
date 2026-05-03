@@ -759,7 +759,7 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 | `token:blacklist:*` | 259200 s (72 h) | `claim_token_cleanup_ttl_hours = 72` |
 | `leaderboard:global` | No expiry; entries removed on ban or GDPR erasure | — |
 | `admin_audit_log.ip_address_hash` | 90 days (column is set to NULL after 90 d by background job) | `ip_address_log_retention_days = 90` |
-| Unclaimed `pets` (guest preview) | Background job deletes `reserved_until < NOW() AND owner_token_hash IS NULL` every 6 h | `pet_reservation_ttl_hours = 24` |
+| Unclaimed `pets` (guest preview) | Background job deletes `reserved_until < NOW() AND owner_token_hash IS NULL` on an implementation-defined schedule (no constant; run frequency is an operational decision) | `pet_reservation_ttl_hours = 24` |
 
 ---
 
@@ -840,4 +840,4 @@ These full-table indexes cover FK scans, sort-only queries, and background job t
 
 ### 6.7 Connection Pool Sizing
 
-At `db_connection_pool_min_connections = 20` and `db_connection_pool_max_connections = 50`, the pool is sized for the sustained 100 RPS target (`normal_operation_rps = 100`) with headroom to the 500 RPS peak (`peak_operation_rps = 500`) before autoscaling adds replicas. Each API server process holds its own pool; with 2 minimum replicas, the database receives up to 100 connections under normal conditions.
+At `db_connection_pool_min_connections = 20` and `db_connection_pool_max_connections = 50`, the pool is sized for the sustained 100 RPS target (`normal_operation_rps = 100`) with headroom to the 500 RPS peak (`peak_operation_rps = 500`) before autoscaling adds replicas. Each API server process holds its own pool; with the minimum API server replica count (implementation-defined; no constant), the total connection count at burst is `min_replicas × db_connection_pool_max_connections`. For example, 2 API server processes × 50 pool max = 100 total connections at burst.
