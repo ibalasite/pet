@@ -297,7 +297,7 @@ INDEXES:
 ```
 
 Notes:
-- Code is a 6-digit numeric OTP (CLAIM_CODE_DIGITS = 6) generated with `crypto.randomInt(100000, 999999)`. Only the hash is stored.
+- Code is a 6-digit numeric OTP (CLAIM_CODE_DIGITS = 6) generated with `crypto.randomInt(100000, 1000000)`. Only the hash is stored.
 - Claim records are deleted by a background job 72 hours after creation or first use (CLAIM_TOKEN_CLEANUP_TTL = 72 hours).
 
 ### §4.4 ArenaMatch
@@ -402,6 +402,7 @@ redis_key: config:runtime                TTL: 300s    Value: JSON blob of curren
 redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
 redis_key: matchmaking:queue:{mode}      NO TTL       Redis List (LPUSH / BRPOP)
 redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, role, createdAt (ISO), absExpiry: createdAt+28800s }; TTL=14400s enforces inactivity; absExpiry field validated on each request for 8h absolute cap
+redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invalidate replaced pet access tokens; TTL = 72h (CLAIM_TOKEN_CLEANUP_TTL = 72h)
 ```
 
 ### §4.9 AdminUser
@@ -427,7 +428,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, rol
 | id | BIGSERIAL | PK | Sequential for log ordering |
 | admin_id | UUID | NOT NULL REFERENCES admin_users(id) | Actor |
 | action | VARCHAR(128) | NOT NULL | e.g., 'pet.ban', 'config.arena_rate_limit' |
-| target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config' |
+| target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config' \| 'gdpr_request' \| 'admin_user' |
 | target_id | TEXT | NULL | UUID or key of affected entity |
 | detail | JSONB | NULL | Action-specific payload |
 | ip_address_hash | VARCHAR(64) | NULL | SHA-256 hash of raw IP; raw IP never stored per §4.2/§6.5; retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
@@ -616,8 +617,13 @@ Description: Create admin user (username, role, temp password)
 Auth: Admin session (Super Admin)
 Description: Deactivate admin account
 
+#### POST /admin/api/roles/:adminId/totp/reset
+Auth: Admin session (Super Admin)
+Description: Reset TOTP for an admin account — clears `totp_secret_encrypted` and `totp_backup_codes_hash`, forcing the target admin through the TOTP enrollment flow on next login. Writes a `admin_user` audit record. Used when an admin loses their authenticator device.
+Response: `{ success: true, auditLogId: string }`
+
 #### GET /admin/api/pets
-Auth: Admin session (Moderator+)
+Auth: Admin session (Moderator+ or Read Only)
 Query: `?page=1&limit=20&search=<petId|emailFragment>&rarity=&isBanned=`
 Response: `{ pets: [{id, ownerEmailMasked, rarity, level, battlesPlayed, winRate, isBanned, createdAt}], total, page, limit }`
 Notes: Search by pet ID or email fragment up to 1 million records in ≤2 seconds (ADMIN_SEARCH_RESPONSE_TIME = 2s).
@@ -634,7 +640,7 @@ Request: `{ reason: string }`
 Response: `{ success: true, auditLogId: string }`
 
 #### GET /admin/api/leaderboard
-Auth: Admin session (Moderator+)
+Auth: Admin session (Moderator+ or Read Only)
 Response: Top 500 pets (LEADERBOARD_ADMIN_VIEW = 500) with suspicious flags for pets >50 battles/hour (BOT_DETECTION_BATTLES_THRESHOLD = 50).
 
 #### GET /admin/api/config/runtime
@@ -733,11 +739,11 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 
 1. User submits email and pet ID to `POST /api/v1/claim`
 2. System checks rate limit: ≤5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5)
-3. 6-digit numeric OTP generated with `crypto.randomInt(100000, 999999)`
+3. 6-digit numeric OTP generated with `crypto.randomInt(100000, 1000000)`
 4. OTP hash (SHA-256) stored in `claim_codes` with `expires_at = NOW() + 15min` (CLAIM_CODE_EXPIRY = 15 min)
 5. Email dispatched via SendGrid containing ONLY the 6-digit code — no clickable URLs (mitigates email client pre-scanning attacks documented in IDEA.md §8.1 R1)
 6. User manually enters code in browser; verified against hash
-7. On valid entry: pet access token generated, old claim code marked `used_at`, ownership bound atomically in a DB transaction
+7. On valid entry: atomic DB transaction — (a) upsert `claim_identities` row for the email_hash (creating if first claim, matching if re-claiming same email), (b) set `pets.claim_identity_id = claim_identities.id`, (c) generate 32-byte pet access token, store SHA-256 hash in `pets.owner_token_hash`, (d) set `pets.claimed_at = NOW()`, (e) mark claim code `used_at`
 8. Claim code records deleted after 72 hours (CLAIM_TOKEN_CLEANUP_TTL = 72 hours)
 9. Rate limit on code entry: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); 60-second cooldown on breach
 
@@ -749,7 +755,7 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 - Absolute expiry: 8 hours regardless of activity (ADMIN_SESSION_ABSOLUTE_EXPIRY = 8h)
 - Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100)
 - All admin auth events (login, logout, failed attempt) written to audit log
-- **First-login TOTP enrollment**: New admin accounts have `totp_secret_encrypted = NULL`. On first login attempt (correct username+password but no TOTP secret), the login endpoint returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED" }`. The admin client redirects to the TOTP setup page where `POST /admin/api/auth/totp/setup` generates and encrypts a TOTP secret. All subsequent logins require a valid `totpCode`. There is no path to an authenticated session without completing TOTP enrollment.
+- **First-login TOTP enrollment**: New admin accounts have `totp_secret_encrypted = NULL`. On first login attempt (correct username+password but no TOTP secret), the login endpoint returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED", setupToken: "<signed-short-lived-JWT>" }`. The admin client uses this `setupToken` to call `POST /admin/api/auth/totp/setup` (no session exists yet — setup token is the auth mechanism). After TOTP setup, the admin performs a standard login with `totpCode` to establish a session. All subsequent logins require a valid `totpCode`. There is no path to an authenticated session without completing TOTP enrollment.
 
 ### §6.4 Rate Limiting Summary
 
