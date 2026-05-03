@@ -148,6 +148,10 @@ COMMENT ON COLUMN claim_codes.used_at IS 'Set when the OTP is successfully verif
 CREATE INDEX idx_claim_codes_pet_id     ON claim_codes (pet_id);
 CREATE INDEX idx_claim_codes_email_hash ON claim_codes (email_hash);
 CREATE INDEX idx_claim_codes_expires_at ON claim_codes (expires_at);
+-- Background cleanup job: deletes rows 72h after creation OR first use (claim_token_cleanup_ttl_hours = 72).
+-- Query: WHERE created_at < NOW() - INTERVAL '72 hours' OR (used_at IS NOT NULL AND used_at < NOW() - INTERVAL '72 hours')
+CREATE INDEX idx_claim_codes_created_at ON claim_codes (created_at);
+CREATE INDEX idx_claim_codes_used_at    ON claim_codes (used_at) WHERE used_at IS NOT NULL;
 ```
 
 ---
@@ -169,6 +173,8 @@ CREATE TABLE arena_matches (
     stat_delta_b     SMALLINT       NOT NULL DEFAULT 0,
     duration_seconds SMALLINT       NOT NULL,
     battle_log       JSONB          NOT NULL DEFAULT '[]',
+    is_flagged       BOOLEAN        NOT NULL DEFAULT FALSE,
+    flagged_at       TIMESTAMPTZ    NULL,
     completed_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_arena_matches PRIMARY KEY (id),
@@ -189,6 +195,8 @@ COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Net stat value used for pet_a a
 COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Net stat value used for pet_b after any active food buff is applied.';
 COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 seconds (arena_match_duration_min/max_seconds).';
 COMMENT ON COLUMN arena_matches.battle_log IS 'Structured event sequence array for client-side replay.';
+COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to admin_audit_log.detail, not stored here.';
+COMMENT ON COLUMN arena_matches.flagged_at IS 'Timestamp when the match was most recently flagged. NULL when is_flagged = FALSE.';
 ```
 
 ```sql
@@ -198,6 +206,8 @@ CREATE INDEX idx_arena_matches_completed_at  ON arena_matches (completed_at);
 CREATE INDEX idx_arena_matches_winner        ON arena_matches (winner_pet_id);
 CREATE INDEX idx_arena_matches_pet_a_history ON arena_matches (pet_a_id, completed_at DESC);
 CREATE INDEX idx_arena_matches_pet_b_history ON arena_matches (pet_b_id, completed_at DESC);
+-- Supports GET /admin/api/battles?flagged=true and POST /admin/api/battles/:matchId/flag queries.
+CREATE INDEX idx_arena_matches_is_flagged    ON arena_matches (is_flagged) WHERE is_flagged = TRUE;
 ```
 
 ---
@@ -491,8 +501,10 @@ COMMENT ON COLUMN gdpr_requests.admin_notes IS 'Filled by admin on completion or
 ```
 
 ```sql
-CREATE INDEX idx_gdpr_requests_identity ON gdpr_requests (claim_identity_id, submitted_at DESC);
-CREATE INDEX idx_gdpr_requests_status   ON gdpr_requests (status, submitted_at);
+CREATE INDEX idx_gdpr_requests_identity         ON gdpr_requests (claim_identity_id, submitted_at DESC);
+CREATE INDEX idx_gdpr_requests_status           ON gdpr_requests (status, submitted_at);
+-- FK support: every FK column must have an index (fk_gdpr_requests_initiating_pet).
+CREATE INDEX idx_gdpr_requests_initiating_pet   ON gdpr_requests (initiating_pet_id) WHERE initiating_pet_id IS NOT NULL;
 ```
 
 ---
@@ -642,6 +654,9 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_pets_reserved_until` — `WHERE reserved_until IS NOT NULL`: only guest preview pets have this set; background cleanup job scans this index exclusively.
 - `idx_marketplace_listings_status` — `WHERE status = 'active'`: the vast majority of historical listings are `cancelled` or `sold`; the active listing index stays small.
 - `idx_marketplace_listings_active_pet` — `WHERE status = 'active'` unique: provides a database-enforced uniqueness constraint for concurrent active listings per pet at near-zero write cost.
+- `idx_arena_matches_is_flagged` — `WHERE is_flagged = TRUE`: nearly all matches are unflagged; partial index stays tiny and serves `GET /admin/api/battles?flagged=true` efficiently.
+- `idx_gdpr_requests_initiating_pet` — `WHERE initiating_pet_id IS NOT NULL`: supports FK cascade integrity check and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.
+- `idx_claim_codes_created_at` and `idx_claim_codes_used_at` — support the 72-hour background cleanup job which must find rows by creation time or first-use time (whichever is later).
 
 ### 6.2 Composite Indexes for History Queries
 
