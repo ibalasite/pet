@@ -61,7 +61,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
 
   Scenario: Admin views pet list and filters by SUSPICIOUS status
     Given the admin is authenticated as a moderator or super_admin
-    And the admin navigates to "/admin/pets"
+    And the admin has navigated to "/admin/pets"
     When the PetListPage.vue loads
     Then GET /admin/api/pets is called with the session cookie
     And the ElTable displays pet rows with columns: pet ID, masked owner email, rarity, level, arena record, creation date
@@ -86,7 +86,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   # --- Admin leaderboard moderation ---
 
   Scenario: Admin leaderboard shows up to 500 entries with SUSPICIOUS flag badges
-    Given the admin navigates to "/admin/leaderboard"
+    Given the admin has navigated to "/admin/leaderboard"
     And GET /admin/api/leaderboard responds with up to (leaderboard_admin_view = 500) entries
     When the AdminLeaderboardPage.vue renders
     Then the ElTable shows all returned entries without pagination
@@ -100,7 +100,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     And the change reflects on the public LeaderboardPage within (leaderboard_ban_reflection_time_minutes = 5) minutes
 
   Scenario: Admin adjusts max battles per hour via runtime config panel
-    Given the admin is authenticated as a super_admin and navigates to "/admin/config/runtime"
+    Given the admin is authenticated as a super_admin and has navigated to "/admin/config/runtime"
     And the RuntimeConfigPage.vue renders an ElForm with an ElInputNumber for "Max Battles Per Hour"
     When the admin changes the value to 15 (within the allowed range of 1 to 50)
     And clicks "Save"
