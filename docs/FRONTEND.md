@@ -1059,7 +1059,7 @@ AdminLoginPage /admin/login
   ├─ Error states:
   │    HTTP 400 VALIDATION_ERROR → inline form error: "Please enter a valid username and password."
   │    HTTP 401 UNAUTHORIZED → inline form error: "Invalid credentials."
-  │    HTTP 429 RATE_LIMIT_EXCEEDED → show lockout message with (admin_login_lockout_duration_minutes = 30) minute countdown
+  │    HTTP 429 RATE_LIMIT_EXCEEDED → show rate-limit message with (admin_login_ip_rate_limit_window_seconds = 900 → 15 min) countdown
   │
   └─ All auth events written to audit log (admin_audit_log_retention_years = 2 years)
 ```
