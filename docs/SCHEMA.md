@@ -64,8 +64,15 @@ CREATE TABLE pets (
         CHECK (stat_stamina BETWEEN 1 AND 100),
     CONSTRAINT chk_pet_level_range
         CHECK (level BETWEEN 1 AND 100),
+    CONSTRAINT chk_pet_total_training_actions_nonneg
+        CHECK (total_training_actions >= 0),
     CONSTRAINT chk_pet_banned_reason_length
-        CHECK (char_length(banned_reason) <= 500)
+        CHECK (char_length(banned_reason) <= 500),
+    CONSTRAINT chk_pet_banned_at_consistency
+        CHECK (
+            (is_banned = FALSE AND banned_at IS NULL) OR
+            (is_banned = TRUE  AND banned_at IS NOT NULL)
+        )
 );
 
 COMMENT ON COLUMN pets.seed IS 'Procedural generation seed — globally unique; drives all sprite generation determinism.';
@@ -396,6 +403,10 @@ COMMENT ON COLUMN marketplace_transactions.listed_at IS 'Copied from the listing
 CREATE INDEX idx_marketplace_transactions_listing   ON marketplace_transactions (listing_id);
 CREATE INDEX idx_marketplace_transactions_pet       ON marketplace_transactions (pet_id);
 CREATE INDEX idx_marketplace_transactions_completed ON marketplace_transactions (completed_at DESC);
+-- Anti-flip query: finds the most recent completed trade for a pet via ORDER BY completed_at DESC LIMIT 1.
+-- Composite covers both the equality filter and the sort without a separate heap sort step.
+CREATE INDEX idx_marketplace_transactions_pet_completed
+    ON marketplace_transactions (pet_id, completed_at DESC);
 ```
 
 ---
@@ -485,6 +496,7 @@ CREATE TABLE gdpr_requests (
     status             gdpr_request_status_enum NOT NULL DEFAULT 'pending',
     submitted_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     completed_at       TIMESTAMPTZ NULL,
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     admin_notes        TEXT        NULL,
 
     CONSTRAINT pk_gdpr_requests PRIMARY KEY (id),
@@ -500,6 +512,7 @@ COMMENT ON COLUMN gdpr_requests.claim_identity_id IS 'Data subject. A single era
 COMMENT ON COLUMN gdpr_requests.initiating_pet_id IS 'Pet whose token authenticated the self-service submission. NULL for admin-initiated requests.';
 COMMENT ON COLUMN gdpr_requests.request_type IS 'erasure | data_access | restrict_processing | object_leaderboard | rectification.';
 COMMENT ON COLUMN gdpr_requests.status IS 'pending | processing | completed | failed.';
+COMMENT ON COLUMN gdpr_requests.updated_at IS 'Timestamp of the last status transition or admin_notes update. Required to populate the updatedAt field in PATCH /admin/api/gdpr/:requestId response. Updated by application on every status change.';
 COMMENT ON COLUMN gdpr_requests.admin_notes IS 'Filled by admin on completion or status update. Also used for admin-initiated erasure reason (max 500 chars per admin_moderation_reason_max_chars).';
 ```
 
@@ -673,6 +686,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort.
 - `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. Covering the `pet_id` prefix avoids a separate lookup.
 - `idx_admin_audit_log_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor within a 12-month window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`).
+- `idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)` — supports the anti-flip eligibility check (`marketplace_trade_antiflip_protection_days = 7`). The query `SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1` is fully served by the composite index without a separate heap sort, replacing the need to use both the single-column `idx_marketplace_transactions_pet` and a post-filter sort.
 
 ### 6.3 Leaderboard Query Pattern
 
