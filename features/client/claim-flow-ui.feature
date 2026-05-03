@@ -25,8 +25,8 @@ Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, U
     And an inline error "Age confirmation required" is shown and the checkbox is re-highlighted
 
   Scenario: Already-claimed pet shows inline error
-    Given the guest submits a claim for a pet that already has an owner
-    And POST /api/v1/claim responds HTTP 400 with error code "ALREADY_CLAIMED"
+    Given the pet being claimed already has an owner
+    And POST /api/v1/claim/request responds HTTP 400 with error code "ALREADY_CLAIMED"
     When the response is received
     Then an inline error message "This pet is already owned." is shown on the ClaimEmailForm
     And the user remains on step "email"

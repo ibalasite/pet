@@ -27,8 +27,8 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     And the app navigates to "/arena/result/:matchId" after the animation completes
 
   Scenario: No opponent found — AIOfferModal is shown after 30-second timeout
-    Given POST /api/v1/arena/enter responds HTTP 408 with error code "MATCHMAKING_TIMEOUT" after (arena_matchmaking_timeout_seconds = 30) seconds
-    When the timeout fires
+    Given the matchmaking service has no available opponent and will return HTTP 408 "MATCHMAKING_TIMEOUT" after (arena_matchmaking_timeout_seconds = 30) seconds
+    When the matchmaking timeout fires
     Then the MatchmakingStatus text changes to "No opponent found"
     And the AIOfferModal appears with role="dialog" and aria-modal="true"
     And the modal has a focus trap: Tab cycles focus within the modal while it is open

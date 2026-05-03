@@ -30,7 +30,7 @@ Feature: Pet Display — Token Generation, Stat Bars, and Food Buff Indicator (U
     And a StatBar labeled "Stamina" is visible with a width proportional to the stamina value
     And each StatBar element has an aria-label announcing the stat name and current value
 
-  Scenario: Pixel art canvas renders with crisp-edges image rendering
+  Scenario: Pixel art canvas renders with pixelated image rendering
     Given a pet is displayed on the LandingPage
     When the PetCanvas div is inspected
     Then the container has the CSS property "image-rendering: pixelated"

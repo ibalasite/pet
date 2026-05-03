@@ -7,8 +7,8 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   # --- Admin login (TOTP) ---
 
   Scenario: Admin submits valid credentials with TOTP code and is redirected to dashboard
-    Given the LoginPage.vue renders an ElForm with a username input, password input, and TOTP code input
-    When the admin enters valid "username", "password", and a current "totpCode"
+    Given the LoginPage.vue renders an ElForm with an email input, password input, and TOTP code input
+    When the admin enters valid "email", "password", and a current "totpCode"
     And clicks the "Login" button
     Then POST /admin/api/auth/login is called with body {"email": "...", "password": "...", "totpCode": "..."}
     And the server responds HTTP 200 with Set-Cookie: session=<id>; HttpOnly; SameSite=Strict; Secure; Path=/admin
@@ -17,15 +17,15 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     And the totpCode value is cleared from the Vue component state immediately after submission
 
   Scenario: First-time admin login without TOTP enrolled — redirected to TOTP setup
-    Given the admin submits credentials without a TOTP code
+    Given the admin has not enrolled a TOTP device
     And POST /admin/api/auth/login responds HTTP 403 with error code "TOTP_SETUP_REQUIRED" and a "setupToken"
-    When the response is received
+    When the admin submits credentials without a TOTP code and the response is received
     Then Vue Router navigates to "/admin/totp-setup"
-    And the TotpSetupPage.vue renders a QR code and calls POST /admin/api/auth/totp/setup with {"setupToken": "...", "password": "..."}
+    And the TotpSetupPage.vue renders a QR code and calls POST /admin/api/auth/totp/setup with {"setupToken": "..."}
     And backup codes are displayed exactly once and not stored in any Vue component state
 
   Scenario: Invalid admin credentials return inline error
-    Given the admin enters an incorrect password
+    Given the admin has entered an incorrect password
     And POST /admin/api/auth/login responds HTTP 401 with error code "UNAUTHORIZED"
     Then an inline error message "Invalid credentials." is shown on the LoginPage ElForm
     And the user remains on "/admin/login"
@@ -67,7 +67,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
   Scenario: Admin bans a pet with a reason and the ban is logged
     Given the admin is on "/admin/pets" and can see a pet with petId "bad-pet-001"
     When the admin clicks the "Ban" button on the pet row
-    Then the PetBanModal.vue (ElDialog) opens with a reason text area
+    And the PetBanModal.vue (ElDialog) opens with a reason text area
     And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters
     And the admin clicks "Confirm Ban"
     Then POST /admin/api/pets/bad-pet-001/ban is called with body {"reason": "<reason>"}
