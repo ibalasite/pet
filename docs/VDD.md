@@ -485,12 +485,21 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-gold-500: oklch(70% 0.17 82);     /* #ffd700 — Focus ring */
 --primitive-gold-700: oklch(55% 0.17 82);     /* #c49900 */
 
+/* Feedback / Status Color Primitives */
+--primitive-orange-400: oklch(70% 0.17 40); /* #e8a87c — Warning */
+--primitive-red-400: oklch(72% 0.2 25); /* #e87c7c — Error */
+--primitive-blue-400: oklch(72% 0.15 240); /* #7cb4e8 — Info */
+
 /* Navy Scale */
 --primitive-navy-900: oklch(12% 0.04 280);    /* #1a1a2e — Surface base */
 --primitive-navy-800: oklch(17% 0.05 280);    /* #242444 — Surface raised */
 --primitive-navy-700: oklch(22% 0.07 280);    /* #2d2d5a — Surface overlay */
 --primitive-navy-600: oklch(28% 0.06 280);    /* #3a3a6e — Hover surfaces */
 --primitive-navy-shadow: oklch(8% 0.02 280);  /* #0d0d1a — deep shadow / near-black navy (PDD §9.1) */
+--primitive-navy-text-secondary: oklch(60% 0.04 280); /* #6c6c9a */
+--primitive-navy-text-disabled: oklch(40% 0.04 280); /* #4a4a6a */
+--primitive-navy-border-default: oklch(32% 0.05 280); /* #35355c */
+--primitive-navy-border-strong: oklch(45% 0.06 280); /* #4d4d7a */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
@@ -565,8 +574,8 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    SEMANTIC: Text Colors
    ============================================= */
 --color-text-primary: var(--primitive-grey-text-primary);  /* #e8e8f0 — 12.4:1 on base */
---color-text-secondary: oklch(60% 0.04 280);              /* #9999cc — 4.7:1 on base */
---color-text-disabled: oklch(40% 0.04 280);               /* #5a5a8e — 3.1:1 minimum */
+--color-text-secondary: var(--primitive-navy-text-secondary); /* #9999cc — 4.7:1 on base */
+--color-text-disabled: var(--primitive-navy-text-disabled);   /* #5a5a8e — 3.1:1 minimum */
 --color-text-inverse: var(--primitive-navy-900);          /* On light surfaces */
 
 /* =============================================
@@ -581,6 +590,22 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
     --color-brand-primary: var(--primitive-purple-300); /* #c4b5fd — dark mode lightened */
   }
 }
+
+@media (prefers-color-scheme: light) {
+  :root {
+    /* Light mode overrides — full palette in §6.4 */
+    --color-surface-base: #f8f8fc;
+    --color-surface-raised: #eeeef8;
+    --color-surface-overlay: #e2e2f0;
+    --color-text-primary: #1a1a2e;
+    --color-text-secondary: #4a4a7a;
+    --color-text-disabled: #7a7aaa;
+    --color-brand-primary: #4a3fd4;
+    --color-border-default: #c8c8e0;
+    --color-border-strong: #9898c0;
+  }
+}
+
 --color-brand-secondary: var(--primitive-teal-400);       /* #00b894 */
 --color-brand-accent: var(--primitive-gold-300);          /* #fdcb6e */
 --color-brand-accent-bright: var(--primitive-purple-300); /* Hover state for accent buttons */
@@ -597,9 +622,9 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    SEMANTIC: Status Colors
    ============================================= */
 --color-success: var(--primitive-teal-400);               /* #00b894 */
---color-warning: oklch(70% 0.17 40);                      /* #e17055 */
---color-error: oklch(72% 0.2 25);                         /* #ff7675 */
---color-info: oklch(72% 0.15 240);                        /* #74b9ff */
+--color-warning: var(--primitive-orange-400);              /* #e17055 */
+--color-error: var(--primitive-red-400);                   /* #ff7675 */
+--color-info: var(--primitive-blue-400);                   /* #74b9ff */
 
 /* =============================================
    SEMANTIC: Neutral Scale Aliases (PDD §9.1 compatibility)
@@ -619,9 +644,9 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    SEMANTIC: Interactive
    ============================================= */
 --color-focus: var(--primitive-gold-500);                 /* #ffd700 — focus ring */
---color-border-default: oklch(32% 0.05 280);              /* #393966 */
+--color-border-default: var(--primitive-navy-border-default); /* #393966 */
 --color-border-focus: var(--color-focus);
---color-border-strong: oklch(45% 0.06 280);               /* stronger border for hover/active */
+--color-border-strong: var(--primitive-navy-border-strong);   /* stronger border for hover/active */
 --color-shadow-default: var(--primitive-navy-shadow); /* #0d0d1a */
 --color-surface-elevated: var(--color-surface-raised);    /* alias for elevated surface */
 --color-brand-primary-muted: color-mix(in oklch, var(--color-brand-primary) 15%, var(--color-surface-base)); /* selected/muted bg */
@@ -1458,18 +1483,18 @@ The admin portal uses a **distinct, professional color scheme** deliberately sep
 
 | Token | Hex | WCAG Contrast | Usage |
 |-------|-----|--------------|-------|
-| `--admin-sidebar-bg` | `#111827` | N/A (background) | Sidebar background — deep charcoal, distinct from game's navy |
-| `--admin-sidebar-text` | `#f9fafb` | **15.2:1 on sidebar** | AAA — sidebar navigation labels |
-| `--admin-sidebar-text-secondary` | `#d1d5db` | **9.6:1 on sidebar** | AAA — inactive nav item labels |
-| `--admin-sidebar-active-bg` | `#1f2937` | N/A | Active/hover sidebar item background |
+| `--admin-sidebar-bg` | `var(--primitive-grey-900)` | N/A (background) | Sidebar background — deep charcoal, distinct from game's navy |
+| `--admin-sidebar-text` | `var(--primitive-grey-50)` | **15.2:1 on sidebar** | AAA — sidebar navigation labels |
+| `--admin-sidebar-text-secondary` | `var(--primitive-grey-300)` | **9.6:1 on sidebar** | AAA — inactive nav item labels |
+| `--admin-sidebar-active-bg` | `var(--primitive-grey-800)` | N/A | Active/hover sidebar item background |
 | `--admin-sidebar-active-indicator` | `var(--color-brand-primary)` | N/A (left border accent) | Active nav item left-border accent (inherits brand primary) |
-| `--admin-content-bg` | `#f9fafb` | N/A (background) | Main content area — light neutral |
-| `--admin-content-text` | `#111827` | **15.2:1 on content** | AAA — primary content text |
-| `--admin-content-text-secondary` | `#6b7280` | **4.6:1 on content** | AA — secondary labels, timestamps |
+| `--admin-content-bg` | `var(--primitive-grey-50)` | N/A (background) | Main content area — light neutral |
+| `--admin-content-text` | `var(--primitive-grey-900)` | **15.2:1 on content** | AAA — primary content text |
+| `--admin-content-text-secondary` | `var(--primitive-grey-500)` | **4.6:1 on content** | AA — secondary labels, timestamps |
 | `--admin-card-bg` | `#ffffff` | N/A | White cards on light content bg |
-| `--admin-card-border` | `#e5e7eb` | N/A | Card and table borders |
-| `--admin-table-header-bg` | `#f3f4f6` | N/A | Table header row background |
-| `--admin-table-row-hover` | `#f9fafb` | N/A | Table row hover state |
+| `--admin-card-border` | `var(--primitive-grey-200)` | N/A | Card and table borders |
+| `--admin-table-header-bg` | `var(--primitive-grey-100)` | N/A | Table header row background |
+| `--admin-table-row-hover` | `var(--primitive-grey-50)` | N/A | Table row hover state |
 | `--admin-danger-bg` | `#fee2e2` | N/A | Ban/delete action backgrounds |
 | `--admin-danger-text` | `#dc2626` | **5.3:1 on white** | AA — danger action labels |
 | `--admin-warning-bg` | `#fef3c7` | N/A | Suspicious flag backgrounds |
@@ -1477,7 +1502,7 @@ The admin portal uses a **distinct, professional color scheme** deliberately sep
 | `--admin-success-bg` | `#d1fae5` | N/A | Active/healthy state backgrounds |
 | `--admin-success-text` | `#065f46` | **7.8:1 on white** | AAA — success labels |
 
-**Note on sidebar contrast**: `--admin-sidebar-text` (#f9fafb) on `--admin-sidebar-bg` (#111827) achieves **15.2:1** — well above the AAA minimum of 7:1 required for high-stakes admin interfaces.
+**Note on sidebar contrast**: `--admin-sidebar-text` (`var(--primitive-grey-50)`) on `--admin-sidebar-bg` (`var(--primitive-grey-900)`) achieves **15.2:1** — well above the AAA minimum of 7:1 required for high-stakes admin interfaces.
 
 ### §13.2 Admin Layout Specs
 
