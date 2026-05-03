@@ -342,7 +342,12 @@ CREATE TABLE marketplace_listings (
     CONSTRAINT fk_marketplace_listings_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT,
     CONSTRAINT chk_marketplace_listing_price_positive
-        CHECK (price_credits > 0)
+        CHECK (price_credits > 0),
+    CONSTRAINT chk_marketplace_listing_completed_at_consistency
+        CHECK (
+            (status = 'active'   AND completed_at IS NULL) OR
+            (status != 'active'  AND completed_at IS NOT NULL)
+        )
 );
 
 COMMENT ON COLUMN marketplace_listings.seller_token_hash IS 'SHA-256 hash of the seller pet access token. Used for ownership verification.';
@@ -430,7 +435,9 @@ CREATE TABLE admin_accounts (
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_admin_accounts PRIMARY KEY (id),
-    CONSTRAINT uq_admin_accounts_username UNIQUE (username)
+    CONSTRAINT uq_admin_accounts_username UNIQUE (username),
+    CONSTRAINT chk_admin_accounts_failed_attempts_nonneg
+        CHECK (failed_attempts >= 0)
 );
 
 COMMENT ON COLUMN admin_accounts.password_hash IS 'bcrypt hash. Minimum work factor: 12.';
@@ -505,7 +512,12 @@ CREATE TABLE gdpr_requests (
     CONSTRAINT fk_gdpr_requests_initiating_pet
         FOREIGN KEY (initiating_pet_id) REFERENCES pets(id) ON DELETE SET NULL,
     CONSTRAINT chk_gdpr_request_admin_notes_length
-        CHECK (char_length(admin_notes) <= 500)
+        CHECK (char_length(admin_notes) <= 500),
+    CONSTRAINT chk_gdpr_request_completed_at_consistency
+        CHECK (
+            (status IN ('pending', 'processing') AND completed_at IS NULL) OR
+            (status IN ('completed', 'failed')   AND completed_at IS NOT NULL)
+        )
 );
 
 COMMENT ON COLUMN gdpr_requests.claim_identity_id IS 'Data subject. A single erasure covers all pets under this identity.';
