@@ -266,7 +266,7 @@ Two Fastify processes share the same codebase and database credentials via envir
 | Normal operation | 100 RPS sustained (NORMAL_OPERATION_RPS) | 2,000–5,000 (NORMAL_OPERATION_DAU_MIN / MAX) |
 | Peak (viral) | 500 RPS (PEAK_OPERATION_RPS) | 2,000 PCU arena (PEAK_CONCURRENT_USERS) |
 
-**Containerization**: Multi-stage Docker build (`node:20-alpine`), non-root user, < 150 MB image target (EDD §8.3 infrastructure constraint). Health check: `GET /health` ≤ 500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500). Images stored in GitHub Container Registry (ghcr.io).
+**Containerization**: Multi-stage Docker build (`node:20-alpine`), non-root user, < 150 MB image target (EDD §10.2 infrastructure constraints). Health check: `GET /health` ≤ 500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500). Images stored in GitHub Container Registry (ghcr.io).
 
 ---
 
@@ -730,7 +730,7 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
 ### §4.3 Leaderboard Update Flow
 
 ```
-Arena Match Completion         Game API                    Redis            PostgreSQL
+Arena Match Completion         Game API                    PostgreSQL       Redis
 (Post-battle write path)            │                          │               │
      │                               │                          │               │
      │  Arena match completed        │                          │               │
@@ -742,20 +742,20 @@ Arena Match Completion         Game API                    Redis            Post
      │                               │   (battles_played increases; win_rate drops)
      │                               │ ZADD leaderboard:global score member=winnerPetId
      │                               │ ZADD leaderboard:global score member=loserPetId
-     │                               │─────────────────────────>│               │
+     │                               │─────────────────────────────────────────>│
      │                               │ [Both ZADDs wrapped in Redis MULTI/EXEC pipeline for atomicity]
      │                               │ [Update lag ≤30s per LEADERBOARD_UPDATE_LAG_MAX_SECONDS]
      │                               │                          │               │
      │                               │ [Every hour: snapshot job]               │
      │                               │ ZRANGEBYSCORE leaderboard:global (top 500)
-     │                               │<─────────────────────────│               │
+     │                               │<─────────────────────────────────────────│
      │                               │ INSERT leaderboard_snapshots(snapshot_time, entries[])
-     │                               │─────────────────────────────────────────>│
+     │                               │─────────────────────────>│               │
      │                               │                          │               │
 GET /api/v1/leaderboard        │                          │               │
      │──────────────────────────────>│                          │               │
      │                               │ ZRANGEBYSCORE leaderboard:global (top 100)
-     │                               │─────────────────────────>│               │
+     │                               │─────────────────────────────────────────>│
      │                               │ [Redis available]        │               │
      │  {entries[100], lastUpdated}  │                          │               │
      │<──────────────────────────────│                          │               │
@@ -763,7 +763,7 @@ GET /api/v1/leaderboard        │                          │               �
      │                               │ [Redis unavailable]      │               │
      │                               │ SELECT entries FROM leaderboard_snapshots
      │                               │   ORDER BY snapshot_time DESC LIMIT 1    │
-     │                               │─────────────────────────────────────────>│
+     │                               │─────────────────────────>│               │
      │  {entries[100], degraded=true}│                          │               │
      │<──────────────────────────────│                          │               │
 ```
@@ -1135,7 +1135,7 @@ GitHub Repository
 | Alert | Threshold | Window | Channel |
 |-------|-----------|--------|---------|
 | API error rate | > 1% of requests (ERROR_RATE_MAX_PERCENT = 1) | 5 min (OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES = 5) | PagerDuty + Slack |
-| P99 latency breach | > 1,000 ms any endpoint (OBSERVABILITY_LATENCY_ALERT_THRESHOLD_MS = 1,000) | 5 min | Slack |
+| P99 latency breach | > 1,000 ms any endpoint (OBSERVABILITY_LATENCY_ALERT_THRESHOLD_MS = 1,000) | 5 min (OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES = 5) | Slack |
 | Email delivery failure | > 2% SendGrid failure (EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT = 2) | 30 min (OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES = 30) | PagerDuty |
 | Leaderboard update lag | > 60 s (OBSERVABILITY_LEADERBOARD_LAG_ALERT_SECONDS = 60) | — | Slack |
 | Pet claim rate drop | < 5 claims/hour (OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD_PER_HOUR = 5) | 2 hours | Slack |
