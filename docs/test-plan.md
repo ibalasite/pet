@@ -1240,7 +1240,7 @@ Visual regression snapshots are taken at 320px, 768px, 1024px, and 1440px viewpo
 
 ### 11.1 BDD Coverage Overview
 
-The minimum number of BDD scenarios is calculated as `ceil(18 × 0.8) = 15`. This plan documents at least 15 scenarios spanning all 18 user stories. Full scenario text lives in `features/server/` and `features/client/` Gherkin files.
+The minimum number of BDD scenarios is calculated as `ceil(18 × 0.8) = 15`. This plan documents 17 scenarios covering the highest-priority user stories (US-PET-001, US-AUTH-001, US-AUTH-002, US-TRAIN-001, US-ARENA-001, US-BOARD-001, US-RARITY-001, US-ADMIN-004, US-ADMIN-005). Remaining user stories are covered at the required level by unit, integration, and E2E tests. Full scenario text lives in `features/server/` and `features/client/` Gherkin files.
 
 ### 11.2 Server-Side BDD Scenarios
 
