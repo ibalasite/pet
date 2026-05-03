@@ -73,6 +73,11 @@ CREATE TABLE pets (
             (is_banned = FALSE AND banned_at IS NULL) OR
             (is_banned = TRUE  AND banned_at IS NOT NULL)
         ),
+    CONSTRAINT chk_pet_banned_reason_consistency
+        CHECK (
+            (is_banned = FALSE AND banned_reason IS NULL) OR
+            (is_banned = TRUE  AND banned_reason IS NOT NULL)
+        ),
     CONSTRAINT chk_pet_claim_consistency
         CHECK (
             (claimed_at IS NULL     AND owner_token_hash IS NULL) OR
@@ -83,11 +88,11 @@ CREATE TABLE pets (
 COMMENT ON COLUMN pets.seed IS 'Procedural generation seed — globally unique; drives all sprite generation determinism.';
 COMMENT ON COLUMN pets.pet_name IS 'Auto-generated from species + color combination at row creation; derived from seed.';
 COMMENT ON COLUMN pets.stat_speed IS 'Speed stat. Range: 1–100 (pet_stat_min / pet_stat_max). Default: 10 (pet_stat_default).';
-COMMENT ON COLUMN pets.stat_strength IS 'Strength stat. Range: 1–100. Default: 10.';
-COMMENT ON COLUMN pets.stat_stamina IS 'Stamina stat. Range: 1–100. Default: 10.';
-COMMENT ON COLUMN pets.level IS 'Derived: FLOOR(total_training_actions / 10) capped at 100. Updated on every training commit.';
+COMMENT ON COLUMN pets.stat_strength IS 'Strength stat. Range: 1–100 (pet_stat_min / pet_stat_max). Default: 10 (pet_stat_default).';
+COMMENT ON COLUMN pets.stat_stamina IS 'Stamina stat. Range: 1–100 (pet_stat_min / pet_stat_max). Default: 10 (pet_stat_default).';
+COMMENT ON COLUMN pets.level IS 'Derived: FLOOR(total_training_actions / pet_level_formula_divisor) capped at pet_level_max (pet_level_formula_divisor = 10, pet_level_max = 100). Updated on every training commit.';
 COMMENT ON COLUMN pets.total_training_actions IS 'Cumulative count of training actions; feeds the level formula.';
-COMMENT ON COLUMN pets.last_trained_at IS 'Timestamp of the most recent training action. NULL if never trained. Used to compute neglect state (threshold: 3 days).';
+COMMENT ON COLUMN pets.last_trained_at IS 'Timestamp of the most recent training action. NULL if never trained. Used to compute neglect state (threshold: 3 days; training_neglect_threshold_days = 3).';
 COMMENT ON COLUMN pets.owner_token_hash IS 'SHA-256 hash of the 32-byte pet access token. NULL = unclaimed. Raw token is never stored.';
 COMMENT ON COLUMN pets.claim_identity_id IS 'Set at claim time. Enables GDPR erasure lookup after claim_codes rows are purged.';
 COMMENT ON COLUMN pets.reserved_until IS 'Set to NOW()+24h when pet is generated for guest preview. NULL for claimed pets. Cleanup job target.';
@@ -391,11 +396,13 @@ CREATE TABLE marketplace_listings (
             (status != 'active'  AND completed_at IS NOT NULL)
         ),
     CONSTRAINT chk_marketplace_listing_expires_at_after_listed
-        CHECK (expires_at IS NULL OR expires_at > listed_at)
+        CHECK (expires_at IS NULL OR expires_at > listed_at),
+    CONSTRAINT chk_marketplace_listing_completed_at_after_listed
+        CHECK (completed_at IS NULL OR completed_at >= listed_at)
 );
 
 COMMENT ON COLUMN marketplace_listings.seller_token_hash IS 'SHA-256 hash of the seller pet access token. Used for ownership verification.';
-COMMENT ON COLUMN marketplace_listings.price_credits IS 'Asking price in food credits. Minimum enforced by application: (pet_level × 100) + (rarity_multiplier × 500).';
+COMMENT ON COLUMN marketplace_listings.price_credits IS 'Asking price in food credits. Minimum enforced by application: (pet_level × trade_min_price_formula_level_coeff) + (rarity_multiplier × trade_min_price_formula_rarity_coeff) (trade_min_price_formula_level_coeff = 100, trade_min_price_formula_rarity_coeff = 500).';
 COMMENT ON COLUMN marketplace_listings.status IS 'active | cancelled | sold.';
 COMMENT ON COLUMN marketplace_listings.expires_at IS 'Optional listing expiry. NULL = no expiry.';
 COMMENT ON COLUMN marketplace_listings.completed_at IS 'Set when status transitions to sold or cancelled.';
@@ -582,7 +589,9 @@ CREATE TABLE gdpr_requests (
         CHECK (
             (status IN ('pending', 'processing') AND completed_at IS NULL) OR
             (status IN ('completed', 'failed')   AND completed_at IS NOT NULL)
-        )
+        ),
+    CONSTRAINT chk_gdpr_request_completed_at_after_submitted
+        CHECK (completed_at IS NULL OR completed_at >= submitted_at)
 );
 
 COMMENT ON COLUMN gdpr_requests.claim_identity_id IS 'Data subject. A single erasure covers all pets under this identity.';
