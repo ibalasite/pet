@@ -9,7 +9,7 @@ Feature: Global Leaderboard (US-BOARD-001, US-ADMIN-002)
 
   Scenario: Leaderboard score is updated within the configured lag window after a battle
     Given pet "fast-pet-token" completes a Race battle and wins
-    And the win increments "fast-pet-token" score in the battle result record
+    And the win increments the battles_won counter on pet "fast-pet-token" in the pets table
     When the leaderboard sync job runs against Redis using ZRANGE REV WITHSCORES
     Then the updated score for "fast-pet-token" is visible in GET /api/v1/leaderboard within (leaderboard_update_lag_max_seconds = 30) seconds
     And "fast-pet-token" appears at the correct rank position
