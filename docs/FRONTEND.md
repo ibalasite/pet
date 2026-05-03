@@ -840,6 +840,7 @@ TrainingPage /pet/:petId/train
   │                                enabled for other stats not yet at max
   │    HTTP 401 → handled globally: clearPetToken() + redirect to /
   │    HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
+  │    HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)
   │
   └─ Exhausted (actionsRemainingToday = 0):
        DailyResetTimer shows countdown to UTC 00:00 reset
@@ -895,6 +896,7 @@ ArenaPage /arena
   │    Long-poll: server waits up to arena_matchmaking_timeout_seconds = 30s
   │    MatchmakingStatus shows "Finding opponent..." with animated dots
   │    HTTP 403 PET_BANNED → show ban notice; arena entry blocked
+  │    HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)
   │
   ├─ A4a: Opponent found (< 30s)
   │    3-2-1 pixel countdown animation
