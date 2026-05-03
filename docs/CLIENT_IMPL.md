@@ -263,7 +263,7 @@ pixel-pet-arena/                         ← monorepo root
             │   ├── <FoodInventory>
             │   │   └── <FoodItem /> × N
             │   ├── <ArenaEntry battlesRemaining />
-            │   └── <NeglectedState />      (conditional: last_trained_at > 3 days)
+            │   └── <NeglectedState />      (conditional: last_trained_at > TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)
             │
             ├── <TrainingPage>  [/pet/:petId/train]
             │   ├── <TrainingActions>
@@ -384,7 +384,7 @@ Sprite sheets are served from Vercel's CDN `/public/sprites/` directory and are 
 | ANIM-01 | Pet Idle | `PetIdleScene` sprite | Continuous (≥ 4 frames at 30 FPS) | Yes | `PetCanvas` mount |
 | ANIM-02 | Pet Bounce (Interaction) | `PetIdleScene` sprite | 200 ms (2-frame: scale 1.15× → 1×) | No | Click / tap on canvas |
 | ANIM-03 | Pet Training Effort | `PetIdleScene` sprite | 400 ms (3-frame) | No | Successful training action |
-| ANIM-04 | Neglected State | PetCanvas container CSS | Persistent while neglected | Yes (`filter` held) | `isNeglected = true` (> 3 days without training) |
+| ANIM-04 | Neglected State | PetCanvas container CSS | Persistent while neglected | Yes (`filter` held) | `isNeglected = true` (> `TRAINING_NEGLECT_THRESHOLD_DAYS = 3` days without training) |
 | ANIM-05 | Legendary Shimmer | RarityBadge / PetCanvas border | 2 s ease-in-out infinite | Yes | LEGENDARY rarity pet displayed |
 | ANIM-06 | Epic Shimmer | RarityBadge / PetCanvas border | 3 s linear infinite | Yes | EPIC rarity pet displayed |
 | ANIM-07 | Stat Change Indicator | `StatChangeIndicator` DOM | 2 s (`translateY` + `opacity` fade out) | No | Training action success (`TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2`) |
@@ -633,17 +633,17 @@ Audio is not part of Phase 1 scope. No background music or SFX library is includ
 
 ### §10.1 Rendering Performance
 
-| Metric | Target | Minimum Acceptable |
-|--------|--------|-------------------|
-| FCP (First Contentful Paint) | ≤ 1.5 s | ≤ 2.0 s |
-| LCP (Largest Contentful Paint) | ≤ 2.5 s | ≤ 3.0 s |
-| CLS (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.15 |
-| INP (Interaction to Next Paint) | ≤ 200 ms | ≤ 300 ms |
-| Pet canvas render on load | ≤ 2 s | ≤ 3 s |
-| Pet interaction response (click/tap) | ≤ 200 ms | ≤ 300 ms |
-| Pet animation frame rate | ≥ 30 FPS sustained | ≥ 24 FPS |
-| Arena battle E2E render | ≤ 2 s | — |
-| Scene / route transition | ≤ 300 ms | — |
+| Metric | Target | Minimum Acceptable | Constant Key |
+|--------|--------|--------------------|----|
+| FCP (First Contentful Paint) | ≤ 1.5 s | ≤ 2.0 s | `FCP_SECONDS` |
+| LCP (Largest Contentful Paint) | ≤ 2.5 s | ≤ 3.0 s | `LCP_SECONDS` |
+| CLS (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.15 | `CLS_SCORE` |
+| INP (Interaction to Next Paint) | ≤ 200 ms | ≤ 300 ms | `INP_MS` |
+| Pet canvas render on load | ≤ 2 s | ≤ 3 s | `PET_RENDER_ON_LOAD_SECONDS` |
+| Pet interaction response (click/tap) | ≤ 200 ms | ≤ 300 ms | `PET_INTERACTION_RESPONSE_MS` |
+| Pet animation frame rate | ≥ 30 FPS sustained | ≥ 24 FPS | `PET_ANIMATION_FPS_MIN` |
+| Arena battle E2E render | ≤ 2 s | — | `ARENA_BATTLE_E2E_SECONDS` |
+| Scene / route transition | ≤ 300 ms | — | — |
 
 ### §10.2 Memory Budget
 
