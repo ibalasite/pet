@@ -6,8 +6,8 @@ upstream-docs:
   - docs/EDD.md    # Tech stack: Web / Phaser.js / React, asset pipeline
   - docs/FRONTEND.md  # Asset usage, loading strategy, directory structure
   - docs/CLIENT_IMPL.md  # Asset budgets, naming conventions, loading constraints
-version: "1.0.0"
-last-updated: "2026-05-03"
+version: "1.0.4"
+last-updated: "2026-05-04"
 ---
 
 # pixel-pet-arena — AI Asset Production Order (RESOURCE)
@@ -31,6 +31,7 @@ last-updated: "2026-05-03"
 | 1.0.1 | 2026-05-04 | Review Agent R6 | Fix §1.2 wrong upstream ref (VDD §8.9→§8.3); fix RES-IMG-043 filename per VDD §7.6 naming (og-battle-result-template→og-battle-result); add RES-IMG-044 WebP fallback for OG battle result per VDD §7.5; renumber RES-IMG-044/045→045/046 (bg-landing-hero, bg-leaderboard); remove incorrect EDD §1 citation from §3 preamble; update §4 checklist and §5 license table |
 | 1.0.2 | 2026-05-04 | Review Agent R7 | Fix RES-ANIM-005 wrong upstream citation (CLIENT_IMPL ANIM-08 victory → CLIENT_IMPL §5.3 ArenaBattleScene VICTORY state); ANIM-08 is the run cycle, not the victory animation |
 | 1.0.3 | 2026-05-04 | Review Agent R8 | Add RES-IMG-017 bg-arena-sumo.avif (missing AVIF primary for sumo arena — VDD §7.5 requires AVIF+WebP for all full-width arena backgrounds); renumber RES-IMG-017→018 through RES-IMG-046→047; fix §2 preamble to include §5.3 source for battle-victory animation; update §4 checklist and §5 license table |
+| 1.0.4 | 2026-05-04 | Review Agent R9 | Fix §1.2 section header wrong citation (VDD §4→§8.3 — VDD §4 is "Character & World Design" with no food item specs; VDD §8.3 is "My Pet Page" which includes food inventory); add missing §4 checklist entry for §1.2 food item sprites coverage |
 
 ---
 
@@ -72,7 +73,7 @@ last-updated: "2026-05-03"
 | RES-IMG-007 | pet-sheet-template-256x32.png | image | Aseprite | pixel art sprite sheet template, 8 animation frames in a single horizontal row, 32x32px per frame (sprite_resolution_px = 32), total 256x32px, idle animation cycle 4-8 frames at 30fps, creature placeholder silhouette, transparent background, 8-bit retro game style, hard pixel edges | 256×32px | ≤ 25 KB | needed | public/assets/sprites/reference/pet-sheet-template-256x32.png | Reference sprite sheet atlas format: 8 frames × 32px = 256×32px single row (sprite_resolution_px = 32). Phaser.js `atlasJSON` format. Used to validate atlas layout before generating seed-specific sheets. |
 | RES-IMG-008 | pet-run-sheet-template-256x32.png | image | Aseprite | pixel art run cycle sprite sheet template, 8 animation frames horizontal row, 32x32px per frame (sprite_resolution_px = 32), total 256x32px, running motion 8-frame loop, creature placeholder, transparent background, 8-bit retro game, hard pixel edges | 256×32px | ≤ 25 KB | needed | public/assets/sprites/reference/pet-run-sheet-template-256x32.png | Arena race run cycle sprite sheet: 8 run frames × 32px = 256×32px (sprite_resolution_px = 32). Used in ArenaBattleScene ANIM-08 battle race cycle (VDD §4.2 + CLIENT_IMPL §5.1 ANIM-08 specify 8-frame run loop). |
 
-### §1.2 Food Item Sprites (VDD §4 / EDD §0 — Food Buffs)
+### §1.2 Food Item Sprites (VDD §8.3 / EDD §0 — Food Buffs)
 
 > Food items grant stat buffs (VDD §8.3 / EDD §0 FOOD_BUFF constants). Each food type is a distinct 32×32px pixel art item icon.
 
@@ -187,6 +188,7 @@ last-updated: "2026-05-03"
 
 - [x] §1 VDD Visual Assets: VDD.md §4 all pet rarity tiers (Common, Rare, Epic, Legendary) have corresponding RES-IMG rows (RES-IMG-001 to RES-IMG-008); sprite sheet frames use 32×32px (sprite_resolution_px = 32)
 - [x] §1 VDD Visual Assets: VDD.md §4 neglected state sprite overlay covered (RES-IMG-006)
+- [x] §1 VDD Visual Assets: VDD.md §8.3 food item sprites covered (RES-IMG-009 to RES-IMG-012) — 4 food buff icon types (speed, strength, stamina, all-stats) at 32×32px per FoodInventory component
 - [x] §1 VDD Visual Assets: VDD.md §7.2 UI icon set covered (RES-IMG-020 to RES-IMG-031) — 12 custom pixel-art icons: 8 at 24×24px SVG (game interactions) + 4 at 16×16px SVG (rarity badges)
 - [x] §1 VDD Visual Assets: VDD.md §7.4 logo/brand assets covered (RES-IMG-032 to RES-IMG-041) — logo primary/inverted, favicon, PWA icons
 - [x] §1 VDD Visual Assets: VDD.md §8.1 landing page hero background covered (RES-IMG-046)
