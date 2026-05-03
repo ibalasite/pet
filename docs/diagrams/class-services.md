@@ -168,7 +168,7 @@ classDiagram
   (`gdpr_email_hashing_internal_sla_hours = 24`) and completes full erasure within 7 days
   (`gdpr_email_deletion_window_days = 7`). As part of erasure it also calls
   `LeaderboardService.removeEntry` for every pet belonging to the erased identity (ZREM
-  `leaderboard:global <pet_id>`) — see EDD §4.13.7 and SCHEMA §4.4. The same ZREM path is
+  `leaderboard:global <pet_id>`) — see EDD §4.13 and SCHEMA §4.4. The same ZREM path is
   used for `object_leaderboard` GDPR requests.
 - All services are instantiated once per process and shared across route handlers via Fastify
   decorators, ensuring connection pool (`db_connection_pool_min_connections = 20`) is not
