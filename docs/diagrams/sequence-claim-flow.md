@@ -34,7 +34,7 @@ sequenceDiagram
     API->>PG: INSERT INTO pets (seed, rarity, generation_meta,<br/>reserved_until = NOW()+24h (pet_reservation_ttl_hours = 24))
     PG-->>API: petId, seed, rarity, stats
     API-->>PlayerApp: { petId, seed, rarity, petName, stats, reservedUntil }
-    PlayerApp->>Player: Render Phaser.js 32×32 px sprite<br/>Show RarityBadge + ClaimCTA
+    PlayerApp->>Player: Render Phaser.js 32×32 px sprite<br/>(sprite_resolution_px = 32)<br/>Show RarityBadge + ClaimCTA
 
     Note over Player,Email: Phase 2 — Claim Initiation (POST /api/v1/claim)
 
@@ -42,12 +42,12 @@ sequenceDiagram
     PlayerApp->>API: POST /api/v1/claim<br/>{ email, petId, ageConfirmed: true }
     API->>Redis: INCR rl:claim:{email_hash} TTL=3600s<br/>(limit: 5 attempts/hr — auth_rate_limit_claim_attempts_per_hour = 5)
     alt Rate limit exceeded
-        Redis-->>API: count > 5
+        Redis-->>API: count > 5 (auth_rate_limit_claim_attempts_per_hour = 5)
         API->>Redis: SET rl:claim:cooldown:{email_hash} TTL=60s<br/>(claim_email_retry_cooldown_seconds = 60)
-        API-->>PlayerApp: HTTP 429 Retry-After: 60
-        PlayerApp-->>Player: "Too many attempts. Try again in 60 s."
+        API-->>PlayerApp: HTTP 429 Retry-After: 60<br/>(claim_email_retry_cooldown_seconds = 60)
+        PlayerApp-->>Player: "Too many attempts. Try again in 60 s."<br/>(claim_email_retry_cooldown_seconds = 60)
     else Within limit
-        Redis-->>API: count ≤ 5
+        Redis-->>API: count ≤ 5 (auth_rate_limit_claim_attempts_per_hour = 5)
         API->>PG: SELECT owner_token_hash FROM pets WHERE id = petId
         alt Pet already claimed
             PG-->>API: owner_token_hash IS NOT NULL
@@ -62,7 +62,7 @@ sequenceDiagram
             API->>Email: sendClaimCode(to: email, code, petName)
             Email-->>API: delivered (or failover to Nodemailer after 3 failures<br/>sendgrid_failover_consecutive_failures = 3)
             API-->>PlayerApp: HTTP 200 { claimId, expiresAt }
-            PlayerApp-->>Player: Show 6-digit code entry form<br/>Display 15-min countdown timer
+            PlayerApp-->>Player: Show 6-digit code entry form<br/>Display 15-min countdown timer<br/>(claim_code_expiry_minutes = 15)
         end
     end
 
@@ -72,8 +72,8 @@ sequenceDiagram
     PlayerApp->>API: POST /api/v1/claim/verify<br/>{ claimId, code }
     API->>Redis: INCR rl:code_entry:{session_id} TTL=900s<br/>(limit: 10 — auth_rate_limit_code_entry_attempts_per_session = 10)
     alt Code entry limit exceeded (fail-closed)
-        Redis-->>API: count > 10 OR Redis unavailable
-        API->>Redis: SET rl:code_entry:cooldown:{session_id} TTL=60s
+        Redis-->>API: count > 10 OR Redis unavailable<br/>(auth_rate_limit_code_entry_attempts_per_session = 10)
+        API->>Redis: SET rl:code_entry:cooldown:{session_id} TTL=60s<br/>(claim_email_retry_cooldown_seconds = 60)
         API-->>PlayerApp: HTTP 429 { code: "MAX_ATTEMPTS_REACHED" }
     else Within limit
         API->>PG: SELECT * FROM claim_codes<br/>WHERE id = claimId AND expires_at > NOW()
@@ -87,7 +87,7 @@ sequenceDiagram
                 API->>PG: UPDATE claim_codes SET attempts = attempts + 1
                 API-->>PlayerApp: HTTP 400 { code: "INVALID_CODE" }
             else Code valid
-                API->>API: petToken = crypto.randomBytes(32) base64url<br/>tokenHash = SHA-256(petToken)
+                API->>API: petToken = crypto.randomBytes(32) base64url<br/>(pet_access_token_min_bytes = 32)<br/>tokenHash = SHA-256(petToken)
                 API->>PG: BEGIN TRANSACTION<br/>UPDATE pets SET owner_token_hash = tokenHash,<br/>  claimed_at = NOW(), reserved_until = NULL,<br/>  claim_identity_id = identityId<br/>UPDATE claim_codes SET used_at = NOW()<br/>COMMIT
                 PG-->>API: updated
                 API->>Redis: DEL rl:code_entry:{session_id}

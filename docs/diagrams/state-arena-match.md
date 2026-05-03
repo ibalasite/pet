@@ -31,7 +31,7 @@ stateDiagram-v2
 
     Queued --> MatchFound : Opponent entry found in\nmatchmaking:queue:{mode}\nwithin 30 s window\n(arena_matchmaking_timeout_seconds = 30)
 
-    Queued --> Timeout : No opponent found\nwithin 30 s
+    Queued --> Timeout : No opponent found\nwithin 30 s\n(arena_matchmaking_timeout_seconds = 30)
 
     Timeout --> AIBattle : acceptAI = true\nAI opponent generated in memory
 
@@ -81,7 +81,7 @@ stateDiagram-v2
 |---|---|---|
 | Queued | Pet waiting for opponent | `matchmaking:queue:{mode}` entry present |
 | MatchFound | Opponent paired; both entries dequeued | — |
-| Timeout | No opponent within 30 s | — |
+| Timeout | No opponent within 30 s (`arena_matchmaking_timeout_seconds = 30`) | — |
 | AIBattle | AI opponent path | — |
 | BattleComputing | Outcome calculation in memory | — |
 | BattleResolved | Winner determined, log built | — |

@@ -37,9 +37,9 @@ sequenceDiagram
     API-->>PlayerApp: { stats, level, isOwner: true, isNeglected }
     PlayerApp->>API: GET /api/v1/pets/:petId/training-status<br/>(today's remaining actions)
     API->>PG: SELECT COUNT(*) FROM training_logs<br/>WHERE pet_id = petId<br/>AND completed_at >= UTC_DATE
-    PG-->>API: actionsUsedToday (0–3)
-    API-->>PlayerApp: { actionsRemainingToday: 3 - used }
-    PlayerApp->>Owner: Render TrainingActions (3 cards)<br/>DailyResetTimer showing next UTC 00:00<br/>NeglectedState if isNeglected
+    PG-->>API: actionsUsedToday (0–3 — training_actions_per_day = 3)
+    API-->>PlayerApp: { actionsRemainingToday: 3 - used }<br/>(training_actions_per_day = 3)
+    PlayerApp->>Owner: Render TrainingActions (3 cards — training_actions_per_day = 3)<br/>DailyResetTimer showing next UTC 00:00<br/>NeglectedState if isNeglected
 
     Note over Owner,PG: Training Action (POST /api/v1/pets/:petId/train)
 
@@ -52,19 +52,19 @@ sequenceDiagram
         API-->>PlayerApp: HTTP 401 UNAUTHORIZED or HTTP 403 NOT_OWNER
     else Token valid
         API->>PG: SELECT COUNT(*) FROM training_logs<br/>WHERE pet_id = petId<br/>AND completed_at >= UTC_DATE
-        alt 3 actions already used today
-            PG-->>API: count = 3
-            API-->>PlayerApp: HTTP 400<br/>{ code: "TRAINING_LIMIT_REACHED",<br/>message: "3 actions used today." }
+        alt 3 actions already used today (training_actions_per_day = 3)
+            PG-->>API: count = 3 (training_actions_per_day = 3)
+            API-->>PlayerApp: HTTP 400<br/>{ code: "TRAINING_LIMIT_REACHED",<br/>message: "3 actions used today." }<br/>(training_actions_per_day = 3)
             PlayerApp-->>Owner: Grey out cards, show DailyResetTimer
         else Actions remaining
-            PG-->>API: count < 3
+            PG-->>API: count < 3 (training_actions_per_day = 3)
             API->>PG: SELECT stat_speed, stat_strength, stat_stamina,<br/>level, total_training_actions FROM pets WHERE id = petId
             PG-->>API: current stat values
             API->>API: targetStat = stat_speed | stat_strength | stat_stamina<br/>based on trainingType
             alt Target stat already at maximum (100)
                 API-->>PlayerApp: HTTP 400 { code: "STAT_AT_MAXIMUM" }<br/>(pet_stat_max = 100)
             else Stat below max
-                API->>API: statDelta = random integer in [1, 3]<br/>(training_stat_points_min = 1,<br/>training_stat_points_max = 3)<br/>newStat = MIN(100, currentStat + statDelta)<br/>newTotalActions = total_training_actions + 1<br/>newLevel = MAX(1, FLOOR(newTotalActions / 10))<br/>  capped at 100
+                API->>API: statDelta = random integer in [1, 3]<br/>(training_stat_points_min = 1,<br/>training_stat_points_max = 3)<br/>newStat = MIN(100, currentStat + statDelta)<br/>  (pet_stat_max = 100)<br/>newTotalActions = total_training_actions + 1<br/>newLevel = MAX(1, FLOOR(newTotalActions / 10))<br/>  capped at 100<br/>  (pet_level_default = 1, pet_level_formula_divisor = 10,<br/>   pet_level_max = 100)
                 API->>PG: BEGIN TRANSACTION<br/>INSERT INTO training_logs<br/>(pet_id, training_type, stat_delta, stat_after)<br/>UPDATE pets SET<br/>  stat_{type} = newStat,<br/>  level = newLevel,<br/>  total_training_actions = newTotalActions,<br/>  last_trained_at = NOW(),<br/>  updated_at = NOW()<br/>COMMIT
                 PG-->>API: success
                 API-->>PlayerApp: HTTP 200<br/>{ updatedStats: {speed, strength, stamina, level},<br/>  statDelta, actionsRemainingToday }

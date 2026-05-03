@@ -88,12 +88,12 @@ stateDiagram-v2
 
 | State | `owner_token_hash` | `is_banned` | `reserved_until` | Description |
 |---|---|---|---|---|
-| Generated / GuestPreview | NULL | FALSE | future timestamp | Pet just created; no owner; visible for 24 h |
+| Generated / GuestPreview | NULL | FALSE | future timestamp | Pet just created; no owner; visible for 24 h (`pet_reservation_ttl_hours = 24`) |
 | Expired | NULL | FALSE | past timestamp | Cleaned up by background job every 6 h |
-| ClaimPending | NULL | FALSE | future timestamp | OTP sent; awaiting code entry (15 min window) |
+| ClaimPending | NULL | FALSE | future timestamp | OTP sent; awaiting code entry (15 min window — `claim_code_expiry_minutes = 15`) |
 | Active | set | FALSE | NULL | Normal state; all features available |
-| ActiveNeglected | set | FALSE | NULL | No training for > 3 days; visual neglect overlay |
-| TrainingLimitReached | set | FALSE | NULL | 3 daily actions exhausted; resets at UTC 00:00 |
+| ActiveNeglected | set | FALSE | NULL | No training for > 3 days (`training_neglect_threshold_days = 3`); visual neglect overlay |
+| TrainingLimitReached | set | FALSE | NULL | 3 daily actions exhausted (`training_actions_per_day = 3`); resets at UTC 00:00 |
 | Buffed | set | FALSE | NULL | Active food buff modifying arena stat |
 | InArena | set | FALSE | NULL | Matchmaking or battle in progress |
 | Banned | set | TRUE | NULL | Blocked from arena; removed from leaderboard |

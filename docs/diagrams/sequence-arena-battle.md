@@ -45,17 +45,17 @@ sequenceDiagram
             PG-->>API: pet stats + active food buffs
             Note over API: Compute effective stats:<br/>effectiveStat = baseStat + stat_delta (food buff)
 
-            Note over Player,PG: Matchmaking Phase (30 s window)
+            Note over Player,PG: Matchmaking Phase (30 s window — arena_matchmaking_timeout_seconds = 30)
 
             API->>Redis: ZADD matchmaking:queue:{mode}<br/>score=enqueue_epoch_ms<br/>member="{petId}:{epoch}"
             API->>Redis: ZRANGEBYSCORE matchmaking:queue:{mode}<br/>0 (NOW - stale_threshold_ms)<br/>to find eligible opponent<br/>(stale if age > 45 s = timeout + 15 s)
-            alt Opponent found within 30 s
+            alt Opponent found within 30 s (arena_matchmaking_timeout_seconds = 30)
                 Redis-->>API: opponentEntry = "{opponentPetId}:{epoch}"
                 API->>Redis: ZREM matchmaking:queue:{mode} opponentEntry
                 API->>Redis: ZREM matchmaking:queue:{mode} petEntry
                 API->>PG: SELECT pets WHERE id = opponentPetId
                 PG-->>API: opponent stats + food buffs
-            else Timeout (30 s) — no human opponent
+            else Timeout (30 s — arena_matchmaking_timeout_seconds = 30) — no human opponent
                 Redis-->>API: no match
                 API->>Redis: ZREM matchmaking:queue:{mode} petEntry
                 alt acceptAI = true
