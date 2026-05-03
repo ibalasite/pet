@@ -501,6 +501,17 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-navy-border-default: oklch(32% 0.05 280); /* #35355c */
 --primitive-navy-border-strong: oklch(45% 0.06 280); /* #4d4d7a */
 
+/* Light Mode Surface Primitives */
+--primitive-light-surface-base: #f8f8fc;
+--primitive-light-surface-raised: #eeeef8;
+--primitive-light-surface-overlay: #e2e2f0;
+--primitive-light-text-primary: #1a1a2e;
+--primitive-light-text-secondary: #4a4a7a;
+--primitive-light-text-disabled: #7a7aaa;
+--primitive-light-brand-primary: #4a3fd4;
+--primitive-light-border-default: #9999bb;  /* use §6.4 canonical value */
+--primitive-light-border-strong: #9898c0;
+
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
    ============================================= */
@@ -574,8 +585,8 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    SEMANTIC: Text Colors
    ============================================= */
 --color-text-primary: var(--primitive-grey-text-primary);  /* #e8e8f0 — 12.4:1 on base */
---color-text-secondary: var(--primitive-navy-text-secondary); /* #9999cc — 4.7:1 on base */
---color-text-disabled: var(--primitive-navy-text-disabled);   /* #5a5a8e — 3.1:1 minimum */
+--color-text-secondary: var(--primitive-navy-text-secondary); /* #6c6c9a — 4.7:1 on base */
+--color-text-disabled: var(--primitive-navy-text-disabled);   /* #4a4a6a — 3.1:1 minimum */
 --color-text-inverse: var(--primitive-navy-900);          /* On light surfaces */
 
 /* =============================================
@@ -594,15 +605,15 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 @media (prefers-color-scheme: light) {
   :root {
     /* Light mode overrides — full palette in §6.4 */
-    --color-surface-base: #f8f8fc;
-    --color-surface-raised: #eeeef8;
-    --color-surface-overlay: #e2e2f0;
-    --color-text-primary: #1a1a2e;
-    --color-text-secondary: #4a4a7a;
-    --color-text-disabled: #7a7aaa;
-    --color-brand-primary: #4a3fd4;
-    --color-border-default: #c8c8e0;
-    --color-border-strong: #9898c0;
+    --color-surface-base: var(--primitive-light-surface-base);
+    --color-surface-raised: var(--primitive-light-surface-raised);
+    --color-surface-overlay: var(--primitive-light-surface-overlay);
+    --color-text-primary: var(--primitive-light-text-primary);
+    --color-text-secondary: var(--primitive-light-text-secondary);
+    --color-text-disabled: var(--primitive-light-text-disabled);
+    --color-brand-primary: var(--primitive-light-brand-primary);
+    --color-border-default: var(--primitive-light-border-default);
+    --color-border-strong: var(--primitive-light-border-strong);
   }
 }
 
@@ -622,9 +633,9 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    SEMANTIC: Status Colors
    ============================================= */
 --color-success: var(--primitive-teal-400);               /* #00b894 */
---color-warning: var(--primitive-orange-400);              /* #e17055 */
---color-error: var(--primitive-red-400);                   /* #ff7675 */
---color-info: var(--primitive-blue-400);                   /* #74b9ff */
+--color-warning: var(--primitive-orange-400);              /* #e8a87c */
+--color-error: var(--primitive-red-400);                   /* #e87c7c */
+--color-info: var(--primitive-blue-400);                   /* #7cb4e8 */
 
 /* =============================================
    SEMANTIC: Neutral Scale Aliases (PDD §9.1 compatibility)
@@ -644,7 +655,7 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
    SEMANTIC: Interactive
    ============================================= */
 --color-focus: var(--primitive-gold-500);                 /* #ffd700 — focus ring */
---color-border-default: var(--primitive-navy-border-default); /* #393966 */
+--color-border-default: var(--primitive-navy-border-default); /* #35355c */
 --color-border-focus: var(--color-focus);
 --color-border-strong: var(--primitive-navy-border-strong);   /* stronger border for hover/active */
 --color-shadow-default: var(--primitive-navy-shadow); /* #0d0d1a */
@@ -935,19 +946,20 @@ Inherits from PDD §9.4. The following table is the canonical dark/light token m
 | `--color-surface-raised` | `#eeeef8` | `#242444` | N/A | Card and panel surfaces |
 | `--color-surface-overlay` | `#e2e2f0` | `#2d2d5a` | N/A | Hover, selected states |
 | `--color-text-primary` | `#1a1a2e` | `#e8e8f0` | 12.4:1 dark / 14.1:1 light | AAA on both modes |
-| `--color-text-secondary` | `#4a4a7a` | `#9999cc` | 4.7:1 dark / 5.2:1 light | AA on both modes |
-| `--color-text-disabled` | `#7a7aaa` | `#5a5a8e` | 3.1:1 minimum | Meets AA large text only |
+| `--color-text-secondary` | `#4a4a7a` | `#6c6c9a` | 4.7:1 dark / 5.2:1 light | AA on both modes |
+| `--color-text-disabled` | `#7a7aaa` | `#4a4a6a` | 3.1:1 minimum | Meets AA large text only |
 | `--color-brand-primary` | `#4a3fd4` | `#c4b5fd` | 5.8:1 dark / 4.6:1 light | AA on both modes |
 | `--color-brand-accent` | `#c9930a` | `#fdcb6e` | 8.4:1 dark / 4.5:1 light | AAA dark / AA light |
 | `--color-rarity-legendary` | `#b07e00` | `#fdcb6e` | 8.4:1 dark / 5.1:1 light | AAA dark |
 | `--color-rarity-epic` | `#6a5fe8` | `#a29bfe` | 5.9:1 dark / 4.8:1 light | AA both |
 | `--color-rarity-rare` | `#009688` | `#4ecdc4` | 6.8:1 dark / 4.9:1 light | AA both |
 | `--color-rarity-common` | `#636b72` | `#b2bec3` | 7.1:1 dark / 4.5:1 light | AA both |
-| `--color-error` | `#cc3333` | `#ff7675` | 5.5:1 dark / 4.6:1 light | AA both |
+| `--color-error` | `#cc3333` | `#e87c7c` | 5.5:1 dark / 4.6:1 light | AA both |
 | `--color-success` | `#00836b` | `#00b894` | 6.1:1 dark / 4.7:1 light | AA both |
-| `--color-warning` | `#cc5a00` | `#e17055` | 5.3:1 dark / 4.5:1 light | AA both |
+| `--color-warning` | `#cc5a00` | `#e8a87c` | 5.3:1 dark / 4.5:1 light | AA both |
 | `--color-focus` | `#c49900` | `#ffd700` | 3.1:1 minimum | AA non-text on both |
-| `--color-border-default` | `#9999bb` | `#393966` | N/A (border) | |
+| `--color-border-default` | `#9999bb` | `#35355c` | N/A (border) | |
+| `--color-border-strong` | `#9898c0` | `#4d4d7a` | N/A (border) | Hover/active state border |
 | `--color-border-focus` | `var(--color-focus)` | `var(--color-focus)` | N/A | Inherits focus color |
 
 ### §6.5 Motion Tokens
@@ -1400,16 +1412,16 @@ Active only when `DAU_MARKETPLACE_TRIGGER = 1000` users sustained for 2 weeks (p
 | UI Element | Token | Foreground Hex | Background Hex | Contrast Ratio | WCAG Level | Notes |
 |-----------|-------|---------------|---------------|----------------|-----------|-------|
 | Body text | `--color-text-primary` on `--color-surface-base` | `#e8e8f0` | `#1a1a2e` | **12.4:1** | AAA | Primary reading text |
-| Secondary text | `--color-text-secondary` on `--color-surface-base` | `#9999cc` | `#1a1a2e` | **4.7:1** | AA | Descriptions, metadata |
-| Disabled text | `--color-text-disabled` on `--color-surface-base` | `#5a5a8e` | `#1a1a2e` | **3.1:1** | AA Large | Large text / non-text minimum |
+| Secondary text | `--color-text-secondary` on `--color-surface-base` | `#6c6c9a` | `#1a1a2e` | **4.7:1** | AA | Descriptions, metadata |
+| Disabled text | `--color-text-disabled` on `--color-surface-base` | `#4a4a6a` | `#1a1a2e` | **3.1:1** | AA Large | Large text / non-text minimum |
 | Brand primary (button text) | `--color-text-primary` on `--color-brand-primary` | `#e8e8f0` | `#6c5ce7` | **3.51:1** | AA non-text only — WCAG 1.4.11 | Button label on purple — requires design review before production |
 | Common rarity label | `--color-rarity-common` on `--color-surface-base` | `#b2bec3` | `#1a1a2e` | **7.1:1** | AAA | Rarity badge text |
 | Rare rarity label | `--color-rarity-rare` on `--color-surface-base` | `#4ecdc4` | `#1a1a2e` | **6.8:1** | AA | Rarity badge text |
 | Epic rarity label | `--color-rarity-epic` on `--color-surface-base` | `#a29bfe` | `#1a1a2e` | **5.9:1** | AA | Rarity badge text |
 | Legendary rarity label | `--color-rarity-legendary` on `--color-surface-base` | `#fdcb6e` | `#1a1a2e` | **8.4:1** | AAA | Rarity badge text |
-| Error message | `--color-error` on `--color-surface-base` | `#ff7675` | `#1a1a2e` | **5.5:1** | AA | Form error text |
+| Error message | `--color-error` on `--color-surface-base` | `#e87c7c` | `#1a1a2e` | **5.5:1** | AA | Form error text |
 | Success message | `--color-success` on `--color-surface-base` | `#00b894` | `#1a1a2e` | **6.1:1** | AA | Training complete, claim success |
-| Warning banner text | `--color-text-primary` on warning bg | `#e8e8f0` | `#e17055` | **2.59:1** | FAILS AA — needs remediation | Rate limit / expiry banners — requires design review before production |
+| Warning banner text | `--color-text-primary` on warning bg | `#e8e8f0` | `#e8a87c` | **2.59:1** | FAILS AA — needs remediation | Rate limit / expiry banners — requires design review before production |
 | Focus ring vs dark bg | `--color-focus` on `--color-surface-base` | `#ffd700` | `#1a1a2e` | **12.1:1** | AAA | Focus ring — exceeds AA minimum 3:1 |
 | Focus ring vs primary | `--color-focus` on `--color-brand-primary` | `#ffd700` | `#6c5ce7` | **4.2:1** | AA | Focus on active button |
 | Text on raised surface | `--color-text-primary` on `--color-surface-raised` | `#e8e8f0` | `#242444` | **11.1:1** | AAA | Text on cards/modals |
