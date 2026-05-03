@@ -1244,9 +1244,9 @@ The minimum number of BDD scenarios is calculated as `ceil(18 × 0.8) = 15`. Thi
 
 ### 11.2 Server-Side BDD Scenarios
 
-**Feature: Email Claim Flow** (US-AUTH-001)
-
 ```gherkin
+Feature: Email Claim Flow (US-AUTH-001)
+
 Scenario: Guest successfully claims a pet via email OTP
   Given a guest has viewed a randomly generated pet
   And the pet is not yet claimed
@@ -1269,9 +1269,9 @@ Scenario: Claim rate limit blocks after (auth_rate_limit_claim_attempts_per_hour
   And the counter is not incremented further
 ```
 
-**Feature: Arena Battle System** (US-ARENA-001)
-
 ```gherkin
+Feature: Arena Battle System (US-ARENA-001)
+
 Scenario: Two pets match and complete a race battle
   Given two claimed pets both enter Race arena mode
   And both pets are in the matchmaking queue
@@ -1295,9 +1295,9 @@ Scenario: Arena rate limit prevents excessive battles
   And the arena rate limit counter is not incremented on matchmaking timeout
 ```
 
-**Feature: GDPR Erasure** (US-AUTH-002, US-ADMIN-004)
-
 ```gherkin
+Feature: GDPR Erasure (US-AUTH-002, US-ADMIN-004)
+
 Scenario: Player requests email erasure
   Given a pet owner with a linked claim identity
   When the owner submits a GDPR erasure request
@@ -1314,9 +1314,9 @@ Scenario: Super admin processes GDPR deletion via admin portal
   And the pet displays with a pseudonymous identifier
 ```
 
-**Feature: Leaderboard Resilience** (US-BOARD-001)
-
 ```gherkin
+Feature: Leaderboard Resilience (US-BOARD-001)
+
 Scenario: Leaderboard falls back to PostgreSQL when Redis unavailable
   Given Redis is unavailable
   And leaderboard_snapshots contains a recent entry
@@ -1325,9 +1325,9 @@ Scenario: Leaderboard falls back to PostgreSQL when Redis unavailable
   And data is sourced from the PostgreSQL snapshot
 ```
 
-**Feature: Admin Suspicious Battle Detection** (US-ADMIN-005)
-
 ```gherkin
+Feature: Admin Suspicious Battle Detection (US-ADMIN-005)
+
 Scenario: Pet auto-flagged after exceeding battle threshold
   Given a pet completes more than (bot_detection_battles_threshold = 50) battles within a (bot_detection_window_minutes = 60)-minute rolling window
   When the bot detection check runs
@@ -1344,9 +1344,9 @@ Scenario: Moderator reviews and bans suspicious pet
 
 ### 11.3 Client-Side BDD Scenarios
 
-**Feature: Guest Pet Display** (US-PET-001)
-
 ```gherkin
+Feature: Guest Pet Display (US-PET-001)
+
 Scenario: Guest sees animated pet on first visit
   Given a new guest browser session
   When the guest navigates to the root URL
@@ -1361,9 +1361,9 @@ Scenario: Pet interaction animates within (pet_interaction_response_ms = 200) ms
   And the interaction is accessible via keyboard (Enter key on focused canvas)
 ```
 
-**Feature: Training System** (US-TRAIN-001)
-
 ```gherkin
+Feature: Training System (US-TRAIN-001)
+
 Scenario: Owner trains pet and sees stat change indicator
   Given a pet owner on the training page
   And the pet has at least one training action available today
@@ -1379,9 +1379,9 @@ Scenario: Training disabled after (training_actions_per_day = 3) daily actions
   And a countdown timer shows time until UTC midnight reset
 ```
 
-**Feature: Arena Rate Limit UX** (US-ARENA-001)
-
 ```gherkin
+Feature: Arena Rate Limit UX (US-ARENA-001)
+
 Scenario: Rate-limited owner sees countdown and disabled button
   Given a pet owner whose pet has reached the hourly arena limit
   When the owner navigates to the arena page
@@ -1390,9 +1390,9 @@ Scenario: Rate-limited owner sees countdown and disabled button
   And the countdown timer updates in real time
 ```
 
-**Feature: Rarity Display** (US-RARITY-001)
-
 ```gherkin
+Feature: Rarity Display (US-RARITY-001)
+
 Scenario: Legendary pet displays animated border effect
   Given a pet with rarity = LEGENDARY
   When the pet page is loaded
