@@ -213,7 +213,7 @@ App
 │       │   └── ActionButtons
 │       ├── LeaderboardPage         /leaderboard
 │       │   ├── RarityFilter
-│       │   ├── LeaderboardTable → LeaderboardRow × 100
+│       │   ├── LeaderboardTable → LeaderboardRow × 100  (leaderboard_top_display = 100)
 │       │   └── OwnerRankBanner     (if pet token present)
 │       ├── GdprPage                /gdpr        (owner auth required)
 │       │   ├── GdprRequestForm     (type selector: erasure / data_access / restrict_processing / object_leaderboard / rectification)
@@ -288,7 +288,7 @@ export class PetCanvasEngine {
       width: spriteResolutionPx * 4,  // scaled for display
       height: spriteResolutionPx * 4,
       transparent: true,
-      scene: [new PetIdleScene(attributes, rarity)],
+      scene: [new PetIdleScene(seed, attributes, rarity)],
     });
   }
 
@@ -342,7 +342,7 @@ interface AppStore {
 
 ### 2.5 Routing
 
-React Router v6 with `createBrowserRouter`. All routes are lazy-loaded via `React.lazy()` + `<Suspense>`.
+React Router v6 with `createBrowserRouter`. All routes are lazy-loaded via React Router v6.4's built-in `lazy` route property (not `React.lazy()` + `<Suspense>` — these are distinct APIs; React Router's `lazy` handles the loading boundary internally).
 
 ```typescript
 // src/App.tsx (router configuration)
@@ -653,7 +653,7 @@ import { SPRITE_RESOLUTION_PX } from '../../constants';
 class PetIdleScene extends Phaser.Scene {
   preload(): void {
     // Sprite sheet: frameWidth = frameHeight = SPRITE_RESOLUTION_PX
-    this.load.spritesheet('pet', `/sprites/pet_${this.petSeed}.png`, {
+    this.load.spritesheet('pet', `/sprites/pet_${this.seed}.png`, {
       frameWidth: SPRITE_RESOLUTION_PX,   // 32
       frameHeight: SPRITE_RESOLUTION_PX,  // 32
     });
@@ -827,6 +827,7 @@ ArenaPage /arena
   │    → POST /api/v1/arena/enter  { petId, mode, acceptAI?: boolean }
   │    Long-poll: server waits up to arena_matchmaking_timeout_seconds = 30s
   │    MatchmakingStatus shows "Finding opponent..." with animated dots
+  │    HTTP 403 PET_BANNED → show ban notice; arena entry blocked
   │
   ├─ A4a: Opponent found (< 30s)
   │    3-2-1 pixel countdown animation
