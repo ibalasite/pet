@@ -504,7 +504,7 @@ apps/admin/
 │   ├── stores/
 │   │   ├── useAdminAuthStore.ts    # Pinia: session state, role
 │   │   ├── usePetStore.ts          # Pinia: admin pet list cache
-│   │   └── useConfigStore.ts       # Pinia: runtime + economy config cache
+│   │   └── useConfigStore.ts       # Pinia: runtime + economy + feature flags config cache
 │   ├── lib/
 │   │   ├── adminApiClient.ts       # Axios with session cookie; CSRF handling
 │   │   └── formatters.ts           # Date, number, rarity formatting
