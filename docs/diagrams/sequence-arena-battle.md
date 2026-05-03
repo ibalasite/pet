@@ -48,10 +48,9 @@ sequenceDiagram
             Note over Player,PG: Matchmaking Phase (30 s window — arena_matchmaking_timeout_seconds = 30)
 
             API->>Redis: ZADD matchmaking:queue:{mode}<br/>score=enqueue_epoch_ms<br/>member="{petId}:{epoch}"
-            API->>Redis: ZRANGEBYSCORE matchmaking:queue:{mode}<br/>(NOW - stale_threshold_ms) +inf<br/>to find eligible opponent<br/>(stale if age > 45 s = timeout + 15 s)
+            API->>Redis: ZPOPMIN matchmaking:queue:{mode}<br/>(atomic pop of oldest entry — SCHEMA §4.2)<br/>discard if age > 45 s (stale; arena_matchmaking_timeout_seconds = 30 + 15 s buffer)
             alt Opponent found within 30 s (arena_matchmaking_timeout_seconds = 30)
                 Redis-->>API: opponentEntry = "{opponentPetId}:{epoch}"
-                API->>Redis: ZREM matchmaking:queue:{mode} opponentEntry
                 API->>Redis: ZREM matchmaking:queue:{mode} petEntry
                 API->>PG: SELECT pets WHERE id = opponentPetId
                 PG-->>API: opponent stats + food buffs
@@ -103,9 +102,10 @@ sequenceDiagram
 
 ## Notes
 
-- **Stale entry cleanup**: matchmaking queue entries older than ~45 seconds (timeout 30 s +
-  buffer 15 s) are silently discarded by the consumer (`arena_matchmaking_timeout_seconds = 30`).
-  Entry format: `"{petId}:{enqueue_epoch_ms}"`.
+- **Matchmaking pop**: `ZPOPMIN matchmaking:queue:{mode}` atomically pops the oldest entry
+  (SCHEMA §4.2). If the popped entry is stale (age > ~45 s = `arena_matchmaking_timeout_seconds = 30`
+  + 15 s buffer), it is silently discarded and the consumer retries. Entry format:
+  `"{petId}:{enqueue_epoch_ms}"`.
 - **Rate limit not incremented on timeout**: If matchmaking times out without finding an opponent,
   the battle counter `rl:arena:{pet_id}` is NOT incremented, so the player does not lose a
   battle slot for a failed queue attempt.

@@ -80,7 +80,7 @@ graph TB
     GameAPI -->|reads| PGReplica
     GameAPI -->|rate limits| RLCounters
     GameAPI -->|ZADD / ZRANGE REV LIMIT| Leaderboard
-    GameAPI -->|ZADD / ZRANGEBYSCORE| Matchmaking
+    GameAPI -->|ZADD / ZPOPMIN| Matchmaking
     GameAPI -->|token blacklist check| TokenBL
     GameAPI -->|GET config| ConfigCache
 
@@ -88,7 +88,7 @@ graph TB
     AdminAPI -->|reads| PGReplica
     AdminAPI -->|admin sessions| Sessions
     AdminAPI -->|rate limits| RLCounters
-    AdminAPI -->|ZRANGE top 500 / ZREM banned pets| Leaderboard
+    AdminAPI -->|ZRANGE top 500 (leaderboard_admin_view = 500) / ZREM banned pets| Leaderboard
     AdminAPI -->|PUT config (invalidate)| ConfigCache
 
     %% API → External
