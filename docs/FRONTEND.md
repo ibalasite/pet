@@ -486,7 +486,8 @@ apps/admin/
 │   │   │   └── GdprRequestRow.vue
 │   │   ├── config/
 │   │   │   ├── RuntimeConfigPage.vue
-│   │   │   └── EconomyConfigPage.vue
+│   │   │   ├── EconomyConfigPage.vue
+│   │   │   └── FlagsConfigPage.vue
 │   │   ├── email/
 │   │   │   └── EmailMonitorPage.vue
 │   │   ├── analytics/
@@ -529,6 +530,7 @@ App.vue
         ├── GdprQueuePage.vue       /admin/gdpr
         ├── RuntimeConfigPage.vue   /admin/config/runtime
         ├── EconomyConfigPage.vue   /admin/config/economy
+        ├── FlagsConfigPage.vue     /admin/config/flags
         ├── EmailMonitorPage.vue    /admin/email
         ├── AnalyticsPage.vue       /admin/analytics
         ├── AuditLogPage.vue        /admin/audit
@@ -542,15 +544,16 @@ Element Plus is registered globally in `main.ts`. Key components used per module
 | Module | Element Plus components |
 |--------|------------------------|
 | Pet Management | `ElTable`, `ElTableColumn`, `ElPagination`, `ElInput`, `ElSelect`, `ElButton`, `ElDialog` |
-| Leaderboard | `ElTable`, `ElTag`, `ElBadge` |
+| Leaderboard | `ElTable`, `ElTag`, `ElBadge` — hard-capped list of up to `leaderboard_admin_view = 500` entries (no pagination; `SuspiciousFlagBadge` annotates high-activity pets) |
 | Battle Records | `ElTable`, `ElDatePicker`, `ElSwitch` |
 | GDPR Queue | `ElTable`, `ElSelect` (status filter), `ElForm`, `ElFormItem` |
-| Config pages | `ElForm`, `ElFormItem`, `ElInputNumber`, `ElSlider`, `ElAlert` |
+| Config pages (runtime, economy) | `ElForm`, `ElFormItem`, `ElInputNumber`, `ElSlider`, `ElAlert` |
+| Feature Flags | `ElTable`, `ElSwitch`, `ElTag` |
 | Analytics | `ElDatePicker` (range), integrated with vue-echarts for `MetricChart` |
 | Audit Log | `ElTable`, `ElDatePicker` (range), `ElPagination` |
 | Login | `ElForm`, `ElInput` (password + TOTP), `ElButton` |
 
-All tables use server-side pagination via the `ElPagination` component bound to Pinia store page state.
+All tables use server-side pagination via the `ElPagination` component bound to Pinia store page state, except the admin leaderboard which is a hard-capped single-response list (`leaderboard_admin_view = 500`).
 
 ### 3.4 State Management (Pinia)
 
@@ -573,12 +576,15 @@ export const useAdminAuthStore = defineStore('adminAuth', () => {
 export const useConfigStore = defineStore('config', () => {
   const runtimeConfig = ref<RuntimeConfig | null>(null);
   const economyConfig = ref<EconomyConfig | null>(null);
+  const featureFlags = ref<FeatureFlag[] | null>(null);
 
   // config_cache_refresh_time_minutes = 5; local cache mirrors backend TTL
   async function fetchRuntimeConfig() { /* GET /admin/api/config/runtime */ }
   async function fetchEconomyConfig() { /* GET /admin/api/config/economy */ }
+  async function fetchFeatureFlags() { /* GET /admin/api/config/flags */ }
+  async function updateFeatureFlag(flag: string, enabled: boolean) { /* PUT /admin/api/config/flags/:flag */ }
 
-  return { runtimeConfig, economyConfig, fetchRuntimeConfig, fetchEconomyConfig };
+  return { runtimeConfig, economyConfig, featureFlags, fetchRuntimeConfig, fetchEconomyConfig, fetchFeatureFlags, updateFeatureFlag };
 });
 ```
 
@@ -604,6 +610,7 @@ const router = createRouter({
         { path: 'gdpr', component: () => import('../components/gdpr/GdprQueuePage.vue') },
         { path: 'config/runtime', component: () => import('../components/config/RuntimeConfigPage.vue') },
         { path: 'config/economy', component: () => import('../components/config/EconomyConfigPage.vue') },
+        { path: 'config/flags', component: () => import('../components/config/FlagsConfigPage.vue') },
         { path: 'email', component: () => import('../components/email/EmailMonitorPage.vue') },
         { path: 'analytics', component: () => import('../components/analytics/AnalyticsPage.vue') },
         { path: 'audit', component: () => import('../components/audit/AuditLogPage.vue') },
@@ -810,8 +817,8 @@ ClaimPage renders ClaimFlow
 - `VALIDATION_ERROR` (HTTP 400): Inline field error shown (malformed email, invalid UUID for `petId`)
 - `AGE_CONFIRMATION_REQUIRED` (HTTP 400): Checkbox re-highlighted with error message "Age confirmation required"
 - `PET_NOT_FOUND` (HTTP 404): "Pet not found. Please reload and try again."
-- `MAX_ATTEMPTS_REACHED` (HTTP 429): All inputs disabled; `claim_email_retry_cooldown_seconds = 60` second cooldown countdown shown
-- Rate limit (HTTP 429): `Retry-After` header value displayed as countdown
+- `MAX_ATTEMPTS_REACHED` (HTTP 429): All inputs disabled after reaching the 10-attempt session limit (`auth_rate_limit_code_entry_attempts_per_session = 10`); `Retry-After` countdown shown
+- `RATE_LIMIT_EXCEEDED` (HTTP 429): Email claim rate limit reached; `claim_email_retry_cooldown_seconds = 60` second cooldown countdown shown
 
 ### 5.2 Training Interaction
 
