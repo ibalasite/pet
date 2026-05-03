@@ -623,6 +623,7 @@ Performs one training action on the authenticated player's pet, incrementing a s
 | 400 | `STAT_AT_MAXIMUM` | The target stat is already at 100 (`pet_stat_max = 100`) |
 | 401 | `UNAUTHORIZED` | Missing or invalid token |
 | 403 | `NOT_OWNER` | Token does not belong to this pet's owner |
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 
 ---
 
@@ -678,10 +679,11 @@ Illustrative buff values: temporary +5 points for 24 hours (`food_buff_example_t
 
 | HTTP | Code | Condition |
 |------|------|-----------|
+| 400 | `VALIDATION_ERROR` | `magnitude` or `buffType` fails admin-configured range validation |
 | 400 | `STAT_AT_MAXIMUM` | Target stat is already at 100 |
 | 401 | `UNAUTHORIZED` | Missing or invalid token |
 | 403 | `NOT_OWNER` | Token does not belong to this pet's owner |
-| 400 | `VALIDATION_ERROR` | `magnitude` or `buffType` fails admin-configured range validation |
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 
 ---
 
@@ -739,9 +741,11 @@ Enters the authenticated pet into the matchmaking queue for an arena battle. Use
 
 | HTTP | Code | Condition |
 |------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Invalid `mode` value or malformed `petId` |
 | 401 | `UNAUTHORIZED` | Missing or invalid token |
 | 403 | `NOT_OWNER` | Token does not own the given `petId` |
 | 403 | `PET_BANNED` | Pet is banned and cannot enter the arena |
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 | 408 | `MATCHMAKING_TIMEOUT` | No opponent found within 30 seconds and `acceptAI` was not `true` |
 | 429 | `RATE_LIMIT_EXCEEDED` | Hourly battle limit exceeded |
 
@@ -858,6 +862,12 @@ Returns the last 20 arena battles for a pet. Public endpoint.
 ```
 
 The last **20 battles** are shown publicly (`arena_battle_records_display_count = 20`).
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 
 ---
 
