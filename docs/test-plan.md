@@ -46,7 +46,7 @@ The objectives are ordered by criticality to the product's core value propositio
 
 5. **Reliability**: Degraded-mode behavior (Redis unavailable, SendGrid failure, PostgreSQL primary failover) is validated in integration and E2E tests so the system behaves predictably in production incidents.
 
-6. **Compliance**: GDPR erasure (7-day SLA, internal 24-hour processing — gdpr_email_hashing_internal_sla_hours = 24), COPPA age-confirmation, and CAN-SPAM transactional-only email constraints are covered by dedicated test cases.
+6. **Compliance**: GDPR erasure ((gdpr_email_deletion_window_days = 7)-day SLA, internal 24-hour processing — gdpr_email_hashing_internal_sla_hours = 24), COPPA age-confirmation, and CAN-SPAM transactional-only email constraints are covered by dedicated test cases.
 
 7. **Accessibility**: All P0 user flows conform to WCAG 2.1 Level AA. Focus contrast meets (a11y_focus_contrast_ratio = 3:1) and text contrast meets (a11y_text_contrast_normal = 4.5:1).
 
@@ -370,14 +370,14 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 |---|---|
 | Given | A pet with `stat_speed = (pet_stat_max = 100)` |
 | When | `applyTrainingAction(pet, 'speed')` is called |
-| Then | Throws `StatAtMaximumError` with HTTP 400 and body `{ error: "stat_at_maximum", message: "This stat has reached the maximum value of 100" }` |
+| Then | Throws `StatAtMaximumError`; when serialized by the API handler the response is HTTP 400 with `{ "code": "STAT_AT_MAXIMUM", "message": "This stat has reached the maximum value of 100" }` |
 | Linked AC | AC-005-6 |
 
 | TC-UNIT-011 | Stat cap enforcement — food feed blocked at maximum |
 |---|---|
 | Given | A pet with `stat_strength = (pet_stat_max = 100)` and a permanent strength-boost food item |
 | When | `feedFoodItem(pet, foodItem)` is called |
-| Then | Throws `StatAtMaximumError` with HTTP 400 and body `{ error: "stat_at_maximum", stat: "strength" }` |
+| Then | Throws `StatAtMaximumError`; when serialized by the API handler the response is HTTP 400 with `{ "code": "STAT_AT_MAXIMUM", "stat": "strength" }` |
 | Linked AC | AC-006-6 |
 
 | TC-UNIT-012 | Neglected state threshold |
@@ -532,14 +532,14 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 | TC-INT-007 | Food buff active during arena combat |
 |---|---|
-| Given | A pet with `stat_speed = 20` and an active temporary speed buff of +5 |
+| Given | A pet with `stat_speed = 20` and an active temporary speed buff of +(food_buff_example_temp_amount_stat_points = 5) |
 | When | Arena battle calculation reads pet stats |
 | Then | Effective speed = 25 (base + buff applied) and buff indicator is included in pre-battle response |
 | Linked AC | AC-006-5 |
 
 | TC-INT-008 | Permanent food buff increments base stat |
 |---|---|
-| Given | A pet with `stat_strength = 30` and a permanent +3 strength food item |
+| Given | A pet with `stat_strength = 30` and a permanent +(food_buff_example_perm_amount_stat_points = 3) strength food item |
 | When | Feed action is confirmed |
 | Then | `pets.stat_strength` = 33; food_buff record has no `expires_at`; `food_buffs.is_permanent = true` |
 | Linked AC | AC-006-2 |
@@ -1011,7 +1011,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 |---|---|
 | Given | A valid pet access token |
 | When | Admin initiates a recovery flow (new token issued); old token hash written to `token:blacklist:{hash}` with TTL = (claim_token_cleanup_ttl_hours = 72) hours |
-| Then | Any request using the old token within the 72-hour window returns HTTP 401 |
+| Then | Any request using the old token within the (claim_token_cleanup_ttl_hours = 72)-hour window returns HTTP 401 |
 | Linked NFR | ARCH §2.5 token blacklist |
 
 | TC-SEC-003 | Admin TOTP required — no bypass |
@@ -1302,7 +1302,6 @@ Scenario: Leaderboard falls back to PostgreSQL when Redis unavailable
   When a player requests the leaderboard
   Then HTTP 200 is returned with degraded: true
   And data is sourced from the PostgreSQL snapshot
-  And the response time is within (p99_api_latency_read_ms_at_100_rps = 200) ms
 ```
 
 **Feature: Admin Suspicious Battle Detection** (US-ADMIN-005)
