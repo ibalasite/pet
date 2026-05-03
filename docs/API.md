@@ -742,7 +742,7 @@ Enters the authenticated pet into the matchmaking queue for an arena battle. Use
 | Field | Description |
 |-------|-------------|
 | `matchId` | UUID of the completed arena match. Use with `GET /api/v1/arena/match/:matchId` to fetch the full battle record. |
-| `result` | `WIN` or `LOSS`. Tie-breaking: if both pets have equal effective stats after the ±15% modifier (`arena_battle_outcome_random_modifier_percent = 15`), the challenger (earlier enqueue timestamp) wins — deterministic, reproducible via `random_seed`. |
+| `result` | `WIN` or `LOSS`. Tie-breaking: if both pets have equal effective stats after the ±15% modifier (`arena_battle_outcome_random_modifier_percent = 15`), the challenger (earlier enqueue timestamp) wins — deterministic and reproducible via the `battleLog` in `GET /api/v1/arena/match/:matchId`. |
 | `opponentPetId` | UUID of the opponent pet. `null` when `isAiOpponent` is `true`. |
 | `isAiOpponent` | `true` when matched against the AI fallback. |
 | `statDelta` | Net stat value applied after buffs and the random modifier. |
