@@ -142,6 +142,8 @@ App
 │   │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
 │   ├── ArenaPage (/arena)
 │   │   └── BattleAnimation (Phaser.js scene)
+│   ├── BattleResultPage (/arena/result/:battleId)
+│   │   └── BattleResultCard (WIN/LOSS variants)
 │   ├── LeaderboardPage (/leaderboard)
 │   │   └── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100)
 │   └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only
@@ -309,6 +311,7 @@ Public top 100 (LEADERBOARD_TOP_DISPLAY = 100); admin sees top 500 (LEADERBOARD_
 | `rl:claim:cooldown:{email_hash}` | 60s | cooldown | CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS |
 | `rl:arena:{pet_id}` | 3600s | 10/hr default | ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT |
 | `rl:code_entry:{session_id}` | 900s | 10/session | AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION |
+| `rl:code_entry:cooldown:{session_id}` | 60s | cooldown sentinel on MAX_ATTEMPTS_REACHED — HTTP 429 Retry-After: 60 while key exists | CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS |
 | `rl:admin_login:{ip_hash}` | 900s | 10/15 min | ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS |
 | `rl:admin:{admin_id}` | 60s | 100/min | ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE |
 
@@ -762,6 +765,8 @@ Three-factor admin authentication:
 
 TOTP enrollment is enforced at first login: `TOTP_SETUP_REQUIRED` error with a short-lived setup token (HS256 JWT, 15-minute TTL) is returned when `totp_secret_encrypted IS NULL`. No authenticated session can be established until TOTP setup is complete.
 
+**Optional IP Allowlist**: The admin portal supports optional restriction to operator IP ranges via `ADMIN_ALLOWED_IPS` environment variable (comma-separated CIDR list). When set, requests from IPs outside the allowlist receive HTTP 403 `FORBIDDEN` before credential check. When unset, IP restriction is disabled (default). Documented in EDD §9.3.
+
 **Role Model**:
 
 | Role | Scope |
@@ -1058,7 +1063,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard: 
 | P99 read latency | < 200 ms at 100 RPS | P99_API_LATENCY_READ_MS_AT_100_RPS |
 | P99 write latency | < 500 ms at 100 RPS | P99_API_LATENCY_WRITE_MS_AT_100_RPS |
 | Arena battle E2E | < 2 s | ARENA_BATTLE_E2E_SECONDS |
-| Leaderboard update | ≤ 30 s | LEADERBOARD_UPDATE_LAG_MAX_SECONDS |
+| Leaderboard update | ≤ 30 s | LEADERBOARD_UPDATE_LAG_SECONDS |
 
 ---
 
@@ -1081,7 +1086,7 @@ All API errors return a consistent envelope:
 **Production Error Sanitization**:
 In `NODE_ENV=production`, the Fastify global error handler strips `stack`, internal `code`, and path/detail fields from all HTTP 500 responses before serialization. Only public `code`, user-safe `message`, and optional `retryAfter` are returned.
 
-**Standard Error Codes**: `VALIDATION_ERROR`, `NOT_FOUND`, `ALREADY_CLAIMED`, `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`, `STAT_AT_MAXIMUM`, `RATE_LIMIT_EXCEEDED`, `UNAUTHORIZED`, `FORBIDDEN`, `PET_BANNED`, `NOT_OWNER`, `MATCHMAKING_TIMEOUT`, `INTERNAL_SERVER_ERROR`.
+**Standard Error Codes**: `VALIDATION_ERROR`, `NOT_FOUND`, `ALREADY_CLAIMED`, `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`, `STAT_AT_MAXIMUM`, `RATE_LIMIT_EXCEEDED`, `UNAUTHORIZED`, `FORBIDDEN`, `PET_BANNED`, `NOT_OWNER`, `MATCHMAKING_TIMEOUT`, `INTERNAL_SERVER_ERROR`, `ACCOUNT_LOCKED`, `WRONG_REQUEST_TYPE`, `OUT_OF_RANGE`, `CONFLICT`, `PET_NOT_FOUND`, `AGE_CONFIRMATION_REQUIRED`.
 
 **Global Defaults**:
 - All authenticated endpoints: HTTP 401 `UNAUTHORIZED` for missing/invalid tokens
