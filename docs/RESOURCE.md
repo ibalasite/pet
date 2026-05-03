@@ -6,7 +6,7 @@ upstream-docs:
   - docs/EDD.md    # Tech stack: Web / Phaser.js / React, asset pipeline
   - docs/FRONTEND.md  # Asset usage, loading strategy, directory structure
   - docs/CLIENT_IMPL.md  # Asset budgets, naming conventions, loading constraints
-version: "1.0.7"
+version: "1.0.8"
 last-updated: "2026-05-04"
 ---
 
@@ -35,6 +35,7 @@ last-updated: "2026-05-04"
 | 1.0.5 | 2026-05-04 | Review Agent R10 | Fix RES-ANIM-001 description inaccurate wording: "recommended maximum" → "8 frames recommended" to match VDD §4.2 which sets 4 as minimum and 8 as recommended (not as a maximum cap) |
 | 1.0.6 | 2026-05-04 | Review Agent R11 | Add RES-IMG-046 og-default-1200x630.png and RES-IMG-047 og-battle-result-1200x630.png (missing PNG last-resort fallbacks for OG social card backgrounds — VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort); renumber RES-IMG-046/047→048/049 (bg-landing-hero, bg-leaderboard); update §4 checklist OG entry to include PNG last resort; update §5 license table |
 | 1.0.7 | 2026-05-04 | Review Agent R12 | Add RES-IMG-050–061 — PNG fallback exports for all 12 SVG game UI icons (VDD §7.1 requires PNG-24 fallbacks for all SVG icons; §1.4 preamble acknowledged the requirement but no rows existed); update §1.4 preamble, §4 checklist, §5 license table |
+| 1.0.8 | 2026-05-04 | Review Agent R13 | Fix §1.7 section header imprecise citation (VDD §8 → VDD §8.1 / §8.7); §8 is the parent heading for all Screen Visual Specs; §8.1 is the Landing Page spec (RES-IMG-048) and §8.7 is the Leaderboard Page spec (RES-IMG-049) |
 
 ---
 
@@ -156,7 +157,7 @@ last-updated: "2026-05-04"
 | RES-IMG-046 | og-default-1200x630.png | image | Midjourney v6 | dark luxury pixel art game card, 1200x630px, deep navy `#1a1a2e` background, "pixel-pet-arena" wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold `#fdcb6e`, purple `#a29bfe`, teal `#4ecdc4`, retro game aesthetic, premium collectible game social share card, hard pixel art style | 1200×630px | ≤ 400 KB | needed | public/assets/og/og-default-1200x630.png | Default OG card PNG last-resort fallback (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort for OG social card backgrounds. Served only when AVIF and WebP are both unavailable. |
 | RES-IMG-047 | og-battle-result-1200x630.png | image | Midjourney v6 | dark luxury pixel art battle result card template, 1200x630px, deep navy `#1a1a2e` background, two pixel creature placeholder silhouettes side by side, gold `#fdcb6e` "WIN" pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style | 1200×630px | ≤ 400 KB | needed | public/assets/og/og-battle-result-1200x630.png | Battle result OG card template PNG last-resort fallback (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort for OG social card backgrounds. Served only when AVIF and WebP are both unavailable. |
 
-### §1.7 UI Scene Backgrounds / Page-Level Visuals (VDD §8)
+### §1.7 UI Scene Backgrounds / Page-Level Visuals (VDD §8.1 / §8.7)
 
 | ID | filename | type | source_tool | prompt | dimensions | file_size_budget | status | output_path | description |
 |----|----------|------|-------------|--------|-----------|-----------------|--------|-------------|-------------|
