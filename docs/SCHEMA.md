@@ -121,7 +121,7 @@ CREATE TABLE pets (
 );
 
 COMMENT ON COLUMN pets.seed IS 'Procedural generation seed — globally unique; drives all sprite generation determinism.';
-COMMENT ON COLUMN pets.rarity IS 'Rarity tier assigned at generation time by weighted random draw: COMMON 60%, RARE 25%, EPIC 12%, LEGENDARY 3% (rarity_common/rare/epic/legendary_percent). Weights are admin-tunable via config but must always sum to 100%.';
+COMMENT ON COLUMN pets.rarity IS 'Rarity tier assigned at generation time by weighted random draw: COMMON 60%, RARE 25%, EPIC 12%, LEGENDARY 3% (rarity_common_percent = 60, rarity_rare_percent = 25, rarity_epic_percent = 12, rarity_legendary_percent = 3). Weights are admin-tunable via config but must always sum to 100%.';
 COMMENT ON COLUMN pets.pet_name IS 'Auto-generated from species + color combination at row creation; derived from seed.';
 COMMENT ON COLUMN pets.stat_speed IS 'Speed stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
 COMMENT ON COLUMN pets.stat_strength IS 'Strength stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
@@ -653,7 +653,7 @@ All enums are defined as PostgreSQL `ENUM` types to enforce domain values at the
 ```sql
 -- Pet rarity tiers. Drop weights (admin-tunable, must sum to 100%):
 --   COMMON = 60%, RARE = 25%, EPIC = 12%, LEGENDARY = 3%
---   (rarity_common/rare/epic/legendary_percent from constants.json probability section)
+--   (rarity_common_percent = 60, rarity_rare_percent = 25, rarity_epic_percent = 12, rarity_legendary_percent = 3)
 CREATE TYPE rarity_enum AS ENUM (
     'COMMON',
     'RARE',
