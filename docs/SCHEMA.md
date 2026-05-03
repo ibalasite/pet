@@ -367,6 +367,7 @@ CREATE TABLE marketplace_listings (
     listed_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     expires_at        TIMESTAMPTZ  NULL,
     completed_at      TIMESTAMPTZ  NULL,
+    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_marketplace_listings PRIMARY KEY (id),
     CONSTRAINT fk_marketplace_listings_pet
@@ -385,6 +386,7 @@ COMMENT ON COLUMN marketplace_listings.price_credits IS 'Asking price in food cr
 COMMENT ON COLUMN marketplace_listings.status IS 'active | cancelled | sold.';
 COMMENT ON COLUMN marketplace_listings.expires_at IS 'Optional listing expiry. NULL = no expiry.';
 COMMENT ON COLUMN marketplace_listings.completed_at IS 'Set when status transitions to sold or cancelled.';
+COMMENT ON COLUMN marketplace_listings.updated_at IS 'Updated by the application on every mutation: status transitions (active → sold/cancelled) and background expiry job.';
 ```
 
 ```sql
@@ -443,8 +445,7 @@ COMMENT ON COLUMN marketplace_transactions.listed_at IS 'Copied from the listing
 ```
 
 ```sql
--- listing_id is also the UNIQUE constraint target; the implicit unique index serves FK scans.
-CREATE INDEX idx_marketplace_transactions_listing   ON marketplace_transactions (listing_id);
+-- listing_id: uq_marketplace_transactions_listing UNIQUE constraint creates an implicit index that serves FK scans; no separate index needed.
 CREATE INDEX idx_marketplace_transactions_completed ON marketplace_transactions (completed_at DESC);
 -- Anti-flip query: finds the most recent completed trade for a pet via ORDER BY completed_at DESC LIMIT 1.
 -- Leading pet_id column also serves the FK RESTRICT scan (ON DELETE RESTRICT).
@@ -472,6 +473,7 @@ CREATE TABLE admin_accounts (
     locked_until            TIMESTAMPTZ NULL,
     deactivated_at          TIMESTAMPTZ NULL,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_admin_accounts PRIMARY KEY (id),
     CONSTRAINT uq_admin_accounts_username UNIQUE (username),
@@ -486,10 +488,11 @@ COMMENT ON COLUMN admin_accounts.role IS 'super_admin | moderator | read_only.';
 COMMENT ON COLUMN admin_accounts.failed_attempts IS 'Consecutive failed login counter. Reset to 0 on successful login.';
 COMMENT ON COLUMN admin_accounts.locked_until IS 'Non-NULL and in future = account is locked. Set after 10 consecutive failures (admin_login_lockout_threshold = 10) for 30 minutes (admin_login_lockout_duration_minutes = 30). NOT used for permanent deactivation.';
 COMMENT ON COLUMN admin_accounts.deactivated_at IS 'Non-NULL = account is permanently deactivated. Set by DELETE /admin/api/roles/:adminId (soft-deactivate). Prevents login. Row is never hard-deleted.';
+COMMENT ON COLUMN admin_accounts.updated_at IS 'Updated by the application on every mutation: password change, TOTP enrollment/reset, role change, lockout set/cleared, and deactivation.';
 ```
 
 ```sql
-CREATE INDEX idx_admin_accounts_username ON admin_accounts (username);
+-- username: uq_admin_accounts_username UNIQUE constraint creates an implicit index for login lookups; no separate index needed.
 ```
 
 ---
@@ -745,6 +748,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
 - `idx_claim_identities_deletion` — `WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL`: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once `email_encrypted` is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.
 - `idx_admin_audit_log_ip_hash_cleanup` — `WHERE ip_address_hash IS NOT NULL`: used by the background job that nulls `ip_address_hash` after 90 days (`ip_address_log_retention_days = 90`). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by `idx_claim_identities_deletion`.
+- `idx_pets_claim_identity` — `WHERE claim_identity_id IS NOT NULL`: only claimed pets have this FK set; the partial index supports the GDPR erasure lookup query (`SELECT id FROM pets WHERE claim_identity_id = $1`) efficiently and also serves the FK integrity scan. See §6.5 for the full query pattern.
 
 ### 6.2 Composite Indexes for History Queries
 
@@ -781,6 +785,22 @@ SELECT id FROM pets WHERE claim_identity_id = $1;
 
 This avoids depending on the ephemeral `claim_codes` table, which is purged 72 hours after use. The partial index `idx_pets_claim_identity` supports this scan efficiently.
 
-### 6.6 Connection Pool Sizing
+### 6.6 Single-Column Support Indexes
+
+These full-table indexes cover FK scans, sort-only queries, and background job targets that are not classified as partial or composite:
+
+- `idx_arena_matches_completed_at (completed_at)` — supports admin list queries ordered by recency and serves as the sort key for leaderboard-adjacent analytics. Not partial because all rows have a non-NULL `completed_at`.
+- `idx_arena_matches_winner (winner_pet_id)` — supports the FK integrity scan for `winner_pet_id ON DELETE SET NULL`. Required because PostgreSQL needs an index on the referencing column when the referenced row is deleted.
+- `idx_claim_codes_pet_id (pet_id)` — supports the FK CASCADE scan when a `pets` row is deleted (`ON DELETE CASCADE`). Also used by the OTP verification query `WHERE pet_id = $1 AND expires_at > NOW() AND used_at IS NULL`.
+- `idx_claim_codes_email_hash (email_hash)` — supports the OTP lookup query `WHERE email_hash = $1` to retrieve pending codes for a given email.
+- `idx_food_buffs_pet_id (pet_id)` — supports the FK CASCADE scan and the active-buff query `WHERE pet_id = $1 AND (expires_at IS NULL OR expires_at > NOW())`.
+- `idx_food_buffs_record_expires (record_expires_at)` — supports the background cleanup job `DELETE FROM food_buffs WHERE record_expires_at < NOW()` (`food_buff_record_retention_days = 30`).
+- `idx_marketplace_listings_pet (pet_id)` — supports the FK RESTRICT scan and seller-facing queries `WHERE pet_id = $1`.
+- `idx_marketplace_listings_listed_at (listed_at DESC)` — supports the admin and public marketplace browse query `ORDER BY listed_at DESC`.
+- `idx_marketplace_transactions_completed (completed_at DESC)` — supports admin transaction audit queries ordered by recency.
+- `idx_gdpr_requests_identity (claim_identity_id, submitted_at DESC)` — composite: supports the query `WHERE claim_identity_id = $1 ORDER BY submitted_at DESC` for listing all requests by a data subject. The leading column also serves the FK RESTRICT scan (`ON DELETE RESTRICT`).
+- `idx_gdpr_requests_status (status, submitted_at)` — supports the admin work queue query `WHERE status IN ('pending', 'processing') ORDER BY submitted_at` for processing requests in FIFO order.
+
+### 6.7 Connection Pool Sizing
 
 At `db_connection_pool_min_connections = 20` and `db_connection_pool_max_connections = 50`, the pool is sized for the sustained 100 RPS target (`normal_operation_rps = 100`) with headroom to the 500 RPS peak (`peak_operation_rps = 500`) before autoscaling adds replicas. Each API server process holds its own pool; with 2 minimum replicas, the database receives up to 100 connections under normal conditions.
