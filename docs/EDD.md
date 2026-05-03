@@ -555,6 +555,12 @@ Auth: None (TOTP + password)
 Request: `{ username: string, password: string, totpCode: string }`
 Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY / ABSOLUTE_EXPIRY)
 
+#### POST /admin/api/auth/totp/setup
+Auth: Admin session (first-login or TOTP-not-yet-enrolled)
+Request: `{ password: string }` (password re-confirmation required)
+Response: `{ otpAuthUrl: string, backupCodes: string[] }` — otpAuthUrl is a `otpauth://totp/...` URI for QR scan
+Description: Generates a new TOTP secret, encrypts it, stores in `admin_users.totp_secret_encrypted`, and returns the provisioning URI plus 10 single-use backup codes. Must be called before the first TOTP-gated login. On first login (when `totp_secret_encrypted IS NULL`), the login endpoint returns HTTP 403 with `{ code: "TOTP_SETUP_REQUIRED" }` and the client redirects to the TOTP setup page. After setup, subsequent logins require `totpCode` in the standard login request.
+
 #### POST /admin/api/auth/logout
 Auth: Admin session
 Description: Invalidate admin session; writes logout event to audit log
@@ -693,6 +699,7 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 - Absolute expiry: 8 hours regardless of activity (ADMIN_SESSION_ABSOLUTE_EXPIRY = 8h)
 - Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100)
 - All admin auth events (login, logout, failed attempt) written to audit log
+- **First-login TOTP enrollment**: New admin accounts have `totp_secret_encrypted = NULL`. On first login attempt (correct username+password but no TOTP secret), the login endpoint returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED" }`. The admin client redirects to the TOTP setup page where `POST /admin/api/auth/totp/setup` generates and encrypts a TOTP secret. All subsequent logins require a valid `totpCode`. There is no path to an authenticated session without completing TOTP enrollment.
 
 ### §6.4 Rate Limiting Summary
 
@@ -893,7 +900,7 @@ The admin portal is deployed as a separate Vite application. It shares backend A
 | Runtime Config | /admin/config/runtime | Arena rate limits, rarity weights, matchmaking timeout | Super Admin |
 | Economy Config | /admin/config/economy | Food buff multipliers (0.5×–5.0×), arena entry cost/cooldown | Super Admin |
 | Email Monitor | /admin/email | SendGrid delivery status, bounce rates, spam complaints | Moderator+ |
-| Analytics | /admin/analytics | DAP trend, claim conversion, retention cohorts | Analyst+ |
+| Analytics | /admin/analytics | DAP trend, claim conversion, retention cohorts | Moderator+ |
 | Audit Log | /admin/audit | Full immutable audit trail, 2-year retention | Super Admin |
 | Roles | /admin/roles | Admin account management, TOTP reset | Super Admin |
 
@@ -1057,7 +1064,8 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 | Claim flow end-to-end | POST /api/v1/claim → verify email send → POST /api/v1/claim/verify → assert token | Vitest + Nodemailer test inbox |
 | Arena battle calculation | Submit two pets to `/api/v1/arena/enter`; assert winner determinism for same seeds | Vitest |
 | Rate limiting | Exceed limit, assert HTTP 429 + Retry-After; assert counter resets after TTL | Vitest + Redis test instance |
-| GDPR deletion | Trigger deletion, run background job, assert email_encrypted = NULL | Vitest + test PostgreSQL |
+| GDPR deletion (admin) | Trigger deletion via POST /admin/api/gdpr/delete, run background job, assert email_encrypted = NULL | Vitest + test PostgreSQL |
+| GDPR self-service request | POST /api/v1/gdpr/request with valid pet token: assert 202 + jobId; with invalid token: assert 401; assert request queued in GDPR processing table | Vitest + test PostgreSQL |
 | Leaderboard consistency | Update pet stats, run arena, assert leaderboard rank updated within 30s | Vitest + Redis test instance |
 
 ### §12.3 E2E Test Plan
