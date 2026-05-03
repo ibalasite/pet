@@ -237,6 +237,7 @@ banned_at        TIMESTAMPTZ  NULL
 created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 generation_meta  JSONB        NOT NULL DEFAULT '{}'  -- {body, head, color_palette, accessory, rarity_trait, pattern}
+claim_identity_id UUID        NULL REFERENCES claim_identities(id) ON DELETE SET NULL -- Set at claim time; enables GDPR erasure lookup after claim_codes purge
 ──────────────────────────────────────────────────────
 INDEXES:
   idx_pets_rarity           ON pets(rarity)
@@ -244,6 +245,7 @@ INDEXES:
   idx_pets_is_banned        ON pets(is_banned) WHERE is_banned = TRUE
   idx_pets_owner_token_hash ON pets(owner_token_hash) WHERE owner_token_hash IS NOT NULL
   idx_pets_seed             ON pets(seed) -- unique, supports uniqueness check on generation
+  idx_pets_claim_identity   ON pets(claim_identity_id) WHERE claim_identity_id IS NOT NULL
 ```
 
 Notes:
@@ -385,7 +387,7 @@ INDEXES:
   idx_food_buffs_record_expires ON food_buffs(record_expires_at)  -- for cleanup job
 ```
 
-### §4.8 ClaimCode (Redis — ephemeral rate-limit counters)
+### §4.8 Redis Key Patterns
 
 The following are Redis key patterns (not PostgreSQL tables):
 
@@ -398,6 +400,52 @@ redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_
 redis_key: matchmaking:queue:{mode}      NO TTL       Redis List (LPUSH / BRPOP)
 redis_key: session:admin:{session_id}    TTL: 14400s  Value: admin user info JSON
 ```
+
+### §4.9 AdminUser
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| id | UUID | PK DEFAULT gen_random_uuid() | |
+| username | VARCHAR(64) | NOT NULL UNIQUE | Display name for audit log |
+| password_hash | TEXT | NOT NULL | bcrypt, min 12 rounds |
+| totp_secret_encrypted | TEXT | NULL | Encrypted TOTP secret (set at first login) |
+| role | VARCHAR(32) | NOT NULL DEFAULT 'moderator' | 'super_admin' \| 'moderator' \| 'read_only' |
+| last_login_at | TIMESTAMPTZ | NULL | |
+| failed_attempts | SMALLINT | NOT NULL DEFAULT 0 | Reset on success |
+| created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+
+**Indexes**: idx_admin_users_username ON admin_users(username)
+
+### §4.10 AuditLog
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| id | BIGSERIAL | PK | Sequential for log ordering |
+| admin_id | UUID | NOT NULL REFERENCES admin_users(id) | Actor |
+| action | VARCHAR(128) | NOT NULL | e.g., 'pet.ban', 'config.arena_rate_limit' |
+| target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config' |
+| target_id | TEXT | NULL | UUID or key of affected entity |
+| detail | JSONB | NULL | Action-specific payload |
+| ip_address | INET | NULL | Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
+| created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+
+**Retention**: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years.
+**Indexes**: idx_audit_log_created_at ON audit_log(created_at DESC); idx_audit_log_admin_id ON audit_log(admin_id, created_at DESC)
+
+### §4.11 TradeRecord (Phase 3 — FF_MARKETPLACE)
+
+| Column | Type | Constraints | Notes |
+|--------|------|-------------|-------|
+| id | UUID | PK DEFAULT gen_random_uuid() | |
+| listing_pet_id | UUID | NOT NULL REFERENCES pets(id) | Pet being traded |
+| seller_token_hash | TEXT | NOT NULL | Hashed access token of seller |
+| buyer_token_hash | TEXT | NOT NULL | Hashed access token of buyer |
+| price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Food credits |
+| fee_credits | INTEGER | NOT NULL | 5% platform fee: floor(price_credits * 0.05) |
+| listed_at | TIMESTAMPTZ | NOT NULL | |
+| completed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+
+**Indexes**: idx_trade_records_listing_pet ON trade_records(listing_pet_id); idx_trade_records_completed ON trade_records(completed_at DESC)
 
 ---
 
@@ -507,6 +555,22 @@ Auth: None (TOTP + password)
 Request: `{ username: string, password: string, totpCode: string }`
 Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY / ABSOLUTE_EXPIRY)
 
+#### POST /admin/api/auth/logout
+Auth: Admin session
+Description: Invalidate admin session; writes logout event to audit log
+
+#### GET /admin/api/roles
+Auth: Admin session (Super Admin)
+Description: List admin users and roles
+
+#### POST /admin/api/roles
+Auth: Admin session (Super Admin)
+Description: Create admin user (username, role, temp password)
+
+#### DELETE /admin/api/roles/:adminId
+Auth: Admin session (Super Admin)
+Description: Deactivate admin account
+
 #### GET /admin/api/pets
 Auth: Admin session (Moderator+)
 Query: `?page=1&limit=20&search=<petId|emailFragment>&rarity=&isBanned=`
@@ -542,6 +606,14 @@ Auth: Admin session (Super Admin)
 Request: `{ emailHash: string, reason: string }`
 Response: `{ jobId: string, estimatedCompletion: ISO8601 }`
 Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW).
+
+#### POST /admin/api/battles/:matchId/flag
+Auth: Admin session (Moderator)
+Description: Flag a battle as suspicious; writes to audit log; increments bot_detection counter
+
+#### DELETE /admin/api/battles/:matchId/flag
+Auth: Admin session (Moderator)
+Description: Remove a flag from a battle
 
 #### GET /admin/api/audit
 Auth: Admin session (Super Admin)
@@ -644,6 +716,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 - **COPPA**: Age-13 confirmation checkbox required on claim form; label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
 - **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years).
 - **CAN-SPAM**: All emails are transactional; no marketing email without separate opt-in consent.
+- **GDPR FK lookup**: The `pets.claim_identity_id` FK enables the GDPR self-service endpoint to locate the `claim_identities` row for a given pet token without depending on the ephemeral `claim_codes` table (purged after CLAIM_TOKEN_CLEANUP_TTL = 72h).
 
 ---
 
@@ -768,7 +841,7 @@ Cache invalidation rules:
 
 - **Engine**: Phaser.js 3 embedded as a React component via `PetCanvasEngine` class
 - **Canvas API**: `image-rendering: pixelated` + `image-rendering: crisp-edges` CSS applied to the canvas element
-- **Sprite sheets**: 64×64px sprites (**32×32px** (provisional; implementation must pass `SPRITE_RESOLUTION_PX` as a config constant — see §14 OQ-E01)), PNG format, indexed color palettes (≤16 colors per sprite for retro constraint)
+- **Sprite sheets**: 32×32px per frame (provisional — see §14 OQ-E01 for resolution; implementation passes `SPRITE_RESOLUTION_PX` as a config constant to avoid hard-coding), PNG format with transparency.
 - **Animation loop**: `requestAnimationFrame` via Phaser's internal scene update; target ≥30 FPS sustained on mid-range devices (NFR-PERF-07)
 - **Procedural generation**: Pet seed → 6-dimension attribute vector (body, head, color_palette, accessory, rarity_trait, pattern) → sprite sheet frame selection. Seed is stored in `pets.seed`; rendering is deterministic from seed. Combination space ≥1,000,000,000 (PET_GENERATION_COMBINATIONS_MIN).
 - **Reduced motion**: `prefers-reduced-motion: reduce` detection — static sprite replaces animation loop; no particle effects.
@@ -1015,7 +1088,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Scope**:
 - Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
 - PostgreSQL schema: `pets`, `claim_identities`, `claim_codes` tables
-- API endpoints: `POST /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `GET /api/v1/pet/:petId`
+- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `GET /api/v1/pet/:petId`
 - Email delivery: SendGrid integration + Nodemailer SMTP fallback
 - Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
 - Rate limiting: Redis-backed claim attempts (5/hr) and code entry (10/session)
@@ -1025,7 +1098,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Exit criteria**:
 - 20 invited alpha testers successfully claim and access their pets. Claim conversion rate ≥7% (CLAIM_CONVERSION_ALPHA_GO = 7%).
 - Core pet display: PetCanvas renders claimed pet with correct sprite, stats, and level.
-- Basic leaderboard: Top 100 leaderboard returns correct data within 30s of battle completion.
+- Basic leaderboard: Top 100 leaderboard returns correct data from seeded test data (no live battles required in Phase 1 — arena is Phase 2 scope).
 
 > **Note**: Basic arena is Phase 2 scope — Phase 1 validates claim flow, pet display, and leaderboard data pipeline only.
 
@@ -1065,7 +1138,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 | # | Question | Impact | Owner | Status |
 |---|---|---|---|---|
-| OQ-E01 | Sprite resolution: 16×16px (NES-era, simpler generation) vs 32×32px (more expressive)? Affects PetCanvasEngine, sprite sheet production, and canvas scaling logic. | Architecture (PDD OQ-D01) | Engineering + Design | OPEN |
+| OQ-E01 | Sprite resolution: 16×16px (NES-era, simpler generation) vs 32×32px (more expressive)? Affects PetCanvasEngine, sprite sheet production, and canvas scaling logic. **Provisional resolution**: Proceed with 32×32px sprites for Phase 1. Revisit at Phase 2 design review with UX/art team input. Implementation MUST use `SPRITE_RESOLUTION_PX = 32` config constant throughout (no hard-coded values). This closes the immediate Phase 1 blocker while preserving the ability to scale to 64×64 without code changes. | Architecture (PDD OQ-D01) | Engineering + Design | PROVISIONALLY RESOLVED (Phase 2 review) |
 | OQ-E02 | Arena matchmaking: HTTP long-poll (simpler, works everywhere) vs WebSocket (lower latency, higher complexity)? The 30-second matchmaking timeout fits HTTP long-poll; WebSocket may be needed if real-time battle animations require bidirectional events. | API complexity, infrastructure | Engineering | OPEN |
 | OQ-E03 | Admin portal deployment: Same Vercel project with route-based separation (`/admin`) vs. separate subdomain (`admin.pixel-pet-arena.com`)? Subdomain offers stricter cookie isolation and CSP separation. | Security, deployment | Engineering | OPEN |
 | OQ-E04 | Pet ownership transfer mechanism: If a user deletes their email account, can they transfer pet ownership to a new email? Current design requires the pet to become unclaimed (GDPR erasure). Is an ownership-transfer endpoint needed pre-GDPR-deletion? | Data model, GDPR flow | Engineering + Legal | OPEN |
