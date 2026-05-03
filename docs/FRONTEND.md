@@ -835,6 +835,7 @@ TrainingPage /pet/:petId/train
   │    usePet cache is invalidated → PetPage re-fetches
   │
   ├─ Error states:
+  │    HTTP 400 VALIDATION_ERROR → toast: "Invalid training type." (should not occur in normal flow)
   │    HTTP 400 TRAINING_LIMIT_REACHED → all action cards disabled; DailyResetTimer shown
   │    HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (pet_stat_max = 100)"; card remains
   │                                enabled for other stats not yet at max
@@ -895,8 +896,12 @@ ArenaPage /arena
   │    → POST /api/v1/arena/enter  { petId, mode, acceptAI?: boolean }
   │    Long-poll: server waits up to arena_matchmaking_timeout_seconds = 30s
   │    MatchmakingStatus shows "Finding opponent..." with animated dots
+  │    HTTP 400 VALIDATION_ERROR → toast: "Invalid arena mode." (should not occur in normal flow)
+  │    HTTP 401 → handled globally: clearPetToken() + redirect to /
+  │    HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
   │    HTTP 403 PET_BANNED → show ban notice; arena entry blocked
   │    HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)
+  │    HTTP 429 RATE_LIMIT_EXCEEDED → RateLimitBanner shown; Retry-After countdown displayed
   │
   ├─ A4a: Opponent found (< 30s)
   │    3-2-1 pixel countdown animation
@@ -943,10 +948,17 @@ MarketplacePage /marketplace
   ├─ Cancel listing (owner only):
   │    → DELETE /api/v1/marketplace/listings/:listingId
   │
-  └─ Buy:
-       → POST /api/v1/marketplace/listings/:listingId/buy
-       ← ownership transferred; buyer's token now controls the pet
-       Trade history: GET /api/v1/marketplace/history/:petId (authenticated, private)
+  ├─ Buy:
+  │    → POST /api/v1/marketplace/listings/:listingId/buy
+  │    ← ownership transferred; buyer's token now controls the pet
+  │    Trade history: GET /api/v1/marketplace/history/:petId (authenticated, private)
+  │
+  └─ Error states (all marketplace endpoints):
+       HTTP 400 VALIDATION_ERROR → inline error: price below minimum or anti-flip protection active
+       HTTP 401 UNAUTHORIZED → handled globally: clearPetToken() + redirect to /
+       HTTP 403 FEATURE_DISABLED → "Marketplace is not currently available." (FF_MARKETPLACE off)
+       HTTP 403 NOT_OWNER → toast: "You do not own this pet."
+       HTTP 404 NOT_FOUND → toast: "Listing or pet not found."
 ```
 
 ### 5.6 Leaderboard View
@@ -996,6 +1008,7 @@ GdprPage /gdpr
   │      rectification → "Processed within 24 hours (gdpr_email_rectification_response_hours = 24)"
   │
   └─ Error states:
+       HTTP 400 VALIDATION_ERROR → inline error: missing or invalid request type / malformed jobId
        HTTP 401 → redirect to / (token cleared)
        HTTP 403 FORBIDDEN → "Your account is not authorized to view this request."
        HTTP 404 NOT_FOUND → "Request not found."
@@ -1029,6 +1042,11 @@ AdminLoginPage /admin/login
   │    After admin_login_lockout_threshold = 10 consecutive failures
   │    ← HTTP 403  { error: { code: "ACCOUNT_LOCKED", details: { unlockedAt } } }
   │    Lockout duration: admin_login_lockout_duration_minutes = 30 min
+  │
+  ├─ Error states:
+  │    HTTP 400 VALIDATION_ERROR → inline field error: missing or malformed username/password/totpCode
+  │    HTTP 401 UNAUTHORIZED → "Invalid username or password." error shown on form
+  │    HTTP 429 RATE_LIMIT_EXCEEDED → "Too many login attempts. Please wait." with Retry-After countdown
   │
   └─ All auth events written to audit log (admin_audit_log_retention_years = 2 years)
 ```
