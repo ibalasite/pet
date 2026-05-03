@@ -189,6 +189,7 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 - SPF + DKIM configured; spam complaint rate target <0.1% (CONSTANTS)
 - Delivery SLO P90 ≤60 seconds (NFR-PERF-10)
 - Retry queue: 3 retries over 15 minutes on delivery failure (EMAIL_DELIVERY_FAILURE_RETRIES = 3; EMAIL_DELIVERY_RETRY_WINDOW_MINUTES = 15)
+- Plan ceiling: 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000); upgrade trigger if projected monthly volume approaches this cap
 
 **Fallback**: Nodemailer + SMTP
 - Activates automatically after 3 consecutive SendGrid failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3)
@@ -206,7 +207,7 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 | CI/CD | GitHub Actions | Test → build → deploy pipeline |
 | Container registry | GitHub Container Registry (ghcr.io) | Docker images for API servers |
 
-Monthly cost at DAU ≤5,000: $50–$200 (SERVER_COST_DAU5K_MONTHLY range from CONSTANTS).
+Monthly cost at DAU ≤5,000: $50–$200 (SERVER_COST_DAU5K_MONTHLY range from CONSTANTS). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000 from CONSTANTS).
 
 ### §3.7 Admin Portal Stack
 
@@ -1268,7 +1269,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Admin portal: Login + basic pet list view (Moderator role only)
 
 **Exit criteria**:
-- 20 invited alpha testers successfully claim and access their pets (ALPHA_BETA_TESTERS = 20). Claim conversion rate ≥7% go (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%); <3% triggers pivot (CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3%). Day-3 retention ≥30% to proceed (DAY_3_RETENTION_ALPHA_GO_PERCENT = 30%); <10% is no-go (DAY_3_RETENTION_NOGO_PERCENT = 10%).
+- 20 invited alpha testers successfully claim and access their pets (ALPHA_BETA_TESTERS = 20). Claim conversion rate ≥7% go (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%); <3% triggers pivot (CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3%). Day-1 return rate ≥50% (DAY_1_RETURN_RATE_TARGET_PERCENT = 50%). Day-3 retention ≥30% to proceed (DAY_3_RETENTION_ALPHA_GO_PERCENT = 30%); <10% is no-go (DAY_3_RETENTION_NOGO_PERCENT = 10%). Claim form error rate ≤2% (CLAIM_FORM_ERROR_RATE_MAX_PERCENT = 2%).
 - Core pet display: PetCanvas renders claimed pet with correct sprite, stats, and level.
 - Basic leaderboard: Top 100 leaderboard returns correct data from seeded test data (no live battles required in Phase 1 — arena is Phase 2 scope).
 
@@ -1304,7 +1305,33 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Performance hardening: Lighthouse CI gate (LCP <2.5s, FCP <1.5s, CLS <0.1); load testing at 500 RPS
 - Security hardening: CSP header with nonce-based script policy; full OWASP Top 10 review
 
-**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). ≥100 daily arena battles (ARENA_BATTLES_GA_SUCCESS_PER_DAY = 100). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). All admin GDPR workflows operational.
+**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). ≥100 daily arena battles (ARENA_BATTLES_GA_SUCCESS_PER_DAY = 100). Day-30 retention ≥15% (DAY_30_RETENTION_TARGET_PERCENT = 15%). Arena social share rate ≥5% (ARENA_SOCIAL_SHARE_RATE_TARGET_PERCENT = 5%). Organic traffic ≥30% of sessions (ORGANIC_TRAFFIC_TARGET_PERCENT = 30%). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). All admin GDPR workflows operational.
+
+### §13.4 Product KPI Targets (Cross-Phase)
+
+The following KPI targets from CONSTANTS apply across all phases:
+
+| Metric | Target | Constant | Phase |
+|---|---|---|---|
+| MAAPO Month 1 | 50 | MAAPO_TARGET_MONTH_1 | Phase 1 |
+| MAAPO Month 3 | 200 | MAAPO_TARGET_MONTH_3 | Phase 2 |
+| MAAPO Month 6 | 500 | MAAPO_TARGET_MONTH_6 | Phase 3 |
+| MAAPO Month 12 | 1,000 | MAAPO_TARGET_MONTH_12 | GA |
+| DAP Week 4 | 100 | DAP_TARGET_WEEK_4 | Phase 1 |
+| DAP Month 3 | 500 | DAP_TARGET_MONTH_3 | Phase 2 |
+| DAP Month 6 | 1,000 | DAP_TARGET_MONTH_6 | Phase 3 |
+| DAP Month 12 | 2,000 | DAP_TARGET_MONTH_12 | GA |
+| Day-1 return rate | ≥50% | DAY_1_RETURN_RATE_TARGET_PERCENT | Phase 1+ |
+| Arena fair-play rate | ≥95% | ARENA_FAIR_PLAY_RATE_TARGET_PERCENT | Phase 2+ |
+| Claim form error rate | ≤2% | CLAIM_FORM_ERROR_RATE_MAX_PERCENT | Phase 1+ |
+| Leaderboard UV/DAU ratio | ≥20% | LEADERBOARD_UV_DAU_RATIO_TARGET_PERCENT | Phase 2+ |
+
+### §13.5 A/B Testing Parameters
+
+For claim flow optimization (tests 001–002) and arena engagement tests (003–004):
+- Sample size: 1,000 visitors per arm for claim tests (AB_TEST_SAMPLE_SIZE_001_002_VISITORS_PER_ARM = 1,000)
+- Sample size: 500 per arm for engagement tests (AB_TEST_SAMPLE_SIZE_003_004_PER_ARM = 500)
+- Test duration: 2 weeks per experiment (AB_TEST_DURATION_WEEKS = 2)
 
 ---
 
