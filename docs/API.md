@@ -947,6 +947,12 @@ Returns the leaderboard rank of a specific pet.
 
 `rank` is `null` if the pet is not on the leaderboard (e.g. banned, or has not fought enough battles).
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
+
 ---
 
 ### 5.5 GDPR Self-Service Endpoints
@@ -1088,9 +1094,11 @@ Returns trade history for a pet. **Private** — only the pet's current owner ca
 
 | HTTP | Code | Condition |
 |------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Price below minimum or anti-flip protection active |
+| 401 | `UNAUTHORIZED` | Missing or invalid pet token (authenticated endpoints only) |
 | 403 | `FEATURE_DISABLED` | `FF_MARKETPLACE` feature flag is off |
 | 403 | `NOT_OWNER` | Token does not own the relevant pet |
-| 400 | `VALIDATION_ERROR` | Price below minimum or anti-flip protection active |
+| 404 | `NOT_FOUND` | Listing or pet not found (path-param endpoints) |
 
 ---
 
@@ -1207,6 +1215,13 @@ Completes TOTP enrollment for a first-time admin login. Requires the short-lived
 
 After setup, the admin performs a standard login with `totpCode` to establish a session.
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid fields in request body |
+| 401 | `UNAUTHORIZED` | `setupToken` is missing, invalid, or expired |
+
 ---
 
 #### `POST /admin/api/auth/logout`
@@ -1224,6 +1239,12 @@ Invalidates the current admin session. Writes a logout event to the audit log.
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
 
 ---
 
@@ -1252,6 +1273,13 @@ Verifies a TOTP code against the current admin's secret. Used for step-up authen
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `totpCode` field |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
 
 ---
 
@@ -1285,6 +1313,13 @@ Lists all admin users and their roles.
   "meta": { "total": 3, "page": 1, "limit": 20 }
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 
 ---
 
@@ -1325,6 +1360,9 @@ Creates a new admin account.
 
 | HTTP | Code | Condition |
 |------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid fields in request body |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 | 409 | `CONFLICT` | Username already exists |
 
 ---
@@ -1347,6 +1385,14 @@ Soft-deactivates an admin account. Sets `deactivated_at = NOW()`. The account ro
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
+| 404 | `NOT_FOUND` | No admin account with the given `adminId` |
+
 ---
 
 #### `POST /admin/api/roles/:adminId/totp/reset`
@@ -1366,6 +1412,14 @@ Resets TOTP for an admin account — clears `totp_secret_encrypted` and `totp_ba
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
+| 404 | `NOT_FOUND` | No admin account with the given `adminId` |
 
 ---
 
@@ -1413,6 +1467,12 @@ Lists pets with optional search and filtering. Supports up to 1 million records 
 
 > **`ownerEmailMasked`**: The server decrypts `claim_identities.email_encrypted` (AES-256-GCM, key from environment variable `EMAIL_ENCRYPTION_KEY`) and masks the plaintext for admin display (format: `p***@example.com`). The raw email is never returned. Decryption occurs server-side only; no decryption key is exposed to the admin portal frontend (EDD §4.2).
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+
 ---
 
 #### `GET /admin/api/pets/:petId`
@@ -1422,6 +1482,13 @@ Returns full pet details including owner info and ban history. *(EDD extension �
 **Auth**: Admin session — Moderator+ or Read Only
 
 **Response (HTTP 200):** Full pet record including `bannedReason`, `bannedAt`, `claimedAt`, `generationMeta`, current stats, and last 20 battle records.
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 
 ---
 
@@ -1444,6 +1511,15 @@ Updates administrative fields on a pet (e.g. correcting `petName` after content 
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Request body fails schema validation |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 
 ---
 
@@ -1475,6 +1551,15 @@ Bans a pet. The pet is removed from the public leaderboard within **5 minutes** 
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `reason` field |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is below `moderator` |
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
+
 ---
 
 #### `POST /admin/api/pets/:petId/unban`
@@ -1502,6 +1587,15 @@ Lifts a ban from a pet. Pet is restored to the leaderboard if eligible.
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `reason` field |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is below `moderator` |
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 
 ---
 
@@ -1548,6 +1642,12 @@ Lists arena battles with optional filters.
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+
 ---
 
 #### `GET /admin/api/suspicious`
@@ -1578,6 +1678,13 @@ Lists pets flagged by the bot detection system — pets with more than 50 battle
 
 The admin leaderboard also flags pets exceeding `leaderboard_admin_suspicious_flag_battles_per_hour = 50` — this is the same threshold value used for a separate admin UI indicator distinct from the bot detection action queue.
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is below `moderator` |
+
 ---
 
 #### `POST /admin/api/battles/:matchId/flag`
@@ -1604,6 +1711,15 @@ Flags a battle record as suspicious.
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `reason` field |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is below `moderator` |
+| 404 | `NOT_FOUND` | No match with the given `matchId` |
+
 ---
 
 #### `DELETE /admin/api/battles/:matchId/flag`
@@ -1629,6 +1745,15 @@ Removes a flag from a battle record.
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `reason` field |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is below `moderator` |
+| 404 | `NOT_FOUND` | No match with the given `matchId` |
 
 ---
 
@@ -1668,6 +1793,12 @@ Returns the top **500** pets (`leaderboard_admin_view = 500`), with suspicious-f
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+
 ---
 
 #### `DELETE /admin/api/leaderboard/:petId`
@@ -1685,6 +1816,14 @@ Removes a specific pet from the leaderboard (ban reflection). This is equivalent
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is below `moderator` |
+| 404 | `NOT_FOUND` | No pet with the given `petId` on the leaderboard |
 
 ---
 
@@ -1716,6 +1855,13 @@ Returns current runtime configuration values. These are the admin-tunable parame
 ```
 
 The four `rarityWeights` values must always sum to 100%.
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 
 ---
 
@@ -1761,6 +1907,8 @@ Tunable ranges:
 |------|------|-----------|
 | 400 | `OUT_OF_RANGE` | A parameter value exceeds its CONSTANTS-defined tunable range |
 | 400 | `VALIDATION_ERROR` | Rarity weights do not sum to 100% |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 
 ---
 
@@ -1786,6 +1934,13 @@ Returns current economy configuration values.
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 
 ---
 
@@ -1821,6 +1976,15 @@ Tunable ranges:
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `OUT_OF_RANGE` | A parameter value exceeds its CONSTANTS-defined tunable range |
+| 400 | `VALIDATION_ERROR` | Request body fails schema validation |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
+
 ---
 
 #### `GET /admin/api/config/flags`
@@ -1843,6 +2007,13 @@ Returns current feature flag states.
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 
 ---
 
@@ -1879,6 +2050,15 @@ Enables or disables a feature flag.
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `enabled` field in request body |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
+| 404 | `NOT_FOUND` | No feature flag with the given `flag` name |
 
 ---
 
@@ -1921,6 +2101,13 @@ Lists all GDPR requests with optional status and type filtering. For Super Admin
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
+
 ---
 
 #### `POST /admin/api/gdpr/delete`
@@ -1952,6 +2139,14 @@ Initiates an admin-triggered erasure request (e.g. for a support ticket). Email 
   "error": null
 }
 ```
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `emailHash` or `reason` field |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 
 ---
 
@@ -1996,7 +2191,10 @@ Updates the status of a non-erasure GDPR request (data_access, restrict_processi
 
 | HTTP | Code | Condition |
 |------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Request body fails schema validation |
 | 400 | `WRONG_REQUEST_TYPE` | Target `request_type` is `erasure` — must use `POST /admin/api/gdpr/delete` instead |
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 | 404 | `NOT_FOUND` | No GDPR request with the given `requestId` |
 
 ---
@@ -2046,6 +2244,13 @@ Returns audit log entries. Search any 12-month window in ≤ 3 seconds (`admin_a
 
 IP addresses are stored as SHA-256 hashes only — never raw. Hash-only records are retained for **90 days** (`ip_address_log_retention_days = 90`).
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
+
 ---
 
 ### 6.9 Admin Dashboard, Analytics & Email Monitor
@@ -2075,6 +2280,12 @@ Returns a real-time summary of platform health for the admin dashboard. Metrics 
 ```
 
 `systemStatus` values: `healthy`, `degraded`, `down`.
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
 
 ---
 
@@ -2113,6 +2324,12 @@ Returns product analytics time-series data.
 }
 ```
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
+
 ---
 
 #### `GET /admin/api/email/monitor`
@@ -2138,6 +2355,12 @@ Returns email delivery health metrics from SendGrid webhook logs.
 ```
 
 Targets: delivery rate ≥ 98% (`claim_email_delivery_rate_target_percent = 98`), spam complaint rate < 0.1% (`spam_complaint_rate_max_percent = 0.1`). Failover activates after 3 consecutive SendGrid failures (`sendgrid_failover_consecutive_failures = 3`).
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 401 | `UNAUTHORIZED` | Admin session missing or invalid |
 
 ---
 
