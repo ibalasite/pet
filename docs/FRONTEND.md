@@ -233,7 +233,7 @@ import { useEffect, useRef } from 'react';
 import { PetCanvasEngine } from './PetCanvasEngine';
 
 interface PetCanvasProps {
-  seed: bigint;
+  seed: bigint;  // API returns seed as a JSON number; callers must convert: BigInt(apiResponse.seed)
   rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
   interactive?: boolean;
 }
@@ -360,7 +360,17 @@ const router = createBrowserRouter([
       { path: 'arena/result/:battleId', lazy: () => import('./components/arena/BattleResultPage') },
       { path: 'leaderboard', lazy: () => import('./components/leaderboard/LeaderboardPage') },
       // GDPR self-service: owner token required; accessible at /gdpr
-      { path: 'gdpr', lazy: () => import('./components/gdpr/GdprPage') },
+      // Route-level guard: loader redirects to / when no pet_access_token present in localStorage
+      {
+        path: 'gdpr',
+        lazy: () => import('./components/gdpr/GdprPage'),
+        loader: () => {
+          if (!localStorage.getItem('pet_access_token')) {
+            throw redirect('/');
+          }
+          return null;
+        },
+      },
       // Marketplace: only rendered when FF_MARKETPLACE feature flag is active
       { path: 'marketplace', lazy: () => import('./components/marketplace/MarketplacePage') },
     ],
@@ -651,6 +661,17 @@ import { SPRITE_RESOLUTION_PX } from '../../constants';
 // SPRITE_RESOLUTION_PX = 32  (sprite_resolution_px from constants.json)
 
 class PetIdleScene extends Phaser.Scene {
+  private seed: bigint;
+  private attributes: AttributeVector;
+  private rarity: string;
+
+  constructor(seed: bigint, attributes: AttributeVector, rarity: string) {
+    super({ key: 'PetIdleScene' });
+    this.seed = seed;
+    this.attributes = attributes;
+    this.rarity = rarity;
+  }
+
   preload(): void {
     // Sprite sheet: frameWidth = frameHeight = SPRITE_RESOLUTION_PX
     this.load.spritesheet('pet', `/sprites/pet_${this.seed}.png`, {
@@ -1005,7 +1026,7 @@ Initial bundle (eager):       React + Router + TanStack Query + Zustand + Zod
 Phaser.js (lazy):             Loaded only when PetCanvas mounts
                                Served from CDN edge; cached after first load
 
-Route chunks (lazy):          One chunk per route via React.lazy()
+Route chunks (lazy):          One chunk per route via React Router v6 lazy route property
                                LandingPage chunk downloads Phaser.js as a side-effect
 
 Admin portal:                 Entirely separate Vite build; no shared bundle with player app
