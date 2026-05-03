@@ -809,7 +809,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_admin_audit_log_ip_hash_cleanup` — `WHERE ip_address_hash IS NOT NULL`: used by the background job that nulls `ip_address_hash` after 90 days (`ip_address_log_retention_days = 90`). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by `idx_claim_identities_deletion`.
 - `idx_pets_claim_identity` — `WHERE claim_identity_id IS NOT NULL`: only claimed pets have this FK set; the partial index supports the GDPR erasure lookup query (`SELECT id FROM pets WHERE claim_identity_id = $1`) efficiently and also serves the FK integrity scan. See §6.5 for the full query pattern.
 
-### 6.2 Composite Indexes for History Queries
+### 6.2 Composite Indexes
 
 - `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort. The leading column of each index also serves PostgreSQL's FK integrity scan for `ON DELETE RESTRICT` (pet_a_id) and `ON DELETE SET NULL` (pet_b_id), eliminating the need for separate single-column indexes.
 - `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. The leading `pet_id` column also serves the FK CASCADE scan (`ON DELETE CASCADE`), making a separate `idx_training_logs_pet_id` unnecessary.
