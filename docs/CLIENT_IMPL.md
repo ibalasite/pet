@@ -49,7 +49,7 @@
 
 ### §1.2 Selection Rationale
 
-React 18 handles all UI chrome — accessible forms (claim, GDPR), stat tables, navigation, leaderboard, and route-level code splitting. Phaser.js 3 handles the HTML5 Canvas game surface — per-frame sprite animation, WebGL rendering, interaction physics, and the arena battle animation. Dynamic `import()` of Phaser ensures it never enters the initial JS bundle, keeping FCP inside the ≤ 1.5 s target (`FCP_SECONDS`) even though Phaser itself is ~1 MB minified.
+React 18 handles all UI chrome — accessible forms (claim, GDPR), stat tables, navigation, leaderboard, and route-level code splitting. Phaser.js 3 handles the HTML5 Canvas game surface — per-frame sprite animation, WebGL rendering, interaction physics, and the arena battle animation. Dynamic `import()` of Phaser ensures it never enters the initial JS bundle, keeping FCP inside the ≤ 1.5 s target (`FCP_SECONDS = 1.5`) even though Phaser itself is ~1 MB minified.
 
 The pixel-art design system (dark navy, rarity color tiers, `Press Start 2P` font, 8px grid) is implemented entirely in CSS custom properties (`tokens.css`). All rarity shimmers and glow effects run as CSS animations on compositor-friendly properties (`box-shadow`, `border-color`, `opacity`) — no Phaser involvement for purely decorative effects.
 
@@ -635,14 +635,14 @@ Audio is not part of Phase 1 scope. No background music or SFX library is includ
 
 | Metric | Target | Minimum Acceptable | Constant Key |
 |--------|--------|--------------------|----|
-| FCP (First Contentful Paint) | ≤ 1.5 s | ≤ 2.0 s | `FCP_SECONDS` |
-| LCP (Largest Contentful Paint) | ≤ 2.5 s | ≤ 3.0 s | `LCP_SECONDS` |
-| CLS (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.15 | `CLS_SCORE` |
-| INP (Interaction to Next Paint) | ≤ 200 ms | ≤ 300 ms | `INP_MS` |
-| Pet canvas render on load | ≤ 2 s | ≤ 3 s | `PET_RENDER_ON_LOAD_SECONDS` |
-| Pet interaction response (click/tap) | ≤ 200 ms | ≤ 300 ms | `PET_INTERACTION_RESPONSE_MS` |
-| Pet animation frame rate | ≥ 30 FPS sustained | ≥ 24 FPS | `PET_ANIMATION_FPS_MIN` |
-| Arena battle E2E render | ≤ 2 s | — | `ARENA_BATTLE_E2E_SECONDS` |
+| FCP (First Contentful Paint) | ≤ 1.5 s | ≤ 2.0 s | `FCP_SECONDS = 1.5` |
+| LCP (Largest Contentful Paint) | ≤ 2.5 s | ≤ 3.0 s | `LCP_SECONDS = 2.5` |
+| CLS (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.15 | `CLS_SCORE = 0.1` |
+| INP (Interaction to Next Paint) | ≤ 200 ms | ≤ 300 ms | `INP_MS = 200` |
+| Pet canvas render on load | ≤ 2 s | ≤ 3 s | `PET_RENDER_ON_LOAD_SECONDS = 2` |
+| Pet interaction response (click/tap) | ≤ 200 ms | ≤ 300 ms | `PET_INTERACTION_RESPONSE_MS = 200` |
+| Pet animation frame rate | ≥ 30 FPS sustained | ≥ 24 FPS | `PET_ANIMATION_FPS_MIN = 30` |
+| Arena battle E2E render | ≤ 2 s | — | `ARENA_BATTLE_E2E_SECONDS = 2` |
 | Scene / route transition | ≤ 300 ms | — | — |
 
 ### §10.2 Memory Budget
