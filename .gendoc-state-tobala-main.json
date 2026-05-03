@@ -9,7 +9,7 @@
   "stop_condition": "finding=0（無上限）",
   "client_type": "web",
   "client_type_source": "confirmed",
-  "last_updated": "2026-05-02T20:21:29.731353Z",
+  "last_updated": "2026-05-03T21:57:50Z",
   "has_admin_backend": true,
   "skill_source": "gendoc-auto",
   "spawned_session": false,
@@ -39,7 +39,19 @@
     "PRD",
     "CONSTANTS",
     "PDD",
-    "VDD"
+    "VDD",
+    "EDD",
+    "ARCH",
+    "API",
+    "SCHEMA",
+    "FRONTEND",
+    "DRYRUN",
+    "CLIENT_IMPL",
+    "ADMIN_IMPL",
+    "RESOURCE",
+    "UML",
+    "test-plan",
+    "BDD-server"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
@@ -49,5 +61,6 @@
   "handoff_source": "gendoc-auto",
   "pipeline_hash": "d2e551157c0da496",
   "lang_stack": "Node.js 20 LTS + Fastify 4",
-  "lang_stack_locked": true
+  "lang_stack_locked": true,
+  "current_step": "BDD-client"
 }
