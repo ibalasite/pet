@@ -309,6 +309,7 @@ winner_pet_id    UUID         NULL REFERENCES pets(id)
 random_seed      BIGINT       NOT NULL  -- seeded random for ±15% modifier reproducibility
 stat_delta_a     SMALLINT     NOT NULL DEFAULT 0  -- net stat value used for pet_a after buff
 stat_delta_b     SMALLINT     NOT NULL DEFAULT 0
+duration_seconds SMALLINT     NOT NULL CHECK (duration_seconds BETWEEN 5 AND 15), -- CONSTANTS: arena_match_duration_min/max_seconds
 battle_log       JSONB        NOT NULL DEFAULT '[]'  -- structured event sequence for replay
 completed_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 ──────────────────────────────────────────────────────
@@ -400,7 +401,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: admin user info JSO
 
 ## §5. API Design
 
-All player-facing API routes are prefixed `/api`. Admin routes are prefixed `/admin/api`. All responses use the envelope format:
+All player-facing API routes use `/api/v1/` prefix. Backward compatibility maintained for at least 1 major version per PRD NFR-MAINT-06. Admin routes are prefixed `/admin/api`. All responses use the envelope format:
 
 ```json
 {
@@ -415,14 +416,7 @@ HTTP status codes: 200 (success), 201 (created), 400 (bad request), 401 (unauthe
 
 ### §5.1 Auth / Claim Flow Endpoints
 
-#### POST /api/pets/random
-Auth: None
-Description: Generate a new unclaimed random pet for guest display.
-Request: `{}` (no body)
-Response: `{ petId, seed, rarity, stats: {speed, strength, stamina, level}, generationMeta }`
-Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset.
-
-#### POST /api/claim
+#### POST /api/v1/claim
 Auth: None (rate-limited by email)
 Description: Initiate the claim flow — sends 6-digit code to email.
 Request: `{ email: string, petId: string, ageConfirmed: boolean }`
@@ -430,7 +424,7 @@ Response: `{ claimId: string, expiresAt: ISO8601 }`
 Rate limit: 5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5). Returns HTTP 429 on breach.
 Error: `{ code: "ALREADY_CLAIMED" }` if pet is already owned.
 
-#### POST /api/claim/verify
+#### POST /api/v1/claim/verify
 Auth: None (rate-limited by session)
 Description: Verify 6-digit OTP and return the pet access token.
 Request: `{ claimId: string, code: string }`
@@ -438,7 +432,7 @@ Response: `{ petToken: string, petId: string, petUrl: string }`
 Rate limit: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10). HTTP 429 after breach; 60-second cooldown.
 Error codes: `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`.
 
-#### POST /api/claim/recover
+#### POST /api/v1/claim/recover
 Auth: None
 Description: Send an access-link recovery email to a previously claimed pet.
 Request: `{ email: string }`
@@ -446,19 +440,26 @@ Response: `{ success: true }` (same response regardless of email existence — p
 
 ### §5.2 Pet Endpoints
 
-#### GET /api/pet/:petId
+#### GET /api/v1/pets/random
+Auth: None
+Description: Generate a new unclaimed random pet for guest display. Public endpoint — no authentication required; generates a guest-preview pet for display.
+Request: `{}` (no body)
+Response: `{ petId, seed, rarity, stats: {speed, strength, stamina, level}, generationMeta }`
+Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset.
+
+#### GET /api/v1/pet/:petId
 Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
 Description: Fetch pet data including stats, rarity, and level.
 Response: `{ id, seed, rarity, stats: {speed, strength, stamina, level}, isOwner: boolean, claimedAt, isNeglected: boolean }`
 Notes: `isNeglected` is true if `NOW() - last_training_action > 3 days` (TRAINING_NEGLECT_THRESHOLD = 3 days).
 
-#### POST /api/pet/:petId/train
+#### POST /api/v1/pet/:petId/train
 Auth: Required (pet owner token)
 Request: `{ trainingType: 'RUN' | 'STRENGTH' | 'STAMINA' }`
 Response: `{ updatedStats: {speed, strength, stamina, level}, statDelta: number, actionsRemainingToday: number }`
 Errors: HTTP 400 if 3 actions already used today; HTTP 400 with `STAT_AT_MAXIMUM` if target stat = 100 (PET_STAT_MAX = 100).
 
-#### POST /api/pet/:petId/feed
+#### POST /api/v1/pet/:petId/feed
 Auth: Required (pet owner token)
 Request: `{ foodBuffId: string }`
 Response: `{ updatedStats: {speed, strength, stamina}, buffApplied: { stat, magnitude, isPermanent, expiresAt } }`
@@ -466,31 +467,31 @@ Errors: HTTP 400 if food item not owned; HTTP 400 if stat already at maximum.
 
 ### §5.3 Arena Endpoints
 
-#### POST /api/arena/enter
+#### POST /api/v1/arena/enter
 Auth: Required (pet owner token)
 Request: `{ petId: string, mode: 'RACE' | 'SUMO', acceptAI?: boolean }`
 Description: Enqueues pet in matchmaking queue (Redis). Waits up to 30 seconds (ARENA_MATCHMAKING_TIMEOUT) for an opponent. Returns battle result synchronously (HTTP long-poll) or AI result if no opponent found and `acceptAI: true`.
 Response: `{ matchId: string, result: 'WIN' | 'LOSS', opponentPetId: string | null, isAiOpponent: boolean, statDelta: number, newLeaderboardScore?: number }`
 Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10); HTTP 429 + `Retry-After` header on breach.
 
-#### GET /api/arena/match/:matchId
+#### GET /api/v1/arena/match/:matchId
 Auth: None (public battle record)
 Response: `{ matchId, mode, petA: PetSummary, petB: PetSummary, winnerId, battleLog, completedAt }`
 
-#### GET /api/arena/history/:petToken
+#### GET /api/v1/arena/history/:petToken
 Auth: Required (pet owner token) or public via petId
 Description: Last 20 battles for a pet (ARENA_BATTLE_RECORDS_DISPLAY = 20).
 Response: `{ petId, battles: [{matchId, mode, opponentId, result, completedAt}], summary: {wins, losses, winRate} }`
 
 ### §5.4 Leaderboard Endpoints
 
-#### GET /api/leaderboard
+#### GET /api/v1/leaderboard
 Auth: None
 Query params: `?rarity=COMMON|RARE|EPIC|LEGENDARY&page=1&limit=100`
 Response: `{ entries: [{rank, petId, petName, rarity, level, score, winRate}], lastUpdated: ISO8601, total: number }`
 Notes: Top 100 for public (LEADERBOARD_TOP_DISPLAY = 100). Update lag ≤30 seconds (LEADERBOARD_UPDATE_LAG_MAX = 30s). Source: Redis sorted set.
 
-#### GET /api/leaderboard/rank/:petId
+#### GET /api/v1/leaderboard/rank/:petId
 Auth: None
 Response: `{ petId, rank: number | null, score: number }`
 Notes: Null rank if pet is not on the leaderboard (banned or insufficient battles).
@@ -544,6 +545,22 @@ Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA);
 Auth: Admin session (Super Admin)
 Query: `?page=1&limit=50&from=ISO8601&to=ISO8601&actorId=&action=`
 Response: Audit log entries; search any 12-month window in ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME = 3s).
+
+### §5.6 Marketplace Endpoints (Phase 3 — FF_MARKETPLACE required)
+
+All endpoints require pet access token auth. Active only when `FF_MARKETPLACE=true`.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/api/v1/marketplace/listings` | Public | Browse active listings (paginated, sort by price/rarity/level) |
+| `POST` | `/api/v1/marketplace/listings` | Pet token | Create listing (min price enforced: level × 100 + rarity_multiplier × 500) |
+| `DELETE` | `/api/v1/marketplace/listings/:listingId` | Pet token (owner only) | Cancel own listing (7-day anti-flip protection from CONSTANTS) |
+| `POST` | `/api/v1/marketplace/listings/:listingId/buy` | Pet token | Purchase listing; 5% fee deducted from seller proceeds |
+| `GET` | `/api/v1/marketplace/history/:petId` | Pet token | Trade history for a pet |
+
+**Fee**: TRADE_TRANSACTION_FEE = 5% deducted from seller, credited to platform.
+**Anti-flip**: MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days between purchase and re-listing.
+**Rate limit**: Inherits arena/pet rate limits; no separate marketplace rate limit in CONSTANTS.
 
 ---
 
@@ -728,7 +745,7 @@ Cache invalidation rules:
 
 - **Engine**: Phaser.js 3 embedded as a React component via `PetCanvasEngine` class
 - **Canvas API**: `image-rendering: pixelated` + `image-rendering: crisp-edges` CSS applied to the canvas element
-- **Sprite sheets**: 64×64px sprites (to be confirmed per OQ-D01), PNG format, indexed color palettes (≤16 colors per sprite for retro constraint)
+- **Sprite sheets**: 64×64px sprites (**32×32px** (provisional; implementation must pass `SPRITE_RESOLUTION_PX` as a config constant — see §14 OQ-E01)), PNG format, indexed color palettes (≤16 colors per sprite for retro constraint)
 - **Animation loop**: `requestAnimationFrame` via Phaser's internal scene update; target ≥30 FPS sustained on mid-range devices (NFR-PERF-07)
 - **Procedural generation**: Pet seed → 6-dimension attribute vector (body, head, color_palette, accessory, rarity_trait, pattern) → sprite sheet frame selection. Seed is stored in `pets.seed`; rendering is deterministic from seed. Combination space ≥1,000,000,000 (PET_GENERATION_COMBINATIONS_MIN).
 - **Reduced motion**: `prefers-reduced-motion: reduce` detection — static sprite replaces animation loop; no particle effects.
