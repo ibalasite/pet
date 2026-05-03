@@ -69,7 +69,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 17 | test-plan | Testing | docs/test-plan.md | ✅ COMPLETE |
 | 18 | BDD-server | features/server/ (6 files, 18 scenarios) | ✅ COMPLETE |
 | 19 | BDD-client | BDD | features/client/ (≥15 scenarios) | ✅ COMPLETE |
-| 20 | RTM | Traceability | docs/RTM.md | PENDING |
+| 20 | RTM | Traceability | docs/RTM.md | ✅ COMPLETE |
 | 21 | runbook | Operations | docs/runbook.md | PENDING |
 | 22 | LOCAL_DEPLOY | DevEx | docs/LOCAL_DEPLOY.md | PENDING |
 | 23 | CICD | CI/CD | docs/CICD.md | PENDING |

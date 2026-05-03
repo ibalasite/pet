@@ -52,7 +52,8 @@
     "UML",
     "test-plan",
     "BDD-server",
-    "BDD-client"
+    "BDD-client",
+    "RTM"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
