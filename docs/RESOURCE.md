@@ -6,7 +6,7 @@ upstream-docs:
   - docs/EDD.md    # Tech stack: Web / Phaser.js / React, asset pipeline
   - docs/FRONTEND.md  # Asset usage, loading strategy, directory structure
   - docs/CLIENT_IMPL.md  # Asset budgets, naming conventions, loading constraints
-version: "1.0.4"
+version: "1.0.5"
 last-updated: "2026-05-04"
 ---
 
@@ -32,6 +32,7 @@ last-updated: "2026-05-04"
 | 1.0.2 | 2026-05-04 | Review Agent R7 | Fix RES-ANIM-005 wrong upstream citation (CLIENT_IMPL ANIM-08 victory → CLIENT_IMPL §5.3 ArenaBattleScene VICTORY state); ANIM-08 is the run cycle, not the victory animation |
 | 1.0.3 | 2026-05-04 | Review Agent R8 | Add RES-IMG-017 bg-arena-sumo.avif (missing AVIF primary for sumo arena — VDD §7.5 requires AVIF+WebP for all full-width arena backgrounds); renumber RES-IMG-017→018 through RES-IMG-046→047; fix §2 preamble to include §5.3 source for battle-victory animation; update §4 checklist and §5 license table |
 | 1.0.4 | 2026-05-04 | Review Agent R9 | Fix §1.2 section header wrong citation (VDD §4→§8.3 — VDD §4 is "Character & World Design" with no food item specs; VDD §8.3 is "My Pet Page" which includes food inventory); add missing §4 checklist entry for §1.2 food item sprites coverage |
+| 1.0.5 | 2026-05-04 | Review Agent R10 | Fix RES-ANIM-001 description inaccurate wording: "recommended maximum" → "8 frames recommended" to match VDD §4.2 which sets 4 as minimum and 8 as recommended (not as a maximum cap) |
 
 ---
 
@@ -156,7 +157,7 @@ last-updated: "2026-05-04"
 
 | ID | filename | type | source_tool | prompt | dimensions | file_size_budget | status | output_path | description |
 |----|----------|------|-------------|--------|-----------|-----------------|--------|-------------|-------------|
-| RES-ANIM-001 | pet-idle-sheet-ref-256x32.png | animation | Aseprite | pixel art pet idle animation sprite sheet, 8 frames horizontal single row, 32x32px per frame = 256x32px total (sprite_resolution_px = 32), gentle bobbing or breathing idle motion, 30fps loop, max 16 colors, transparent background, hard pixel edges, retro 8-bit game character | 8f × 30fps (256×32px) | ≤ 25 KB | needed | public/assets/sprites/anim-ref/pet-idle-sheet-ref-256x32.png | Idle animation reference sheet (CLIENT_IMPL ANIM-01). 8 frames (VDD §4.2 recommended maximum; minimum is 4 frames — this reference uses the recommended 8), 30 FPS continuous loop. Phaser key: `idle`. Used in PetIdleScene. Actual per-seed sheets generated server-side from seed. |
+| RES-ANIM-001 | pet-idle-sheet-ref-256x32.png | animation | Aseprite | pixel art pet idle animation sprite sheet, 8 frames horizontal single row, 32x32px per frame = 256x32px total (sprite_resolution_px = 32), gentle bobbing or breathing idle motion, 30fps loop, max 16 colors, transparent background, hard pixel edges, retro 8-bit game character | 8f × 30fps (256×32px) | ≤ 25 KB | needed | public/assets/sprites/anim-ref/pet-idle-sheet-ref-256x32.png | Idle animation reference sheet (CLIENT_IMPL ANIM-01). 8 frames (VDD §4.2: minimum is 4 frames, 8 frames recommended — this reference uses the recommended 8), 30 FPS continuous loop. Phaser key: `idle`. Used in PetIdleScene. Actual per-seed sheets generated server-side from seed. |
 | RES-ANIM-002 | pet-bounce-sheet-ref-64x32.png | animation | Aseprite | pixel art pet bounce interaction sprite sheet, 2 frames horizontal, 32x32px per frame = 64x32px (sprite_resolution_px = 32), frame 1 scale 1.15x squished, frame 2 return to normal, click/tap response animation, transparent background, hard pixel edges | 2f × 30fps (64×32px) | ≤ 8 KB | needed | public/assets/sprites/anim-ref/pet-bounce-sheet-ref-64x32.png | Bounce/interaction animation reference (CLIENT_IMPL ANIM-02). 2-frame sequence, (pet_interaction_response_ms = 200)ms total. Triggered on canvas click/tap via Phaser `pointerdown`. |
 | RES-ANIM-003 | pet-effort-sheet-ref-96x32.png | animation | Aseprite | pixel art pet training effort animation sprite sheet, 3 frames horizontal, 32x32px per frame = 96x32px (sprite_resolution_px = 32), exertion/workout motion frames, sweat particles or effort pose, 400ms duration, transparent background, hard pixel edges | 3f × 30fps (96×32px) | ≤ 10 KB | needed | public/assets/sprites/anim-ref/pet-effort-sheet-ref-96x32.png | Training effort animation reference (CLIENT_IMPL ANIM-03). 3-frame sequence, 400ms. Triggered on successful training action mutation. |
 | RES-ANIM-004 | pet-run-sheet-ref-256x32.png | animation | Aseprite | pixel art pet run cycle sprite sheet, 8 frames horizontal single row, 32x32px per frame = 256x32px (sprite_resolution_px = 32), forward running motion 8-frame loop, transparent background, hard pixel edges, arena battle race animation | 8f × 30fps (256×32px) | ≤ 25 KB | needed | public/assets/sprites/anim-ref/pet-run-sheet-ref-256x32.png | Arena battle race run cycle reference (CLIENT_IMPL ANIM-08). 8-frame run loop sheet per VDD §4.2 ("8-frame run cycle") and CLIENT_IMPL §5.1 ANIM-08 ("8-frame run loop"); loop repeated in Phaser for 5–15s arena match duration (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15). Used in ArenaBattleScene. |
