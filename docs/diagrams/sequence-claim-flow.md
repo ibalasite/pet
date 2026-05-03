@@ -86,7 +86,7 @@ sequenceDiagram
                 API-->>PlayerApp: HTTP 400 { code: "INVALID_CODE" }
             else Code valid
                 API->>API: petToken = crypto.randomBytes(32) base64url<br/>(pet_access_token_min_bytes = 32)<br/>tokenHash = SHA-256(petToken)
-                API->>PG: BEGIN TRANSACTION<br/>UPSERT claim_identities (email_hash, email_encrypted)<br/>  ON CONFLICT (email_hash) DO NOTHING<br/>  RETURNING id → identityId<br/>UPDATE pets SET owner_token_hash = tokenHash,<br/>  claimed_at = NOW(), reserved_until = NULL,<br/>  claim_identity_id = identityId<br/>UPDATE claim_codes SET used_at = NOW()<br/>COMMIT
+                API->>PG: BEGIN TRANSACTION<br/>UPSERT claim_identities (email_hash, email_encrypted)<br/>  ON CONFLICT (email_hash)<br/>  DO UPDATE SET email_encrypted = EXCLUDED.email_encrypted<br/>  RETURNING id → identityId<br/>UPDATE pets SET owner_token_hash = tokenHash,<br/>  claimed_at = NOW(), reserved_until = NULL,<br/>  claim_identity_id = identityId<br/>UPDATE claim_codes SET used_at = NOW()<br/>COMMIT
                 PG-->>API: updated
                 API->>Redis: DEL rl:code_entry:{session_id}
                 API-->>PlayerApp: HTTP 200<br/>{ petToken, petId, petUrl }

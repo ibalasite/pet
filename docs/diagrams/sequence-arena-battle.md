@@ -48,7 +48,7 @@ sequenceDiagram
             Note over Player,PG: Matchmaking Phase (30 s window — arena_matchmaking_timeout_seconds = 30)
 
             API->>Redis: ZADD matchmaking:queue:{mode}<br/>score=enqueue_epoch_ms<br/>member="{petId}:{epoch}"
-            API->>Redis: ZRANGEBYSCORE matchmaking:queue:{mode}<br/>0 (NOW - stale_threshold_ms)<br/>to find eligible opponent<br/>(stale if age > 45 s = timeout + 15 s)
+            API->>Redis: ZRANGEBYSCORE matchmaking:queue:{mode}<br/>(NOW - stale_threshold_ms) +inf<br/>to find eligible opponent<br/>(stale if age > 45 s = timeout + 15 s)
             alt Opponent found within 30 s (arena_matchmaking_timeout_seconds = 30)
                 Redis-->>API: opponentEntry = "{opponentPetId}:{epoch}"
                 API->>Redis: ZREM matchmaking:queue:{mode} opponentEntry

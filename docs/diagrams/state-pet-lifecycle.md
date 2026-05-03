@@ -33,7 +33,7 @@ stateDiagram-v2
 
     ClaimExpired --> GuestPreview : Player must re-initiate claim\n(pet row still unclaimed)
 
-    ClaimPending --> Claimed : POST /api/v1/claim/verify\nOTP valid\nowner_token_hash set\nclaimed_at set\nreserved_until = NULL
+    ClaimPending --> Claimed : POST /api/v1/claim/verify\nOTP valid\nowner_token_hash set\nclaimed_at set\nreserved_until = NULL\nclaim_identity_id set
 
     Claimed --> Active : Initial state after claim\nlevel = 1, all stats = 10\n(pet_level_default = 1,\npet_stat_default = 10)
 
