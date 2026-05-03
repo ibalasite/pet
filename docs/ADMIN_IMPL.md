@@ -78,7 +78,7 @@ Core operations problems the portal solves:
 | Build Tool | Vite 5.x | Fast HMR + optimized production bundle; seamless integration with monorepo pnpm workspaces |
 | State Management | Pinia 2.x | Modular stores; Vue 3 native TypeScript-friendly; official replacement for Vuex |
 | Routing | Vue Router 4.x | History mode + dynamic routing + `beforeEach` route guards (RBAC validation) |
-| HTTP Client | Axios 1.x | Request/response interceptors for session expiry handling and CSRF token injection |
+| HTTP Client | Axios 1.x | Request/response interceptors for session expiry handling; `withCredentials: true` for session cookie |
 | Charts | ECharts 5.x (via vue-echarts 6.x) | Analytics dashboard line chart requirements; tree-shakeable on-demand imports control bundle size |
 | i18n | None (single-language — English only) | Admin is an internal tool; English-only interface is sufficient |
 
@@ -118,7 +118,7 @@ Core operations problems the portal solves:
 packages/admin-app/                   ← Admin Portal root (pnpm workspace)
 ├── src/
 │   ├── api/                          ← API call wrappers (maps to API.md /admin/api/* routes)
-│   │   ├── http.ts                   ← Axios instance + interceptors (CSRF + session handling)
+│   │   ├── http.ts                   ← Axios instance + interceptors (session handling)
 │   │   ├── auth.ts                   ← login / logout / totp/setup / totp/verify
 │   │   ├── pets.ts                   ← GET /pets, GET /pets/:id, ban, unban
 │   │   ├── battles.ts                ← GET /battles, GET /suspicious, flag, unflag
@@ -161,7 +161,6 @@ packages/admin-app/                   ← Admin Portal root (pnpm workspace)
 │   │   └── api.ts                    ← ApiEnvelope, PagedResponse, Meta
 │   ├── utils/                        ← Utility functions
 │   │   ├── format.ts                 ← Date format, email mask, reason truncate
-│   │   ├── csrf.ts                   ← X-CSRF-Token read and injection
 │   │   └── session.ts                ← Session expiry calculation utilities
 │   ├── styles/                       ← Styles
 │   │   ├── variables.css             ← CSS Custom Properties (color / spacing tokens)
@@ -214,7 +213,7 @@ packages/admin-app/                   ← Admin Portal root (pnpm workspace)
 | Path | Component | Required Permission | Description |
 |------|-----------|--------------------|----|
 | `/admin/login` | `LoginView` | Public | Admin login page (username + password + TOTP) |
-| `/admin/totp/setup` | `TotpSetupView` | Public (requires setupToken) | First-login TOTP enrollment |
+| `/admin/totp-setup` | `TotpSetupView` | Public (requires setupToken) | First-login TOTP enrollment |
 | `/admin/dashboard` | `DashboardView` | All authenticated roles | KPI Dashboard |
 | `/admin/pets` | `PetListView` | `read_only+` | Pet list + search + filter |
 | `/admin/pets/:petId` | `PetDetailView` | `read_only+` | Pet detail + ban history |
@@ -245,7 +244,7 @@ export function setupRouterGuards(router: Router) {
     const authStore = useAuthStore()
     const permStore = usePermissionStore()
 
-    // Public pages (login / totp/setup / error pages) — pass through
+    // Public pages (login / totp-setup / error pages) — pass through
     if (to.meta.public) return next()
 
     // Not authenticated → redirect to login, preserve destination path
@@ -362,7 +361,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 | Absolute expiry | 8 hours (admin_session_absolute_expiry_hours = 8) |
 | Session identity | Frontend stores no token string; `isAuthenticated` is inferred from 401 / 200 responses on any authenticated API call |
 | Refresh strategy | Axios Response Interceptor intercepts 401 → clears auth state → redirects to login page |
-| CSRF protection | `X-CSRF-Token` header (see §8.2 + §8.3) |
+| CSRF protection | SameSite=Strict cookie policy prevents cross-site request forgery; no additional token required (FRONTEND.md §3.6) |
 
 ---
 
@@ -425,7 +424,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 - Success → store adminId + role in `authStore`, redirect to `redirect` query param or default `/admin/dashboard`
 - 10 consecutive failures → account locked (admin_login_lockout_threshold = 10; admin_login_lockout_duration_minutes = 30), display `unlockedAt` remaining time
 - IP-level pre-auth rate limit: 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10; admin_login_ip_rate_limit_window_seconds = 900)
-- `TOTP_SETUP_REQUIRED` response → extract `error.details.setupToken`, navigate to `/admin/totp/setup`
+- `TOTP_SETUP_REQUIRED` response → extract `error.details.setupToken`, navigate to `/admin/totp-setup`
 
 **APIs required**: `POST /admin/api/auth/login`
 
@@ -479,7 +478,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 
 **Displayed information**:
 - Basic info: ID, Pet Name, Seed, Rarity, Level, Generation Meta (6 dimensions)
-- Stats: speed / strength / stamina, Total Training Actions, Last Trained At, is_neglected
+- Stats: speed / strength / stamina, Total Training Actions, Last Trained At, isNeglected
 - Owner: Owner Email (masked), Claimed At
 - Ban status: is_banned, Banned Reason (max 500 chars), Banned At
 - Last 20 arena battle records (arena_battle_records_display_count = 20)
@@ -492,7 +491,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 
 **Purpose**: Review all arena battle records; supports flag/unflag operations
 
-**Table columns**: Match ID, Mode (RACE/SUMO), Pet A, Pet B (null if AI), Winner, Duration, Flagged, Completed At
+**Table columns**: Match ID, Pet A, Pet B (null if AI), Winner (`winnerId`), Duration, Flagged (`isFlagged`), Completed At
 
 **Filters**: Date range (from/to) / Pet ID / Flagged (All / Flagged Only)
 
@@ -682,17 +681,7 @@ const http = axios.create({
   withCredentials: true, // carry httpOnly session cookie
 })
 
-// Request interceptor: inject X-CSRF-Token header (API.md §2.2)
-http.interceptors.request.use(config => {
-  const csrfToken = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('csrf_token='))
-    ?.split('=')[1]
-  if (csrfToken) {
-    config.headers['X-CSRF-Token'] = csrfToken
-  }
-  return config
-})
+// No CSRF token injection required — SameSite=Strict cookie policy prevents cross-site forgery (FRONTEND.md §3.6)
 
 // Response interceptor: session expiry handling
 http.interceptors.response.use(
@@ -714,13 +703,9 @@ http.interceptors.response.use(
 export default http
 ```
 
-### §8.2 CSRF Protection (API.md §2.2)
+### §8.2 CSRF Protection
 
-Admin API uses the `X-CSRF-Token` header to protect state-changing requests:
-
-1. After session creation, the server sets `csrf_token=<token>` as a SameSite=Strict cookie (not httpOnly, so JS can read it)
-2. The Axios request interceptor (see §8.1) reads the cookie and attaches it as the `X-CSRF-Token` header
-3. The server validates the header matches the CSRF token bound to the session
+Admin API CSRF protection relies on the `SameSite=Strict` attribute on the session cookie (API.md §2.2). Because the cookie is `SameSite=Strict`, browsers will not attach it to cross-origin requests, making cross-site request forgery impossible without additional token mechanisms. No `X-CSRF-Token` header is required (FRONTEND.md §3.6). If the deployment is ever extended to cross-origin scenarios, an `X-CSRF-Token` double-submit pattern must be added at that time.
 
 ### §8.3 Admin Session Handling
 
@@ -735,7 +720,7 @@ Admin sessions use server-side Redis sessions (`session:admin:{session_id}`):
 | Feature | Method | Path | Required Permission | Page |
 |---------|--------|------|--------------------|----|
 | Admin login | POST | `/admin/api/auth/login` | Public | `/admin/login` |
-| TOTP setup | POST | `/admin/api/auth/totp/setup` | setupToken | `/admin/totp/setup` |
+| TOTP setup | POST | `/admin/api/auth/totp/setup` | setupToken | `/admin/totp-setup` |
 | Logout | POST | `/admin/api/auth/logout` | Authenticated | — |
 | TOTP verify (step-up) | POST | `/admin/api/auth/totp/verify` | Authenticated | — |
 | List admin accounts | GET | `/admin/api/roles` | super_admin | `/admin/roles` |
@@ -808,14 +793,14 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(credentials: { username: string; password: string; totpCode?: string }) {
     const res = await authApi.login(credentials)
     adminUser.value = {
-      adminId: res.data.adminId,
+      adminId: res.data.data.adminId,
       username: credentials.username,
-      role: res.data.role,
-      sessionExpiresAt: res.data.sessionExpiresAt,
+      role: res.data.data.role,
+      sessionExpiresAt: res.data.data.sessionExpiresAt,
     }
     loginAt.value = Date.now()
     const permStore = usePermissionStore()
-    permStore.setRole(res.data.role)
+    permStore.setRole(res.data.data.role)
   }
 
   async function logout() {
@@ -922,7 +907,7 @@ export const useConfigStore = defineStore('config', () => {
     loading.value = true
     try {
       const res = await configApi.getRuntimeConfig()
-      runtimeConfig.value = res.data
+      runtimeConfig.value = res.data.data
     } finally {
       loading.value = false
     }
@@ -935,7 +920,7 @@ export const useConfigStore = defineStore('config', () => {
 
   async function fetchFeatureFlags() {
     const res = await configApi.getFeatureFlags()
-    featureFlags.value = res.data.flags
+    featureFlags.value = res.data.data.flags
   }
 
   async function toggleFlag(flag: string, enabled: boolean) {
@@ -1411,7 +1396,7 @@ location /admin/api/ {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Pass CSRF token cookie
+    # Pass session cookie through
     proxy_pass_header Set-Cookie;
 }
 ```
@@ -1450,7 +1435,7 @@ location /admin/api/ {
 | Cookie flags | `HttpOnly; SameSite=Strict; Secure; Path=/admin` |
 | Inactivity timeout | 4 hours (admin_session_inactivity_expiry_hours = 4) |
 | Absolute timeout | 8 hours (admin_session_absolute_expiry_hours = 8) |
-| CSRF protection | `X-CSRF-Token` header double-submit pattern |
+| CSRF protection | `SameSite=Strict` cookie attribute — cross-site submissions are blocked by the browser; no additional token required |
 | Session store | Redis server-side (`session:admin:{session_id}`) |
 
 ### §16.3 RBAC Security
@@ -1480,7 +1465,7 @@ All CUD operations write to `admin_audit_log`:
 | 3 | §5 RBAC: three roles fully defined + PermissionGuard composable + `v-permission` directive | ✅ |
 | 4 | §5.2 Permission Guard: `hasPermission()` (role hierarchy) + route guard + button-level permission examples | ✅ |
 | 5 | §7 Page specs: Login / Dashboard / Pet / Battle / Suspicious / Leaderboard / Analytics / Email / Config (Runtime/Economy/Flags) / GDPR / Roles / Audit — all have column and action descriptions | ✅ |
-| 6 | §8.1 Axios config: baseURL + request interceptor (CSRF token injection) + response interceptor (401/403 handling) | ✅ |
+| 6 | §8.1 Axios config: baseURL + `withCredentials: true` (session cookie) + response interceptor (401/403 handling); CSRF handled by SameSite=Strict (no token injection needed) | ✅ |
 | 7 | §8.4 `/admin/api/*` endpoint mapping complete (32 endpoints, covering API.md §6.1–§6.9) | ✅ |
 | 8 | §9 Three Pinia stores (authStore / permissionStore / configStore) with full state + actions | ✅ |
 | 9a | §15.1 Vite build: `base='/admin/'`, `outDir='dist/admin'`, `manualChunks` vendor splitting, `server.proxy` for `/admin/api` | ✅ |
