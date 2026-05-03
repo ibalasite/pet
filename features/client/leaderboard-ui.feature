@@ -71,5 +71,6 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
   Scenario: Banned pet removed from leaderboard within 5 minutes of admin ban
     Given a pet with petId "bad123" is visible at rank 12 in the LeaderboardTable
     And the pet "bad123" has been banned by an admin
+    And GET /api/v1/leaderboard responds HTTP 200 with refreshed entries not including "bad123"
     When (leaderboard_ban_reflection_time_minutes = 5) minutes have elapsed and the leaderboard auto-refresh fires
     Then "bad123" no longer appears in any LeaderboardRow in the LeaderboardTable

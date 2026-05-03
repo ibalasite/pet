@@ -93,6 +93,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
 
   Scenario: Admin removes a suspicious pet from the leaderboard
     Given the AdminLeaderboardPage shows petId "cheat-pet-007" with a SuspiciousFlagBadge
+    And DELETE /admin/api/leaderboard/cheat-pet-007 responds HTTP 200
     When the admin clicks "Remove from Leaderboard" on that row
     Then DELETE /admin/api/leaderboard/cheat-pet-007 is called with the session cookie
     And the row for "cheat-pet-007" disappears from the AdminLeaderboardPage ElTable

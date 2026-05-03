@@ -38,6 +38,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
 
   Scenario: User accepts AI opponent from AIOfferModal — battle proceeds
     Given the AIOfferModal is visible after a matchmaking timeout
+    And the selected battle mode is "RACE"
     And POST /api/v1/arena/enter responds HTTP 200 with "matchId", "result", and "opponentPetId"
     When the owner clicks the "Accept AI Opponent" button inside the modal
     Then POST /api/v1/arena/enter is re-called with body {"petId": "<petId>", "mode": "RACE", "acceptAI": true} to signal AI opponent acceptance

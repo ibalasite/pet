@@ -4,7 +4,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     Given the player app is loaded
     And a valid "pet_token" of at least (pet_access_token_min_bytes = 32) bytes is stored in localStorage
     And the user is on the TrainingPage at "/pet/:petId/train"
-    And GET /api/v1/pets/:petId returns HTTP 200 with "actionsRemainingToday" > 0
+    And GET /api/v1/pets/:petId returns HTTP 200 with the pet's current stats
 
   # --- Happy path training ---
 
