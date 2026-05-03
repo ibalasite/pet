@@ -401,13 +401,15 @@ The following are Redis key patterns (not PostgreSQL tables):
 
 ```
 redis_key: rl:claim:{email_hash}         TTL: 3600s   Value: attempt count (≤5); enforces AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5
-redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set when hourly attempt limit is breached (on attempt >5); CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
+redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set when MAX_ATTEMPTS_REACHED (count = AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5); CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
 redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10 default)
 redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤10)
 redis_key: rl:code_entry:cooldown:{session_id} TTL: 60s  Value: "1"; set when MAX_ATTEMPTS_REACHED (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); HTTP 429 with Retry-After: 60 while key exists
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
 redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
 redis_key: matchmaking:queue:{mode}      NO TTL       Redis Sorted Set (ZADD score=enqueue_epoch; ZRANGEBYSCORE for stale entry cleanup); entries older than ARENA_MATCHMAKING_TIMEOUT+15s (≈45s) are considered stale and skipped by the consumer. Entry format: `"{petId}:{enqueue_epoch_ms}"`. Consumer validates entry age before pairing and discards stale entries silently.
+redis_key: rl:admin_login:{ip_hash}      TTL: 900s    Value: attempt count; enforces pre-auth IP rate limit (10 attempts per 15 min — §6.3)
+redis_key: rl:admin:{admin_id}           TTL: 60s     Value: request count; enforces ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100 per authenticated admin account
 redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, role, createdAt (ISO), absExpiry: createdAt+28800s }; TTL=14400s enforces inactivity; absExpiry field validated on each request for 8h absolute cap
 redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invalidate replaced pet access tokens; TTL = 72h (CLAIM_TOKEN_CLEANUP_TTL = 72h)
 ```
@@ -431,7 +433,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 **Indexes**: idx_admin_users_username ON admin_users(username)
 **Note**: Admin accounts are never hard-deleted (audit log FK requires the row to remain). "Deletion" is a soft deactivation: set `deactivated_at = NOW()`. The `DELETE /admin/api/roles/:adminId` endpoint performs a soft deactivate, not a SQL DELETE.
 
-### §4.10 AuditLog
+### §4.10 AuditLogs
 
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
@@ -445,7 +447,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
 **Retention**: ADMIN_AUDIT_LOG_RETENTION = 2 years.
-**Indexes**: idx_audit_log_created_at ON audit_log(created_at DESC); idx_audit_log_admin_id ON audit_log(admin_id, created_at DESC)
+**Indexes**: idx_audit_logs_created_at ON audit_logs(created_at DESC); idx_audit_logs_admin_id ON audit_logs(admin_id, created_at DESC)
 
 ### §4.11 TradeRecord (Phase 3 — FF_MARKETPLACE)
 
@@ -487,7 +489,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | id | UUID | PK DEFAULT gen_random_uuid() | Returned as jobId in API response |
 | claim_identity_id | UUID | NOT NULL REFERENCES claim_identities(id) ON DELETE RESTRICT | Data subject (email identity); a single erasure covers all pets under this identity; RESTRICT prevents identity deletion before all GDPR requests are resolved |
 | initiating_pet_id | UUID | NULL REFERENCES pets(id) ON DELETE SET NULL | Pet whose token authenticated the self-service submission; NULL for admin-initiated requests |
-| request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' \| 'object_leaderboard' — CHECK (request_type IN ('erasure','data_access','restrict_processing','object_leaderboard')) |
+| request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' \| 'object_leaderboard' \| 'rectification' — CHECK (request_type IN ('erasure','data_access','restrict_processing','object_leaderboard','rectification')) |
 | status | VARCHAR(32) | NOT NULL DEFAULT 'pending' | 'pending' \| 'processing' \| 'completed' \| 'failed' |
 | submitted_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 | completed_at | TIMESTAMPTZ | NULL | |
@@ -682,9 +684,36 @@ Auth: Admin session (Super Admin)
 Request: Economy parameter updates (food buff multiplier range 0.5×–5.0× — FOOD_BUFF_MULTIPLIER_ADMIN_MIN/MAX; arena entry cost 0–10 credits — ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT/ADMIN_MAX; arena entry cooldown 0–60 min — ARENA_ENTRY_COOLDOWN_ADMIN_MIN/MAX_MINUTES)
 Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min).
 
+#### GET /admin/api/dashboard
+Auth: Admin session (Moderator+ or Read Only)
+Response: `{ claimedPetsToday, activeBattlesToday, pendingGdprRequests, dailyActiveUsers, errorRateLast5Min, emailDeliveryRate, systemStatus: "healthy"|"degraded"|"down" }`
+Description: Real-time dashboard summary — all values from Redis counters and PostgreSQL aggregates.
+
+#### GET /admin/api/battles
+Auth: Admin session (Moderator+ or Read Only)
+Query: `?page=1&limit=20&from=ISO8601&to=ISO8601&petId=&flagged=true|false`
+Response: `{ battles: [{matchId, petAId, petBId, winnerId, outcome, duration, createdAt, isFlagged}], total, page, limit }`
+Description: Battle Records list view — paginated; last ARENA_BATTLE_RECORDS_DISPLAY = 20 shown by default.
+
+#### GET /admin/api/suspicious
+Auth: Admin session (Moderator+)
+Response: `{ suspiciousPets: [{petId, battlesLastHour, winRate, flagCount, lastFlaggedAt}] }`
+Description: Pets exceeding BOT_DETECTION_BATTLES_THRESHOLD = 50 battles per 60-minute window.
+
+#### GET /admin/api/email/monitor
+Auth: Admin session (Moderator+ or Read Only)
+Response: `{ emailsSentLast24h, deliverySuccessRate, bounceRate, spamComplaintRate, failoverActive: boolean }`
+Description: Email delivery health monitor — delivery rate, bounce/spam stats from SendGrid webhook logs.
+
+#### GET /admin/api/analytics
+Auth: Admin session (Moderator+ or Read Only)
+Query: `?from=ISO8601&to=ISO8601&metric=dau|claims|arena_battles|leaderboard_uvs`
+Response: `{ metric, dataPoints: [{date, value}], summary: { total, average, peak } }`
+Description: Product analytics — DAU, claim funnel, arena engagement, leaderboard unique visitors.
+
 #### GET /admin/api/gdpr
 Auth: Admin session (Super Admin)
-Query: `?page=1&limit=20&status=pending|processing|completed|failed&type=erasure|data_access|restrict_processing|object_leaderboard`
+Query: `?page=1&limit=20&status=pending|processing|completed|failed&type=erasure|data_access|restrict_processing|object_leaderboard|rectification`
 Response: `{ requests: [{id, requestType, status, submittedAt, completedAt, adminNotes}], total, page, limit }`
 Description: List all GDPR requests in the gdpr_requests table for the admin GDPR Queue module.
 
@@ -722,12 +751,12 @@ No persistent accounts exist — players identify via pet token. GDPR requests a
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `POST` | `/api/v1/gdpr/request` | Pet token | Submit a GDPR request (erasure / data-access / restrict-processing / object-leaderboard) |
+| `POST` | `/api/v1/gdpr/request` | Pet token | Submit a GDPR request (erasure / data-access / restrict-processing / object-leaderboard / rectification) |
 | `GET` | `/api/v1/gdpr/request/status?jobId=<uuid>` | Pet token | Check status of a specific GDPR request by jobId |
 
 **Request body** (`POST /api/v1/gdpr/request`):
 ```json
-{ "type": "erasure" | "data_access" | "restrict_processing" | "object_leaderboard" }
+{ "type": "erasure" | "data_access" | "restrict_processing" | "object_leaderboard" | "rectification" }
 ```
 Auth: `Authorization: Bearer <petToken>` header (same pattern as all other authenticated player endpoints). The server resolves the token hash to the `pets` row, then reads `pets.claim_identity_id` to identify the GDPR data subject and create a `gdpr_requests` row scoped to that `claim_identities` record.
 
@@ -740,6 +769,7 @@ Auth: `Authorization: Bearer <petToken>` header (same pattern as all other authe
 - Data access/portability: `GDPR_DATA_ACCESS_RESPONSE_DAYS = 30`
 - Restrict processing: `GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24`
 - Object leaderboard: `GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5` — the subject's pet entries are removed from the public leaderboard within 5 business days of request (admin-reviewed; the leaderboard objection right is not absolute under GDPR Art. 21 but is resolved in 5 business days as policy)
+- Rectification: `GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24` — email encrypted field updated within 24 hours of request; applies when the user needs to correct stored email data
 
 Requests are queued and processed by the admin portal GDPR module. Confirmation sent to the email on file (if not yet erased).
 
@@ -819,6 +849,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 - **Right of access / portability**: JSON export of pet data, battle records, training logs delivered within 30 days (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 / GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30).
 - **Right to restrict processing**: Applied within 24 hours (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24).
 - **Right to object (leaderboard)**: Pet entries removed from public leaderboard within 5 business days of request (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5). On fulfillment, `ZREM leaderboard:global <pet_id>` executed for each pet belonging to the identity. Admin-reviewed; objection is not absolute under GDPR Art. 21 but resolved as policy.
+- **Right to rectification (Art. 16)**: Email encrypted field updated within 24 hours of request (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24). Applies when data subject needs to correct stored email data.
 - **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 - **COPPA**: Age-13 confirmation checkbox required on claim form; label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
 - **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years).
@@ -909,7 +940,7 @@ App
 │       │   └── NeglectedState (conditional)
 │       ├── TrainingPage (/pet/:petId/train)
 │       │   ├── TrainingActions → TrainingActionCard ×3
-│       │   ├── StatChangeIndicator
+│       │   ├── StatChangeIndicator (visible for 2 seconds after training action — TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2)
 │       │   ├── DailyResetTimer
 │       │   └── TrainingStreak
 │       ├── BattleRecordsPage (/pet/:petId/records)
@@ -1198,8 +1229,8 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 **Scope**:
 - Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
-- PostgreSQL schema: `pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_log`, `gdpr_requests` tables (GDPR compliance is a legal obligation from Phase 1, not a GA feature)
-- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pet/:petId`
+- PostgreSQL schema: `pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_logs`, `gdpr_requests` tables (GDPR compliance is a legal obligation from Phase 1, not a GA feature)
+- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pet/:petId`, `GET /api/v1/leaderboard` (Phase 1 implementation: direct PostgreSQL query on pets/arena_matches; Redis sorted set deferred to Phase 2)
 - Email delivery: SendGrid integration + Nodemailer SMTP fallback
 - Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
 - Rate limiting: Redis-backed claim attempts (5/hr) and code entry (10/session)
