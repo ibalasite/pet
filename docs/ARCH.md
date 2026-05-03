@@ -119,7 +119,7 @@ The player app is a client-side SPA served from Vercel's global CDN. No server-s
 
 | Tier | Library | Scope |
 |------|---------|-------|
-| Server state | TanStack Query v5 (`staleTime: 30_000`) | Pet stats, leaderboard, battle history |
+| Server state | TanStack Query v5 (`staleTime: 30_000` ms = LEADERBOARD_UPDATE_LAG_MAX_SECONDS × 1000) | Pet stats, leaderboard, battle history |
 | Client state | Zustand (sliced store) | Arena mode, claim flow step, toast queue |
 | URL state | URLSearchParams / route segments | Leaderboard rarity filter, pagination |
 | Form state | React Hook Form + Zod | ClaimEmailForm, ClaimCodeForm |
@@ -226,7 +226,7 @@ The admin portal is a separate Vite application, deployed to Vercel independentl
 
 **State**: Pinia (Vue-native) for local portal state. Axios with request/response interceptors for session expiry (4h inactivity — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4; 8h absolute — ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8).
 
-**Performance**: Pages load ≤ 3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3). Pet search returns up to 1 million records in ≤ 2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2). Single moderator handles 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100).
+**Performance**: Pages load ≤ 3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3; PRD NFR-ADMIN-06). Pet search returns up to 1 million records in ≤ 2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2; PRD NFR-ADMIN-06). Single moderator handles 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100).
 
 ---
 
@@ -343,7 +343,7 @@ Public top 100 (LEADERBOARD_TOP_DISPLAY = 100); admin sees top 500 (LEADERBOARD_
 | `rl:arena:{pet_id}` | 3600s | 10/hr default | ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT |
 | `rl:code_entry:{session_id}` | 900s | 10/session | AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION |
 | `rl:code_entry:cooldown:{session_id}` | 60s | cooldown sentinel on MAX_ATTEMPTS_REACHED — HTTP 429 Retry-After: 60 while key exists | CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS |
-| `rl:admin_login:{ip_hash}` | 900s | 10/15 min | ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS |
+| `rl:admin_login:{ip_hash}` | 900s | 10/15 min | ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS; ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS |
 | `rl:admin:{admin_id}` | 60s | 100/min | ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE |
 
 Rate limiting is fail-open for operational traffic (counters not enforced on Redis unavailability — logged as alert), **except** OTP code entry which is fail-closed (blocked on Redis unavailability).
@@ -897,7 +897,7 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 
 **Open Question OQ-E04**: GDPR ownership transfer — what happens when a player requests erasure of an email that was used to claim a pet that was subsequently traded? The current data model has no ownership-transfer record. Resolution required before GA: either add a `former_identity_id[]` array to `pets` or restrict GDPR erasure scope to current owner only (see EDD §14).
 
-**COPPA**: Age-13 confirmation checkbox required on all claim forms (COPPA_MINIMUM_AGE_YEARS = 13). Label text: "I confirm I am at least 13 years old" (PRD US-AUTH-001 AC-003-8).
+**COPPA**: Age-13 confirmation checkbox required on all claim forms (COPPA_MINIMUM_AGE_YEARS = 13). Label text: "I am at least 13 years old" (PRD US-AUTH-001 AC-003-8).
 
 **CAN-SPAM**: All emails are transactional. No marketing email without separate explicit opt-in. Claim and recovery emails contain ONLY the 6-digit code — no promotional content.
 
@@ -1160,7 +1160,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard: 
 | Pet canvas render | ≤ 2 s on load | PET_RENDER_ON_LOAD_SECONDS |
 | Pet interaction response | ≤ 200 ms | PET_INTERACTION_RESPONSE_MS |
 | Arena battle E2E | < 2 s | ARENA_BATTLE_E2E_SECONDS |
-| Leaderboard update | ≤ 30 s | LEADERBOARD_UPDATE_LAG_MAX_SECONDS |
+| Leaderboard update | ≤ 30 s | LEADERBOARD_UPDATE_LAG_SECONDS |
 | Email delivery P90 | ≤ 60 s | EMAIL_DELIVERY_P90_SECONDS |
 | Error rate | < 1% | ERROR_RATE_MAX_PERCENT |
 | Email delivery failure rate | < 2% | EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT |
