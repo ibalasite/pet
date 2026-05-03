@@ -24,6 +24,8 @@ All column names use `snake_case`. All IDs are `UUID` (generated via `gen_random
 
 ## 2. Tables
 
+> **DDL execution order**: The PostgreSQL `ENUM` types defined in §3 must be created **before** any table in this section. Run all `CREATE TYPE` statements from §3 first, then execute the `CREATE TABLE` statements below in the order §2.1 → §2.12. Within the table definitions, §2.1 (`claim_identities`) must precede §2.2 (`pets`) because `pets.claim_identity_id` carries a foreign key to `claim_identities`; similarly, §2.8 (`marketplace_listings`) must precede §2.9 (`marketplace_transactions`), and §2.10 (`admin_accounts`) must precede §2.11 (`admin_audit_log`).
+
 ### 2.1 `claim_identities`
 
 One row per unique email address. Implements PII minimization: only the SHA-256 hash is indexed; the raw email is stored only as AES-256-GCM ciphertext. Defined before `pets` because `pets.claim_identity_id` carries a foreign key to this table.
