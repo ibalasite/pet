@@ -654,7 +654,7 @@ Applies a food buff to the authenticated player's pet, granting a temporary or p
 |-------|------|----------|-------------|
 | `buffType` | string | Yes | Identifier for the food item type. Validated against admin-configured item catalog. |
 | `stat` | string | Yes | One of `speed`, `strength`, `stamina`. |
-| `magnitude` | integer | Yes | Stat points to add. Must be within admin-configured range (`food_buff_multiplier_admin_min = 0.5×` to `food_buff_multiplier_admin_max = 5.0×` of base). |
+| `magnitude` | integer | Yes | Stat points to add. Must be within admin-configured range (`food_buff_multiplier_admin_min = 0.5`× to `food_buff_multiplier_admin_max = 5.0`× of base). |
 | `isPermanent` | boolean | No | If `true`, the buff is permanent (no expiry). Default: `false`. Illustrative example: permanent +3 points (`food_buff_example_perm_amount_stat_points = 3`). |
 
 **Response (HTTP 200):**
