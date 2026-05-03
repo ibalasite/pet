@@ -273,7 +273,7 @@ Two Fastify processes share the same codebase and database credentials via envir
 
 **Technology**: PostgreSQL 15+ managed by Supabase
 
-**Core Tables**:
+**Core Tables** (Impl Phase = EDD implementation phase 1/2/3, distinct from PRD priority P0/P1/P2):
 
 | Table | Purpose | Phase |
 |-------|---------|-------|
@@ -560,7 +560,7 @@ Availability posture: Redis unavailability triggers fallback to PostgreSQL for l
 **Status**: Accepted (implementation approach partially open — OQ-E07)
 
 **Context**:
-The marketplace (Phase 3 — F-MARKET-01) requires DAU > 1,000 sustained for 2 weeks before activation (DAU_MARKETPLACE_TRIGGER = 1,000). The sumo arena mode (F-ARENA-02) is P1 scope. The admin portal itself is behind `FF_ADMIN_PORTAL` during alpha.
+The marketplace (Phase 3 — F-TRADE-01) requires DAU > 1,000 sustained for 2 weeks before activation (DAU_MARKETPLACE_TRIGGER = 1,000). The sumo arena mode (F-ARENA-02) is P1 scope. The admin portal itself is behind `FF_ADMIN_PORTAL` during alpha.
 
 **Decision**:
 Phase 1-2: Environment variable-based feature flags sufficient for MVP. Complete flag inventory:
@@ -859,7 +859,7 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 
 **Leaderboard Ban Reflection**: When a ban is applied via `POST /admin/api/pets/:petId/ban`, the banned pet must be removed from `leaderboard:global` (ZREM) within 5 minutes (LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5). This SLA is enforced as a synchronous ZREM in the ban transaction, not a background job.
 
-**Moderation Reason**: All admin ban/unban/flag operations require a reason field with a maximum of 500 characters (ADMIN_MODERATION_REASON_MAX_CHARS = 500). The reason is stored in `audit_logs.reason` and validated at the API boundary.
+**Moderation Reason**: All admin ban/unban/flag operations require a reason field with a maximum of 500 characters (ADMIN_MODERATION_REASON_MAX_CHARS = 500). The reason is stored in the `audit_logs.detail` JSONB field and validated at the API boundary.
 
 ---
 
