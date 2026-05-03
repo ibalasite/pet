@@ -177,7 +177,7 @@ CREATE INDEX idx_claim_codes_used_at    ON claim_codes (used_at) WHERE used_at I
 
 ### 2.4 `arena_matches`
 
-Immutable record of every completed battle. `pet_b_id` and `winner_pet_id` use `ON DELETE SET NULL` so that the match row is retained for audit integrity even if a pet row is later affected.
+Append-only record of every completed battle. Battle outcome columns are never mutated after insert; however, `is_flagged` and `flagged_at` can be toggled by admin flag/unflag actions. `pet_b_id` and `winner_pet_id` use `ON DELETE SET NULL` so that the match row is retained for audit integrity even if a pet row is later affected.
 
 ```sql
 CREATE TABLE arena_matches (
@@ -195,6 +195,7 @@ CREATE TABLE arena_matches (
     is_flagged       BOOLEAN        NOT NULL DEFAULT FALSE,
     flagged_at       TIMESTAMPTZ    NULL,
     completed_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_arena_matches PRIMARY KEY (id),
     CONSTRAINT fk_arena_matches_pet_a
@@ -232,6 +233,7 @@ COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 se
 COMMENT ON COLUMN arena_matches.battle_log IS 'Structured event sequence array for client-side replay.';
 COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to admin_audit_log.detail, not stored here.';
 COMMENT ON COLUMN arena_matches.flagged_at IS 'Timestamp when the match was most recently flagged. NULL when is_flagged = FALSE.';
+COMMENT ON COLUMN arena_matches.updated_at IS 'Updated by the application on every mutation: when is_flagged is set to TRUE (POST .../flag) or cleared to FALSE (DELETE .../flag). Unchanged on insert-only path.';
 ```
 
 ```sql
@@ -733,7 +735,6 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 
 Partial indexes on boolean and nullable columns are preferred over full-table indexes where the indexed set is a small fraction of total rows:
 
-- `idx_pets_rarity` — full index on `rarity`; supports admin list-view and leaderboard snapshot queries that filter by rarity tier.
 - `idx_pets_claimed_at` — `WHERE claimed_at IS NOT NULL`: only claimed pets have this set; used by analytics and admin list queries that filter for claimed pets.
 - `idx_pets_is_banned` — `WHERE is_banned = TRUE`: nearly all rows are `FALSE`; this partial index is tiny and fast for ban-check queries.
 - `idx_pets_owner_token_hash` — `WHERE owner_token_hash IS NOT NULL`: unclaimed pets have NULL; only claimed pet rows are indexed, keeping the index compact.
@@ -743,8 +744,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_marketplace_listings_active_pet` — `WHERE status = 'active'` unique: provides a database-enforced uniqueness constraint for concurrent active listings per pet at near-zero write cost.
 - `idx_arena_matches_is_flagged` — `WHERE is_flagged = TRUE`: nearly all matches are unflagged; partial index stays tiny and serves `GET /admin/api/battles?flagged=true` efficiently.
 - `idx_gdpr_requests_initiating_pet` — `WHERE initiating_pet_id IS NOT NULL`: supports FK cascade integrity check and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.
-- `idx_claim_codes_expires_at` — full index on `expires_at`; used by OTP verification to filter unexpired codes and by the background job to identify stale unverified codes.
-- `idx_claim_codes_created_at` and `idx_claim_codes_used_at` — support the 72-hour background cleanup job which must find rows by creation time or first-use time (whichever is later).
+- `idx_claim_codes_used_at` — `WHERE used_at IS NOT NULL`: used by the 72-hour background cleanup job which must find rows whose first-use time has passed.
 - `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
 - `idx_claim_identities_deletion` — `WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL`: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once `email_encrypted` is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.
 - `idx_admin_audit_log_ip_hash_cleanup` — `WHERE ip_address_hash IS NOT NULL`: used by the background job that nulls `ip_address_hash` after 90 days (`ip_address_log_retention_days = 90`). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by `idx_claim_identities_deletion`.
@@ -789,6 +789,9 @@ This avoids depending on the ephemeral `claim_codes` table, which is purged 72 h
 
 These full-table indexes cover FK scans, sort-only queries, and background job targets that are not classified as partial or composite:
 
+- `idx_pets_rarity (rarity)` — supports admin list-view and leaderboard snapshot queries that filter by rarity tier. Not partial because all rows have a non-NULL `rarity`.
+- `idx_claim_codes_expires_at (expires_at)` — supports OTP verification filtering for unexpired codes (`WHERE expires_at > NOW()`) and the background job that identifies stale unverified codes. Not partial because all rows have a non-NULL `expires_at`.
+- `idx_claim_codes_created_at (created_at)` — supports the 72-hour background cleanup job which finds rows by creation time (`WHERE created_at < NOW() - INTERVAL '72 hours'`). Not partial because all rows have a non-NULL `created_at`.
 - `idx_arena_matches_completed_at (completed_at)` — supports admin list queries ordered by recency and serves as the sort key for leaderboard-adjacent analytics. Not partial because all rows have a non-NULL `completed_at`.
 - `idx_arena_matches_winner (winner_pet_id)` — supports the FK integrity scan for `winner_pet_id ON DELETE SET NULL`. Required because PostgreSQL needs an index on the referencing column when the referenced row is deleted.
 - `idx_claim_codes_pet_id (pet_id)` — supports the FK CASCADE scan when a `pets` row is deleted (`ON DELETE CASCADE`). Also used by the OTP verification query `WHERE pet_id = $1 AND expires_at > NOW() AND used_at IS NULL`.
