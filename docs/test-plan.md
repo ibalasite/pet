@@ -238,7 +238,7 @@ Test fixtures are organized into four categories matching the domain model:
 - Pet with `stat_speed = 100` (at maximum — (pet_stat_max = 100)) to test the training-blocked path
 - Pet with `last_trained_at` set to 4 days ago (exceeds (training_neglect_threshold_days = 3)) for neglected-state tests
 - Claim code with `expires_at = NOW() - 1 second` to test the expired-code path
-- Admin account with `locked_until = NOW() + 60 minutes` for lockout state tests
+- Admin account with `locked_until = NOW() + (admin_login_lockout_duration_minutes = 30) minutes` for lockout state tests
 
 **Negative Fixtures** (invalid data, must produce errors):
 
