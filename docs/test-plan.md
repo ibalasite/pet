@@ -94,7 +94,7 @@ All 18 user stories are covered by at least one automated test. The complete tra
 | US-ARENA-002 — Sumo Arena Mode | P1 | EPIC-ARENA | Unit, Integration, E2E |
 | US-BOARD-001 — Global Leaderboard | P0 | EPIC-RANKING | Integration, E2E, Performance |
 | US-RECORD-001 — Battle Records Page | P0 | EPIC-RANKING | E2E, Integration |
-| US-RARITY-001 — Rarity Scoring | P1 | EPIC-RANKING | Unit, E2E, Visual Regression |
+| US-RARITY-001 — Rarity Scoring | P1 | EPIC-RANKING | E2E, Visual Regression |
 | US-TRADE-001 — Pet Trading Marketplace | P2 | EPIC-MARKETPLACE | Integration (feature-flag gate only) |
 | US-ADMIN-001 — Admin Pet Management | P0 | EPIC-ADMIN | E2E, Integration, Performance |
 | US-ADMIN-002 — Admin Leaderboard Moderation | P0 | EPIC-ADMIN | Integration, E2E |
@@ -630,7 +630,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 |---|---|
 | Given | An admin performs a ban, config change, and GDPR deletion in sequence |
 | When | `GET /admin/api/audit?limit=10` is called |
-| Then | Three distinct audit records exist with correct `action_type`, `actor_admin_id`, `old_value_json`, and `new_value_json` |
+| Then | Three distinct audit records exist with correct `action`, `admin_id`, and `detail` (JSONB payload) fields |
 | Linked AC | AC-015-3, AC-016-4, AC-017-4, AC-018-4 |
 
 | TC-INT-020 | Suspicious pet auto-flagged at threshold |
@@ -1376,7 +1376,7 @@ Scenario: Legendary pet displays animated border effect
   Given a pet with rarity = LEGENDARY
   When the pet page is loaded
   Then a special animated border effect is visible around the sprite
-  And the rarity badge reads "Legendary — 3% of all pets"
+  And the rarity badge reads "Legendary — (rarity_legendary_percent = 3)% of all pets"
   And when reduced-motion is active, the border animation is replaced with a static glow
 ```
 
