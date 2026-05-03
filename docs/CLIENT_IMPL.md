@@ -569,7 +569,7 @@ Audio is not part of Phase 1 scope. No background music or SFX library is includ
 | UI-07 | UTC 00:00 reset | UI-06 | `usePet` cache invalidated; `actionsRemainingToday = TRAINING_ACTIONS_PER_DAY = 3` |
 | UI-05 | Click ArenaEntry | UI-08 | `navigate('/arena')`; POST /api/v1/arena/enter begins |
 | UI-08 | Opponent found | UI-09 | 3-2-1 countdown → `ArenaScene` mounts |
-| UI-08 | 30 s timeout, no AI | UI-08 | `AIOfferModal` shown; `MATCHMAKING_TIMEOUT` handled |
+| UI-08 | 30 s timeout, no AI | UI-08 | `AIOfferModal` shown; `ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30` elapsed |
 | UI-08 | Accept AI | UI-09 | Re-POST with `acceptAI: true` |
 | UI-08 | 429 response | UI-11 | `RateLimitBanner` shown; `Retry-After` countdown |
 | UI-09 | Battle result received | UI-10 | `navigate('/arena/result/:matchId')` |
