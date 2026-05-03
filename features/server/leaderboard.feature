@@ -17,7 +17,7 @@ Feature: Global Leaderboard (US-BOARD-001, US-ADMIN-002)
   Scenario: Admin ban removes pet from leaderboard within the reflection time
     Given pet "cheating-pet-token" currently holds rank 3 on the leaderboard
     And a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
-    When the admin issues a ban action for "cheating-pet-token" with a moderation reason under (admin_moderation_reason_max_chars = 500) characters
+    When the admin issues a ban action via POST /admin/api/pets/cheating-pet-token/ban with a moderation reason under (admin_moderation_reason_max_chars = 500) characters
     Then "cheating-pet-token" is removed from the Redis leaderboard sorted set
     And within (leaderboard_ban_reflection_time_minutes = 5) minutes the pet no longer appears in GET /api/v1/leaderboard responses
     And an entry is written to admin_audit_log with action "BAN" and detail containing the moderation reason

@@ -10,7 +10,7 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     And both pets receive updated win/loss counts in their profiles
 
   Scenario: AI fallback when no real opponent is available after timeout
-    Given pet "alpha-token-abc" is the only pet in the matchmaking queue
+    Given pet "alpha-token-abc" has entered the matchmaking queue via POST /api/v1/arena/enter and is the only pet present
     And (arena_matchmaking_timeout_seconds = 30) seconds pass without a second pet joining
     When the matchmaking service triggers the AI fallback logic
     Then a Race battle is created pairing "alpha-token-abc" against an AI bot opponent
@@ -19,7 +19,7 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
 
   Scenario: Arena rate limit prevents excessive battles per hour
     Given pet "alpha-token-abc" has already completed (arena_rate_limit_battles_per_hour_default = 10) battles within the current hour
-    When pet "alpha-token-abc" attempts to join the matchmaking queue again
+    When pet "alpha-token-abc" attempts to enter the matchmaking queue via POST /api/v1/arena/enter
     Then the server responds with HTTP 429
     And the response body contains error code "ARENA_RATE_LIMIT_EXCEEDED"
     And pet "alpha-token-abc" is not added to the matchmaking queue

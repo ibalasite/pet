@@ -4,9 +4,9 @@ Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
     Given pet "trainee-token-001" has used 0 training actions today
     When the owner submits a training request with type "STRENGTH" for "trainee-token-001"
     Then the server increments the strength stat by a value between (training_stat_points_min = 1) and (training_stat_points_max = 3) points
-    And the training_actions_used_today counter for "trainee-token-001" is incremented to 1
+    And a training_logs row is written for "trainee-token-001" bringing today's training log count to 1
     When the owner submits two more valid training requests for "trainee-token-001" on the same day
-    Then training_actions_used_today reaches (training_actions_per_day = 3)
+    Then the count of training_logs rows today for "trainee-token-001" reaches (training_actions_per_day = 3)
     When the owner submits a fourth training request for "trainee-token-001" on the same day
     Then the server responds with HTTP 429 and error code "TRAINING_DAILY_LIMIT_REACHED"
 

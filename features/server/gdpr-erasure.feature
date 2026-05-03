@@ -1,7 +1,7 @@
 Feature: GDPR Data Erasure (US-AUTH-002, US-ADMIN-004)
 
   Scenario: Player requests email erasure and email_encrypted is nulled within the SLA
-    Given a pet owner with pet token "owner-token-gdpr" has a verified email "erasure@example.com" on file
+    Given a pet owner with pet token "owner-token-gdpr" has a linked email "erasure@example.com" stored in email_encrypted
     When the owner submits a GDPR erasure request to POST /api/v1/gdpr/request with body { "type": "erasure" }
     Then the server enqueues an erasure job and responds with HTTP 202
     And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column is set to NULL
