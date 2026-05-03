@@ -2186,7 +2186,7 @@ Updates the status of a non-erasure GDPR request (data_access, restrict_processi
 }
 ```
 
-`status` must be `processing`, `completed`, or `failed`. `adminNotes` max 500 characters.
+`status` must be `processing`, `completed`, or `failed`. `adminNotes` max 500 characters (`admin_moderation_reason_max_chars = 500`).
 
 **Response (HTTP 200):**
 
