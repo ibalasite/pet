@@ -709,6 +709,10 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
      │                               │ Same battle calculation  │               │
      │                               │ INSERT arena_matches(is_ai_opponent=true) │
      │                               │─────────────────────────>│               │
+     │                               │ ZADD leaderboard:global score member=playerPetId
+     │                               │─────────────────────────>│               │
+     │                               │ [AI matches DO update player pet's leaderboard score;
+     │                               │  the AI synthetic pet does NOT get a leaderboard entry]
      │  {matchId, result, isAI=true} │                          │               │
      │<──────────────────────────────│                          │               │
      │                               │                          │               │
@@ -736,7 +740,8 @@ Arena Match Completion         Game API                    Redis            Post
      │                               │   (battles_played increases; win_rate drops)
      │                               │ ZADD leaderboard:global score member=loserPetId
      │                               │─────────────────────────>│               │
-     │                               │ [Both updates atomic — Update lag ≤30s per LEADERBOARD_UPDATE_LAG_SECONDS]
+     │                               │ [Both ZADDs wrapped in Redis MULTI/EXEC pipeline for atomicity]
+     │                               │ [Update lag ≤30s per LEADERBOARD_UPDATE_LAG_SECONDS]
      │                               │                          │               │
      │                               │ [Every hour: snapshot job]               │
      │                               │ ZRANGEBYSCORE leaderboard:global (top 500)
@@ -911,8 +916,8 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
 
 **Content Security Policy** (PRD NFR-SEC-08):
-- Phase 1-2: `default-src 'self'; script-src 'self' 'unsafe-inline'` (interim — Phaser.js inline canvas requires relaxation)
-- Phase 3 hardening: nonce-based CSP (`script-src 'self' 'nonce-{RANDOM}'`) with no `unsafe-inline` (EDD §13.3)
+- Phase 1-2: `default-src 'self'; script-src 'self' 'unsafe-inline'` — **accepted deviation from PRD NFR-SEC-08** (`unsafe-inline` required by Phaser.js canvas rendering in Phase 1-2). Risk accepted: script injection surface is limited by Phaser.js's inline canvas model; all other NFR-SEC controls (TLS, HSTS, token hashing) remain enforced. Deviation documented as accepted risk in the project risk register.
+- Phase 3 hardening: nonce-based CSP (`script-src 'self' 'nonce-{RANDOM}'`) with no `unsafe-inline` eliminates the deviation (EDD §13.3)
 
 ---
 
