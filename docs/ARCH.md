@@ -140,7 +140,7 @@ App
 │   │       ├── ClaimCodeForm
 │   │       └── URLReveal
 │   ├── PetPage (/pet/:petId)
-│   │   ├── PetCanvas, StatsPanel, TrainingEntry, ArenaEntry
+│   │   ├── PetCanvas, StatsPanel → StatBar ×3, TrainingEntry, ArenaEntry
 │   │   ├── RarityBadge
 │   │   ├── FoodInventory → FoodItem ×N
 │   │   └── NeglectedState (if last_trained_at > 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)
@@ -150,6 +150,7 @@ App
 │   │   ├── DailyResetTimer
 │   │   └── TrainingStreak
 │   ├── BattleRecordsPage (/pet/:petId/records)
+│   │   ├── PetSummaryCard
 │   │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
 │   ├── ArenaPage (/arena)
 │   │   ├── ModeSelector (RACE / SUMO)
@@ -182,6 +183,13 @@ App
 | CLS | < 0.1 | CLS_SCORE |
 | INP | < 200 ms | INP_MS |
 | Pet interaction response | ≤ 200 ms | PET_INTERACTION_RESPONSE_MS |
+
+**Accessibility (WCAG 2.1 AA)**:
+- Focus indicator contrast ratio ≥ 3:1 (A11Y_FOCUS_CONTRAST_RATIO = 3:1)
+- Normal text contrast ratio ≥ 4.5:1 (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1)
+- Large text contrast ratio ≥ 3:1 (A11Y_TEXT_CONTRAST_LARGE = 3:1)
+- Claim code expiry warning at 2 minutes remaining (A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES = 2)
+- All interactive elements are keyboard-navigable; focus is trapped in modal dialogs; `aria-live` regions used for dynamic content (EDD §8.4)
 
 ---
 
@@ -648,6 +656,8 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
      │                               │─────────────────────────────────────────>│
      │                               │                          │               │
      │                               │ [Poll for opponent — up to 30s ARENA_MATCHMAKING_TIMEOUT_SECONDS]
+     │                               │ [Transport: HTTP long-poll (synchronous response, up to 30s)
+     │                               │  OQ-E02 open: WebSocket alternative under evaluation]
      │                               │ ZRANGEBYSCORE matchmaking:queue:{mode}   │
      │                               │   oldest eligible entry  │               │
      │                               │<─────────────────────────────────────────│
@@ -656,8 +666,10 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
      │                               │ Fetch both pet stats     │               │
      │                               │─────────────────────────>│               │
      │                               │ Calculate outcome:       │               │
-     │                               │   seed = random()        │               │
-     │                               │   modA = speed_A × (1 ± 0.15 × rand)   │
+     │                               │   seed = random() → stored as random_seed BIGINT│
+     │                               │   (enables deterministic replay per EDD §4.4)   │
+     │                               │   statA = stat_by_mode(mode): Race→speed, Sumo→strength│
+     │                               │   modA = statA × (1 ± ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT/100 × rand)│
      │                               │   winner = MAX(modA, modB)               │
      │                               │   tie-break: earlier enqueue wins        │
      │                               │ INSERT arena_matches(...)│               │
@@ -845,7 +857,7 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 | Right | Action | SLA | Constant |
 |-------|--------|-----|----------|
 | Erasure (Art. 17) | Null `email_encrypted`; ZREM pet from leaderboard | 7 days (internal 24h) | GDPR_EMAIL_DELETION_WINDOW_DAYS = 7; GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24 |
-| Data access (Art. 15) | JSON export of pet, battles, training | 30 days | GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 |
+| Data access / portability (Art. 15/20) | JSON export of pet, battles, training | 30 days | GDPR_DATA_ACCESS_RESPONSE_DAYS = 30; GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30 |
 | Restrict processing (Art. 18) | Flag identity for processing restriction | 24 hours | GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 |
 | Object leaderboard (Art. 21) | ZREM pet from public leaderboard | 5 business days | GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5 |
 | Rectification (Art. 16) | Update `email_encrypted` field | 24 hours | GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24 |
