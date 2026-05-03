@@ -29,7 +29,7 @@ Backend Game API and Admin API are two Fastify processes within one Node.js 20 L
 The player app (React 18 + Phaser.js 3) and the admin portal (Vue 3 + Element Plus) are separate Vite applications deployed to Vercel as separate builds. This prevents the pixel-art CSS design system from bleeding into the data-dense admin UI and allows independent release cycles.
 
 **P5 — Fail-Closed Security**
-Every authentication boundary is fail-closed: if Redis is unavailable, OTP code entry is blocked (not allowed through). If a rate-limit counter cannot be checked, the action is denied. Admin sessions use httpOnly + SameSite=Strict cookies; pet tokens are transmitted once over HTTPS and stored only as SHA-256 hashes in the database.
+Every authentication boundary is fail-closed: if Redis is unavailable, OTP code entry is blocked (not allowed through). If a rate-limit counter cannot be checked, player-facing rate limits degrade gracefully (fail-open, logged as alert); only OTP code entry is fail-closed (blocked). Admin sessions use httpOnly + SameSite=Strict cookies; pet tokens are transmitted once over HTTPS and stored only as SHA-256 hashes in the database.
 
 **P6 — GDPR by Architecture**
 Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash. Raw email is never written to logs, databases, or analytics events. All GDPR SLAs (erasure: GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days; restrict processing: GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 hours; data access: GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 days) are implemented as first-class data-pipeline concerns, not post-hoc compliance patches.
@@ -56,6 +56,12 @@ Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash
  │  │  React 18 + Phaser.js 3       │    │  Vue 3 + Element Plus                  │   │
  │  │  Vite 5 / TypeScript 5        │    │  Vite 5 / TypeScript 5                 │   │
  │  └──────────────┬────────────────┘    └──────────────────────┬─────────────────┘   │
+ └─────────────────┼────────────────────────────────────────────┼─────────────────────┘
+                   │ HTTPS                                       │ HTTPS
+                   ▼                                             ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────────┐
+ │  API Gateway / Load Balancer (Nginx or Vercel Edge)                                 │
+ │  TLS termination · rate-limit header forwarding · X-Real-IP passthrough            │
  └─────────────────┼────────────────────────────────────────────┼─────────────────────┘
                    │ REST /api/v1/*                              │ REST /admin/api/*
                    ▼                                             ▼
@@ -282,7 +288,7 @@ Two Fastify processes share the same codebase and database credentials via envir
 
 **Technology**: Redis 7+ via Upstash (serverless, pay-per-request)
 
-Redis serves four distinct responsibilities, each with its own key-pattern and TTL discipline:
+Redis serves six distinct responsibilities, each with its own key-pattern and TTL discipline:
 
 **1. Leaderboard (Authoritative Real-Time)**
 
