@@ -20,17 +20,17 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | PET_STAT_DEFAULT / MIN / MAX | 10 / 1 / 100 | points | speed, strength, stamina |
 | PET_LEVEL_DEFAULT / MAX | 1 / 100 | level | FLOOR(training_actions / 10) |
 | TRAINING_ACTIONS_PER_DAY | 3 | actions/day | Reset UTC 00:00 |
-| TRAINING_NEGLECT_THRESHOLD | 3 | days | Triggers visual neglect state |
-| ARENA_RATE_LIMIT_BATTLES_PER_HOUR | 10 | battles/hr (default) | Admin-tunable 1–50 |
-| ARENA_MATCHMAKING_TIMEOUT | 30 | seconds | AI fallback offered |
+| TRAINING_NEGLECT_THRESHOLD_DAYS | 3 | days | Triggers visual neglect state |
+| ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT | 10 | battles/hr (default) | Admin-tunable 1–50 |
+| ARENA_MATCHMAKING_TIMEOUT_SECONDS | 30 | seconds | AI fallback offered |
 | ARENA_MATCH_DURATION | 5–15 | seconds | Animation window |
 | ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER | ±15 | percent | Seeded random applied to Speed/Strength |
-| ARENA_BATTLE_RECORDS_DISPLAY | 20 | battles | Last 20 shown publicly |
+| ARENA_BATTLE_RECORDS_DISPLAY_COUNT | 20 | battles | Last 20 shown publicly |
 | LEADERBOARD_TOP_DISPLAY | 100 | pets | Public; admin sees 500 |
-| LEADERBOARD_UPDATE_LAG_MAX | 30 | seconds | Redis → consistent |
+| LEADERBOARD_UPDATE_LAG_MAX_SECONDS | 30 | seconds | Redis → consistent |
 | CLAIM_CODE_DIGITS | 6 | digits | One-time numeric code |
-| CLAIM_CODE_EXPIRY | 15 | minutes | After generation |
-| CLAIM_TOKEN_CLEANUP_TTL | 72 | hours | After creation or first use |
+| CLAIM_CODE_EXPIRY_MINUTES | 15 | minutes | After generation |
+| CLAIM_TOKEN_CLEANUP_TTL_HOURS | 72 | hours | After creation or first use |
 | PET_ACCESS_TOKEN_MIN_BYTES | 32 | bytes | URL-safe base64 random |
 | CLAIM_TOKEN_MIN_ENTROPY | 32 | bytes | Cryptographically random |
 | AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR | 5 | attempts/hr | Per email address |
@@ -38,11 +38,11 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | ADMIN_SESSION_INACTIVITY_EXPIRY | 4 | hours | Inactivity timeout |
 | ADMIN_SESSION_ABSOLUTE_EXPIRY | 8 | hours | Regardless of activity |
 | ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE | 100 | req/min | Per admin account |
-| ADMIN_AUDIT_LOG_RETENTION | 2 | years | GDPR Art. 30 compliance |
+| ADMIN_AUDIT_LOG_RETENTION_YEARS | 2 | years | GDPR Art. 30 compliance |
 | BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window (arena bot-detection system); BOT_DETECTION_WINDOW_MINUTES = 60 |
 | LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR | 50 | battles/hr | Admin leaderboard UI suspicious-flag indicator (distinct purpose from bot detection) |
-| HORIZONTAL_SCALE_CPU_THRESHOLD | 70 | percent | HPA scale-out trigger |
-| DB_AUTOFAILOVER_TIME | 60 | seconds | PostgreSQL automated failover |
+| HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT | 70 | percent | HPA scale-out trigger |
+| DB_AUTOFAILOVER_TIME_SECONDS | 60 | seconds | PostgreSQL automated failover |
 | SENDGRID_FAILOVER_CONSECUTIVE_FAILURES | 3 | failures | Switch to Nodemailer SMTP |
 | CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT | 98 | percent | Minimum email delivery success rate target |
 | SENDGRID_DELIVERY_RATE_ASSUMPTION_PERCENT | 98 | percent | Capacity planning assumption for SendGrid delivery rate |
@@ -56,12 +56,12 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | AVAILABILITY | 99.9% | monthly | ≤43.8 min downtime/month |
 | P99_API_LATENCY_READ | <200 | ms at 100 RPS | All read endpoints |
 | P99_API_LATENCY_WRITE | <500 | ms at 100 RPS | Training, arena write endpoints |
-| GDPR_EMAIL_DELETION_WINDOW | 7 | days | Email → SHA-256 hash |
+| GDPR_EMAIL_DELETION_WINDOW_DAYS | 7 | days | Email → SHA-256 hash |
 | GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS | 24 | hours | Internal SLA for email hash completion |
 | RARITY_COMMON_PERCENT / RARE / EPIC / LEGENDARY | 60 / 25 / 12 / 3 | percent | Default rarity drop weights; admin-tunable; four values must always sum to 100% |
 | RARITY_MULTIPLIER_COMMON / RARE / EPIC / LEGENDARY | 1 / 2 / 4 / 8 | × | Applied in trade min-price formula: (pet_level × 100) + (rarity_multiplier × 500) |
 | TRADE_TRANSACTION_FEE | 5 | percent | Platform fee on trades; within BRD-defined range of 5–10% (TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5, TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10) |
-| FOOD_BUFF_RECORD_RETENTION | 30 | days | After expiry/consumption |
+| FOOD_BUFF_RECORD_RETENTION_DAYS | 30 | days | After expiry/consumption |
 | MVP_BUDGET | 40,000 | USD | Hard constraint |
 | PET_RESERVATION_TTL_HOURS | 24 | hours | Guest preview reservation window before unclaimed pet cleanup |
 | SPRITE_RESOLUTION_PX | 32 | px | Sprite frame size; provisional Phase 1 resolution (see §14 OQ-E01) |
@@ -145,8 +145,8 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 
 - **Player App**: Static assets built by Vite and served via Vercel CDN (global edge). No SSR required; purely client-side SPA with REST API calls.
 - **Admin Portal**: Same Vercel project, separate route prefix or subdomain (`admin.pixel-pet-arena.com`). Deployed as a separate Vite application.
-- **API Server**: Containerized Node.js / Fastify on Railway (initial) or Fly.io. Minimum 2 replicas for HA. Horizontal autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD = 70%).
-- **PostgreSQL**: Supabase managed PostgreSQL 15+. Primary writer + 1 read replica. Automated failover target 60 seconds (DB_AUTOFAILOVER_TIME = 60s). Daily backups to S3-compatible storage.
+- **API Server**: Containerized Node.js / Fastify on Railway (initial) or Fly.io. Minimum 2 replicas for HA. Horizontal autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70%).
+- **PostgreSQL**: Supabase managed PostgreSQL 15+. Primary writer + 1 read replica. Automated failover target 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60s). Daily backups to S3-compatible storage.
 - **Redis**: Upstash Redis (serverless, pay-per-request) or Railway Redis. Used for leaderboard sorted sets, rate-limit counters, claim token blacklist, and matchmaking queue.
 - **Email**: SendGrid v3 API primary. Nodemailer SMTP fallback activates on 3 consecutive SendGrid failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3).
 
@@ -176,7 +176,7 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 - Stores all durable data: pets, claim tokens, training logs, arena matches, leaderboard snapshots, food buffs, trade records, admin users, audit log
 - Read replica for leaderboard and public pet page queries (NFR-SCALE-03)
 - Connection pool minimum 20 connections (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20)
-- Automated failover target 60 seconds (DB_AUTOFAILOVER_TIME = 60s)
+- Automated failover target 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60s)
 - JSONB for extensible pet generation metadata (sprite seed attributes)
 
 ### §3.4 Cache / Session
@@ -184,9 +184,9 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 **Redis 7+** (Upstash or Railway)
 - Leaderboard sorted sets (ZRANGEBYSCORE, ZADD operations); authoritative source, PostgreSQL is durable backup
 - Rate-limit counters: arena battles per pet per hour (TTL = 1 hour); email claim attempts per email per hour
-- Pet access token blacklist (replaced pet access tokens — e.g. after recovery flow; TTL = 72 hours per CLAIM_TOKEN_CLEANUP_TTL)
+- Pet access token blacklist (replaced pet access tokens — e.g. after recovery flow; TTL = 72 hours per CLAIM_TOKEN_CLEANUP_TTL_HOURS)
 - Arena matchmaking queue (Redis Sorted Set; score = enqueue epoch — see §4.8)
-- Config cache: runtime parameter values refreshed every 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min)
+- Config cache: runtime parameter values refreshed every 5 minutes (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 min)
 - Fallback: if Redis unavailable, leaderboard falls back to direct PostgreSQL read (degraded, not outage — NFR-AVAIL-05)
 - Admin sessions stored server-side in Redis with 4h inactivity / 8h absolute expiry
 
@@ -292,7 +292,7 @@ INDEXES:
 
 Notes:
 - Raw email is only held in memory during the claim transaction and in SendGrid delivery. The database stores only the encrypted form and the hash for lookup.
-- On GDPR deletion request: `email_encrypted` is set to NULL, `deletion_requested_at` recorded. Background job replaces with hash-only record within 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days; system completes within 24 hours per GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS).
+- On GDPR deletion request: `email_encrypted` is set to NULL, `deletion_requested_at` recorded. Background job replaces with hash-only record within 7 days (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days; system completes within 24 hours per GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS).
 - IP addresses are never stored raw; hashed IP retained 90 days for abuse monitoring (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 
 ### §4.3 ClaimCode (OTP Token)
@@ -304,7 +304,7 @@ id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
 pet_id           UUID         NOT NULL REFERENCES pets(id) ON DELETE CASCADE
 email_hash       VARCHAR(64)  NOT NULL
 code_hash        VARCHAR(64)  NOT NULL  -- SHA-256 of 6-digit OTP; never stored plaintext
-expires_at       TIMESTAMPTZ  NOT NULL  -- NOW() + 15 minutes (CLAIM_CODE_EXPIRY)
+expires_at       TIMESTAMPTZ  NOT NULL  -- NOW() + 15 minutes (CLAIM_CODE_EXPIRY_MINUTES)
 used_at          TIMESTAMPTZ  NULL
 attempts         SMALLINT     NOT NULL DEFAULT 0
 created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
@@ -317,7 +317,7 @@ INDEXES:
 
 Notes:
 - Code is a 6-digit numeric OTP (CLAIM_CODE_DIGITS = 6) generated with `crypto.randomInt(100000, 1000000)`. Only the hash is stored.
-- Claim records are deleted by a background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL = 72 hours).
+- Claim records are deleted by a background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours).
 - **Attempt tracking**: Redis key `rl:code_entry:{session_id}` (TTL 900s) is the authoritative rate-limit enforcer (10 attempts per session). The DB `attempts` column is informational only — incremented on each verify call for audit purposes but NOT used for enforcement. On Redis unavailability, code entry is blocked (fail-closed) to prevent bypass.
 
 ### §4.4 ArenaMatch
@@ -349,7 +349,7 @@ INDEXES:
 
 Notes:
 - Battle outcome uses a seeded random modifier ±15% (ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER = 15%). The `random_seed` field enables deterministic replay.
-- The last 20 battles per pet are shown publicly (ARENA_BATTLE_RECORDS_DISPLAY = 20); query uses `ORDER BY completed_at DESC LIMIT 20`.
+- The last 20 battles per pet are shown publicly (ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20); query uses `ORDER BY completed_at DESC LIMIT 20`.
 
 ### §4.5 TrainingLog
 
@@ -403,7 +403,7 @@ magnitude        SMALLINT     NOT NULL CHECK (magnitude > 0)
 is_permanent     BOOLEAN      NOT NULL DEFAULT FALSE
 expires_at       TIMESTAMPTZ  NULL      -- NULL for permanent buffs
 consumed_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-record_expires_at TIMESTAMPTZ NOT NULL  -- consumed_at + 30 days (FOOD_BUFF_RECORD_RETENTION)
+record_expires_at TIMESTAMPTZ NOT NULL  -- consumed_at + 30 days (FOOD_BUFF_RECORD_RETENTION_DAYS)
 ──────────────────────────────────────────────────────
 INDEXES:
   idx_food_buffs_pet_id         ON food_buffs(pet_id)
@@ -427,11 +427,11 @@ redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤1
 redis_key: rl:code_entry:cooldown:{session_id} TTL: 60s  Value: "1"; set when MAX_ATTEMPTS_REACHED (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); HTTP 429 with Retry-After: 60 while key exists
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
 redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
-redis_key: matchmaking:queue:{mode}      NO TTL       Redis Sorted Set (ZADD score=enqueue_epoch; ZRANGEBYSCORE for stale entry cleanup); entries older than ARENA_MATCHMAKING_TIMEOUT+15s (≈45s) are considered stale and skipped by the consumer. Entry format: `"{petId}:{enqueue_epoch_ms}"`. Consumer validates entry age before pairing and discards stale entries silently.
+redis_key: matchmaking:queue:{mode}      NO TTL       Redis Sorted Set (ZADD score=enqueue_epoch; ZRANGEBYSCORE for stale entry cleanup); entries older than ARENA_MATCHMAKING_TIMEOUT_SECONDS+15s (≈45s) are considered stale and skipped by the consumer. Entry format: `"{petId}:{enqueue_epoch_ms}"`. Consumer validates entry age before pairing and discards stale entries silently.
 redis_key: rl:admin_login:{ip_hash}      TTL: 900s    Value: attempt count; enforces pre-auth IP rate limit (10 attempts per 15 min — §6.3)
 redis_key: rl:admin:{admin_id}           TTL: 60s     Value: request count; enforces ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100 per authenticated admin account
 redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, role, createdAt (ISO), absExpiry: createdAt+28800s }; TTL=14400s enforces inactivity; absExpiry field validated on each request for 8h absolute cap
-redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invalidate replaced pet access tokens; TTL = 72h (CLAIM_TOKEN_CLEANUP_TTL = 72h)
+redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invalidate replaced pet access tokens; TTL = 72h (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h)
 ```
 
 ### §4.9 AdminUser
@@ -466,7 +466,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | ip_address_hash | VARCHAR(64) | NULL | SHA-256 hash of raw IP; raw IP never stored per §4.2/§6.5; retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
 | created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
-**Retention**: ADMIN_AUDIT_LOG_RETENTION = 2 years.
+**Retention**: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years.
 **Indexes**: idx_audit_logs_created_at ON audit_logs(created_at DESC); idx_audit_logs_admin_id ON audit_logs(admin_id, created_at DESC)
 
 ### §4.11 TradeRecord (Phase 3 — FF_MARKETPLACE)
@@ -580,7 +580,7 @@ Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unse
 Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
 Description: Fetch pet data including stats, rarity, and level.
 Response: `{ id, seed, rarity, petName, stats: {speed, strength, stamina, level}, isOwner: boolean, claimedAt, isNeglected: boolean }`
-Notes: `isNeglected` is true if `pets.last_trained_at IS NULL OR NOW() - pets.last_trained_at > INTERVAL '3 days'` (TRAINING_NEGLECT_THRESHOLD = 3 days). Computed from the denormalized `last_trained_at` column on the pets row (no JOIN required).
+Notes: `isNeglected` is true if `pets.last_trained_at IS NULL OR NOW() - pets.last_trained_at > INTERVAL '3 days'` (TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days). Computed from the denormalized `last_trained_at` column on the pets row (no JOIN required).
 
 #### POST /api/v1/pet/:petId/train
 Auth: Required (pet owner token)
@@ -599,11 +599,11 @@ Errors: HTTP 400 if stat already at maximum; HTTP 422 if magnitude or buffType f
 #### POST /api/v1/arena/enter
 Auth: Required (pet owner token)
 Request: `{ petId: string, mode: 'RACE' | 'SUMO', acceptAI?: boolean }`
-Description: Enqueues pet in matchmaking queue (Redis). Waits up to 30 seconds (ARENA_MATCHMAKING_TIMEOUT) for an opponent. Returns battle result synchronously (HTTP long-poll) or AI result if no opponent found and `acceptAI: true`.
+Description: Enqueues pet in matchmaking queue (Redis). Waits up to 30 seconds (ARENA_MATCHMAKING_TIMEOUT_SECONDS) for an opponent. Returns battle result synchronously (HTTP long-poll) or AI result if no opponent found and `acceptAI: true`.
 Response: `{ matchId: string, result: 'WIN' | 'LOSS', opponentPetId: string | null, isAiOpponent: boolean, statDelta: number, newLeaderboardScore?: number }`
 Tie-breaking: If both pets have equal effective stats after the ±15% modifier, the challenger (pet with the earlier enqueue timestamp in the sorted set) wins. This is deterministic and derived from the enqueue epoch score.
 Timeout (no opponent, `acceptAI: false` or omitted): HTTP 408 `{ code: "MATCHMAKING_TIMEOUT", message: "No opponent found within 30 seconds. Try again or enable AI opponent." }`. Pet's rate-limit counter is NOT incremented on timeout.
-Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10); HTTP 429 + `Retry-After` header on breach.
+Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT = 10); HTTP 429 + `Retry-After` header on breach.
 
 #### GET /api/v1/arena/match/:matchId
 Auth: None (public battle record)
@@ -611,7 +611,7 @@ Response: `{ matchId, mode, petA: PetSummary, petB: PetSummary, winnerId, battle
 Note: `winnerId` maps to `arena_matches.winner_pet_id`; null when no winner (should not occur after tie-break rule is applied).
 
 #### GET /api/v1/arena/history/:petId
-Auth: None (public — last 20 battles per pet are shown publicly per CONSTANTS ARENA_BATTLE_RECORDS_DISPLAY = 20)
+Auth: None (public — last 20 battles per pet are shown publicly per CONSTANTS ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
 Description: Last 20 battles for a pet.
 Response: `{ petId, battles: [{matchId, mode, opponentId, result, completedAt}], summary: {wins, losses, winRate} }`
 
@@ -621,7 +621,7 @@ Response: `{ petId, battles: [{matchId, mode, opponentId, result, completedAt}],
 Auth: None
 Query params: `?rarity=COMMON|RARE|EPIC|LEGENDARY&page=1&limit=100`
 Response: `{ entries: [{rank, petId, petName, rarity, level, score, winRate}], lastUpdated: ISO8601, total: number }`
-Notes: Top 100 for public (LEADERBOARD_TOP_DISPLAY = 100). Update lag ≤30 seconds (LEADERBOARD_UPDATE_LAG_MAX = 30s). Source: Redis sorted set.
+Notes: Top 100 for public (LEADERBOARD_TOP_DISPLAY = 100). Update lag ≤30 seconds (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30s). Source: Redis sorted set.
 
 #### GET /api/v1/leaderboard/rank/:petId
 Auth: None
@@ -671,13 +671,13 @@ Response: `{ success: true, auditLogId: string }`
 Auth: Admin session (Moderator+ or Read Only)
 Query: `?page=1&limit=20&search=<petId|emailHash>&rarity=&isBanned=`
 Response: `{ pets: [{id, ownerEmailMasked, rarity, level, battlesPlayed, winRate, isBanned, createdAt}], total, page, limit }`
-Notes: Search by pet ID or exact SHA-256 email hash (fragment search is not possible — emails are stored as AES-256-GCM ciphertext; only hash-indexed lookup is supported). Returns up to 1 million records in ≤2 seconds (ADMIN_SEARCH_RESPONSE_TIME = 2s).
+Notes: Search by pet ID or exact SHA-256 email hash (fragment search is not possible — emails are stored as AES-256-GCM ciphertext; only hash-indexed lookup is supported). Returns up to 1 million records in ≤2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2s).
 
 #### POST /admin/api/pets/:petId/ban
 Auth: Admin session (Moderator+)
 Request: `{ reason: string (max 500 chars) }`
 Response: `{ success: true, auditLogId: string }`
-Notes: Pet removed from leaderboard within 5 minutes of ban (LEADERBOARD_BAN_REFLECTION_TIME = 5 min).
+Notes: Pet removed from leaderboard within 5 minutes of ban (LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5 min).
 
 #### POST /admin/api/pets/:petId/unban
 Auth: Admin session (Moderator+)
@@ -695,7 +695,7 @@ Response: `{ arenaRateLimit, rarityWeights: {common, rare, epic, legendary}, are
 #### PUT /admin/api/config/runtime
 Auth: Admin session (Super Admin)
 Request: Runtime parameter updates (validated against admin-tunable ranges from CONSTANTS)
-Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min).
+Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 min).
 
 #### GET /admin/api/config/economy
 Auth: Admin session (Super Admin)
@@ -704,7 +704,7 @@ Response: `{ foodBuffMultiplierMin, foodBuffMultiplierMax, arenaEntryCostDefault
 #### PUT /admin/api/config/economy
 Auth: Admin session (Super Admin)
 Request: Economy parameter updates (food buff multiplier range 0.5×–5.0× — FOOD_BUFF_MULTIPLIER_ADMIN_MIN/MAX; arena entry cost 0–10 credits — ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT/ADMIN_MAX; arena entry cooldown 0–60 min — ARENA_ENTRY_COOLDOWN_ADMIN_MIN/MAX_MINUTES)
-Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min).
+Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 min).
 
 #### GET /admin/api/dashboard
 Auth: Admin session (Moderator+ or Read Only)
@@ -715,7 +715,7 @@ Description: Real-time dashboard summary — all values from Redis counters and 
 Auth: Admin session (Moderator+ or Read Only)
 Query: `?page=1&limit=20&from=ISO8601&to=ISO8601&petId=&flagged=true|false`
 Response: `{ battles: [{matchId, petAId, petBId, winnerId, outcome, duration, completedAt, isFlagged}], total, page, limit }`
-Description: Battle Records list view — paginated; last ARENA_BATTLE_RECORDS_DISPLAY = 20 shown by default.
+Description: Battle Records list view — paginated; last ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20 shown by default.
 
 #### GET /admin/api/suspicious
 Auth: Admin session (Moderator+)
@@ -743,7 +743,7 @@ Description: List all GDPR requests in the gdpr_requests table for the admin GDP
 Auth: Admin session (Super Admin)
 Request: `{ emailHash: string, reason: string (max 500 chars — ADMIN_MODERATION_REASON_MAX_CHARS) }`
 Response: `{ jobId: string, estimatedCompletion: ISO8601 }`
-Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW). `reason` is stored in `gdpr_requests.admin_notes` on row creation.
+Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW_DAYS). `reason` is stored in `gdpr_requests.admin_notes` on row creation.
 
 #### PATCH /admin/api/gdpr/:requestId
 Auth: Admin session (Super Admin)
@@ -765,7 +765,7 @@ Description: Remove a flag from a battle; reason recorded in audit log
 #### GET /admin/api/audit
 Auth: Admin session (Super Admin)
 Query: `?page=1&limit=50&from=ISO8601&to=ISO8601&actorId=&action=`
-Response: Audit log entries; search any 12-month window in ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME = 3s).
+Response: Audit log entries; search any 12-month window in ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3s).
 
 ### §5.6 GDPR Self-Service Endpoints
 
@@ -787,7 +787,7 @@ Auth: `Authorization: Bearer <petToken>` header (same pattern as all other authe
 **Response** (`GET /api/v1/gdpr/request/status?jobId=<uuid>`): HTTP 200 `{ jobId, requestType, status, submittedAt, completedAt | null }`. The server validates that the authenticating pet token's `claim_identity_id` matches the `gdpr_requests.claim_identity_id` for the given jobId before returning the status (prevents cross-identity status polling).
 
 **SLAs** (from CONSTANTS):
-- Erasure: `GDPR_EMAIL_DELETION_WINDOW = 7 days`
+- Erasure: `GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days`
 - Data access/portability: `GDPR_DATA_ACCESS_RESPONSE_DAYS = 30`
 - Restrict processing: `GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24`
 - Object leaderboard: `GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5` — the subject's pet entries are removed from the public leaderboard within 5 business days of request (admin-reviewed; the leaderboard objection right is not absolute under GDPR Art. 21 but is resolved in 5 business days as policy)
@@ -832,11 +832,11 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 1. User submits email and pet ID to `POST /api/v1/claim`
 2. System checks rate limit: ≤5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5)
 3. 6-digit numeric OTP generated with `crypto.randomInt(100000, 1000000)`
-4. OTP hash (SHA-256) stored in `claim_codes` with `expires_at = NOW() + 15min` (CLAIM_CODE_EXPIRY = 15 min)
+4. OTP hash (SHA-256) stored in `claim_codes` with `expires_at = NOW() + 15min` (CLAIM_CODE_EXPIRY_MINUTES = 15 min)
 5. Email dispatched via SendGrid containing ONLY the 6-digit code — no clickable URLs (mitigates email client pre-scanning attacks documented in IDEA.md §8.1 R1)
 6. User manually enters code in browser; verified against hash
 7. On valid entry: atomic DB transaction — (a) upsert `claim_identities` row for the email_hash (creating if first claim, matching if re-claiming same email), (b) set `pets.claim_identity_id = claim_identities.id`, (c) generate 32-byte pet access token, store SHA-256 hash in `pets.owner_token_hash`, (d) set `pets.claimed_at = NOW()`, (e) mark claim code `used_at`, (f) set `pets.reserved_until = NULL`
-8. Claim code records deleted by background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL = 72 hours)
+8. Claim code records deleted by background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours)
 9. Rate limit on code entry: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); 60-second cooldown on breach
 
 ### §6.3 Admin Authentication
@@ -867,16 +867,16 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 ### §6.5 GDPR / Data Handling Summary
 
 - **Data minimization**: Only email hash + encrypted email stored. Raw email never written to database or logs.
-- **Right to erasure**: Email encrypted field nulled within 24 hours of request; SHA-256 hash retained for anti-re-registration. All pets belonging to the erased identity are removed from the `leaderboard:global` Redis sorted set (`ZREM leaderboard:global <pet_id>` for each pet) as part of the erasure job. Full compliance SLA: 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days).
+- **Right to erasure**: Email encrypted field nulled within 24 hours of request; SHA-256 hash retained for anti-re-registration. All pets belonging to the erased identity are removed from the `leaderboard:global` Redis sorted set (`ZREM leaderboard:global <pet_id>` for each pet) as part of the erasure job. Full compliance SLA: 7 days (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days).
 - **Right of access / portability**: JSON export of pet data, battle records, training logs delivered within 30 days (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 / GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30).
 - **Right to restrict processing**: Applied within 24 hours (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24).
 - **Right to object (leaderboard)**: Pet entries removed from public leaderboard within 5 business days of request (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5). On fulfillment, `ZREM leaderboard:global <pet_id>` executed for each pet belonging to the identity. Admin-reviewed; objection is not absolute under GDPR Art. 21 but resolved as policy.
 - **Right to rectification (Art. 16)**: Email encrypted field updated within 24 hours of request (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24). Applies when data subject needs to correct stored email data.
 - **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 - **COPPA**: Age-13 confirmation checkbox required on claim form (COPPA_MINIMUM_AGE_YEARS = 13); label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
-- **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years).
+- **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years).
 - **CAN-SPAM**: All emails are transactional; no marketing email without separate opt-in consent.
-- **GDPR FK lookup**: The `pets.claim_identity_id` FK enables the GDPR self-service endpoint to locate the `claim_identities` row for a given pet token without depending on the ephemeral `claim_codes` table (purged after CLAIM_TOKEN_CLEANUP_TTL = 72h).
+- **GDPR FK lookup**: The `pets.claim_identity_id` FK enables the GDPR self-service endpoint to locate the `claim_identities` row for a given pet token without depending on the ephemeral `claim_codes` table (purged after CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h).
 
 ---
 
@@ -928,10 +928,10 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 
 ### §7.3 Scalability
 
-- **Horizontal scaling**: API server replicas autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD = 70%). Railway autoscaling or Kubernetes HPA.
+- **Horizontal scaling**: API server replicas autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70%). Railway autoscaling or Kubernetes HPA.
 - **Normal operation**: 2,000–5,000 DAU (NORMAL_OPERATION_DAU_MIN = 2,000; NORMAL_OPERATION_DAU_MAX = 5,000); 100 RPS sustained (NORMAL_OPERATION_RPS = 100).
 - **Peak load**: 500 RPS sustained, 2,000 PCU arena events (PEAK_OPERATION_RPS / PEAK_CONCURRENT_USERS from CONSTANTS).
-- **Arena matchmaking**: Redis Sorted Set queue (score = enqueue epoch); consumer uses ZRANGEBYSCORE to pop the oldest eligible entry. Stale entries (>45s old = ARENA_MATCHMAKING_TIMEOUT + 15s buffer) are discarded before pairing to prevent ghost matches from abandoned connections. Supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
+- **Arena matchmaking**: Redis Sorted Set queue (score = enqueue epoch); consumer uses ZRANGEBYSCORE to pop the oldest eligible entry. Stale entries (>45s old = ARENA_MATCHMAKING_TIMEOUT_SECONDS + 15s buffer) are discarded before pairing to prevent ghost matches from abandoned connections. Supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
 - **Leaderboard**: Redis sorted set as authoritative real-time source; PostgreSQL snapshot as durable backup. Update lag ≤30 seconds.
 - **Pet generation concurrency**: 1,000 concurrent pet generations complete within 10 seconds (PET_GENERATION_CONCURRENT_BATCH = 1,000; PET_GENERATION_CONCURRENT_BATCH_TIME = 10s).
 - **Database**: Primary writer handles all mutations. Read replica handles leaderboard, public pet pages, and admin list views. Connection pool allows burst to 50 connections.
@@ -972,7 +972,7 @@ App
 │       │   └── TrainingStreak
 │       ├── BattleRecordsPage (/pet/:petId/records)
 │       │   ├── PetSummaryCard
-│       │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY = 20)
+│       │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
 │       ├── ArenaPage (/arena)
 │       │   ├── ModeSelector (RACE / SUMO)
 │       │   ├── MatchmakingQueue
@@ -1079,11 +1079,11 @@ The admin portal is deployed as a separate Vite application. It shares backend A
 
 - **Rate limit**: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100), separately tracked from player API
 - **Session security**: Redis server-side session; httpOnly + SameSite=Strict cookies; 4h inactivity / 8h absolute expiry
-- **Audit log**: Every create/update/delete/moderation action generates an audit record with actor ID, action type, target entity, reason, and timestamp. Retention: 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years). Search response for any 12-month window: ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME = 3s).
+- **Audit log**: Every create/update/delete/moderation action generates an audit record with actor ID, action type, target entity, reason, and timestamp. Retention: 2 years (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years). Search response for any 12-month window: ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3s).
 - **Moderation reason field**: Max 500 characters, required for all ban/unban/flag actions (ADMIN_MODERATION_REASON_MAX_CHARS = 500)
 - **TOTP**: RFC 6238 required for admin login; 6-digit, 30-second window; backup codes generated on setup
 - **IP allowlist**: Admin portal optionally restricted to operator IP ranges via environment variable configuration
-- **Performance**: Pages load in ≤3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME = 3s); single moderator can handle 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100)
+- **Performance**: Pages load in ≤3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3s); single moderator can handle 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100)
 
 ---
 
@@ -1121,7 +1121,7 @@ CMD ["node", "dist/server.js"]
 
 - Multi-stage build to minimize image size (<150 MB target)
 - Non-root user in runtime stage
-- Health check endpoint: `GET /health` must respond in ≤500 ms (HEALTH_CHECK_RESPONSE_TIME = 500ms)
+- Health check endpoint: `GET /health` must respond in ≤500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500ms)
 - Container registry: GitHub Container Registry (ghcr.io)
 - Resource limits: 512 MB RAM, 0.5 CPU per replica baseline; autoscale up to 2 GB / 2 CPU
 
@@ -1163,8 +1163,8 @@ GitHub Actions Pipeline:
 
 ### §10.4 Database Backup & Failover
 
-- **Automated failover**: PostgreSQL failover to read replica within 60 seconds (DB_AUTOFAILOVER_TIME = 60s)
-- **Maintenance windows**: Maximum 2 hours/month (DB_MAINTENANCE_WINDOW_MAX = 2 hours); 48-hour advance notice required (DB_MAINTENANCE_NOTICE = 48 hours)
+- **Automated failover**: PostgreSQL failover to read replica within 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60s)
+- **Maintenance windows**: Maximum 2 hours/month (DB_MAINTENANCE_WINDOW_MAX_HOURS_PER_MONTH = 2 hours); 48-hour advance notice required (DB_MAINTENANCE_NOTICE_HOURS = 48 hours)
 - **Backup schedule**: Daily full backup to S3-compatible storage (Supabase automated); point-in-time recovery enabled
 - **Redis persistence**: Upstash provides built-in persistence; leaderboard sorted sets are reconstructed from PostgreSQL snapshots on full Redis flush (fallback path tested in staging)
 - **Vendor migration plan**: Documented 14-day migration plan for PostgreSQL hosting (to AWS RDS) and email provider (to AWS SES / Mailgun) per VENDOR_MIGRATION_PLAN_DAYS = 14
@@ -1202,7 +1202,7 @@ Error messages follow the PDD §10.1 tone of voice — specific and actionable, 
 - **Correlation ID**: `X-Request-Id` header generated at API gateway; threaded through all log entries for a request
 - **PII in logs**: Email addresses NEVER written to logs; only email_hash may appear. IP addresses written as hashed values only.
 - **Log shipping**: Structured JSON logs → Railway log drain → external log aggregator (Datadog or equivalent)
-- **Log retention**: Hot storage 90 days; cold archive 2 years for audit trail (IP_ADDRESS_LOG_RETENTION_DAYS = 90 for IP log data; ADMIN_AUDIT_LOG_RETENTION = 2 years for audit log data)
+- **Log retention**: Hot storage 90 days; cold archive 2 years for audit trail (IP_ADDRESS_LOG_RETENTION_DAYS = 90 for IP log data; ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years for audit log data)
 - **Analytics event retention**: Analytics events hot tier: 90 days (ANALYTICS_EVENT_HOT_RETENTION_DAYS = 90); cold archive: 2 years (ANALYTICS_EVENT_COLD_ARCHIVE_YEARS = 2). Analytics events are distinct from operational logs — they capture product behavioral data for the GET /admin/api/analytics dashboard.
 - **PII email retention after deletion**: After a GDPR erasure request, email encrypted field is nulled within 24 hours; SHA-256 hash retained for anti-re-registration (PII_EMAIL_RETENTION_POST_DELETE_DAYS = 7 aligns with GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 — these two constants represent the same policy, with the latter being the primary reference)
 
@@ -1210,14 +1210,14 @@ Error messages follow the PDD §10.1 tone of voice — specific and actionable, 
 
 | Alert | Threshold | Window | Channel | Source |
 |---|---|---|---|---|
-| API error rate | >1% of requests | 5 minutes | PagerDuty + Slack | CONSTANTS OBSERVABILITY_ERROR_RATE_ALERT_WINDOW |
+| API error rate | >1% of requests | 5 minutes | PagerDuty + Slack | CONSTANTS OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES |
 | P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD (= OBSERVABILITY_P99_ALERT_MS = 1,000ms; both constants are equivalent aliases) |
 | Email delivery failure | >2% SendGrid failure | 30 minutes | PagerDuty | OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES (window); EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT (2% threshold) |
-| Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT (note: constant value is 60s; SLO target is 30s — alert fires after 2× SLO breach; recommend aligning constant to 30s in a future CONSTANTS revision) |
-| Pet claim rate drop | <5 claims/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD |
-| Arena battle rate drop | <10 battles/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD |
-| Redis memory usage | >80% | — | Slack | CONSTANTS INFRA_REDIS_ALERT_THRESHOLD |
-| DB connection pool | >80% utilized | — | Slack | CONSTANTS INFRA_DB_POOL_ALERT_THRESHOLD |
+| Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT_SECONDS (note: constant value is 60s; SLO target is 30s — alert fires after 2× SLO breach; recommend aligning constant to 30s in a future CONSTANTS revision) |
+| Pet claim rate drop | <5 claims/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD_PER_HOUR |
+| Arena battle rate drop | <10 battles/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD_PER_HOUR |
+| Redis memory usage | >80% | — | Slack | CONSTANTS INFRA_REDIS_ALERT_THRESHOLD_PERCENT |
+| DB connection pool | >80% utilized | — | Slack | CONSTANTS INFRA_DB_POOL_ALERT_THRESHOLD_PERCENT |
 
 Metrics collected via Prometheus exporters on API servers and Redis. Dashboard in Grafana.
 
@@ -1292,12 +1292,12 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 **Scope**:
 - PostgreSQL schema: `training_logs`, `arena_matches`, `food_buffs`, `leaderboard_snapshots` tables
-- Training system: `POST /api/v1/pet/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD = 3 days)
+- Training system: `POST /api/v1/pet/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)
 - Food buff system: FoodBuff table; `/api/v1/pet/:petId/feed`
 - Arena matchmaking: Redis queue; 30-second timeout; AI fallback; battle calculation with seeded ±15% modifier
 - Arena API: `POST /api/v1/arena/enter`, `GET /api/v1/arena/match/:id`, `GET /api/v1/arena/history/:petId`
 - Leaderboard: Redis sorted set (authoritative) + PostgreSQL snapshots; `GET /api/v1/leaderboard`; ≤30s update lag
-- Arena rate limiting: Redis counter 10 battles/hr per pet (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10)
+- Arena rate limiting: Redis counter 10 battles/hr per pet (ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT = 10)
 - Bot detection: Auto-flag pets >50 battles/60-min rolling window (BOT_DETECTION_BATTLES_THRESHOLD = 50)
 - Frontend: Arena page, Battle result page, Leaderboard page, Battle records page, Training page
 - Admin portal: Leaderboard management, suspicious activity dashboard, runtime config tuning
