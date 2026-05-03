@@ -38,7 +38,8 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | ADMIN_SESSION_ABSOLUTE_EXPIRY | 8 | hours | Regardless of activity |
 | ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE | 100 | req/min | Per admin account |
 | ADMIN_AUDIT_LOG_RETENTION | 2 | years | GDPR Art. 30 compliance |
-| BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window |
+| BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window (arena bot-detection system) |
+| LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR | 50 | battles/hr | Admin leaderboard UI suspicious-flag indicator (distinct purpose from bot detection) |
 | HORIZONTAL_SCALE_CPU_THRESHOLD | 70 | percent | HPA scale-out trigger |
 | DB_AUTOFAILOVER_TIME | 60 | seconds | PostgreSQL automated failover |
 | SENDGRID_FAILOVER_CONSECUTIVE_FAILURES | 3 | failures | Switch to Nodemailer SMTP |
@@ -728,7 +729,7 @@ Auth: Admin session (Super Admin)
 Description: Update the status of a non-erasure GDPR request (data_access, restrict_processing, object_leaderboard, rectification). Used by the admin GDPR Queue module to transition requests through their lifecycle. For rectification, admin fulfills by updating the subject's claim_identities.email_encrypted field, then marks status completed.
 Request: `{ status: "processing" | "completed" | "failed", adminNotes?: string (max 500 chars) }`
 Response: `{ success: true, requestId: string, status: string, updatedAt: ISO8601 }`
-Notes: `admin_notes` is written to `gdpr_requests.admin_notes`. Audit log entry created on each transition. Erasure requests are processed via POST /admin/api/gdpr/delete, not this endpoint.
+Notes: `admin_notes` is written to `gdpr_requests.admin_notes`. Audit log entry created on each transition. Erasure requests are processed via POST /admin/api/gdpr/delete, not this endpoint. Error: HTTP 400 `WRONG_REQUEST_TYPE` if the target `request_type = 'erasure'`.
 
 #### POST /admin/api/battles/:matchId/flag
 Auth: Admin session (Moderator+)
@@ -872,6 +873,8 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 | CLS | <0.1 | CONSTANTS §4 |
 | INP | <200 ms | CONSTANTS §4 |
 | Pet animation frame rate | ≥30 FPS sustained | CONSTANTS §4 |
+| Pet canvas render on load | ≤2 seconds | CONSTANTS §4 |
+| Pet interaction response | ≤200 ms | CONSTANTS §4 |
 | Arena battle result E2E | <2 seconds | CONSTANTS §4 |
 | Leaderboard update lag | ≤30 seconds | CONSTANTS §4 |
 | Email delivery P90 | ≤60 seconds | CONSTANTS §4 |
