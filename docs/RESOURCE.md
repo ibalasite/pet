@@ -169,12 +169,12 @@ last-updated: "2026-05-03"
 
 | ID | filename | type | source_tool | prompt | dimensions | file_size_budget | status | output_path | description |
 |----|----------|------|-------------|--------|-----------|-----------------|--------|-------------|-------------|
-| RES-SFX-001 | sfx-ui-click.ogg | sfx | ElevenLabs SFX | short crisp pixel-art UI click sound, retro 8-bit button press, slight satisfying click, 0.2 seconds, game UI interaction sound | 0.2s | ≤ 50 KB | needed | public/assets/audio/sfx/sfx-ui-click.ogg | UI button click SFX (CLIENT_IMPL SFX-01). Triggered on all button/CTA clicks. Phase 2 only. |
-| RES-SFX-002 | sfx-claim-success.ogg | sfx | ElevenLabs SFX | pixel-art victory jingle short, retro 8-bit success fanfare, celebratory 3-note ascending melody, 1.5 seconds, coin collect style | 1.5s | ≤ 200 KB | needed | public/assets/audio/sfx/sfx-claim-success.ogg | Claim success SFX (CLIENT_IMPL SFX-02). Triggered on URLReveal mount after successful pet claim. Phase 2 only. |
-| RES-SFX-003 | sfx-training-done.ogg | sfx | ElevenLabs SFX | short pixel-art training complete chime, retro 8-bit positive sound, level-up style brief sound, 0.8 seconds, satisfying achievement sound | 0.8s | ≤ 100 KB | needed | public/assets/audio/sfx/sfx-training-done.ogg | Training complete SFX (CLIENT_IMPL SFX-03). Triggered on training mutation success. Phase 2 only. |
-| RES-SFX-004 | sfx-battle-win.ogg | sfx | ElevenLabs SFX | pixel-art victory fanfare, retro 8-bit win music short loop, heroic ascending melody, triumphant celebration sound, 2 seconds | 2.0s | ≤ 200 KB | needed | public/assets/audio/sfx/sfx-battle-win.ogg | Battle WIN SFX (CLIENT_IMPL SFX-04). Triggered on WIN result received. Phase 2 only. |
-| RES-SFX-005 | sfx-battle-loss.ogg | sfx | ElevenLabs SFX | pixel-art defeat sound effect, retro 8-bit descending tone, sad wah-wah game over sound, not too harsh, 1.5 seconds | 1.5s | ≤ 200 KB | needed | public/assets/audio/sfx/sfx-battle-loss.ogg | Battle LOSS SFX (CLIENT_IMPL SFX-05). Triggered on LOSS result received. Phase 2 only. |
-| RES-BGM-001 | bgm-arena.ogg | bgm | Suno v3 | retro 8-bit chiptune arena battle music, fast-paced competitive energy, NES/SNES game style, loopable, 90bpm, 2 minutes, high tension pixel game soundtrack, loop-friendly start and end points | 120s | ≤ 5 MB | needed | public/assets/audio/bgm/bgm-arena.ogg | Arena BGM (CLIENT_IMPL BGM-01). Plays on arena route enter, stops on route leave. Howler.js streaming (`html5: true`). Phase 2 only. |
+| RES-SFX-001 | sfx_ui_click.ogg | sfx | ElevenLabs SFX | short crisp pixel-art UI click sound, retro 8-bit button press, slight satisfying click, 0.2 seconds, game UI interaction sound | 0.2s | ≤ 50 KB | needed | public/assets/audio/sfx/sfx_ui_click.ogg | UI button click SFX (CLIENT_IMPL SFX-01). Triggered on all button/CTA clicks. Phase 2 only. |
+| RES-SFX-002 | sfx_claim_success.ogg | sfx | ElevenLabs SFX | pixel-art victory jingle short, retro 8-bit success fanfare, celebratory 3-note ascending melody, 1.5 seconds, coin collect style | 1.5s | ≤ 200 KB | needed | public/assets/audio/sfx/sfx_claim_success.ogg | Claim success SFX (CLIENT_IMPL SFX-02). Triggered on URLReveal mount after successful pet claim. Phase 2 only. |
+| RES-SFX-003 | sfx_training_done.ogg | sfx | ElevenLabs SFX | short pixel-art training complete chime, retro 8-bit positive sound, level-up style brief sound, 0.8 seconds, satisfying achievement sound | 0.8s | ≤ 100 KB | needed | public/assets/audio/sfx/sfx_training_done.ogg | Training complete SFX (CLIENT_IMPL SFX-03). Triggered on training mutation success. Phase 2 only. |
+| RES-SFX-004 | sfx_battle_win.ogg | sfx | ElevenLabs SFX | pixel-art victory fanfare, retro 8-bit win music short loop, heroic ascending melody, triumphant celebration sound, 2 seconds | 2.0s | ≤ 200 KB | needed | public/assets/audio/sfx/sfx_battle_win.ogg | Battle WIN SFX (CLIENT_IMPL SFX-04). Triggered on WIN result received. Phase 2 only. |
+| RES-SFX-005 | sfx_battle_loss.ogg | sfx | ElevenLabs SFX | pixel-art defeat sound effect, retro 8-bit descending tone, sad wah-wah game over sound, not too harsh, 1.5 seconds | 1.5s | ≤ 200 KB | needed | public/assets/audio/sfx/sfx_battle_loss.ogg | Battle LOSS SFX (CLIENT_IMPL SFX-05). Triggered on LOSS result received. Phase 2 only. |
+| RES-BGM-001 | bgm_arena.ogg | bgm | Suno v3 | retro 8-bit chiptune arena battle music, fast-paced competitive energy, NES/SNES game style, loopable, 90bpm, 2 minutes, high tension pixel game soundtrack, loop-friendly start and end points | 120s | ≤ 5 MB | needed | public/assets/audio/bgm/bgm_arena.ogg | Arena BGM (CLIENT_IMPL BGM-01). Plays on arena route enter, stops on route leave. Howler.js streaming (`html5: true`). Phase 2 only. |
 
 ---
 
@@ -182,7 +182,7 @@ last-updated: "2026-05-03"
 
 - [x] §1 VDD Visual Assets: VDD.md §4 all pet rarity tiers (Common, Rare, Epic, Legendary) have corresponding RES-IMG rows (RES-IMG-001 to RES-IMG-008); sprite sheet frames use 32×32px (sprite_resolution_px = 32)
 - [x] §1 VDD Visual Assets: VDD.md §4 neglected state sprite overlay covered (RES-IMG-006)
-- [x] §1 VDD Visual Assets: VDD.md §5 UI icon set covered (RES-IMG-019 to RES-IMG-030) — 12 custom pixel-art icons, 24×24px SVG
+- [x] §1 VDD Visual Assets: VDD.md §7.2 UI icon set covered (RES-IMG-019 to RES-IMG-030) — 12 custom pixel-art icons: 8 at 24×24px SVG (game interactions) + 4 at 16×16px SVG (rarity badges)
 - [x] §1 VDD Visual Assets: VDD.md §7.4 logo/brand assets covered (RES-IMG-031 to RES-IMG-040) — logo primary/inverted, favicon, PWA icons
 - [x] §1 VDD Visual Assets: VDD.md §8.1 landing page hero background covered (RES-IMG-044)
 - [x] §1 VDD Visual Assets: VDD.md §8.7 leaderboard background covered (RES-IMG-045)
@@ -259,9 +259,9 @@ last-updated: "2026-05-03"
 | RES-ANIM-004 | pet-run-sheet-ref-256x32.png | internal | N/A | §2 Arena run cycle reference sheet — hand-crafted in Aseprite |
 | RES-ANIM-005 | pet-victory-sheet-ref-128x32.png | internal | N/A | §2 Victory animation reference sheet — hand-crafted in Aseprite |
 | RES-ANIM-006 | vfx-victory-particles-sheet-256x256.png | internal | N/A | §2 Victory particle burst texture — hand-crafted in Aseprite |
-| RES-SFX-001 | sfx-ui-click.ogg | AI-generated | https://elevenlabs.io/terms | §3 UI click SFX — ElevenLabs SFX. Phase 2 only. |
-| RES-SFX-002 | sfx-claim-success.ogg | AI-generated | https://elevenlabs.io/terms | §3 Claim success SFX — ElevenLabs SFX. Phase 2 only. |
-| RES-SFX-003 | sfx-training-done.ogg | AI-generated | https://elevenlabs.io/terms | §3 Training complete SFX — ElevenLabs SFX. Phase 2 only. |
-| RES-SFX-004 | sfx-battle-win.ogg | AI-generated | https://elevenlabs.io/terms | §3 Battle win SFX — ElevenLabs SFX. Phase 2 only. |
-| RES-SFX-005 | sfx-battle-loss.ogg | AI-generated | https://elevenlabs.io/terms | §3 Battle loss SFX — ElevenLabs SFX. Phase 2 only. |
-| RES-BGM-001 | bgm-arena.ogg | AI-generated | https://suno.com/terms | §3 Arena BGM — Suno v3. Phase 2 only. |
+| RES-SFX-001 | sfx_ui_click.ogg | AI-generated | https://elevenlabs.io/terms | §3 UI click SFX — ElevenLabs SFX. Phase 2 only. |
+| RES-SFX-002 | sfx_claim_success.ogg | AI-generated | https://elevenlabs.io/terms | §3 Claim success SFX — ElevenLabs SFX. Phase 2 only. |
+| RES-SFX-003 | sfx_training_done.ogg | AI-generated | https://elevenlabs.io/terms | §3 Training complete SFX — ElevenLabs SFX. Phase 2 only. |
+| RES-SFX-004 | sfx_battle_win.ogg | AI-generated | https://elevenlabs.io/terms | §3 Battle win SFX — ElevenLabs SFX. Phase 2 only. |
+| RES-SFX-005 | sfx_battle_loss.ogg | AI-generated | https://elevenlabs.io/terms | §3 Battle loss SFX — ElevenLabs SFX. Phase 2 only. |
+| RES-BGM-001 | bgm_arena.ogg | AI-generated | https://suno.com/terms | §3 Arena BGM — Suno v3. Phase 2 only. |
