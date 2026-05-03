@@ -128,7 +128,7 @@ Every authenticated admin request resets the inactivity clock. When the absolute
 
 **First-login TOTP enrollment:**
 
-On first login, if TOTP is not yet configured, the server returns HTTP 403 with `{ "code": "TOTP_SETUP_REQUIRED", "setupToken": "..." }`. The admin must complete TOTP setup via `POST /admin/api/auth/totp/setup` before a session is granted.
+On first login, if TOTP is not yet configured, the server returns HTTP 403 using the standard error envelope (§4.1) with `error.code = "TOTP_SETUP_REQUIRED"` and `error.details.setupToken` containing a short-lived signed JWT. The admin must complete TOTP setup via `POST /admin/api/auth/totp/setup` before a session is granted.
 
 ### 2.3 Authentication Errors
 
@@ -543,7 +543,7 @@ Returns the full stats panel for a pet including training history summary. *(EDD
     },
     "totalTrainingActions": 72,
     "trainingActionsToday": 1,
-    "trainingActionsRemainingToday": 2,
+    "actionsRemainingToday": 2,
     "lastTrainedAt": "2026-05-02T18:45:00Z",
     "isNeglected": false,
     "activeFoodBuffs": [
@@ -561,7 +561,7 @@ Returns the full stats panel for a pet including training history summary. *(EDD
 
 | Field | Description |
 |-------|-------------|
-| `trainingActionsRemainingToday` | Max 3 actions per UTC day (`training_actions_per_day = 3`). Resets at UTC 00:00. |
+| `actionsRemainingToday` | Max 3 actions per UTC day (`training_actions_per_day = 3`). Resets at UTC 00:00. |
 | `level` | `FLOOR(total_training_actions / 10)` capped at 100 (`pet_level_formula_divisor = 10`, `pet_level_max = 100`). |
 | `activeFoodBuffs` | Temporary food buffs currently active on this pet. |
 
@@ -1167,7 +1167,7 @@ Sets `Set-Cookie: session=<session_id>; HttpOnly; SameSite=Strict; Secure; Path=
 
 Session: 4-hour inactivity timeout (`admin_session_inactivity_expiry_hours = 4`), 8-hour absolute maximum (`admin_session_absolute_expiry_hours = 8`).
 
-**First-login TOTP enrollment flow**: If the admin account has no TOTP secret configured, the server returns HTTP 403 `{ "code": "TOTP_SETUP_REQUIRED", "setupToken": "<signed JWT, 15-min expiry>" }`. The admin must call `POST /admin/api/auth/totp/setup` before a session is granted.
+**First-login TOTP enrollment flow**: If the admin account has no TOTP secret configured, the server returns HTTP 403 using the standard error envelope (§4.1) with `error.code = "TOTP_SETUP_REQUIRED"` and `error.details.setupToken` containing a short-lived signed JWT (15-minute expiry). The admin must call `POST /admin/api/auth/totp/setup` before a session is granted.
 
 **Rate limits**: Pre-auth IP rate limit: 10 attempts per 15-minute window (`admin_login_ip_rate_limit_attempts = 10`, `admin_login_ip_rate_limit_window_seconds = 900`). Account lockout: after 10 consecutive failures (`admin_login_lockout_threshold = 10`), account is locked for 30 minutes (`admin_login_lockout_duration_minutes = 30`).
 
@@ -1193,7 +1193,7 @@ Completes TOTP enrollment for a first-time admin login. Requires the short-lived
 
 ```json
 {
-  "setupToken": "<signed JWT from login 403 response>",
+  "setupToken": "<signed JWT from login 403 error.details.setupToken>",
   "password": "correct-horse-battery-staple"
 }
 ```
