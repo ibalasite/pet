@@ -355,7 +355,7 @@ INDEXES:
 
 Notes:
 - 3 training actions per day per pet (TRAINING_ACTIONS_PER_DAY = 3); the count of today's actions (UTC) is computed as `COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`.
-- The stat delta per action is 1–3 points (TRAINING_STAT_POINTS_MIN/MAX), based on current pet level.
+- The stat delta per action is a uniformly random integer in [1, 3] points (TRAINING_STAT_POINTS_MIN = 1, TRAINING_STAT_POINTS_MAX = 3); no formula linking delta to pet level exists in CONSTANTS.
 
 ### §4.6 LeaderboardSnapshot
 
@@ -401,9 +401,10 @@ The following are Redis key patterns (not PostgreSQL tables):
 
 ```
 redis_key: rl:claim:{email_hash}         TTL: 3600s   Value: attempt count (≤5); enforces AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5
-redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set on 5th failed attempt; CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
+redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set when hourly attempt limit is breached (on attempt >5); CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
 redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10 default)
 redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤10)
+redis_key: rl:code_entry:cooldown:{session_id} TTL: 60s  Value: "1"; set when MAX_ATTEMPTS_REACHED (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); HTTP 429 with Retry-After: 60 while key exists
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
 redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
 redis_key: matchmaking:queue:{mode}      NO TTL       Redis Sorted Set (ZADD score=enqueue_epoch; ZRANGEBYSCORE for stale entry cleanup); entries older than ARENA_MATCHMAKING_TIMEOUT+15s (≈45s) are considered stale and skipped by the consumer. Entry format: `"{petId}:{enqueue_epoch_ms}"`. Consumer validates entry age before pairing and discards stale entries silently.
@@ -693,6 +694,13 @@ Request: `{ emailHash: string, reason: string (max 500 chars — ADMIN_MODERATIO
 Response: `{ jobId: string, estimatedCompletion: ISO8601 }`
 Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW). `reason` is stored in `gdpr_requests.admin_notes` on row creation.
 
+#### PATCH /admin/api/gdpr/:requestId
+Auth: Admin session (Super Admin)
+Description: Update the status of a non-erasure GDPR request (data_access, restrict_processing, object_leaderboard). Used by the admin GDPR Queue module to transition requests through their lifecycle.
+Request: `{ status: "processing" | "completed" | "failed", adminNotes?: string (max 500 chars) }`
+Response: `{ success: true, requestId: string, status: string, updatedAt: ISO8601 }`
+Notes: `admin_notes` is written to `gdpr_requests.admin_notes`. Audit log entry created on each transition. Erasure requests are processed via POST /admin/api/gdpr/delete, not this endpoint.
+
 #### POST /admin/api/battles/:matchId/flag
 Auth: Admin session (Moderator+)
 Request: `{ reason: string (max 500 chars) }`
@@ -714,7 +722,7 @@ No persistent accounts exist — players identify via pet token. GDPR requests a
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `POST` | `/api/v1/gdpr/request` | Pet token | Submit a GDPR request (erasure / data-access / restrict-processing) |
+| `POST` | `/api/v1/gdpr/request` | Pet token | Submit a GDPR request (erasure / data-access / restrict-processing / object-leaderboard) |
 | `GET` | `/api/v1/gdpr/request/status?jobId=<uuid>` | Pet token | Check status of a specific GDPR request by jobId |
 
 **Request body** (`POST /api/v1/gdpr/request`):
@@ -810,7 +818,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 - **Right to erasure**: Email encrypted field nulled within 24 hours of request; SHA-256 hash retained for anti-re-registration. All pets belonging to the erased identity are removed from the `leaderboard:global` Redis sorted set (`ZREM leaderboard:global <pet_id>` for each pet) as part of the erasure job. Full compliance SLA: 7 days (GDPR_EMAIL_DELETION_WINDOW = 7 days).
 - **Right of access / portability**: JSON export of pet data, battle records, training logs delivered within 30 days (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 / GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30).
 - **Right to restrict processing**: Applied within 24 hours (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24).
-- **Right to object (leaderboard)**: Pet entries removed from public leaderboard within 5 business days of request (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5). Admin-reviewed; objection is not absolute under GDPR Art. 21 but resolved as policy.
+- **Right to object (leaderboard)**: Pet entries removed from public leaderboard within 5 business days of request (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5). On fulfillment, `ZREM leaderboard:global <pet_id>` executed for each pet belonging to the identity. Admin-reviewed; objection is not absolute under GDPR Art. 21 but resolved as policy.
 - **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
 - **COPPA**: Age-13 confirmation checkbox required on claim form; label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
 - **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years).
@@ -988,7 +996,7 @@ The admin portal is deployed as a separate Vite application. It shares backend A
 | Leaderboard | /admin/leaderboard | Top 500 view, suspicious flag indicators, remove/restore | Moderator+ |
 | Battle Records | /admin/battles | Flag suspicious matches, view battle logs | Moderator+ |
 | Suspicious Activity | /admin/suspicious | Auto-flagged pets (>50 battles/60min), triage queue | Moderator+ |
-| GDPR Queue | /admin/gdpr | Process deletion requests, audit trail | Super Admin |
+| GDPR Queue | /admin/gdpr | Process all GDPR requests (erasure, data access, restrict processing, object leaderboard), audit trail | Super Admin |
 | Runtime Config | /admin/config/runtime | Arena rate limits, rarity weights, matchmaking timeout | Super Admin |
 | Economy Config | /admin/config/economy | Food buff multipliers (0.5×–5.0×), arena entry cost/cooldown | Super Admin |
 | Email Monitor | /admin/email | SendGrid delivery status, bounce rates, spam complaints | Moderator+ |
