@@ -80,7 +80,7 @@ The methodology follows forward traceability: each user story is the anchor, wit
 | EPIC-AUTH | 2 | 2 | 0 | 0 | 0 | 100% |
 | EPIC-TRAINING | 2 | 2 | 0 | 0 | 0 | 100% |
 | EPIC-ARENA | 2 | 2 | 0 | 0 | 0 | 100% |
-| EPIC-RANKING | 3 | 1 | 2 | 0 | 0 | 67% |
+| EPIC-RANKING | 3 | 1 | 2 | 0 | 0 | 33% |
 | EPIC-MARKETPLACE | 1 | 0 | 0 | 1 | 0 | 0% (deferred) |
 | EPIC-ADMIN | 5 | 5 | 0 | 0 | 0 | 100% |
 | **Total** | **17** | **14** | **2** | **1** | **0** | **82%** |
