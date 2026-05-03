@@ -187,7 +187,7 @@ classDiagram
 
     MarketplaceListing "1" --> "0..1" MarketplaceTransaction : listing_id (RESTRICT on delete)
 
-    AdminAccount "1" --> "0..*" AdminAuditLog : admin_id (RESTRICT on delete)
+    AdminAccount "0..1" --> "0..*" AdminAuditLog : admin_id (RESTRICT on delete, nullable)
 ```
 
 ## Notes

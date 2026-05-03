@@ -48,9 +48,9 @@ graph TB
             RLCounters["Rate-limit counters\nrl:claim:{email_hash}\nrl:arena:{pet_id}\nrl:code_entry:{session_id}\nrl:admin:{admin_id}"]
             Leaderboard["Leaderboard sorted set\nleaderboard:global\n(ZADD / ZRANGEBYSCORE)"]
             Matchmaking["Matchmaking queue\nmatchmaking:queue:RACE\nmatchmaking:queue:SUMO"]
-            Sessions["Admin sessions\nsession:admin:{session_id}\nTTL 14400 s (4 h inactivity)"]
-            TokenBL["Token blacklist\ntoken:blacklist:{token_hash}\nTTL 259200 s (72 h)"]
-            ConfigCache["Config cache\nconfig:runtime\nTTL 300 s (5 min)"]
+            Sessions["Admin sessions\nsession:admin:{session_id}\nTTL 14400 s (4 h — admin_session_inactivity_expiry_hours = 4)"]
+            TokenBL["Token blacklist\ntoken:blacklist:{token_hash}\nTTL 259200 s (72 h — claim_token_cleanup_ttl_hours = 72)"]
+            ConfigCache["Config cache\nconfig:runtime\nTTL 300 s (5 min — config_cache_refresh_time_minutes = 5)"]
         end
     end
 

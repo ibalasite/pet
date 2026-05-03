@@ -17,7 +17,7 @@ Key lifecycle constants:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Generated : GET /api/v1/pets/random\ncreates pet row with\nreserved_until = NOW()+24h
+    [*] --> Generated : GET /api/v1/pets/random\ncreates pet row with\nreserved_until = NOW()+24h\n(pet_reservation_ttl_hours = 24)
 
     Generated --> GuestPreview : Pet row created,\nowner_token_hash IS NULL,\nreserved_until IS NOT NULL
 

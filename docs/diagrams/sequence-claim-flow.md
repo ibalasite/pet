@@ -31,7 +31,7 @@ sequenceDiagram
 
     Player->>PlayerApp: Visit landing page
     PlayerApp->>API: GET /api/v1/pets/random
-    API->>PG: INSERT INTO pets (seed, rarity, generation_meta,<br/>reserved_until = NOW()+24h)
+    API->>PG: INSERT INTO pets (seed, rarity, generation_meta,<br/>reserved_until = NOW()+24h (pet_reservation_ttl_hours = 24))
     PG-->>API: petId, seed, rarity, stats
     API-->>PlayerApp: { petId, seed, rarity, petName, stats, reservedUntil }
     PlayerApp->>Player: Render Phaser.js 32×32 px sprite<br/>Show RarityBadge + ClaimCTA
@@ -51,7 +51,7 @@ sequenceDiagram
         API->>PG: SELECT owner_token_hash FROM pets WHERE id = petId
         alt Pet already claimed
             PG-->>API: owner_token_hash IS NOT NULL
-            API-->>PlayerApp: HTTP 409 { code: "ALREADY_CLAIMED" }
+            API-->>PlayerApp: HTTP 400 { code: "ALREADY_CLAIMED" }
         else Pet unclaimed
             PG-->>API: owner_token_hash IS NULL
             API->>API: code = crypto.randomInt(100000, 1000000)<br/>code_hash = SHA-256(code)<br/>expires_at = NOW() + 15 min (claim_code_expiry_minutes = 15)
@@ -61,7 +61,7 @@ sequenceDiagram
             PG-->>API: claimId
             API->>Email: sendClaimCode(to: email, code, petName)
             Email-->>API: delivered (or failover to Nodemailer after 3 failures<br/>sendgrid_failover_consecutive_failures = 3)
-            API-->>PlayerApp: HTTP 201 { claimId, expiresAt }
+            API-->>PlayerApp: HTTP 200 { claimId, expiresAt }
             PlayerApp-->>Player: Show 6-digit code entry form<br/>Display 15-min countdown timer
         end
     end

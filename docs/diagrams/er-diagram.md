@@ -186,7 +186,7 @@ erDiagram
 
     marketplace_listings ||--o| marketplace_transactions : "listing_id (RESTRICT)"
 
-    admin_accounts ||--o{ admin_audit_log : "admin_id (RESTRICT)"
+    admin_accounts |o--o{ admin_audit_log : "admin_id (RESTRICT, nullable)"
 ```
 
 ## Enum Types
