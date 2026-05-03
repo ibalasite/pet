@@ -1176,7 +1176,7 @@ Session: 4-hour inactivity timeout (`admin_session_inactivity_expiry_hours = 4`)
 |------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Missing or malformed fields |
 | 401 | `UNAUTHORIZED` | Invalid username or password |
-| 403 | `ACCOUNT_LOCKED` | Account locked after repeated failures; `locked_until` in response |
+| 403 | `ACCOUNT_LOCKED` | Account locked after repeated failures; `unlockedAt` (ISO 8601) in error response |
 | 403 | `TOTP_SETUP_REQUIRED` | First login; TOTP not yet enrolled |
 | 429 | `RATE_LIMIT_EXCEEDED` | IP pre-auth rate limit exceeded |
 
@@ -1207,7 +1207,14 @@ Completes TOTP enrollment for a first-time admin login. Requires the short-lived
     "backupCodes": [
       "A1B2C3D4E5",
       "F6G7H8I9J0",
-      "..."
+      "K1L2M3N4O5",
+      "P6Q7R8S9T0",
+      "U1V2W3X4Y5",
+      "Z6A7B8C9D0",
+      "E1F2G3H4I5",
+      "J6K7L8M9N0",
+      "O1P2Q3R4S5",
+      "T6U7V8W9X0"
     ]
   },
   "error": null
