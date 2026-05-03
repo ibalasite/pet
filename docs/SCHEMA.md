@@ -820,7 +820,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 
 ### 6.3 Leaderboard Query Pattern
 
-The live leaderboard is served exclusively from the Redis `leaderboard:global` sorted set (`ZREVRANGE` for top-N retrieval, `ZREVRANK` for a pet's rank — both O(log N)). The `leaderboard_snapshots` table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.
+The live leaderboard is served exclusively from the Redis `leaderboard:global` sorted set (`ZREVRANGE` for top-N retrieval — O(log N + M) where M is the number of elements returned; `ZREVRANK` for a pet's rank — O(log N)). The `leaderboard_snapshots` table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.
 
 ### 6.4 Token Lookup Path
 
