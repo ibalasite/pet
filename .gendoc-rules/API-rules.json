@@ -1,0 +1,38 @@
+{
+  "step_id": "API",
+  "step_name": "API Specification",
+  "output_files": [
+    {
+      "path": "docs/API.md",
+      "must_exist": true,
+      "must_not_be_empty": true,
+      "min_h2_sections": 6,
+      "required_sections": [
+        "API Overview",
+        "Authentication",
+        "Endpoints",
+        "Error Codes"
+      ],
+      "no_bare_placeholders": true,
+      "min_words_per_section": 30,
+      "min_endpoint_count": 53
+    }
+  ],
+  "anti_fake_rules": [
+    {
+      "type": "no_placeholder_strings",
+      "pattern": "\\{\\{[A-Z_]+\\}\\}"
+    },
+    {
+      "type": "no_duplicate_paragraphs",
+      "min_char_length": 150
+    },
+    {
+      "type": "min_section_words",
+      "min_words": 30
+    },
+    {
+      "type": "no_trivial_entity_names"
+    }
+  ]
+}

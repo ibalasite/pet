@@ -1,0 +1,29 @@
+{
+  "step_id": "UML-CICD",
+  "step_name": "CI/CD UML Diagrams",
+  "output_files": [
+    {
+      "output_glob": "docs/diagrams/cicd-*.md",
+      "must_exist": true,
+      "min_file_count": 5,
+      "no_bare_placeholders": true
+    }
+  ],
+  "anti_fake_rules": [
+    {
+      "type": "no_placeholder_strings",
+      "pattern": "\\{\\{[A-Z_]+\\}\\}"
+    },
+    {
+      "type": "no_duplicate_paragraphs",
+      "min_char_length": 150
+    },
+    {
+      "type": "min_section_words",
+      "min_words": 30
+    },
+    {
+      "type": "no_trivial_entity_names"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "step_id": "DEVELOPER_GUIDE",
+  "step_name": "Developer Guide",
+  "output_files": [
+    {
+      "path": "docs/DEVELOPER_GUIDE.md",
+      "must_exist": true,
+      "must_not_be_empty": true,
+      "min_h2_sections": 5,
+      "required_sections": [
+        "Daily Scenarios",
+        "CI/CD Diagnosis",
+        "Quick Reference"
+      ],
+      "no_bare_placeholders": true,
+      "min_words_per_section": 30
+    }
+  ],
+  "anti_fake_rules": [
+    {
+      "type": "no_placeholder_strings",
+      "pattern": "\\{\\{[A-Z_]+\\}\\}"
+    },
+    {
+      "type": "no_duplicate_paragraphs",
+      "min_char_length": 150
+    },
+    {
+      "type": "min_section_words",
+      "min_words": 30
+    },
+    {
+      "type": "no_trivial_entity_names"
+    }
+  ]
+}
