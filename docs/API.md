@@ -2454,6 +2454,8 @@ Non-breaking changes (additive fields, new optional query parameters, new endpoi
 
 Returns platform health status. Required by PRD NFR-AVAIL-06.
 
+> **Note**: This endpoint intentionally uses a minimal response body (`{status, checks, timestamp}`) rather than the standard `{success, data, error, meta}` envelope described in §4.1. Health-check consumers (load balancers, uptime monitors) expect this lightweight format.
+
 **Auth**: None
 
 **Rate Limit**: None
