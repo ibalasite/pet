@@ -167,8 +167,8 @@ COMMENT ON COLUMN claim_codes.used_at IS 'Set when the OTP is successfully verif
 CREATE INDEX idx_claim_codes_pet_id     ON claim_codes (pet_id);
 CREATE INDEX idx_claim_codes_email_hash ON claim_codes (email_hash);
 CREATE INDEX idx_claim_codes_expires_at ON claim_codes (expires_at);
--- Background cleanup job: deletes rows 72h after creation OR first use (claim_token_cleanup_ttl_hours = 72).
--- Query: WHERE created_at < NOW() - INTERVAL '72 hours' OR (used_at IS NOT NULL AND used_at < NOW() - INTERVAL '72 hours')
+-- Background cleanup job: deletes rows 72h after creation or first use, whichever is LATER (claim_token_cleanup_ttl_hours = 72).
+-- Query: WHERE created_at < NOW() - INTERVAL '72 hours' AND (used_at IS NULL OR used_at < NOW() - INTERVAL '72 hours')
 CREATE INDEX idx_claim_codes_created_at ON claim_codes (created_at);
 CREATE INDEX idx_claim_codes_used_at    ON claim_codes (used_at) WHERE used_at IS NOT NULL;
 ```
@@ -214,6 +214,12 @@ CREATE TABLE arena_matches (
         CHECK (
             (is_ai_opponent = FALSE) OR
             (is_ai_opponent = TRUE AND pet_b_id IS NULL)
+        ),
+    CONSTRAINT chk_arena_match_winner_is_combatant
+        CHECK (
+            winner_pet_id IS NULL OR
+            winner_pet_id = pet_a_id OR
+            winner_pet_id = pet_b_id
         )
 );
 
@@ -511,6 +517,12 @@ COMMENT ON COLUMN admin_audit_log.ip_address_hash IS 'SHA-256 hash of the raw re
 ```sql
 CREATE INDEX idx_admin_audit_log_created_at ON admin_audit_log (created_at DESC);
 CREATE INDEX idx_admin_audit_log_admin_id   ON admin_audit_log (admin_id, created_at DESC);
+-- Background job target: nulls ip_address_hash after 90 days (ip_address_log_retention_days = 90).
+-- Query: UPDATE ... SET ip_address_hash = NULL WHERE ip_address_hash IS NOT NULL AND created_at < NOW() - INTERVAL '90 days'
+-- Partial predicate keeps the index tiny — once nulled, rows drop out of the index automatically.
+CREATE INDEX idx_admin_audit_log_ip_hash_cleanup
+    ON admin_audit_log (created_at)
+    WHERE ip_address_hash IS NOT NULL;
 ```
 
 ---
@@ -719,6 +731,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_claim_codes_created_at` and `idx_claim_codes_used_at` — support the 72-hour background cleanup job which must find rows by creation time or first-use time (whichever is later).
 - `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
 - `idx_claim_identities_deletion` — `WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL`: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once `email_encrypted` is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.
+- `idx_admin_audit_log_ip_hash_cleanup` — `WHERE ip_address_hash IS NOT NULL`: used by the background job that nulls `ip_address_hash` after 90 days (`ip_address_log_retention_days = 90`). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by `idx_claim_identities_deletion`.
 
 ### 6.2 Composite Indexes for History Queries
 
