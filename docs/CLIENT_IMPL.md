@@ -366,7 +366,7 @@ Sprite sheets are served from Vercel's CDN `/public/sprites/` directory and are 
 
 | Type | Limit | Notes |
 |------|-------|-------|
-| Single sprite sheet | ≤ 1920 px wide (WebP/PNG) | 32 px frame grid; ≤ 16 colors per frame (pixel art constraint — VDD §4.2) |
+| Single sprite sheet | ≤ 1920 px wide (WebP/PNG) | 32 px frame grid; ≤ 16 colors per sprite (pixel art constraint — VDD §4.2) |
 | Audio SFX (single file) | ≤ 200 KB | OGG format preferred (engine default) |
 | Background music | ≤ 5 MB per track | Streamed; not used in Phase 1 |
 | Entry bundle (eager JS, gzipped) | ≤ 150 KB | React + Router + TanStack Query + Zustand + Zod |
