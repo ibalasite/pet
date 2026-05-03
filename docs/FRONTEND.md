@@ -143,6 +143,7 @@ apps/player/
 │   │   ├── useLeaderboard.ts
 │   │   ├── useArenaHistory.ts
 │   │   ├── useTraining.ts
+│   │   ├── useFeed.ts
 │   │   ├── useClaim.ts
 │   │   ├── useReducedMotion.ts
 │   │   └── usePetToken.ts
@@ -249,7 +250,7 @@ export function PetCanvas({ seed, rarity, interactive = false }: PetCanvasProps)
         seed,
         rarity,
         interactive,
-        spriteResolutionPx: 32, // sprite_resolution_px from constants.json
+        spriteResolutionPx: 32, // (sprite_resolution_px = 32)
       });
     });
     return () => {
@@ -336,7 +337,7 @@ interface AppStore {
 **TanStack Query cache rules**:
 - Global `staleTime: 30_000` (30 seconds)
 - `useLeaderboard` sets `refetchInterval: 30_000` (leaderboard_update_lag_max_seconds = 30 from constants.json)
-- `usePet` is invalidated on successful `submitTraining` or `useFood` mutation
+- `usePet` is invalidated on successful `submitTraining` or `useFeed` mutation
 - No cache is shared between the player app and the admin portal
 
 ### 2.5 Routing
@@ -685,9 +686,9 @@ class PetIdleScene extends Phaser.Scene {
 | Context | Sprite size | Display size |
 |---------|-------------|--------------|
 | Hero canvas (Landing, My Pet, Battle Result) | 64×64 px @ 1× | 128×128 px @ 2× (retina) |
-| Leaderboard thumbnail | 32×32 px | 32×32 px @ 1×, 64×64 px @2× |
-| Trade card (Marketplace) | 32×32 px | 48×48 px |
-| OG social share card | 32×32 px | 128×128 px rendered on 1200×630 card |
+| Leaderboard thumbnail | 32×32 px | 32×32 px @ 1×, 64×64 px @ 2× |
+| Trade card (Marketplace) | 48×48 px @ 1× | 96×96 px @ 2× |
+| OG social share card | 128×128 px | 128×128 px rendered on 1200×630 card |
 
 ### 4.3 Animation
 
@@ -832,7 +833,7 @@ ArenaPage /arena
   │    ArenaScene (Phaser.js) renders battle animation
   │    Duration: arena_match_duration_min_seconds = 5s to
   │              arena_match_duration_max_seconds = 15s
-  │    ← { matchId, result, opponentPetId, isAiOpponent, statDelta }
+  │    ← { matchId, result, opponentPetId, isAiOpponent, statDelta, newLeaderboardScore }
   │
   ├─ A4b: No opponent (30s timeout), acceptAI omitted or false
   │    HTTP 408 MATCHMAKING_TIMEOUT
@@ -843,7 +844,7 @@ ArenaPage /arena
   │    → POST /api/v1/arena/enter  { ..., acceptAI: true }
   │    ← AI opponent result
   │
-  └─ A5: navigate to /arena/result/:matchId
+  └─ A5: navigate to /arena/result/:battleId
        BattleResultPage shows WIN/LOSS card
        ShareBattleButton copies public URL
        Leaderboard score updated within leaderboard_update_lag_max_seconds = 30s
@@ -856,7 +857,7 @@ This flow is only active when the `FF_MARKETPLACE` feature flag is `true`.
 ```
 MarketplacePage /marketplace
   │
-  ├─ Browse: GET /api/v1/marketplace/listings?sort=price|rarity|level&page=1
+  ├─ Browse: GET /api/v1/marketplace/listings?sortBy=price|rarity|level&order=asc|desc&page=1
   │    Public — no auth required
   │    ElTable (admin portal) / custom table (player app) with rarity filtering
   │
@@ -940,7 +941,7 @@ AdminLoginPage /admin/login
   │                   admin_login_ip_rate_limit_window_seconds = 900s (15 min)
   │
   ├─ Path A: TOTP not yet enrolled (first login)
-  │    ← HTTP 403  { code: "TOTP_SETUP_REQUIRED", setupToken }
+  │    ← HTTP 403  { error: { code: "TOTP_SETUP_REQUIRED", details: { setupToken } } }
   │    Redirect → /admin/totp-setup
   │    TotpSetupPage calls POST /admin/api/auth/totp/setup  { setupToken, password }
   │    ← { otpAuthUrl, backupCodes }
@@ -948,17 +949,17 @@ AdminLoginPage /admin/login
   │    → Return to /admin/login for standard login
   │
   ├─ Path B: Successful login with TOTP code
-  │    ← HTTP 200; Set-Cookie: session=<id>; HttpOnly; SameSite=Strict; Secure
+  │    ← HTTP 200; Set-Cookie: session=<id>; HttpOnly; SameSite=Strict; Secure; Path=/admin
   │    Session: inactivity admin_session_inactivity_expiry_hours = 4h
   │             absolute admin_session_absolute_expiry_hours = 8h
   │    → navigate to /admin/dashboard
   │
   ├─ Path C: Account locked
   │    After admin_login_lockout_threshold = 10 consecutive failures
-  │    ← HTTP 403  { code: "ACCOUNT_LOCKED", unlockedAt }
+  │    ← HTTP 403  { error: { code: "ACCOUNT_LOCKED", details: { unlockedAt } } }
   │    Lockout duration: admin_login_lockout_duration_minutes = 30 min
   │
-  └─ All auth events written to audit log (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years)
+  └─ All auth events written to audit log (admin_audit_log_retention_years = 2 years)
 ```
 
 ---
