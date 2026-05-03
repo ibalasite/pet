@@ -883,12 +883,12 @@ interface RuntimeConfig {
 }
 
 interface EconomyConfig {
-  foodBuffMultiplierMin: number               // 0.5 (food_buff_multiplier_admin_min)
-  foodBuffMultiplierMax: number               // 5.0 (food_buff_multiplier_admin_max)
-  arenaEntryCostFoodCreditsDefault: number    // 0 (arena_entry_cost_food_credits_default)
-  arenaEntryCostFoodCreditsMax: number        // 10 (arena_entry_cost_food_credits_admin_max)
-  arenaEntryCooldownMinMinutes: number        // 0 (arena_entry_cooldown_admin_min_minutes)
-  arenaEntryCooldownMaxMinutes: number        // 60 (arena_entry_cooldown_admin_max_minutes)
+  foodBuffMultiplierMin: number               // (food_buff_multiplier_admin_min = 0.5)
+  foodBuffMultiplierMax: number               // (food_buff_multiplier_admin_max = 5.0)
+  arenaEntryCostFoodCreditsDefault: number    // (arena_entry_cost_food_credits_default = 0)
+  arenaEntryCostFoodCreditsMax: number        // (arena_entry_cost_food_credits_admin_max = 10)
+  arenaEntryCooldownMinMinutes: number        // (arena_entry_cooldown_admin_min_minutes = 0)
+  arenaEntryCooldownMaxMinutes: number        // (arena_entry_cooldown_admin_max_minutes = 60)
 }
 
 interface FeatureFlag {
@@ -1156,7 +1156,7 @@ Renders the `admin_audit_log.detail` JSONB column with formatted key-value displ
 
 ```typescript
 interface AuditLogDetailProps {
-  logId: string | number        // audit_log id (BIGSERIAL)
+  id: string | number           // audit_log id (BIGSERIAL) — matches API.md §6.8 response field `id`
   adminUsername: string
   action: string                // e.g. 'pet.ban', 'config.arena_rate_limit'
   targetType: string            // 'pet' | 'arena_match' | 'config_runtime' | ...
@@ -1305,6 +1305,17 @@ const routes = [
         meta: { permission: 'super_admin' },
       },
     ],
+  },
+  // Error pages — public, outside AdminLayout
+  {
+    path: '/403',
+    component: () => import('@/views/errors/403View.vue'),
+    meta: { public: true },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/views/errors/404View.vue'),
+    meta: { public: true },
   },
 ]
 ```
