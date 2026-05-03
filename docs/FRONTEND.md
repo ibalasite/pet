@@ -681,7 +681,7 @@ class PetIdleScene extends Phaser.Scene {
 
   preload(): void {
     // Sprite sheet: frameWidth = frameHeight = SPRITE_RESOLUTION_PX
-    this.load.spritesheet('pet', `/sprites/pet_${this.seed}.png`, {
+    this.load.spritesheet('pet', `/sprites/pet_${this.seed.toString()}.png`, {
       frameWidth: SPRITE_RESOLUTION_PX,   // 32
       frameHeight: SPRITE_RESOLUTION_PX,  // 32
     });
@@ -1252,8 +1252,65 @@ The `pet_access_token` read from `localStorage` is sent in the `Authorization: B
 
 - No admin API calls are made from the player app — the two apps use entirely separate API client instances
 - The admin portal is served from a separate subdomain or route prefix (`admin.pixel-pet-arena.com`) and is not part of the player app bundle
-- TOTP code (`totpCode`) is submitted as a string in the JSON body and cleared from React state immediately after submission
+- TOTP code (`totpCode`) is submitted as a string in the JSON body and cleared from Vue component state immediately after submission
 - Backup codes are displayed once after TOTP setup and are never stored in frontend state
+
+---
+
+## 9. Testing
+
+### 9.1 Player App
+
+**Framework**: Vitest (unit/integration), Playwright (E2E)
+
+| Test type | Location | Scope |
+|-----------|----------|-------|
+| Unit | `apps/player/src/**/__tests__/*.test.ts` | Hooks, utilities, Zod schemas, `petGeneration.ts`, `tokenStorage.ts` |
+| Component | `apps/player/src/**/__tests__/*.test.tsx` | Form components (`ClaimEmailForm`, `ClaimCodeForm`), `ExpiryWarning`, `StatBar`, `DailyResetTimer` |
+| E2E | `apps/player/e2e/*.spec.ts` | Claim flow, training flow, arena entry, leaderboard navigation, GDPR submission |
+
+**Minimum coverage target**: 80% (`unit_test_coverage_min_percent = 80` from `constants.json` slo section), enforced by Vitest `coverage.thresholds`.
+
+**Key E2E scenarios** (Playwright):
+
+```ts
+// apps/player/e2e/claim.spec.ts
+test('claim flow completes and token is stored', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('h1')).toBeVisible();
+  // ...step through email, OTP, reveal
+});
+```
+
+- Screenshot breakpoints: 320, 768, 1024, 1440 (both dark mode — primary — and light mode)
+- Verify `useReducedMotion` path: Phaser animation paused, shimmer CSS suppressed
+- Verify `HTTP 429` → `RateLimitBanner` renders and inputs are disabled
+- Verify `HTTP 401` → token cleared, redirect to `/`
+
+### 9.2 Admin Portal
+
+**Framework**: Vitest (unit), Playwright (E2E)
+
+| Test type | Location | Scope |
+|-----------|----------|-------|
+| Unit | `apps/admin/src/**/__tests__/*.test.ts` | Pinia store actions (`useAdminAuthStore`, `useConfigStore`), `formatters.ts` |
+| E2E | `apps/admin/e2e/*.spec.ts` | Login with TOTP, pet ban/unban, GDPR queue, runtime config update |
+
+**Key E2E scenarios**:
+- Login → TOTP enrollment path → standard login with `totpCode`
+- `moderator` role cannot access `/admin/config/runtime` (403 → visible error)
+- `read_only` role cannot perform mutations (ban, flag)
+- Session expiry → redirect to `/admin/login`
+
+### 9.3 Visual Regression
+
+Playwright screenshots are taken at 320, 768, 1024, and 1440px breakpoints for:
+- `LandingPage` (with and without pet token in localStorage)
+- `PetPage` (Common, Rare, Epic, Legendary rarity)
+- `BattleResultPage` (WIN and LOSS variants)
+- `LeaderboardPage` (with `OwnerRankBanner` visible)
+- `ArenaPage` (matchmaking state, rate-limited state)
+- `GdprPage` (form and status banner states)
 
 ---
 
