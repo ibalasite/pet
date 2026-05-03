@@ -172,7 +172,7 @@ Rationale: Fastify provides JSON Schema-based route validation out of the box (e
 - Leaderboard sorted sets (ZRANGEBYSCORE, ZADD operations); authoritative source, PostgreSQL is durable backup
 - Rate-limit counters: arena battles per pet per hour (TTL = 1 hour); email claim attempts per email per hour
 - Pet access token blacklist (replaced pet access tokens — e.g. after recovery flow; TTL = 72 hours per CLAIM_TOKEN_CLEANUP_TTL)
-- Arena matchmaking queue (Redis List or Pub/Sub)
+- Arena matchmaking queue (Redis Sorted Set; score = enqueue epoch — see §4.8)
 - Config cache: runtime parameter values refreshed every 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min)
 - Fallback: if Redis unavailable, leaderboard falls back to direct PostgreSQL read (degraded, not outage — NFR-AVAIL-05)
 - Admin sessions stored server-side in Redis with 4h inactivity / 8h absolute expiry
@@ -302,7 +302,8 @@ INDEXES:
 
 Notes:
 - Code is a 6-digit numeric OTP (CLAIM_CODE_DIGITS = 6) generated with `crypto.randomInt(100000, 1000000)`. Only the hash is stored.
-- Claim records are deleted by a background job 72 hours after creation or first use (CLAIM_TOKEN_CLEANUP_TTL = 72 hours).
+- Claim records are deleted by a background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL = 72 hours).
+- **Attempt tracking**: Redis key `rl:code_entry:{session_id}` (TTL 900s) is the authoritative rate-limit enforcer (10 attempts per session). The DB `attempts` column is informational only — incremented on each verify call for audit purposes but NOT used for enforcement. On Redis unavailability, code entry is blocked (fail-closed) to prevent bypass.
 
 ### §4.4 ArenaMatch
 
@@ -454,7 +455,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | seller_token_hash | TEXT | NOT NULL | Hashed access token of seller |
 | buyer_token_hash | TEXT | NOT NULL | Hashed access token of buyer |
 | price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Food credits |
-| fee_credits | INTEGER | NOT NULL | 5% platform fee: floor(price_credits * 0.05) |
+| fee_credits | INTEGER | NOT NULL CHECK (fee_credits >= 0) | 5% platform fee: floor(price_credits * 0.05); may be 0 for price_credits < 20 |
 | listed_at | TIMESTAMPTZ | NOT NULL | |
 | completed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
@@ -540,8 +541,8 @@ Rate limit: Inherits AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5 per email.
 Auth: None
 Description: Generate a new unclaimed random pet for guest display. Public endpoint — no authentication required; generates a guest-preview pet for display.
 Request: `{}` (no body)
-Response: `{ petId, seed, rarity, petName, stats: {speed, strength, stamina, level}, generationMeta }`
-Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset.
+Response: `{ petId, seed, rarity, petName, stats: {speed, strength, stamina, level}, generationMeta, reservedUntil: ISO8601 }`
+Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset. `reservedUntil` = `NOW() + 24h` (TBD: `PET_RESERVATION_TTL_HOURS` constant) — client should display countdown to encourage timely claiming.
 
 #### GET /api/v1/pet/:petId
 Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
@@ -568,7 +569,8 @@ Auth: Required (pet owner token)
 Request: `{ petId: string, mode: 'RACE' | 'SUMO', acceptAI?: boolean }`
 Description: Enqueues pet in matchmaking queue (Redis). Waits up to 30 seconds (ARENA_MATCHMAKING_TIMEOUT) for an opponent. Returns battle result synchronously (HTTP long-poll) or AI result if no opponent found and `acceptAI: true`.
 Response: `{ matchId: string, result: 'WIN' | 'LOSS', opponentPetId: string | null, isAiOpponent: boolean, statDelta: number, newLeaderboardScore?: number }`
-Tie-breaking: If both pets have equal effective stats after the ±15% modifier, the challenger (pet that entered the queue first) wins. This is deterministic and derived from the enqueue timestamp stored in the queue entry.
+Tie-breaking: If both pets have equal effective stats after the ±15% modifier, the challenger (pet with the earlier enqueue timestamp in the sorted set) wins. This is deterministic and derived from the enqueue epoch score.
+Timeout (no opponent, `acceptAI: false` or omitted): HTTP 408 `{ code: "MATCHMAKING_TIMEOUT", message: "No opponent found within 30 seconds. Try again or enable AI opponent." }`. Pet's rate-limit counter is NOT incremented on timeout.
 Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10); HTTP 429 + `Retry-After` header on breach.
 
 #### GET /api/v1/arena/match/:matchId
@@ -624,7 +626,8 @@ Description: Create admin user (username, role, temp password)
 
 #### DELETE /admin/api/roles/:adminId
 Auth: Admin session (Super Admin)
-Description: Deactivate admin account
+Description: Soft-deactivate admin account — sets `deactivated_at = NOW()` (no SQL DELETE; audit log FK requires row retention). Login is immediately blocked for the target account.
+Response: `{ success: true, auditLogId: string }`
 
 #### POST /admin/api/roles/:adminId/totp/reset
 Auth: Admin session (Super Admin)
@@ -763,8 +766,8 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 4. OTP hash (SHA-256) stored in `claim_codes` with `expires_at = NOW() + 15min` (CLAIM_CODE_EXPIRY = 15 min)
 5. Email dispatched via SendGrid containing ONLY the 6-digit code — no clickable URLs (mitigates email client pre-scanning attacks documented in IDEA.md §8.1 R1)
 6. User manually enters code in browser; verified against hash
-7. On valid entry: atomic DB transaction — (a) upsert `claim_identities` row for the email_hash (creating if first claim, matching if re-claiming same email), (b) set `pets.claim_identity_id = claim_identities.id`, (c) generate 32-byte pet access token, store SHA-256 hash in `pets.owner_token_hash`, (d) set `pets.claimed_at = NOW()`, (e) mark claim code `used_at`
-8. Claim code records deleted by background job 72 hours after creation or first use, whichever is earlier (CLAIM_TOKEN_CLEANUP_TTL = 72 hours)
+7. On valid entry: atomic DB transaction — (a) upsert `claim_identities` row for the email_hash (creating if first claim, matching if re-claiming same email), (b) set `pets.claim_identity_id = claim_identities.id`, (c) generate 32-byte pet access token, store SHA-256 hash in `pets.owner_token_hash`, (d) set `pets.claimed_at = NOW()`, (e) mark claim code `used_at`, (f) set `pets.reserved_until = NULL`
+8. Claim code records deleted by background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL = 72 hours)
 9. Rate limit on code entry: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS = 10); 60-second cooldown on breach
 
 ### §6.3 Admin Authentication
