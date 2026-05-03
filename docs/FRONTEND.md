@@ -206,7 +206,7 @@ App
 │       │   ├── MatchmakingStatus
 │       │   ├── AIOfferModal        (offered after arena_matchmaking_timeout_seconds = 30)
 │       │   └── RateLimitBanner
-│       ├── BattleResultPage        /arena/result/:battleId
+│       ├── BattleResultPage        /arena/result/:matchId
 │       │   ├── BattleResultCard    (WIN / LOSS variants)
 │       │   ├── StatComparison
 │       │   ├── ShareBattleButton
@@ -244,8 +244,10 @@ export function PetCanvas({ seed, rarity, interactive = false }: PetCanvasProps)
 
   useEffect(() => {
     if (!containerRef.current) return;
+    let cancelled = false;
     // Phaser is dynamically imported — excluded from initial JS bundle
     import('./PetCanvasEngine').then(({ PetCanvasEngine }) => {
+      if (cancelled) return; // guard against unmount before import resolves
       engineRef.current = new PetCanvasEngine(containerRef.current!, {
         seed,
         rarity,
@@ -254,10 +256,14 @@ export function PetCanvas({ seed, rarity, interactive = false }: PetCanvasProps)
       });
     });
     return () => {
+      cancelled = true;
       engineRef.current?.destroy();
+      engineRef.current = null;
     };
   }, [seed, rarity, interactive]);
 
+  // Note: image-rendering: crisp-edges (Firefox fallback for pixelated) must be
+  // declared in a CSS class (e.g. .pixel-canvas) — inline styles cannot stack the same property.
   return (
     <div
       ref={containerRef}
@@ -285,8 +291,8 @@ export class PetCanvasEngine {
     this.game = new Phaser.Game({
       type: Phaser.AUTO,            // WebGL with Canvas 2D fallback
       parent: container,
-      width: spriteResolutionPx * 4,  // scaled for display
-      height: spriteResolutionPx * 4,
+      width: spriteResolutionPx * 2,   // 32 × 2 = 64 CSS px @1×; retina handled via image-rendering: pixelated
+      height: spriteResolutionPx * 2,
       transparent: true,
       scene: [new PetIdleScene(seed, attributes, rarity)],
     });
@@ -357,7 +363,7 @@ const router = createBrowserRouter([
       { path: 'pet/:petId/train', lazy: () => import('./components/training/TrainingPage') },
       { path: 'pet/:petId/records', lazy: () => import('./components/records/BattleRecordsPage') },
       { path: 'arena', lazy: () => import('./components/arena/ArenaPage') },
-      { path: 'arena/result/:battleId', lazy: () => import('./components/arena/BattleResultPage') },
+      { path: 'arena/result/:matchId', lazy: () => import('./components/arena/BattleResultPage') },
       { path: 'leaderboard', lazy: () => import('./components/leaderboard/LeaderboardPage') },
       // GDPR self-service: owner token required; accessible at /gdpr
       // Route-level guard: loader redirects to / when no pet_access_token present in localStorage
@@ -381,7 +387,7 @@ const router = createBrowserRouter([
 **URL state conventions**:
 - `/leaderboard?rarity=EPIC&page=2` — rarity filter and pagination are URL state
 - `/pet/:petId?token=<petToken>` — initial token hydration from deep link; token copied to `localStorage` on mount
-- `/arena/result/:battleId` — shareable battle record URL
+- `/arena/result/:matchId` — shareable battle record URL
 
 ### 2.6 API Client Layer
 
@@ -701,7 +707,7 @@ class PetIdleScene extends Phaser.Scene {
 ### 4.2 Sprite Resolution
 
 - **Frame size**: `sprite_resolution_px = 32` px per frame (from `constants.json` core section). All sprite sheets are authored at this resolution.
-- **Display scaling**: Sprites are rendered at 4× scale in the hero canvas (128×128 visible), using CSS `image-rendering: pixelated` and `image-rendering: crisp-edges` to preserve hard pixel boundaries at all zoom levels.
+- **Display scaling**: Sprites are rendered at 2× scale in the hero canvas (64×64 CSS px visible at @1×; 128×128 px at @2× retina), using CSS `image-rendering: pixelated` and `image-rendering: crisp-edges` to preserve hard pixel boundaries at all zoom levels.
 - **Sprite sizes by context** (from VDD §4.2):
 
 | Context | Sprite size | Display size |
@@ -866,7 +872,7 @@ ArenaPage /arena
   │    → POST /api/v1/arena/enter  { ..., acceptAI: true }
   │    ← AI opponent result
   │
-  └─ A5: navigate to /arena/result/:battleId
+  └─ A5: navigate to /arena/result/:matchId
        BattleResultPage shows WIN/LOSS card
        ShareBattleButton copies public URL
        Leaderboard score updated within leaderboard_update_lag_max_seconds = 30s
@@ -941,10 +947,10 @@ GdprPage /gdpr
   │    Displays current status: pending | processing | completed | failed
   │    SLA copy displayed per request type:
   │      erasure → "Processed within 7 days (gdpr_email_deletion_window_days = 7)"
-  │      data_access / portability → "Processed within 30 days"
-  │      restrict_processing → "Processed within 24 hours"
-  │      object_leaderboard → "Processed within 5 business days"
-  │      rectification → "Processed within 24 hours"
+  │      data_access / portability → "Processed within 30 days (gdpr_data_access_response_days = 30)"
+  │      restrict_processing → "Processed within 24 hours (gdpr_restrict_processing_response_hours = 24)"
+  │      object_leaderboard → "Processed within 5 business days (gdpr_object_leaderboard_response_business_days = 5)"
+  │      rectification → "Processed within 24 hours (gdpr_email_rectification_response_hours = 24)"
   │
   └─ Error states:
        HTTP 401 → redirect to / (token cleared)
