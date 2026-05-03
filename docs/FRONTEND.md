@@ -874,6 +874,7 @@ PetPage (owner authenticated via Bearer token)
        HTTP 400 VALIDATION_ERROR → inline error (magnitude or buffType out of configured range)
        HTTP 401 → handled globally: clearPetToken() + redirect to /
        HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
+       HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)
 ```
 
 ### 5.4 Arena Battle Flow
