@@ -102,7 +102,7 @@ stateDiagram-v2
   `is_flagged`.
 - **Bot detection**: A background monitor checks for > 50 battles in a 60-minute rolling window
   (`bot_detection_battles_threshold = 50`, `bot_detection_window_minutes = 60`). Triggered pets
-  appear in the admin suspicious-activity view (distinct from `LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR = 50`).
+  appear in the admin suspicious-activity view (distinct from `leaderboard_admin_suspicious_flag_battles_per_hour = 50`).
 - **AI opponent persistence**: When `is_ai_opponent = TRUE`, `pet_b_id = NULL` in the match row
   and `winner_pet_id` is NULL if the AI wins (the player's pet lost). For human-vs-human,
   `winner_pet_id` is always non-null (tie-break prevents draws).

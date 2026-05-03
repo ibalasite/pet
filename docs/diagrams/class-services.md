@@ -146,6 +146,7 @@ classDiagram
     ConfigService --> AuditService : logs config changes
     GdprService --> AuditService : logs GDPR actions
     GdprService --> EmailService : delivers data-access packages
+    GdprService --> LeaderboardService : ZREM erased pet entries on erasure / object_leaderboard
     MarketplaceService --> PetService : verifies ownership
     MarketplaceService --> AuditService : logs trade events
 ```
@@ -165,7 +166,10 @@ classDiagram
   (`trade_transaction_fee_percent = 5`).
 - **GdprService.processErasure** sets `claim_identities.email_encrypted = NULL` within 24 hours
   (`gdpr_email_hashing_internal_sla_hours = 24`) and completes full erasure within 7 days
-  (`gdpr_email_deletion_window_days = 7`).
+  (`gdpr_email_deletion_window_days = 7`). As part of erasure it also calls
+  `LeaderboardService.removeEntry` for every pet belonging to the erased identity (ZREM
+  `leaderboard:global <pet_id>`) — see EDD §4.13.7 and SCHEMA §4.4. The same ZREM path is
+  used for `object_leaderboard` GDPR requests.
 - All services are instantiated once per process and shared across route handlers via Fastify
   decorators, ensuring connection pool (`db_connection_pool_min_connections = 20`) is not
   re-created per request.

@@ -88,7 +88,7 @@ graph TB
     AdminAPI -->|reads| PGReplica
     AdminAPI -->|admin sessions| Sessions
     AdminAPI -->|rate limits| RLCounters
-    AdminAPI -->|ZREM banned pets| Leaderboard
+    AdminAPI -->|ZRANGE top 500 / ZREM banned pets| Leaderboard
     AdminAPI -->|PUT config (invalidate)| ConfigCache
 
     %% API → External
