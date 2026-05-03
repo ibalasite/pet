@@ -2400,7 +2400,7 @@ Targets: delivery rate ≥ 98% (`claim_email_delivery_rate_target_percent = 98`)
 
 ## 7. WebSocket / Real-Time
 
-**Scope note**: Per the EDD and ARCH, the arena battle resolution uses **HTTP long-polling** on `POST /api/v1/arena/enter` (waiting up to 30 seconds — `arena_matchmaking_timeout_seconds = 30`) rather than a WebSocket connection. This is sufficient for the MVP load profile (500 RPS peak, 2,000 PCU — `peak_operation_rps = 500`, `peak_concurrent_users = 2000`) and avoids the operational complexity of a persistent WebSocket server within the MVP budget (`mvp_budget_usd = 40000`).
+**Scope note**: Per the EDD and ARCH, the arena battle resolution uses **HTTP long-polling** on `POST /api/v1/arena/enter` (waiting up to 30 seconds — `arena_matchmaking_timeout_seconds = 30`) rather than a WebSocket connection. This is sufficient for the MVP load profile (500 RPS peak, 2000 PCU — `peak_operation_rps = 500`, `peak_concurrent_users = 2000`) and avoids the operational complexity of a persistent WebSocket server within the MVP budget (`mvp_budget_usd = 40000`).
 
 **Real-time updates** currently handled by client-side polling:
 
