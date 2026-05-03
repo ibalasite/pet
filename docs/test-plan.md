@@ -493,7 +493,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 | TC-INT-003 | Seed collision retry mechanism |
 |---|---|
-| Given | The first 2 generated seeds already exist in `pets.pet_seed` |
+| Given | The first 2 generated seeds already exist in `pets.seed` |
 | When | `GET /api/v1/pets/random` is called |
 | Then | A unique seed is found on the 3rd attempt; HTTP 200 returned |
 | Linked AC | AC-002-3 |
@@ -868,7 +868,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | TC-E2E-021 | Admin pet search within SLA |
 |---|---|
 | Given | 1,000,000 pet records in the database (staging performance data) |
-| When | Admin searches by pet ID or partial email hash |
+| When | Admin searches by exact pet ID or exact email hash (SHA-256; fragment search is not supported) |
 | Then | Results returned within (admin_search_response_time_seconds = 2) seconds |
 | Linked AC | AC-013-4 |
 
