@@ -22,6 +22,7 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | PET_STAT_MAX | 100 | points | Maximum stat value |
 | PET_LEVEL_DEFAULT | 1 | level | Starting level |
 | PET_LEVEL_MAX | 100 | level | Max level cap; FLOOR(training_actions / PET_LEVEL_FORMULA_DIVISOR) |
+| PET_LEVEL_FORMULA_DIVISOR | 10 | — | Divisor in FLOOR(total_training_actions / PET_LEVEL_FORMULA_DIVISOR) level formula |
 | TRAINING_ACTIONS_PER_DAY | 3 | actions/day | Reset UTC 00:00 |
 | TRAINING_NEGLECT_THRESHOLD_DAYS | 3 | days | Triggers visual neglect state |
 | ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT | 10 | battles/hr (default) | Admin-tunable; ARENA_RATE_LIMIT_ADMIN_MIN = 1; ARENA_RATE_LIMIT_ADMIN_MAX = 50 |
@@ -51,7 +52,8 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT | 98 | percent | Minimum email delivery success rate target |
 | SENDGRID_DELIVERY_RATE_ASSUMPTION_PERCENT | 98 | percent | Capacity planning assumption for SendGrid delivery rate |
 | NORMAL_OPERATION_RPS | 100 | RPS | Sustained |
-| NORMAL_OPERATION_DAU_MIN / MAX | 2,000 / 5,000 | DAU | Expected daily active user range at normal operation |
+| NORMAL_OPERATION_DAU_MIN | 2,000 | DAU | Expected minimum DAU at normal operation |
+| NORMAL_OPERATION_DAU_MAX | 5,000 | DAU | Expected maximum DAU at normal operation |
 | PEAK_OPERATION_RPS | 500 | RPS | Viral peak |
 | PEAK_CONCURRENT_USERS | 2,000 | PCU | Arena events |
 | DB_CONNECTION_POOL_MIN_CONNECTIONS | 20 | connections | PostgreSQL pool floor |
