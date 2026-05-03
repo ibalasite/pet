@@ -128,42 +128,46 @@ The player app is a client-side SPA served from Vercel's global CDN. No server-s
 
 ```
 App
-├── Layout (NavBar, Router)
-│   ├── LandingPage (/)
-│   │   ├── PetCanvas          ← Phaser.js instance (PetCanvasEngine — sole Phaser import boundary)
-│   │   ├── ClaimCTA
-│   │   ├── RarityHint
-│   │   └── SocialProofCounter
-│   ├── ClaimPage (/claim)
-│   │   └── ClaimFlow (3-step compound — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
-│   │       ├── ClaimEmailForm
-│   │       ├── ClaimCodeForm
-│   │       └── URLReveal
-│   ├── PetPage (/pet/:petId)
-│   │   ├── PetCanvas, StatsPanel → StatBar ×3, TrainingEntry, ArenaEntry
-│   │   ├── RarityBadge
-│   │   ├── FoodInventory → FoodItem ×N
-│   │   └── NeglectedState (if last_trained_at > 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)
-│   ├── TrainingPage (/pet/:petId/train)
-│   │   ├── TrainingActions → TrainingActionCard ×3 (TRAINING_ACTIONS_PER_DAY = 3)
-│   │   ├── StatChangeIndicator (visible TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s)
-│   │   ├── DailyResetTimer
-│   │   └── TrainingStreak
-│   ├── BattleRecordsPage (/pet/:petId/records)
-│   │   ├── PetSummaryCard
-│   │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
-│   ├── ArenaPage (/arena)
-│   │   ├── ModeSelector (RACE / SUMO)
-│   │   ├── MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)
-│   │   └── BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)
-│   ├── BattleResultPage (/arena/result/:battleId)
-│   │   └── BattleResultCard (WIN/LOSS variants)
-│   ├── LeaderboardPage (/leaderboard)
-│   │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100)
-│   │   ├── LeaderboardRow ×100
-│   │   ├── RarityFilter
-│   │   └── OwnerRankBanner
-│   └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only
+├── Layout
+│   ├── NavBar (hasPetToken prop — shows/hides pet links)
+│   └── Router (React Router v6)
+│       ├── LandingPage (/)
+│       │   ├── PetCanvas          ← Phaser.js instance (PetCanvasEngine — sole Phaser import boundary)
+│       │   ├── RarityHint
+│       │   ├── ClaimCTA
+│       │   └── SocialProofCounter
+│       ├── ClaimPage (/claim)
+│       │   └── ClaimFlow (3-step compound — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+│       │       ├── ClaimEmailForm
+│       │       ├── ClaimCodeForm
+│       │       └── URLReveal
+│       ├── PetPage (/pet/:petId)
+│       │   ├── PetCanvas
+│       │   ├── RarityBadge
+│       │   ├── StatsPanel → StatBar ×3
+│       │   ├── TrainingEntry
+│       │   ├── FoodInventory → FoodItem ×N
+│       │   ├── ArenaEntry
+│       │   └── NeglectedState (if last_trained_at > 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)
+│       ├── TrainingPage (/pet/:petId/train)
+│       │   ├── TrainingActions → TrainingActionCard ×3 (TRAINING_ACTIONS_PER_DAY = 3)
+│       │   ├── StatChangeIndicator (visible TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s)
+│       │   ├── DailyResetTimer
+│       │   └── TrainingStreak
+│       ├── BattleRecordsPage (/pet/:petId/records)
+│       │   ├── PetSummaryCard
+│       │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
+│       ├── ArenaPage (/arena)
+│       │   ├── ModeSelector (RACE / SUMO)
+│       │   ├── MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)
+│       │   └── BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)
+│       ├── BattleResultPage (/arena/result/:battleId)
+│       │   └── BattleResultCard (WIN/LOSS variants)
+│       ├── LeaderboardPage (/leaderboard)
+│       │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100) → LeaderboardRow ×100
+│       │   ├── RarityFilter
+│       │   └── OwnerRankBanner
+│       └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only
 ```
 
 **Pixel Art Rendering**:
@@ -293,7 +297,8 @@ Two Fastify processes share the same codebase and database credentials via envir
 **Key Index Strategies**:
 - `idx_pets_owner_token_hash` — partial index (WHERE NOT NULL) — auth on every authenticated request
 - `idx_pets_reserved_until` — partial index (WHERE NOT NULL) — unclaimed pet cleanup job
-- `idx_arena_matches_pet_a_history ON (pet_a_id, completed_at DESC)` — battle records queries
+- `idx_arena_matches_pet_a_history ON (pet_a_id, completed_at DESC)` — battle records queries (pet as challenger)
+- `idx_arena_matches_pet_b_history ON (pet_b_id, completed_at DESC)` — battle records queries (pet as challenged party)
 - `idx_claim_identities_email_hash UNIQUE` — email claim lookup
 
 **Reliability**:
@@ -558,7 +563,7 @@ The marketplace (Phase 3 — F-MARKET-01) requires DAU > 1,000 sustained for 2 w
 
 **Decision**:
 Phase 1-2: Environment variable-based feature flags sufficient for MVP:
-- `FF_MARKETPLACE=false` — enables/disables `POST /api/v1/marketplace/*` routes and the `/marketplace` frontend route
+- `FF_MARKETPLACE=false` — enables/disables all `/api/v1/marketplace/*` routes (GET /listings, GET /history/:petId, POST /listings, DELETE /listings/:id, POST /listings/:id/buy) and the `/marketplace` frontend route
 - `FF_ARENA_SUMO=false` — enables/disables the SUMO mode option in arena entry
 - `FF_ADMIN_PORTAL=true` — controls admin portal availability
 
