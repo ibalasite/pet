@@ -831,6 +831,13 @@ TrainingPage /pet/:petId/train
   │    Stat bars animate to new values
   │    usePet cache is invalidated → PetPage re-fetches
   │
+  ├─ Error states:
+  │    HTTP 400 TRAINING_LIMIT_REACHED → all action cards disabled; DailyResetTimer shown
+  │    HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (100)"; card remains
+  │                                enabled for other stats not yet at max
+  │    HTTP 401 → handled globally: clearPetToken() + redirect to /
+  │    HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
+  │
   └─ Exhausted (actionsRemainingToday = 0):
        DailyResetTimer shows countdown to UTC 00:00 reset
        All action cards disabled
@@ -1159,7 +1166,7 @@ When `useReducedMotion()` returns `true`:
 - `<h1>` present on every route
 - `<table>` with `<th scope="col">` for `LeaderboardTable`, `BattleHistoryTable`, `StatComparison`
 - `<button>` for all interactive actions (not `<div onClick>`)
-- Minimum touch target: 44×44px on all interactive elements (WCAG 2.5.5 AA)
+- Minimum touch target: 44×44px on all interactive elements (WCAG 2.5.5 AAA; also meets Apple HIG and Material Design recommendations)
 
 ### 7.7 ARIA Roles in Dynamic Regions
 
@@ -1168,7 +1175,7 @@ When `useReducedMotion()` returns `true`:
 | `ExpiryWarning` | `role="alert"`, `aria-live="assertive"` |
 | `OwnerRankBanner` | `role="status"` |
 | `MatchmakingStatus` | `aria-live="polite"`, `aria-busy="true"` during queue wait |
-| `DailyResetTimer` | `aria-live="polite"` (updates every second) |
+| `DailyResetTimer` | `aria-live="polite"` with throttled announcements (every 60 seconds and at ≤ 5 minutes remaining); the visible counter may update every second but the live-region text is only changed at those thresholds to avoid flooding screen readers |
 | `RateLimitBanner` | `role="alert"`, `aria-live="assertive"` |
 | `AIOfferModal` | `role="dialog"`, `aria-modal="true"`, focus trap |
 | `PetCanvas` | `role="img"`, `aria-label="Pixel pet canvas"` |
