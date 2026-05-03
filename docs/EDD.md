@@ -231,6 +231,7 @@ stat_strength    SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_strength BETWEEN 
 stat_stamina     SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_stamina BETWEEN 1 AND 100)
 level            SMALLINT     NOT NULL DEFAULT 1   CHECK (level BETWEEN 1 AND 100)
 total_training_actions  INTEGER NOT NULL DEFAULT 0
+last_trained_at  TIMESTAMPTZ  NULL      -- Updated on every training action; NULL if never trained; used for neglect detection
 owner_token_hash VARCHAR(64)  NULL      -- SHA-256 hash of the pet access token; NULL = unclaimed
 claimed_at       TIMESTAMPTZ  NULL
 is_banned        BOOLEAN      NOT NULL DEFAULT FALSE
@@ -429,7 +430,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, rol
 | target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config' |
 | target_id | TEXT | NULL | UUID or key of affected entity |
 | detail | JSONB | NULL | Action-specific payload |
-| ip_address | INET | NULL | Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
+| ip_address_hash | VARCHAR(64) | NULL | SHA-256 hash of raw IP; raw IP never stored per §4.2/§6.5; retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
 | created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
 **Retention**: ADMIN_AUDIT_LOG_RETENTION = 2 years.
@@ -459,7 +460,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, rol
 | seller_token_hash | TEXT | NOT NULL | Hashed seller access token (ownership verification) |
 | price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Asking price in food credits |
 | status | VARCHAR(16) | NOT NULL DEFAULT 'active' | 'active' \| 'cancelled' \| 'sold' |
-| listed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | Start of anti-flip window |
+| listed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | When the listing was created |
 | expires_at | TIMESTAMPTZ | NULL | Optional expiry; NULL = no expiry |
 | completed_at | TIMESTAMPTZ | NULL | Set when status transitions to 'sold' or 'cancelled' |
 
@@ -519,9 +520,10 @@ Error codes: `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`.
 
 #### POST /api/v1/claim/recover
 Auth: None
-Description: Send an access-link recovery email to a previously claimed pet.
-Request: `{ email: string }`
-Response: `{ success: true }` (same response regardless of email existence — prevents enumeration)
+Description: Send a recovery 6-digit code to a previously claimed pet's email address. On successful code verification via POST /api/v1/claim/verify, a new 32-byte access token is issued and the old token hash is atomically replaced.
+Request: `{ email: string, petId: string }`
+Response: `{ claimId: string, expiresAt: ISO8601 }` — always returned regardless of whether email/petId combination is found (prevents enumeration); the claimId is functional only when the email matches a claimed pet.
+Rate limit: Inherits AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5 per email.
 
 ### §5.2 Pet Endpoints
 
@@ -536,7 +538,7 @@ Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unse
 Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
 Description: Fetch pet data including stats, rarity, and level.
 Response: `{ id, seed, rarity, petName, stats: {speed, strength, stamina, level}, isOwner: boolean, claimedAt, isNeglected: boolean }`
-Notes: `isNeglected` is true if `NOW() - last_training_action > 3 days` (TRAINING_NEGLECT_THRESHOLD = 3 days).
+Notes: `isNeglected` is true if `pets.last_trained_at IS NULL OR NOW() - pets.last_trained_at > INTERVAL '3 days'` (TRAINING_NEGLECT_THRESHOLD = 3 days). Computed from the denormalized `last_trained_at` column on the pets row (no JOIN required).
 
 #### POST /api/v1/pet/:petId/train
 Auth: Required (pet owner token)
@@ -585,16 +587,18 @@ Notes: Null rank if pet is not on the leaderboard (banned or insufficient battle
 
 All admin endpoints require admin session cookie (httpOnly, SameSite=Strict). Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100). All mutations write to the audit log.
 
+**Role access summary**: `super_admin` has full access to all endpoints. `moderator` has access to all `Moderator+` endpoints (pet management, leaderboard, battles, suspicious activity, email monitor, analytics, dashboard). `read_only` has read-only (GET) access to dashboard, pet list, leaderboard, battle records, email monitor, and analytics — no mutations, no config changes, no GDPR actions, no role management.
+
 #### POST /admin/api/auth/login
 Auth: None (TOTP + password)
 Request: `{ username: string, password: string, totpCode?: string }`
 Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY / ADMIN_SESSION_ABSOLUTE_EXPIRY)
 
 #### POST /admin/api/auth/totp/setup
-Auth: Admin session (first-login or TOTP-not-yet-enrolled)
-Request: `{ password: string }` (password re-confirmation required)
+Auth: Setup token (see enrollment flow below)
+Request: `{ setupToken: string, password: string }` (password re-confirmation required)
 Response: `{ otpAuthUrl: string, backupCodes: string[] }` — otpAuthUrl is a `otpauth://totp/...` URI for QR scan
-Description: Generates a new TOTP secret, encrypts it, stores in `admin_users.totp_secret_encrypted`, and returns the provisioning URI plus 10 single-use backup codes. Must be called before the first TOTP-gated login. On first login (when `totp_secret_encrypted IS NULL`), the login endpoint returns HTTP 403 with `{ code: "TOTP_SETUP_REQUIRED" }` and the client redirects to the TOTP setup page. After setup, subsequent logins require `totpCode` in the standard login request.
+Description: **First-login TOTP enrollment flow**: (1) Client POSTs credentials without `totpCode`; server detects `totp_secret_encrypted IS NULL`, returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED", setupToken: "<signed-short-lived-JWT>" }`. (2) Client calls this endpoint with `setupToken` + password confirmation — no admin session exists yet. (3) Server validates setupToken signature and password, generates TOTP secret, stores encrypted in `admin_users.totp_secret_encrypted`, returns provisioning URI + 10 backup codes (hashes stored in `totp_backup_codes_hash`). (4) Admin scans QR, then performs a standard login with `totpCode` to establish a session. The `setupToken` is a signed JWT (short-lived, 15 minutes, HS256 with server secret) containing the adminId — it is not a session and grants only access to this setup endpoint.
 
 #### POST /admin/api/auth/logout
 Auth: Admin session
@@ -641,6 +645,12 @@ Response: `{ arenaRateLimit, rarityWeights: {common, rare, epic, legendary}, are
 Auth: Admin session (Super Admin)
 Request: Runtime parameter updates (validated against admin-tunable ranges from CONSTANTS)
 Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min).
+
+#### GET /admin/api/gdpr
+Auth: Admin session (Super Admin)
+Query: `?page=1&limit=20&status=pending|processing|completed|failed&type=erasure|data_access|restrict_processing`
+Response: `{ requests: [{id, requestType, status, submittedAt, completedAt, adminNotes}], total, page, limit }`
+Description: List all GDPR requests in the gdpr_requests table for the admin GDPR Queue module.
 
 #### POST /admin/api/gdpr/delete
 Auth: Admin session (Super Admin)
@@ -694,8 +704,8 @@ Write endpoints require pet access token auth. `GET /listings` is public (unauth
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `GET` | `/api/v1/marketplace/listings` | Public | Browse active listings (paginated, sort by price/rarity/level) |
-| `POST` | `/api/v1/marketplace/listings` | Pet token | Create listing (min price enforced: level × 100 + rarity_multiplier × 500) |
-| `DELETE` | `/api/v1/marketplace/listings/:listingId` | Pet token (owner only) | Cancel own listing (7-day anti-flip protection from CONSTANTS) |
+| `POST` | `/api/v1/marketplace/listings` | Pet token | Create listing (min price enforced: level × 100 + rarity_multiplier × 500; 7-day anti-flip check on last completed trade — MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) |
+| `DELETE` | `/api/v1/marketplace/listings/:listingId` | Pet token (owner only) | Cancel own listing |
 | `POST` | `/api/v1/marketplace/listings/:listingId/buy` | Pet token | Purchase listing; 5% fee deducted from seller proceeds |
 | `GET` | `/api/v1/marketplace/history/:petId` | Pet token | Trade history for a pet |
 
