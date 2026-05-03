@@ -45,6 +45,7 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | DB_AUTOFAILOVER_TIME | 60 | seconds | PostgreSQL automated failover |
 | SENDGRID_FAILOVER_CONSECUTIVE_FAILURES | 3 | failures | Switch to Nodemailer SMTP |
 | NORMAL_OPERATION_RPS | 100 | RPS | Sustained |
+| NORMAL_OPERATION_DAU_MIN / MAX | 2,000 / 5,000 | DAU | Expected daily active user range at normal operation |
 | PEAK_OPERATION_RPS | 500 | RPS | Viral peak |
 | PEAK_CONCURRENT_USERS | 2,000 | PCU | Arena events |
 | DB_CONNECTION_POOL_MIN_CONNECTIONS | 20 | connections | PostgreSQL pool floor |
@@ -862,7 +863,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 - **Right to object (leaderboard)**: Pet entries removed from public leaderboard within 5 business days of request (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5). On fulfillment, `ZREM leaderboard:global <pet_id>` executed for each pet belonging to the identity. Admin-reviewed; objection is not absolute under GDPR Art. 21 but resolved as policy.
 - **Right to rectification (Art. 16)**: Email encrypted field updated within 24 hours of request (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24). Applies when data subject needs to correct stored email data.
 - **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
-- **COPPA**: Age-13 confirmation checkbox required on claim form; label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
+- **COPPA**: Age-13 confirmation checkbox required on claim form (COPPA_MINIMUM_AGE_YEARS = 13); label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
 - **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION = 2 years).
 - **CAN-SPAM**: All emails are transactional; no marketing email without separate opt-in consent.
 - **GDPR FK lookup**: The `pets.claim_identity_id` FK enables the GDPR self-service endpoint to locate the `claim_identities` row for a given pet token without depending on the ephemeral `claim_codes` table (purged after CLAIM_TOKEN_CLEANUP_TTL = 72h).
@@ -916,6 +917,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 ### §7.3 Scalability
 
 - **Horizontal scaling**: API server replicas autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD = 70%). Railway autoscaling or Kubernetes HPA.
+- **Normal operation**: 2,000–5,000 DAU (NORMAL_OPERATION_DAU_MIN = 2,000; NORMAL_OPERATION_DAU_MAX = 5,000); 100 RPS sustained (NORMAL_OPERATION_RPS = 100).
 - **Peak load**: 500 RPS sustained, 2,000 PCU arena events (PEAK_OPERATION_RPS / PEAK_CONCURRENT_USERS from CONSTANTS).
 - **Arena matchmaking**: Redis Sorted Set queue (score = enqueue epoch); consumer uses ZRANGEBYSCORE to pop the oldest eligible entry. Stale entries (>45s old = ARENA_MATCHMAKING_TIMEOUT + 15s buffer) are discarded before pairing to prevent ghost matches from abandoned connections. Supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
 - **Leaderboard**: Redis sorted set as authoritative real-time source; PostgreSQL snapshot as durable backup. Update lag ≤30 seconds.
@@ -939,7 +941,7 @@ App
 │       │   ├── ClaimCTA
 │       │   └── SocialProofCounter
 │       ├── ClaimPage (/claim)
-│       │   └── ClaimFlow (compound)
+│       │   └── ClaimFlow (compound, max 3 steps — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
 │       │       ├── ClaimEmailForm (React Hook Form)
 │       │       ├── ClaimCodeForm (React Hook Form)
 │       │       └── URLReveal
@@ -1197,7 +1199,7 @@ Error messages follow the PDD §10.1 tone of voice — specific and actionable, 
 | Alert | Threshold | Window | Channel | Source |
 |---|---|---|---|---|
 | API error rate | >1% of requests | 5 minutes | PagerDuty + Slack | CONSTANTS OBSERVABILITY_ERROR_RATE_ALERT_WINDOW |
-| P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD |
+| P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD (= OBSERVABILITY_P99_ALERT_MS = 1,000ms; both constants are equivalent aliases) |
 | Email delivery failure | >2% SendGrid failure | 30 minutes | PagerDuty | CONSTANTS OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW |
 | Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT (note: constant value is 60s; SLO target is 30s — alert fires after 2× SLO breach; recommend aligning constant to 30s in a future CONSTANTS revision) |
 | Pet claim rate drop | <5 claims/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD |
@@ -1266,7 +1268,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Admin portal: Login + basic pet list view (Moderator role only)
 
 **Exit criteria**:
-- 20 invited alpha testers successfully claim and access their pets. Claim conversion rate ≥7% (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%).
+- 20 invited alpha testers successfully claim and access their pets (ALPHA_BETA_TESTERS = 20). Claim conversion rate ≥7% go (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%); <3% triggers pivot (CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3%). Day-3 retention ≥30% to proceed (DAY_3_RETENTION_ALPHA_GO_PERCENT = 30%); <10% is no-go (DAY_3_RETENTION_NOGO_PERCENT = 10%).
 - Core pet display: PetCanvas renders claimed pet with correct sprite, stats, and level.
 - Basic leaderboard: Top 100 leaderboard returns correct data from seeded test data (no live battles required in Phase 1 — arena is Phase 2 scope).
 
@@ -1288,7 +1290,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Frontend: Arena page, Battle result page, Leaderboard page, Battle records page, Training page
 - Admin portal: Leaderboard management, suspicious activity dashboard, runtime config tuning
 
-**Exit criteria**: 50 daily arena battles (ARENA_BATTLES_BETA_GA_MIN_PER_DAY = 50 battles/day). Day-7 retention ≥25% (DAY_7_RETENTION_TARGET_PERCENT = 25%). 500 beta users via itch.io + Discord rollout (BETA_AUDIENCE_APPROX = 500).
+**Exit criteria**: ≥50 daily arena battles go (ARENA_BATTLES_BETA_GA_MIN_PER_DAY = 50 battles/day); <20 battles/day is no-go (ARENA_BATTLES_BETA_GA_NOGO_PER_DAY = 20). Day-7 retention ≥25% go (DAY_7_RETENTION_TARGET_PERCENT = 25%); <10% is no-go (DAY_7_RETENTION_BETA_NOGO_PERCENT = 10%). 500 beta users via itch.io + Discord rollout (BETA_AUDIENCE_APPROX = 500).
 
 ### §13.3 Phase 3 — Marketplace + Admin Full Feature (GA)
 
@@ -1302,7 +1304,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 - Performance hardening: Lighthouse CI gate (LCP <2.5s, FCP <1.5s, CLS <0.1); load testing at 500 RPS
 - Security hardening: CSP header with nonce-based script policy; full OWASP Top 10 review
 
-**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). All admin GDPR workflows operational.
+**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). ≥100 daily arena battles (ARENA_BATTLES_GA_SUCCESS_PER_DAY = 100). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). All admin GDPR workflows operational.
 
 ---
 
