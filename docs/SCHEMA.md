@@ -174,7 +174,7 @@ CREATE TABLE claim_codes (
 COMMENT ON COLUMN claim_codes.code_hash IS 'SHA-256 of the 6-digit numeric OTP (claim_code_digits = 6). Plaintext OTP is never stored.';
 COMMENT ON COLUMN claim_codes.expires_at IS 'NOW() + 15 minutes at creation (claim_code_expiry_minutes = 15).';
 COMMENT ON COLUMN claim_codes.attempts IS 'Informational counter incremented on each verify call. Enforcement is in Redis (rl:code_entry:{session_id}), not this column.';
-COMMENT ON COLUMN claim_codes.used_at IS 'Set when the OTP is successfully verified. Background job purges rows 72h after creation or first use (claim_token_cleanup_ttl_hours = 72).';
+COMMENT ON COLUMN claim_codes.used_at IS 'Set when the OTP is successfully verified. Background job purges rows 72h after creation or first use, whichever is later (claim_token_cleanup_ttl_hours = 72).';
 ```
 
 ```sql
@@ -225,6 +225,8 @@ CREATE TABLE arena_matches (
             (is_flagged = FALSE AND flagged_at IS NULL) OR
             (is_flagged = TRUE  AND flagged_at IS NOT NULL)
         ),
+    CONSTRAINT chk_arena_match_flagged_at_after_completed
+        CHECK (flagged_at IS NULL OR flagged_at >= completed_at),
     CONSTRAINT chk_arena_match_ai_opponent_consistency
         CHECK (
             (is_ai_opponent = FALSE) OR
@@ -795,7 +797,7 @@ SELECT id, is_banned, claim_identity_id, owner_token_hash
  WHERE owner_token_hash = $1;
 ```
 
-The partial index `idx_pets_owner_token_hash` (covering only non-NULL rows) makes this a single index scan. The result is also checked against the Redis `token:blacklist:{token_hash}` key before the DB query to short-circuit revoked tokens.
+Before executing the SELECT, the application checks the incoming token hash against the Redis `token:blacklist:{token_hash}` key; if the key is present the request is rejected immediately without touching PostgreSQL. The partial index `idx_pets_owner_token_hash` (covering only non-NULL rows) makes the subsequent DB lookup a single index scan.
 
 ### 6.5 GDPR Erasure Lookup
 
