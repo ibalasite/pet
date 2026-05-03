@@ -299,7 +299,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 |---|---|
 | Given | The generation algorithm with dimension counts from constants |
 | When | Combination space is calculated as body × head × color_palette × accessory × rarity_trait × pattern |
-| Then | Result exceeds (pet_generation_combinations_min = 1,000,000,000) |
+| Then | Result exceeds (pet_generation_combinations_min = 1000000000) |
 | Linked AC | AC-002-1 |
 
 | TC-UNIT-002 | Deterministic generation from seed |
