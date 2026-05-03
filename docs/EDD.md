@@ -858,7 +858,7 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 | Email claim initiation | 5 | per hour per email | Redis TTL 3600s | HTTP 429 + Retry-After |
 | Claim code entry | 10 | per session | Redis TTL 900s | HTTP 429 + 60s cooldown |
 | Arena battles per pet | 10 (default; 1–50 admin) | per hour per pet | Redis TTL 3600s | HTTP 429 + Retry-After |
-| Admin login (pre-auth, per IP) | 10 (TBD constant) | per 15 minutes per IP | Redis TTL 900s | HTTP 429 |
+| Admin login (pre-auth, per IP) | 10 (ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS) | per 15 minutes per IP (ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS = 900) | Redis TTL 900s | HTTP 429 |
 | Admin portal requests | 100 | per minute per admin | Redis TTL 60s | HTTP 429 |
 | Health endpoint | No limit | — | N/A | 200 always |
 
@@ -914,7 +914,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 
 **CDN / Frontend**:
 - Vite code splitting: Phaser.js dynamically imported to avoid blocking the claim flow bundle
-- JS bundle budget: <300 KB gzipped (CONSTANTS §4 bundle limit — App page type)
+- JS bundle budget: <300 KB gzipped (TOTAL_JS_BUNDLE_GZIPPED_KB = 300)
 - CSS bundle budget: <50 KB gzipped (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50)
 - `font-display: swap` for both fonts (Press Start 2P + Inter)
 - Preload only Press Start 2P (above-fold); Inter loads async
