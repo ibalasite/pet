@@ -278,18 +278,18 @@ Two Fastify processes share the same codebase and database credentials via envir
 
 | Table | Purpose | Phase |
 |-------|---------|-------|
-| `pets` | Pet generation metadata, stats, token hash, reservation | P1 |
-| `claim_identities` | Email hash + AES-256-GCM encrypted email | P1 |
-| `claim_codes` | OTP hashes with TTL | P1 |
-| `admin_users` | Admin credentials, TOTP, roles | P1 |
-| `audit_logs` | Immutable admin action trail (2-year retention) | P1 |
-| `gdpr_requests` | GDPR request lifecycle | P1 |
-| `training_logs` | Per-pet training event log | P2 |
-| `arena_matches` | Battle records with seeded random | P2 |
-| `food_buffs` | Temporary and permanent stat buffs | P2 |
-| `leaderboard_snapshots` | Hourly PostgreSQL backups of Redis sorted set; top 500 entries per snapshot (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500); rolling 12-month retention (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12) | P2 |
-| `marketplace_listings` | Active trade listings (FF_MARKETPLACE) | P3 |
-| `trade_records` | Completed trade history (FF_MARKETPLACE) | P3 |
+| `pets` | Pet generation metadata, stats, token hash, reservation | Phase 1 |
+| `claim_identities` | Email hash + AES-256-GCM encrypted email | Phase 1 |
+| `claim_codes` | OTP hashes with TTL | Phase 1 |
+| `admin_users` | Admin credentials, TOTP, roles | Phase 1 |
+| `audit_logs` | Immutable admin action trail (2-year retention) | Phase 1 |
+| `gdpr_requests` | GDPR request lifecycle | Phase 1 |
+| `training_logs` | Per-pet training event log | Phase 2 |
+| `arena_matches` | Battle records with seeded random | Phase 2 |
+| `food_buffs` | Temporary and permanent stat buffs | Phase 2 |
+| `leaderboard_snapshots` | Hourly PostgreSQL backups of Redis sorted set; top 500 entries per snapshot (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500); rolling 12-month retention (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12) | Phase 2 |
+| `marketplace_listings` | Active trade listings (FF_MARKETPLACE) | Phase 3 |
+| `trade_records` | Completed trade history (FF_MARKETPLACE) | Phase 3 |
 
 **Access Patterns**:
 - All writes go to the primary writer
@@ -577,7 +577,7 @@ Phase 1-2: Environment variable-based feature flags sufficient for MVP. Complete
 | `FF_ARENA_SUMO` | `false` | Enable/disable SUMO arena mode (P1 gate — EDD Phase 2) |
 | `FF_LEADERBOARD` | `true` | Disable public leaderboard |
 | `FF_BATTLE_RECORDS` | `true` | Disable battle history endpoints |
-| `FF_RARITY_DISPLAY` | `false` | Enable rarity UI elements when ready (P1 gate) |
+| `FF_RARITY_DISPLAY` | `false` | Enable rarity UI elements when ready (P1 gate — EDD Phase 2) |
 | `FF_ADMIN_PORTAL` | `true` | Control admin portal availability |
 | `FF_MARKETPLACE` | `false` | Enable marketplace when DAU_MARKETPLACE_TRIGGER sustained 2 weeks |
 
