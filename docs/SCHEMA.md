@@ -267,6 +267,8 @@ COMMENT ON COLUMN leaderboard_snapshots.created_at IS 'System timestamp when the
 ```
 
 ```sql
+-- Background retention job: deletes snapshots older than 12 months (leaderboard_snapshot_retention_months = 12).
+-- Query: DELETE FROM leaderboard_snapshots WHERE snapshot_time < NOW() - INTERVAL '12 months'
 CREATE INDEX idx_leaderboard_snapshots_time ON leaderboard_snapshots (snapshot_time DESC);
 ```
 
@@ -515,6 +517,8 @@ COMMENT ON COLUMN admin_audit_log.ip_address_hash IS 'SHA-256 hash of the raw re
 ```
 
 ```sql
+-- Background retention job: deletes rows older than 2 years (admin_audit_log_retention_years = 2).
+-- Query: DELETE FROM admin_audit_log WHERE created_at < NOW() - INTERVAL '2 years'
 CREATE INDEX idx_admin_audit_log_created_at ON admin_audit_log (created_at DESC);
 CREATE INDEX idx_admin_audit_log_admin_id   ON admin_audit_log (admin_id, created_at DESC);
 -- Background job target: nulls ip_address_hash after 90 days (ip_address_log_retention_days = 90).
@@ -739,6 +743,8 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. Covering the `pet_id` prefix avoids a separate lookup.
 - `idx_admin_audit_log_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor within a 12-month window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`).
 - `idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)` — supports the anti-flip eligibility check (`marketplace_trade_antiflip_protection_days = 7`). The query `SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1` is fully served by the composite index without a separate heap sort, replacing the need to use both the single-column `idx_marketplace_transactions_pet` and a post-filter sort.
+- `idx_leaderboard_snapshots_time (snapshot_time DESC)` — supports both the historical reporting query (`SELECT ... ORDER BY snapshot_time DESC LIMIT 1`) and the 12-month rolling retention DELETE (`WHERE snapshot_time < NOW() - INTERVAL '12 months'`; `leaderboard_snapshot_retention_months = 12`).
+- `idx_admin_audit_log_created_at (created_at DESC)` — supports audit log search queries and the 2-year row retention DELETE (`WHERE created_at < NOW() - INTERVAL '2 years'`; `admin_audit_log_retention_years = 2`). The composite `idx_admin_audit_log_admin_id` additionally covers filtered searches by actor.
 
 ### 6.3 Leaderboard Query Pattern
 
