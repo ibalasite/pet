@@ -162,10 +162,11 @@ App
 │       │   ├── MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)
 │       │   └── BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)
 │       ├── BattleResultPage (/arena/result/:battleId)
-│       │   └── BattleResultCard (WIN/LOSS variants)
+│       │   ├── BattleResultCard (WIN/LOSS variants)
+│       │   └── [OQ-E05 open: Open Graph card generation method TBD]
 │       ├── LeaderboardPage (/leaderboard)
-│       │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100) → LeaderboardRow ×100
 │       │   ├── RarityFilter
+│       │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100) → LeaderboardRow ×100
 │       │   └── OwnerRankBanner
 │       └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only
 ```
@@ -562,10 +563,22 @@ Availability posture: Redis unavailability triggers fallback to PostgreSQL for l
 The marketplace (Phase 3 — F-MARKET-01) requires DAU > 1,000 sustained for 2 weeks before activation (DAU_MARKETPLACE_TRIGGER = 1,000). The sumo arena mode (F-ARENA-02) is P1 scope. The admin portal itself is behind `FF_ADMIN_PORTAL` during alpha.
 
 **Decision**:
-Phase 1-2: Environment variable-based feature flags sufficient for MVP:
-- `FF_MARKETPLACE=false` — enables/disables all `/api/v1/marketplace/*` routes (GET /listings, GET /history/:petId, POST /listings, DELETE /listings/:id, POST /listings/:id/buy) and the `/marketplace` frontend route
-- `FF_ARENA_SUMO=false` — enables/disables the SUMO mode option in arena entry
-- `FF_ADMIN_PORTAL=true` — controls admin portal availability
+Phase 1-2: Environment variable-based feature flags sufficient for MVP. Complete flag inventory:
+
+| Flag | Default | Kill-switch scope |
+|------|---------|-------------------|
+| `FF_GUEST_PET_DISPLAY` | `true` | Disable guest pet preview on landing page |
+| `FF_PET_GENERATION` | `true` | Disable pet generation pipeline |
+| `FF_EMAIL_CLAIM` | `true` | Disable email claim flow entirely |
+| `FF_TRAINING_SYSTEM` | `true` | Disable training actions |
+| `FF_FOOD_SYSTEM` | `true` | Disable food buff endpoints |
+| `FF_ARENA_RACE` | `true` | Disable Race arena mode |
+| `FF_ARENA_SUMO` | `false` | Enable/disable SUMO arena mode (Phase 1 gate) |
+| `FF_LEADERBOARD` | `true` | Disable public leaderboard |
+| `FF_BATTLE_RECORDS` | `true` | Disable battle history endpoints |
+| `FF_RARITY_DISPLAY` | `true` | Disable rarity UI elements |
+| `FF_ADMIN_PORTAL` | `true` | Control admin portal availability |
+| `FF_MARKETPLACE` | `false` | Enable marketplace when DAU_MARKETPLACE_TRIGGER sustained 2 weeks |
 
 `FF_MARKETPLACE` is promoted to `true` when product analytics confirm DAU > 1,000 for 2 consecutive weeks. The flag is a runtime environment variable (not a code branch) to allow activation without redeployment. Config cache TTL (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5) means flag changes propagate within 5 minutes.
 
@@ -867,6 +880,8 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 | Object leaderboard (Art. 21) | ZREM pet from public leaderboard | 5 business days | GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5 |
 | Rectification (Art. 16) | Update `email_encrypted` field | 24 hours | GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24 |
 
+**Open Question OQ-E04**: GDPR ownership transfer — what happens when a player requests erasure of an email that was used to claim a pet that was subsequently traded? The current data model has no ownership-transfer record. Resolution required before GA: either add a `former_identity_id[]` array to `pets` or restrict GDPR erasure scope to current owner only (see EDD §14).
+
 **COPPA**: Age-13 confirmation checkbox required on all claim forms (COPPA_MINIMUM_AGE_YEARS = 13). Label text: "I confirm I am at least 13 years old" (PRD US-AUTH-001 AC-003-8).
 
 **CAN-SPAM**: All emails are transactional. No marketing email without separate explicit opt-in. Claim and recovery emails contain ONLY the 6-digit code — no promotional content.
@@ -1102,8 +1117,19 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard: 
 | Availability | 99.9% monthly (≤ 43.8 min downtime) | AVAILABILITY_MONTHLY_PERCENT; AVAILABILITY_MAX_DOWNTIME_MINUTES_PER_MONTH = 43.8 |
 | P99 read latency | < 200 ms at 100 RPS | P99_API_LATENCY_READ_MS_AT_100_RPS |
 | P99 write latency | < 500 ms at 100 RPS | P99_API_LATENCY_WRITE_MS_AT_100_RPS |
+| FCP | < 1.5 s | FCP_SECONDS |
+| LCP | < 2.5 s | LCP_SECONDS |
+| CLS | < 0.1 | CLS_SCORE |
+| INP | < 200 ms | INP_MS |
+| Pet animation FPS | ≥ 30 FPS | PET_ANIMATION_FPS_MIN |
+| Pet canvas render | ≤ 2 s on load | PET_RENDER_ON_LOAD_SECONDS |
+| Pet interaction response | ≤ 200 ms | PET_INTERACTION_RESPONSE_MS |
 | Arena battle E2E | < 2 s | ARENA_BATTLE_E2E_SECONDS |
 | Leaderboard update | ≤ 30 s | LEADERBOARD_UPDATE_LAG_SECONDS |
+| Email delivery P90 | ≤ 60 s | EMAIL_DELIVERY_P90_SECONDS |
+| Error rate | < 1% | ERROR_RATE_MAX_PERCENT |
+| Email delivery failure rate | < 2% | EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT |
+| Spam complaint rate | < 0.1% | SPAM_COMPLAINT_RATE_MAX_PERCENT |
 
 ---
 
