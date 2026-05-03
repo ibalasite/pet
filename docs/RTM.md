@@ -59,7 +59,7 @@ The methodology follows forward traceability: each user story is the anchor, wit
 | US-ARENA-002 | Sumo Arena Mode | `arena-battle.feature` (4) | `arena-ui.feature` (10) | Sumo outcome calculation | — | — | ✅ Covered |
 | US-BOARD-001 | Global Leaderboard | `leaderboard.feature` (3) | `leaderboard-ui.feature` (10) | — | Leaderboard update lag | — | ✅ Covered |
 | US-RECORD-001 | Battle Records Page | — | — | Battle record save/retrieve | Open Graph meta | — | ⚠️ Partial |
-| US-RARITY-001 | Rarity Scoring | — | `leaderboard-ui.feature` (10) | — | — | Visual regression: Legendary border | ✅ Covered |
+| US-RARITY-001 | Rarity Scoring | — | `leaderboard-ui.feature` (10) | — | — | Visual regression: Legendary border | ⚠️ Partial |
 | US-TRADE-001 | Pet Trading Marketplace | — | — | — | — | — | ⏸ Deferred (P2) |
 | US-ADMIN-001 | Admin Pet Management | — | `admin-portal.feature` (13) | — | Ban propagation | Perf: search ≤2 s for 1 M records | ✅ Covered |
 | US-ADMIN-002 | Admin Leaderboard Moderation | `leaderboard.feature` (3) | `admin-portal.feature` (13) | — | — | — | ✅ Covered |
@@ -80,16 +80,19 @@ The methodology follows forward traceability: each user story is the anchor, wit
 | EPIC-AUTH | 2 | 2 | 0 | 0 | 0 | 100% |
 | EPIC-TRAINING | 2 | 2 | 0 | 0 | 0 | 100% |
 | EPIC-ARENA | 2 | 2 | 0 | 0 | 0 | 100% |
-| EPIC-RANKING | 3 | 2 | 1 | 0 | 0 | 83% |
+| EPIC-RANKING | 3 | 1 | 2 | 0 | 0 | 67% |
 | EPIC-MARKETPLACE | 1 | 0 | 0 | 1 | 0 | 0% (deferred) |
 | EPIC-ADMIN | 5 | 5 | 0 | 0 | 0 | 100% |
-| **Total** | **17** | **15** | **1** | **1** | **0** | **88%** |
+| **Total** | **17** | **14** | **2** | **1** | **0** | **82%** |
 
 ### Overall Coverage
 
-Excluding the formally deferred US-TRADE-001 (P2, `FF_MARKETPLACE` off), **15 of 16 active user stories are fully covered** (94%). Including the deferred story, the uncapped ratio is **15 fully covered, 1 partial, 1 deferred** out of 17, yielding an overall percentage of **88%** against all requirements.
+Excluding the formally deferred US-TRADE-001 (P2, `FF_MARKETPLACE` off), **14 of 16 active user stories are fully covered** (88%). Including the deferred story, the uncapped ratio is **14 fully covered, 2 partial, 1 deferred** out of 17, yielding an overall percentage of **82%** against all requirements.
 
 ### Gaps and Notes
+
+**US-RARITY-001 — Rarity Scoring (⚠️ Partial)**
+US-RARITY-001 is covered by client-side BDD scenarios in `leaderboard-ui.feature` and a visual regression test verifying the Legendary border rendering. However, the rarity scoring algorithm — which runs server-side and determines the tier classification for each generated pet — has no BDD-Server feature file, no unit tests, and no integration tests. This is a logic coverage gap: the visual presentation is verified but the underlying calculation is not. Recommend adding at minimum a `rarity-scoring.feature` in `features/server/` and a unit test suite for the scoring formula before the story can be promoted to Covered status.
 
 **US-RECORD-001 — Battle Records Page (⚠️ Partial)**
 US-RECORD-001 is covered by unit tests (battle record save/retrieve) and an integration test verifying Open Graph meta tags on the records page. However, no dedicated BDD feature file exists for this story in the current sprint scope. The existing coverage is sufficient for v1 release confidence, but a `battle-records.feature` file should be created before the story is promoted to "fully covered" status. Recommend adding a minimum of 3–4 BDD scenarios covering record pagination, per-pet filtering, and empty-state rendering.
