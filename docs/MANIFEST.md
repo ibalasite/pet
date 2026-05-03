@@ -66,7 +66,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 14 | ADMIN_IMPL | Implementation | docs/ADMIN_IMPL.md | PENDING |
 | 15 | RESOURCE | Infrastructure | docs/RESOURCE.md | PENDING |
 | 16 | UML | Diagrams | docs/diagrams/ (≥9 files) | PENDING |
-| 17 | test-plan | Testing | docs/test-plan.md | PENDING |
+| 17 | test-plan | Testing | docs/test-plan.md | ✅ COMPLETE |
 | 18 | BDD-server | BDD | features/server/ (≥15 scenarios) | PENDING |
 | 19 | BDD-client | BDD | features/client/ (≥15 scenarios) | PENDING |
 | 20 | RTM | Traceability | docs/RTM.md | PENDING |
