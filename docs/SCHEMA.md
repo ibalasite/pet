@@ -361,13 +361,15 @@ CREATE TABLE food_buffs (
     CONSTRAINT chk_food_buff_expires_at_after_consumed
         CHECK (expires_at IS NULL OR expires_at > consumed_at),
     CONSTRAINT chk_food_buff_record_expires_after_consumed
-        CHECK (record_expires_at > consumed_at)
+        CHECK (record_expires_at > consumed_at),
+    CONSTRAINT chk_food_buff_expires_before_record_cleanup
+        CHECK (expires_at IS NULL OR expires_at <= record_expires_at)
 );
 
 COMMENT ON COLUMN food_buffs.buff_stat IS 'Stat affected: speed, strength, or stamina.';
 COMMENT ON COLUMN food_buffs.magnitude IS 'Stat points granted. Must be > 0. Admin-configurable multiplier range: 0.5×–5.0× (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0).';
-COMMENT ON COLUMN food_buffs.expires_at IS 'NULL for permanent buffs. Set to consumed_at + duration for temporary buffs.';
-COMMENT ON COLUMN food_buffs.record_expires_at IS 'consumed_at + 30 days (food_buff_record_retention_days = 30). Target for background cleanup job.';
+COMMENT ON COLUMN food_buffs.expires_at IS 'NULL for permanent buffs. Set to consumed_at + duration for temporary buffs. chk_food_buff_expires_before_record_cleanup ensures expires_at <= record_expires_at so the buff always expires before its record is deleted by the background cleanup job.';
+COMMENT ON COLUMN food_buffs.record_expires_at IS 'consumed_at + 30 days (food_buff_record_retention_days = 30). Target for background cleanup job. Enforced to be >= expires_at (chk_food_buff_expires_before_record_cleanup) so the record is never deleted while the buff is still logically active.';
 ```
 
 ```sql
