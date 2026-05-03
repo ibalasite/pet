@@ -225,7 +225,7 @@ Test fixtures are organized into four categories matching the domain model:
 - `fixtures/pets/`: 20 pre-seeded pet records at known seeds covering all rarity tiers (Common × 12, Rare × 5, Epic × 2, Legendary × 1)
 - `fixtures/admin_users/`: 3 admin accounts — one per role (super_admin, moderator, read_only)
 - `fixtures/battle_records/`: 25 battle records (race × 15, sumo × 10, including AI matches)
-- `fixtures/food_buffs/`: 10 food buff records (temporary × 6, permanent × 4, expired × 2)
+- `fixtures/food_buffs/`: 12 food buff records (temporary × 6, permanent × 4, expired × 2)
 
 **Generated Fixtures** (created at test setup, cleaned up after):
 
@@ -508,7 +508,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 | TC-INT-024 | Seed uniqueness guarantee across large batch |
 |---|---|
 | Given | 10,000 pet records generated with random seeds |
-| When | All `pets.pet_seed` values are collected |
+| When | All `pets.seed` values are collected |
 | Then | No two pets share the same seed value; the uniqueness constraint holds across the full generated set |
 | Linked AC | AC-002-4 |
 
@@ -526,7 +526,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 | TC-INT-006 | Training stat persisted across reads |
 |---|---|
 | Given | A pet with `stat_speed = 15` |
-| When | `POST /api/v1/pets/:petId/train` is called with `{ type: "speed" }` |
+| When | `POST /api/v1/pets/:petId/train` is called with `{ trainingType: "RUN" }` |
 | Then | Subsequent `GET /api/v1/pets/:petId` returns `stat_speed` in range `[16, 18]` |
 | Linked AC | AC-005-4 |
 
@@ -1302,7 +1302,7 @@ Scenario: Leaderboard falls back to PostgreSQL when Redis unavailable
   When a player requests the leaderboard
   Then HTTP 200 is returned with degraded: true
   And data is sourced from the PostgreSQL snapshot
-  And the response time is within (health_check_response_time_ms = 500) ms
+  And the response time is within (p99_api_latency_read_ms_at_100_rps = 200) ms
 ```
 
 **Feature: Admin Suspicious Battle Detection** (US-ADMIN-005)
