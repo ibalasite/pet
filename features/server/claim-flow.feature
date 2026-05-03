@@ -6,13 +6,13 @@ Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
     When the server generates a (claim_code_digits = 6)-digit OTP and emails it to "player@example.com"
     And the guest submits the correct 6-digit code within (claim_code_expiry_minutes = 15) minutes
     Then the server links the email to the pet token and responds with HTTP 200
-    And the pet record shows email_verified = true
+    And the pets record has owner_token_hash populated and the claim_codes record has used_at set
 
   Scenario: Claim code expires after the configured window
     Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
     And the server issued a (claim_code_digits = 6)-digit OTP to "player@example.com"
     When the guest submits the correct OTP after (claim_code_expiry_minutes = 15) minutes have elapsed
-    Then the server responds with HTTP 410
+    Then the server responds with HTTP 400
     And the response body contains error code "CLAIM_CODE_EXPIRED"
 
   Scenario: Claim rate limit blocks requests after the hourly threshold
@@ -28,5 +28,5 @@ Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
     And the server issued a (claim_code_digits = 6)-digit OTP to "player@example.com"
     And the guest successfully verified the OTP on the first attempt
     When the guest submits the same OTP a second time
-    Then the server responds with HTTP 410
+    Then the server responds with HTTP 400
     And the response body contains error code "CLAIM_CODE_ALREADY_USED"

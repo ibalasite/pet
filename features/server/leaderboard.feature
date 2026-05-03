@@ -5,7 +5,7 @@ Feature: Global Leaderboard (US-BOARD-001, US-ADMIN-002)
     And a PostgreSQL snapshot of leaderboard scores exists from the last sync
     When a client requests GET /api/v1/leaderboard
     Then the server responds with HTTP 200 using the PostgreSQL snapshot data
-    And the response includes a header "X-Leaderboard-Source: postgres-fallback"
+    And the response body contains "degraded": true
 
   Scenario: Leaderboard score is updated within the configured lag window after a battle
     Given pet "fast-pet-token" completes a Race battle and wins

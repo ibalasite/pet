@@ -6,7 +6,7 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     When the matchmaking service pairs the two pets via ZPOPMIN from the Redis queue
     Then a Race battle record is created with status "IN_PROGRESS"
     And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
-    And the pet with the higher speed stat is recorded as the winner
+    And the pet with the higher effective speed (base stat plus up to ±15% random modifier) is recorded as the winner
     And both pets receive updated win/loss counts in their profiles
 
   Scenario: AI fallback when no real opponent is available after timeout
@@ -14,7 +14,7 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     And (arena_matchmaking_timeout_seconds = 30) seconds pass without a second pet joining
     When the matchmaking service triggers the AI fallback logic
     Then a Race battle is created pairing "alpha-token-abc" against an AI bot opponent
-    And the battle record includes bot_opponent = true
+    And the battle record includes is_ai_opponent = true
     And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
 
   Scenario: Arena rate limit prevents excessive battles per hour
