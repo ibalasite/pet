@@ -364,14 +364,14 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 | TC-UNIT-009 | Stat increment range |
 |---|---|
 | Given | A pet with `stat_speed = 15` (any level; stat delta is level-independent per constants) |
-| When | `applyTrainingAction(pet, 'speed')` is called |
+| When | `applyTrainingAction(pet, 'RUN')` is called |
 | Then | `stat_speed` increases by an integer in `[training_stat_points_min = 1, training_stat_points_max = 3]`; the delta is uniformly random and not level-dependent |
 | Linked AC | AC-005-1 |
 
 | TC-UNIT-010 | Stat cap enforcement — training blocked at maximum |
 |---|---|
 | Given | A pet with `stat_speed = (pet_stat_max = 100)` |
-| When | `applyTrainingAction(pet, 'speed')` is called |
+| When | `applyTrainingAction(pet, 'RUN')` is called |
 | Then | Throws `StatAtMaximumError`; when serialized by the API handler the response is HTTP 400 with `{ "code": "STAT_AT_MAXIMUM", "message": "This stat has reached the maximum value of 100" }` |
 | Linked AC | AC-005-6 |
 
@@ -1041,7 +1041,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 |---|---|
 | Given | Admin submits correct username + password only (no TOTP) |
 | When | Login endpoint is called |
-| Then | HTTP 403 with `TOTP_SETUP_REQUIRED` or `UNAUTHORIZED`; no session cookie issued |
+| Then | HTTP 403 `TOTP_SETUP_REQUIRED` (if TOTP not yet enrolled) or HTTP 401 `UNAUTHORIZED` (if TOTP is enrolled but no code submitted); no session cookie issued in either case |
 | Linked NFR | NFR-SEC-11 |
 
 | TC-SEC-004 | Admin session absolute expiry |
