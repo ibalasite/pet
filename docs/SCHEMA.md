@@ -235,10 +235,9 @@ COMMENT ON COLUMN arena_matches.flagged_at IS 'Timestamp when the match was most
 ```
 
 ```sql
-CREATE INDEX idx_arena_matches_pet_a_id      ON arena_matches (pet_a_id);
-CREATE INDEX idx_arena_matches_pet_b_id      ON arena_matches (pet_b_id);
 CREATE INDEX idx_arena_matches_completed_at  ON arena_matches (completed_at);
 CREATE INDEX idx_arena_matches_winner        ON arena_matches (winner_pet_id);
+-- Leading pet_a_id / pet_b_id column also serves FK integrity scans (ON DELETE RESTRICT / SET NULL).
 CREATE INDEX idx_arena_matches_pet_a_history ON arena_matches (pet_a_id, completed_at DESC);
 CREATE INDEX idx_arena_matches_pet_b_history ON arena_matches (pet_b_id, completed_at DESC);
 -- Supports GET /admin/api/battles?flagged=true and POST /admin/api/battles/:matchId/flag queries.
@@ -303,7 +302,7 @@ COMMENT ON COLUMN training_logs.completed_at IS 'UTC timestamp of the action. Da
 ```
 
 ```sql
-CREATE INDEX idx_training_logs_pet_id       ON training_logs (pet_id);
+-- Leading pet_id column also serves the FK CASCADE scan (ON DELETE CASCADE).
 CREATE INDEX idx_training_logs_completed_at ON training_logs (pet_id, completed_at DESC);
 ```
 
@@ -334,7 +333,11 @@ CREATE TABLE food_buffs (
         CHECK (
             (is_permanent = TRUE  AND expires_at IS NULL) OR
             (is_permanent = FALSE AND expires_at IS NOT NULL)
-        )
+        ),
+    CONSTRAINT chk_food_buff_expires_at_after_consumed
+        CHECK (expires_at IS NULL OR expires_at > consumed_at),
+    CONSTRAINT chk_food_buff_record_expires_after_consumed
+        CHECK (record_expires_at > consumed_at)
 );
 
 COMMENT ON COLUMN food_buffs.buff_stat IS 'Stat affected: speed, strength, or stamina.';
@@ -424,6 +427,8 @@ CREATE TABLE marketplace_transactions (
         FOREIGN KEY (listing_id) REFERENCES marketplace_listings(id) ON DELETE RESTRICT,
     CONSTRAINT fk_marketplace_transactions_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT,
+    CONSTRAINT uq_marketplace_transactions_listing
+        UNIQUE (listing_id),
     CONSTRAINT chk_marketplace_transaction_price_positive
         CHECK (price_credits > 0),
     CONSTRAINT chk_marketplace_transaction_fee_non_negative
@@ -438,10 +443,11 @@ COMMENT ON COLUMN marketplace_transactions.listed_at IS 'Copied from the listing
 ```
 
 ```sql
+-- listing_id is also the UNIQUE constraint target; the implicit unique index serves FK scans.
 CREATE INDEX idx_marketplace_transactions_listing   ON marketplace_transactions (listing_id);
-CREATE INDEX idx_marketplace_transactions_pet       ON marketplace_transactions (pet_id);
 CREATE INDEX idx_marketplace_transactions_completed ON marketplace_transactions (completed_at DESC);
 -- Anti-flip query: finds the most recent completed trade for a pet via ORDER BY completed_at DESC LIMIT 1.
+-- Leading pet_id column also serves the FK RESTRICT scan (ON DELETE RESTRICT).
 -- Composite covers both the equality filter and the sort without a separate heap sort step.
 CREATE INDEX idx_marketplace_transactions_pet_completed
     ON marketplace_transactions (pet_id, completed_at DESC);
@@ -724,6 +730,8 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 
 Partial indexes on boolean and nullable columns are preferred over full-table indexes where the indexed set is a small fraction of total rows:
 
+- `idx_pets_rarity` — full index on `rarity`; supports admin list-view and leaderboard snapshot queries that filter by rarity tier.
+- `idx_pets_claimed_at` — `WHERE claimed_at IS NOT NULL`: only claimed pets have this set; used by analytics and admin list queries that filter for claimed pets.
 - `idx_pets_is_banned` — `WHERE is_banned = TRUE`: nearly all rows are `FALSE`; this partial index is tiny and fast for ban-check queries.
 - `idx_pets_owner_token_hash` — `WHERE owner_token_hash IS NOT NULL`: unclaimed pets have NULL; only claimed pet rows are indexed, keeping the index compact.
 - `idx_pets_last_trained_at` — `WHERE last_trained_at IS NOT NULL`: never-trained pets are excluded; the index supports neglect detection queries without scanning the full table.
@@ -732,6 +740,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_marketplace_listings_active_pet` — `WHERE status = 'active'` unique: provides a database-enforced uniqueness constraint for concurrent active listings per pet at near-zero write cost.
 - `idx_arena_matches_is_flagged` — `WHERE is_flagged = TRUE`: nearly all matches are unflagged; partial index stays tiny and serves `GET /admin/api/battles?flagged=true` efficiently.
 - `idx_gdpr_requests_initiating_pet` — `WHERE initiating_pet_id IS NOT NULL`: supports FK cascade integrity check and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.
+- `idx_claim_codes_expires_at` — full index on `expires_at`; used by OTP verification to filter unexpired codes and by the background job to identify stale unverified codes.
 - `idx_claim_codes_created_at` and `idx_claim_codes_used_at` — support the 72-hour background cleanup job which must find rows by creation time or first-use time (whichever is later).
 - `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
 - `idx_claim_identities_deletion` — `WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL`: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once `email_encrypted` is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.
@@ -739,10 +748,10 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 
 ### 6.2 Composite Indexes for History Queries
 
-- `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort.
-- `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. Covering the `pet_id` prefix avoids a separate lookup.
+- `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort. The leading column of each index also serves PostgreSQL's FK integrity scan for `ON DELETE RESTRICT` (pet_a_id) and `ON DELETE SET NULL` (pet_b_id), eliminating the need for separate single-column indexes.
+- `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. The leading `pet_id` column also serves the FK CASCADE scan (`ON DELETE CASCADE`), making a separate `idx_training_logs_pet_id` unnecessary.
 - `idx_admin_audit_log_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor within a 12-month window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`).
-- `idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)` — supports the anti-flip eligibility check (`marketplace_trade_antiflip_protection_days = 7`). The query `SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1` is fully served by the composite index without a separate heap sort, replacing the need to use both the single-column `idx_marketplace_transactions_pet` and a post-filter sort.
+- `idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)` — supports the anti-flip eligibility check (`marketplace_trade_antiflip_protection_days = 7`). The query `SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1` is fully served by the composite index without a separate heap sort. The leading `pet_id` column also covers the FK RESTRICT scan (`ON DELETE RESTRICT`), eliminating the need for a separate single-column `idx_marketplace_transactions_pet` index.
 - `idx_leaderboard_snapshots_time (snapshot_time DESC)` — supports both the historical reporting query (`SELECT ... ORDER BY snapshot_time DESC LIMIT 1`) and the 12-month rolling retention DELETE (`WHERE snapshot_time < NOW() - INTERVAL '12 months'`; `leaderboard_snapshot_retention_months = 12`).
 - `idx_admin_audit_log_created_at (created_at DESC)` — supports audit log search queries and the 2-year row retention DELETE (`WHERE created_at < NOW() - INTERVAL '2 years'`; `admin_audit_log_retention_years = 2`). The composite `idx_admin_audit_log_admin_id` additionally covers filtered searches by actor.
 
