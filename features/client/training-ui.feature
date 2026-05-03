@@ -38,7 +38,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
   Scenario: All training actions exhausted — cards disabled and DailyResetTimer appears
     Given the owner has already used all (training_actions_per_day = 3) daily training actions
     And POST /api/v1/training responds HTTP 400 with error code "TRAINING_LIMIT_REACHED"
-    When the TrainingPage renders
+    When the owner navigates to the TrainingPage
     Then all three TrainingActionCard "Train" buttons are disabled
     And the DailyResetTimer component is visible showing a countdown to UTC 00:00
     And the DailyResetTimer has aria-live="polite" and announces the remaining time throttled at 60-second intervals and at ≤ 5 minutes remaining

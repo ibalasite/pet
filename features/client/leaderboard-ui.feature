@@ -16,7 +16,8 @@ Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degra
 
   Scenario: Leaderboard auto-refreshes every 30 seconds via TanStack Query
     Given the LeaderboardPage is mounted
-    When (leaderboard_update_lag_max_seconds = 30) seconds have elapsed since the last fetch
+    And (leaderboard_update_lag_max_seconds = 30) seconds have elapsed since the last fetch
+    When the TanStack Query stale timer fires a background refetch
     Then the useLeaderboard hook triggers a new GET /api/v1/leaderboard request automatically
     And the LeaderboardTable updates to reflect the refreshed data without a full page reload
 
