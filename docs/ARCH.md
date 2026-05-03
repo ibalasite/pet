@@ -177,6 +177,7 @@ App
 - CSS: `image-rendering: pixelated` + `image-rendering: crisp-edges` on canvas element
 - FPS target: ≥ 30 FPS sustained (PET_ANIMATION_FPS_MIN = 30)
 - Reduced motion: `prefers-reduced-motion: reduce` → static sprite, no particles
+- WebGL unavailable: Canvas 2D fallback rendering with static sprite image (no animation)
 - Pet render on load: ≤ 2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)
 
 **Performance Targets**:
@@ -687,6 +688,7 @@ Pet Owner Browser              Game API                    PostgreSQL       Redi
      │                               │   seed = random() → stored as random_seed BIGINT│
      │                               │   (enables deterministic replay per EDD §4.4)   │
      │                               │   statA = stat_by_mode(mode): Race→speed, Sumo→strength│
+     │                               │   [provisional — see EDD OQ-E08 re: equal-stat edge cases]│
      │                               │   modA = statA × (1 ± ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT/100 × rand)│
      │                               │   winner = MAX(modA, modB)               │
      │                               │   tie-break: earlier enqueue wins        │
@@ -726,11 +728,15 @@ Arena Match Completion         Game API                    Redis            Post
      │  Arena match completed        │                          │               │
      │  (winner_pet_id determined)   │                          │               │
      │──────────────────────────────>│                          │               │
-     │                               │ Recalculate arena_score for winner       │
+     │                               │ Recalculate arena_score for WINNER       │
      │                               │   formula: win_rate × battles × level_mult
-     │                               │ ZADD leaderboard:global score member=petId
+     │                               │ ZADD leaderboard:global score member=winnerPetId
      │                               │─────────────────────────>│               │
-     │                               │ [Update lag ≤30s per LEADERBOARD_UPDATE_LAG_MAX_SECONDS]
+     │                               │ Recalculate arena_score for LOSER        │
+     │                               │   (battles_played increases; win_rate drops)
+     │                               │ ZADD leaderboard:global score member=loserPetId
+     │                               │─────────────────────────>│               │
+     │                               │ [Both updates atomic — Update lag ≤30s per LEADERBOARD_UPDATE_LAG_SECONDS]
      │                               │                          │               │
      │                               │ [Every hour: snapshot job]               │
      │                               │ ZRANGEBYSCORE leaderboard:global (top 500)
@@ -887,6 +893,26 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 **CAN-SPAM**: All emails are transactional. No marketing email without separate explicit opt-in. Claim and recovery emails contain ONLY the 6-digit code — no promotional content.
 
 **Audit Log**: All admin actions (mutations, GDPR operations, role changes) written to `audit_logs` with actor ID, action type, target entity, reason, and timestamp. Retention: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years. Search response time for any 12-month window: ≤ 3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3).
+
+---
+
+### §5.5 Transport and Header Security
+
+**TLS**: Minimum TLS 1.2 at the API gateway; TLS 1.3 preferred (PRD NFR-SEC-06). TLS termination at the Nginx/Vercel Edge layer per §1.2 diagram. Downgrade to HTTP never permitted.
+
+**Security Response Headers** (set on all API and frontend responses):
+
+| Header | Value |
+|--------|-------|
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
+
+**Content Security Policy** (PRD NFR-SEC-08):
+- Phase 1-2: `default-src 'self'; script-src 'self' 'unsafe-inline'` (interim — Phaser.js inline canvas requires relaxation)
+- Phase 3 hardening: nonce-based CSP (`script-src 'self' 'nonce-{RANDOM}'`) with no `unsafe-inline` (EDD §13.3)
 
 ---
 
