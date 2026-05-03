@@ -35,7 +35,7 @@ sequenceDiagram
     PG-->>API: pet row (stats, level, last_trained_at, is_banned)
     API->>API: isNeglected = (last_trained_at IS NULL OR<br/>NOW() - last_trained_at > 3 days)<br/>(training_neglect_threshold_days = 3)
     API-->>PlayerApp: { stats, level, isOwner: true, isNeglected }
-    PlayerApp->>API: GET /api/v1/pets/:petId/training-status<br/>(today's remaining actions)
+    PlayerApp->>API: GET /api/v1/pets/:petId/stats<br/>(today's remaining actions)
     API->>PG: SELECT COUNT(*) FROM training_logs<br/>WHERE pet_id = petId<br/>AND completed_at >= UTC_DATE
     PG-->>API: actionsUsedToday (0–3 — training_actions_per_day = 3)
     API-->>PlayerApp: { actionsRemainingToday: 3 - used }<br/>(training_actions_per_day = 3)
@@ -89,9 +89,10 @@ sequenceDiagram
   where `pet_level_default = 1` and `pet_level_formula_divisor = 10`. At 0 training actions
   the formula yields 0, so the lower bound clamps it to 1. The column is denormalized on `pets`
   for query efficiency and updated atomically inside the same training transaction.
-- **Stat ceiling**: If `currentStat + statDelta` would exceed 100 (`pet_stat_max = 100`) the
-  value is clamped to 100 and the endpoint returns HTTP 400 `STAT_AT_MAXIMUM` to signal to the
-  UI that this stat type is maxed out.
+- **Stat ceiling**: If the target stat is already at 100 (`pet_stat_max = 100`) the endpoint
+  returns HTTP 400 `STAT_AT_MAXIMUM` and no training action is recorded. When the stat is below
+  100, training proceeds and `newStat = MIN(100, currentStat + statDelta)` caps the result at
+  100 — the response is HTTP 200 regardless of whether clamping occurs.
 - **Neglect visual**: The `NeglectedState` component appears on the PetPage and TrainingPage
   when `isNeglected = true`. It does not block training — a neglected pet can still train.
 - **Food buff interaction**: Active `food_buffs` rows contribute `stat_delta` only during arena

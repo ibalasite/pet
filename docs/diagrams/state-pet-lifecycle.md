@@ -59,9 +59,9 @@ stateDiagram-v2
 
     Active --> Listed : POST /api/v1/marketplace/listings\n(FF_MARKETPLACE only)\nstatus = active
 
-    Listed --> Active : DELETE /api/v1/marketplace/listings/:id\nstatus = cancelled\nOR expires_at reached
+    Listed --> Active : DELETE /api/v1/marketplace/listings/:listingId\nstatus = cancelled\nOR expires_at reached
 
-    Listed --> Sold : POST /api/v1/marketplace/listings/:id/buy\nstatus = sold\nowner_token_hash updated\nmarketplace_transactions row inserted\nAnti-flip: re-listing blocked\nfor 7 days (marketplace_trade_antiflip_protection_days = 7)
+    Listed --> Sold : POST /api/v1/marketplace/listings/:listingId/buy\nstatus = sold\nowner_token_hash updated\nmarketplace_transactions row inserted\nAnti-flip: re-listing blocked\nfor 7 days (marketplace_trade_antiflip_protection_days = 7)
 
     Sold --> Active : New owner holds token\nPet returns to Active state
 

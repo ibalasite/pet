@@ -99,7 +99,7 @@ sequenceDiagram
 
     Note over Player,Email: Background — Cleanup Jobs
 
-    Note right of PG: Claim codes purged 72h after creation or<br/>first use (claim_token_cleanup_ttl_hours = 72)
+    Note right of PG: Claim codes purged 72h after creation or<br/>first use, whichever is LATER (claim_token_cleanup_ttl_hours = 72)
     Note right of PG: Unclaimed pets deleted every 6h where<br/>reserved_until < NOW() AND owner_token_hash IS NULL<br/>(pet_reservation_ttl_hours = 24)
 ```
 
