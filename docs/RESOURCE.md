@@ -28,6 +28,7 @@ last-updated: "2026-05-03"
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 1.0.0 | 2026-05-03 | Gen Agent | Initial generation — AI asset production order for pixel-pet-arena |
+| 1.0.1 | 2026-05-04 | Review Agent R6 | Fix §1.2 wrong upstream ref (VDD §8.9→§8.3); fix RES-IMG-043 filename per VDD §7.6 naming (og-battle-result-template→og-battle-result); add RES-IMG-044 WebP fallback for OG battle result per VDD §7.5; renumber RES-IMG-044/045→045/046 (bg-landing-hero, bg-leaderboard); remove incorrect EDD §1 citation from §3 preamble; update §4 checklist and §5 license table |
 
 ---
 
@@ -71,7 +72,7 @@ last-updated: "2026-05-03"
 
 ### §1.2 Food Item Sprites (VDD §4 / EDD §0 — Food Buffs)
 
-> Food items grant stat buffs (VDD §8.9 / EDD FOOD_BUFF constants). Each food type is a distinct 32×32px pixel art item icon.
+> Food items grant stat buffs (VDD §8.3 / EDD §0 FOOD_BUFF constants). Each food type is a distinct 32×32px pixel art item icon.
 
 | ID | filename | type | source_tool | prompt | dimensions | file_size_budget | status | output_path | description |
 |----|----------|------|-------------|--------|-----------|-----------------|--------|-------------|-------------|
@@ -125,20 +126,21 @@ last-updated: "2026-05-03"
 | RES-IMG-039 | favicon-192.png | image | Aseprite | pixel art pet icon 192x192px PNG, dark navy background `#1a1a2e`, gold `#fdcb6e` pet mark, PWA icon, hard pixel edges, `image-rendering: pixelated` intended | 192×192px | ≤ 30 KB | needed | public/favicon-192.png | PWA icon 192×192px for `manifest.json`. |
 | RES-IMG-040 | favicon-512.png | image | Aseprite | pixel art pet icon 512x512px PNG, dark navy background `#1a1a2e`, gold `#fdcb6e` pet mark, PWA splash icon, hard pixel edges | 512×512px | ≤ 80 KB | needed | public/favicon-512.png | PWA icon 512×512px for `manifest.json` and splash screen. |
 
-### §1.6 OG / Social Card Assets (VDD §8.8 / §7.5)
+### §1.6 OG / Social Card Assets (VDD §8.8 / §7.5 / §7.6)
 
 | ID | filename | type | source_tool | prompt | dimensions | file_size_budget | status | output_path | description |
 |----|----------|------|-------------|--------|-----------|-----------------|--------|-------------|-------------|
 | RES-IMG-041 | og-default-1200x630.avif | image | Midjourney v6 | dark luxury pixel art game card, 1200x630px, deep navy `#1a1a2e` background, "pixel-pet-arena" wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold `#fdcb6e`, purple `#a29bfe`, teal `#4ecdc4`, retro game aesthetic, premium collectible game social share card, hard pixel art style | 1200×630px | ≤ 150 KB | needed | public/assets/og/og-default-1200x630.avif | Default OG card (no specific pet). Used for landing page, leaderboard, and generic social shares. AVIF primary (≤150 KB), WebP fallback ≤200 KB. |
 | RES-IMG-042 | og-default-1200x630.webp | image | Midjourney v6 | dark luxury pixel art game card, 1200x630px, deep navy `#1a1a2e` background, "pixel-pet-arena" wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold `#fdcb6e`, purple `#a29bfe`, teal `#4ecdc4`, retro game aesthetic, premium collectible game social share card, hard pixel art style | 1200×630px | ≤ 200 KB | needed | public/assets/og/og-default-1200x630.webp | Default OG card WebP fallback (VDD §7.5). |
-| RES-IMG-043 | og-battle-result-template-1200x630.avif | image | Midjourney v6 | dark luxury pixel art battle result card template, 1200x630px, deep navy `#1a1a2e` background, two pixel creature placeholder silhouettes side by side, gold `#fdcb6e` "WIN" pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style | 1200×630px | ≤ 150 KB | needed | public/assets/og/og-battle-result-template-1200x630.avif | Battle result OG card template (VDD §8.8). Pre-rendered per-pet at runtime by server using this as base layout. AVIF primary format. |
+| RES-IMG-043 | og-battle-result-1200x630.avif | image | Midjourney v6 | dark luxury pixel art battle result card template, 1200x630px, deep navy `#1a1a2e` background, two pixel creature placeholder silhouettes side by side, gold `#fdcb6e` "WIN" pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style | 1200×630px | ≤ 150 KB | needed | public/assets/og/og-battle-result-1200x630.avif | Battle result OG card template (VDD §8.8). Pre-rendered per-pet at runtime by server using this as base layout. AVIF primary format. |
+| RES-IMG-044 | og-battle-result-1200x630.webp | image | Midjourney v6 | dark luxury pixel art battle result card template, 1200x630px, deep navy `#1a1a2e` background, two pixel creature placeholder silhouettes side by side, gold `#fdcb6e` "WIN" pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style | 1200×630px | ≤ 200 KB | needed | public/assets/og/og-battle-result-1200x630.webp | Battle result OG card template WebP fallback (VDD §7.5). Required WebP fallback per VDD §7.5 (AVIF primary + WebP fallback for OG social card backgrounds). |
 
 ### §1.7 UI Scene Backgrounds / Page-Level Visuals (VDD §8)
 
 | ID | filename | type | source_tool | prompt | dimensions | file_size_budget | status | output_path | description |
 |----|----------|------|-------------|--------|-----------|-----------------|--------|-------------|-------------|
-| RES-IMG-044 | bg-landing-hero.webp | image | Midjourney v6 | dark luxury pixel art landing page hero background, 1920x1080px, deep navy `#1a1a2e` to dark charcoal `#242444` gradient, subtle pixel grid texture, retro CRT glow atmospheric effect, no specific characters, abstract depth and atmosphere, premium dark game aesthetic --ar 16:9 --v 6 | 1920×1080px | ≤ 200 KB | needed | public/assets/backgrounds/bg-landing-hero.webp | Landing page hero background (VDD §8.1). Serves as atmosphere behind PetCanvas. Lazy-loaded below the canvas. |
-| RES-IMG-045 | bg-leaderboard.webp | image | Midjourney v6 | dark luxury pixel art leaderboard page background, 1920x1080px, deep navy `#1a1a2e` base, subtle pixel trophy or podium motif, editorial hierarchy feel, retro game scoreboard aesthetic, muted to not compete with table content --ar 16:9 --v 6 | 1920×1080px | ≤ 200 KB | needed | public/assets/backgrounds/bg-leaderboard.webp | Leaderboard page background (VDD §8.7). Subtle, does not compete with table F-pattern scan. Lazy-loaded. |
+| RES-IMG-045 | bg-landing-hero.webp | image | Midjourney v6 | dark luxury pixel art landing page hero background, 1920x1080px, deep navy `#1a1a2e` to dark charcoal `#242444` gradient, subtle pixel grid texture, retro CRT glow atmospheric effect, no specific characters, abstract depth and atmosphere, premium dark game aesthetic --ar 16:9 --v 6 | 1920×1080px | ≤ 200 KB | needed | public/assets/backgrounds/bg-landing-hero.webp | Landing page hero background (VDD §8.1). Serves as atmosphere behind PetCanvas. Lazy-loaded below the canvas. |
+| RES-IMG-046 | bg-leaderboard.webp | image | Midjourney v6 | dark luxury pixel art leaderboard page background, 1920x1080px, deep navy `#1a1a2e` base, subtle pixel trophy or podium motif, editorial hierarchy feel, retro game scoreboard aesthetic, muted to not compete with table content --ar 16:9 --v 6 | 1920×1080px | ≤ 200 KB | needed | public/assets/backgrounds/bg-leaderboard.webp | Leaderboard page background (VDD §8.7). Subtle, does not compete with table F-pattern scan. Lazy-loaded. |
 
 ---
 
@@ -161,7 +163,7 @@ last-updated: "2026-05-03"
 
 ## §3 Audio Asset Inventory (BGM / SFX)
 
-> **No AUDIO.md exists for this project**. Per `docs/CLIENT_IMPL.md §6` and `docs/EDD.md §1`, audio is **explicitly deferred to Phase 2**. The player app Phase 1 build includes zero audio assets.
+> **No AUDIO.md exists for this project**. Per `docs/CLIENT_IMPL.md §6`, audio is **explicitly deferred to Phase 2**. The player app Phase 1 build includes zero audio assets.
 >
 > This section documents the Phase 2 planned audio assets for reference. All items below have `status: needed` and are not blocking Phase 1 delivery.
 
@@ -184,19 +186,19 @@ last-updated: "2026-05-03"
 - [x] §1 VDD Visual Assets: VDD.md §4 neglected state sprite overlay covered (RES-IMG-006)
 - [x] §1 VDD Visual Assets: VDD.md §7.2 UI icon set covered (RES-IMG-019 to RES-IMG-030) — 12 custom pixel-art icons: 8 at 24×24px SVG (game interactions) + 4 at 16×16px SVG (rarity badges)
 - [x] §1 VDD Visual Assets: VDD.md §7.4 logo/brand assets covered (RES-IMG-031 to RES-IMG-040) — logo primary/inverted, favicon, PWA icons
-- [x] §1 VDD Visual Assets: VDD.md §8.1 landing page hero background covered (RES-IMG-044)
-- [x] §1 VDD Visual Assets: VDD.md §8.7 leaderboard background covered (RES-IMG-045)
+- [x] §1 VDD Visual Assets: VDD.md §8.1 landing page hero background covered (RES-IMG-045)
+- [x] §1 VDD Visual Assets: VDD.md §8.7 leaderboard background covered (RES-IMG-046)
 - [x] §1 VDD Visual Assets: VDD.md §4.3 arena backgrounds (race + sumo tiles + full backdrop) covered (RES-IMG-013 to RES-IMG-016)
 - [x] §1 VDD Visual Assets: VDD.md §7.5 page background pattern covered (RES-IMG-017, RES-IMG-018)
-- [x] §1 VDD Visual Assets: VDD.md §8.8 OG social card template covered (RES-IMG-041 to RES-IMG-043)
+- [x] §1 VDD Visual Assets: VDD.md §8.8 OG social card template covered (RES-IMG-041 to RES-IMG-044) — AVIF primary + WebP fallback per VDD §7.5
 - [x] §2 ANIM sprite animations: All 6 CLIENT_IMPL.md §5 Phaser.js animation states covered (idle, bounce, effort, run, victory, particles) (RES-ANIM-001 to RES-ANIM-006); run cycle is 8 frames × 32px = 256×32px per VDD §4.2 and CLIENT_IMPL §5.1 ANIM-08
 - [x] §2 ANIM sprite animations: ANIM.md does not exist — §2 covers Phaser.js sprite sheet animations only (N/A — ANIM.md does not exist)
-- [x] §3 AUDIO assets: AUDIO.md does not exist — §3 documents Phase 2 planned audio only (N/A — AUDIO.md does not exist; audio is Phase 2)
+- [x] §3 AUDIO assets: AUDIO.md does not exist — §3 documents Phase 2 planned audio only (N/A — AUDIO.md does not exist; audio is Phase 2 per CLIENT_IMPL §6)
 - [x] All `file_size_budget` fields have concrete values, compliant with Web platform limits: critical-path images ≤ 200 KB, lazy-loaded ≤ 1 MB, sprites ≤ 50 KB, SFX ≤ 200 KB (CLIENT_IMPL §4.4), BGM ≤ 5 MB
 - [x] All `prompt` fields are filled with ready-to-use English prompts
 - [x] All `output_path` values are consistent with CLIENT_IMPL.md §4.1 directory structure (`public/assets/`, `apps/player/src/assets/` conventions)
 - [x] No bare `{{...}}` placeholders remaining (excluding template example rows)
-- [x] No duplicate IDs within same prefix (RES-IMG-001 through RES-IMG-045, RES-ANIM-001 through RES-ANIM-006, RES-SFX-001 through RES-SFX-005, RES-BGM-001)
+- [x] No duplicate IDs within same prefix (RES-IMG-001 through RES-IMG-046, RES-ANIM-001 through RES-ANIM-006, RES-SFX-001 through RES-SFX-005, RES-BGM-001)
 - [x] §5 License Management: all §1/§2/§3 asset IDs have corresponding license records
 
 ---
@@ -250,9 +252,10 @@ last-updated: "2026-05-03"
 | RES-IMG-040 | favicon-512.png | internal | N/A | §1.5 PWA icon 512px |
 | RES-IMG-041 | og-default-1200x630.avif | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.6 Default OG card AVIF — Midjourney v6 |
 | RES-IMG-042 | og-default-1200x630.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.6 Default OG card WebP — Midjourney v6 |
-| RES-IMG-043 | og-battle-result-template-1200x630.avif | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.6 Battle result OG card template — Midjourney v6 |
-| RES-IMG-044 | bg-landing-hero.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.7 Landing hero background — Midjourney v6 |
-| RES-IMG-045 | bg-leaderboard.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.7 Leaderboard background — Midjourney v6 |
+| RES-IMG-043 | og-battle-result-1200x630.avif | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.6 Battle result OG card template AVIF — Midjourney v6 |
+| RES-IMG-044 | og-battle-result-1200x630.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.6 Battle result OG card template WebP fallback — Midjourney v6 |
+| RES-IMG-045 | bg-landing-hero.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.7 Landing hero background — Midjourney v6 |
+| RES-IMG-046 | bg-leaderboard.webp | AI-generated | https://docs.midjourney.com/docs/terms-of-service | §1.7 Leaderboard background — Midjourney v6 |
 | RES-ANIM-001 | pet-idle-sheet-ref-256x32.png | internal | N/A | §2 Idle animation reference sheet — hand-crafted in Aseprite |
 | RES-ANIM-002 | pet-bounce-sheet-ref-64x32.png | internal | N/A | §2 Bounce animation reference sheet — hand-crafted in Aseprite |
 | RES-ANIM-003 | pet-effort-sheet-ref-96x32.png | internal | N/A | §2 Training effort animation reference sheet — hand-crafted in Aseprite |
