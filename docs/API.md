@@ -33,9 +33,9 @@
    - 6.8 [Admin Audit Log](#68-admin-audit-log)
    - 6.9 [Admin Dashboard, Analytics & Email Monitor](#69-admin-dashboard-analytics--email-monitor)
 7. [WebSocket / Real-Time](#7-websocket--real-time)
-10. [Health Check](#10-health-check)
 8. [Pagination](#8-pagination)
 9. [Changelog / Versioning](#9-changelog--versioning)
+10. [Health Check](#10-health-check)
 
 ---
 
@@ -521,6 +521,12 @@ Returns the full stats panel for a pet including training history summary. *(EDD
 
 **Auth**: Optional
 
+**Path parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `petId` | UUID | Pet ID |
+
 **Response (HTTP 200):**
 
 ```json
@@ -557,6 +563,12 @@ Returns the full stats panel for a pet including training history summary. *(EDD
 | `trainingActionsRemainingToday` | Max 3 actions per UTC day (`training_actions_per_day = 3`). Resets at UTC 00:00. |
 | `level` | `FLOOR(total_training_actions / 10)` capped at 100 (`pet_level_formula_divisor = 10`, `pet_level_max = 100`). |
 | `activeFoodBuffs` | Temporary food buffs currently active on this pet. |
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 404 | `PET_NOT_FOUND` | No pet with the given `petId` exists |
 
 ---
 
@@ -972,6 +984,13 @@ Submits a GDPR request (erasure, data access, restrict processing, object leader
 | Object leaderboard | 5 business days | `gdpr_object_leaderboard_response_business_days = 5` |
 | Rectification | 24 hours | `gdpr_email_rectification_response_hours = 24` |
 
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or invalid `type` value |
+| 401 | `UNAUTHORIZED` | Missing or invalid pet token |
+
 ---
 
 #### `GET /api/v1/gdpr/request/status`
@@ -1003,6 +1022,15 @@ Checks the status of a specific GDPR request. The server validates that the auth
 ```
 
 `status` values: `pending`, `processing`, `completed`, `failed`.
+
+**Error responses:**
+
+| HTTP | Code | Condition |
+|------|------|-----------|
+| 400 | `VALIDATION_ERROR` | Missing or malformed `jobId` |
+| 401 | `UNAUTHORIZED` | Missing or invalid pet token |
+| 403 | `FORBIDDEN` | Authenticated pet's `claim_identity_id` does not match the request's identity |
+| 404 | `NOT_FOUND` | No GDPR request found with the given `jobId` |
 
 ---
 
@@ -2119,48 +2147,6 @@ Targets: delivery rate ≥ 98% (`claim_email_delivery_rate_target_percent = 98`)
 
 ---
 
-## 10. Health Check
-
-#### `GET /health`
-
-Returns platform health status. Required by PRD NFR-AVAIL-06.
-
-**Auth**: None
-
-**Rate Limit**: None
-
-**Response time**: ≤ 500 ms (`health_check_response_time_ms = 500`)
-
-**Response (HTTP 200 — healthy):**
-
-```json
-{
-  "status": "healthy",
-  "checks": {
-    "database": "ok",
-    "redis": "ok"
-  },
-  "timestamp": "2026-05-03T12:00:00Z"
-}
-```
-
-**Response (HTTP 503 — degraded or down):**
-
-```json
-{
-  "status": "degraded",
-  "checks": {
-    "database": "ok",
-    "redis": "unavailable"
-  },
-  "timestamp": "2026-05-03T12:00:00Z"
-}
-```
-
-`status` values: `healthy` (all checks pass), `degraded` (partial failure), `down` (critical failure).
-
----
-
 ## 8. Pagination
 
 All list endpoints that may return more than 20 results support cursor-less offset pagination using the following standard query parameters:
@@ -2210,3 +2196,45 @@ When breaking changes are required:
 4. Release notes will be published to the developer changelog before the deprecation notice date.
 
 Non-breaking changes (additive fields, new optional query parameters, new endpoints) are deployed without a version bump and are backward compatible by definition.
+
+---
+
+## 10. Health Check
+
+#### `GET /health`
+
+Returns platform health status. Required by PRD NFR-AVAIL-06.
+
+**Auth**: None
+
+**Rate Limit**: None
+
+**Response time**: ≤ 500 ms (`health_check_response_time_ms = 500`)
+
+**Response (HTTP 200 — healthy):**
+
+```json
+{
+  "status": "healthy",
+  "checks": {
+    "database": "ok",
+    "redis": "ok"
+  },
+  "timestamp": "2026-05-03T12:00:00Z"
+}
+```
+
+**Response (HTTP 503 — degraded or down):**
+
+```json
+{
+  "status": "degraded",
+  "checks": {
+    "database": "ok",
+    "redis": "unavailable"
+  },
+  "timestamp": "2026-05-03T12:00:00Z"
+}
+```
+
+`status` values: `healthy` (all checks pass), `degraded` (partial failure), `down` (critical failure).
