@@ -247,6 +247,7 @@ INDEXES:
   idx_pets_claimed_at       ON pets(claimed_at) WHERE claimed_at IS NOT NULL
   idx_pets_is_banned        ON pets(is_banned) WHERE is_banned = TRUE
   idx_pets_owner_token_hash ON pets(owner_token_hash) WHERE owner_token_hash IS NOT NULL
+  idx_pets_last_trained_at  ON pets(last_trained_at) WHERE last_trained_at IS NOT NULL
   idx_pets_seed             ON pets(seed) -- unique, supports uniqueness check on generation
   idx_pets_claim_identity   ON pets(claim_identity_id) WHERE claim_identity_id IS NOT NULL
 ```
@@ -428,7 +429,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | id | BIGSERIAL | PK | Sequential for log ordering |
 | admin_id | UUID | NOT NULL REFERENCES admin_users(id) | Actor |
 | action | VARCHAR(128) | NOT NULL | e.g., 'pet.ban', 'config.arena_rate_limit' |
-| target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config' \| 'gdpr_request' \| 'admin_user' |
+| target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config_runtime' \| 'config_economy' \| 'gdpr_request' \| 'admin_user' |
 | target_id | TEXT | NULL | UUID or key of affected entity |
 | detail | JSONB | NULL | Action-specific payload |
 | ip_address_hash | VARCHAR(64) | NULL | SHA-256 hash of raw IP; raw IP never stored per §4.2/§6.5; retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
@@ -650,6 +651,15 @@ Response: `{ arenaRateLimit, rarityWeights: {common, rare, epic, legendary}, are
 #### PUT /admin/api/config/runtime
 Auth: Admin session (Super Admin)
 Request: Runtime parameter updates (validated against admin-tunable ranges from CONSTANTS)
+Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min).
+
+#### GET /admin/api/config/economy
+Auth: Admin session (Super Admin)
+Response: `{ foodBuffMultiplierMin, foodBuffMultiplierMax, arenaEntryCostDefault, arenaEntryCostMax, arenaEntryCooldownMin, arenaEntryCooldownMax }` — current economy configuration values.
+
+#### PUT /admin/api/config/economy
+Auth: Admin session (Super Admin)
+Request: Economy parameter updates (food buff multiplier range 0.5×–5.0× — FOOD_BUFF_MULTIPLIER_ADMIN_MIN/MAX; arena entry cost 0–10 credits — ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT/ADMIN_MAX; arena entry cooldown 0–60 min — ARENA_ENTRY_COOLDOWN_ADMIN_MIN/MAX_MINUTES)
 Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME = 5 min).
 
 #### GET /admin/api/gdpr
@@ -1032,6 +1042,7 @@ GitHub Actions Pipeline:
       needs: build
       on: push to main
       - Deploy API to Railway (staging)
+      - pnpm run db:migrate --env staging (node-pg-migrate; idempotent; runs pending migrations only)
       - Deploy frontend to Vercel (staging)
       - Run smoke tests (Playwright)
 
@@ -1039,6 +1050,7 @@ GitHub Actions Pipeline:
       needs: deploy-staging
       on: manual approval (GitHub Environments)
       - Deploy to production
+      - pnpm run db:migrate --env production
       - Run smoke tests
       - Notify Slack channel
 ```
@@ -1093,7 +1105,7 @@ Error messages follow the PDD §10.1 tone of voice — specific and actionable, 
 | API error rate | >1% of requests | 5 minutes | PagerDuty + Slack | CONSTANTS OBSERVABILITY_ERROR_RATE_ALERT_WINDOW |
 | P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD |
 | Email delivery failure | >2% SendGrid failure | 30 minutes | PagerDuty | CONSTANTS OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW |
-| Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT |
+| Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT (note: constant value is 60s; SLO target is 30s — alert fires after 2× SLO breach; recommend aligning constant to 30s in a future CONSTANTS revision) |
 | Pet claim rate drop | <5 claims/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD |
 | Arena battle rate drop | <10 battles/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD |
 | Redis memory usage | >80% | — | Slack | CONSTANTS INFRA_REDIS_ALERT_THRESHOLD |
@@ -1152,7 +1164,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Scope**:
 - Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
 - PostgreSQL schema: `pets`, `claim_identities`, `claim_codes` tables
-- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `GET /api/v1/pet/:petId`
+- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pet/:petId`
 - Email delivery: SendGrid integration + Nodemailer SMTP fallback
 - Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
 - Rate limiting: Redis-backed claim attempts (5/hr) and code entry (10/session)
@@ -1171,6 +1183,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Goal**: Validate competitive engagement loop. Corresponds to Beta milestone.
 
 **Scope**:
+- PostgreSQL schema: `training_logs`, `arena_matches`, `food_buffs`, `leaderboard_snapshots` tables
 - Training system: `POST /api/v1/pet/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD = 3 days)
 - Food buff system: FoodBuff table; `/api/v1/pet/:petId/feed`
 - Arena matchmaking: Redis queue; 30-second timeout; AI fallback; battle calculation with seeded ±15% modifier
