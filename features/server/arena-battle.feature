@@ -31,3 +31,4 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     Then a Sumo battle record is created with mode "SUMO"
     And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
     And "sumo-token-001" is recorded as the winner because its strength stat is higher
+    And the outcome is determined solely by the raw strength stat with no random modifier applied
