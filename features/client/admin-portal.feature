@@ -22,7 +22,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     When the admin submits credentials without a TOTP code
     Then Vue Router navigates to "/admin/totp-setup"
     And the TotpSetupPage.vue renders a QR code and calls POST /admin/api/auth/totp/setup with {"setupToken": "..."}
-    And backup codes are displayed exactly once and not stored in any Vue component state
+    And backup codes are displayed exactly once
 
   Scenario: Invalid admin credentials return inline error
     Given the admin has entered an incorrect password
@@ -68,7 +68,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     And the ElTable displays pet rows with columns: pet ID, masked owner email, rarity, level, arena record, creation date
     And an ElSelect filter for status "SUSPICIOUS" is available and narrows the table when selected
 
-  Scenario: Admin bans a pet with a reason and the ban is logged
+  Scenario: Admin bans a pet with a reason
     Given the admin is on "/admin/pets" and can see a pet with petId "bad-pet-001"
     When the admin clicks the "Ban" button on the pet row
     And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters in the PetBanModal.vue reason field
