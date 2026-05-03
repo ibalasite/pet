@@ -847,7 +847,7 @@ Returns the last 20 arena battles for a pet. Public endpoint.
       {
         "matchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "mode": "RACE",
-        "opponentId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        "opponentPetId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
         "result": "WIN",
         "completedAt": "2026-05-03T11:42:00Z"
       }
@@ -1590,6 +1590,8 @@ Lifts a ban from a pet. Pet is restored to the leaderboard if eligible.
 }
 ```
 
+`reason` max length: 500 characters (`admin_moderation_reason_max_chars = 500`).
+
 **Response (HTTP 200):**
 
 ```json
@@ -1716,6 +1718,8 @@ Flags a battle record as suspicious.
 }
 ```
 
+`reason` max length: 500 characters (`admin_moderation_reason_max_chars = 500`).
+
 **Response (HTTP 200):**
 
 ```json
@@ -1750,6 +1754,8 @@ Removes a flag from a battle record.
   "reason": "Manual review confirmed legitimate outcome"
 }
 ```
+
+`reason` max length: 500 characters (`admin_moderation_reason_max_chars = 500`).
 
 **Response (HTTP 200):**
 
