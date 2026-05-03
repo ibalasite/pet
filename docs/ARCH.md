@@ -500,7 +500,7 @@ The admin portal is data-dense: paginated tables, complex forms, modals, and cha
 **Decision**:
 Admin portal built with Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5. Pinia for state management. ECharts (vue-echarts) for analytics dashboards. Axios for API communication with request/response interceptors for session expiry handling.
 
-The admin portal shares NO frontend code with the player app — separate npm workspace, separate Vite build, separate Vercel deployment. Both communicate with the same backend API but at different route prefixes.
+The admin portal shares NO frontend code with the player app — separate pnpm workspace, separate Vite build, separate Vercel deployment. Both communicate with the same backend API but at different route prefixes.
 
 **Consequences**:
 - Positive: Element Plus's `el-table` handles admin's data-density requirements with minimal custom code
@@ -576,7 +576,7 @@ Phase 1-2: Environment variable-based feature flags sufficient for MVP. Complete
 | `FF_ARENA_SUMO` | `false` | Enable/disable SUMO arena mode (Phase 1 gate) |
 | `FF_LEADERBOARD` | `true` | Disable public leaderboard |
 | `FF_BATTLE_RECORDS` | `true` | Disable battle history endpoints |
-| `FF_RARITY_DISPLAY` | `true` | Disable rarity UI elements |
+| `FF_RARITY_DISPLAY` | `false` | Enable rarity UI elements when ready (P1 gate) |
 | `FF_ADMIN_PORTAL` | `true` | Control admin portal availability |
 | `FF_MARKETPLACE` | `false` | Enable marketplace when DAU_MARKETPLACE_TRIGGER sustained 2 weeks |
 
