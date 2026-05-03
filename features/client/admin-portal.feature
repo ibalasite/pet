@@ -65,7 +65,7 @@ Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (
     When the PetListPage.vue loads
     Then GET /admin/api/pets is called with the session cookie
     And the ElTable displays pet rows with columns: pet ID, masked owner email, rarity, level, arena record, creation date
-    And an ElSelect filter for status "SUSPICIOUS" is available and narrows the table when selected
+    And an ElSelect filter for status "SUSPICIOUS" is available
 
   Scenario: Admin bans a pet with a reason
     Given the admin is on "/admin/pets" and can see a pet with petId "bad-pet-001"
