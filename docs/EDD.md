@@ -52,6 +52,7 @@ The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20
 | P99_API_LATENCY_READ | <200 | ms at 100 RPS | All read endpoints |
 | P99_API_LATENCY_WRITE | <500 | ms at 100 RPS | Training, arena write endpoints |
 | GDPR_EMAIL_DELETION_WINDOW | 7 | days | Email → SHA-256 hash |
+| GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS | 24 | hours | Internal SLA for email hash completion |
 | TRADE_TRANSACTION_FEE | 5 | percent | Platform fee on trades |
 | FOOD_BUFF_RECORD_RETENTION | 30 | days | After expiry/consumption |
 | MVP_BUDGET | 40,000 | USD | Hard constraint |
@@ -224,7 +225,7 @@ Table: pets
 id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
 seed             BIGINT       NOT NULL UNIQUE  -- procedural generation seed; globally unique
 rarity           VARCHAR(10)  NOT NULL  CHECK (rarity IN ('COMMON','RARE','EPIC','LEGENDARY'))
-pet_name         VARCHAR(64)  NOT NULL  -- Auto-generated from species + color combination at claim time
+pet_name         VARCHAR(64)  NOT NULL  -- Auto-generated from species + color combination at row creation time (seed-derived)
 stat_speed       SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_speed BETWEEN 1 AND 100)
 stat_strength    SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_strength BETWEEN 1 AND 100)
 stat_stamina     SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_stamina BETWEEN 1 AND 100)
@@ -464,7 +465,7 @@ redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, rol
 
 **Indexes**: idx_marketplace_listings_status ON marketplace_listings(status) WHERE status = 'active'; idx_marketplace_listings_pet ON marketplace_listings(pet_id); idx_marketplace_listings_listed_at ON marketplace_listings(listed_at DESC)
 
-**Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `listed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in trade_records before accepting a new listing.
+**Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `completed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in trade_records before accepting a new listing. `completed_at` (purchase timestamp) is used — not `listed_at` — because the protection window begins when the buyer takes ownership.
 
 ### §4.13 GdprRequest
 
@@ -528,7 +529,7 @@ Response: `{ success: true }` (same response regardless of email existence — p
 Auth: None
 Description: Generate a new unclaimed random pet for guest display. Public endpoint — no authentication required; generates a guest-preview pet for display.
 Request: `{}` (no body)
-Response: `{ petId, seed, rarity, stats: {speed, strength, stamina, level}, generationMeta }`
+Response: `{ petId, seed, rarity, petName, stats: {speed, strength, stamina, level}, generationMeta }`
 Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset.
 
 #### GET /api/v1/pet/:petId
@@ -671,10 +672,13 @@ No persistent accounts exist — players identify via pet token. GDPR requests a
 
 **Request body** (`POST /api/v1/gdpr/request`):
 ```json
-{ "type": "erasure" | "data_access" | "restrict_processing", "petToken": "<token>" }
+{ "type": "erasure" | "data_access" | "restrict_processing" }
 ```
+Auth: `Authorization: Bearer <petToken>` header (same pattern as all other authenticated player endpoints). The server resolves the token hash to the `pets` row, then reads `pets.claim_identity_id` to identify the GDPR data subject and create a `gdpr_requests` row scoped to that `claim_identities` record.
 
 **Response** (`POST /api/v1/gdpr/request`): HTTP 202 `{ jobId: string, message: string }`
+
+**Response** (`GET /api/v1/gdpr/request/status?jobId=<uuid>`): HTTP 200 `{ jobId, requestType, status, submittedAt, completedAt | null }`. The server validates that the authenticating pet token's `claim_identity_id` matches the `gdpr_requests.claim_identity_id` for the given jobId before returning the status (prevents cross-identity status polling).
 
 **SLAs** (from CONSTANTS):
 - Erasure: `GDPR_EMAIL_DELETION_WINDOW = 7 days`
@@ -1087,7 +1091,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 
 ### §12.1 Unit Test Targets
 
-- Minimum coverage: 80% of all business logic modules (CONSTANTS `test_unit_coverage_min_percent` = 80%)
+- Minimum coverage: 80% of all business logic modules (CONSTANTS `unit_test_coverage_min_percent` = 80%)
 - Test framework: Vitest (shared between player app and API server)
 - No module exceeds 800 lines (CODE_MODULE_MAX_LINES = 800); no function exceeds 50 lines (CODE_FUNCTION_MAX_LINES = 50) — enforced via ESLint `max-lines` and `max-lines-per-function` rules
 - Priority modules for unit testing: pet generation algorithm (seed → attributes), battle outcome calculation (seeded ±15% modifier), claim code OTP generation/verification, rate-limit logic, GDPR email hashing workflow
