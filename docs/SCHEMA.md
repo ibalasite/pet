@@ -185,7 +185,12 @@ CREATE TABLE arena_matches (
     CONSTRAINT fk_arena_matches_winner
         FOREIGN KEY (winner_pet_id) REFERENCES pets(id) ON DELETE SET NULL,
     CONSTRAINT chk_arena_match_duration
-        CHECK (duration_seconds BETWEEN 5 AND 15)
+        CHECK (duration_seconds BETWEEN 5 AND 15),
+    CONSTRAINT chk_arena_match_flagged_at_consistency
+        CHECK (
+            (is_flagged = FALSE AND flagged_at IS NULL) OR
+            (is_flagged = TRUE  AND flagged_at IS NOT NULL)
+        )
 );
 
 COMMENT ON COLUMN arena_matches.pet_a_id IS 'Challenger pet. ON DELETE RESTRICT: pet row is retained for audit integrity.';
@@ -241,25 +246,23 @@ One row per completed training action. Enables per-pet daily action counting and
 
 ```sql
 CREATE TABLE training_logs (
-    id            UUID        NOT NULL DEFAULT gen_random_uuid(),
-    pet_id        UUID        NOT NULL,
-    training_type VARCHAR(10) NOT NULL,
-    stat_delta    SMALLINT    NOT NULL,
-    stat_after    SMALLINT    NOT NULL,
-    completed_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    id            UUID               NOT NULL DEFAULT gen_random_uuid(),
+    pet_id        UUID               NOT NULL,
+    training_type training_type_enum NOT NULL,
+    stat_delta    SMALLINT           NOT NULL,
+    stat_after    SMALLINT           NOT NULL,
+    completed_at  TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_training_logs PRIMARY KEY (id),
     CONSTRAINT fk_training_logs_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
-    CONSTRAINT chk_training_type_values
-        CHECK (training_type IN ('RUN', 'STRENGTH', 'STAMINA')),
     CONSTRAINT chk_training_stat_delta_range
         CHECK (stat_delta BETWEEN 1 AND 3),
     CONSTRAINT chk_training_stat_after_range
         CHECK (stat_after BETWEEN 1 AND 100)
 );
 
-COMMENT ON COLUMN training_logs.training_type IS 'RUN → speed, STRENGTH → strength, STAMINA → stamina. Values match EDD §4.5 CHECK constraint.';
+COMMENT ON COLUMN training_logs.training_type IS 'RUN → speed, STRENGTH → strength, STAMINA → stamina. Enforced by training_type_enum.';
 COMMENT ON COLUMN training_logs.stat_delta IS 'Stat points gained this action: random integer in [1, 3] (training_stat_points_min = 1, training_stat_points_max = 3).';
 COMMENT ON COLUMN training_logs.stat_after IS 'Absolute stat value after this action is applied. Range: 1–100 (pet_stat_min/max).';
 COMMENT ON COLUMN training_logs.completed_at IS 'UTC timestamp of the action. Daily action limit (training_actions_per_day = 3) is enforced by counting rows WHERE pet_id = ? AND completed_at >= UTC_DATE.';
@@ -528,6 +531,13 @@ CREATE TYPE rarity_enum AS ENUM (
 CREATE TYPE arena_mode_enum AS ENUM (
     'RACE',
     'SUMO'
+);
+
+-- Training action type. Maps to the stat trained: RUN→speed, STRENGTH→strength, STAMINA→stamina.
+CREATE TYPE training_type_enum AS ENUM (
+    'RUN',
+    'STRENGTH',
+    'STAMINA'
 );
 
 -- Food buff target stat.
