@@ -72,6 +72,11 @@ CREATE TABLE pets (
         CHECK (
             (is_banned = FALSE AND banned_at IS NULL) OR
             (is_banned = TRUE  AND banned_at IS NOT NULL)
+        ),
+    CONSTRAINT chk_pet_claim_consistency
+        CHECK (
+            (claimed_at IS NULL     AND owner_token_hash IS NULL) OR
+            (claimed_at IS NOT NULL AND owner_token_hash IS NOT NULL)
         )
 );
 
@@ -154,7 +159,11 @@ CREATE TABLE claim_codes (
     CONSTRAINT fk_claim_codes_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
     CONSTRAINT chk_claim_codes_attempts_nonneg
-        CHECK (attempts >= 0)
+        CHECK (attempts >= 0),
+    CONSTRAINT chk_claim_codes_expires_at_after_created
+        CHECK (expires_at > created_at),
+    CONSTRAINT chk_claim_codes_used_at_after_created
+        CHECK (used_at IS NULL OR used_at >= created_at)
 );
 
 COMMENT ON COLUMN claim_codes.code_hash IS 'SHA-256 of the 6-digit numeric OTP (claim_code_digits = 6). Plaintext OTP is never stored.';
@@ -229,7 +238,7 @@ COMMENT ON COLUMN arena_matches.pet_b_id IS 'Opponent pet. NULL if AI opponent o
 COMMENT ON COLUMN arena_matches.random_seed IS 'Seeded random value used for the ±15% outcome modifier (arena_battle_outcome_random_modifier_percent = 15). Enables deterministic replay.';
 COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Net stat value used for pet_a after any active food buff is applied.';
 COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Net stat value used for pet_b after any active food buff is applied.';
-COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 seconds (arena_match_duration_min/max_seconds).';
+COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 seconds (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15).';
 COMMENT ON COLUMN arena_matches.battle_log IS 'Structured event sequence array for client-side replay.';
 COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to admin_audit_log.detail, not stored here.';
 COMMENT ON COLUMN arena_matches.flagged_at IS 'Timestamp when the match was most recently flagged. NULL when is_flagged = FALSE.';
@@ -299,7 +308,7 @@ CREATE TABLE training_logs (
 
 COMMENT ON COLUMN training_logs.training_type IS 'RUN → speed, STRENGTH → strength, STAMINA → stamina. Enforced by training_type_enum.';
 COMMENT ON COLUMN training_logs.stat_delta IS 'Stat points gained this action: random integer in [1, 3] (training_stat_points_min = 1, training_stat_points_max = 3).';
-COMMENT ON COLUMN training_logs.stat_after IS 'Absolute stat value after this action is applied. Range: 1–100 (pet_stat_min/max).';
+COMMENT ON COLUMN training_logs.stat_after IS 'Absolute stat value after this action is applied. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100).';
 COMMENT ON COLUMN training_logs.completed_at IS 'UTC timestamp of the action. Daily action limit (training_actions_per_day = 3) is enforced by counting rows WHERE pet_id = ? AND completed_at >= UTC_DATE.';
 ```
 
@@ -343,7 +352,7 @@ CREATE TABLE food_buffs (
 );
 
 COMMENT ON COLUMN food_buffs.buff_stat IS 'Stat affected: speed, strength, or stamina.';
-COMMENT ON COLUMN food_buffs.magnitude IS 'Stat points granted. Must be > 0. Admin-configurable multiplier range: 0.5×–5.0× (food_buff_multiplier_admin_min/max).';
+COMMENT ON COLUMN food_buffs.magnitude IS 'Stat points granted. Must be > 0. Admin-configurable multiplier range: 0.5×–5.0× (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0).';
 COMMENT ON COLUMN food_buffs.expires_at IS 'NULL for permanent buffs. Set to consumed_at + duration for temporary buffs.';
 COMMENT ON COLUMN food_buffs.record_expires_at IS 'consumed_at + 30 days (food_buff_record_retention_days = 30). Target for background cleanup job.';
 ```
@@ -380,7 +389,9 @@ CREATE TABLE marketplace_listings (
         CHECK (
             (status = 'active'   AND completed_at IS NULL) OR
             (status != 'active'  AND completed_at IS NOT NULL)
-        )
+        ),
+    CONSTRAINT chk_marketplace_listing_expires_at_after_listed
+        CHECK (expires_at IS NULL OR expires_at > listed_at)
 );
 
 COMMENT ON COLUMN marketplace_listings.seller_token_hash IS 'SHA-256 hash of the seller pet access token. Used for ownership verification.';
@@ -436,7 +447,9 @@ CREATE TABLE marketplace_transactions (
     CONSTRAINT chk_marketplace_transaction_price_positive
         CHECK (price_credits > 0),
     CONSTRAINT chk_marketplace_transaction_fee_non_negative
-        CHECK (fee_credits >= 0)
+        CHECK (fee_credits >= 0),
+    CONSTRAINT chk_marketplace_transaction_completed_at_after_listed
+        CHECK (completed_at >= listed_at)
 );
 
 COMMENT ON COLUMN marketplace_transactions.pet_id IS 'Denormalised from listing for fast anti-flip queries. Anti-flip window: 7 days (marketplace_trade_antiflip_protection_days).';
