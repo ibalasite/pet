@@ -232,6 +232,12 @@ CREATE TABLE arena_matches (
             (is_ai_opponent = FALSE) OR
             (is_ai_opponent = TRUE AND pet_b_id IS NULL)
         ),
+    CONSTRAINT chk_arena_match_different_pets
+        CHECK (pet_b_id IS NULL OR pet_b_id != pet_a_id),
+    CONSTRAINT chk_arena_match_stat_delta_a_nonneg
+        CHECK (stat_delta_a >= 0),
+    CONSTRAINT chk_arena_match_stat_delta_b_nonneg
+        CHECK (stat_delta_b >= 0),
     CONSTRAINT chk_arena_match_winner_is_combatant
         CHECK (
             winner_pet_id IS NULL OR
@@ -241,10 +247,10 @@ CREATE TABLE arena_matches (
 );
 
 COMMENT ON COLUMN arena_matches.pet_a_id IS 'Challenger pet. ON DELETE RESTRICT: pet row is retained for audit integrity.';
-COMMENT ON COLUMN arena_matches.pet_b_id IS 'Opponent pet. NULL if AI opponent or if the pet row has been administratively removed.';
+COMMENT ON COLUMN arena_matches.pet_b_id IS 'Opponent pet. NULL if AI opponent (is_ai_opponent = TRUE) or if the pet row has been administratively removed after match completion (ON DELETE SET NULL). Non-null at insert time for human-vs-human matches; enforced by application, not a CHECK constraint (ON DELETE SET NULL would violate a database-level NOT NULL check).';
 COMMENT ON COLUMN arena_matches.random_seed IS 'Seeded random value used for the ±15% outcome modifier (arena_battle_outcome_random_modifier_percent = 15). Enables deterministic replay.';
-COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Net stat value used for pet_a after any active food buff is applied.';
-COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Net stat value used for pet_b after any active food buff is applied.';
+COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Food buff bonus (delta) added to pet_a''s base stat for this match. 0 = no active buff. Always >= 0 (chk_arena_match_stat_delta_a_nonneg); food buff magnitude is strictly positive.';
+COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Food buff bonus (delta) added to pet_b''s base stat for this match. 0 = no active buff or AI opponent. Always >= 0 (chk_arena_match_stat_delta_b_nonneg).';
 COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 seconds (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15).';
 COMMENT ON COLUMN arena_matches.battle_log IS 'Structured event sequence array for client-side replay.';
 COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to admin_audit_log.detail, not stored here.';
