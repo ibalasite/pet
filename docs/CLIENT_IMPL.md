@@ -77,117 +77,117 @@ pixel-pet-arena/                         ← monorepo root
 ├── package.json                         ← pnpm workspace root
 ├── pnpm-workspace.yaml
 ├── packages/
-│   ├── shared/                          ← Zod schemas, domain types, constants bridge
-│   │   ├── src/
-│   │   │   ├── schemas/                 ← Shared Zod schemas (Pet, ArenaMatch, etc.)
-│   │   │   ├── types/                   ← Shared TypeScript interfaces
-│   │   │   └── constants.ts             ← Re-exported typed constants from constants.json
-│   │   └── package.json
-│   ├── api/                             ← Node.js / Fastify game + admin API
-│   └── player-app/                      ← React 18 + Phaser.js player application
-│       ├── index.html
-│       ├── vite.config.ts
-│       ├── tsconfig.json
-│       ├── vitest.config.ts
-│       ├── playwright.config.ts
-│       └── src/
-│           ├── main.tsx                 ← React root; QueryClient + router providers
-│           ├── App.tsx                  ← createBrowserRouter + Layout wrapper
-│           ├── constants.ts             ← Re-exports from packages/shared/constants.ts
-│           ├── components/
-│           │   ├── layout/
-│           │   │   ├── Layout.tsx       ← Header + Outlet wrapper
-│           │   │   └── NavBar.tsx       ← Visibility driven by hasPetToken prop
-│           │   ├── landing/
-│           │   │   ├── LandingPage.tsx
-│           │   │   ├── ClaimCTA.tsx
-│           │   │   ├── RarityHint.tsx
-│           │   │   └── SocialProofCounter.tsx
-│           │   ├── claim/
-│           │   │   ├── ClaimPage.tsx
-│           │   │   ├── ClaimFlow.tsx    ← Compound, max 3 steps (EMAIL_CLAIM_FLOW_STEPS_MAX)
-│           │   │   ├── ClaimEmailForm.tsx
-│           │   │   ├── ClaimCodeForm.tsx
-│           │   │   ├── ExpiryWarning.tsx
-│           │   │   └── URLReveal.tsx
-│           │   ├── pet/
-│           │   │   ├── PetPage.tsx
-│           │   │   ├── RarityBadge.tsx
-│           │   │   ├── StatsPanel.tsx
-│           │   │   ├── StatBar.tsx
-│           │   │   ├── TrainingEntry.tsx
-│           │   │   ├── FoodInventory.tsx
-│           │   │   ├── FoodItem.tsx
-│           │   │   ├── ArenaEntry.tsx
-│           │   │   └── NeglectedState.tsx
-│           │   ├── training/
-│           │   │   ├── TrainingPage.tsx
-│           │   │   ├── TrainingActions.tsx
-│           │   │   ├── TrainingActionCard.tsx
-│           │   │   ├── StatChangeIndicator.tsx
-│           │   │   ├── DailyResetTimer.tsx
-│           │   │   └── TrainingStreak.tsx
-│           │   ├── arena/
-│           │   │   ├── ArenaPage.tsx
-│           │   │   ├── ArenaScene.tsx   ← React host for Phaser arena scene
-│           │   │   ├── ModeSelector.tsx
-│           │   │   ├── PreBattlePanel.tsx
-│           │   │   ├── MatchmakingStatus.tsx
-│           │   │   ├── AIOfferModal.tsx
-│           │   │   ├── RateLimitBanner.tsx
-│           │   │   ├── BattleResultPage.tsx
-│           │   │   ├── BattleResultCard.tsx
-│           │   │   ├── StatComparison.tsx
-│           │   │   └── ShareBattleButton.tsx
-│           │   ├── leaderboard/
-│           │   │   ├── LeaderboardPage.tsx
-│           │   │   ├── LeaderboardTable.tsx
-│           │   │   ├── LeaderboardRow.tsx
-│           │   │   ├── RarityFilter.tsx
-│           │   │   └── OwnerRankBanner.tsx
-│           │   ├── records/
-│           │   │   ├── BattleRecordsPage.tsx
-│           │   │   ├── PetSummaryCard.tsx
-│           │   │   └── BattleHistoryTable.tsx
-│           │   ├── gdpr/
-│           │   │   ├── GdprPage.tsx
-│           │   │   ├── GdprRequestForm.tsx
-│           │   │   └── GdprStatusBanner.tsx
-│           │   ├── marketplace/         ← FF_MARKETPLACE only
-│           │   │   └── MarketplacePage.tsx
-│           │   └── canvas/
-│           │       ├── PetCanvas.tsx    ← React host div; manages Phaser lifecycle
-│           │       └── PetCanvasEngine.ts  ← SOLE Phaser import boundary
-│           ├── hooks/
-│           │   ├── usePet.ts            ← TanStack Query: GET /api/v1/pets/:petId
-│           │   ├── useLeaderboard.ts    ← TanStack Query + refetchInterval: 30_000
-│           │   ├── useArenaHistory.ts
-│           │   ├── useTraining.ts       ← Mutation: POST /api/v1/pets/:petId/train
-│           │   ├── useFeed.ts           ← Mutation: POST /api/v1/pets/:petId/feed
-│           │   ├── useClaim.ts          ← Mutations: POST /api/v1/claim + /verify
-│           │   ├── useReducedMotion.ts  ← window.matchMedia prefers-reduced-motion
-│           │   └── usePetToken.ts       ← localStorage read/write helpers
-│           ├── store/
-│           │   └── useAppStore.ts       ← Zustand: arena slice, claim slice, toast slice
-│           ├── lib/
-│           │   ├── apiClient.ts         ← Axios instance; Bearer token interceptor
-│           │   ├── tokenStorage.ts      ← getPetToken / setPetToken / clearPetToken
-│           │   ├── petGeneration.ts     ← seed → AttributeVector (deterministic, 6 dims)
-│           │   └── spriteLoader.ts      ← Phaser preload helper utilities
-│           ├── schemas/
-│           │   ├── pet.ts               ← Zod schema: PetResponse
-│           │   ├── claim.ts             ← Zod schema: ClaimResponse, VerifyResponse
-│           │   ├── arena.ts             ← Zod schema: ArenaEnterResponse
-│           │   └── leaderboard.ts       ← Zod schema: LeaderboardResponse
-│           ├── styles/
-│           │   ├── tokens.css           ← CSS custom properties (design tokens from VDD §6)
-│           │   ├── typography.css       ← Press Start 2P + Inter font declarations
-│           │   ├── rarity.css           ← Rarity tier animations (legendary-shimmer, epic-shimmer)
-│           │   └── global.css           ← Reset + base element styles
-│           └── types/
-│               └── index.ts             ← Shared TypeScript types for player app
+│   └── shared/                          ← Zod schemas, domain types, constants bridge
+│       ├── src/
+│       │   ├── schemas/                 ← Shared Zod schemas (Pet, ArenaMatch, etc.)
+│       │   ├── types/                   ← Shared TypeScript interfaces
+│       │   └── constants.ts             ← Re-exported typed constants from constants.json
+│       └── package.json
 └── apps/
-    └── admin/                           ← Vue 3 + Element Plus (separate build — not in scope here)
+    ├── api/                             ← Node.js / Fastify game + admin API
+    ├── admin/                           ← Vue 3 + Element Plus (separate build — not in scope here)
+    └── player/                          ← React 18 + Phaser.js player application
+        ├── index.html
+        ├── vite.config.ts
+        ├── tsconfig.json
+        ├── vitest.config.ts
+        ├── playwright.config.ts
+        └── src/
+            ├── main.tsx                 ← React root; QueryClient + router providers
+            ├── App.tsx                  ← createBrowserRouter + Layout wrapper
+            ├── constants.ts             ← Re-exports from packages/shared/constants.ts
+            ├── components/
+            │   ├── layout/
+            │   │   ├── Layout.tsx       ← Header + Outlet wrapper
+            │   │   └── NavBar.tsx       ← Visibility driven by hasPetToken prop
+            │   ├── landing/
+            │   │   ├── LandingPage.tsx
+            │   │   ├── ClaimCTA.tsx
+            │   │   ├── RarityHint.tsx
+            │   │   └── SocialProofCounter.tsx
+            │   ├── claim/
+            │   │   ├── ClaimPage.tsx
+            │   │   ├── ClaimFlow.tsx    ← Compound, max 3 steps (EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+            │   │   ├── ClaimEmailForm.tsx
+            │   │   ├── ClaimCodeForm.tsx
+            │   │   ├── ExpiryWarning.tsx
+            │   │   └── URLReveal.tsx
+            │   ├── pet/
+            │   │   ├── PetPage.tsx
+            │   │   ├── RarityBadge.tsx
+            │   │   ├── StatsPanel.tsx
+            │   │   ├── StatBar.tsx
+            │   │   ├── TrainingEntry.tsx
+            │   │   ├── FoodInventory.tsx
+            │   │   ├── FoodItem.tsx
+            │   │   ├── ArenaEntry.tsx
+            │   │   └── NeglectedState.tsx
+            │   ├── training/
+            │   │   ├── TrainingPage.tsx
+            │   │   ├── TrainingActions.tsx
+            │   │   ├── TrainingActionCard.tsx
+            │   │   ├── StatChangeIndicator.tsx
+            │   │   ├── DailyResetTimer.tsx
+            │   │   └── TrainingStreak.tsx
+            │   ├── arena/
+            │   │   ├── ArenaPage.tsx
+            │   │   ├── ArenaScene.tsx   ← React host for Phaser arena scene
+            │   │   ├── ModeSelector.tsx
+            │   │   ├── PreBattlePanel.tsx
+            │   │   ├── MatchmakingStatus.tsx
+            │   │   ├── AIOfferModal.tsx
+            │   │   ├── RateLimitBanner.tsx
+            │   │   ├── BattleResultPage.tsx
+            │   │   ├── BattleResultCard.tsx
+            │   │   ├── StatComparison.tsx
+            │   │   └── ShareBattleButton.tsx
+            │   ├── leaderboard/
+            │   │   ├── LeaderboardPage.tsx
+            │   │   ├── LeaderboardTable.tsx
+            │   │   ├── LeaderboardRow.tsx
+            │   │   ├── RarityFilter.tsx
+            │   │   └── OwnerRankBanner.tsx
+            │   ├── records/
+            │   │   ├── BattleRecordsPage.tsx
+            │   │   ├── PetSummaryCard.tsx
+            │   │   └── BattleHistoryTable.tsx
+            │   ├── gdpr/
+            │   │   ├── GdprPage.tsx
+            │   │   ├── GdprRequestForm.tsx
+            │   │   └── GdprStatusBanner.tsx
+            │   ├── marketplace/         ← FF_MARKETPLACE only
+            │   │   └── MarketplacePage.tsx
+            │   └── canvas/
+            │       ├── PetCanvas.tsx    ← React host div; manages Phaser lifecycle
+            │       └── PetCanvasEngine.ts  ← SOLE Phaser import boundary
+            ├── hooks/
+            │   ├── usePet.ts            ← TanStack Query: GET /api/v1/pets/:petId
+            │   ├── useLeaderboard.ts    ← TanStack Query + refetchInterval: 30_000
+            │   ├── useArenaHistory.ts
+            │   ├── useTraining.ts       ← Mutation: POST /api/v1/pets/:petId/train
+            │   ├── useFeed.ts           ← Mutation: POST /api/v1/pets/:petId/feed
+            │   ├── useClaim.ts          ← Mutations: POST /api/v1/claim + /verify
+            │   ├── useReducedMotion.ts  ← window.matchMedia prefers-reduced-motion
+            │   └── usePetToken.ts       ← localStorage read/write helpers
+            ├── store/
+            │   └── useAppStore.ts       ← Zustand: arena slice, claim slice, toast slice
+            ├── lib/
+            │   ├── apiClient.ts         ← Axios instance; Bearer token interceptor
+            │   ├── tokenStorage.ts      ← getPetToken / setPetToken / clearPetToken
+            │   ├── petGeneration.ts     ← seed → AttributeVector (deterministic, 6 dims)
+            │   └── spriteLoader.ts      ← Phaser preload helper utilities
+            ├── schemas/
+            │   ├── pet.ts               ← Zod schema: PetResponse
+            │   ├── claim.ts             ← Zod schema: ClaimResponse, VerifyResponse
+            │   ├── arena.ts             ← Zod schema: ArenaEnterResponse
+            │   └── leaderboard.ts       ← Zod schema: LeaderboardResponse
+            ├── styles/
+            │   ├── tokens.css           ← CSS custom properties (design tokens from VDD §6)
+            │   ├── typography.css       ← Press Start 2P + Inter font declarations
+            │   ├── rarity.css           ← Rarity tier animations (legendary-shimmer, epic-shimmer)
+            │   └── global.css           ← Reset + base element styles
+            └── types/
+                └── index.ts             ← Shared TypeScript types for player app
 ```
 
 ### §2.2 Naming Conventions
@@ -268,7 +268,7 @@ pixel-pet-arena/                         ← monorepo root
             ├── <TrainingPage>  [/pet/:petId/train]
             │   ├── <TrainingActions>
             │   │   └── <TrainingActionCard type stat value remaining /> × 3
-            │   ├── <StatChangeIndicator delta stat />   (visible 2 s — TRAINING_STAT_DISPLAY_DURATION)
+            │   ├── <StatChangeIndicator delta stat />   (visible 2 s — TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2)
             │   ├── <DailyResetTimer />    (aria-live="polite", throttled announcements)
             │   └── <TrainingStreak />
             │
@@ -442,7 +442,7 @@ ArenaBattleScene states:
 |------|-------|-------|
 | Simultaneous Phaser animations on screen | ≤ 20 (React / web target) | Typically 1–2 sprites active; arena scene adds 2 |
 | Simultaneous CSS animations | ≤ 20 | Rarity shimmers are compositor-only properties; no layout reflow |
-| Particle count per burst | ≤ 200 (tsparticles default) | Victory burst is 24 particles — well within budget |
+| Particle count per burst | ≤ 200 | Victory burst is 24 particles — well within budget (Phaser `GameObjects.Particles` built-in system; no tsparticles dependency) |
 | Animation clip max duration | 15 s | Arena match max is `ARENA_MATCH_DURATION_MAX_SECONDS = 15 s` |
 | `prefers-reduced-motion: reduce` | Pause all Phaser loops; suppress CSS shimmers | `useReducedMotion()` hook; `@media (prefers-reduced-motion: reduce) { .rarity-legendary, .rarity-epic { animation: none; } }` |
 
@@ -741,7 +741,7 @@ Minimum coverage target: **80%** (`UNIT_TEST_COVERAGE_MIN_PERCENT = 80`) enforce
 | Bundle size check | Vite `build --reporter` + custom CI step | Entry bundle ≤ 150 KB gzipped; total JS ≤ 300 KB gzipped |
 | Pet canvas render time | Playwright `page.evaluate` performance API | Canvas ready ≤ 2 s after navigation |
 | Memory leak (Phaser destroy) | Playwright + Chrome DevTools protocol heap snapshot | No retained `Phaser.Game` instances after component unmount |
-| Phaser animation FPS | `Phaser.Game.loop.actualFps` assertion in integration test | ≥ 30 FPS over 10-frame window |
+| Phaser animation FPS | `game.loop.actualFps` assertion in integration test (instance property — not `Phaser.Game.loop.actualFps`) | ≥ 30 FPS over 10-frame window |
 
 ---
 
