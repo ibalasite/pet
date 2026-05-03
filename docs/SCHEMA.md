@@ -113,6 +113,7 @@ CREATE TABLE claim_identities (
     email_encrypted       BYTEA       NULL,
     deletion_requested_at TIMESTAMPTZ NULL,
     created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_claim_identities PRIMARY KEY (id),
     CONSTRAINT uq_claim_identities_email_hash UNIQUE (email_hash)
@@ -121,6 +122,15 @@ CREATE TABLE claim_identities (
 COMMENT ON COLUMN claim_identities.email_hash IS 'SHA-256 of lowercase email. Used for lookups. Never decryptable from this column alone.';
 COMMENT ON COLUMN claim_identities.email_encrypted IS 'AES-256-GCM encrypted raw email. Set to NULL within 24 hours of a GDPR erasure request (internal SLA) and fully NULL within 7 days (gdpr_email_deletion_window_days).';
 COMMENT ON COLUMN claim_identities.deletion_requested_at IS 'Set when a GDPR erasure request is initiated. Triggers background erasure job.';
+COMMENT ON COLUMN claim_identities.updated_at IS 'Updated by the application on every mutation: when deletion_requested_at is set and when email_encrypted is nulled by the GDPR erasure job.';
+```
+
+```sql
+-- GDPR erasure background job: finds rows pending email encryption removal.
+-- Query: WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL
+CREATE INDEX idx_claim_identities_deletion
+    ON claim_identities (deletion_requested_at)
+    WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL;
 ```
 
 ---
@@ -240,12 +250,14 @@ CREATE TABLE leaderboard_snapshots (
     id            UUID        NOT NULL DEFAULT gen_random_uuid(),
     snapshot_time TIMESTAMPTZ NOT NULL,
     entries       JSONB       NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_leaderboard_snapshots PRIMARY KEY (id)
 );
 
 COMMENT ON COLUMN leaderboard_snapshots.entries IS 'Array of top 500 entries: [{rank, pet_id, pet_name, score, win_rate, rarity, level}]. Size: leaderboard_snapshot_retention_top_n = 500.';
 COMMENT ON COLUMN leaderboard_snapshots.snapshot_time IS 'UTC timestamp when this snapshot was taken. Retention: rolling 12 months (leaderboard_snapshot_retention_months = 12).';
+COMMENT ON COLUMN leaderboard_snapshots.created_at IS 'System timestamp when the row was inserted. Distinct from snapshot_time, which is the business timestamp of the leaderboard state captured.';
 ```
 
 ```sql
@@ -706,6 +718,7 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_gdpr_requests_initiating_pet` — `WHERE initiating_pet_id IS NOT NULL`: supports FK cascade integrity check and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.
 - `idx_claim_codes_created_at` and `idx_claim_codes_used_at` — support the 72-hour background cleanup job which must find rows by creation time or first-use time (whichever is later).
 - `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
+- `idx_claim_identities_deletion` — `WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL`: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once `email_encrypted` is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.
 
 ### 6.2 Composite Indexes for History Queries
 
