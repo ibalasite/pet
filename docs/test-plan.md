@@ -423,7 +423,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 |---|---|
 | Given | A pet with win_rate = 0.75, battles_played = 40, level = 5 |
 | When | `calculateArenaScore(pet)` is called |
-| Then | Result = 0.75 × 40 × level_multiplier(5), matching `(arena_score_formula = win_rate × battles_played × level_multiplier)` |
+| Then | Result = 0.75 × 40 × level_multiplier(5), matching `(arena_score_formula = win_rate * battles_played * level_multiplier)` |
 | Linked AC | AC-009-1 |
 
 ### 5.6 Level Formula Unit Tests
@@ -933,7 +933,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 |---|---|
 | Target | All player-facing endpoints combined |
 | Load | Ramp from 100 to (peak_operation_rps = 500) RPS over 2 minutes; sustain 500 RPS for 5 minutes |
-| Pass Threshold | System remains available (no HTTP 500 spikes > 1%); P99 < 1,000 ms (observability_latency_alert_threshold_ms = 1,000) |
+| Pass Threshold | System remains available (no HTTP 500 spikes > 1%); P99 < 1,000 ms (observability_latency_alert_threshold_ms = 1000) |
 | Linked NFR | NFR-SCALE-01, NFR-SCALE-02 |
 
 | TC-PERF-004 | Matchmaking concurrent entries |
@@ -946,7 +946,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 | TC-PERF-005 | Pet generation batch concurrency |
 |---|---|
 | Target | Internal batch generation pipeline |
-| Load | Generate (pet_generation_concurrent_batch = 1,000) pets simultaneously |
+| Load | Generate (pet_generation_concurrent_batch = 1000) pets simultaneously |
 | Pass Threshold | All 1,000 pets generated within (pet_generation_concurrent_batch_time_seconds = 10) seconds |
 | Linked NFR | NFR-SCALE-05 |
 
