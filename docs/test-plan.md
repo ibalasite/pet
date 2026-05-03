@@ -361,9 +361,9 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 | TC-UNIT-009 | Stat increment range |
 |---|---|
-| Given | A training action for a pet at level 5 |
+| Given | A pet with `stat_speed = 15` (any level; stat delta is level-independent per constants) |
 | When | `applyTrainingAction(pet, 'speed')` is called |
-| Then | `stat_speed` increases by an integer in `[training_stat_points_min = 1, training_stat_points_max = 3]` |
+| Then | `stat_speed` increases by an integer in `[training_stat_points_min = 1, training_stat_points_max = 3]`; the delta is uniformly random and not level-dependent |
 | Linked AC | AC-005-1 |
 
 | TC-UNIT-010 | Stat cap enforcement — training blocked at maximum |
@@ -494,16 +494,23 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 | TC-INT-003 | Seed collision retry mechanism |
 |---|---|
 | Given | The first 2 generated seeds already exist in `pets.pet_seed` |
-| When | `POST /api/v1/pets/random` is called |
+| When | `GET /api/v1/pets/random` is called |
 | Then | A unique seed is found on the 3rd attempt; HTTP 200 returned |
 | Linked AC | AC-002-3 |
 
 | TC-INT-004 | Seed collision max retries exceeded |
 |---|---|
 | Given | All attempts up to (pet_seed_collision_max_retries = 3) produce colliding seeds |
-| When | `POST /api/v1/pets/random` is called |
+| When | `GET /api/v1/pets/random` is called |
 | Then | HTTP 500 with `INTERNAL_SERVER_ERROR` |
 | Linked AC | ARCH §6.1 collision retry |
+
+| TC-INT-024 | Seed uniqueness guarantee across large batch |
+|---|---|
+| Given | 10,000 pet records generated with random seeds |
+| When | All `pets.pet_seed` values are collected |
+| Then | No two pets share the same seed value; the uniqueness constraint holds across the full generated set |
+| Linked AC | AC-002-4 |
 
 | TC-INT-005 | OTP code entry fail-closed on Redis unavailability |
 |---|---|
@@ -1041,7 +1048,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 |---|---|
 | Given | Redis unavailable |
 | When | `POST /api/v1/claim/verify` is called |
-| Then | HTTP 503 or 503-class error returned; code NOT treated as valid; alert logged |
+| Then | HTTP 503 or 429 returned; code NOT treated as valid; alert logged |
 | Linked NFR | ARCH §5.3 fail-closed |
 
 | TC-SEC-008 | Admin login IP rate limit |
@@ -1402,7 +1409,7 @@ pnpm run test:unit        # Vitest
 
 ```bash
 pnpm run test:integration # Vitest + Docker PostgreSQL + Docker Redis
-                          # All 22 TC-INT-* cases must pass
+                          # All 24 TC-INT-* cases must pass
 ```
 
 **Gate 4 — Build (blocks staging deploy on failure)**
@@ -1545,6 +1552,7 @@ This section provides a consolidated index of all test case identifiers defined 
 | TC-INT-021 | Economy config applied within cache TTL | §6.5 |
 | TC-INT-022 | SendGrid failover after consecutive failures | §6.6 |
 | TC-INT-023 | Claim email contains 6-digit code, no URL | §6.6 |
+| TC-INT-024 | Seed uniqueness guarantee across large batch | §6.1 |
 
 ### 13.3 End-to-End Test Cases (TC-E2E-*)
 
