@@ -158,7 +158,7 @@ All rate limits are enforced via Redis counters. When a limit is exceeded the se
 | Email claim attempts per hour | **5** | `email_claim_attempts_per_hour_per_email = 5` | Per email address | `rl:claim:{email_hash}` TTL 3600s |
 | Claim email retry cooldown | **60 seconds** | `claim_email_retry_cooldown_seconds = 60` | Per email, after limit reached | `rl:claim:cooldown:{email_hash}` TTL 60s |
 | OTP code entry attempts per session | **10** | `claim_code_entry_attempts_per_session = 10` | Per session ID | `rl:code_entry:{session_id}` TTL 900s |
-| OTP code entry cooldown | **60 seconds** | `claim_email_retry_cooldown_seconds = 60` | Per session, after limit reached | `rl:code_entry:cooldown:{session_id}` TTL 60s |
+| OTP code entry cooldown | **60 seconds** | *(no dedicated constant; 60 s shared by design with `claim_email_retry_cooldown_seconds`)* | Per session, after limit reached | `rl:code_entry:cooldown:{session_id}` TTL 60s |
 
 **Important**: The arena battle rate limit is the default value. Admins may tune it within the range `[arena_rate_limit_admin_min, arena_rate_limit_admin_max]` via `PUT /admin/api/config/runtime`. Changes take effect within 5 minutes (`config_cache_refresh_time_minutes = 5`).
 
@@ -2199,7 +2199,7 @@ Updates the status of a non-erasure GDPR request (data_access, restrict_processi
 | HTTP | Code | Condition |
 |------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Request body fails schema validation |
-| 400 | `WRONG_REQUEST_TYPE` | Target `request_type` is `erasure` — must use `POST /admin/api/gdpr/delete` instead |
+| 400 | `WRONG_REQUEST_TYPE` | Target `requestType` is `erasure` — must use `POST /admin/api/gdpr/delete` instead |
 | 401 | `UNAUTHORIZED` | Admin session missing or invalid |
 | 403 | `FORBIDDEN` | Authenticated admin role is not `super_admin` |
 | 404 | `NOT_FOUND` | No GDPR request with the given `requestId` |
