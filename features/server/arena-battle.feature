@@ -21,7 +21,7 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     Given pet "alpha-token-abc" has already completed (arena_rate_limit_battles_per_hour_default = 10) battles within the current hour
     When pet "alpha-token-abc" attempts to enter the matchmaking queue via POST /api/v1/arena/enter
     Then the server responds with HTTP 429
-    And the response body contains error code "ARENA_RATE_LIMIT_EXCEEDED"
+    And the response body contains error code "RATE_LIMIT_EXCEEDED"
     And pet "alpha-token-abc" is not added to the matchmaking queue
 
   Scenario: Sumo mode resolves outcome using strength stat instead of speed

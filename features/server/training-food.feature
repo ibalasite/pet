@@ -8,7 +8,7 @@ Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
     When the owner submits two more valid POST /api/v1/training requests for "trainee-token-001" on the same day
     Then the count of training_logs rows today for "trainee-token-001" reaches (training_actions_per_day = 3)
     When the owner submits a fourth POST /api/v1/training request for "trainee-token-001" on the same day
-    Then the server responds with HTTP 429 and error code "TRAINING_DAILY_LIMIT_REACHED"
+    Then the server responds with HTTP 400 and error code "TRAINING_LIMIT_REACHED"
 
   Scenario: Temporary food buff applies bonus stat during an arena battle and expires after duration
     Given pet "buffed-pet-token" has a base speed stat of 50
