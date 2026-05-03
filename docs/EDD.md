@@ -241,6 +241,7 @@ created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 generation_meta  JSONB        NOT NULL DEFAULT '{}'  -- {body, head, color_palette, accessory, rarity_trait, pattern}
 claim_identity_id UUID        NULL REFERENCES claim_identities(id) ON DELETE SET NULL -- Set at claim time; enables GDPR erasure lookup after claim_codes purge
+reserved_until    TIMESTAMPTZ NULL      -- Set to NOW()+24h when pet is generated for guest preview; NULL for claimed pets; used by cleanup job
 ──────────────────────────────────────────────────────
 INDEXES:
   idx_pets_rarity           ON pets(rarity)
@@ -250,12 +251,14 @@ INDEXES:
   idx_pets_last_trained_at  ON pets(last_trained_at) WHERE last_trained_at IS NOT NULL
   idx_pets_seed             ON pets(seed) -- unique, supports uniqueness check on generation
   idx_pets_claim_identity   ON pets(claim_identity_id) WHERE claim_identity_id IS NOT NULL
+  idx_pets_reserved_until   ON pets(reserved_until) WHERE reserved_until IS NOT NULL  -- cleanup job target
 ```
 
 Notes:
 - The raw pet access token (32-byte base64 string) is NEVER stored; only the SHA-256 hash is stored. The token is transmitted once at claim time via URL.
 - `level` is derived from `FLOOR(total_training_actions / PET_LEVEL_FORMULA_DIVISOR)` capped at 100; the column is updated on each training action commit.
 - Seed collision on generation: application retries up to 3 times (PET_SEED_COLLISION_MAX_RETRIES = 3) before returning an error.
+- **Unclaimed pet cleanup**: A background job (scheduled every 6 hours) deletes pets where `reserved_until < NOW() AND owner_token_hash IS NULL`. The 24-hour reservation window is pending CONSTANTS addition (TBD: `PET_RESERVATION_TTL_HOURS`). On claim, `reserved_until` is set to NULL.
 
 ### §4.2 User / Email (ClaimIdentity)
 
@@ -401,7 +404,7 @@ redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10
 redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤10)
 redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
 redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
-redis_key: matchmaking:queue:{mode}      NO TTL       Redis List (LPUSH / BRPOP)
+redis_key: matchmaking:queue:{mode}      NO TTL       Redis Sorted Set (ZADD score=enqueue_epoch; ZRANGEBYSCORE for stale entry cleanup); entries older than ARENA_MATCHMAKING_TIMEOUT+15s (≈45s) are considered stale and skipped by the consumer. Entry format: `"{petId}:{enqueue_epoch_ms}"`. Consumer validates entry age before pairing and discards stale entries silently.
 redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, role, createdAt (ISO), absExpiry: createdAt+28800s }; TTL=14400s enforces inactivity; absExpiry field validated on each request for 8h absolute cap
 redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invalidate replaced pet access tokens; TTL = 72h (CLAIM_TOKEN_CLEANUP_TTL = 72h)
 ```
@@ -418,16 +421,19 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | role | VARCHAR(32) | NOT NULL DEFAULT 'moderator' | 'super_admin' \| 'moderator' \| 'read_only' |
 | last_login_at | TIMESTAMPTZ | NULL | |
 | failed_attempts | SMALLINT | NOT NULL DEFAULT 0 | Reset on success |
+| locked_until | TIMESTAMPTZ | NULL | Lockout expiry timestamp; non-NULL and in future means account is temporarily locked after repeated failed_attempts |
+| deactivated_at | TIMESTAMPTZ | NULL | Soft-delete timestamp; non-NULL means account is permanently deactivated and login is blocked |
 | created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
 **Indexes**: idx_admin_users_username ON admin_users(username)
+**Note**: Admin accounts are never hard-deleted (audit log FK requires the row to remain). "Deletion" is a soft deactivation: set `deactivated_at = NOW()`. The `DELETE /admin/api/roles/:adminId` endpoint performs a soft deactivate, not a SQL DELETE.
 
 ### §4.10 AuditLog
 
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | id | BIGSERIAL | PK | Sequential for log ordering |
-| admin_id | UUID | NULL REFERENCES admin_users(id) | Actor; NULL for failed logins with unknown username |
+| admin_id | UUID | NULL REFERENCES admin_users(id) ON DELETE RESTRICT | Actor; NULL for failed logins with unknown username |
 | action | VARCHAR(128) | NOT NULL | e.g., 'pet.ban', 'config.arena_rate_limit' |
 | target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config_runtime' \| 'config_economy' \| 'gdpr_request' \| 'admin_user' |
 | target_id | TEXT | NULL | UUID or key of affected entity |
@@ -443,7 +449,8 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | id | UUID | PK DEFAULT gen_random_uuid() | |
-| listing_pet_id | UUID | NOT NULL REFERENCES pets(id) | Pet being traded |
+| listing_id | UUID | NOT NULL REFERENCES marketplace_listings(id) | Originating listing (canonical FK; enables audit trail and dispute resolution) |
+| pet_id | UUID | NOT NULL REFERENCES pets(id) | Pet traded (denormalised from listing for fast anti-flip queries) |
 | seller_token_hash | TEXT | NOT NULL | Hashed access token of seller |
 | buyer_token_hash | TEXT | NOT NULL | Hashed access token of buyer |
 | price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Food credits |
@@ -451,7 +458,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | listed_at | TIMESTAMPTZ | NOT NULL | |
 | completed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
-**Indexes**: idx_trade_records_listing_pet ON trade_records(listing_pet_id); idx_trade_records_completed ON trade_records(completed_at DESC)
+**Indexes**: idx_trade_records_listing ON trade_records(listing_id); idx_trade_records_pet ON trade_records(pet_id); idx_trade_records_completed ON trade_records(completed_at DESC)
 
 ### §4.12 MarketplaceListing (Phase 3 — FF_MARKETPLACE)
 
@@ -466,7 +473,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | expires_at | TIMESTAMPTZ | NULL | Optional expiry; NULL = no expiry |
 | completed_at | TIMESTAMPTZ | NULL | Set when status transitions to 'sold' or 'cancelled' |
 
-**Indexes**: idx_marketplace_listings_status ON marketplace_listings(status) WHERE status = 'active'; idx_marketplace_listings_pet ON marketplace_listings(pet_id); idx_marketplace_listings_listed_at ON marketplace_listings(listed_at DESC)
+**Indexes**: idx_marketplace_listings_status ON marketplace_listings(status) WHERE status = 'active'; idx_marketplace_listings_pet ON marketplace_listings(pet_id); idx_marketplace_listings_listed_at ON marketplace_listings(listed_at DESC); `CREATE UNIQUE INDEX idx_marketplace_listings_active_pet ON marketplace_listings(pet_id) WHERE status = 'active'` — prevents duplicate concurrent active listings per pet at DB level
 
 **Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `completed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in trade_records before accepting a new listing. `completed_at` (purchase timestamp) is used — not `listed_at` — because the protection window begins when the buyer takes ownership.
 
@@ -476,7 +483,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 |--------|------|-------------|-------|
 | id | UUID | PK DEFAULT gen_random_uuid() | Returned as jobId in API response |
 | claim_identity_id | UUID | NOT NULL REFERENCES claim_identities(id) | Data subject (email identity); a single erasure covers all pets under this identity |
-| initiating_pet_id | UUID | NULL REFERENCES pets(id) | Pet whose token authenticated the self-service submission; NULL for admin-initiated requests |
+| initiating_pet_id | UUID | NULL REFERENCES pets(id) ON DELETE SET NULL | Pet whose token authenticated the self-service submission; NULL for admin-initiated requests |
 | request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' |
 | status | VARCHAR(32) | NOT NULL DEFAULT 'pending' | 'pending' \| 'processing' \| 'completed' \| 'failed' |
 | submitted_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
@@ -561,6 +568,7 @@ Auth: Required (pet owner token)
 Request: `{ petId: string, mode: 'RACE' | 'SUMO', acceptAI?: boolean }`
 Description: Enqueues pet in matchmaking queue (Redis). Waits up to 30 seconds (ARENA_MATCHMAKING_TIMEOUT) for an opponent. Returns battle result synchronously (HTTP long-poll) or AI result if no opponent found and `acceptAI: true`.
 Response: `{ matchId: string, result: 'WIN' | 'LOSS', opponentPetId: string | null, isAiOpponent: boolean, statDelta: number, newLeaderboardScore?: number }`
+Tie-breaking: If both pets have equal effective stats after the ±15% modifier, the challenger (pet that entered the queue first) wins. This is deterministic and derived from the enqueue timestamp stored in the queue entry.
 Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10); HTTP 429 + `Retry-After` header on breach.
 
 #### GET /api/v1/arena/match/:matchId
@@ -670,9 +678,9 @@ Description: List all GDPR requests in the gdpr_requests table for the admin GDP
 
 #### POST /admin/api/gdpr/delete
 Auth: Admin session (Super Admin)
-Request: `{ emailHash: string, reason: string }`
+Request: `{ emailHash: string, reason: string (max 500 chars — ADMIN_MODERATION_REASON_MAX_CHARS) }`
 Response: `{ jobId: string, estimatedCompletion: ISO8601 }`
-Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW).
+Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW). `reason` is stored in `gdpr_requests.admin_notes` on row creation.
 
 #### POST /admin/api/battles/:matchId/flag
 Auth: Admin session (Moderator+)
@@ -725,7 +733,7 @@ Write endpoints require pet access token auth. `GET /listings` is public (unauth
 | `POST` | `/api/v1/marketplace/listings` | Pet token | Create listing (min price enforced: level × 100 + rarity_multiplier × 500; 7-day anti-flip check on last completed trade — MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) |
 | `DELETE` | `/api/v1/marketplace/listings/:listingId` | Pet token (owner only) | Cancel own listing |
 | `POST` | `/api/v1/marketplace/listings/:listingId/buy` | Pet token | Purchase listing; 5% fee deducted from seller proceeds |
-| `GET` | `/api/v1/marketplace/history/:petId` | Pet token | Trade history for a pet |
+| `GET` | `/api/v1/marketplace/history/:petId` | Pet token | Trade history for a pet (private — trade prices are commercial-in-confidence; intentionally differs from public arena battle history) |
 
 **Fee**: TRADE_TRANSACTION_FEE = 5% deducted from seller, credited to platform.
 **Anti-flip**: MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days between purchase and re-listing.
@@ -765,7 +773,9 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 - Session: server-side Redis session with httpOnly + SameSite=Strict cookie
 - Inactivity expiry: 4 hours (ADMIN_SESSION_INACTIVITY_EXPIRY = 4h)
 - Absolute expiry: 8 hours regardless of activity (ADMIN_SESSION_ABSOLUTE_EXPIRY = 8h)
-- Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100)
+- Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100) — applies to authenticated sessions only
+- **Pre-authentication rate limit**: `POST /admin/api/auth/login` is rate-limited by IP address: 10 attempts per 15 minutes; HTTP 429 on breach. Redis key: `rl:admin_login:{ip_hash}` TTL 900s. (Constants TBD: `ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS`, `ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS`)
+- **Account lockout**: After 10 consecutive `failed_attempts` on a valid username, the account is locked for 30 minutes (`deactivated_at` is NOT used for lockout — a separate `locked_until TIMESTAMPTZ NULL` column is set). Login returns HTTP 403 `{ code: "ACCOUNT_LOCKED", unlockedAt: ISO8601 }`. Lockout resets on successful login. (Constants TBD: `ADMIN_LOGIN_LOCKOUT_THRESHOLD`, `ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES`)
 - All admin auth events (login, logout, failed attempt) written to audit log
 - **First-login TOTP enrollment**: New admin accounts have `totp_secret_encrypted = NULL`. On first login attempt (correct username+password but no TOTP secret), the login endpoint returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED", setupToken: "<signed-short-lived-JWT>" }`. The admin client uses this `setupToken` to call `POST /admin/api/auth/totp/setup` (no session exists yet — setup token is the auth mechanism). After TOTP setup, the admin performs a standard login with `totpCode` to establish a session. All subsequent logins require a valid `totpCode`. There is no path to an authenticated session without completing TOTP enrollment.
 
@@ -776,6 +786,7 @@ Token recovery: Users who lose their URL may request a new access link via POST 
 | Email claim initiation | 5 | per hour per email | Redis TTL 3600s | HTTP 429 + Retry-After |
 | Claim code entry | 10 | per session | Redis TTL 900s | HTTP 429 + 60s cooldown |
 | Arena battles per pet | 10 (default; 1–50 admin) | per hour per pet | Redis TTL 3600s | HTTP 429 + Retry-After |
+| Admin login (pre-auth, per IP) | 10 (TBD constant) | per 15 minutes per IP | Redis TTL 900s | HTTP 429 |
 | Admin portal requests | 100 | per minute per admin | Redis TTL 60s | HTTP 429 |
 | Health endpoint | No limit | — | N/A | 200 always |
 
@@ -841,7 +852,7 @@ All rate limit keys are stored in Redis. The Redis counter TTL equals the window
 
 - **Horizontal scaling**: API server replicas autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD = 70%). Railway autoscaling or Kubernetes HPA.
 - **Peak load**: 500 RPS sustained, 2,000 PCU arena events (PEAK_OPERATION_RPS / PEAK_CONCURRENT_USERS from CONSTANTS).
-- **Arena matchmaking**: Redis List queue; BRPOP with 30-second timeout (ARENA_MATCHMAKING_TIMEOUT). Supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
+- **Arena matchmaking**: Redis Sorted Set queue (score = enqueue epoch); consumer uses ZRANGEBYSCORE to pop the oldest eligible entry. Stale entries (>45s old = ARENA_MATCHMAKING_TIMEOUT + 15s buffer) are discarded before pairing to prevent ghost matches from abandoned connections. Supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
 - **Leaderboard**: Redis sorted set as authoritative real-time source; PostgreSQL snapshot as durable backup. Update lag ≤30 seconds.
 - **Pet generation concurrency**: 1,000 concurrent pet generations complete within 10 seconds (PET_GENERATION_CONCURRENT_BATCH = 1,000; PET_GENERATION_CONCURRENT_BATCH_TIME = 10s).
 - **Database**: Primary writer handles all mutations. Read replica handles leaderboard, public pet pages, and admin list views. Connection pool allows burst to 50 connections.
