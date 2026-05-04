@@ -1304,6 +1304,8 @@ LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-staging \
 
 if [ -z "$LAST_GOOD_REVISION" ] || [ "$LAST_GOOD_REVISION" = "null" ]; then
   echo "WARNING: No previous successful deployment found; skipping automatic rollback."
+elif ! [[ "${LAST_GOOD_REVISION}" =~ ^[0-9]+$ ]]; then
+  echo "ERROR: LAST_GOOD_REVISION '${LAST_GOOD_REVISION}' is not a plain integer; skipping rollback."
 else
   curl -s -X POST "$ARGOCD_SERVER/api/v1/applications/pixel-pet-arena-staging/rollback" \
     -H "Authorization: Bearer $ARGOCD_TOKEN" \
@@ -1609,8 +1611,8 @@ pipeline {
                   ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256 | awk '{print $1}')
                   curl -sSL -o /usr/local/bin/argocd \
                     https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64
-                  chmod +x /usr/local/bin/argocd
                   echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
+                  chmod +x /usr/local/bin/argocd
                   argocd login "${ARGOCD_SERVER}" --auth-token "${ARGOCD_TOKEN}" --grpc-web
                 '''
                 if (env.TAG_NAME) {
