@@ -32,7 +32,7 @@ The challenge selection screen lists all opponents the player can fight right no
 └───────────────────────────────────────────────┘
 ```
 
-The opponent list is fetched via `GET /api/v1/arena/challenge` on mount. Each row shows the opponent's pet name, level, type, win rate, and current leaderboard rank. A segmented mode toggle (Race / Sumo) appears at the top because `FF_ARENA_SUMO` is `true`; the selected mode is stored in component state and passed as a query param when initiating a battle. Tapping the play button `[▶]` on any row initiates the challenge and transitions to the Battle Animation screen. The list supports infinite scroll, loading 12 opponents per page.
+The opponent list is fetched via `GET /api/v1/arena/challenge` on mount. Each row shows the opponent's pet name, level, type, win rate, and current leaderboard rank. A segmented mode toggle (Race / Sumo) appears at the top because `FF_ARENA_SUMO` is `true`; the selected mode is stored in component state and included in the JSON request body when initiating a battle. Tapping the play button `[▶]` on any row initiates the challenge and transitions to the Battle Animation screen. The list supports infinite scroll, loading 12 opponents per page.
 
 ### API Call — GET /api/v1/arena/challenge
 
@@ -106,6 +106,7 @@ Response 200:
   "winnerId": "pet_abc123",
   "xpGain": 120,
   "newRank": 39,
+  "previousRank": 43,
   "battleLog": [
     { "turn": 1, "actorId": "pet_volt42", "move": "Static Shock", "damage": 18 },
     { "turn": 2, "actorId": "pet_abc123", "move": "Fire Slash",   "damage": 25 }

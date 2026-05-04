@@ -125,7 +125,7 @@ Auto-refresh uses a 30-second polling interval driven by `setInterval` in the Vu
 
 ## Screen 3 — GDPR Erasure Workflow
 
-The GDPR Erasure screen provides a structured, auditable multi-step form for processing Article 17 right-to-erasure requests. Only `superadmin` users can access this section; `moderator` users see a locked state with the message "Contact a superadmin to process erasure requests." This section is deliberately not accessible from the left nav for moderator sessions — the nav item is absent entirely, not merely disabled.
+The GDPR Erasure screen provides a structured, auditable multi-step form for processing Article 17 right-to-erasure requests. Only `superadmin` users can access this section. `moderator` sessions never reach this screen: the left nav item is absent entirely (rendered with `v-if="isSuperadmin"`), and the Vue Router `beforeEach` guard redirects any direct `/gdpr` navigation back to the dashboard before the component mounts.
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
