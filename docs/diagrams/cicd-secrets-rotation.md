@@ -12,6 +12,7 @@ The following secrets are managed across the pixel-pet-arena deployment. They ar
 | `SUPABASE_SERVICE_KEY` | GH Actions + K8s | api — Supabase Admin SDK | Quarterly |
 | `DATABASE_URL` | K8s only | api — Fastify PostgreSQL connection | On DB credential rotation |
 | `REDIS_URL` | K8s only | api — Redis session / cache | On Redis credential rotation |
+| `REDIS_URL_STAGING` | GH Actions | deploy-staging.yml | On Redis credential rotation |
 | `JWT_SECRET` | K8s only | api — JWT signing | Annually or on suspected leak |
 | `SUPABASE_ANON_KEY` | GH Actions + K8s | api, player-app build | On Supabase project key rotation |
 | `DETECT_SECRETS_BASELINE` | Repo file | ci.yml — baseline diff | Updated in housekeeping PRs |
@@ -96,8 +97,6 @@ flowchart TD
 
     subgraph RESTART_STG [Staging Service Restart]
         ROLLOUT_API_STG[kubectl rollout restart\ndeployment/api -n staging]
-        ROLLOUT_PLAYER_STG[kubectl rollout restart\ndeployment/player-app -n staging]
-        ROLLOUT_ADMIN_STG[kubectl rollout restart\ndeployment/admin-app -n staging]
         HEALTH_STG{Staging Pods\nHealthy?}
         STG_OK([Staging Verified\nNew secret active])
         STG_FAIL([Staging Rollout Failed\nInvestigate credential\nDo NOT proceed to prod])
@@ -106,8 +105,6 @@ flowchart TD
     subgraph RESTART_PROD [Production Service Restart — sequential]
         ROLLOUT_API_PROD[kubectl rollout restart\ndeployment/api -n production]
         WAIT_API_PROD[await api rollout complete]
-        ROLLOUT_FRONTENDS_PROD[kubectl rollout restart\ndeployment/player-app\ndeployment/admin-app -n production]
-        WAIT_FRONTENDS_PROD[await frontend rollouts complete]
         HEALTH_PROD{Production Pods\nHealthy?}
         PROD_OK([Production Verified\nNew secret active])
         PROD_FAIL([Production Rollout Failed\nEmergency rollback\nPage on-call])
@@ -118,16 +115,12 @@ flowchart TD
 
     DETECT --> PREP
     PREP --> RESTART_STG
-    ROLLOUT_API_STG --> ROLLOUT_PLAYER_STG
-    ROLLOUT_PLAYER_STG --> ROLLOUT_ADMIN_STG
-    ROLLOUT_ADMIN_STG --> HEALTH_STG
+    ROLLOUT_API_STG --> HEALTH_STG
     HEALTH_STG -- Healthy --> STG_OK
     HEALTH_STG -- Unhealthy --> STG_FAIL
     STG_OK --> RESTART_PROD
     ROLLOUT_API_PROD --> WAIT_API_PROD
-    WAIT_API_PROD --> ROLLOUT_FRONTENDS_PROD
-    ROLLOUT_FRONTENDS_PROD --> WAIT_FRONTENDS_PROD
-    WAIT_FRONTENDS_PROD --> HEALTH_PROD
+    WAIT_API_PROD --> HEALTH_PROD
     HEALTH_PROD -- Healthy --> PROD_OK
     HEALTH_PROD -- Unhealthy --> PROD_FAIL
     PROD_OK --> REVOKE_OLD

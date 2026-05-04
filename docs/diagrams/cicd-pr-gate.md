@@ -29,7 +29,7 @@ flowchart TD
     end
 
     subgraph BUILD [Docker Builds — parallel]
-        BUILD_API[docker build api\nmulti-stage · VITE_API_BASE_URL ARG]
+        BUILD_API[docker build api\nmulti-stage TypeScript compile]
         BUILD_PLAYER[docker build player-app\nnginx:alpine · port 80]
         BUILD_ADMIN[docker build admin-app\nnginx:alpine · port 80]
     end
