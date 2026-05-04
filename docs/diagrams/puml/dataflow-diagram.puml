@@ -1,0 +1,98 @@
+@startuml pixel-pet-arena-dataflow
+
+!define PROCESS #F5F5F5
+!define DATASTORE #E8F5E9
+!define EXTERNAL #FFF5E6
+!define ACTOR #E8F4F8
+
+skinparam linetype ortho
+
+left to right direction
+
+entity "Player" as player #E8F4F8
+entity "Admin" as admin #E8F4F8
+
+process "Claim Flow" as claimProcess #F5F5F5
+process "Training\nSystem" as trainingProc #F5F5F5
+process "Arena\nMatchmaking" as arenaProc #F5F5F5
+process "Battle\nCalculation" as battleProc #F5F5F5
+process "Leaderboard\nUpdate" as lbProc #F5F5F5
+process "GDPR\nErasure Job" as gdprProc #F5F5F5
+process "Admin\nModeration" as adminProc #F5F5F5
+
+database "PostgreSQL\nPrimary" as pgWrite #E8F5E9
+database "PostgreSQL\nRead Replica" as pgRead #E8F5E9
+database "Redis\nLeaderboard" as redisLb #E8F5E9
+database "Redis\nMatchmaking" as redisQueue #E8F5E9
+database "Redis\nRate Limit" as redisRl #E8F5E9
+
+entity "SendGrid" as sendgrid #FFF5E6
+entity "Nodemailer" as nodemailer #FFF5E6
+
+player --> claimProcess: email + OTP
+claimProcess --> pgWrite: INSERT claim_codes
+claimProcess --> pgWrite: INSERT claim_identities
+claimProcess --> sendgrid: send email
+sendgrid -.->|fallback| nodemailer
+claimProcess --> player: return access token
+
+player --> trainingProc: POST /train
+trainingProc --> redisRl: check daily limit
+redisRl --> trainingProc: count
+trainingProc --> pgWrite: INSERT training_logs
+trainingProc --> pgWrite: UPDATE pets.stat_*
+pgWrite --> pgRead: replicate
+
+player --> arenaProc: POST /arena/enter
+arenaProc --> redisRl: check battle limit
+arenaProc --> redisQueue: LPUSH matchmaking
+redisQueue --> arenaProc: opponent or timeout
+
+arenaProc --> battleProc: start match
+battleProc --> battleProc: seeded random calc
+battleProc --> pgWrite: INSERT arena_matches
+battleProc --> pgWrite: UPDATE winners.stats
+pgWrite --> pgRead: replicate
+battleProc --> redisLb: ZADD leaderboard
+redisLb --> lbProc: leaderboard data
+
+pgRead --> lbProc: query top 500
+lbProc --> pgWrite: INSERT leaderboard_snapshots
+lbProc --> redisLb: update sorted set
+
+admin --> adminProc: moderation action
+adminProc --> pgWrite: UPDATE pets.is_banned
+adminProc --> pgWrite: INSERT admin_audit_log
+pgWrite --> pgRead: replicate
+
+gdprProc --> pgWrite: query deletion_requested_at IS NOT NULL
+pgWrite --> gdprProc: claim_identities rows
+gdprProc --> pgWrite: UPDATE claim_identities.email_encrypted = NULL
+gdprProc --> pgWrite: cleanup claim_codes
+
+note bottom of redisRl
+  Rate limit counters
+  TTL: 1 hour per window
+end note
+
+note bottom of redisQueue
+  Matchmaking queue
+  Score: enqueue epoch
+  Timeout: 30 seconds
+end note
+
+note bottom of lbProc
+  Runs hourly
+  Reads PostgreSQL
+  Updates Redis
+  Stores snapshots
+end note
+
+note bottom of gdprProc
+  Runs daily
+  Marks deletion_requested_at
+  Hashes email within 24h
+  Cleans tokens at 72h
+end note
+
+@enduml

@@ -1,0 +1,94 @@
+@startuml pixel-pet-arena-components
+
+!define FRONTEND #E8F4F8
+!define BACKEND #F5F5F5
+!define DATA #E8F5E9
+!define EXTERNAL #FFF5E6
+
+skinparam linetype ortho
+
+package "Client Layer" #FRONTEND {
+  component [Player App\nReact + Phaser.js] as playerApp
+  component [Admin Portal\nVue 3 + Element Plus] as adminPortal
+  component [Vite Build] as viteBuild
+}
+
+package "API Layer" #BACKEND {
+  component [API Server\nNode.js / Fastify] as apiServer
+  component [Admin Routes\n/admin prefix] as adminRoutes
+  component [Game Routes\n/ prefix] as gameRoutes
+  component [Rate Limiter\nMiddleware] as rateLimiter
+  component [JWT Auth\nMiddleware] as authMw
+}
+
+package "Data Layer" #DATA {
+  component [PostgreSQL 15+\nPrimary + Replica] as postgres
+  component [Redis 7+\nLeaderboard / Cache] as redis
+  component [Migration Tool\nLiquibase] as migrations
+}
+
+package "External Services" #EXTERNAL {
+  component [SendGrid API] as sendgrid
+  component [CDN / Vercel] as cdn
+  component [S3 Backups] as s3
+}
+
+playerApp --> viteBuild: builds to
+viteBuild --> cdn: deployed to
+cdn --> apiServer: calls
+
+adminPortal --> viteBuild: builds to
+viteBuild --> cdn: deployed to
+cdn --> adminRoutes: calls
+
+apiServer --> authMw: uses
+apiServer --> rateLimiter: uses
+authMw --> gameRoutes: protects
+rateLimiter --> adminRoutes: limits
+authMw --> adminRoutes: protects
+
+gameRoutes --> postgres: read/write
+gameRoutes --> redis: cache hit/miss
+adminRoutes --> postgres: read/write
+adminRoutes --> redis: config cache
+
+gameRoutes --> sendgrid: email delivery
+postgres --> s3: backup pipeline
+postgres --> migrations: schema updates
+
+note right of playerApp
+  Sprite rendering,
+  training UI,
+  arena match viewer,
+  leaderboard display
+end note
+
+note right of adminPortal
+  Pet management table,
+  leaderboard moderation,
+  config tuning UI,
+  audit log viewer
+end note
+
+note right of apiServer
+  REST endpoints,
+  WebSocket namespace (future),
+  JSON Schema validation,
+  plugin ecosystem
+end note
+
+note right of postgres
+  claim_identities,
+  pets, arena_matches,
+  training_logs,
+  leaderboard_snapshots
+end note
+
+note right of redis
+  Sorted sets (leaderboard),
+  rate limit counters,
+  matchmaking queue,
+  session tokens
+end note
+
+@enduml

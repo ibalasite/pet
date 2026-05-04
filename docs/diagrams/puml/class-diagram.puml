@@ -1,0 +1,164 @@
+@startuml pixel-pet-arena-class-diagram
+
+!define ENTITY #F5F5F5
+!define PROCESS #E8F4F8
+!define EXTERNAL #FFF5E6
+
+skinparam linetype ortho
+skinparam classBackgroundColor ENTITY
+skinparam classBorderColor #333333
+
+class User {
+  id: UUID
+  email_hash: VARCHAR(64)
+  email_encrypted: BYTEA
+  deletion_requested_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  updated_at: TIMESTAMPTZ
+  --
+  +getClaimedPets()
+  +requestGDPRDeletion()
+}
+
+class Pet {
+  id: UUID
+  seed: BIGINT
+  rarity: ENUM
+  pet_name: VARCHAR(64)
+  stat_speed: SMALLINT [1..100]
+  stat_strength: SMALLINT [1..100]
+  stat_stamina: SMALLINT [1..100]
+  level: SMALLINT [1..100]
+  total_training_actions: INTEGER
+  is_banned: BOOLEAN
+  owner_token_hash: VARCHAR(64)
+  claimed_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  --
+  +train(type): void
+  +compete(opponent): BattleResult
+  +getStats(): Stats
+}
+
+class ClaimCode {
+  id: UUID
+  pet_id: UUID
+  email_hash: VARCHAR(64)
+  code_hash: VARCHAR(64)
+  expires_at: TIMESTAMPTZ
+  used_at: TIMESTAMPTZ
+  attempts: SMALLINT
+  created_at: TIMESTAMPTZ
+  --
+  +verify(code): boolean
+  +isExpired(): boolean
+}
+
+class ArenaMatch {
+  id: UUID
+  pet_a_id: UUID
+  pet_b_id: UUID
+  is_ai_opponent: BOOLEAN
+  mode: ENUM {RACE, SUMO}
+  winner_pet_id: UUID
+  random_seed: BIGINT
+  stat_delta_a: SMALLINT
+  stat_delta_b: SMALLINT
+  duration_seconds: SMALLINT [5..15]
+  battle_log: JSONB
+  completed_at: TIMESTAMPTZ
+  --
+  +calculateOutcome(): UUID
+  +getReplay(): BattleLog
+}
+
+class TrainingLog {
+  id: UUID
+  pet_id: UUID
+  training_type: ENUM {RUN, STRENGTH, STAMINA}
+  stat_delta: SMALLINT [1..3]
+  stat_after: SMALLINT
+  completed_at: TIMESTAMPTZ
+  --
+  +getDailyCount(): INTEGER
+}
+
+class FoodBuff {
+  id: UUID
+  pet_id: UUID
+  buff_type: ENUM {SPEED_BOOST, STRENGTH_BOOST, STAMINA_BOOST}
+  stat_multiplier: DECIMAL
+  expires_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  --
+  +isActive(): boolean
+  +getStatBonus(stat): INTEGER
+}
+
+class Leaderboard {
+  id: UUID
+  snapshot_time: TIMESTAMPTZ
+  entries: JSONB
+  --
+  +getTopPets(limit): Pet[]
+  +getRank(pet_id): INTEGER
+  +updateScores(): void
+}
+
+class AdminAccount {
+  id: UUID
+  username: VARCHAR(64)
+  password_hash: VARCHAR(256)
+  role: ENUM {MODERATOR, ADMIN}
+  is_locked: BOOLEAN
+  created_at: TIMESTAMPTZ
+  --
+  +banPet(pet_id, reason): void
+  +setRateLimits(config): void
+}
+
+class AdminAuditLog {
+  id: UUID
+  admin_id: UUID
+  action: VARCHAR(255)
+  target_type: VARCHAR(50)
+  target_id: UUID
+  details: JSONB
+  created_at: TIMESTAMPTZ
+  --
+  +log(action, target): void
+}
+
+class Session {
+  id: UUID
+  admin_id: UUID
+  token_hash: VARCHAR(64)
+  expires_at: TIMESTAMPTZ
+  inactivity_expires_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  --
+  +isValid(): boolean
+  +refresh(): void
+}
+
+class BattleResult {
+  winner_id: UUID
+  loser_id: UUID
+  mode: ENUM
+  duration: INTEGER
+  log: BattleLog
+  timestamp: TIMESTAMPTZ
+}
+
+User "1" -- "*" Pet : "claims >"
+Pet "1" -- "*" ArenaMatch : "participates in >"
+Pet "1" -- "*" TrainingLog : "records >"
+Pet "1" -- "*" FoodBuff : "uses >"
+ArenaMatch "1" -- "1" BattleResult : "produces >"
+ClaimCode "1" -- "1" Pet : "unlocks >"
+Leaderboard "1" -- "*" Pet : "ranks >"
+AdminAccount "1" -- "*" AdminAuditLog : "logs >"
+AdminAccount "1" -- "*" Session : "creates >"
+Session "1" -- "1" AdminAccount : "belongs to >"
+
+@enduml

@@ -1,0 +1,79 @@
+@startuml pixel-pet-arena-state-pet
+
+title Pet State Machine
+
+[*] --> GENERATED
+
+state GENERATED {
+  [*] --> UNCLAIMED
+  UNCLAIMED --> CLAIMED: claim_code_verified()
+  note right of UNCLAIMED
+    Reserved for 24h (guest preview)
+    owner_token_hash: NULL
+    claimed_at: NULL
+  end note
+}
+
+state CLAIMED {
+  [*] --> IDLE
+  IDLE --> TRAINING: train()
+  TRAINING --> IDLE: complete_action()
+  IDLE --> BATTLING: enter_arena()
+  BATTLING --> IDLE: battle_complete()
+  IDLE --> RESTING: >> 3 days without training
+  RESTING --> TRAINING: train() [if trained today]
+  RESTING --> IDLE: reset_daily_training()
+
+  note right of IDLE
+    owner_token_hash: set
+    claimed_at: now()
+    last_trained_at: recent or null
+  end note
+
+  note right of TRAINING
+    Stat delta +[1..3]
+    Action count incremented
+    Level updated
+  end note
+
+  note right of RESTING
+    Visual state: neglected
+    Sprite shows sad face
+    last_trained_at < NOW() - 3 days
+  end note
+
+  note right of BATTLING
+    Match in progress
+    Cannot train/claim during
+  end note
+}
+
+CLAIMED --> BANNED: admin_ban()
+state BANNED {
+  [*] --> BANNED_STATE
+  BANNED_STATE: is_banned = TRUE
+  BANNED_STATE: banned_reason = text
+  BANNED_STATE: banned_at = now()
+  note right of BANNED_STATE
+    Pet removed from leaderboard
+    Cannot enter arena
+    Cannot be trained
+    Visible to owner for transparency
+  end note
+}
+
+GENERATED --> DELETED: cleanup_job() [if reserved_until < now() && unclaimed]
+CLAIMED --> DELETED: gdpr_erasure() [if owner requests deletion]
+
+[*] --> [*]: state_query(pet_id) returns current state
+
+note bottom
+  State transitions driven by:
+  - Training action (daily reset at UTC 00:00)
+  - Arena match completion
+  - Admin moderation
+  - GDPR erasure request
+  - Scheduled cleanup job (reserved pets >24h old)
+end note
+
+@enduml

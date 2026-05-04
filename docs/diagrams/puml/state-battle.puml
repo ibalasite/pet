@@ -1,0 +1,99 @@
+@startuml pixel-pet-arena-state-battle
+
+title Arena Match State Machine
+
+[*] --> CREATED: arena_match record inserted
+
+state CREATED {
+  [*] --> FINDING_OPPONENT
+  note right of FINDING_OPPONENT
+    Time: 0-30s
+    Matchmaking queue polled
+    One of:
+    - Opponent found
+    - Timeout (AI fallback)
+  end note
+}
+
+FINDING_OPPONENT --> READY: opponent_found() OR timeout()
+state READY {
+  [*] --> READY_STATE
+  note right of READY_STATE
+    pet_a_id: assigned
+    pet_b_id: assigned (human or AI)
+    random_seed: generated
+    Duration: 5-15s
+    Both players ready
+  end note
+}
+
+READY --> IN_PROGRESS: start_match()
+state IN_PROGRESS {
+  [*] --> RUNNING
+  note right of RUNNING
+    Duration: 5-15s per mode
+    Mode: RACE or SUMO
+    Seeded random ±15% modifier
+    Battle log events recorded:
+    - attack
+    - dodge
+    - critical_hit
+    - buff_applied
+    - stat_calc
+  end note
+}
+
+IN_PROGRESS --> RESOLVED: duration_complete()
+state RESOLVED {
+  [*] --> CALCULATE_OUTCOME
+  CALCULATE_OUTCOME --> ASSIGN_WINNER
+  ASSIGN_WINNER --> UPDATE_STATS
+  UPDATE_STATS --> COMPLETE
+
+  note right of CALCULATE_OUTCOME
+    Outcome formula:
+    Base = (pet.stat_relevant +
+            random_seed * ±15%)
+    If buff active: Base *= multiplier
+  end note
+
+  note right of ASSIGN_WINNER
+    winner_pet_id: determined
+    loser_pet_id: determined
+    Draw not possible
+    (tie-break: speed wins)
+  end note
+
+  note right of UPDATE_STATS
+    Update: training_logs
+    Update: arena_matches
+    Update: Redis leaderboard ZSET
+    Update: pet.stat_* (if buffed)
+  end note
+
+  note right of COMPLETE
+    completed_at: NOW()
+    Match immutable from here
+    Available for replay
+  end note
+}
+
+RESOLVED --> ARCHIVED: retention_window_complete()
+state ARCHIVED {
+  note right
+    Kept for 60 days minimum
+    After: available for deletion
+    (retention policy TBD)
+  end note
+}
+
+[*] --> [*]: query_status(match_id)
+
+note bottom
+  Timeouts handled:
+  - FINDING_OPPONENT > 30s: switch to AI
+  - IN_PROGRESS > 20s: force completion
+  - RESOLVED: 24h window for stats confirmation
+end note
+
+@enduml

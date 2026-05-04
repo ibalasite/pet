@@ -21,6 +21,61 @@ The methodology follows forward traceability: each user story is the anchor, wit
 
 ---
 
+## BDD Feature File Inventory
+
+This section maps all 23 BDD feature files (1,797 Gherkin lines, 131 scenarios) to their corresponding user stories and test layers.
+
+### Server-Side Features (6 files, 172 scenarios)
+
+| Feature File | Scenarios | US Stories | Layer | Coverage |
+|---|---|---|---|---|
+| `features/server/claim-flow.feature` | 4 | US-AUTH-001, US-AUTH-002 | Backend API | ✅ Covered |
+| `features/server/arena-battle.feature` | 4 | US-ARENA-001, US-ARENA-002 | Backend API | ✅ Covered |
+| `features/server/training-food.feature` | 2 | US-TRAIN-001, US-FOOD-001 | Backend API | ✅ Covered |
+| `features/server/leaderboard.feature` | 3 | US-BOARD-001, US-ADMIN-002 | Backend API | ✅ Covered |
+| `features/server/gdpr-erasure.feature` | 2 | US-ADMIN-004 | Backend API | ✅ Covered |
+| `features/server/suspicious-detection.feature` | 3 | US-ADMIN-005 | Backend API | ✅ Covered |
+| **Total** | **18** | — | — | — |
+
+### Client-Side Features (9 files, 1,071 scenarios)
+
+| Feature File | Scenarios | US Stories | Layer | Coverage |
+|---|---|---|---|---|
+| `features/client/pet-display.feature` | 8 | US-PET-001, US-PET-002 | Frontend UI | ✅ Covered |
+| `features/client/claim-flow-ui.feature` | 10 | US-AUTH-001, US-AUTH-002 | Frontend UI | ✅ Covered |
+| `features/client/training-ui.feature` | 8 | US-TRAIN-001 | Frontend UI | ✅ Covered |
+| `features/client/food-system.feature` | 17 | US-FOOD-001 | Frontend UI | ✅ Covered |
+| `features/client/arena-ui.feature` | 10 | US-ARENA-001, US-ARENA-002 | Frontend UI | ✅ Covered |
+| `features/client/leaderboard-ui.feature` | 10 | US-BOARD-001, US-RARITY-001 | Frontend UI | ✅ Covered |
+| `features/client/battle-records.feature` | 16 | US-RECORD-001 | Frontend UI | ⚠️ Partial |
+| `features/client/admin-portal.feature` | 13 | US-ADMIN-001, US-ADMIN-003, US-ADMIN-006 | Frontend Admin | ✅ Covered |
+| `features/client/settings.feature` | 21 | US-AUTH-002, US-ADMIN-004 | Frontend UI | ⚠️ Partial |
+| **Total** | **113** | — | — | — |
+
+### Legacy Root-Level Features (8 files, 554 scenarios)
+
+**Note**: The following 8 feature files are located at `/features/` (root level) and appear to be duplicates or legacy versions of the server and client features. They are NOT formally included in the RTM coverage matrix. Recommend archival or formal consolidation with the server/client organization.
+
+| Feature File | Scenarios | Status |
+|---|---|---|
+| `features/auth-login.feature` | 7 | Legacy (duplicate of claim-flow-ui.feature intent) |
+| `features/pet-management.feature` | 7 | Legacy (duplicate of pet-display.feature intent) |
+| `features/pet-training.feature` | 8 | Legacy (duplicate of training-ui.feature intent) |
+| `features/arena-combat.feature` | 10 | Legacy (duplicate of arena-ui.feature intent) |
+| `features/arena-leaderboard.feature` | 11 | Legacy (duplicate of leaderboard-ui.feature intent) |
+| `features/trading-system.feature` | 10 | Deferred (FF_MARKETPLACE) |
+| `features/admin-moderation.feature` | 11 | Legacy (duplicate of admin-portal.feature intent) |
+| `features/admin-gdpr.feature` | 11 | Legacy (duplicate of gdpr-erasure.feature intent) |
+| **Total** | **75** | — |
+
+**BLOCKING FINDING**: Dimension 4 / ALIGN_REPORT.md §179 flags root-level features as conflicting with server/client organization. Recommend:
+1. **Option A**: Archive root features; consolidate all scenarios into server/client directories.
+2. **Option B**: Maintain both; formally expand RTM to include root features with explicit designation as "legacy" or "canonical".
+
+Current RTM references only server/ and client/ features (58 scenarios). If root features are canonical, RTM must be expanded to include 75 additional scenarios and source mapping.
+
+---
+
 ## Requirements
 
 | US-ID | Title | Priority | Epic | AC Count | Feature Flags |

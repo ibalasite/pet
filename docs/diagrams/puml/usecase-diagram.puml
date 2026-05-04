@@ -1,0 +1,94 @@
+@startuml pixel-pet-arena-usecase
+
+!define PLAYER #E8F4F8
+!define ADMIN #FFF5E6
+!define SYSTEM #F5F5F5
+
+skinparam linetype ortho
+
+left to right direction
+
+actor "Guest Player" as guest #E8F4F8
+actor "Pet Owner" as owner #E8F4F8
+actor "Collector" as collector #E8F4F8
+actor "Competitive\nPlayer" as competitor #E8F4F8
+actor "Admin\nOperator" as admin #FFF5E6
+actor "System\nBackground Job" as system #F5F5F5
+
+rectangle "pixel-pet-arena" {
+  usecase UC1 as "View Random Pet\n(Guest)"
+  usecase UC2 as "Claim Pet\n(Email + OTP)"
+  usecase UC3 as "Train Pet\n(Daily Actions)"
+  usecase UC4 as "Apply Food Buff\n(Stat Boost)"
+  usecase UC5 as "Enter Arena\n(Race or Sumo)"
+  usecase UC6 as "View Global\nLeaderboard"
+  usecase UC7 as "View Battle\nRecords (Public)"
+  usecase UC8 as "Request GDPR\nErasure"
+  usecase UC9 as "Ban Pet\n(Moderation)"
+  usecase UC10 as "Tune Rate\nLimits"
+  usecase UC11 as "Configure Game\nEconomy"
+  usecase UC12 as "Cleanup Expired\nClaims"
+  usecase UC13 as "Update Leaderboard\nSnapshots"
+}
+
+guest --> UC1: discovers
+owner --> UC2: claims pet
+owner --> UC3: daily training
+owner --> UC4: food system
+competitor --> UC5: arena battles
+competitor --> UC6: check rankings
+collector --> UC7: pet achievements
+owner --> UC8: data deletion
+owner --> UC7: share battles
+owner --> UC6: track progress
+
+admin --> UC9: moderation
+admin --> UC10: platform tuning
+admin --> UC11: economy balance
+
+system --> UC12: scheduled cleanup
+system --> UC13: hourly leaderboard
+
+UC2 .> UC3: after claim
+UC3 .> UC5: prerequisite
+UC5 .> UC6: feeds data
+UC5 .> UC7: generates record
+UC7 .> UC8: GDPR scope
+UC3 .> UC4: food buff applied
+
+UC6 .> UC11: influenced by
+UC5 .> UC10: rate limit check
+UC12 .> UC2: removes tokens
+
+note right of guest
+  Guest mode: any visitor
+  Can view/interact with random pet
+  No persistence
+end note
+
+note right of owner
+  Claimed pet owner
+  Persistent access via URL token
+  Full gameplay features
+end note
+
+note right of collector
+  Motivated by rarity
+  Seeks unique pets
+  Follows leaderboard for legendary
+end note
+
+note right of competitor
+  Arena-focused player
+  Cares about rank
+  Shares battle records
+end note
+
+note right of admin
+  Internal operators
+  Moderation & tuning
+  Config changes
+  Audit visibility
+end note
+
+@enduml

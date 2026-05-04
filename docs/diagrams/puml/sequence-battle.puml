@@ -1,0 +1,92 @@
+@startuml pixel-pet-arena-sequence-battle
+
+!define PLAYER #E8F4F8
+!define SERVER #F5F5F5
+!define CACHE #FCE4EC
+!define DB #E8F5E9
+
+participant "Player App" as player #E8F4F8
+participant "API Server" as server #F5F5F5
+participant "Redis" as cache #FCE4EC
+participant "PostgreSQL" as db #E8F5E9
+
+player -> server: POST /api/v1/arena/enter (pet_id, mode, token)
+activate server
+
+server -> server: Verify access token
+server -> cache: INCR rl:battles:{pet_id}
+activate cache
+cache -> cache: TTL 3600s (1 hour)
+cache --> server: count
+deactivate cache
+
+alt Rate limit exceeded (>10 per hour)
+  server --> player: HTTP 429 {Retry-After: seconds}
+  deactivate server
+else Limit OK
+  server -> cache: LPUSH matchmaking:{mode} {pet_id}
+  activate cache
+  cache --> server: queue position
+  deactivate cache
+
+  server --> player: HTTP 202 {match_id, status: "FINDING_OPPONENT"}
+  deactivate server
+
+  note over player, server: Client polls GET /api/v1/arena/match/{match_id}
+end
+
+par Opponent Matching
+  server -> cache: BLPOP matchmaking:{mode} (timeout 30s)
+  activate cache
+  cache --> server: opponent_pet_id
+  deactivate cache
+
+  alt Opponent found
+    server -> db: SELECT * FROM pets WHERE id IN (pet_a_id, pet_b_id)
+    activate db
+    db --> server: [pet_a, pet_b]
+    deactivate db
+  else Timeout (AI fallback)
+    server -> server: Generate AI opponent
+  end
+and
+  player -> server: GET /api/v1/arena/match/{match_id}
+  activate server
+  alt Match not started
+    server --> player: HTTP 200 {status: "FINDING_OPPONENT", time_elapsed}
+  else Match ready
+    server -> db: SELECT * FROM arena_matches WHERE id = ?
+    activate db
+    db --> server: match record
+    deactivate db
+    server --> player: HTTP 200 {status: "READY", pet_a, pet_b}
+  end
+  deactivate server
+end
+
+player -> server: POST /api/v1/arena/match/{match_id}/start
+activate server
+
+server -> server: Generate seeded random (±15% modifier)
+server -> server: Calculate outcome based on stats + random
+server -> server: Simulate 5-15s battle animation log
+
+server -> db: BEGIN TRANSACTION
+activate db
+server -> db: INSERT INTO arena_matches (pet_a_id, pet_b_id, winner_pet_id, battle_log, ...)
+server -> db: UPDATE pets SET stat_* (if buffed) WHERE id IN (winner, loser)
+db --> server: OK
+deactivate db
+
+server -> cache: ZADD leaderboard:{mode} {winner_score} {winner_pet_id}
+activate cache
+cache --> server: OK
+deactivate cache
+
+server --> player: HTTP 200 {match_result, winner_pet_id, loser_pet_id, battle_log}
+deactivate server
+
+player -> player: Display battle animation replay
+player -> player: Show result card + XP/rank changes
+
+@enduml

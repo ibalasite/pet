@@ -240,6 +240,342 @@ Rationale for Vue 3 + Element Plus: The admin portal is data-dense (tables, form
 
 ---
 
+## §3.8 UML Diagrams & Architecture Visualizations
+
+This section provides comprehensive UML and architecture diagrams documenting the system design, data flows, state transitions, and component interactions. All diagrams are authored in PlantUML; source files are maintained in `docs/diagrams/puml/`.
+
+### Class Diagram — Domain Entities & Relationships
+
+The class diagram below illustrates the core domain entities (Pet, User/ClaimIdentity, ClaimCode, ArenaMatch, etc.) and their relationships. Each class maps directly to a PostgreSQL table defined in §4.
+
+``` puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+class User {
+  id: UUID
+  email_hash: VARCHAR(64)
+  email_encrypted: BYTEA
+  deletion_requested_at: TIMESTAMPTZ
+  --
+  +getClaimedPets()
+  +requestGDPRDeletion()
+}
+
+class Pet {
+  id: UUID
+  seed: BIGINT
+  rarity: ENUM (COMMON|RARE|EPIC|LEGENDARY)
+  stat_speed/strength/stamina: [1..100]
+  level: [1..100]
+  is_banned: BOOLEAN
+  --
+  +train(type): void
+  +compete(opponent): BattleResult
+}
+
+class ClaimCode {
+  id: UUID
+  code_hash: VARCHAR(64)
+  expires_at: TIMESTAMPTZ
+  used_at: TIMESTAMPTZ
+  --
+  +verify(code): boolean
+}
+
+class ArenaMatch {
+  id: UUID
+  pet_a_id, pet_b_id: UUID
+  mode: ENUM (RACE|SUMO)
+  winner_pet_id: UUID
+  battle_log: JSONB
+  --
+  +calculateOutcome(): UUID
+}
+
+class TrainingLog {
+  id: UUID
+  training_type: ENUM
+  stat_delta: [1..3]
+}
+
+class Leaderboard {
+  id: UUID
+  snapshot_time: TIMESTAMPTZ
+  entries: JSONB [top 500]
+  --
+  +getTopPets(limit): Pet[]
+}
+
+User "1" -- "*" Pet : claims
+Pet "1" -- "*" ArenaMatch : participates
+Pet "1" -- "*" TrainingLog : records
+ClaimCode "1" -- "1" Pet : unlocks
+Leaderboard "1" -- "*" Pet : ranks
+```
+
+**See also**: `docs/diagrams/puml/class-diagram.puml` (source file)
+
+### Sequence Diagrams
+
+#### Claim Flow (Email OTP → Pet Access)
+
+The claim flow sequence illustrates the complete lifecycle from email entry through OTP verification to pet access token generation:
+
+``` puml
+participant "Player App" as player
+participant "API Server" as server
+participant "SendGrid" as email
+participant "PostgreSQL" as db
+
+player -> server: POST /api/v1/claim (email)
+activate server
+server -> db: INSERT claim_code (otp_hash, expiry=15m)
+server -> email: send email (otp_plain)
+server --> player: HTTP 200 {claim_id}
+deactivate server
+
+email --> player: Email: "Your code: 123456"
+
+player -> server: POST /api/v1/claim/{id}/verify (code)
+activate server
+server -> server: Hash code, compare with DB
+alt valid
+  server -> db: INSERT claim_identity + UPDATE pet
+  server --> player: HTTP 200 {access_token}
+else invalid
+  server --> player: HTTP 400 {error}
+end
+deactivate server
+```
+
+**See also**: `docs/diagrams/puml/sequence-auth.puml`
+
+#### Battle Flow (Matchmaking → Result)
+
+The arena battle sequence shows opponent matchmaking, battle execution, and result persistence:
+
+``` puml
+participant "Player" as player
+participant "API" as server
+participant "Redis" as cache
+
+player -> server: POST /api/v1/arena/enter
+activate server
+server -> cache: INCR battle_counter (1h window)
+alt rate limit exceeded
+  server --> player: HTTP 429 {Retry-After}
+else ok
+  server -> cache: LPUSH matchmaking_queue
+  server --> player: HTTP 202 {match_id: "FINDING"}
+end
+
+par polling
+  player -> server: GET /api/v1/arena/match/{id}
+  server --> player: {status: "READY"} when opponent found
+and matching
+  server -> cache: BLPOP (timeout 30s)
+  alt found
+    server -> server: opponent assigned
+  else timeout
+    server -> server: AI fallback
+  end
+end
+
+player -> server: POST /api/v1/arena/match/{id}/start
+activate server
+server -> server: Seeded random ±15% modifier
+server -> server: Calculate outcome based on stats
+server -> db: INSERT arena_match, UPDATE leaderboard
+server --> player: HTTP 200 {winner, battle_log}
+deactivate server
+```
+
+**See also**: `docs/diagrams/puml/sequence-battle.puml`
+
+### State Machines
+
+#### Pet State Machine
+
+Pets transition through multiple states across their lifecycle:
+
+``` puml
+[*] --> GENERATED
+GENERATED --> UNCLAIMED: created (guest preview)
+UNCLAIMED --> CLAIMED: claim_code_verified
+CLAIMED --> IDLE
+IDLE --> TRAINING: train()
+IDLE --> BATTLING: enter_arena()
+IDLE --> RESTING: 3+ days no training (visual neglect)
+TRAINING --> IDLE
+BATTLING --> IDLE
+RESTING --> IDLE: reset daily
+CLAIMED --> BANNED: admin_ban()
+CLAIMED --> DELETED: gdpr_erasure()
+UNCLAIMED --> DELETED: cleanup job (24h+ unreserved)
+```
+
+**See also**: `docs/diagrams/puml/state-pet.puml`
+
+#### Battle Match State Machine
+
+Arena matches progress through a series of states from creation to resolution:
+
+``` puml
+[*] --> CREATED
+CREATED --> FINDING_OPPONENT: (matchmaking queue)
+FINDING_OPPONENT --> READY: opponent_found OR timeout (30s AI)
+READY --> IN_PROGRESS: start_match()
+IN_PROGRESS --> RESOLVED: duration_complete (5-15s)
+RESOLVED --> ARCHIVED: completed_at set
+ARCHIVED --> [*]
+```
+
+**Key transitions**:
+- `FINDING_OPPONENT → READY`: One pet waits for opponent; if timeout (30s), AI opponent assigned
+- `IN_PROGRESS`: Battle duration 5-15 seconds (mode-dependent); seeded random ±15% applied to base stat
+- `RESOLVED → ARCHIVED`: Match immutable; battle_log stored for replay
+
+**See also**: `docs/diagrams/puml/state-battle.puml`
+
+### Component Diagram
+
+The component diagram illustrates the modular architecture: Client Layer (React + Vue), API Layer (Fastify + middlewares), Data Layer (PostgreSQL + Redis), and external services:
+
+``` puml
+package "Client" {
+  [Player App: React + Phaser]
+  [Admin Portal: Vue3 + Element]
+  [Vite Build]
+}
+
+package "API" {
+  [Fastify Server]
+  [Game Routes]
+  [Admin Routes]
+}
+
+package "Data" {
+  [PostgreSQL: primary + replica]
+  [Redis: leaderboard + cache]
+}
+
+package "External" {
+  [SendGrid]
+  [CDN / Vercel]
+}
+
+[Player App] --> [Vite Build]
+[Admin Portal] --> [Vite Build]
+[Vite Build] --> [CDN / Vercel]
+[CDN / Vercel] --> [Fastify Server]
+[Fastify Server] --> [PostgreSQL: primary + replica]
+[Fastify Server] --> [Redis: leaderboard + cache]
+[Fastify Server] --> [SendGrid]
+```
+
+**See also**: `docs/diagrams/puml/component-diagram.puml`
+
+### Deployment Diagram
+
+The deployment architecture shows runtime topology: Vercel CDN (frontend), Railway containers (API + autoscale), managed databases (Supabase PostgreSQL + Upstash Redis), and external services:
+
+``` puml
+node "Vercel Edge" {
+  component [Global CDN]
+  component [Static Assets (Vite)]
+}
+
+node "Railway Compute" {
+  component [API Replica 1]
+  component [API Replica 2]
+  component [Nginx LB]
+  component [HPA (70% CPU trigger)]
+}
+
+node "Data Layer" {
+  component [PostgreSQL Primary]
+  component [PostgreSQL Replica]
+  component [Upstash Redis]
+}
+
+node "External" {
+  component [SendGrid API]
+  component [S3 Backups]
+}
+
+[Vercel Edge] --> [Railway Compute]
+[API Replica 1] --> [PostgreSQL Primary]
+[API Replica 2] --> [PostgreSQL Primary]
+[PostgreSQL Primary] --> [PostgreSQL Replica]
+[Railway Compute] --> [Upstash Redis]
+[Railway Compute] --> [SendGrid API]
+```
+
+**See also**: `docs/diagrams/puml/deployment.puml`
+
+### Use Case Diagram
+
+Actors and their interactions with the system:
+
+``` puml
+actor "Guest Player"
+actor "Pet Owner"
+actor "Collector"
+actor "Competitor"
+actor "Admin"
+actor "System Job"
+
+usecase "View Random Pet (Guest)"
+usecase "Claim Pet (Email + OTP)"
+usecase "Train Pet (Daily Actions)"
+usecase "Enter Arena (Race/Sumo)"
+usecase "View Global Leaderboard"
+usecase "View Battle Records (Public)"
+usecase "Request GDPR Erasure"
+usecase "Ban Pet (Moderation)"
+usecase "Tune Rate Limits"
+usecase "Configure Game Economy"
+usecase "Cleanup Expired Claims"
+usecase "Update Leaderboard Snapshots"
+```
+
+**See also**: `docs/diagrams/puml/usecase-diagram.puml`
+
+### Data Flow Diagram
+
+Event flows and data transformations:
+
+``` puml
+[Player] -->|email + OTP| (Claim Flow)
+(Claim Flow) -->|INSERT| [PostgreSQL]
+(Claim Flow) -->|send email| [SendGrid]
+
+[Player] -->|training action| (Training System)
+(Training System) -->|check limit| [Redis Rate Limit]
+(Training System) -->|INSERT log| [PostgreSQL]
+
+[Player] -->|arena entry| (Arena Matchmaking)
+(Arena Matchmaking) -->|LPUSH queue| [Redis Matchmaking]
+(Arena Matchmaking) -->|opponent found| (Battle Calculation)
+(Battle Calculation) -->|seeded random| (Battle Calculation)
+(Battle Calculation) -->|INSERT match| [PostgreSQL]
+(Battle Calculation) -->|ZADD| [Redis Leaderboard]
+
+(Leaderboard Update) -->|query top 500| [PostgreSQL]
+(Leaderboard Update) -->|ZADD| [Redis Leaderboard]
+
+[Admin] -->|moderation| (Admin Moderation)
+(Admin Moderation) -->|UPDATE pets| [PostgreSQL]
+
+(GDPR Erasure Job) -->|daily| (Cleanup)
+(Cleanup) -->|query deletion| [PostgreSQL]
+(Cleanup) -->|hash email| (Cleanup)
+```
+
+**See also**: `docs/diagrams/puml/dataflow-diagram.puml`
+
+---
+
 ## §4. Data Models
 
 All models are PostgreSQL tables unless noted. Field types use PostgreSQL notation.

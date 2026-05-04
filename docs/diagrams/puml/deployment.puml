@@ -1,0 +1,85 @@
+@startuml pixel-pet-arena-deployment
+
+!define EDGE #E3F2FD
+!define COMPUTE #F5F5F5
+!define STORAGE #E8F5E9
+!define EXTERNAL #FFF5E6
+
+skinparam linetype ortho
+
+package "Vercel Edge" #EDGE {
+  component [Global CDN] as cdn
+  component [Next.js / Vite\nStatic Assets] as staticAssets
+}
+
+package "Railway Compute" #COMPUTE {
+  component [API Server\nReplica 1] as api1
+  component [API Server\nReplica 2] as api2
+  component [Horizontal\nAutoscale\n(70% CPU)] as hpa
+  component [Nginx\nLoad Balancer] as lb
+}
+
+package "Data Layer" #STORAGE {
+  component [PostgreSQL\nPrimary (Writer)] as pgPrimary
+  component [PostgreSQL\nRead Replica] as pgReplica
+  component [Upstash Redis\nServerless] as redisUpstash
+}
+
+package "External Services" #EXTERNAL {
+  component [SendGrid\n(Primary Email)] as sendgridPrimary
+  component [Nodemailer SMTP\n(Fallback)] as nodemailer
+  component [S3-compatible\nBackups] as s3Backups
+}
+
+cdn --> staticAssets: serves
+cdn --> lb: routes to API
+
+api1 --> lb: registers
+api2 --> lb: registers
+hpa --> api1: scales
+hpa --> api2: scales
+
+lb --> pgPrimary: writes
+api1 --> pgPrimary: writes
+api2 --> pgPrimary: writes
+
+lb --> pgReplica: reads
+api1 --> pgReplica: reads (leaderboard)
+api2 --> pgReplica: reads (leaderboard)
+
+api1 --> redisUpstash: rate limit / cache
+api2 --> redisUpstash: rate limit / cache
+
+api1 --> sendgridPrimary: email
+sendgridPrimary -.->|failover after\n3 consecutive failures| nodemailer
+
+pgPrimary --> s3Backups: daily backup
+
+note right of hpa
+  Trigger: CPU > 70%
+  Scale: +1 replica (max 4)
+  Cooldown: 5 minutes
+end note
+
+note right of pgPrimary
+  Managed Supabase
+  Auto-failover: 60s
+  Backup: daily
+  Retention: 30 days
+end note
+
+note right of redisUpstash
+  Serverless pay-per-request
+  Geo-proximity routing
+  No cold start
+  API: AWS compatible
+end note
+
+note right of sendgridPrimary
+  Monthly: 10k email limit
+  SPF + DKIM: configured
+  Complaint rate: <0.1%
+  Delivery SLO P90: <60s
+end note
+
+@enduml

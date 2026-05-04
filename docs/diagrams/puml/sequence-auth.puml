@@ -1,0 +1,88 @@
+@startuml pixel-pet-arena-sequence-auth
+
+!define PLAYER #E8F4F8
+!define SERVER #F5F5F5
+!define EMAIL #FFF5E6
+!define DB #E8F5E9
+
+participant "Player App" as player #E8F4F8
+participant "API Server" as server #F5F5F5
+participant "SendGrid" as email #FFF5E6
+participant "PostgreSQL" as db #E8F5E9
+participant "Redis" as cache #FCE4EC
+
+player -> server: POST /api/v1/claim (email)
+activate server
+
+server -> server: Rate limit check: rl:claim:{email}
+server -> db: SELECT * FROM claim_identities WHERE email_hash = ?
+activate db
+db --> server: row (or NULL)
+deactivate db
+
+server -> server: Generate OTP (6 digits)
+server -> db: INSERT INTO claim_codes (pet_id, email_hash, code_hash, expires_at)
+activate db
+db --> server: claim_code record
+deactivate db
+
+server -> cache: INCR rl:claim:{email}
+activate cache
+cache -> cache: Set TTL 3600s
+cache --> server: new count
+deactivate cache
+
+server -> email: POST /mail/send (email, claim_code_plain)
+activate email
+email -> email: Format claim password email
+email --> server: success
+deactivate email
+
+server --> player: HTTP 200 {claim_id, message}
+deactivate server
+
+player -> player: Display "Check your email"
+
+email --> player: Email (async): "Your claim code: 123456"
+
+player -> server: POST /api/v1/claim/{claim_id}/verify (code)
+activate server
+
+server -> db: SELECT * FROM claim_codes WHERE id = ?
+activate db
+db --> server: claim_code record
+deactivate db
+
+server -> server: Hash code: SHA-256(code_input)
+server -> server: Compare code_hash
+
+alt Code valid & not expired
+  server -> db: BEGIN TRANSACTION
+  activate db
+
+  server -> db: INSERT INTO claim_identities (email_hash, email_encrypted) [if new]
+  server -> db: UPDATE pets SET claimed_at=NOW(), owner_token_hash=SHA-256(token), claim_identity_id=?
+  server -> db: UPDATE claim_codes SET used_at=NOW()
+
+  db --> server: OK
+  deactivate db
+
+  server -> server: Generate access token (32 bytes, random)
+  server -> cache: SET rl:pet:{pet_id}:battles 0
+  activate cache
+  cache -> cache: Expiry 3600s
+  cache --> server: OK
+  deactivate cache
+
+  server --> player: HTTP 200 {access_token, pet_id, pet_name}
+else Code invalid or expired
+  server -> server: Increment failed attempt counter
+  server --> player: HTTP 400 {error: "Invalid or expired code"}
+end
+
+deactivate server
+
+player -> player: Store access_token in localStorage
+player -> player: Redirect to /pet/{pet_id}
+
+@enduml
