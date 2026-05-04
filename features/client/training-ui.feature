@@ -74,3 +74,35 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     When the owner clicks the "Train" button on any action card
     Then the "pet_token" key is removed from localStorage
     And the app navigates to "/"
+
+  # --- Server-side training behavior ---
+
+  Scenario: Training action increments stat within valid range
+    Given a pet with stat_speed = 25 and a valid petToken
+    And the pet has remaining training actions today (< 3 used)
+    When POST /api/v1/training is called with trainingType = "RUN"
+    Then the system returns HTTP 200
+    And stat_speed is incremented by a random integer in [1, 3]
+    And new stat_speed is between 26 and 28 inclusive
+    And a training_logs record is created with training_type, stat_delta, and stat_after values
+
+  Scenario: Training action increments total_training_actions for level formula
+    Given a pet with total_training_actions = 27 (current level = 2)
+    When a training action is submitted successfully
+    Then total_training_actions is incremented to 28
+    And level calculation: FLOOR(28 / 10) = 2 (no level change yet)
+    When 2 more training actions are submitted successfully
+    Then total_training_actions = 30 and level = 3
+
+  Scenario: Training disabled on banned pet returns HTTP 403
+    Given a pet with is_banned = true and a valid petToken
+    When POST /api/v1/training is called
+    Then the system returns HTTP 403 with error code PET_BANNED
+    And no training is applied
+
+  Scenario: Daily training limit resets at UTC midnight
+    Given a pet that completed 3 training actions at 23:59 UTC
+    When the UTC day rolls over to 00:00 UTC
+    And the same pet submits a new training request
+    Then the request is accepted with actionsRemainingToday = 2
+    And the daily counter has reset

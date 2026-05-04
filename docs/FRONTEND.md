@@ -1445,4 +1445,38 @@ Playwright screenshots are taken at 320, 768, 1024, and 1440px breakpoints for:
 
 ---
 
+## 10. Player App Features → BDD Scenario Mapping
+
+Each page and component in the player app is covered by BDD scenarios in the `features/` directory. The mapping below tracks traceability between UI components and test coverage.
+
+| Page/Component | Route | BDD Feature File | Scenarios | Coverage |
+|---|---|---|---|---|
+| Landing Page | `/` | `claim-flow-ui.feature` | Landing display, pet canvas, claim CTA | Initial claim flow |
+| Claim Page | `/claim` | `claim-flow-ui.feature` | Email input, OTP verification, rate limiting, error states | Email claim, OTP entry, expiry, enumeration prevention |
+| Pet Dashboard | `/pet/:petId` | `pet-display.feature` | Sprite rendering, stat display, rarity badges, action buttons, training cards | Pet generation, stat bars, rarity distribution, neglected state |
+| Training UI | `/pet/:petId/train` | `training-ui.feature` | Daily cap, buff selection, confirm dialog, buff application, stat change indicators | Training actions, daily limits, skill-ups, level progression |
+| Arena Mode Selection | `/arena` | `arena-ui.feature` | Mode selection (RACE/SUMO), opponent loading, error handling, rate limit banner | Battle mode choice, matchmaking status, AI fallback |
+| Battle View | `/arena/battle/:matchId` | `arena-ui.feature` | Live battle animation, result display, reward notification, share button | Battle resolution, WIN/LOSS variants, stat changes |
+| Leaderboard | `/leaderboard` | `leaderboard-ui.feature` | Ranking display, pagination, player search, filter by rarity | Top 100 display, rarity filters, score calculation |
+| Battle Records | `/pet/:petId/records` | `battle-records.feature` | Record list, pagination, social share preview, public access | History display, OG meta tags, pagination cursor, AI opponent marking |
+| Settings | `/settings` | `settings.feature` | Theme toggle, audio mute, notification prefs, session management | User preferences, local state, logout |
+| Admin Portal | `/admin` | `admin-portal.feature` | Login, TOTP, dashboard, moderation, config management | Authentication, authorization, role-based access |
+
+### 10.1 Feature File Organization
+
+- **`features/client/`**: Player app UI scenarios (component behavior, routing, state management)
+- **`features/server/`**: API scenarios (backend validation, business logic, rate limiting, GDPR compliance)
+- **`features/server/`**: Supporting scenarios (rarity distribution, battle records API, admin operations)
+
+### 10.2 Uncovered Areas
+
+The following areas are covered in unit tests rather than BDD scenarios:
+
+- Phaser.js pixel art rendering logic (`apps/player/src/components/canvas/PetCanvasEngine.test.ts`)
+- TanStack Query cache invalidation patterns (`apps/player/src/hooks/__tests__/usePet.test.ts`)
+- Zod schema validation edge cases (`apps/player/src/schemas/__tests__/*.test.ts`)
+- Vue Element Plus admin data table interactions (covered in admin-portal.feature E2E scenarios)
+
+---
+
 STEP_COMPLETE: FRONTEND

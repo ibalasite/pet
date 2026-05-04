@@ -1,0 +1,66 @@
+AC_ID,AC_Title,User_Story,BDD_Feature_File,BDD_Feature_Type,BDD_Scenario_Count,Test_Type,Coverage_Status,Feature_Flag,Priority
+AC-001-1,Pet displays at random on page load,US-PET-001,pet-display.feature,client,8,BDD,Covered,,P0
+AC-001-2,Guest can interact (click/touch) without account,US-PET-001,pet-display.feature,client,8,BDD,Covered,,P0
+AC-001-3,Pet attributes (name/rarity/sprite) are unique per seed,US-PET-001,pet-display.feature,client,8,BDD,Covered,,P0
+AC-001-4,Pet visual state reflects stat values (color/detail),US-PET-001,pet-display.feature,client,8,BDD,Covered,,P0
+AC-001-5,Sprite rendering is pixel-perfect (32x32 grid),US-PET-001,pet-display.feature,client,8,Visual Regression,Covered,,P0
+AC-002-1,Pet generation uses 6-dimensional seed space,US-PET-002,pet-display.feature,client,8,Unit,Covered,,P0
+AC-002-2,Generation produces ≥1B unique combinations,US-PET-002,pet-display.feature,client,8,Unit,Covered,,P0
+AC-002-3,Seeded generation is deterministic (same seed = same pet),US-PET-002,pet-display.feature,client,8,Unit,Covered,,P0
+AC-002-4,Generation algorithm is not reversible (cannot derive seed from pet),US-PET-002,pet-display.feature,client,8,Unit,Covered,,P0
+AC-003-1,Email claim form accepts valid email addresses,US-AUTH-001,claim-flow.feature,server,4,BDD,Covered,,P0
+AC-003-2,One-time OTP (6 digits) generated and emailed within 60s,US-AUTH-001,claim-flow.feature,server,4,Integration,Covered,,P0
+AC-003-3,OTP expires after 15 minutes,US-AUTH-001,claim-flow.feature,server,4,Unit,Covered,,P0
+AC-003-4,Correct OTP + email binds pet to email identity,US-AUTH-001,claim-flow.feature,server,4,Integration,Covered,,P0
+AC-003-5,Invalid OTP rejected; 10 attempts per session limit enforced,US-AUTH-001,claim-flow.feature,server,4,Security,Covered,,P0
+AC-003-6,Email enumeration prevention: identical response structure/timing for valid/invalid emails,US-AUTH-001,claim-flow.feature,server,4,Security,Covered,,P0
+AC-004-1,Returned pet owner enters unique URL token (bookmarkable),US-AUTH-002,claim-flow.feature,server,4,BDD,Covered,,P0
+AC-004-2,Player can request new access link if URL expires/lost,US-AUTH-002,claim-flow.feature,server,4,BDD,Covered,,P0
+AC-004-3,Invalid or expired URL returns HTTP 404,US-AUTH-002,claim-flow.feature,server,4,Integration,Covered,,P0
+AC-004-4,URL token refreshed on each login; old tokens invalidated,US-AUTH-002,claim-flow.feature,server,4,Integration,Covered,,P0
+AC-005-1,Training action selects one of three types: RUN/STRENGTH/STAMINA,US-TRAIN-001,training-food.feature,server,2,BDD,Covered,,P0
+AC-005-2,Selected stat incremented by [1..3] points (random),US-TRAIN-001,training-food.feature,server,2,Unit,Covered,,P0
+AC-005-3,Stat capped at 100; buff applied stats cannot exceed 100,US-TRAIN-001,training-food.feature,server,2,Unit,Covered,,P0
+AC-005-4,3 training actions allowed per day (UTC reset),US-TRAIN-001,training-food.feature,server,2,Integration,Covered,,P0
+AC-005-5,Stat max cap enforced (PRD AC-005-6 range [1..100]),US-TRAIN-001,training-food.feature,server,2,Unit,Covered,,P0
+AC-006-1,Food buff types: SPEED_BOOST / STRENGTH_BOOST / STAMINA_BOOST,US-FOOD-001,training-food.feature,server,2,BDD,Covered,,P0
+AC-006-2,Buff multiplier applied for duration (1.5x stat boost example),US-FOOD-001,training-food.feature,server,2,Unit,Covered,,P0
+AC-006-3,Buff expires after fixed duration; pet stats revert,US-FOOD-001,training-food.feature,server,2,Integration,Covered,,P0
+AC-006-4,Buff does not allow stat to exceed 100 (cap enforced),US-FOOD-001,training-food.feature,server,2,Unit,Covered,,P0
+AC-007-1,Player can enter arena in RACE mode (speed-based),US-ARENA-001,arena-battle.feature,server,4,BDD,Covered,,P0
+AC-007-2,Player can enter arena in SUMO mode (strength-based),US-ARENA-002,arena-battle.feature,server,4,BDD,Covered,,P0
+AC-007-3,Matchmaking timeout 30s; AI opponent offered if no human opponent,US-ARENA-001,arena-battle.feature,server,4,Integration,Covered,,P0
+AC-007-4,Battle outcome calculated: seeded random ±15% modifier applied to base stat,US-ARENA-001,arena-battle.feature,server,4,Unit,Covered,,P0
+AC-007-5,Battle record saved with winner_pet_id and replay log,US-ARENA-001,arena-battle.feature,server,4,Integration,Covered,,P0
+AC-007-6,Rate limit enforced: 10 battles per hour (admin-tunable [1..50]); HTTP 429 on exceeded,US-ARENA-001,arena-battle.feature,server,4,Security,Covered,,P0
+AC-008-1,Global leaderboard ranks pets by win-count and name (sort order),US-BOARD-001,leaderboard.feature,server,3,BDD,Covered,,P0
+AC-008-2,Leaderboard updated within 30 seconds of battle completion,US-BOARD-001,leaderboard.feature,server,3,Integration,Covered,,P0
+AC-008-3,Top 100 pets publicly visible (admin sees 500),US-BOARD-001,leaderboard.feature,server,3,BDD,Covered,,P0
+AC-008-4,Leaderboard timezone-normalized (UTC for comparison),US-BOARD-001,leaderboard.feature,server,3,Integration,Covered,,P0
+AC-008-5,Rarity badge shown on leaderboard (COMMON/RARE/EPIC/LEGENDARY),US-BOARD-001,leaderboard.feature,server,3,Visual Regression,Covered,,P0
+AC-009-1,Battle records page shows last 20 battles per pet (public),US-RECORD-001,battle-records.feature,client,16,BDD,Partial,,P0
+AC-009-2,Records include outcome/opponent/timestamp for each battle,US-RECORD-001,battle-records.feature,client,16,Integration,Partial,,P0
+AC-009-3,Record page URL is shareable; includes Open Graph meta tags,US-RECORD-001,battle-records.feature,client,16,Integration,Partial,,P0
+AC-010-1,Rarity determined by weighted distribution: Common 60% / Rare 25% / Epic 12% / Legendary 3%,US-RARITY-001,leaderboard-ui.feature,client,10,Unit,Partial,,P1
+AC-010-2,Rarity persists across pet lifecycle; visible on leaderboard,US-RARITY-001,leaderboard-ui.feature,client,10,Visual Regression,Partial,,P1
+AC-010-3,Legendary pets show special border/glow effect on UI,US-RARITY-001,leaderboard-ui.feature,client,10,Visual Regression,Partial,,P1
+AC-011-1,Admin can view all pets in management table,US-ADMIN-001,admin-portal.feature,client,13,BDD,Covered,,P0
+AC-011-2,Admin can search pets by name/ID; results return within 2 seconds for ≤1M records,US-ADMIN-001,admin-portal.feature,client,13,Performance,Covered,,P0
+AC-011-3,Admin can ban pet; pet removed from arena/leaderboard,US-ADMIN-001,admin-portal.feature,client,13,Integration,Covered,,P0
+AC-011-4,Ban action logged in audit log with reason/admin_id/timestamp,US-ADMIN-001,admin-portal.feature,client,13,Integration,Covered,,P0
+AC-012-1,Admin can flag suspicious battle activity for review,US-ADMIN-002,leaderboard.feature,server,3,BDD,Covered,,P0
+AC-012-2,Suspicious activity defined: >50 battles per hour rolling window,US-ADMIN-002,leaderboard.feature,server,3,Security,Covered,,P0
+AC-012-3,Flagged pets highlighted in leaderboard UI for admin review,US-ADMIN-002,admin-portal.feature,client,13,BDD,Covered,,P0
+AC-013-1,Admin can tune rate limit: battles per hour [1..50] range,US-ADMIN-003,admin-portal.feature,client,13,BDD,Covered,,P0
+AC-013-2,Admin can tune rarity weights: maintain sum = 100%,US-ADMIN-003,admin-portal.feature,client,13,Integration,Covered,,P0
+AC-013-3,Config changes cached; refresh within 5 minutes,US-ADMIN-003,admin-portal.feature,client,13,Integration,Covered,,P0
+AC-014-1,Player can request GDPR erasure via account settings,US-ADMIN-004,gdpr-erasure.feature,server,2,BDD,Covered,,P0
+AC-014-2,Erasure request triggers: email_encrypted set to NULL within 24 hours (internal SLA),US-ADMIN-004,gdpr-erasure.feature,server,2,Integration,Covered,,P0
+AC-014-3,User notified of erasure completion within 7 days (external SLA),US-ADMIN-004,gdpr-erasure.feature,server,2,Integration,Covered,,P0
+AC-014-4,Claim codes and recovery links invalidated on erasure,US-ADMIN-004,gdpr-erasure.feature,server,2,Integration,Covered,,P0
+AC-015-1,System detects bot-like behavior: >50 battles per 60-min rolling window,US-ADMIN-005,suspicious-detection.feature,server,3,BDD,Covered,,P0
+AC-015-2,Suspicious pets flagged in admin UI; admin can ban/investigate,US-ADMIN-005,suspicious-detection.feature,server,3,BDD,Covered,,P0
+AC-015-3,Audit log records detection event with reason/timestamp,US-ADMIN-005,suspicious-detection.feature,server,3,Integration,Covered,,P0
+AC-016-1,Admin can adjust food buff multipliers (e.g., 1.5x → 2.0x),US-ADMIN-006,admin-portal.feature,client,13,BDD,Covered,,P0
+AC-016-2,Admin can adjust arena entry cost / cooldown (future tuning),US-ADMIN-006,admin-portal.feature,client,13,Integration,Covered,,P0
+AC-016-3,Economy config changes cached; impacts gameplay within 5 minutes,US-ADMIN-006,admin-portal.feature,client,13,Integration,Covered,,P0

@@ -54,10 +54,15 @@ Feature: Battle Records Page — View History, Share URL, and Public Access (US-
     Given a user shares the public URL "/pet/:petId/records" on Twitter or Discord
     When the link is previewed
     Then an Open Graph card is displayed with:
-      - The pet's sprite image as the og:image
-      - The pet name in the og:title
-      - A summary of the pet's record (e.g., "12-8 record, Level 5") in og:description
-      - The preview should be visually appealing and compelling
+      | Meta Tag | Expected Value |
+      | og:title | "Pet A vs Pet B" |
+      | og:image | [sprite_image_url] with 1200x630px dimensions |
+      | og:description | "Pet A won with 12 total wins" |
+      | og:url | https://pixel-pet-arena.com/battles/[match_id] |
+      | og:type | website |
+    And the preview is visually appealing on Twitter, Discord, and Facebook
+    And all URLs are absolute and properly percent-encoded
+    And image dimensions are optimized for social platform compatibility
 
   Scenario: Guest views opponent's battle records after shared URL
     Given a guest receives a shared URL "/pet/:petId/records" for opponent "Zara"
@@ -124,3 +129,30 @@ Feature: Battle Records Page — View History, Share URL, and Public Access (US-
     Then the BattleHistoryTable adapts to a mobile-friendly view (e.g., stacked rows or horizontal scroll)
     And the pet sprite remains visible and properly sized
     And the table does not cause horizontal overflow beyond the viewport
+
+  # --- Pagination on client ---
+
+  Scenario: Battle records pagination with load more button
+    Given a pet has 45 total battle records
+    And the first page shows 20 records
+    And the server response includes pagination_cursor = "offset_20" and hasMore = true
+    When the BattleRecordsPage renders
+    Then a "Load More" button is displayed below the table
+    And clicking the button calls GET /api/v1/arena/history/:petId?cursor=offset_20
+    And the next 20 battles are appended to the table
+    And the button is disabled until the next page loads
+
+  Scenario: Load more button hidden when all records fetched
+    Given a pet has 8 total battle records
+    And GET /api/v1/arena/history/:petId returns all 8 records
+    And the response indicates hasMore = false
+    When the BattleRecordsPage renders
+    Then the "Load More" button is not displayed
+    And the message "You've reached the end of battle history" is shown
+
+  Scenario: Pagination preserves scroll position when loading more
+    Given the user scrolls to the bottom of the 20-battle table
+    And clicks the "Load More" button
+    When the next 20 battles load
+    Then the scroll position remains near the load-more button
+    And the user can immediately see the newly loaded battles without re-scrolling

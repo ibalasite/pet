@@ -32,3 +32,25 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
     And "sumo-token-001" is recorded as the winner because its strength stat is higher
     And the outcome is determined solely by the raw strength stat with no random modifier applied
+
+  Scenario: Player receives HTTP 429 when exceeding 10 battles per hour limit
+    Given a player has played 10 battles in the current hour
+    When the player attempts to start another battle via POST /api/v1/arena/enter
+    Then the API returns HTTP 429 Too Many Requests
+    And the response includes a Retry-After header with value in seconds
+    And the response body contains the message "Battle rate limit exceeded. Please wait [countdown] minutes before your next battle."
+    And the client displays a countdown timer showing remaining wait time
+    And the countdown is accurate within ±5 seconds
+
+  Scenario: Battle outcome is deterministic with same seed
+    Given petA (stat_speed = 50) and petB (stat_speed = 45) battle with fixed random_seed = 12345
+    When the battle is calculated twice independently
+    Then both calculations return the same winner and stat_delta values
+    And battleLog event sequences are identical
+    And the outcome can be replayed deterministically for viewing
+
+  Scenario: Arena entry with authentication failures
+    Given a request to POST /api/v1/arena/enter WITHOUT authentication header
+    When the request is submitted
+    Then the system returns HTTP 401 with error code UNAUTHORIZED
+    And no matchmaking entry is created

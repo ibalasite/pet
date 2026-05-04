@@ -63,3 +63,37 @@ Feature: Pet Display — Token Generation, Stat Bars, and Food Buff Indicator (U
     When the PetPage renders
     Then the PetCanvas wrapper has the CSS class "rarity-legendary"
     And the element has the CSS animation "legendary-shimmer 2s ease-in-out infinite" applied from rarity.css
+
+  # --- Pet Seed Uniqueness & Generation Validation ---
+
+  Scenario: Pet seed uniqueness is guaranteed across generation requests
+    Given 100 consecutive calls to GET /api/v1/pets/random via the landing page
+    When seeds from all 100 generated pets are collected by the client
+    Then no two pets share the same seed value
+    And the uniqueness constraint on the server side is verified in tests
+
+  Scenario: Random pet generation returns valid unclaimed pet with rarity distribution
+    Given a request to GET /api/v1/pets/random without authentication
+    When the endpoint is called multiple times (sample size ≥ 1000)
+    Then rarity distribution follows expected:
+      | Rarity    | Target | Tolerance |
+      | COMMON    | 60%    | ±2%       |
+      | RARE      | 25%    | ±2%       |
+      | EPIC      | 12%    | ±2%       |
+      | LEGENDARY | 3%     | ±2%       |
+    And each pet has fields: id, seed, rarity, stats (speed, strength, stamina all = 10)
+    And reservedUntil is set to NOW() + 24 hours
+
+  Scenario: Retrieve claimed pet shows owner-only fields when authenticated
+    Given a claimed pet with petId "pet-uuid-003" and valid petToken
+    When GET /api/v1/pets/:petId is called with Authorization: Bearer {petToken}
+    Then the response includes isOwner = true and claimedAt timestamp
+    And stats.level is calculated from total_training_actions
+    And isNeglected reflects whether pet was trained within 3 days
+
+  Scenario: Retrieve pet without authentication shows public data only
+    Given a claimed pet with petId "pet-uuid-004"
+    When GET /api/v1/pets/:petId is called WITHOUT authentication header
+    Then the response includes all fields EXCEPT claimedAt
+    And isOwner field is set to false
+    And status is HTTP 200 (no 401 error)
