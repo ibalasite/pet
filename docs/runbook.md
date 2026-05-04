@@ -510,7 +510,6 @@ Returned when the database is unreachable (the system cannot serve any requests 
 | Arena battles total rate | < 10 battles/hr **platform-wide** for 2 h | Note: this is a platform-wide total, not per-pet (per-pet cap is also 10/hr via `arena_rate_limit_battles_per_hour_default`) |
 | Leaderboard update lag | > 60 s | `observability_leaderboard_lag_alert = 60 s` |
 | Pet claims rate | < 5 claims/hr for 2 h | `observability_pet_claims_drop_threshold = 5` |
-| Arena battles rate | < 10 battles/hr for 2 h | `observability_arena_battles_drop_threshold = 10` |
 | SendGrid failure rate | > 2% over 30 min | `observability_email_failure_alert_window = 30 min` |
 | Any endpoint P99 | > 1,000 ms | `observability_latency_alert_threshold = 1000 ms` |
 
