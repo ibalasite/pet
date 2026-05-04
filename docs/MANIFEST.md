@@ -80,7 +80,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 28 | ALIGN-VERIFY | Alignment | docs/ALIGN-REPORT.md (verified) | ✅ COMPLETE |
 | 29 | CONTRACTS | Contracts | docs/contracts/ (≥3 files) | ✅ COMPLETE |
 | 30 | MOCK | Mock Data | docs/mock-data/ (≥3 files) | ✅ COMPLETE |
-| 31 | PROTOTYPE | Prototype | docs/prototype/ (≥3 files) | PENDING |
+| 31 | PROTOTYPE | Prototype | docs/prototype/ (≥3 files) | ✅ COMPLETE |
 | 32 | HTML | HTML | docs/pages/ (≥3 files) | PENDING |
 
 ---
