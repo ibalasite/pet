@@ -103,7 +103,7 @@ files to a local Supabase Docker stack and may produce unexpected behaviour on a
 
 ---
 
-### ISSUE-005 — detect-secrets baseline update command: CICD.md and secrets-rotation diagram use `--update` flag; DEVELOPER_GUIDE.md and diagrams use `--baseline`
+### ISSUE-005 — detect-secrets baseline update command: CICD.md uses `--update` flag; DEVELOPER_GUIDE.md and all diagrams use `--baseline`
 
 **Location**: `docs/CICD.md` — §Secrets Detection (line 1029); `docs/DEVELOPER_GUIDE.md`
 (line 684); `docs/diagrams/cicd-secrets-rotation.md` (line 30, 141); `docs/diagrams/cicd-pr-gate.md` (line 39, 105).
