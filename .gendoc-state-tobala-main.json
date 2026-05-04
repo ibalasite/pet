@@ -59,7 +59,8 @@
     "CICD",
     "DEVELOPER_GUIDE",
     "UML-CICD",
-    "ALIGN"
+    "ALIGN",
+    "ALIGN-FIX"
   ],
   "idea_review_passed": true,
   "brd_generated": true,

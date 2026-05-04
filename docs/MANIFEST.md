@@ -76,7 +76,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 24 | DEVELOPER_GUIDE | DevEx | docs/DEVELOPER_GUIDE.md | ✅ COMPLETE |
 | 25 | UML-CICD | Diagrams | docs/diagrams/cicd-*.md (≥5 files) | ✅ COMPLETE |
 | 26 | ALIGN | Alignment | docs/ALIGN-REPORT.md | ✅ COMPLETE |
-| 27 | ALIGN-FIX | Alignment | docs/ALIGN-REPORT.md (fixed) | PENDING |
+| 27 | ALIGN-FIX | Alignment | docs/ALIGN-REPORT.md (fixed) | ✅ COMPLETE |
 | 28 | ALIGN-VERIFY | Alignment | docs/ALIGN-REPORT.md (verified) | PENDING |
 | 29 | CONTRACTS | Contracts | docs/contracts/ (≥3 files) | PENDING |
 | 30 | MOCK | Mock Data | docs/mock-data/ (≥3 files) | PENDING |
