@@ -1,9 +1,10 @@
 # Cross-Document Alignment Report — pixel-pet-arena
 
 **DOC-ID**: ALIGN-PIXEL-PET-ARENA-20260504
-**Status**: FIXES APPLIED
+**Status**: VERIFIED
 **Generated**: 2026-05-04
 **Fixes Applied**: 2026-05-04
+**Verified**: 2026-05-03
 **Scope**: docs/EDD.md, docs/API.md, docs/SCHEMA.md, docs/PRD.md, docs/ARCH.md,
 docs/CICD.md, docs/FRONTEND.md, docs/test-plan.md, docs/RTM.md,
 docs/LOCAL_DEPLOY.md, docs/runbook.md, docs/DEVELOPER_GUIDE.md
@@ -308,14 +309,32 @@ SCHEMA, or ARCH documents, which are internally consistent and mutually aligned.
 
 ## Fix Status
 
-All 7 alignment issues have been resolved in commit `docs(gendoc)[ALIGN-FIX]`.
+All 7 alignment issues have been resolved in commit `docs(gendoc)[ALIGN-FIX]` and verified on 2026-05-03.
 
-| Issue | Severity | File | Fix Applied |
-|---|---|---|---|
-| ISSUE-001 | HIGH | `docs/runbook.md` | All occurrences of `/api/v1/health` replaced with `/health` (lines 17, 71, 76, 129, 156, 164, 346, 435, 437, 572) |
-| ISSUE-002 | HIGH | `docs/runbook.md` | Health response status values corrected: `"ok"` → `"healthy"`, `"error"` → `"down"`; schema aligned to `docs/API.md §10` |
-| ISSUE-003 | MEDIUM | `docs/runbook.md` | `JWT_SECRET` description updated to "used for TOTP setup token signing only — not for player auth or admin sessions" |
-| ISSUE-004 | MEDIUM | `docs/LOCAL_DEPLOY.md` | `supabase db push` replaced with `supabase migration up` in Step 3 |
-| ISSUE-005 | MEDIUM | `docs/CICD.md` | `detect-secrets scan --update` replaced with `detect-secrets scan --baseline` |
-| ISSUE-006 | MEDIUM | `docs/RTM.md` | US-ADMIN-006 (Game Economy Configuration, P1) added to requirements table, test-cases table, and coverage summary; total count updated from 17 to 18 |
-| ISSUE-007 | LOW | `docs/test-plan.md` | All `packages/api/`, `packages/player-app/`, `packages/admin-app/` paths updated to `apps/api/`, `apps/player/`, `apps/admin/` |
+| Issue | Severity | File | Fix Applied | Status |
+|---|---|---|---|---|
+| ISSUE-001 | HIGH | `docs/runbook.md` | All occurrences of `/api/v1/health` replaced with `/health` (lines 17, 71, 76, 129, 156, 164, 346, 435, 437, 572) | VERIFIED ✅ |
+| ISSUE-002 | HIGH | `docs/runbook.md` | Health response status values corrected: `"ok"` → `"healthy"`, `"error"` → `"down"`; schema aligned to `docs/API.md §10` | VERIFIED ✅ |
+| ISSUE-003 | MEDIUM | `docs/runbook.md` | `JWT_SECRET` description updated to "used for TOTP setup token signing only — not for player auth or admin sessions" | VERIFIED ✅ |
+| ISSUE-004 | MEDIUM | `docs/LOCAL_DEPLOY.md` | `supabase db push` replaced with `supabase migration up` in Step 3 | VERIFIED ✅ |
+| ISSUE-005 | MEDIUM | `docs/CICD.md` | `detect-secrets scan --update` replaced with `detect-secrets scan --baseline` | VERIFIED ✅ |
+| ISSUE-006 | MEDIUM | `docs/RTM.md` | US-ADMIN-006 (Game Economy Configuration, P1) added to requirements table, test-cases table, and coverage summary; total count updated from 17 to 18 | VERIFIED ✅ |
+| ISSUE-007 | LOW | `docs/test-plan.md` | All `packages/api/`, `packages/player-app/`, `packages/admin-app/` paths updated to `apps/api/`, `apps/player/`, `apps/admin/` | VERIFIED ✅ |
+
+## Verification
+
+**Verification Date**: 2026-05-03
+**Method**: grep checks and manual review of each affected document and section
+**Result**: All clear — every fix confirmed present; no regressions detected
+
+### Verification Detail
+
+| Issue | Verification Check | Result |
+|---|---|---|
+| ISSUE-001 | `grep -n "api/v1/health" docs/runbook.md` — no matches | CLEAR ✅ |
+| ISSUE-002 | `grep -n '"status": "ok"' docs/runbook.md` and `'"status": "error"'` — no matches; `"healthy"` and `"down"` confirmed present | CLEAR ✅ |
+| ISSUE-003 | Manual review of `docs/runbook.md §On-Call Quick Reference` JWT_SECRET row — updated description confirmed | CLEAR ✅ |
+| ISSUE-004 | `grep -n "supabase db push" docs/LOCAL_DEPLOY.md` — no matches; `supabase migration up` confirmed in Step 3 | CLEAR ✅ |
+| ISSUE-005 | `grep -n "detect-secrets.*--update" docs/CICD.md` — no matches; `--baseline` confirmed present | CLEAR ✅ |
+| ISSUE-006 | Manual review of `docs/RTM.md` requirements table — US-ADMIN-006 row confirmed present; total count shows 18 | CLEAR ✅ |
+| ISSUE-007 | `grep -rn "packages/api\|packages/player-app\|packages/admin-app" docs/test-plan.md` — no matches; `apps/api/`, `apps/player/`, `apps/admin/` confirmed throughout | CLEAR ✅ |
