@@ -150,10 +150,10 @@ Follow these steps in order. Each step depends on the previous one completing su
    Apply all pending schema migrations to the local PostgreSQL database. The canonical command is:
 
    ```bash
-   supabase db push
+   supabase migration up
    ```
 
-   If the repository defines a `pnpm db:migrate` script in the root `package.json`, use that instead of running `supabase db push` directly — do **not** run both, as this will double-apply migrations. The `db:migrate` script may use a different migration driver (such as `node-pg-migrate`) rather than the Supabase CLI directly. Check `package.json` to see which is available:
+   If the repository defines a `pnpm db:migrate` script in the root `package.json`, use that instead of running `supabase migration up` directly — do **not** run both, as this will double-apply migrations. The `db:migrate` script may use a different migration driver (such as `node-pg-migrate`) rather than the Supabase CLI directly. Check `package.json` to see which is available:
 
    ```bash
    grep -A2 '"db:' package.json

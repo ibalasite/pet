@@ -295,7 +295,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 5.2 Pet Generation Unit Tests (US-PET-001, US-PET-002)
 
-**File**: `packages/api/src/domain/pet/__tests__/pet-generation.test.ts`
+**File**: `apps/api/src/domain/pet/__tests__/pet-generation.test.ts`
 
 | TC-UNIT-001 | Combination space exceeds minimum |
 |---|---|
@@ -327,7 +327,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 5.3 Claim Flow Unit Tests (US-AUTH-001, US-AUTH-002)
 
-**File**: `packages/api/src/domain/auth/__tests__/claim-flow.test.ts`
+**File**: `apps/api/src/domain/auth/__tests__/claim-flow.test.ts`
 
 | TC-UNIT-005 | OTP code expiry enforcement |
 |---|---|
@@ -359,7 +359,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 5.4 Training System Unit Tests (US-TRAIN-001, US-FOOD-001)
 
-**File**: `packages/api/src/domain/training/__tests__/training.test.ts`
+**File**: `apps/api/src/domain/training/__tests__/training.test.ts`
 
 | TC-UNIT-009 | Stat increment range |
 |---|---|
@@ -398,7 +398,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 5.5 Arena Battle Unit Tests (US-ARENA-001, US-ARENA-002)
 
-**File**: `packages/api/src/domain/arena/__tests__/battle-calculation.test.ts`
+**File**: `apps/api/src/domain/arena/__tests__/battle-calculation.test.ts`
 
 | TC-UNIT-014 | Race outcome determinism with seed |
 |---|---|
@@ -430,7 +430,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 5.6 Level Formula Unit Tests
 
-**File**: `packages/api/src/domain/pet/__tests__/level.test.ts`
+**File**: `apps/api/src/domain/pet/__tests__/level.test.ts`
 
 | TC-UNIT-018 | Level formula derivation |
 |---|---|
@@ -448,7 +448,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 5.7 Security Unit Tests
 
-**File**: `packages/api/src/security/__tests__/`
+**File**: `apps/api/src/security/__tests__/`
 
 | TC-UNIT-020 | Email enumeration prevention |
 |---|---|
@@ -477,7 +477,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 6.1 Claim Flow Integration Tests (US-AUTH-001, US-AUTH-002)
 
-**File**: `packages/api/src/__tests__/integration/claim-flow.integration.test.ts`
+**File**: `apps/api/src/__tests__/integration/claim-flow.integration.test.ts`
 
 | TC-INT-001 | Full claim flow persists ownership |
 |---|---|
@@ -523,7 +523,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 6.2 Training and Food Integration Tests (US-TRAIN-001, US-FOOD-001)
 
-**File**: `packages/api/src/__tests__/integration/training.integration.test.ts`
+**File**: `apps/api/src/__tests__/integration/training.integration.test.ts`
 
 | TC-INT-006 | Training stat persisted across reads |
 |---|---|
@@ -548,7 +548,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 6.3 Arena Integration Tests (US-ARENA-001, US-ARENA-002, US-BOARD-001)
 
-**File**: `packages/api/src/__tests__/integration/arena.integration.test.ts`
+**File**: `apps/api/src/__tests__/integration/arena.integration.test.ts`
 
 | TC-INT-009 | Battle record saved for both pets |
 |---|---|
@@ -587,7 +587,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 6.4 GDPR Integration Tests (US-AUTH-002, US-ADMIN-004)
 
-**File**: `packages/api/src/__tests__/integration/gdpr.integration.test.ts`
+**File**: `apps/api/src/__tests__/integration/gdpr.integration.test.ts`
 
 | TC-INT-014 | Erasure request nulls email within internal SLA |
 |---|---|
@@ -612,7 +612,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 6.5 Admin Integration Tests (US-ADMIN-001 through US-ADMIN-006)
 
-**File**: `packages/api/src/__tests__/integration/admin.integration.test.ts`
+**File**: `apps/api/src/__tests__/integration/admin.integration.test.ts`
 
 | TC-INT-017 | Admin pet ban removes from leaderboard within SLA |
 |---|---|
@@ -651,7 +651,7 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 6.6 Email Service Integration Tests (US-AUTH-001)
 
-**File**: `packages/api/src/__tests__/integration/email-service.integration.test.ts`
+**File**: `apps/api/src/__tests__/integration/email-service.integration.test.ts`
 
 | TC-INT-022 | SendGrid failover after consecutive failures |
 |---|---|
@@ -677,7 +677,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 ### 7.2 Guest Pet Interaction Flow (US-PET-001)
 
-**File**: `packages/player-app/tests/e2e/guest-pet.spec.ts`
+**File**: `apps/player/tests/e2e/guest-pet.spec.ts`
 
 | TC-E2E-001 | Pet renders within SLO on page load |
 |---|---|
@@ -702,7 +702,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 ### 7.3 Email Claim Flow (US-AUTH-001, US-AUTH-002)
 
-**File**: `packages/player-app/tests/e2e/claim-flow.spec.ts`
+**File**: `apps/player/tests/e2e/claim-flow.spec.ts`
 
 | TC-E2E-004 | Complete claim flow — happy path |
 |---|---|
@@ -741,7 +741,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 ### 7.4 Training and Food E2E Tests (US-TRAIN-001, US-FOOD-001)
 
-**File**: `packages/player-app/tests/e2e/training.spec.ts`
+**File**: `apps/player/tests/e2e/training.spec.ts`
 
 | TC-E2E-009 | Three training actions per day |
 |---|---|
@@ -773,7 +773,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 ### 7.5 Arena E2E Tests (US-ARENA-001, US-ARENA-002)
 
-**File**: `packages/player-app/tests/e2e/arena.spec.ts`
+**File**: `apps/player/tests/e2e/arena.spec.ts`
 
 | TC-E2E-012 | Arena battle complete cycle |
 |---|---|
@@ -798,7 +798,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 ### 7.6 Leaderboard, Battle Records, and Rarity E2E Tests (US-BOARD-001, US-RECORD-001, US-RARITY-001)
 
-**File**: `packages/player-app/tests/e2e/leaderboard.spec.ts`
+**File**: `apps/player/tests/e2e/leaderboard.spec.ts`
 
 | TC-E2E-015 | Leaderboard publicly accessible without login |
 |---|---|
@@ -858,7 +858,7 @@ All E2E tests use Playwright with the configuration defined in Section 3.4. Test
 
 ### 7.7 Admin Portal E2E Tests (US-ADMIN-001 through US-ADMIN-006)
 
-**File**: `packages/admin-app/tests/e2e/admin.spec.ts`
+**File**: `apps/admin/tests/e2e/admin.spec.ts`
 
 | TC-E2E-020 | Admin TOTP login flow |
 |---|---|
@@ -1473,7 +1473,7 @@ Performance tests do NOT run on every pull request (too slow and resource-intens
 |---|---|---|---|
 | `pnpm audit` | Every PR | All workspace packages | Fail on high/critical vulnerabilities |
 | OWASP ZAP baseline scan | Nightly on main | `https://staging.pixel-pet-arena.com` | Alert on MEDIUM+; fail on HIGH+ |
-| Semgrep (TypeScript ruleset) | Every PR | `packages/api/src/` | Fail on security rules (SQL injection, hardcoded secrets) |
+| Semgrep (TypeScript ruleset) | Every PR | `apps/api/src/` | Fail on security rules (SQL injection, hardcoded secrets) |
 
 ### 12.4 Observability Verification Tests
 
@@ -1503,15 +1503,15 @@ Coverage reports are generated by Vitest's V8 provider and uploaded to the CI ar
 
 | Package | Minimum Coverage |
 |---|---|
-| `packages/api/src/domain/` (core business logic) | (unit_test_coverage_min_percent = 80)% |
-| `packages/api/src/routes/` (API handlers) | (unit_test_coverage_min_percent = 80)% |
-| `packages/shared/` (domain types + constants bridge) | (unit_test_coverage_min_percent = 80)% |
-| `packages/player-app/src/` (React components + hooks) | (unit_test_coverage_min_percent = 80)% |
-| `packages/admin-app/src/` (Vue components + Pinia stores) | (unit_test_coverage_min_percent = 80)% |
+| `apps/api/src/domain/` (core business logic) | (unit_test_coverage_min_percent = 80)% |
+| `apps/api/src/routes/` (API handlers) | (unit_test_coverage_min_percent = 80)% |
+| `apps/shared/` (domain types + constants bridge) | (unit_test_coverage_min_percent = 80)% |
+| `apps/player/src/` (React components + hooks) | (unit_test_coverage_min_percent = 80)% |
+| `apps/admin/src/` (Vue components + Pinia stores) | (unit_test_coverage_min_percent = 80)% |
 
 Coverage exemptions (excluded from threshold calculation):
 - Auto-generated files (Vite build outputs, type stubs)
-- `packages/api/src/migrations/` (SQL migration files — covered by integration tests, not unit tests)
+- `apps/api/src/migrations/` (SQL migration files — covered by integration tests, not unit tests)
 - Phaser.js `PetCanvasEngine` class internals (covered by E2E and visual regression tests)
 
 ---

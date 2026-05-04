@@ -1,8 +1,9 @@
 # Cross-Document Alignment Report — pixel-pet-arena
 
 **DOC-ID**: ALIGN-PIXEL-PET-ARENA-20260504
-**Status**: ACTIVE
+**Status**: FIXES APPLIED
 **Generated**: 2026-05-04
+**Fixes Applied**: 2026-05-04
 **Scope**: docs/EDD.md, docs/API.md, docs/SCHEMA.md, docs/PRD.md, docs/ARCH.md,
 docs/CICD.md, docs/FRONTEND.md, docs/test-plan.md, docs/RTM.md,
 docs/LOCAL_DEPLOY.md, docs/runbook.md, docs/DEVELOPER_GUIDE.md
@@ -302,3 +303,19 @@ blacklist) are consistently enumerated in EDD.md, ARCH.md, and API.md.
 
 All 7 issues are correctible without architectural change. None affect the EDD, API,
 SCHEMA, or ARCH documents, which are internally consistent and mutually aligned.
+
+---
+
+## Fix Status
+
+All 7 alignment issues have been resolved in commit `docs(gendoc)[ALIGN-FIX]`.
+
+| Issue | Severity | File | Fix Applied |
+|---|---|---|---|
+| ISSUE-001 | HIGH | `docs/runbook.md` | All occurrences of `/api/v1/health` replaced with `/health` (lines 17, 71, 76, 129, 156, 164, 346, 435, 437, 572) |
+| ISSUE-002 | HIGH | `docs/runbook.md` | Health response status values corrected: `"ok"` → `"healthy"`, `"error"` → `"down"`; schema aligned to `docs/API.md §10` |
+| ISSUE-003 | MEDIUM | `docs/runbook.md` | `JWT_SECRET` description updated to "used for TOTP setup token signing only — not for player auth or admin sessions" |
+| ISSUE-004 | MEDIUM | `docs/LOCAL_DEPLOY.md` | `supabase db push` replaced with `supabase migration up` in Step 3 |
+| ISSUE-005 | MEDIUM | `docs/CICD.md` | `detect-secrets scan --update` replaced with `detect-secrets scan --baseline` |
+| ISSUE-006 | MEDIUM | `docs/RTM.md` | US-ADMIN-006 (Game Economy Configuration, P1) added to requirements table, test-cases table, and coverage summary; total count updated from 17 to 18 |
+| ISSUE-007 | LOW | `docs/test-plan.md` | All `packages/api/`, `packages/player-app/`, `packages/admin-app/` paths updated to `apps/api/`, `apps/player/`, `apps/admin/` |

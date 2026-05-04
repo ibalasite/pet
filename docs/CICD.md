@@ -1026,7 +1026,7 @@ Each application package must individually meet the 80% line coverage threshold.
 
 ### Secrets Detection
 
-The `detect-secrets` tool scans each PR diff for patterns matching API keys, tokens, connection strings, and other credential shapes. The `.secrets.baseline` file at the repository root records known false positives that have been reviewed and approved. Any new match that is not already listed in the baseline will fail the `secret-scan` job and block the merge. To add a false positive to the baseline, run `detect-secrets scan --update .secrets.baseline` locally, review the new entry, and commit the updated baseline file in a separate PR.
+The `detect-secrets` tool scans each PR diff for patterns matching API keys, tokens, connection strings, and other credential shapes. The `.secrets.baseline` file at the repository root records known false positives that have been reviewed and approved. Any new match that is not already listed in the baseline will fail the `secret-scan` job and block the merge. To add a false positive to the baseline, run `detect-secrets scan --baseline .secrets.baseline` locally, review the new entry, and commit the updated baseline file in a separate PR.
 
 ---
 

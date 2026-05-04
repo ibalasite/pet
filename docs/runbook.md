@@ -14,7 +14,7 @@ This runbook covers the full operational lifecycle for the pixel-pet-arena stack
 1. [Deployment](#deployment) — pre-flight checklist, build and deploy steps, smoke tests, zero-downtime strategy
 2. [Incident Response](#incident-response) — severity matrix (P0/P1/P2), escalation paths, and specific playbooks
 3. [Rollback](#rollback) — backend image rollback, database migration revert, CDN cache invalidation
-4. [Health Checks and Monitoring](#health-checks-and-monitoring) — `/api/v1/health` schema, alert thresholds, observability setup
+4. [Health Checks and Monitoring](#health-checks-and-monitoring) — `/health` schema, alert thresholds, observability setup
 5. [On-Call Quick Reference](#on-call-quick-reference) — critical endpoints, env vars, common error codes, contacts
 
 ---
@@ -68,12 +68,12 @@ The backend is a Node.js 20 / Fastify 4 / TypeScript service deployed on Railway
    ```
 4. Wait for the new instance to pass the health check. Poll until HTTP 200:
    ```bash
-   until curl -sf https://api.pixel-pet-arena.com/api/v1/health; do
+   until curl -sf https://api.pixel-pet-arena.com/health; do
      echo "Waiting for health check…"; sleep 5
    done
    echo "Backend healthy"
    ```
-5. Confirm the `/api/v1/health` response body includes `"status": "ok"` and reports database and Redis as connected (see [Health Checks and Monitoring](#health-checks-and-monitoring)).
+5. Confirm the `/health` response body includes `"status": "healthy"` and reports database and Redis as connected (see [Health Checks and Monitoring](#health-checks-and-monitoring)).
 6. Monitor error rate in the observability dashboard for 5 minutes. If error rate exceeds 1% (`observability_error_rate_alert_window = 5` min), this is a P1 event — initiate rollback immediately if the regression correlates with the deploy.
 
 ### Frontend (Player) Build and CDN Deploy
@@ -126,7 +126,7 @@ The admin portal is Vue 3 + Element Plus + Pinia, also built with Vite 5.
 
 Run these checks within 10 minutes of every production deploy:
 
-1. **Health endpoint** — `GET /api/v1/health` returns HTTP 200 with `"status": "ok"`.
+1. **Health endpoint** — `GET /health` returns HTTP 200 with `"status": "healthy"`.
 2. **Leaderboard** — `GET /api/v1/leaderboard` returns HTTP 200 with a `data` array of up to 100 entries (`leaderboard_top_display = 100`).
 3. **Public pet page** — `GET /api/v1/pets/:knownPetId` returns HTTP 200 with correct pet sprite seed and stats.
 4. **Arena entry** (use a test pet token) — `POST /api/v1/arena/enter` with a valid pet token returns HTTP 200 or HTTP 202, not a 5xx.
@@ -153,7 +153,7 @@ This section defines severity levels, SLAs, escalation paths, and first-responde
 
 | Severity | Definition | Response SLA | Escalation |
 |----------|-----------|-------------|-----------|
-| **P0** | Complete outage — all users cannot play; `GET /api/v1/health` returns non-200 or is unreachable | Acknowledge within 5 min; resolve or roll back within 30 min | Page [ON-CALL-ENGINEER] immediately; escalate to [PLATFORM-LEAD] if not resolved in 15 min |
+| **P0** | Complete outage — all users cannot play; `GET /health` returns non-200 or is unreachable | Acknowledge within 5 min; resolve or roll back within 30 min | Page [ON-CALL-ENGINEER] immediately; escalate to [PLATFORM-LEAD] if not resolved in 15 min |
 | **P1** | Degraded performance — error rate > 1% (monitoring alert threshold) or P99 latency > 1,000 ms for any player-facing endpoint | Acknowledge within 15 min; restore to SLO within 60 min | Notify [ON-CALL-ENGINEER] via PagerDuty; loop in [DATABASE-OWNER] if DB or Redis implicated |
 | **P2** | Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works) | Acknowledge within 1 hour; resolve within 4 hours or next business day | Notify [ON-CALL-ENGINEER] via Slack `#incidents`; no escalation required unless degrading to P1 |
 
@@ -161,7 +161,7 @@ This section defines severity levels, SLAs, escalation paths, and first-responde
 
 **First responder actions (in order):**
 
-1. Check `/api/v1/health` from an external network. Note the HTTP status and response body.
+1. Check `/health` from an external network. Note the HTTP status and response body.
 2. Check the observability dashboard (Railway metrics / Fly.io metrics) for CPU, memory, and restart storms.
 3. Check Supabase dashboard for database health, connection count, and recent query errors.
 4. Check Upstash Redis dashboard for connectivity and memory usage.
@@ -343,7 +343,7 @@ Rollback is the primary recovery tool for deploy-caused regressions. Act quickly
    ```
 3. Wait for the health check to pass:
    ```bash
-   until curl -sf https://api.pixel-pet-arena.com/api/v1/health; do
+   until curl -sf https://api.pixel-pet-arena.com/health; do
      echo "Waiting…"; sleep 5
    done
    ```
@@ -432,9 +432,9 @@ In all forward-fix cases, acknowledge the incident, communicate the fix ETA, and
 
 ## Health Checks and Monitoring
 
-The `/api/v1/health` endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating.
+The `/health` endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating.
 
-### `/api/v1/health` Response Schema
+### `/health` Response Schema
 
 The endpoint must respond within `health_check_response_time = 500` ms.
 
@@ -442,29 +442,11 @@ The endpoint must respond within `health_check_response_time = 500` ms.
 
 ```json
 {
-  "status": "ok",
-  "version": "1.4.2",
-  "buildSha": "a3f9c12",
+  "status": "healthy",
   "timestamp": "2026-05-04T08:00:00.000Z",
   "checks": {
-    "database": {
-      "status": "ok",
-      "connectionPoolUtilization": 0.32,
-      "latencyMs": 4
-    },
-    "redis": {
-      "status": "ok",
-      "memoryUsagePercent": 41,
-      "latencyMs": 1
-    },
-    "email": {
-      "status": "ok",
-      "provider": "sendgrid"
-    }
-  },
-  "featureFlags": {
-    "FF_MARKETPLACE": false,
-    "FF_ARENA_SUMO": true
+    "database": { "status": "healthy" },
+    "redis": { "status": "healthy" }
   }
 }
 ```
@@ -474,10 +456,10 @@ The endpoint must respond within `health_check_response_time = 500` ms.
 ```json
 {
   "status": "degraded",
+  "timestamp": "2026-05-04T08:00:00.000Z",
   "checks": {
-    "database": { "status": "ok" },
-    "redis": { "status": "error", "error": "Connection refused" },
-    "email": { "status": "ok" }
+    "database": { "status": "healthy" },
+    "redis": { "status": "down", "error": "Connection refused" }
   }
 }
 ```
@@ -488,11 +470,11 @@ Returned when the database is unreachable (the system cannot serve any requests 
 
 ```json
 {
-  "status": "error",
+  "status": "down",
+  "timestamp": "2026-05-04T08:00:00.000Z",
   "checks": {
-    "database": { "status": "error", "error": "ECONNREFUSED" },
-    "redis": { "status": "ok" },
-    "email": { "status": "ok" }
+    "database": { "status": "down", "error": "ECONNREFUSED" },
+    "redis": { "status": "healthy" }
   }
 }
 ```
@@ -569,7 +551,7 @@ A compact reference card for the first responder. Full API documentation is in `
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| `GET` | `/api/v1/health` | Liveness and readiness check; first thing to hit during any incident |
+| `GET` | `/health` | Liveness and readiness check; first thing to hit during any incident |
 | `GET` | `/api/v1/leaderboard` | Top 100 pets by arena score; verifies Redis + DB read path |
 | `POST` | `/api/v1/arena/enter` | Player enters matchmaking queue; verifies arena write path and Redis queue |
 | `GET` | `/api/v1/pets/:petId` | Public pet profile; verifies DB read and sprite seed generation |
@@ -583,7 +565,7 @@ Confirm all of the following are present and non-empty before any deployment or 
 ```
 DATABASE_URL          # Supabase PostgreSQL connection string (pooler preferred)
 REDIS_URL             # Upstash Redis TLS URL
-JWT_SECRET            # ≥ 32 bytes base64url; used for claim token signing
+JWT_SECRET            # ≥ 32 bytes base64url; used for TOTP setup token signing only — not for player auth or admin sessions
 SENDGRID_API_KEY      # SendGrid API key for transactional email
 ADMIN_TOTP_ISSUER     # Displayed in authenticator apps (e.g. "PixelPetArena Admin")
 FF_MARKETPLACE        # "false" (default) or "true"

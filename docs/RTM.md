@@ -11,7 +11,7 @@
 
 ## Overview
 
-This Requirement Traceability Matrix (RTM) maps all 17 user stories defined in the pixel-pet-arena PRD to their corresponding test coverage assets across four test layers: BDD (server-side and client-side Cucumber/Gherkin feature files), unit tests, integration tests, and cross-cutting performance and security tests.
+This Requirement Traceability Matrix (RTM) maps all 18 user stories defined in the pixel-pet-arena PRD to their corresponding test coverage assets across four test layers: BDD (server-side and client-side Cucumber/Gherkin feature files), unit tests, integration tests, and cross-cutting performance and security tests.
 
 The scope covers the v1 release milestone. Coverage is assessed at the user story level; each row records which specific feature files exercise a story and which additional test categories supplement BDD coverage. One cross-cutting non-functional requirements row captures platform-wide concerns (authentication security hardening, rate limiting, and COPPA compliance) that span multiple stories.
 
@@ -42,6 +42,7 @@ The methodology follows forward traceability: each user story is the anchor, wit
 | US-ADMIN-003 | Admin Runtime Parameter Tuning | P1 | EPIC-ADMIN | 3 | — |
 | US-ADMIN-004 | GDPR Data Erasure | P0 | EPIC-ADMIN | 4 | — |
 | US-ADMIN-005 | Suspicious Battle Detection | P0 | EPIC-ADMIN | 3 | — |
+| US-ADMIN-006 | Game Economy Configuration | P1 | EPIC-ADMIN | 3 | — |
 
 ---
 
@@ -66,6 +67,7 @@ The methodology follows forward traceability: each user story is the anchor, wit
 | US-ADMIN-003 | Admin Runtime Parameter Tuning | — | `admin-portal.feature` (13) | — | Config cache refresh | — | ✅ Covered |
 | US-ADMIN-004 | GDPR Data Erasure | `gdpr-erasure.feature` (2) | — | — | — | — | ✅ Covered |
 | US-ADMIN-005 | Suspicious Battle Detection | `suspicious-detection.feature` (3) | — | — | — | — | ✅ Covered |
+| US-ADMIN-006 | Game Economy Configuration | — | `admin-portal.feature` (13) | — | Config cache refresh; food buff multiplier | — | ✅ Covered |
 | NFR-XCUT-001 | Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention | `claim-flow.feature` (4) | `claim-flow-ui.feature` (10) | OTP expiry | One-time token | Security: email enumeration; rate limit; COPPA | ✅ Covered |
 
 ---
@@ -82,12 +84,12 @@ The methodology follows forward traceability: each user story is the anchor, wit
 | EPIC-ARENA | 2 | 2 | 0 | 0 | 0 | 100% |
 | EPIC-RANKING | 3 | 1 | 2 | 0 | 0 | 33% |
 | EPIC-MARKETPLACE | 1 | 0 | 0 | 1 | 0 | 0% (deferred) |
-| EPIC-ADMIN | 5 | 5 | 0 | 0 | 0 | 100% |
-| **Total** | **17** | **14** | **2** | **1** | **0** | **82%** |
+| EPIC-ADMIN | 6 | 6 | 0 | 0 | 0 | 100% |
+| **Total** | **18** | **15** | **2** | **1** | **0** | **83%** |
 
 ### Overall Coverage
 
-Excluding the formally deferred US-TRADE-001 (P2, `FF_MARKETPLACE` off), **14 of 16 active user stories are fully covered** (88%). Including the deferred story, the uncapped ratio is **14 fully covered, 2 partial, 1 deferred** out of 17, yielding an overall percentage of **82%** against all requirements.
+Excluding the formally deferred US-TRADE-001 (P2, `FF_MARKETPLACE` off), **15 of 17 active user stories are fully covered** (88%). Including the deferred story, the uncapped ratio is **15 fully covered, 2 partial, 1 deferred** out of 18, yielding an overall percentage of **83%** against all requirements.
 
 ### Gaps and Notes
 
