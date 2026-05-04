@@ -96,6 +96,12 @@ on:
       - develop
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+  checks: write
+  pull-requests: write
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -160,7 +166,7 @@ jobs:
         run: pnpm --recursive lint
 
       - name: TypeScript type-check (all packages)
-        run: pnpm --recursive tsc --noEmit
+        run: pnpm --recursive exec tsc --noEmit
 
   unit-tests:
     name: Unit tests (Vitest)
@@ -267,13 +273,15 @@ jobs:
 
       - name: Export Supabase connection details
         run: |
-          DB_URL=$(supabase status --output json | jq -r '.DB_URL')
+          DB_URL=$(supabase status --output json | jq -r '."DB URL"')
           echo "DATABASE_URL=${DB_URL}" >> "$GITHUB_ENV"
           echo "REDIS_URL=redis://localhost:6379" >> "$GITHUB_ENV"
           echo "JWT_SECRET=ci-test-jwt-secret-not-for-production" >> "$GITHUB_ENV"
           echo "EMAIL_ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000" >> "$GITHUB_ENV"
           echo "SENDGRID_API_KEY=SG.test" >> "$GITHUB_ENV"
           echo "ADMIN_TOTP_ISSUER=pixel-pet-arena-ci" >> "$GITHUB_ENV"
+          echo "FF_MARKETPLACE=false" >> "$GITHUB_ENV"
+          echo "FF_ARENA_SUMO=true" >> "$GITHUB_ENV"
 
       - name: Run API integration tests
         run: pnpm --filter api test:integration
@@ -318,6 +326,9 @@ jobs:
       - name: Build admin-app
         run: pnpm --filter admin-app build
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build Docker image (api)
         uses: docker/build-push-action@v6
         with:
@@ -338,6 +349,13 @@ jobs:
           context: apps/admin
           push: false
           tags: ghcr.io/pixel-pet-arena/admin-app:ci-${{ github.sha }}
+
+      - name: Upload API build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-dist
+          path: apps/api/dist/
+          retention-days: 1
 
   secret-scan:
     name: Secret scanning
@@ -401,14 +419,22 @@ jobs:
 
       - name: Export env vars for E2E
         run: |
-          DB_URL=$(supabase status --output json | jq -r '.DB_URL')
+          DB_URL=$(supabase status --output json | jq -r '."DB URL"')
           echo "DATABASE_URL=${DB_URL}" >> "$GITHUB_ENV"
           echo "REDIS_URL=redis://localhost:6379" >> "$GITHUB_ENV"
           echo "JWT_SECRET=ci-test-jwt-secret-not-for-production" >> "$GITHUB_ENV"
           echo "EMAIL_ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000" >> "$GITHUB_ENV"
           echo "SENDGRID_API_KEY=SG.test" >> "$GITHUB_ENV"
           echo "ADMIN_TOTP_ISSUER=pixel-pet-arena-ci" >> "$GITHUB_ENV"
+          echo "FF_MARKETPLACE=false" >> "$GITHUB_ENV"
+          echo "FF_ARENA_SUMO=true" >> "$GITHUB_ENV"
           echo "VITE_API_BASE_URL=http://localhost:3000" >> "$GITHUB_ENV"
+
+      - name: Download API build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-dist
+          path: apps/api/dist/
 
       - name: Start API in background
         run: pnpm --filter api start &
@@ -455,6 +481,11 @@ on:
     branches:
       - develop
   workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
 
 env:
   NODE_VERSION: "20"
@@ -622,9 +653,11 @@ jobs:
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
           ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
         run: |
+          LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-staging --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
           curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+            -H "Content-Type: application/json" \
             "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-staging/rollback" \
-            -d '{"id": 0}' || true
+            -d "{\"id\": $LAST_GOOD_REVISION}" || true
           echo "Rollback triggered via ArgoCD API."
 ```
 
@@ -647,6 +680,11 @@ on:
       tag:
         description: "Image tag to deploy (e.g. v1.2.3)"
         required: true
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
 
 env:
   NODE_VERSION: "20"
@@ -863,9 +901,11 @@ jobs:
           ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
           PAGERDUTY_INTEGRATION_KEY: ${{ secrets.PAGERDUTY_INTEGRATION_KEY }}
         run: |
+          LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
           curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+            -H "Content-Type: application/json" \
             "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
-            -d '{"id": 0}' || true
+            -d "{\"id\": $LAST_GOOD_REVISION}" || true
           curl -sS -X POST "https://events.pagerduty.com/v2/enqueue" \
             -H "Content-Type: application/json" \
             -d "{
@@ -919,7 +959,7 @@ Each application package must individually meet the 80% line coverage threshold.
 
 ### Secrets Detection
 
-The `detect-secrets` tool scans each PR diff for patterns matching API keys, tokens, connection strings, and other credential shapes. The `.secrets.baseline` file at the repository root records known false positives that have been reviewed and approved. Any new match that is not already listed in the baseline will fail the `secret-scan` job and block the merge. To add a false positive to the baseline, run `detect-secrets scan > .secrets.baseline` locally, review the new entry, and commit the updated baseline file in a separate PR.
+The `detect-secrets` tool scans each PR diff for patterns matching API keys, tokens, connection strings, and other credential shapes. The `.secrets.baseline` file at the repository root records known false positives that have been reviewed and approved. Any new match that is not already listed in the baseline will fail the `secret-scan` job and block the merge. To add a false positive to the baseline, run `detect-secrets scan --update .secrets.baseline` locally, review the new entry, and commit the updated baseline file in a separate PR.
 
 ---
 
@@ -961,10 +1001,10 @@ k8s/
 │   │   ├── service.yaml           # ClusterIP service
 │   │   └── hpa.yaml               # HorizontalPodAutoscaler
 │   ├── player-app/
-│   │   ├── deployment.yaml        # Nginx serving player build (port 5173)
+│   │   ├── deployment.yaml        # Nginx serving player build (port 80)
 │   │   └── service.yaml
 │   ├── admin-app/
-│   │   ├── deployment.yaml        # Nginx serving admin build (port 5174)
+│   │   ├── deployment.yaml        # Nginx serving admin build (port 80)
 │   │   └── service.yaml
 │   ├── ingress.yaml               # Ingress rules for all three apps
 │   └── kustomization.yaml         # Base Kustomize configuration
@@ -1095,7 +1135,7 @@ There is no automatic down-migration on failure. The rollback procedure depends 
 
 ```bash
 # Roll back the last applied migration
-DATABASE_URL="<target-url>" pnpm node-pg-migrate down 1
+DATABASE_URL="<target-url>" pnpm exec node-pg-migrate down 1
 ```
 
 ---
@@ -1115,13 +1155,14 @@ All credentials are stored as GitHub repository secrets and injected into GitHub
 | `JWT_SECRET` | Kubernetes Sealed Secrets (both envs) | 64-byte base64url-encoded secret for TOTP setup token signing |
 | `EMAIL_ENCRYPTION_KEY` | Kubernetes Sealed Secrets (both envs) | 64-character hex string (32-byte AES-256-GCM key) for email encryption |
 | `SENDGRID_API_KEY` | Kubernetes Sealed Secrets (both envs) | SendGrid API key for transactional email delivery |
-| `GHCR_TOKEN` | `ci.yml`, `deploy-staging.yml`, `deploy-production.yml` | GitHub Personal Access Token or PAT with `write:packages` scope for ghcr.io push |
+| `GHCR_TOKEN` | `ci.yml`, `deploy-staging.yml`, `deploy-production.yml` | GitHub Personal Access Token (PAT) with `write:packages` scope for ghcr.io push |
 | `ARGOCD_SERVER` | `deploy-staging.yml`, `deploy-production.yml` | ArgoCD server hostname, e.g. `https://argocd.internal.pixel-pet-arena.com` |
 | `ARGOCD_TOKEN` | `deploy-staging.yml`, `deploy-production.yml` | ArgoCD API token for programmatic application sync and rollback |
 | `SUPABASE_PROJECT_REF` | Supabase CLI in CI/CD | Supabase project reference ID (found in project settings) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase CLI in CI/CD, admin-side operations | Service role key for privileged Supabase operations (bypass RLS) |
 | `SENTRY_AUTH_TOKEN` | `deploy-production.yml` | Sentry authentication token for release notifications |
-| `PAGERDUTY_INTEGRATION_KEY` | `deploy-staging.yml`, `deploy-production.yml` | PagerDuty Events API v2 integration key for deploy notifications and failure alerts |
+| `ADMIN_TOTP_ISSUER` | `ci.yml`, `deploy-staging.yml`, `deploy-production.yml` | Issuer label shown in authenticator apps for admin TOTP enrollment. Used by: api. Example: pixel-pet-arena-prod. |
+| `PAGERDUTY_INTEGRATION_KEY` | `deploy-production.yml` | PagerDuty Events API v2 integration key for deploy notifications and failure alerts |
 
 ### Mapping to Application Environment Variables
 
@@ -1134,6 +1175,7 @@ The Kubernetes Sealed Secrets or ExternalSecrets resources in `k8s/base/` map Gi
 | `JWT_SECRET` | `JWT_SECRET` | Injected via Kubernetes Secret |
 | `EMAIL_ENCRYPTION_KEY` | `EMAIL_ENCRYPTION_KEY` | Injected via Kubernetes Secret |
 | `SENDGRID_API_KEY` | `SENDGRID_API_KEY` | Injected via Kubernetes Secret |
+| `ADMIN_TOTP_ISSUER` | `ADMIN_TOTP_ISSUER` | Injected via Kubernetes ConfigMap |
 
 Frontend applications (`player-app`, `admin-app`) receive only `VITE_API_BASE_URL` at build time, which is a non-secret value set in the overlay ConfigMap. No sensitive values are embedded in frontend builds.
 
@@ -1185,15 +1227,17 @@ To set up: create a PagerDuty Events API v2 integration on the pixel-pet-arena s
 
 ### Automatic Rollback on Health Check Failure
 
-If the post-deploy health check exhausts all retries, both staging and production workflows invoke the ArgoCD rollback API before exiting:
+If the post-deploy health check exhausts all retries, both staging and production workflows invoke the ArgoCD rollback API before exiting. A PagerDuty critical alert fires after production rollbacks to page the on-call engineer:
 
 ```bash
+LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
 curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+  -H "Content-Type: application/json" \
   "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
-  -d '{"id": 0}'
+  -d "{\"id\": $LAST_GOOD_REVISION}"
 ```
 
-Passing `"id": 0` instructs ArgoCD to roll back to the most recent previous healthy sync. After the rollback, the PagerDuty critical alert is fired so the on-call engineer is paged and the incident is tracked. The `k8s/production/kustomization.yaml` must be manually corrected to remove the bad image tag before any subsequent deploy is attempted.
+The `id` value should be the revision ID of the last healthy sync, retrieved via `argocd app history`. Use `0` only as a fallback; pass the actual last-good revision ID in automated scripts. After the rollback, the PagerDuty critical alert is fired so the on-call engineer is paged and the incident is tracked. The `k8s/production/kustomization.yaml` must be manually corrected to remove the bad image tag before any subsequent deploy is attempted.
 
 ---
 
@@ -1268,7 +1312,7 @@ pipeline {
                 }
                 stage('TypeScript') {
                     steps {
-                        sh 'pnpm --recursive tsc --noEmit'
+                        sh 'pnpm --recursive exec tsc --noEmit'
                     }
                 }
             }
@@ -1317,13 +1361,15 @@ pipeline {
                         // Supabase CLI and Docker must be available on the Jenkins agent
                         sh '''
                             supabase start
-                            DB_URL=$(supabase status --output json | jq -r '.DB_URL')
+                            DB_URL=$(supabase status --output json | jq -r '."DB URL"')
                             export DATABASE_URL="${DB_URL}"
                             export REDIS_URL="redis://localhost:6379"
                             export JWT_SECRET="jenkins-ci-test-secret"
                             export EMAIL_ENCRYPTION_KEY="0000000000000000000000000000000000000000000000000000000000000000"
                             export SENDGRID_API_KEY="SG.test"
                             export ADMIN_TOTP_ISSUER="pixel-pet-arena-ci"
+                            export FF_MARKETPLACE="false"
+                            export FF_ARENA_SUMO="true"
                             pnpm db:migrate
                             pnpm db:seed --ci
                             pnpm --filter api test:integration
@@ -1392,11 +1438,13 @@ pipeline {
                     export DATABASE_URL="${DATABASE_URL_STAGING}"
                     pnpm db:migrate --env staging
 
+                    cd k8s/staging
                     kustomize edit set image \
                         "ghcr.io/pixel-pet-arena/api=ghcr.io/pixel-pet-arena/api:${IMAGE_TAG}" \
                         "ghcr.io/pixel-pet-arena/player-app=ghcr.io/pixel-pet-arena/player-app:${IMAGE_TAG}" \
                         "ghcr.io/pixel-pet-arena/admin-app=ghcr.io/pixel-pet-arena/admin-app:${IMAGE_TAG}"
 
+                    cd ../..
                     git config user.name "Jenkins"
                     git config user.email "jenkins@pixel-pet-arena.com"
                     git add k8s/staging/kustomization.yaml
@@ -1440,10 +1488,12 @@ pipeline {
                     export DATABASE_URL="${DATABASE_URL_PRODUCTION}"
                     pnpm db:migrate --env production
 
+                    cd k8s/production
                     kustomize edit set image \
                         "ghcr.io/pixel-pet-arena/api=ghcr.io/pixel-pet-arena/api:${IMAGE_TAG}" \
                         "ghcr.io/pixel-pet-arena/player-app=ghcr.io/pixel-pet-arena/player-app:${IMAGE_TAG}" \
                         "ghcr.io/pixel-pet-arena/admin-app=ghcr.io/pixel-pet-arena/admin-app:${IMAGE_TAG}"
+                    cd ../..
 
                     git config user.name "Jenkins"
                     git config user.email "jenkins@pixel-pet-arena.com"
@@ -1479,9 +1529,11 @@ pipeline {
             script {
                 if (env.TAG_NAME) {
                     sh '''
+                        LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
                         curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+                            -H "Content-Type: application/json" \
                             "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
-                            -d '{"id": 0}' || true
+                            -d "{\"id\": $LAST_GOOD_REVISION}" || true
                         curl -sS -X POST "https://events.pagerduty.com/v2/enqueue" \
                             -H "Content-Type: application/json" \
                             -d "{\"routing_key\": \"${PAGERDUTY_INTEGRATION_KEY}\", \"event_action\": \"trigger\", \"payload\": {\"summary\": \"PRODUCTION DEPLOY FAILED: ${IMAGE_TAG}\", \"severity\": \"critical\", \"source\": \"jenkins\"}, \"dedup_key\": \"deploy-failure-${IMAGE_TAG}\"}"
