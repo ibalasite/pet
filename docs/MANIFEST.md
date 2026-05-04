@@ -74,7 +74,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 22 | LOCAL_DEPLOY | DevEx | docs/LOCAL_DEPLOY.md | ✅ COMPLETE |
 | 23 | CICD | CI/CD | docs/CICD.md | ✅ COMPLETE |
 | 24 | DEVELOPER_GUIDE | DevEx | docs/DEVELOPER_GUIDE.md | ✅ COMPLETE |
-| 25 | UML-CICD | Diagrams | docs/diagrams/cicd-*.md (≥5 files) | PENDING |
+| 25 | UML-CICD | Diagrams | docs/diagrams/cicd-*.md (≥5 files) | ✅ COMPLETE |
 | 26 | ALIGN | Alignment | docs/ALIGN-REPORT.md | PENDING |
 | 27 | ALIGN-FIX | Alignment | docs/ALIGN-REPORT.md (fixed) | PENDING |
 | 28 | ALIGN-VERIFY | Alignment | docs/ALIGN-REPORT.md (verified) | PENDING |

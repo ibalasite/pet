@@ -57,7 +57,8 @@
     "runbook",
     "LOCAL_DEPLOY",
     "CICD",
-    "DEVELOPER_GUIDE"
+    "DEVELOPER_GUIDE",
+    "UML-CICD"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
