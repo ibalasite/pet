@@ -11,6 +11,8 @@ This guide is your practical day-to-day reference. It covers the most common tas
 
 ## Table of Contents
 
+This guide covers the most common development workflows for pixel-pet-arena. Use the sections below to quickly navigate to daily tasks, CI/CD diagnosis, or the command reference.
+
 1. [Daily Scenarios](#1-daily-scenarios)
 2. [Architecture Overview](#2-architecture-overview)
 3. [Testing Guide](#3-testing-guide)
@@ -272,7 +274,7 @@ CREATE INDEX idx_food_inventory_pet_id ON food_inventory (pet_id);
 **Step 3 — Apply the migration to your local database.**
 
 ```bash
-supabase db push
+supabase migration up
 ```
 
 Supabase CLI applies all pending migrations in chronological order. Verify the table appeared in Supabase Studio at `http://localhost:54323`.
@@ -344,7 +346,7 @@ Run through this sequence any time your local environment is in an inconsistent 
 # 1. Reset the Supabase database — drops all data, replays all migrations
 supabase db reset
 
-# 2. Re-seed the database with initial data (saves admin TOTP secret to stdout)
+# 2. Re-seed the database with initial data (save the username, initial password, and TOTP secret printed to stdout)
 pnpm db:seed
 
 # 3. Confirm the Redis container is running
@@ -366,7 +368,7 @@ pnpm --filter player-app dev
 pnpm --filter admin-app dev
 ```
 
-Save the TOTP secret printed by `pnpm db:seed`. You need it to log into the admin portal at `http://localhost:5174/admin/login`. If you lose it, run `pnpm db:seed --reset-admin` to generate a new one.
+Save the username, initial password, and TOTP secret printed by `pnpm db:seed`. You need them to log into the admin portal at `http://localhost:5174/admin/login`. If you lose them, run `pnpm db:seed --reset-admin` to generate a new one.
 
 ---
 
@@ -411,10 +413,10 @@ Fastify API — Admin namespace plugin
   ├── Admin service layer (apps/api/src/admin/<feature>.service.ts)
   │
   ├── PostgreSQL (same database, restricted admin queries)
-  └── Redis (leaderboard admin view, rate-limit config)
+  └── Redis (leaderboard admin view, rate-limit config, admin session store)
 ```
 
-The admin portal always communicates with the same Fastify process as the player API; the admin routes are scoped under `/admin/api/` and protected by a separate authentication mechanism (TOTP session cookies rather than player bearer tokens).
+The admin portal always communicates with the same Fastify process as the player API; the admin routes are scoped under `/admin/api/` and protected by a separate authentication mechanism (TOTP session cookies rather than player bearer tokens). (Player bearer tokens are raw opaque tokens, not JWTs — the API validates them by lookup, not signature verification.)
 
 ### 2.3 Shared Types
 
@@ -433,10 +435,10 @@ Each app reads its own `.env.local` file. Vite apps also support `.env.developme
 
 | Priority | File | Scope |
 |---|---|---|
-| 1 (highest) | `apps/<name>/.env.local` | Local machine only, gitignored |
-| 2 | `apps/<name>/.env.development` | Shared dev defaults, committed |
-| 3 | `apps/<name>/.env` | Fallback defaults, committed |
-| 4 (lowest) | Process environment variables | CI / container runtime |
+| 1 (highest) | Process environment variables | Already set when the process starts — not overridden by .env files |
+| 2 | `apps/<name>/.env.local` | Local machine only, gitignored |
+| 3 | `apps/<name>/.env.development` | Shared dev defaults, committed |
+| 4 (lowest) | `apps/<name>/.env` | Fallback defaults, committed |
 
 For the API, Node.js does not load `.env` files automatically — the API uses `dotenv` or equivalent. Check `apps/api/src/config.ts` to confirm the exact load order. Never commit `.env.local` files — they are in `.gitignore` and contain secrets.
 
@@ -679,7 +681,7 @@ pip install detect-secrets
 detect-secrets audit .secrets.baseline
 
 # After marking false positives as non-secrets in the audit, regenerate the baseline
-detect-secrets scan > .secrets.baseline
+detect-secrets scan --baseline .secrets.baseline
 ```
 
 Commit the updated `.secrets.baseline`. Never mark a real secret as a false positive — if a genuine secret was committed, rotate it immediately in the relevant service dashboard and remove it from the git history using `git filter-repo`.
@@ -694,7 +696,7 @@ Commit the updated `.secrets.baseline`. Never mark a real secret as a false posi
 **Check migration status locally (against staging, read-only):**
 
 ```bash
-supabase db remote diff --linked
+supabase db diff --linked
 ```
 
 **Rollback procedure:**
@@ -820,7 +822,7 @@ supabase db reset
 pnpm db:seed
 
 # Apply pending migrations
-supabase db push
+supabase migration up
 
 # Generate a new migration file
 supabase migration new <migration_name>
@@ -851,7 +853,7 @@ pnpm --filter api test:coverage
 
 | File | Who reads it | What it configures |
 |---|---|---|
-| `apps/api/.env.local` | API (dotenv at startup) | `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `EMAIL_ENCRYPTION_KEY`, `SENDGRID_API_KEY`, `ADMIN_TOTP_ISSUER`, feature flags |
+| `apps/api/.env.local` | API (dotenv at startup) | `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET` (used exclusively to sign the short-lived TOTP setup token returned during first-time admin account enrollment — not used for player authentication or admin sessions), `EMAIL_ENCRYPTION_KEY`, `SENDGRID_API_KEY`, `ADMIN_TOTP_ISSUER`, feature flags |
 | `apps/player/.env.local` | Vite (build + dev server) | `VITE_API_BASE_URL` |
 | `apps/admin/.env.local` | Vite (build + dev server) | `VITE_API_BASE_URL` |
 
@@ -1037,7 +1039,7 @@ You pull changes and suddenly see TypeScript errors that were not present before
 **Most likely causes and fixes:**
 
 1. **New dependencies added** — run `pnpm install` to link new packages.
-2. **Schema changed** — run `supabase gen types typescript --local > packages/shared/src/database.types.ts` to regenerate types, then apply pending migrations with `supabase db push`.
+2. **Schema changed** — run `supabase gen types typescript --local > packages/shared/src/database.types.ts` to regenerate types, then apply pending migrations with `supabase migration up`.
 3. **Shared package API changed** — check `packages/shared/CHANGELOG.md` (if present) for breaking type changes. Update your call sites accordingly.
 4. **tsconfig.json changed** — review the diff of any `tsconfig*.json` files in the PR you pulled; a stricter setting may now flag previously passing code.
 
