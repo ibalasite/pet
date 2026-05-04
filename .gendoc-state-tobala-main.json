@@ -56,7 +56,8 @@
     "RTM",
     "runbook",
     "LOCAL_DEPLOY",
-    "CICD"
+    "CICD",
+    "DEVELOPER_GUIDE"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
