@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ad000001-fade-beef-cafe-000000000001",
+    "username": "superadmin_rex",
+    "role": "superadmin",
+    "email": "[AES-256-GCM encrypted]",
+    "totpEnabled": true,
+    "lastLoginAt": "2026-05-04T09:12:00.000Z",
+    "createdAt": "2025-01-15T08:00:00.000Z",
+    "active": true
+  },
+  {
+    "id": "ad000002-fade-beef-cafe-000000000002",
+    "username": "mod_sparrow",
+    "role": "moderator",
+    "email": "[AES-256-GCM encrypted]",
+    "totpEnabled": true,
+    "lastLoginAt": "2026-05-03T22:47:30.000Z",
+    "createdAt": "2025-03-20T10:30:00.000Z",
+    "active": true
+  },
+  {
+    "id": "ad000003-fade-beef-cafe-000000000003",
+    "username": "mod_fernwood",
+    "role": "moderator",
+    "email": "[AES-256-GCM encrypted]",
+    "totpEnabled": false,
+    "lastLoginAt": "2026-04-10T14:05:00.000Z",
+    "createdAt": "2025-07-08T13:45:00.000Z",
+    "active": false
+  }
+]
