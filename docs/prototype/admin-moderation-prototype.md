@@ -91,7 +91,7 @@ The Suspicious Battles panel surfaces battle records that the server's anomaly d
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-The suspicion score renders as a colored `el-progress` bar: green (0–49), amber (50–79), red (80–100). Clicking **Review** opens a side drawer (`el-drawer` direction="rtl") showing the full `battleLog` array in a timeline format built with `el-timeline`. The reviewer can mark the battle as "Cleared — False Positive" or "Confirmed Suspicious" using radio buttons in the drawer footer, which calls `PUT /api/v1/admin/battles/:id/review` with `{ "verdict": "cleared" | "confirmed" }`. The **Void** action is only rendered in the DOM for `superadmin` role sessions; `moderator` sessions never receive the button, avoiding reliance on CSS-only hiding for security-sensitive actions.
+The suspicion score renders as a colored `el-progress` bar: green (0–49), amber (50–79), red (80–100). Clicking **Review** opens a side drawer (`el-drawer` direction="rtl") showing the full `battleLog` array in a timeline format built with `el-timeline`. The reviewer can mark the battle as "Cleared — False Positive" or "Confirmed Suspicious" using radio buttons in the drawer footer, which calls `PUT /api/v1/admin/battles/:id/review` with `{ "verdict": "cleared" | "confirmed" }`. The **Void** action is only rendered in the DOM for `superadmin` role sessions via `v-if="isSuperadmin"` — `moderator` sessions never receive the button, avoiding reliance on CSS-only hiding for security-sensitive actions. Void calls `DELETE /api/v1/admin/battles/:id` which rolls back all XP changes for both participants and marks the battle record as voided.
 
 ### API Calls
 
@@ -153,7 +153,7 @@ The workflow is a three-step `el-steps` component:
 
 **Step 2 — Confirm Scope:** A checklist (`el-checkbox-group`) shows what will be erased: account credentials, pet records, battle history, leaderboard entries. All checkboxes are pre-ticked and non-interactive (erasure is always full scope to comply with GDPR completeness requirements). A mandatory text input requires the admin to type the user's email address verbatim as a deliberate confirmation step — the **Confirm Erasure** button remains disabled until the typed email exactly matches the selected user record.
 
-**Step 3 — Erasure Receipt:** After `DELETE /api/v1/admin/users/:id/gdpr-erase` returns 200, the screen shows a non-dismissible confirmation panel displaying the erasure reference ID, timestamp, and the admin's session username for audit log purposes. The admin can print or copy this receipt. No navigation away from this screen is possible until the receipt is acknowledged.
+**Step 3 — Erasure Receipt:** After `DELETE /api/v1/admin/users/:id/gdpr-erase` returns 202 Accepted, the screen shows a non-dismissible confirmation panel displaying the erasure job ID, timestamp, and the admin's session username for audit log purposes. Erasure is processed asynchronously via the `ppa:jobs:gdpr-erasure` BullMQ queue — the 202 response confirms the job has been enqueued, not that deletion is already complete. The admin can print or copy this receipt. No navigation away from this screen is possible until the receipt is acknowledged.
 
 ### API Call — DELETE /api/v1/admin/users/:id/gdpr-erase
 
@@ -167,18 +167,14 @@ Content-Type: application/json
   "requestReference": "GDPR-2026-0504-001"
 }
 
-Response 200:
+Response 202:
 {
-  "erasureId": "erasure_abc789",
-  "erasedAt": "2026-05-04T10:45:00Z",
+  "jobId": "erasure_abc789",
+  "enqueuedAt": "2026-05-04T10:45:00Z",
   "adminUsername": "admin@arena",
   "userId": "user_001",
-  "recordsDeleted": {
-    "account": true,
-    "pets": 2,
-    "battles": 87,
-    "leaderboardEntries": 1
-  }
+  "status": "queued",
+  "queue": "ppa:jobs:gdpr-erasure"
 }
 ```
 
