@@ -33,13 +33,13 @@ The Supabase CLI is required for Steps 2 and 3 (`supabase start`, `supabase db p
 # macOS — Homebrew
 brew install supabase/tap/supabase
 
-# Linux — direct install
-curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh
+# Linux — Homebrew (recommended)
+brew install supabase/tap/supabase
 ```
 
 Verify installation:
 ```bash
-supabase --version   # should print 1.x.x or higher
+supabase --version   # should print 2.x.x or higher
 ```
 
 ### Optional tools
@@ -61,7 +61,7 @@ Each application in the monorepo has its own environment file. You must copy and
 ### Clone the repository
 
 ```bash
-git clone https://github.com/your-org/pixel-pet-arena.git
+git clone https://github.com/<your-org>/pixel-pet-arena.git
 cd pixel-pet-arena
 ```
 
@@ -83,8 +83,9 @@ Open each `.env.local` file and set the values listed below. Variables marked **
 |---|---|---|
 | `DATABASE_URL` | Yes | Leave blank for now — the value is printed by `supabase start` in Setup Steps step 2 (looks like `postgresql://postgres:postgres@localhost:54322/postgres`) |
 | `REDIS_URL` | Yes | Redis connection string; use `redis://localhost:6379` for the local Docker container |
-| `JWT_SECRET` | Yes | A long random string used to sign player authentication cookies (see below) |
-| `SENDGRID_API_KEY` | No | Can be any non-empty dummy string locally; emails are printed to the API console in development mode instead of being sent |
+| `JWT_SECRET` | Yes | Used to sign the short-lived TOTP setup token returned during first-time admin account enrollment; not used for player authentication (players use raw bearer tokens) |
+| `EMAIL_ENCRYPTION_KEY` | Yes | A 32-byte AES-256 key used to decrypt stored email addresses; generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `SENDGRID_API_KEY` | No | Can be any non-empty dummy string locally; emails are captured by the Supabase Inbucket testing inbox and viewable at `http://localhost:54324` |
 | `ADMIN_TOTP_ISSUER` | Yes | The issuer name shown in your authenticator app, e.g. `pixel-pet-arena-local` |
 
 #### `apps/player/.env.local`
@@ -104,10 +105,10 @@ Open each `.env.local` file and set the values listed below. Variables marked **
 Use Node.js to generate a cryptographically random secret. Run this command and paste the output into `apps/api/.env.local`:
 
 ```bash
-node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))"
 ```
 
-The output will be a 128-character hexadecimal string. Keep this value private and never commit it to source control.
+The output will be a base64url-encoded string of 64 random bytes. Keep this value private and never commit it to source control.
 
 ### Feature flags
 
@@ -126,7 +127,7 @@ Follow these steps in order. Each step depends on the previous one completing su
 
 1. **Install all workspace dependencies.**
 
-   Run this from the repository root. pnpm will hoist shared dependencies and link workspace packages automatically.
+   Run this from the repository root. pnpm will link workspace packages via symlinks and resolve shared dependencies through its virtual store.
 
    ```bash
    pnpm install
@@ -152,7 +153,7 @@ Follow these steps in order. Each step depends on the previous one completing su
    supabase db push
    ```
 
-   If the repository defines a `pnpm db:migrate` script in the root `package.json`, it is a thin wrapper around `supabase db push`. Use **one or the other — not both** — to avoid double-applying migrations. Check `package.json` to see which is available:
+   If the repository defines a `pnpm db:migrate` script in the root `package.json`, use that instead of running `supabase db push` directly — do **not** run both, as this will double-apply migrations. The `db:migrate` script may use a different migration driver (such as `node-pg-migrate`) rather than the Supabase CLI directly. Check `package.json` to see which is available:
 
    ```bash
    grep -A2 '"db:' package.json
@@ -202,7 +203,7 @@ Follow these steps in order. Each step depends on the previous one completing su
    The React + Phaser frontend runs on Vite's dev server at port 5173 with hot module replacement enabled.
 
    ```bash
-   pnpm --filter player dev
+   pnpm --filter player-app dev
    ```
 
 8. **Start the admin portal.**
@@ -210,7 +211,7 @@ Follow these steps in order. Each step depends on the previous one completing su
    The Vue 3 admin portal runs on its own Vite dev server at port 5174.
 
    ```bash
-   pnpm --filter admin dev
+   pnpm --filter admin-app dev
    ```
 
    Each of the three services in steps 6–8 should be run in separate terminal tabs or panes so you can observe their output simultaneously.
@@ -224,16 +225,16 @@ Once all three services are running, use the following checks to confirm a healt
 ### API health check
 
 ```bash
-curl http://localhost:3000/api/v1/health
+curl http://localhost:3000/health
 ```
 
 Expected response:
 
 ```json
-{"status":"ok","uptime":12.5}
+{"status":"healthy","checks":{"database":"ok","redis":"ok"},"timestamp":"2026-05-03T12:00:00Z"}
 ```
 
-Any non-200 response or a connection refusal indicates the API is not running or failed to connect to the database or Redis.
+Any non-200 response or a connection refusal indicates the API is not running or one or more upstream dependencies (database or Redis) are unhealthy.
 
 ### Player frontend
 
@@ -257,7 +258,7 @@ The `pnpm db:seed` command creates a default admin user. The seed script prints 
 
 1. Open `http://localhost:5174/admin/login`.
 2. Enter the seeded credentials (username and password printed by `db:seed`).
-3. Open your authenticator app (Google Authenticator, Authy, 1Password, etc.) and scan the QR code or manually enter the TOTP secret printed by `db:seed`. The issuer name will match the `ADMIN_TOTP_ISSUER` value you set in the environment file.
+3. Open your authenticator app (Google Authenticator, Authy, 1Password, etc.) and manually enter the TOTP secret printed by `db:seed`. The issuer name will match the `ADMIN_TOTP_ISSUER` value you set in the environment file.
 4. Enter the six-digit TOTP code from your authenticator app to complete login.
 
 ---
@@ -394,8 +395,8 @@ Run tests for a specific workspace package:
 
 ```bash
 pnpm --filter api test
-pnpm --filter player test
-pnpm --filter admin test
+pnpm --filter player-app test
+pnpm --filter admin-app test
 ```
 
 ### Supabase Studio
