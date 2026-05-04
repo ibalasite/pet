@@ -61,7 +61,8 @@
     "UML-CICD",
     "ALIGN",
     "ALIGN-FIX",
-    "ALIGN-VERIFY"
+    "ALIGN-VERIFY",
+    "CONTRACTS"
   ],
   "idea_review_passed": true,
   "brd_generated": true,

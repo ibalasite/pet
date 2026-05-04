@@ -78,7 +78,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 26 | ALIGN | Alignment | docs/ALIGN-REPORT.md | ✅ COMPLETE |
 | 27 | ALIGN-FIX | Alignment | docs/ALIGN-REPORT.md (fixed) | ✅ COMPLETE |
 | 28 | ALIGN-VERIFY | Alignment | docs/ALIGN-REPORT.md (verified) | ✅ COMPLETE |
-| 29 | CONTRACTS | Contracts | docs/contracts/ (≥3 files) | PENDING |
+| 29 | CONTRACTS | Contracts | docs/contracts/ (≥3 files) | ✅ COMPLETE |
 | 30 | MOCK | Mock Data | docs/mock-data/ (≥3 files) | PENDING |
 | 31 | PROTOTYPE | Prototype | docs/prototype/ (≥3 files) | PENDING |
 | 32 | HTML | HTML | docs/pages/ (≥3 files) | PENDING |
