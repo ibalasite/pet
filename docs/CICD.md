@@ -260,7 +260,7 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: "2.1.6"
 
       - name: Start Supabase local stack
         run: supabase start
@@ -409,7 +409,7 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: "2.1.6"
 
       - name: Start Supabase local stack
         run: supabase start
@@ -490,6 +490,10 @@ on:
     branches:
       - develop
   workflow_dispatch:
+
+concurrency:
+  group: deploy-staging-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -617,7 +621,7 @@ jobs:
           ref: develop
 
       - name: Install kustomize
-        uses: imranismail/setup-kustomize@v2
+        uses: imranismail/setup-kustomize@2cebf1efc75ef7b4f533c67e33c41e09eb5920c3  # v2.1.0
         with:
           kustomize-version: "5.4.1"
 
@@ -663,9 +667,9 @@ jobs:
       - name: Install ArgoCD CLI
         if: failure()
         run: |
-          ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
+          ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256 | awk '{print $1}')
           curl -sSL -o /usr/local/bin/argocd \
-            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+            https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64
           echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
           chmod +x /usr/local/bin/argocd
           argocd login "${{ secrets.ARGOCD_SERVER }}" \
@@ -710,6 +714,10 @@ on:
         description: "Image tag to deploy (e.g. v1.2.3)"
         required: true
 
+concurrency:
+  group: deploy-production-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   packages: write
@@ -732,6 +740,8 @@ jobs:
       image_tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
 
       - name: Resolve image tag
         id: tag
@@ -850,7 +860,7 @@ jobs:
           ref: main
 
       - name: Install kustomize
-        uses: imranismail/setup-kustomize@v2
+        uses: imranismail/setup-kustomize@2cebf1efc75ef7b4f533c67e33c41e09eb5920c3  # v2.1.0
         with:
           kustomize-version: "5.4.1"
 
@@ -930,9 +940,9 @@ jobs:
       - name: Install ArgoCD CLI
         if: failure()
         run: |
-          ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
+          ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256 | awk '{print $1}')
           curl -sSL -o /usr/local/bin/argocd \
-            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+            https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64
           echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
           chmod +x /usr/local/bin/argocd
           argocd login "${{ secrets.ARGOCD_SERVER }}" \
@@ -1107,7 +1117,7 @@ To trigger a production sync after the manifest commit:
 
 ```bash
 # Log in (once per session)
-argocd login <ARGOCD_SERVER> --auth-token <ARGOCD_TOKEN>
+argocd login <ARGOCD_SERVER> --auth-token <ARGOCD_TOKEN> --grpc-web
 
 # Trigger a manual sync
 argocd app sync pixel-pet-arena-production
@@ -1240,6 +1250,8 @@ Frontend applications (`player-app`, `admin-app`) receive `VITE_API_BASE_URL` as
 | `GHCR_TOKEN` | Every 90 days or on token compromise | Ensure new token has `write:packages` before retiring the old one |
 | `ARGOCD_TOKEN` | Every 90 days | Generate a new token in ArgoCD account settings |
 | `SUPABASE_SERVICE_ROLE_KEY` | On staff departure or compromise | Regenerate in Supabase project API settings |
+| `SENTRY_AUTH_TOKEN` | Quarterly | Revoke old token in Sentry → generate new → update GitHub secret |
+| `PAGERDUTY_INTEGRATION_KEY` | Annually | Regenerate integration key in PagerDuty service → update GitHub secret |
 
 ---
 
@@ -1466,6 +1478,8 @@ pipeline {
                         imageTag = "develop-${env.GIT_COMMIT.take(8)}"
                     }
                     env.IMAGE_TAG = imageTag
+                    def apiUrl = env.TAG_NAME ? 'https://api.pixel-pet-arena.com' : 'https://api.staging.pixel-pet-arena.com'
+                    env.VITE_API_BASE_URL = apiUrl
                 }
                 sh '''
                     echo "${GHCR_TOKEN_PSW}" | docker login "${REGISTRY}" -u "${GHCR_TOKEN_USR}" --password-stdin
@@ -1473,10 +1487,10 @@ pipeline {
                     docker build -t "${REGISTRY}/${IMAGE_ORG}/api:${IMAGE_TAG}" apps/api
                     docker push "${REGISTRY}/${IMAGE_ORG}/api:${IMAGE_TAG}"
 
-                    docker build -t "${REGISTRY}/${IMAGE_ORG}/player-app:${IMAGE_TAG}" apps/player
+                    docker build --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL} -t "${REGISTRY}/${IMAGE_ORG}/player-app:${IMAGE_TAG}" apps/player
                     docker push "${REGISTRY}/${IMAGE_ORG}/player-app:${IMAGE_TAG}"
 
-                    docker build -t "${REGISTRY}/${IMAGE_ORG}/admin-app:${IMAGE_TAG}" apps/admin
+                    docker build --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL} -t "${REGISTRY}/${IMAGE_ORG}/admin-app:${IMAGE_TAG}" apps/admin
                     docker push "${REGISTRY}/${IMAGE_ORG}/admin-app:${IMAGE_TAG}"
 
                     docker logout "${REGISTRY}"
@@ -1584,9 +1598,9 @@ pipeline {
             script {
                 if (env.TAG_NAME) {
                     sh '''
-                        ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
+                        ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256 | awk '{print $1}')
                         curl -sSL -o /usr/local/bin/argocd \
-                          https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+                          https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64
                         echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
                         chmod +x /usr/local/bin/argocd
                         argocd login "${ARGOCD_SERVER}" --auth-token "${ARGOCD_TOKEN}" --grpc-web
@@ -1606,6 +1620,25 @@ pipeline {
                             -d "{\"routing_key\": \"${PAGERDUTY_INTEGRATION_KEY}\", \"event_action\": \"trigger\", \"payload\": {\"summary\": \"PRODUCTION DEPLOY FAILED: ${IMAGE_TAG}\", \"severity\": \"critical\", \"source\": \"jenkins\"}, \"dedup_key\": \"deploy-failure-${IMAGE_TAG}\"}"
                     '''
                 }
+                script {
+                  if (!env.TAG_NAME) {
+                    def lastGoodRev = sh(
+                      script: '''LAST=$(argocd app history pixel-pet-arena-staging --output json 2>/dev/null | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // empty' 2>/dev/null); echo "${LAST:-}"''',
+                      returnStdout: true
+                    ).trim()
+                    // Validate that the revision ID is a plain integer before use to prevent injection
+                    if (lastGoodRev && lastGoodRev != 'null' && lastGoodRev ==~ /^\d+$/) {
+                      sh """
+                        curl -s -X POST "\${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-staging/rollback" \
+                          -H "Authorization: Bearer \${ARGOCD_TOKEN}" \
+                          -H "Content-Type: application/json" \
+                          -d "{\\"id\\": ${lastGoodRev}}"
+                      """
+                    } else {
+                      echo 'WARNING: No previous successful deployment found; skipping staging rollback.'
+                    }
+                  }
+                }
             }
         }
         always {
@@ -1615,7 +1648,7 @@ pipeline {
 }
 ```
 
-The Jenkins pipeline mirrors the GitHub Actions workflows in every material respect: the same quality gates, the same Docker image naming convention, the same post-deploy health checks, and the same ArgoCD-based rollback procedure. Teams running Jenkins should store all credential values in the Jenkins Credentials Store under the IDs listed in the `environment` block above, using the `Username with password` type for `ghcr-token` and the `Secret text` type for all others.
+The Jenkins pipeline mirrors the GitHub Actions workflows in the same logical stages: the same quality gates, the same Docker image naming convention, the same post-deploy health checks, and the same ArgoCD-based rollback procedure. Teams running Jenkins should store all credential values in the Jenkins Credentials Store under the IDs listed in the `environment` block above, using the `Username with password` type for `ghcr-token` and the `Secret text` type for all others.
 
 ---
 
