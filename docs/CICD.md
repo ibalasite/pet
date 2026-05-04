@@ -1606,7 +1606,7 @@ pipeline {
             script {
                 // Install ArgoCD CLI once for both rollback paths
                 sh '''
-                  ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256)
+                  ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256 | awk '{print $1}')
                   curl -sSL -o /usr/local/bin/argocd \
                     https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64
                   chmod +x /usr/local/bin/argocd
