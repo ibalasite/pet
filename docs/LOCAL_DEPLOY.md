@@ -44,7 +44,6 @@ supabase --version   # should print 1.x.x or higher
 
 ### Optional tools
 
-- **Supabase CLI** — already listed above as required.
 - **Redis CLI** — useful for inspecting cache state. Install via Homebrew (`brew install redis`) on macOS; on Linux, install the `redis-tools` package. You do not need a locally installed Redis server — the Docker container is sufficient.
 
 ### Platform notes
