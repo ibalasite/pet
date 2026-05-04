@@ -84,7 +84,7 @@ Open each `.env.local` file and set the values listed below. Variables marked **
 | `DATABASE_URL` | Yes | Leave blank for now — the value is printed by `supabase start` in Setup Steps step 2 (looks like `postgresql://postgres:postgres@localhost:54322/postgres`) |
 | `REDIS_URL` | Yes | Redis connection string; use `redis://localhost:6379` for the local Docker container |
 | `JWT_SECRET` | Yes | Used to sign the short-lived TOTP setup token returned during first-time admin account enrollment; not used for player authentication (players use raw bearer tokens) |
-| `EMAIL_ENCRYPTION_KEY` | Yes | A 32-byte AES-256 key used to decrypt stored email addresses; generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `EMAIL_ENCRYPTION_KEY` | Yes | A 32-byte AES-256-GCM key used to encrypt and decrypt stored email addresses; generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `SENDGRID_API_KEY` | No | Can be any non-empty dummy string locally; emails are captured by the Supabase Inbucket testing inbox and viewable at `http://localhost:54324` |
 | `ADMIN_TOTP_ISSUER` | Yes | The issuer name shown in your authenticator app, e.g. `pixel-pet-arena-local` |
 
@@ -161,7 +161,7 @@ Follow these steps in order. Each step depends on the previous one completing su
 
 4. **Seed the database.**
 
-   This command inserts initial data including a default admin account, starter pets, and arena configuration. The seed script prints the TOTP secret for the local admin account — **save this output now**. You will need it in the Verification section to log into the admin portal. If you lose it, run `pnpm db:seed --reset-admin` to regenerate a new TOTP secret (see *TOTP setup for the local admin account* in Troubleshooting).
+   This command inserts initial data including a default admin account, starter pets, and arena configuration. The seed script prints the username, initial password, and TOTP secret for the local admin account — **save this entire output now**. You will need all three values in the Verification section to log into the admin portal. If you lose them, run `pnpm db:seed --reset-admin` to regenerate a new TOTP secret (see *TOTP setup for the local admin account* in Troubleshooting).
 
    ```bash
    pnpm db:seed
@@ -269,7 +269,7 @@ The `pnpm db:seed` command creates a default admin user. The seed script prints 
 
 **Symptom:** `supabase start` hangs or prints a Docker-related error.
 
-- Verify Docker Desktop is running. The Docker icon should be visible in the macOS menu bar.
+- Verify Docker Desktop is running. On macOS, the Docker icon should be visible in the menu bar. On Linux, run `systemctl status docker` (or `sudo service docker status`) to confirm the daemon is active.
 - Run `docker info` to confirm the Docker daemon is responsive.
 - If a previous Supabase session left containers running in a broken state, stop and reset everything:
 
@@ -292,7 +292,7 @@ lsof -ti :5173 | xargs kill -9
 lsof -ti :5174 | xargs kill -9
 ```
 
-On Linux, substitute `fuser -k 3000/tcp` if `lsof` is not installed.
+On Linux, substitute `fuser` if `lsof` is not installed: `fuser -k 3000/tcp`, `fuser -k 5173/tcp`, `fuser -k 5174/tcp`.
 
 ### Redis connection refused or port 6379 already in use
 
