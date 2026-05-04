@@ -12,7 +12,7 @@ Before you begin, make sure the following software is installed and available on
 
 | Tool | Minimum version | Notes |
 |---|---|---|
-| Node.js | 20.x | Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schnaub/fnm) to manage versions |
+| Node.js | 20.x | Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to manage versions |
 | pnpm | 9.x | Install with `npm install -g pnpm@latest` |
 | Docker Desktop | 24.x or higher | Required to run the Supabase local stack; must be running before `supabase start` |
 | Git | 2.x | Any modern version works |
