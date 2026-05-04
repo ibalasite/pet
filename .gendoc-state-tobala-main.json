@@ -53,7 +53,8 @@
     "test-plan",
     "BDD-server",
     "BDD-client",
-    "RTM"
+    "RTM",
+    "runbook"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
