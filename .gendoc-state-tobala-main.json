@@ -55,7 +55,8 @@
     "BDD-client",
     "RTM",
     "runbook",
-    "LOCAL_DEPLOY"
+    "LOCAL_DEPLOY",
+    "CICD"
   ],
   "idea_review_passed": true,
   "brd_generated": true,

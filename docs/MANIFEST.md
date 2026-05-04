@@ -72,7 +72,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 20 | RTM | Traceability | docs/RTM.md | ✅ COMPLETE |
 | 21 | runbook | Operations | docs/runbook.md | ✅ COMPLETE |
 | 22 | LOCAL_DEPLOY | DevEx | docs/LOCAL_DEPLOY.md | ✅ COMPLETE |
-| 23 | CICD | CI/CD | docs/CICD.md | PENDING |
+| 23 | CICD | CI/CD | docs/CICD.md | ✅ COMPLETE |
 | 24 | DEVELOPER_GUIDE | DevEx | docs/DEVELOPER_GUIDE.md | PENDING |
 | 25 | UML-CICD | Diagrams | docs/diagrams/cicd-*.md (≥5 files) | PENDING |
 | 26 | ALIGN | Alignment | docs/ALIGN-REPORT.md | PENDING |
