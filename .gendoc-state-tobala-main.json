@@ -62,7 +62,8 @@
     "ALIGN",
     "ALIGN-FIX",
     "ALIGN-VERIFY",
-    "CONTRACTS"
+    "CONTRACTS",
+    "MOCK"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
