@@ -392,7 +392,7 @@ Fastify API (localhost:3000)
   ├── Service layer (apps/api/src/<domain>/<domain>.service.ts)
   │
   ├── PostgreSQL (Supabase local, port 54322)  ← durable data
-  └── Redis (Docker container, port 6379)      ← leaderboard + rate limits
+  └── Redis (Docker container, port 6379)      ← caching / leaderboard / rate limits / job queue
 ```
 
 In production the Vite dev server is replaced by Vercel CDN serving the built static assets, and the API runs as a containerised Node.js process behind a load balancer.
@@ -413,7 +413,7 @@ Fastify API — Admin namespace plugin
   ├── Admin service layer (apps/api/src/admin/<feature>.service.ts)
   │
   ├── PostgreSQL (same database, restricted admin queries)
-  └── Redis (leaderboard admin view, rate-limit config, admin session store)
+  └── Redis (leaderboard admin view, rate-limit config, admin session store, caching, job queue)
 ```
 
 The admin portal always communicates with the same Fastify process as the player API; the admin routes are scoped under `/admin/api/` and protected by a separate authentication mechanism (TOTP session cookies rather than player bearer tokens). (Player bearer tokens are raw opaque tokens, not JWTs — the API validates them by lookup, not signature verification.)
@@ -895,7 +895,7 @@ lsof -i :3000
 # Generate a JWT_SECRET
 node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))"
 
-# Generate an EMAIL_ENCRYPTION_KEY (32 random bytes as hex)
+# Generate an EMAIL_ENCRYPTION_KEY — 32 bytes = 256-bit key for AES-256-GCM (used to encrypt and decrypt stored email addresses)
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 # Flush all Redis keys (local dev only — never run in production)
