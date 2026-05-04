@@ -3,7 +3,7 @@
 **Project**: pixel-pet-arena  
 **Generated**: 2026-05-03  
 **Pipeline Version**: 3.0  
-**Status**: IN PROGRESS
+**Status**: ✅ COMPLETE
 
 ---
 
@@ -81,7 +81,7 @@ Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):
 | 29 | CONTRACTS | Contracts | docs/contracts/ (≥3 files) | ✅ COMPLETE |
 | 30 | MOCK | Mock Data | docs/mock-data/ (≥3 files) | ✅ COMPLETE |
 | 31 | PROTOTYPE | Prototype | docs/prototype/ (≥3 files) | ✅ COMPLETE |
-| 32 | HTML | HTML | docs/pages/ (≥3 files) | PENDING |
+| 32 | HTML | HTML | docs/pages/ (≥3 files) | ✅ COMPLETE |
 
 ---
 
