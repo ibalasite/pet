@@ -885,7 +885,7 @@
           <strong>2 GDPR erasure requests</strong> pending — erasure is processed asynchronously via <code>ppa:jobs:gdpr-erasure</code> (BullMQ) and returns HTTP 202 Accepted. Must be queued within 30 days per regulation.
           Oldest request: <strong>6 days old</strong>.
         </div>
-        <button class="btn btn-danger btn-sm">Review Requests</button>
+        <button class="btn btn-danger btn-sm btn-superadmin-only" title="Superadmin only">Review Requests</button>
       </div>
 
       <!-- FLAGGED BATTLES TABLE -->
@@ -1117,11 +1117,11 @@
                 </div>
               </div>
 
-              <div class="quick-action-card" role="button" tabindex="0" aria-label="Process GDPR erasure requests">
+              <div class="quick-action-card superadmin-only" role="button" tabindex="0" aria-label="Process GDPR erasure requests — superadmin only">
                 <div class="qa-icon red" aria-hidden="true">🗑️</div>
                 <div class="qa-info">
                   <div class="qa-title">GDPR Erasure</div>
-                  <div class="qa-desc">Process 2 pending data deletion requests</div>
+                  <div class="qa-desc">Queue 2 pending data deletion requests (async 202)</div>
                 </div>
               </div>
 
@@ -1129,7 +1129,7 @@
                 <div class="qa-icon purple" aria-hidden="true">⚑</div>
                 <div class="qa-info">
                   <div class="qa-title">Feature Flags</div>
-                  <div class="qa-desc">Toggle FF_ARENA_SUMO and other runtime flags</div>
+                  <div class="qa-desc">Toggle FF_ARENA_SUMO and FF_MARKETPLACE</div>
                 </div>
               </div>
 
