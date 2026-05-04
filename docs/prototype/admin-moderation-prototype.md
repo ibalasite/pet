@@ -63,7 +63,7 @@ Response 200:
 
 Clicking **Ban** opens an `el-dialog` confirmation modal that requires the moderator to enter a ban reason (minimum 10 characters, validated client-side before submission). On confirm, `PUT /api/v1/admin/pets/:id/ban` is called with `{ "reason": "..." }`. On success the row status badge updates optimistically. `superadmin` users also see a **Permanent Ban** checkbox in the dialog that sets `{ "permanent": true }` in the request body; moderators see only the standard time-limited ban form.
 
-**Unban** triggers a simpler `el-popconfirm` inline confirmation with the text "Restore this pet to active status?" before calling `PUT /api/v1/admin/pets/:id/ban` with `{ "active": true }`.
+**Unban** triggers a simpler `el-popconfirm` inline confirmation with the text "Restore this pet to active status?" before calling `DELETE /api/v1/admin/pets/:id/ban`, which lifts the ban and returns the pet to active status. Using a dedicated endpoint keeps the ban and unban operations semantically distinct and easier to audit in server logs.
 
 ---
 
