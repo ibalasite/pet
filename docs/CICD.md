@@ -342,6 +342,8 @@ jobs:
           context: apps/player
           push: false
           tags: ghcr.io/pixel-pet-arena/player-app:ci-${{ github.sha }}
+          build-args: |
+            VITE_API_BASE_URL=http://localhost:3000
 
       - name: Build Docker image (admin-app)
         uses: docker/build-push-action@v6
@@ -349,6 +351,8 @@ jobs:
           context: apps/admin
           push: false
           tags: ghcr.io/pixel-pet-arena/admin-app:ci-${{ github.sha }}
+          build-args: |
+            VITE_API_BASE_URL=http://localhost:3000
 
       - name: Upload API build artifact
         uses: actions/upload-artifact@v4
@@ -452,7 +456,7 @@ jobs:
             sleep 2
           done
           if [ "$API_READY" = "false" ]; then
-            echo "ERROR: API did not become healthy within 60 seconds" >&2
+            echo "ERROR: API did not become healthy within ~60 seconds" >&2
             exit 1
           fi
 
@@ -685,6 +689,8 @@ jobs:
           LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-staging --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id' 2>/dev/null)
           if [ -z "${LAST_GOOD_REVISION}" ] || [ "${LAST_GOOD_REVISION}" = "null" ]; then
             echo "WARNING: could not determine last good revision; skipping rollback." >&2
+          elif ! [[ "${LAST_GOOD_REVISION}" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: LAST_GOOD_REVISION '${LAST_GOOD_REVISION}' is not a plain integer; skipping rollback."
           else
             curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
               -H "Content-Type: application/json" \
@@ -1610,6 +1616,10 @@ pipeline {
                         if [ -z "${LAST_GOOD_REVISION}" ] || [ "${LAST_GOOD_REVISION}" = "null" ]; then
                             echo "WARNING: could not determine last good revision; skipping rollback." >&2
                         else
+                            if ! echo "${LAST_GOOD_REVISION}" | grep -qE '^[0-9]+$'; then
+                              echo "ERROR: revision is not a plain integer; skipping rollback."
+                              exit 0
+                            fi
                             curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
                                 -H "Content-Type: application/json" \
                                 "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
