@@ -54,7 +54,8 @@
     "BDD-server",
     "BDD-client",
     "RTM",
-    "runbook"
+    "runbook",
+    "LOCAL_DEPLOY"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
