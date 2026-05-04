@@ -14,7 +14,7 @@ Before you begin, make sure the following software is installed and available on
 |---|---|---|
 | Node.js | 20.x | Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schnaub/fnm) to manage versions |
 | pnpm | 9.x | Install with `npm install -g pnpm@latest` |
-| Docker Desktop | Latest stable | Required to run the Supabase local stack; must be running before `supabase start` |
+| Docker Desktop | 24.x or higher | Required to run the Supabase local stack; must be running before `supabase start` |
 | Git | 2.x | Any modern version works |
 
 Check your versions before continuing:
@@ -25,9 +25,26 @@ pnpm --version   # should print 9.x.x or higher
 docker --version # should print Docker version 24.x or higher
 ```
 
+### Supabase CLI (required for local setup)
+
+The Supabase CLI is required for Steps 2 and 3 (`supabase start`, `supabase db push`). Install it before proceeding:
+
+```bash
+# macOS — Homebrew
+brew install supabase/tap/supabase
+
+# Linux — direct install
+curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | sh
+```
+
+Verify installation:
+```bash
+supabase --version   # should print 1.x.x or higher
+```
+
 ### Optional tools
 
-- **Supabase CLI** — required for `supabase start` and `supabase db push`. Install via Homebrew (`brew install supabase/tap/supabase`) or the [official installer](https://supabase.com/docs/guides/cli).
+- **Supabase CLI** — already listed above as required.
 - **Redis CLI** — useful for inspecting cache state. Install via Homebrew (`brew install redis`) on macOS; on Linux, install the `redis-tools` package. You do not need a locally installed Redis server — the Docker container is sufficient.
 
 ### Platform notes
@@ -130,12 +147,16 @@ Follow these steps in order. Each step depends on the previous one completing su
 
 3. **Run database migrations.**
 
-   Apply all pending schema migrations to the local PostgreSQL database. Use whichever command your project exposes:
+   Apply all pending schema migrations to the local PostgreSQL database. The canonical command is:
 
    ```bash
    supabase db push
-   # or, if a pnpm script is wired up:
-   pnpm db:migrate
+   ```
+
+   If the repository defines a `pnpm db:migrate` script in the root `package.json`, it is a thin wrapper around `supabase db push`. Use **one or the other — not both** — to avoid double-applying migrations. Check `package.json` to see which is available:
+
+   ```bash
+   cat package.json | grep -A2 '"db:'
    ```
 
 4. **Seed the database.**
