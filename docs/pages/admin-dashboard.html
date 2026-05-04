@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Pet Arena — Admin Portal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      /* Element Plus-inspired palette */
+      --bg-page:      #f0f2f5;
+      --bg-surface:   #ffffff;
+      --bg-sidebar:   #1d2035;
+      --bg-sidebar-hover: #252840;
+      --bg-sidebar-active: #2f3352;
+
+      --border:       #e4e7ed;
+      --border-light: #f2f3f5;
+
+      --text-primary:   #303133;
+      --text-regular:   #606266;
+      --text-secondary: #909399;
+      --text-placeholder: #c0c4cc;
+
+      --color-primary:  #409eff;
+      --color-success:  #67c23a;
+      --color-warning:  #e6a23c;
+      --color-danger:   #f56c6c;
+      --color-info:     #909399;
+
+      --color-superadmin: #9b59b6;
+      --color-moderator:  #27ae60;
+
+      --sidebar-text:     #a8abb2;
+      --sidebar-active:   #ffffff;
+      --sidebar-accent:   #409eff;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+      --radius:    4px;
+      --radius-lg: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP HEADER ── */
+    .top-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: var(--shadow-sm);
+      gap: 16px;
+    }
+
+    .top-bar-logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .top-bar-logo-badge {
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--bg-sidebar);
+      color: #a8abb2;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+
+    .top-bar-spacer { flex: 1; }
+
+    .top-bar-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      min-width: 240px;
+    }
+
+    .top-bar-search input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-primary);
+      width: 100%;
+    }
+
+    .top-bar-search input::placeholder { color: var(--text-placeholder); }
+
+    .search-icon { color: var(--text-placeholder); font-size: 13px; }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      color: var(--text-secondary);
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    .icon-btn:hover { background: var(--bg-page); }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      background: var(--color-danger);
+      border-radius: 50%;
+      border: 1px solid var(--bg-surface);
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      transition: background 0.15s;
+    }
+
+    .user-menu:hover { background: var(--bg-page); }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-superadmin);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .user-info { line-height: 1.3; }
+
+    .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+    .user-role {
+      font-size: 11px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .user-role.superadmin { color: var(--color-superadmin); }
+    .user-role.moderator  { color: var(--color-moderator); }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      flex: 1;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      background: var(--bg-sidebar);
+      flex-shrink: 0;
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 60px);
+    }
+
+    .nav-group { margin-bottom: 8px; }
+
+    .nav-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #555875;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 20px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: var(--sidebar-text);
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-sidebar-hover);
+      color: #d0d3e0;
+    }
+
+    .nav-item.active {
+      background: var(--bg-sidebar-active);
+      color: var(--sidebar-active);
+      border-left-color: var(--sidebar-accent);
+    }
+
+    .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var(--color-danger);
+      color: #fff;
+    }
+
+    .nav-badge.info { background: var(--color-primary); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid #2a2d42;
+    }
+
+    .sidebar-footer-text {
+      font-size: 11px;
+      color: #555875;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .content {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+
+    .page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+    .page-actions { display: flex; gap: 10px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid;
+      transition: all 0.15s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #66b1ff; border-color: #66b1ff; }
+
+    .btn-default {
+      background: #fff;
+      border-color: var(--border);
+      color: var(--text-regular);
+    }
+
+    .btn-default:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+    .btn-danger {
+      background: var(--color-danger);
+      border-color: var(--color-danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover { background: #f78989; border-color: #f78989; }
+
+    .btn-warning {
+      background: var(--color-warning);
+      border-color: var(--color-warning);
+      color: #fff;
+    }
+
+    .btn-warning:hover { opacity: 0.88; }
+
+    .btn-superadmin-only {
+      background: #f5eeff;
+      border-color: var(--color-superadmin);
+      color: var(--color-superadmin);
+      position: relative;
+    }
+
+    .btn-superadmin-only::after {
+      content: '★ SA';
+      font-size: 9px;
+      font-weight: 700;
+      position: absolute;
+      top: -8px;
+      right: -4px;
+      background: var(--color-superadmin);
+      color: #fff;
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .btn-superadmin-only:hover { background: #eedeff; }
+
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* ── STAT CARDS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .stats-row { grid-template-columns: 1fr; } }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .stat-card.pets::before    { background: var(--color-primary); }
+    .stat-card.battles::before { background: var(--color-success); }
+    .stat-card.reviews::before { background: var(--color-warning); }
+    .stat-card.users::before   { background: var(--color-superadmin); }
+
+    .stat-card-icon {
+      font-size: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      margin-bottom: 4px;
+    }
+
+    .stat-card.pets    .stat-card-icon { background: #ecf5ff; }
+    .stat-card.battles .stat-card-icon { background: #f0f9eb; }
+    .stat-card.reviews .stat-card-icon { background: #fdf6ec; }
+    .stat-card.users   .stat-card-icon { background: #f4edfd; }
+
+    .stat-card-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .stat-card-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-card-delta {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .stat-card-delta.up   { color: var(--color-success); }
+    .stat-card-delta.down { color: var(--color-danger); }
+
+    /* ── SECTION CARD ── */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .card-body { padding: 20px; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead tr {
+      background: var(--bg-page);
+      border-bottom: 1px solid var(--border);
+    }
+
+    thead th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border-light);
+      transition: background 0.1s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbfc; }
+
+    td { padding: 12px 14px; vertical-align: middle; }
+
+    .cell-pet {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pet-mini-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius);
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .pet-mini-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    .pet-mini-owner { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+
+    /* Rarity tags */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .tag-common    { background: #f4f4f5; color: var(--text-secondary); }
+    .tag-uncommon  { background: #f0f9eb; color: var(--color-success); }
+    .tag-rare      { background: #ecf5ff; color: var(--color-primary); }
+    .tag-epic      { background: #f4edfd; color: var(--color-superadmin); }
+    .tag-legendary { background: #fdf6ec; color: var(--color-warning); }
+
+    .tag-mode-race  { background: #ecf5ff; color: var(--color-primary); }
+    .tag-mode-sumo  { background: #fdf6ec; color: var(--color-warning); }
+
+    .tag-status-pending  { background: #fdf6ec; color: var(--color-warning); }
+    .tag-status-resolved { background: #f0f9eb; color: var(--color-success); }
+    .tag-status-escalated { background: #fef0f0; color: var(--color-danger); }
+
+    /* Suspicion score progress bar */
+    .score-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .score-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+      min-width: 80px;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .score-bar-fill.low    { background: var(--color-success); }
+    .score-bar-fill.medium { background: var(--color-warning); }
+    .score-bar-fill.high   { background: var(--color-danger); }
+
+    .score-value {
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 32px;
+      text-align: right;
+    }
+
+    .score-value.low    { color: var(--color-success); }
+    .score-value.medium { color: var(--color-warning); }
+    .score-value.high   { color: var(--color-danger); }
+
+    .cell-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+
+    /* ── QUICK ACTIONS GRID ── */
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .quick-action-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+    }
+
+    .quick-action-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .quick-action-card.superadmin-only {
+      border-style: dashed;
+    }
+
+    .quick-action-card.superadmin-only::before {
+      content: '★ SUPERADMIN ONLY';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--color-superadmin);
+      background: #f4edfd;
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    .qa-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .qa-icon.blue   { background: #ecf5ff; }
+    .qa-icon.green  { background: #f0f9eb; }
+    .qa-icon.red    { background: #fef0f0; }
+    .qa-icon.purple { background: #f4edfd; }
+    .qa-icon.orange { background: #fdf6ec; }
+
+    .qa-info { flex: 1; padding-top: 2px; }
+
+    .qa-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+
+    .qa-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* ── GDPR MINI SECTION ── */
+    .gdpr-mini {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #fef0f0;
+      border: 1px solid #fbc4c4;
+      border-radius: var(--radius);
+      font-size: 13px;
+    }
+
+    .gdpr-mini-icon { font-size: 20px; }
+
+    .gdpr-mini-text { flex: 1; color: var(--text-regular); }
+
+    .gdpr-mini-text strong { color: var(--text-primary); }
+
+    /* ── ROLE TOGGLE (demo UI) ── */
+    .role-toggle {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .role-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .role-chip.superadmin { background: #f4edfd; border-color: var(--color-superadmin); color: var(--color-superadmin); }
+    .role-chip.moderator  { background: #f0f9eb; border-color: var(--color-moderator);  color: var(--color-moderator); }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="top-bar">
+    <div class="top-bar-logo">
+      🐉 PixelPetArena
+      <span class="top-bar-logo-badge">ADMIN</span>
+    </div>
+
+    <div class="top-bar-spacer"></div>
+
+    <div class="top-bar-search" role="search">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="search" placeholder="Search pets, users, battles…" aria-label="Search admin portal" />
+    </div>
+
+    <div class="top-bar-actions">
+      <button class="icon-btn" aria-label="Notifications (3 unread)">
+        🔔
+        <span class="notif-dot" aria-hidden="true"></span>
+      </button>
+      <button class="icon-btn" aria-label="Settings">⚙️</button>
+
+      <div class="user-menu" role="button" aria-label="User menu for AdminKira" tabindex="0">
+        <div class="user-avatar" aria-hidden="true">AK</div>
+        <div class="user-info">
+          <div class="user-name">AdminKira</div>
+          <span class="user-role superadmin" aria-label="Role: superadmin">
+            ★ SUPERADMIN
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- LAYOUT -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" aria-label="Admin navigation">
+      <div class="nav-group">
+        <div class="nav-group-label">Overview</div>
+        <a class="nav-item active" href="#" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">📊</span>
+          Dashboard
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon" aria-hidden="true">📈</span>
+          Analytics
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">Content</div>
+        <a class="nav-item" href="#" aria-label="Pet Management, 1,842 pets">
+          <span class="nav-icon" aria-hidden="true">🐾</span>
+          Pet Management
+          <span class="nav-badge info">1,842</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon" aria-hidden="true">👥</span>
+          Users
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon" aria-hidden="true">🎲</span>
+          Gacha Config
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">Moderation</div>
+        <a class="nav-item" href="#" aria-label="Suspicious Battles, 7 pending">
+          <span class="nav-icon" aria-hidden="true">⚠️</span>
+          Suspicious Battles
+          <span class="nav-badge">7</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon" aria-hidden="true">🚩</span>
+          Reports
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" href="#" aria-label="GDPR Erasure, 2 pending">
+          <span class="nav-icon" aria-hidden="true">🗑️</span>
+          GDPR Erasure
+          <span class="nav-badge">2</span>
+        </a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">System</div>
+        <a class="nav-item" href="#">
+          <span class="nav-icon" aria-hidden="true">⚑</span>
+          Feature Flags
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon" aria-hidden="true">🔐</span>
+          Roles &amp; Perms
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon" aria-hidden="true">📋</span>
+          Audit Log
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-text">v2.4.1 · Fastify 4 API</div>
+        <div class="sidebar-footer-text" style="margin-top:4px">Port 5174 (Admin UI)</div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="content" aria-labelledby="page-heading">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <h1 id="page-heading" class="page-title">Dashboard</h1>
+          <div class="page-subtitle">Welcome back, AdminKira — last login 42 min ago</div>
+        </div>
+        <div class="page-actions">
+          <div class="role-toggle" aria-label="Current role context">
+            <span>Viewing as:</span>
+            <span class="role-chip superadmin" role="status" aria-live="polite">★ SUPERADMIN</span>
+          </div>
+          <button class="btn btn-primary">
+            <span aria-hidden="true">⟳</span>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <section aria-label="Key metrics" style="margin-bottom:24px">
+        <div class="stats-row">
+          <div class="stat-card pets">
+            <div class="stat-card-icon" aria-hidden="true">🐾</div>
+            <div class="stat-card-label">Total Pets</div>
+            <div class="stat-card-value">1,842</div>
+            <div class="stat-card-delta up" aria-label="Up 12% from last week">▲ +12% this week</div>
+          </div>
+          <div class="stat-card battles">
+            <div class="stat-card-icon" aria-hidden="true">⚔️</div>
+            <div class="stat-card-label">Active Battles</div>
+            <div class="stat-card-value">37</div>
+            <div class="stat-card-delta up" aria-label="Up 4 in last hour">▲ +4 in last hour</div>
+          </div>
+          <div class="stat-card reviews">
+            <div class="stat-card-icon" aria-hidden="true">🚨</div>
+            <div class="stat-card-label">Pending Reviews</div>
+            <div class="stat-card-value">7</div>
+            <div class="stat-card-delta down" aria-label="Down 2 from yesterday">▼ −2 from yesterday</div>
+          </div>
+          <div class="stat-card users">
+            <div class="stat-card-icon" aria-hidden="true">👥</div>
+            <div class="stat-card-label">Total Users</div>
+            <div class="stat-card-value">9,641</div>
+            <div class="stat-card-delta up" aria-label="Up 3 percent from last month">▲ +3% this month</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GDPR BANNER -->
+      <div class="gdpr-mini" role="alert" aria-label="Pending GDPR erasure requests">
+        <span class="gdpr-mini-icon" aria-hidden="true">🗑️</span>
+        <div class="gdpr-mini-text">
+          <strong>2 GDPR erasure requests</strong> pending — must be processed within 30 days per regulation.
+          Oldest request: <strong>6 days old</strong>.
+        </div>
+        <button class="btn btn-danger btn-sm">Review Requests</button>
+      </div>
+
+      <!-- FLAGGED BATTLES TABLE -->
+      <section aria-labelledby="flagged-heading" style="margin-top:20px">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 id="flagged-heading" class="card-title">
+                <span aria-hidden="true">⚠️</span>
+                Recently Flagged Battles
+              </h2>
+              <div class="card-subtitle">Battles with suspicion score ≥ 45 — reviewed by AI anomaly detection</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-default btn-sm">Filter</button>
+              <button class="btn btn-default btn-sm">Export CSV</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table aria-label="Flagged battle reports">
+              <thead>
+                <tr>
+                  <th scope="col">Battle ID</th>
+                  <th scope="col">Pets Involved</th>
+                  <th scope="col">Mode</th>
+                  <th scope="col">Suspicion Score</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Time</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">#B-7741</span>
+                  </td>
+                  <td>
+                    <div class="cell-pet">
+                      <div class="pet-mini-avatar" aria-hidden="true">⚡</div>
+                      <div>
+                        <div class="pet-mini-name">STORMFANG</div>
+                        <div class="pet-mini-owner">vs EMBERTHORN · owner: xenorush</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-mode-race">RACE</span></td>
+                  <td>
+                    <div class="score-cell" role="group" aria-label="Suspicion score 91 out of 100, high">
+                      <div class="score-bar-track">
+                        <div class="score-bar-fill high" style="width:91%" aria-hidden="true"></div>
+                      </div>
+                      <span class="score-value high">91</span>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-status-escalated">ESCALATED</span></td>
+                  <td class="cell-time">2 min ago</td>
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-danger btn-sm">Invalidate</button>
+                      <button class="btn btn-default btn-sm">View</button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">#B-7728</span>
+                  </td>
+                  <td>
+                    <div class="cell-pet">
+                      <div class="pet-mini-avatar" aria-hidden="true">🔥</div>
+                      <div>
+                        <div class="pet-mini-name">BLAZECREST</div>
+                        <div class="pet-mini-owner">vs FROSTPIKE · owner: moltenwave</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-mode-sumo">SUMO</span></td>
+                  <td>
+                    <div class="score-cell" role="group" aria-label="Suspicion score 78 out of 100, high">
+                      <div class="score-bar-track">
+                        <div class="score-bar-fill high" style="width:78%" aria-hidden="true"></div>
+                      </div>
+                      <span class="score-value high">78</span>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-status-pending">PENDING</span></td>
+                  <td class="cell-time">18 min ago</td>
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-warning btn-sm">Review</button>
+                      <button class="btn btn-default btn-sm">View</button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">#B-7719</span>
+                  </td>
+                  <td>
+                    <div class="cell-pet">
+                      <div class="pet-mini-avatar" aria-hidden="true">🌑</div>
+                      <div>
+                        <div class="pet-mini-name">VOIDSCALE</div>
+                        <div class="pet-mini-owner">vs MOSSVEIL · owner: wraithbyte</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-mode-race">RACE</span></td>
+                  <td>
+                    <div class="score-cell" role="group" aria-label="Suspicion score 54 out of 100, medium">
+                      <div class="score-bar-track">
+                        <div class="score-bar-fill medium" style="width:54%" aria-hidden="true"></div>
+                      </div>
+                      <span class="score-value medium">54</span>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-status-pending">PENDING</span></td>
+                  <td class="cell-time">1 hr ago</td>
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-warning btn-sm">Review</button>
+                      <button class="btn btn-default btn-sm">View</button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">#B-7704</span>
+                  </td>
+                  <td>
+                    <div class="cell-pet">
+                      <div class="pet-mini-avatar" aria-hidden="true">🌿</div>
+                      <div>
+                        <div class="pet-mini-name">THORNSPIRE</div>
+                        <div class="pet-mini-owner">vs GLACIERBACK · owner: fernlord</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-mode-sumo">SUMO</span></td>
+                  <td>
+                    <div class="score-cell" role="group" aria-label="Suspicion score 47 out of 100, medium">
+                      <div class="score-bar-track">
+                        <div class="score-bar-fill medium" style="width:47%" aria-hidden="true"></div>
+                      </div>
+                      <span class="score-value medium">47</span>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-status-pending">PENDING</span></td>
+                  <td class="cell-time">3 hr ago</td>
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-warning btn-sm">Review</button>
+                      <button class="btn btn-default btn-sm">View</button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">#B-7691</span>
+                  </td>
+                  <td>
+                    <div class="cell-pet">
+                      <div class="pet-mini-avatar" aria-hidden="true">☄️</div>
+                      <div>
+                        <div class="pet-mini-name">ASTERFORGE</div>
+                        <div class="pet-mini-owner">vs SHADOWMAW · owner: cosmo99</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-mode-race">RACE</span></td>
+                  <td>
+                    <div class="score-cell" role="group" aria-label="Suspicion score 32 out of 100, low">
+                      <div class="score-bar-track">
+                        <div class="score-bar-fill low" style="width:32%" aria-hidden="true"></div>
+                      </div>
+                      <span class="score-value low">32</span>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-status-resolved">RESOLVED</span></td>
+                  <td class="cell-time">6 hr ago</td>
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-default btn-sm" disabled>Resolved</button>
+                      <button class="btn btn-default btn-sm">View</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK ACTIONS -->
+      <section aria-labelledby="quick-actions-heading">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 id="quick-actions-heading" class="card-title">
+                <span aria-hidden="true">⚡</span>
+                Quick Actions
+              </h2>
+              <div class="card-subtitle">
+                <span class="role-chip superadmin" aria-label="Superadmin only indicator">★ SA</span>
+                &nbsp;= superadmin only
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="quick-actions-grid">
+
+              <div class="quick-action-card" role="button" tabindex="0" aria-label="Generate new pets">
+                <div class="qa-icon blue" aria-hidden="true">🎲</div>
+                <div class="qa-info">
+                  <div class="qa-title">Generate Pets</div>
+                  <div class="qa-desc">Batch-generate pets with chosen rarity distribution</div>
+                </div>
+              </div>
+
+              <div class="quick-action-card" role="button" tabindex="0" aria-label="Review suspicious battles">
+                <div class="qa-icon orange" aria-hidden="true">⚠️</div>
+                <div class="qa-info">
+                  <div class="qa-title">Review Flagged</div>
+                  <div class="qa-desc">7 battles awaiting moderation review</div>
+                </div>
+              </div>
+
+              <div class="quick-action-card" role="button" tabindex="0" aria-label="Process GDPR erasure requests">
+                <div class="qa-icon red" aria-hidden="true">🗑️</div>
+                <div class="qa-info">
+                  <div class="qa-title">GDPR Erasure</div>
+                  <div class="qa-desc">Process 2 pending data deletion requests</div>
+                </div>
+              </div>
+
+              <div class="quick-action-card superadmin-only" role="button" tabindex="0" aria-label="Edit feature flags — superadmin only">
+                <div class="qa-icon purple" aria-hidden="true">⚑</div>
+                <div class="qa-info">
+                  <div class="qa-title">Feature Flags</div>
+                  <div class="qa-desc">Toggle FF_ARENA_SUMO and other runtime flags</div>
+                </div>
+              </div>
+
+              <div class="quick-action-card superadmin-only" role="button" tabindex="0" aria-label="Manage admin roles — superadmin only">
+                <div class="qa-icon purple" aria-hidden="true">🔐</div>
+                <div class="qa-info">
+                  <div class="qa-title">Role Management</div>
+                  <div class="qa-desc">Assign moderator and superadmin roles</div>
+                </div>
+              </div>
+
+              <div class="quick-action-card" role="button" tabindex="0" aria-label="View audit log">
+                <div class="qa-icon green" aria-hidden="true">📋</div>
+                <div class="qa-info">
+                  <div class="qa-title">Audit Log</div>
+                  <div class="qa-desc">Review all admin actions and system events</div>
+                </div>
+              </div>
+
+              <div class="quick-action-card superadmin-only" role="button" tabindex="0" aria-label="Run database maintenance — superadmin only">
+                <div class="qa-icon purple" aria-hidden="true">🛢️</div>
+                <div class="qa-info">
+                  <div class="qa-title">DB Maintenance</div>
+                  <div class="qa-desc">Vacuum, re-index, and run schema migrations</div>
+                </div>
+              </div>
+
+              <div class="quick-action-card" role="button" tabindex="0" aria-label="Export leaderboard data">
+                <div class="qa-icon blue" aria-hidden="true">📊</div>
+                <div class="qa-info">
+                  <div class="qa-title">Export Leaderboard</div>
+                  <div class="qa-desc">Download current season rankings as CSV</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Pet Arena — Battle</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+
+    :root {
+      --bg-deep:       #060610;
+      --bg-panel:      #0e0e20;
+      --bg-card:       #14142e;
+      --bg-card-hover: #1e1e40;
+      --border:        #252545;
+      --border-bright: #3838aa;
+
+      --accent-cyan:   #00e5ff;
+      --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740;
+      --accent-green:  #69ff47;
+      --accent-red:    #ff4444;
+      --accent-orange: #ff9900;
+
+      --rarity-common:    #9e9e9e;
+      --rarity-uncommon:  #44dd44;
+      --rarity-rare:      #4488ff;
+      --rarity-epic:      #bb44ff;
+      --rarity-legendary: #ffaa00;
+
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+
+      --rank-up:   var(--accent-green);
+      --rank-down: var(--accent-red);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-deep);
+      color: #e0e0ff;
+      font-family: var(--pixel-font);
+      font-size: 10px;
+      min-height: 100vh;
+      image-rendering: pixelated;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 3px,
+        rgba(0,0,0,0.07) 3px,
+        rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--bg-panel);
+      border-bottom: 2px solid var(--border-bright);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 2px solid var(--border-bright);
+      color: var(--accent-cyan);
+      font-family: var(--pixel-font);
+      font-size: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-back:hover {
+      background: rgba(0,229,255,0.08);
+      border-color: var(--accent-cyan);
+    }
+
+    .btn-back:active { transform: translate(1px,1px); }
+
+    .header-title {
+      font-size: 14px;
+      color: var(--accent-red);
+      text-shadow: 2px 2px 0 #880000;
+      letter-spacing: 2px;
+    }
+
+    .header-pet-info {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 8px;
+      color: #8888bb;
+    }
+
+    .my-pet-chip {
+      border: 1px solid var(--border-bright);
+      padding: 4px 8px;
+      color: var(--accent-purple);
+      font-size: 8px;
+    }
+
+    /* ── MODE TOGGLE ── */
+    .mode-section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 24px 0;
+    }
+
+    .mode-label {
+      font-size: 8px;
+      color: #6666aa;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
+      border: 2px solid var(--border-bright);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .mode-btn {
+      padding: 10px 24px;
+      font-family: var(--pixel-font);
+      font-size: 9px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      color: #6666aa;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.1s;
+    }
+
+    .mode-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.04);
+      color: #9999cc;
+    }
+
+    .mode-btn.active {
+      background: var(--accent-red);
+      color: #060610;
+    }
+
+    .mode-btn.active.sumo {
+      background: var(--accent-orange);
+    }
+
+    .mode-flag {
+      font-size: 6px;
+      padding: 1px 4px;
+      background: rgba(105,255,71,0.2);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      vertical-align: middle;
+    }
+
+    /* ── BATTLE RESULT BANNER ── */
+    .result-banner {
+      max-width: 960px;
+      margin: 0 auto 8px;
+      padding: 0 24px;
+    }
+
+    .result-card {
+      background: var(--bg-panel);
+      border: 2px solid var(--accent-green);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: 'VICTORY!';
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-8deg);
+      font-size: 48px;
+      color: rgba(105,255,71,0.06);
+      font-family: var(--retro-font);
+      pointer-events: none;
+      letter-spacing: 4px;
+    }
+
+    .result-icon {
+      font-size: 40px;
+      line-height: 1;
+    }
+
+    .result-text { flex: 1; }
+
+    .result-title {
+      font-size: 14px;
+      color: var(--accent-green);
+      text-shadow: 1px 1px 0 #226600;
+      margin-bottom: 8px;
+      font-family: var(--retro-font);
+    }
+
+    .result-detail {
+      font-size: 8px;
+      color: #8888bb;
+      margin-bottom: 6px;
+    }
+
+    .result-rewards {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .reward-chip {
+      font-size: 8px;
+      padding: 4px 10px;
+      border: 1px solid;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .reward-chip.xp   { border-color: var(--accent-cyan);   color: var(--accent-cyan); }
+    .reward-chip.coin { border-color: var(--accent-yellow);  color: var(--accent-yellow); }
+    .reward-chip.rank { border-color: var(--accent-green);   color: var(--accent-green); }
+
+    .rank-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rank-arrow { color: var(--rank-up); }
+
+    .rank-prev { color: #8888bb; text-decoration: line-through; }
+
+    .rank-new  { color: var(--accent-green); font-weight: bold; }
+
+    .dismiss-btn {
+      background: transparent;
+      border: 1px solid #4444aa;
+      color: #6666aa;
+      font-family: var(--pixel-font);
+      font-size: 7px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.1s;
+      white-space: nowrap;
+    }
+
+    .dismiss-btn:hover { border-color: var(--border-bright); color: #9999cc; }
+
+    /* ── OPPONENT LIST ── */
+    .opponents-section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 9px;
+      color: #6666aa;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .opponent-count {
+      font-size: 7px;
+      color: #555577;
+    }
+
+    .opponent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .opponent-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      cursor: pointer;
+      transition: border-color 0.1s, background 0.1s;
+      position: relative;
+    }
+
+    .opponent-card:hover {
+      border-color: var(--accent-red);
+      background: var(--bg-card-hover);
+    }
+
+    .opponent-card.recommended {
+      border-color: var(--accent-yellow);
+    }
+
+    .opponent-card.recommended::before {
+      content: '★ RECOMMENDED';
+      position: absolute;
+      top: -1px;
+      left: 12px;
+      font-size: 6px;
+      background: var(--accent-yellow);
+      color: #060610;
+      padding: 1px 6px;
+    }
+
+    /* Mini sprite preview */
+    .opp-sprite {
+      width: 48px;
+      height: 48px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      image-rendering: pixelated;
+    }
+
+    .opp-info { display: flex; flex-direction: column; gap: 6px; }
+
+    .opp-name {
+      font-size: 11px;
+      color: #e0e0ff;
+      font-family: var(--retro-font);
+      letter-spacing: 1px;
+    }
+
+    .opp-meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .opp-level  { font-size: 7px; color: #6666aa; }
+
+    .rarity-dot {
+      width: 6px;
+      height: 6px;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .rarity-dot.common    { background: var(--rarity-common); }
+    .rarity-dot.uncommon  { background: var(--rarity-uncommon); }
+    .rarity-dot.rare      { background: var(--rarity-rare); }
+    .rarity-dot.epic      { background: var(--rarity-epic); }
+    .rarity-dot.legendary { background: var(--rarity-legendary); }
+
+    .opp-type-tag {
+      font-size: 7px;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      color: #6666aa;
+    }
+
+    .opp-winrate-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .winrate-label { font-size: 7px; color: #555577; white-space: nowrap; }
+
+    .winrate-track {
+      width: 80px;
+      height: 4px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .winrate-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+      transition: width 0.5s ease;
+    }
+
+    .opp-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .opp-rank {
+      font-size: 9px;
+      color: var(--accent-yellow);
+      text-align: right;
+      font-family: var(--retro-font);
+    }
+
+    .opp-rank small { font-size: 7px; color: #555577; display: block; font-family: var(--pixel-font); margin-top: 2px; }
+
+    .challenge-btn {
+      padding: 8px 16px;
+      font-family: var(--pixel-font);
+      font-size: 7px;
+      cursor: pointer;
+      border: 2px solid var(--accent-red);
+      background: var(--accent-red);
+      color: #060610;
+      box-shadow: 3px 3px 0 #880000;
+      transition: all 0.06s;
+    }
+
+    .challenge-btn:hover { background: #ff6666; }
+    .challenge-btn:active { transform: translate(2px,2px); box-shadow: none; }
+
+    .challenge-btn.sumo {
+      border-color: var(--accent-orange);
+      background: var(--accent-orange);
+      box-shadow: 3px 3px 0 #885500;
+      color: #060610;
+    }
+
+    .difficulty-badge {
+      font-size: 6px;
+      padding: 2px 6px;
+      border: 1px solid;
+    }
+
+    .difficulty-badge.easy   { border-color: var(--accent-green);  color: var(--accent-green); }
+    .difficulty-badge.medium { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+    .difficulty-badge.hard   { border-color: var(--accent-red);    color: var(--accent-red); }
+
+    /* ── LOADING SKELETON (shown when battle is pending) ── */
+    .battle-loading {
+      text-align: center;
+      padding: 40px;
+      display: none;
+    }
+
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .page-btn {
+      padding: 6px 12px;
+      font-family: var(--pixel-font);
+      font-size: 8px;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #6666aa;
+      transition: all 0.1s;
+    }
+
+    .page-btn:hover, .page-btn.active {
+      border-color: var(--accent-purple);
+      color: var(--accent-purple);
+      background: rgba(187,134,252,0.07);
+    }
+
+    /* ── SUMO MODE INFO ── */
+    .mode-info-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: rgba(255,153,0,0.07);
+      border: 1px solid rgba(255,153,0,0.3);
+      margin-bottom: 16px;
+      font-size: 7px;
+      color: var(--accent-orange);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .opponent-card {
+        grid-template-columns: 40px 1fr;
+        grid-template-rows: auto auto;
+      }
+      .opp-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .result-card { flex-wrap: wrap; }
+      .result-card::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <button class="btn-back" aria-label="Go back to pet display">◄ BACK</button>
+    <h1 class="header-title">⚔ ARENA</h1>
+    <div class="header-pet-info">
+      <span>YOUR PET:</span>
+      <span class="my-pet-chip">VOIDSCALE LV.38</span>
+      <span style="color:#4444aa">|</span>
+      <span style="color:var(--accent-cyan)">HP: 342 &nbsp; ATK: 87</span>
+    </div>
+  </header>
+
+  <!-- MODE TOGGLE -->
+  <section class="mode-section" aria-label="Battle mode selection">
+    <div class="mode-label">Select Battle Mode</div>
+    <div class="mode-toggle" role="tablist" aria-label="Arena battle modes">
+      <button class="mode-btn active" role="tab" aria-selected="true" id="tab-race" aria-controls="panel-race">
+        🏁 RACE MODE
+      </button>
+      <button class="mode-btn sumo" role="tab" aria-selected="false" id="tab-sumo" aria-controls="panel-sumo">
+        🔴 SUMO MODE
+        <span class="mode-flag">FF_ON</span>
+      </button>
+    </div>
+
+    <!-- Sumo mode info bar -->
+    <div class="mode-info-bar" role="status">
+      🔴 SUMO MODE — Push your opponent out of the ring! Mass and DEF stats dominate.
+      Speed matters less. <strong>NEW: Last pet standing wins bonus XP.</strong>
+    </div>
+  </section>
+
+  <!-- BATTLE RESULT BANNER -->
+  <section class="result-banner" aria-live="polite" aria-label="Most recent battle result">
+    <div class="result-card" role="region" aria-label="Battle victory result">
+      <div class="result-icon" aria-hidden="true">🏆</div>
+      <div class="result-text">
+        <div class="result-title">VICTORY!</div>
+        <div class="result-detail">
+          vs. <strong style="color:#e0e0ff">CINDERCLAW</strong> (LV.36 Epic Fire/Phoenix) — Race Mode
+          &nbsp;·&nbsp; <span style="color:#555577">2 minutes ago</span>
+        </div>
+        <div class="result-rewards">
+          <span class="reward-chip xp">⚡ +620 XP</span>
+          <span class="reward-chip coin">🪙 +180 COINS</span>
+          <span class="reward-chip rank">
+            <span class="rank-change" aria-label="Rank changed from Diamond III to Diamond II">
+              📈
+              <span class="rank-prev">DIAMOND III</span>
+              <span class="rank-arrow">▶</span>
+              <span class="rank-new">DIAMOND II</span>
+            </span>
+          </span>
+        </div>
+      </div>
+      <button class="dismiss-btn" aria-label="Dismiss battle result">✕ DISMISS</button>
+    </div>
+  </section>
+
+  <!-- OPPONENT LIST -->
+  <section class="opponents-section" aria-labelledby="opponents-heading">
+    <div class="section-header">
+      <h2 id="opponents-heading" class="section-title">Available Opponents — Sumo Mode</h2>
+      <span class="opponent-count">12 challengers found</span>
+    </div>
+
+    <ol class="opponent-list" aria-label="Opponent list">
+
+      <!-- Opponent 1: Recommended -->
+      <li class="opponent-card recommended" aria-labelledby="opp1-name">
+        <div class="opp-sprite" aria-hidden="true">🔥</div>
+        <div class="opp-info">
+          <div class="opp-name" id="opp1-name">EMBERTHORN</div>
+          <div class="opp-meta">
+            <span class="opp-level">LV.37</span>
+            <span>
+              <span class="rarity-dot epic" aria-hidden="true"></span>
+              <span style="font-size:7px;color:var(--rarity-epic)">EPIC</span>
+            </span>
+            <span class="opp-type-tag">🔥 FIRE / BEAST</span>
+            <span class="difficulty-badge medium">SIMILAR</span>
+          </div>
+          <div class="opp-winrate-bar">
+            <span class="winrate-label">WIN RATE:</span>
+            <div class="winrate-track" role="progressbar" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100" aria-label="Win rate 58%">
+              <div class="winrate-fill" style="width:58%"></div>
+            </div>
+            <span class="winrate-label" style="color:#e0e0ff">58%</span>
+            <span class="winrate-label">(74W / 54L)</span>
+          </div>
+        </div>
+        <div class="opp-actions">
+          <div class="opp-rank">#512 <small>DIAMOND III</small></div>
+          <button class="challenge-btn sumo" aria-label="Challenge Emberthorn to a Sumo battle">SUMO ▶</button>
+        </div>
+      </li>
+
+      <!-- Opponent 2 -->
+      <li class="opponent-card" aria-labelledby="opp2-name">
+        <div class="opp-sprite" aria-hidden="true">⚡</div>
+        <div class="opp-info">
+          <div class="opp-name" id="opp2-name">STORMFANG</div>
+          <div class="opp-meta">
+            <span class="opp-level">LV.40</span>
+            <span>
+              <span class="rarity-dot legendary" aria-hidden="true"></span>
+              <span style="font-size:7px;color:var(--rarity-legendary)">LEGENDARY</span>
+            </span>
+            <span class="opp-type-tag">⚡ STORM / WOLF</span>
+            <span class="difficulty-badge hard">HARD</span>
+          </div>
+          <div class="opp-winrate-bar">
+            <span class="winrate-label">WIN RATE:</span>
+            <div class="winrate-track" role="progressbar" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100" aria-label="Win rate 71%">
+              <div class="winrate-fill" style="width:71%"></div>
+            </div>
+            <span class="winrate-label" style="color:#e0e0ff">71%</span>
+            <span class="winrate-label">(142W / 58L)</span>
+          </div>
+        </div>
+        <div class="opp-actions">
+          <div class="opp-rank">#318 <small>DIAMOND I</small></div>
+          <button class="challenge-btn sumo" aria-label="Challenge Stormfang to a Sumo battle">SUMO ▶</button>
+        </div>
+      </li>
+
+      <!-- Opponent 3 -->
+      <li class="opponent-card" aria-labelledby="opp3-name">
+        <div class="opp-sprite" aria-hidden="true">🌿</div>
+        <div class="opp-info">
+          <div class="opp-name" id="opp3-name">MOSSVEIL</div>
+          <div class="opp-meta">
+            <span class="opp-level">LV.35</span>
+            <span>
+              <span class="rarity-dot rare" aria-hidden="true"></span>
+              <span style="font-size:7px;color:var(--rarity-rare)">RARE</span>
+            </span>
+            <span class="opp-type-tag">🌿 NATURE / GOLEM</span>
+            <span class="difficulty-badge easy">EASY</span>
+          </div>
+          <div class="opp-winrate-bar">
+            <span class="winrate-label">WIN RATE:</span>
+            <div class="winrate-track" role="progressbar" aria-valuenow="44" aria-valuemin="0" aria-valuemax="100" aria-label="Win rate 44%">
+              <div class="winrate-fill" style="width:44%"></div>
+            </div>
+            <span class="winrate-label" style="color:#e0e0ff">44%</span>
+            <span class="winrate-label">(51W / 65L)</span>
+          </div>
+        </div>
+        <div class="opp-actions">
+          <div class="opp-rank">#701 <small>PLATINUM I</small></div>
+          <button class="challenge-btn sumo" aria-label="Challenge Mossveil to a Sumo battle">SUMO ▶</button>
+        </div>
+      </li>
+
+      <!-- Opponent 4 -->
+      <li class="opponent-card" aria-labelledby="opp4-name">
+        <div class="opp-sprite" aria-hidden="true">❄️</div>
+        <div class="opp-info">
+          <div class="opp-name" id="opp4-name">GLACIERBACK</div>
+          <div class="opp-meta">
+            <span class="opp-level">LV.38</span>
+            <span>
+              <span class="rarity-dot epic" aria-hidden="true"></span>
+              <span style="font-size:7px;color:var(--rarity-epic)">EPIC</span>
+            </span>
+            <span class="opp-type-tag">❄️ ICE / BEAR</span>
+            <span class="difficulty-badge medium">SIMILAR</span>
+          </div>
+          <div class="opp-winrate-bar">
+            <span class="winrate-label">WIN RATE:</span>
+            <div class="winrate-track" role="progressbar" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100" aria-label="Win rate 63%">
+              <div class="winrate-fill" style="width:63%"></div>
+            </div>
+            <span class="winrate-label" style="color:#e0e0ff">63%</span>
+            <span class="winrate-label">(88W / 52L)</span>
+          </div>
+        </div>
+        <div class="opp-actions">
+          <div class="opp-rank">#445 <small>DIAMOND II</small></div>
+          <button class="challenge-btn sumo" aria-label="Challenge Glacierback to a Sumo battle">SUMO ▶</button>
+        </div>
+      </li>
+
+      <!-- Opponent 5 -->
+      <li class="opponent-card" aria-labelledby="opp5-name">
+        <div class="opp-sprite" aria-hidden="true">🌑</div>
+        <div class="opp-info">
+          <div class="opp-name" id="opp5-name">SHADOWMAW</div>
+          <div class="opp-meta">
+            <span class="opp-level">LV.36</span>
+            <span>
+              <span class="rarity-dot uncommon" aria-hidden="true"></span>
+              <span style="font-size:7px;color:var(--rarity-uncommon)">UNCOMMON</span>
+            </span>
+            <span class="opp-type-tag">🌑 DARK / FELINE</span>
+            <span class="difficulty-badge easy">EASY</span>
+          </div>
+          <div class="opp-winrate-bar">
+            <span class="winrate-label">WIN RATE:</span>
+            <div class="winrate-track" role="progressbar" aria-valuenow="39" aria-valuemin="0" aria-valuemax="100" aria-label="Win rate 39%">
+              <div class="winrate-fill" style="width:39%"></div>
+            </div>
+            <span class="winrate-label" style="color:#e0e0ff">39%</span>
+            <span class="winrate-label">(29W / 45L)</span>
+          </div>
+        </div>
+        <div class="opp-actions">
+          <div class="opp-rank">#812 <small>PLATINUM II</small></div>
+          <button class="challenge-btn sumo" aria-label="Challenge Shadowmaw to a Sumo battle">SUMO ▶</button>
+        </div>
+      </li>
+
+      <!-- Opponent 6 -->
+      <li class="opponent-card" aria-labelledby="opp6-name">
+        <div class="opp-sprite" aria-hidden="true">☄️</div>
+        <div class="opp-info">
+          <div class="opp-name" id="opp6-name">ASTERFORGE</div>
+          <div class="opp-meta">
+            <span class="opp-level">LV.41</span>
+            <span>
+              <span class="rarity-dot legendary" aria-hidden="true"></span>
+              <span style="font-size:7px;color:var(--rarity-legendary)">LEGENDARY</span>
+            </span>
+            <span class="opp-type-tag">☄️ COSMIC / TITAN</span>
+            <span class="difficulty-badge hard">HARD</span>
+          </div>
+          <div class="opp-winrate-bar">
+            <span class="winrate-label">WIN RATE:</span>
+            <div class="winrate-track" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100" aria-label="Win rate 78%">
+              <div class="winrate-fill" style="width:78%"></div>
+            </div>
+            <span class="winrate-label" style="color:#e0e0ff">78%</span>
+            <span class="winrate-label">(201W / 57L)</span>
+          </div>
+        </div>
+        <div class="opp-actions">
+          <div class="opp-rank">#87 <small>GRANDMASTER</small></div>
+          <button class="challenge-btn sumo" aria-label="Challenge Asterforge to a Sumo battle">SUMO ▶</button>
+        </div>
+      </li>
+
+    </ol>
+
+    <!-- PAGINATION -->
+    <nav class="pagination" aria-label="Opponent list pages">
+      <button class="page-btn active" aria-current="page" aria-label="Page 1">1</button>
+      <button class="page-btn" aria-label="Page 2">2</button>
+      <button class="page-btn" aria-label="Page 3">3</button>
+      <button class="page-btn" aria-label="Next page">NEXT ▶</button>
+    </nav>
+  </section>
+
+</body>
+</html>
