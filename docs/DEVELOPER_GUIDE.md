@@ -368,7 +368,7 @@ pnpm --filter player-app dev
 pnpm --filter admin-app dev
 ```
 
-Save the username, initial password, and TOTP secret printed by `pnpm db:seed`. You need them to log into the admin portal at `http://localhost:5174/admin/login`. If you lose them, run `pnpm db:seed --reset-admin` to generate a new one.
+Save the username, initial password, and TOTP secret printed by `pnpm db:seed`. You need them to log into the admin portal at `http://localhost:5174/admin/login`. If you lose them, run `pnpm db:seed --reset-admin` to regenerate all three.
 
 ---
 
@@ -427,7 +427,7 @@ The `@pixel-pet-arena/shared` package lives in `packages/shared/`. It exports:
 - **Zod schemas** — validation schemas shared between the API (server-side validation) and the frontends (client-side form validation)
 - **Constants** — numeric and string constants that must be consistent across the stack
 
-Both `apps/api`, `apps/player`, and `apps/admin` import from `@pixel-pet-arena/shared`. Because pnpm workspaces link the package via symlinks, changes to `packages/shared/src/` are available immediately in all consumers during development — no separate build step is needed in watch mode.
+All three of `apps/api`, `apps/player`, and `apps/admin` import from `@pixel-pet-arena/shared`. Because pnpm workspaces link the package via symlinks, changes to `packages/shared/src/` are available immediately in all consumers during development — no separate build step is needed in watch mode.
 
 ### 2.4 Environment File Priority
 
