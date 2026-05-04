@@ -81,7 +81,7 @@ sequenceDiagram
 
 ## Secret Rotation Procedure
 
-When a secret must be rotated — due to expiry, suspected compromise, or scheduled policy — the following procedure ensures zero-downtime rollover across both CI/CD and runtime environments.
+When a secret must be rotated — due to expiry, suspected compromise, or scheduled policy — the following procedure ensures zero-downtime rollover across both CI/CD and runtime environments. Rotation always follows a staging-before-production gate: the new credential is verified in staging before being applied to production. The old credential is revoked only after production health checks pass, ensuring no window of downtime.
 
 ```mermaid
 flowchart TD

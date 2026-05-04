@@ -1,6 +1,6 @@
 # Production Deployment Flow (deploy-production.yml)
 
-This document describes the production deployment pipeline for the pixel-pet-arena monorepo. Production deployments are triggered exclusively by pushing a semver Git tag matching `v*.*.*`, ensuring that only intentional, version-stamped releases reach the production Kubernetes cluster. The pipeline builds and pushes versioned Docker images to `ghcr.io`, requires an explicit human approval via the GitHub Actions environment protection gate, updates the `k8s/production/` Kustomize overlay, and triggers an ArgoCD GitOps sync. A multi-step health check gates success, and a documented rollback path is available if issues are detected post-deployment.
+This document describes the production deployment pipeline for the pixel-pet-arena monorepo. Production deployments are triggered exclusively by pushing a semver Git tag matching `v[0-9]*.[0-9]*.[0-9]*`, ensuring that only intentional, version-stamped releases reach the production Kubernetes cluster. The pipeline builds and pushes versioned Docker images to `ghcr.io`, requires an explicit human approval via the GitHub Actions environment protection gate, updates the `k8s/production/` Kustomize overlay, and triggers an ArgoCD GitOps sync. A multi-step health check gates success, and a documented rollback path is available if issues are detected post-deployment.
 
 ## Trigger and Release Discipline
 

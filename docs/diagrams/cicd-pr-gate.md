@@ -102,7 +102,7 @@ sequenceDiagram
 
 ## Security Scan Details
 
-The `detect-secrets` scanner runs with `--baseline .secrets.baseline` so that pre-approved findings are suppressed. Any newly detected high-entropy string, AWS key pattern, GitHub token, or database DSN that does not appear in the baseline causes the job to exit with a non-zero status, blocking the merge. The baseline file is committed to the repository and updated deliberately via `detect-secrets scan > .secrets.baseline` in a dedicated housekeeping PR. This ensures the PR gate enforces a zero-tolerance policy on newly introduced secrets without penalising developers for existing managed entries.
+The `detect-secrets` scanner runs with `--baseline .secrets.baseline` so that pre-approved findings are suppressed. Any newly detected high-entropy string, AWS key pattern, GitHub token, or database DSN that does not appear in the baseline causes the job to exit with a non-zero status, blocking the merge. The baseline file is committed to the repository and updated deliberately via `detect-secrets scan --baseline .secrets.baseline` in a dedicated housekeeping PR. This ensures the PR gate enforces a zero-tolerance policy on newly introduced secrets without penalising developers for existing managed entries.
 
 ## Test Coverage Requirements
 
