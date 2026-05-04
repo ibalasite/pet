@@ -27,7 +27,7 @@ docker --version # should print Docker version 24.x or higher
 
 ### Supabase CLI (required for local setup)
 
-The Supabase CLI is required for Steps 2 and 3 (`supabase start`, `supabase db push`). Install it before proceeding:
+The Supabase CLI is required for Steps 2 and 3 (`supabase start`, `supabase migration up`). Install it before proceeding:
 
 ```bash
 # macOS — Homebrew
@@ -336,7 +336,7 @@ If you lose the seed output or need to reset the admin TOTP:
 
 ### Database migration errors
 
-**Symptom:** `supabase db push` fails with schema conflicts or missing tables.
+**Symptom:** `supabase migration up` fails with schema conflicts or missing tables.
 
 The safest fix for a local database is a full reset. This wipes all local data and re-applies every migration from scratch:
 
