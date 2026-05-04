@@ -58,7 +58,8 @@
     "LOCAL_DEPLOY",
     "CICD",
     "DEVELOPER_GUIDE",
-    "UML-CICD"
+    "UML-CICD",
+    "ALIGN"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
