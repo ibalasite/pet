@@ -72,7 +72,7 @@ The backend is a Node.js 20 / Fastify 4 / TypeScript service deployed on Railway
    echo "Backend healthy"
    ```
 5. Confirm the `/api/v1/health` response body includes `"status": "ok"` and reports database and Redis as connected (see [Health Checks and Monitoring](#health-checks-and-monitoring)).
-6. Monitor error rate in the observability dashboard for 5 minutes. If error rate exceeds 1% per the `observability_error_rate_alert_window = 5` minute window, initiate rollback immediately.
+6. Monitor error rate in the observability dashboard for 5 minutes. If error rate exceeds 1% (`observability_error_rate_alert_window = 5` min), this is a P1 event — initiate rollback immediately if the regression correlates with the deploy.
 
 ### Frontend (Player) Build and CDN Deploy
 
@@ -151,8 +151,8 @@ This section defines severity levels, SLAs, escalation paths, and first-responde
 
 | Severity | Definition | Response SLA | Escalation |
 |----------|-----------|-------------|-----------|
-| **P0** | Complete outage — all users cannot play; `GET /api/v1/health` returns non-200 or is unreachable | Acknowledge within 5 min; resolve or roll back within 30 min | Page [ON-CALL-ENGINEER] immediately; escalate to platform lead if not resolved in 15 min |
-| **P1** | Degraded performance — error rate > 5% or P99 latency > 2 s for any player-facing endpoint | Acknowledge within 15 min; restore to SLO within 60 min | Notify [ON-CALL-ENGINEER] via PagerDuty; loop in database/infra owner if DB or Redis implicated |
+| **P0** | Complete outage — all users cannot play; `GET /api/v1/health` returns non-200 or is unreachable | Acknowledge within 5 min; resolve or roll back within 30 min | Page [ON-CALL-ENGINEER] immediately; escalate to [PLATFORM-LEAD] if not resolved in 15 min |
+| **P1** | Degraded performance — error rate > 1% (monitoring alert threshold) or P99 latency > 1,000 ms for any player-facing endpoint | Acknowledge within 15 min; restore to SLO within 60 min | Notify [ON-CALL-ENGINEER] via PagerDuty; loop in [DATABASE-OWNER] if DB or Redis implicated |
 | **P2** | Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works) | Acknowledge within 1 hour; resolve within 4 hours or next business day | Notify [ON-CALL-ENGINEER] via Slack `#incidents`; no escalation required unless degrading to P1 |
 
 ### P0 — Complete Outage
@@ -168,6 +168,8 @@ This section defines severity levels, SLAs, escalation paths, and first-responde
 7. Communicate status in `#incidents` every 15 minutes until resolved.
 
 ### P1 — Degraded Performance
+
+**Communication cadence**: Post a status update in `#incidents` every 30 minutes until resolved.
 
 **First responder actions:**
 
@@ -264,6 +266,26 @@ The system auto-flags any pet with more than `bot_detection_battles_threshold = 
    ```
    Restore to default (10) when the attack is resolved.
 
+#### SendGrid Email Delivery Failure
+
+The platform sends transactional emails for the claim flow (OTP link and backup codes delivery). Email failures prevent new players from claiming their pets.
+
+**P2 alert fires when**: `email_failure_rate_30m > 2%`
+
+**Actions:**
+
+1. Check the SendGrid Activity Feed dashboard for bounce/block/spam reports. Look for delivery errors in the last 30 minutes.
+2. Verify `SENDGRID_API_KEY` is correct and not expired:
+   ```bash
+   curl -X GET "https://api.sendgrid.com/v3/user/profile" \
+     -H "Authorization: Bearer $SENDGRID_API_KEY"
+   ```
+   A 401 response means the key is invalid or revoked.
+3. If the key is valid, check SendGrid status page (`status.sendgrid.com`) for an ongoing platform incident.
+4. If the failure is limited to a specific sender domain, check DNS records (SPF, DKIM, DMARC) in the Sendgrid → Settings → Sender Authentication dashboard.
+5. If SendGrid is fully down and the outage will exceed 30 minutes, assess whether to temporarily disable new pet claims to prevent a broken user experience (disable via `FF_CLAIM_FLOW` feature flag if it exists, or deploy a maintenance page for the claim endpoint).
+6. Once resolved, verify delivery is restored by triggering a test claim email through the staging environment.
+
 #### Feature Flag Emergency Toggle
 
 Feature flags are environment variables read at startup and cached in memory. Config changes propagate within 5 minutes (`config_cache_refresh_time_minutes = 5`).
@@ -328,23 +350,38 @@ Rollback is the primary recovery tool for deploy-caused regressions. Act quickly
 
 ### Database Migration Rollback
 
-> **WARNING**: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from the platform lead and a confirmed backup.
+> **WARNING**: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from [PLATFORM-LEAD] and a confirmed recent backup.
+
+**Step 0 — Verify backup before any migration rollback (mandatory):**
+
+1. Navigate to Supabase → Dashboard → Database → Backups.
+2. Confirm the most recent automated backup timestamp is within the last 24 hours.
+3. If the latest backup is stale or missing, trigger a manual backup: Supabase dashboard → Database → Backups → `Create backup` before proceeding.
+4. Record the backup ID in the `#incidents` thread.
 
 **Safe rollback (additive migrations only):**
 
 If the migration only added columns or indexes and no application code has written to them yet, a rollback is relatively safe:
 
-The project uses Supabase CLI for migrations (schema files in `supabase/migrations/`). The `pnpm db:migrate:down` script is a thin wrapper around `supabase db reset` for local environments; in production use the Supabase dashboard or CLI directly:
+The project uses Supabase CLI for migrations (schema files in `supabase/migrations/`).
 
+**Production — mark a migration as reverted (does NOT run SQL; use when the schema already matches the pre-migration state):**
 ```bash
-# Supabase CLI — reset to a specific migration version (staging/local only)
-supabase db reset
+supabase migration repair --status reverted <migration_version>
+# Example: supabase migration repair --status reverted 20260501120000
+```
 
-# Check pending migrations
+**Staging/local — full reset (destructive; never run in production):**
+```bash
+supabase db reset
+```
+
+**Check migration state:**
+```bash
 supabase migration list
 ```
 
-If a custom `pnpm db:migrate:down --target <previous-version>` script exists in `package.json`, it will invoke Supabase under the hood with the appropriate flags. Verify the script definition before running it in production:
+If the project has a `pnpm db:migrate:down` wrapper in `package.json`, verify what it calls before running in production:
 ```bash
 cat package.json | grep -A3 "db:migrate"
 ```
@@ -366,6 +403,7 @@ Vite produces content-hashed asset filenames, so a new deploy automatically serv
    # Vercel — purge cache via API
    curl -X POST "https://api.vercel.com/v1/projects/<project-id>/purge-cache" \
      -H "Authorization: Bearer $VERCEL_TOKEN" \
+     -H "Content-Type: application/json" \
      -d '{"files": ["/index.html"]}'
 
    # Cloudflare — purge by URL
