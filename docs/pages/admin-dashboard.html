@@ -882,7 +882,7 @@
       <div class="gdpr-mini" role="alert" aria-label="Pending GDPR erasure requests">
         <span class="gdpr-mini-icon" aria-hidden="true">🗑️</span>
         <div class="gdpr-mini-text">
-          <strong>2 GDPR erasure requests</strong> pending — must be processed within 30 days per regulation.
+          <strong>2 GDPR erasure requests</strong> pending — erasure is processed asynchronously via <code>ppa:jobs:gdpr-erasure</code> (BullMQ) and returns HTTP 202 Accepted. Must be queued within 30 days per regulation.
           Oldest request: <strong>6 days old</strong>.
         </div>
         <button class="btn btn-danger btn-sm">Review Requests</button>
@@ -1061,11 +1061,11 @@
                   </td>
                   <td><span class="tag tag-mode-race">RACE</span></td>
                   <td>
-                    <div class="score-cell" role="group" aria-label="Suspicion score 32 out of 100, low">
+                    <div class="score-cell" role="group" aria-label="Suspicion score 47 out of 100, low">
                       <div class="score-bar-track">
-                        <div class="score-bar-fill low" style="width:32%" aria-hidden="true"></div>
+                        <div class="score-bar-fill low" style="width:47%" aria-hidden="true"></div>
                       </div>
-                      <span class="score-value low">32</span>
+                      <span class="score-value low">47</span>
                     </div>
                   </td>
                   <td><span class="tag tag-status-resolved">RESOLVED</span></td>
