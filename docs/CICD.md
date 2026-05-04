@@ -74,7 +74,7 @@ Developer workstation
 |---|---|
 | Pull request opened or synchronised (→ `develop` or `main`) | `ci.yml` |
 | Push to `develop` branch | `deploy-staging.yml` |
-| Tag push matching `v*.*.*` | `deploy-production.yml` |
+| Tag push matching `v[0-9]*.[0-9]*.[0-9]*` | `deploy-production.yml` |
 | Manual `workflow_dispatch` on any workflow | All three workflows support manual runs |
 
 ---
@@ -367,7 +367,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run detect-secrets scan
-        uses: reviewdog/action-detect-secrets@v0
+        uses: reviewdog/action-detect-secrets@38c4021a5dc90e29bd86ea68f3d26b21e691b3a7  # v0.27.0
         with:
           reporter: github-pr-review
           fail_on_error: true
@@ -560,6 +560,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/player-app:${{ steps.tag.outputs.tag }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/player-app:staging-latest
+          build-args: |
+            VITE_API_BASE_URL=https://api.staging.pixel-pet-arena.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -571,6 +573,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/admin-app:${{ steps.tag.outputs.tag }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/admin-app:staging-latest
+          build-args: |
+            VITE_API_BASE_URL=https://api.staging.pixel-pet-arena.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -690,7 +694,7 @@ jobs:
 
 ### `deploy-production.yml` — Deploy to Production
 
-Triggered on semantic version tag pushes (pattern `v*.*.*`). This workflow mirrors the staging deploy but targets the production Kubernetes cluster, requires a manual approval gate from a designated approver, and issues Sentry release notifications and PagerDuty webhooks after deployment.
+Triggered on semantic version tag pushes (pattern `v[0-9]*.[0-9]*.[0-9]*`). This workflow mirrors the staging deploy but targets the production Kubernetes cluster, requires a manual approval gate from a designated approver, and issues Sentry release notifications and PagerDuty webhooks after deployment.
 
 ```yaml
 # .github/workflows/deploy-production.yml
@@ -780,6 +784,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/player-app:${{ steps.tag.outputs.tag }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/player-app:latest
+          build-args: |
+            VITE_API_BASE_URL=https://api.pixel-pet-arena.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -791,6 +797,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/admin-app:${{ steps.tag.outputs.tag }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_ORG }}/admin-app:latest
+          build-args: |
+            VITE_API_BASE_URL=https://api.pixel-pet-arena.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -865,7 +873,7 @@ jobs:
 
   health-check-production:
     name: Post-deploy health check (production)
-    needs: update-k8s-manifest
+    needs: [update-k8s-manifest, build-push]
     runs-on: ubuntu-24.04
     steps:
       - name: Wait for ArgoCD sync (120s grace period)
@@ -1218,7 +1226,7 @@ The Kubernetes Sealed Secrets or ExternalSecrets resources in `k8s/base/` map Gi
 | `SENDGRID_API_KEY` | `SENDGRID_API_KEY` | Injected via Kubernetes Secret |
 | `ADMIN_TOTP_ISSUER` | `ADMIN_TOTP_ISSUER` | Injected via Kubernetes ConfigMap |
 
-Frontend applications (`player-app`, `admin-app`) receive only `VITE_API_BASE_URL` at build time, which is a non-secret value set in the overlay ConfigMap. No sensitive values are embedded in frontend builds.
+Frontend applications (`player-app`, `admin-app`) receive `VITE_API_BASE_URL` as a Docker build-time argument (`build-args`) passed directly in the deploy workflow, not as a runtime ConfigMap value. No sensitive values are embedded in frontend builds.
 
 ### Rotation Policy
 
@@ -1271,11 +1279,17 @@ To set up: create a PagerDuty Events API v2 integration on the pixel-pet-arena s
 If the post-deploy health check exhausts all retries, both staging and production workflows invoke the ArgoCD rollback API before exiting. A PagerDuty critical alert fires after production rollbacks to page the on-call engineer:
 
 ```bash
-LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
-curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
-  -H "Content-Type: application/json" \
-  "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
-  -d "{\"id\": $LAST_GOOD_REVISION}"
+LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-staging \
+  --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id' 2>/dev/null)
+
+if [ -z "$LAST_GOOD_REVISION" ] || [ "$LAST_GOOD_REVISION" = "null" ]; then
+  echo "WARNING: No previous successful deployment found; skipping automatic rollback."
+else
+  curl -s -X POST "$ARGOCD_SERVER/api/v1/applications/pixel-pet-arena-staging/rollback" \
+    -H "Authorization: Bearer $ARGOCD_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"id\": $LAST_GOOD_REVISION}"
+fi
 ```
 
 The `id` value should be the revision ID of the last healthy sync, retrieved via `argocd app history`. Use `0` only as a fallback; pass the actual last-good revision ID in automated scripts. After the rollback, the PagerDuty critical alert is fired so the on-call engineer is paged and the incident is tracked. The `k8s/production/kustomization.yaml` must be manually corrected to remove the bad image tag before any subsequent deploy is attempted.
@@ -1570,10 +1584,10 @@ pipeline {
             script {
                 if (env.TAG_NAME) {
                     sh '''
-                        ARGOCD_VERSION=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
+                        ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
                         curl -sSL -o /usr/local/bin/argocd \
                           https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-                        echo "${ARGOCD_VERSION}  /usr/local/bin/argocd" | sha256sum -c -
+                        echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
                         chmod +x /usr/local/bin/argocd
                         argocd login "${ARGOCD_SERVER}" --auth-token "${ARGOCD_TOKEN}" --grpc-web
                     '''
