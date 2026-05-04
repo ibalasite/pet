@@ -255,7 +255,14 @@ The system auto-flags any pet with more than `bot_detection_battles_threshold = 
 2. Review the timestamps. If battles are uniformly spaced to the second or all originate from one IP, this is strong evidence of automation.
 3. If confirmed bot activity, ban the pet via `POST /admin/api/pets/:petId/ban` with a moderation reason (max 500 characters, `admin_moderation_reason_max_chars = 500`).
 4. If the alert is a false positive (e.g. a legitimate stress test or event), dismiss the flag and document the reason in the audit log.
-5. If the alert volume exceeds 5 distinct pets in 1 hour, escalate to P1 — this may indicate a coordinated bot attack. Consider temporarily lowering `arena_rate_limit_battles_per_hour` to 1 via the admin config endpoint.
+5. If the alert volume exceeds 5 distinct pets in 1 hour, escalate to P1 — this may indicate a coordinated bot attack. Consider temporarily lowering the arena battles-per-hour cap to 1 via the admin config endpoint. The default is `arena_rate_limit_battles_per_hour_default = 10`. Example:
+   ```bash
+   curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
+     -H "Cookie: session=<admin_session_id>" \
+     -H "Content-Type: application/json" \
+     -d '{"key": "arena_rate_limit_battles_per_hour", "value": 1}'
+   ```
+   Restore to default (10) when the attack is resolved.
 
 #### Feature Flag Emergency Toggle
 
@@ -327,12 +334,19 @@ Rollback is the primary recovery tool for deploy-caused regressions. Act quickly
 
 If the migration only added columns or indexes and no application code has written to them yet, a rollback is relatively safe:
 
-```bash
-# Run the down migration (if one exists)
-pnpm db:migrate:down --target <previous-version>
+The project uses Supabase CLI for migrations (schema files in `supabase/migrations/`). The `pnpm db:migrate:down` script is a thin wrapper around `supabase db reset` for local environments; in production use the Supabase dashboard or CLI directly:
 
-# Verify schema is back to expected state
-pnpm db:migrate:status
+```bash
+# Supabase CLI — reset to a specific migration version (staging/local only)
+supabase db reset
+
+# Check pending migrations
+supabase migration list
+```
+
+If a custom `pnpm db:migrate:down --target <previous-version>` script exists in `package.json`, it will invoke Supabase under the hood with the appropriate flags. Verify the script definition before running it in production:
+```bash
+cat package.json | grep -A3 "db:migrate"
 ```
 
 **Unsafe rollback (destructive migrations):**
@@ -492,6 +506,11 @@ alerts:
   - name: sendgrid_failure_rate
     condition: email_failure_rate_30m > 0.02
     severity: P2
+
+  - name: training_limit_hit_spike
+    condition: training_limit_reached_per_hour > 500
+    severity: P2
+    note: "Spike may indicate UTC 00:00 reset bug (limits not resetting) or exploit attempt"
 ```
 
 ---
@@ -551,8 +570,8 @@ All API errors use the standard envelope defined in `docs/API.md §4.1`. Key err
 | Role | Contact |
 |------|---------|
 | Primary on-call engineer | [ON-CALL-ENGINEER] |
-| Platform lead (escalation) | [ON-CALL-ENGINEER] — escalate via PagerDuty P0 policy |
-| Database owner (Supabase issues) | [ON-CALL-ENGINEER] — open Supabase support ticket if platform incident confirmed |
+| Platform lead (escalation) | [PLATFORM-LEAD] — escalate via PagerDuty P0 policy |
+| Database owner (Supabase issues) | [DATABASE-OWNER] — open Supabase support ticket if platform incident confirmed |
 | Upstash Redis support | https://upstash.com/support |
 | SendGrid support | https://support.sendgrid.com |
 | Railway support | https://railway.app/help |
