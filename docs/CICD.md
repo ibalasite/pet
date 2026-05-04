@@ -443,9 +443,18 @@ jobs:
 
       - name: Wait for API health
         run: |
+          API_READY=false
           for i in $(seq 1 30); do
-            curl -sf http://localhost:3000/health && break || sleep 2
+            if curl -sf http://localhost:3000/health; then
+              API_READY=true
+              break
+            fi
+            sleep 2
           done
+          if [ "$API_READY" = "false" ]; then
+            echo "ERROR: API did not become healthy within 60 seconds" >&2
+            exit 1
+          fi
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
@@ -647,18 +656,34 @@ jobs:
           echo "Health check failed after 10 attempts. Triggering rollback."
           exit 1
 
+      - name: Install ArgoCD CLI
+        if: failure()
+        run: |
+          ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
+          curl -sSL -o /usr/local/bin/argocd \
+            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
+          chmod +x /usr/local/bin/argocd
+          argocd login "${{ secrets.ARGOCD_SERVER }}" \
+            --auth-token "${{ secrets.ARGOCD_TOKEN }}" \
+            --grpc-web
+
       - name: Rollback on health check failure
         if: failure()
         env:
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
           ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
         run: |
-          LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-staging --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
-          curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
-            -H "Content-Type: application/json" \
-            "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-staging/rollback" \
-            -d "{\"id\": $LAST_GOOD_REVISION}" || true
-          echo "Rollback triggered via ArgoCD API."
+          LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-staging --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id' 2>/dev/null)
+          if [ -z "${LAST_GOOD_REVISION}" ] || [ "${LAST_GOOD_REVISION}" = "null" ]; then
+            echo "WARNING: could not determine last good revision; skipping rollback." >&2
+          else
+            curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+              -H "Content-Type: application/json" \
+              "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-staging/rollback" \
+              -d "{\"id\": ${LAST_GOOD_REVISION}}" || true
+            echo "Rollback triggered via ArgoCD API."
+          fi
 ```
 
 ---
@@ -674,7 +699,7 @@ name: Deploy — Production
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]*.[0-9]*.[0-9]*"
   workflow_dispatch:
     inputs:
       tag:
@@ -894,6 +919,18 @@ jobs:
               \"dedup_key\": \"deploy-${{ needs.build-push.outputs.image_tag }}\"
             }"
 
+      - name: Install ArgoCD CLI
+        if: failure()
+        run: |
+          ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
+          curl -sSL -o /usr/local/bin/argocd \
+            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
+          chmod +x /usr/local/bin/argocd
+          argocd login "${{ secrets.ARGOCD_SERVER }}" \
+            --auth-token "${{ secrets.ARGOCD_TOKEN }}" \
+            --grpc-web
+
       - name: Rollback on health check failure
         if: failure()
         env:
@@ -901,11 +938,15 @@ jobs:
           ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
           PAGERDUTY_INTEGRATION_KEY: ${{ secrets.PAGERDUTY_INTEGRATION_KEY }}
         run: |
-          LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
-          curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
-            -H "Content-Type: application/json" \
-            "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
-            -d "{\"id\": $LAST_GOOD_REVISION}" || true
+          LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id' 2>/dev/null)
+          if [ -z "${LAST_GOOD_REVISION}" ] || [ "${LAST_GOOD_REVISION}" = "null" ]; then
+            echo "WARNING: could not determine last good revision; skipping rollback." >&2
+          else
+            curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+              -H "Content-Type: application/json" \
+              "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
+              -d "{\"id\": ${LAST_GOOD_REVISION}}" || true
+          fi
           curl -sS -X POST "https://events.pagerduty.com/v2/enqueue" \
             -H "Content-Type: application/json" \
             -d "{
@@ -1155,13 +1196,13 @@ All credentials are stored as GitHub repository secrets and injected into GitHub
 | `JWT_SECRET` | Kubernetes Sealed Secrets (both envs) | 64-byte base64url-encoded secret for TOTP setup token signing |
 | `EMAIL_ENCRYPTION_KEY` | Kubernetes Sealed Secrets (both envs) | 64-character hex string (32-byte AES-256-GCM key) for email encryption |
 | `SENDGRID_API_KEY` | Kubernetes Sealed Secrets (both envs) | SendGrid API key for transactional email delivery |
-| `GHCR_TOKEN` | `ci.yml`, `deploy-staging.yml`, `deploy-production.yml` | GitHub Personal Access Token (PAT) with `write:packages` scope for ghcr.io push |
+| `GHCR_TOKEN` | `deploy-staging.yml`, `deploy-production.yml` | GitHub Personal Access Token (PAT) with `write:packages` scope for ghcr.io push |
 | `ARGOCD_SERVER` | `deploy-staging.yml`, `deploy-production.yml` | ArgoCD server hostname, e.g. `https://argocd.internal.pixel-pet-arena.com` |
 | `ARGOCD_TOKEN` | `deploy-staging.yml`, `deploy-production.yml` | ArgoCD API token for programmatic application sync and rollback |
 | `SUPABASE_PROJECT_REF` | Supabase CLI in CI/CD | Supabase project reference ID (found in project settings) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase CLI in CI/CD, admin-side operations | Service role key for privileged Supabase operations (bypass RLS) |
 | `SENTRY_AUTH_TOKEN` | `deploy-production.yml` | Sentry authentication token for release notifications |
-| `ADMIN_TOTP_ISSUER` | `ci.yml`, `deploy-staging.yml`, `deploy-production.yml` | Issuer label shown in authenticator apps for admin TOTP enrollment. Used by: api. Example: pixel-pet-arena-prod. |
+| `ADMIN_TOTP_ISSUER` | `ci.yml` | Issuer label shown in authenticator apps for admin TOTP enrollment. Used by: api. Example: pixel-pet-arena-prod. |
 | `PAGERDUTY_INTEGRATION_KEY` | `deploy-production.yml` | PagerDuty Events API v2 integration key for deploy notifications and failure alerts |
 
 ### Mapping to Application Environment Variables
@@ -1475,7 +1516,7 @@ pipeline {
                     submitter: 'release-managers',
                     submitterParameter: 'APPROVER'
                 )
-                echo "Approved by ${APPROVER}"
+                echo "Approved by ${env.APPROVER}"
             }
         }
 
@@ -1529,11 +1570,23 @@ pipeline {
             script {
                 if (env.TAG_NAME) {
                     sh '''
-                        LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // 0' 2>/dev/null || echo 0)
-                        curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
-                            -H "Content-Type: application/json" \
-                            "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
-                            -d "{\"id\": $LAST_GOOD_REVISION}" || true
+                        ARGOCD_VERSION=$(curl -sSL https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64.sha256 | awk '{print $1}')
+                        curl -sSL -o /usr/local/bin/argocd \
+                          https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+                        echo "${ARGOCD_VERSION}  /usr/local/bin/argocd" | sha256sum -c -
+                        chmod +x /usr/local/bin/argocd
+                        argocd login "${ARGOCD_SERVER}" --auth-token "${ARGOCD_TOKEN}" --grpc-web
+                    '''
+                    sh '''
+                        LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id' 2>/dev/null)
+                        if [ -z "${LAST_GOOD_REVISION}" ] || [ "${LAST_GOOD_REVISION}" = "null" ]; then
+                            echo "WARNING: could not determine last good revision; skipping rollback." >&2
+                        else
+                            curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+                                -H "Content-Type: application/json" \
+                                "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
+                                -d "{\"id\": ${LAST_GOOD_REVISION}}" || true
+                        fi
                         curl -sS -X POST "https://events.pagerduty.com/v2/enqueue" \
                             -H "Content-Type: application/json" \
                             -d "{\"routing_key\": \"${PAGERDUTY_INTEGRATION_KEY}\", \"event_action\": \"trigger\", \"payload\": {\"summary\": \"PRODUCTION DEPLOY FAILED: ${IMAGE_TAG}\", \"severity\": \"critical\", \"source\": \"jenkins\"}, \"dedup_key\": \"deploy-failure-${IMAGE_TAG}\"}"
