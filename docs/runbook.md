@@ -9,11 +9,13 @@
 
 ## Table of Contents
 
-1. [Deployment](#deployment)
-2. [Incident Response](#incident-response)
-3. [Rollback](#rollback)
-4. [Health Checks and Monitoring](#health-checks-and-monitoring)
-5. [On-Call Quick Reference](#on-call-quick-reference)
+This runbook covers the full operational lifecycle for the pixel-pet-arena stack. Sections are ordered from routine operations to emergency response:
+
+1. [Deployment](#deployment) — pre-flight checklist, build and deploy steps, smoke tests, zero-downtime strategy
+2. [Incident Response](#incident-response) — severity matrix (P0/P1/P2), escalation paths, and specific playbooks
+3. [Rollback](#rollback) — backend image rollback, database migration revert, CDN cache invalidation
+4. [Health Checks and Monitoring](#health-checks-and-monitoring) — `/api/v1/health` schema, alert thresholds, observability setup
+5. [On-Call Quick Reference](#on-call-quick-reference) — critical endpoints, env vars, common error codes, contacts
 
 ---
 
@@ -196,7 +198,7 @@ This section defines severity levels, SLAs, escalation paths, and first-responde
 
 Redis is used for rate-limiting counters and the arena matchmaking queue. When Redis is unavailable:
 
-- **Leaderboard**: The frontend displays a stale-data banner (reads fall back to the last successful PostgreSQL snapshot). This is acceptable for up to `leaderboard_update_lag_max = 30` seconds; beyond that, the banner is surfaced to players automatically.
+- **Leaderboard**: The frontend displays a stale-data banner (reads fall back to the last successful PostgreSQL snapshot). The player-facing banner appears at `leaderboard_update_lag_max = 30` seconds. The ops alert fires at `observability_leaderboard_lag_alert = 60` seconds. The 30–60 second window where players see the banner but no ops alert has fired is intentional — minor Redis blips that resolve within a minute should not page on-call. If the banner persists beyond 60 seconds, the ops alert fires and action is required.
 - **Arena rate limiting**: Arena battle rate limits are **fail-open** — if Redis is unavailable, rate limits are not enforced. This is an accepted risk designed to keep gameplay running; the failure is logged as an alert.
 - **OTP code entry rate limiting**: This is **fail-closed** — code entry is blocked when Redis is down to prevent brute-force bypass.
 - **Matchmaking queue**: Arena enter requests will time out after `arena_matchmaking_timeout = 30` seconds and fall back to an AI opponent.
@@ -505,6 +507,7 @@ Returned when the database is unreachable (the system cannot serve any requests 
 | DB connection pool utilization | > 80% | `infra_db_pool_alert_threshold = 80` |
 | Redis memory usage | > 80% | `infra_redis_alert_threshold = 80` |
 | Arena battle queue depth | > 100 concurrent entries | `arena_matchmaking_concurrent_entries = 100` |
+| Arena battles total rate | < 10 battles/hr **platform-wide** for 2 h | Note: this is a platform-wide total, not per-pet (per-pet cap is also 10/hr via `arena_rate_limit_battles_per_hour_default`) |
 | Leaderboard update lag | > 60 s | `observability_leaderboard_lag_alert = 60 s` |
 | Pet claims rate | < 5 claims/hr for 2 h | `observability_pet_claims_drop_threshold = 5` |
 | Arena battles rate | < 10 battles/hr for 2 h | `observability_arena_battles_drop_threshold = 10` |
@@ -540,6 +543,12 @@ alerts:
   - name: low_pet_claims
     condition: pet_claims_per_hour < 5 for 120m
     severity: P2
+    note: "Triage: check SendGrid delivery (email claim link); check for JS errors on claim page; see SendGrid Email Delivery Failure playbook"
+
+  - name: low_arena_battles
+    condition: platform_arena_battles_per_hour < 10 for 120m   # platform-wide total (distinct from per-pet cap)
+    severity: P2
+    note: "Triage: check FF_ARENA_SUMO state (arena disabled?); check arena enter endpoint for 4xx/5xx spike; check Redis arena queue depth"
 
   - name: sendgrid_failure_rate
     condition: email_failure_rate_30m > 0.02
