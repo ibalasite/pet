@@ -82,7 +82,7 @@ Open each `.env.local` file and set the values listed below. Variables marked **
 
 | Variable | Required | Description |
 |---|---|---|
-| `DATABASE_URL` | Yes | PostgreSQL connection string, provided by `supabase start` output (see Setup Steps) |
+| `DATABASE_URL` | Yes | Leave blank for now — the value is printed by `supabase start` in Setup Steps step 2 (looks like `postgresql://postgres:postgres@localhost:54322/postgres`) |
 | `REDIS_URL` | Yes | Redis connection string; use `redis://localhost:6379` for the local Docker container |
 | `JWT_SECRET` | Yes | A long random string used to sign player authentication cookies (see below) |
 | `SENDGRID_API_KEY` | No | Can be any non-empty dummy string locally; emails are printed to the API console in development mode instead of being sent |
@@ -156,12 +156,12 @@ Follow these steps in order. Each step depends on the previous one completing su
    If the repository defines a `pnpm db:migrate` script in the root `package.json`, it is a thin wrapper around `supabase db push`. Use **one or the other — not both** — to avoid double-applying migrations. Check `package.json` to see which is available:
 
    ```bash
-   cat package.json | grep -A2 '"db:'
+   grep -A2 '"db:' package.json
    ```
 
 4. **Seed the database.**
 
-   This command inserts initial data including a default admin account, starter pets, and arena configuration. The seed script also outputs the TOTP secret for the local admin account — save that output for the Verification section.
+   This command inserts initial data including a default admin account, starter pets, and arena configuration. The seed script prints the TOTP secret for the local admin account — **save this output now**. You will need it in the Verification section to log into the admin portal. If you lose it, run `pnpm db:seed --reset-admin` to regenerate a new TOTP secret (see *TOTP setup for the local admin account* in Troubleshooting).
 
    ```bash
    pnpm db:seed
@@ -294,9 +294,23 @@ lsof -ti :5174 | xargs kill -9
 
 On Linux, substitute `fuser -k 3000/tcp` if `lsof` is not installed.
 
-### Redis connection refused
+### Redis connection refused or port 6379 already in use
 
-**Symptom:** The API logs `Error: connect ECONNREFUSED 127.0.0.1:6379`.
+**Symptom A — `docker run` fails with `port is already allocated`:**
+
+Port 6379 is already bound by a native Redis installation (e.g. installed via Homebrew or `apt`). Stop it before starting the Docker container:
+
+```bash
+# macOS (Homebrew)
+brew services stop redis
+
+# Linux (systemd)
+sudo systemctl stop redis
+```
+
+Then re-run `docker run -d --name pixel-pet-redis -p 6379:6379 redis:7-alpine`.
+
+**Symptom B — The API logs `Error: connect ECONNREFUSED 127.0.0.1:6379`:**
 
 - Check that the Redis Docker container is running:
 
