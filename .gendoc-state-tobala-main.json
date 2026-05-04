@@ -60,7 +60,8 @@
     "DEVELOPER_GUIDE",
     "UML-CICD",
     "ALIGN",
-    "ALIGN-FIX"
+    "ALIGN-FIX",
+    "ALIGN-VERIFY"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
