@@ -278,10 +278,9 @@ blacklist) are consistently enumerated in EDD.md, ARCH.md, and API.md.
 **Severity breakdown**:
 - HIGH: 2 (ISSUE-001, ISSUE-002) — both in runbook.md, affecting the health endpoint path
   and response schema used during live incidents.
-- MEDIUM: 3 (ISSUE-003, ISSUE-004, ISSUE-005) — JWT_SECRET mislabel, local migration
-  command, detect-secrets flag variant.
+- MEDIUM: 4 (ISSUE-003, ISSUE-004, ISSUE-005, ISSUE-006) — JWT_SECRET mislabel, local
+  migration command, detect-secrets flag variant, RTM traceability gap.
 - LOW: 1 (ISSUE-007) — test file path layout in test-plan.md.
-- Traceability gap: 1 (ISSUE-006) — US-ADMIN-006 absent from RTM.
 
 **Coverage metrics**:
 
