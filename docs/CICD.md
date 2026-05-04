@@ -963,13 +963,15 @@ jobs:
           PAGERDUTY_INTEGRATION_KEY: ${{ secrets.PAGERDUTY_INTEGRATION_KEY }}
         run: |
           LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id' 2>/dev/null)
-          if [ -z "${LAST_GOOD_REVISION}" ] || [ "${LAST_GOOD_REVISION}" = "null" ]; then
-            echo "WARNING: could not determine last good revision; skipping rollback." >&2
+          if [ -z "$LAST_GOOD_REVISION" ] || [ "$LAST_GOOD_REVISION" = "null" ]; then
+            echo "WARNING: No previous successful deployment found; skipping automatic rollback."
+          elif ! [[ "${LAST_GOOD_REVISION}" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: LAST_GOOD_REVISION '${LAST_GOOD_REVISION}' is not a plain integer; skipping rollback."
           else
-            curl -sf -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
+            curl -s -X POST "${{ secrets.ARGOCD_SERVER }}/api/v1/applications/pixel-pet-arena-production/rollback" \
+              -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" \
               -H "Content-Type: application/json" \
-              "${ARGOCD_SERVER}/api/v1/applications/pixel-pet-arena-production/rollback" \
-              -d "{\"id\": ${LAST_GOOD_REVISION}}" || true
+              -d "{\"id\": ${LAST_GOOD_REVISION}}"
           fi
           curl -sS -X POST "https://events.pagerduty.com/v2/enqueue" \
             -H "Content-Type: application/json" \
@@ -1602,15 +1604,16 @@ pipeline {
     post {
         failure {
             script {
+                // Install ArgoCD CLI once for both rollback paths
+                sh '''
+                  ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256)
+                  curl -sSL -o /usr/local/bin/argocd \
+                    https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64
+                  chmod +x /usr/local/bin/argocd
+                  echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
+                  argocd login "${ARGOCD_SERVER}" --auth-token "${ARGOCD_TOKEN}" --grpc-web
+                '''
                 if (env.TAG_NAME) {
-                    sh '''
-                        ARGOCD_CHECKSUM=$(curl -sSL https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64.sha256 | awk '{print $1}')
-                        curl -sSL -o /usr/local/bin/argocd \
-                          https://github.com/argoproj/argo-cd/releases/download/v2.11.3/argocd-linux-amd64
-                        echo "${ARGOCD_CHECKSUM}  /usr/local/bin/argocd" | sha256sum -c -
-                        chmod +x /usr/local/bin/argocd
-                        argocd login "${ARGOCD_SERVER}" --auth-token "${ARGOCD_TOKEN}" --grpc-web
-                    '''
                     sh '''
                         LAST_GOOD_REVISION=$(argocd app history pixel-pet-arena-production --output json | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id' 2>/dev/null)
                         if [ -z "${LAST_GOOD_REVISION}" ] || [ "${LAST_GOOD_REVISION}" = "null" ]; then
@@ -1630,8 +1633,7 @@ pipeline {
                             -d "{\"routing_key\": \"${PAGERDUTY_INTEGRATION_KEY}\", \"event_action\": \"trigger\", \"payload\": {\"summary\": \"PRODUCTION DEPLOY FAILED: ${IMAGE_TAG}\", \"severity\": \"critical\", \"source\": \"jenkins\"}, \"dedup_key\": \"deploy-failure-${IMAGE_TAG}\"}"
                     '''
                 }
-                script {
-                  if (!env.TAG_NAME) {
+                if (!env.TAG_NAME) {
                     def lastGoodRev = sh(
                       script: '''LAST=$(argocd app history pixel-pet-arena-staging --output json 2>/dev/null | jq '[.[] | select(.operationState.phase=="Succeeded")][1].id // empty' 2>/dev/null); echo "${LAST:-}"''',
                       returnStdout: true
@@ -1647,7 +1649,6 @@ pipeline {
                     } else {
                       echo 'WARNING: No previous successful deployment found; skipping staging rollback.'
                     }
-                  }
                 }
             }
         }
