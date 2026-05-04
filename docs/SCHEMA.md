@@ -508,6 +508,10 @@ CREATE INDEX idx_marketplace_transactions_pet_completed
 
 ---
 
+**Feature Flag Gating Note:** `marketplace_listings` and `marketplace_transactions` tables exist in the base schema unconditionally. However, all marketplace write endpoints (POST /api/v1/marketplace/list, POST /api/v1/marketplace/buy) and admin/player UIs (marketplace browse, sell form) are gated behind the feature flag `FF_MARKETPLACE`. Read-only queries on empty tables are safe during Phase 1 and Phase 2 (before FF_MARKETPLACE is enabled). Table presence does not imply feature availability; the feature flag is the source of truth.
+
+---
+
 ### 2.10 `admin_accounts`
 
 Admin operator credentials. Accounts are never hard-deleted — deactivation is a soft-delete via `deactivated_at`. The audit log holds a FK to this table, requiring row retention.

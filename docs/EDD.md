@@ -11,7 +11,7 @@ Upstream: PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-
 
 ## §0. Business Constants (Key Values from CONSTANTS.md / constants.json)
 
-The following constants are extracted directly from CONSTANTS-PIXEL-PET-ARENA-20260503 and govern all engineering decisions in this document.
+The following constants are extracted directly from [CONSTANTS.md](CONSTANTS.md) (CONSTANTS-PIXEL-PET-ARENA-20260503) and govern all engineering decisions in this document. See [CONSTANTS.md](CONSTANTS.md) for the authoritative source definitions and rationale for each constant.
 
 | Constant | Value | Unit | Notes |
 |---|---|---|---|
@@ -251,18 +251,18 @@ Table: pets
 ──────────────────────────────────────────────────────
 id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
 seed             BIGINT       NOT NULL UNIQUE  -- procedural generation seed; globally unique
-rarity           VARCHAR(10)  NOT NULL  CHECK (rarity IN ('COMMON','RARE','EPIC','LEGENDARY'))
+rarity           VARCHAR(10)  NOT NULL  CHECK (rarity IN ('COMMON','RARE','EPIC','LEGENDARY'))  -- Rarity assignment enforced by PRD AC-002-5 (distribution weights: 60% COMMON, 25% RARE, 12% EPIC, 3% LEGENDARY)
 pet_name         VARCHAR(64)  NOT NULL  -- Auto-generated from species + color combination at row creation time (seed-derived)
-stat_speed       SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_speed BETWEEN 1 AND 100)
-stat_strength    SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_strength BETWEEN 1 AND 100)
-stat_stamina     SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_stamina BETWEEN 1 AND 100)
-level            SMALLINT     NOT NULL DEFAULT 1   CHECK (level BETWEEN 1 AND 100)
+stat_speed       SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_speed BETWEEN 1 AND 100)  -- Range enforced by PRD AC-005-6 (pet_stat_min = 1, pet_stat_max = 100)
+stat_strength    SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_strength BETWEEN 1 AND 100)  -- Range enforced by PRD AC-005-6
+stat_stamina     SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_stamina BETWEEN 1 AND 100)  -- Range enforced by PRD AC-005-6
+level            SMALLINT     NOT NULL DEFAULT 1   CHECK (level BETWEEN 1 AND 100)  -- Range enforced by PRD AC-006-2 (pet_level_min = 1, pet_level_max = 100)
 total_training_actions  INTEGER NOT NULL DEFAULT 0
 last_trained_at  TIMESTAMPTZ  NULL      -- Updated on every training action; NULL if never trained; used for neglect detection
 owner_token_hash VARCHAR(64)  NULL      -- SHA-256 hash of the pet access token; NULL = unclaimed
 claimed_at       TIMESTAMPTZ  NULL
-is_banned        BOOLEAN      NOT NULL DEFAULT FALSE
-banned_reason    TEXT         NULL      CHECK (char_length(banned_reason) <= 500)
+is_banned        BOOLEAN      NOT NULL DEFAULT FALSE  -- Set to TRUE when admin bans a pet; enforces PRD AC-005-8 and AC-013-3 (moderation)
+banned_reason    TEXT         NULL      CHECK (char_length(banned_reason) <= 500)  -- Max length enforced by PRD AC-013-3 (admin_moderation_reason_max_chars = 500)
 banned_at        TIMESTAMPTZ  NULL
 created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
@@ -370,8 +370,8 @@ Table: training_logs
 ──────────────────────────────────────────────────────
 id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
 pet_id           UUID         NOT NULL REFERENCES pets(id) ON DELETE CASCADE
-training_type    VARCHAR(10)  NOT NULL CHECK (training_type IN ('RUN','STRENGTH','STAMINA'))
-stat_delta       SMALLINT     NOT NULL CHECK (stat_delta BETWEEN 1 AND 3)
+training_type    VARCHAR(10)  NOT NULL CHECK (training_type IN ('RUN','STRENGTH','STAMINA'))  -- Training types enforced by PRD AC-006-1 (US-TRAIN-001)
+stat_delta       SMALLINT     NOT NULL CHECK (stat_delta BETWEEN 1 AND 3)  -- Stat delta range enforced by PRD AC-006-1 (training_stat_points_min = 1, training_stat_points_max = 3)
 stat_after       SMALLINT     NOT NULL
 completed_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 ──────────────────────────────────────────────────────
@@ -381,8 +381,8 @@ INDEXES:
 ```
 
 Notes:
-- 3 training actions per day per pet (TRAINING_ACTIONS_PER_DAY = 3); the count of today's actions (UTC) is computed as `COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`.
-- The stat delta per action is a uniformly random integer in [1, 3] points (TRAINING_STAT_POINTS_MIN = 1, TRAINING_STAT_POINTS_MAX = 3); no formula linking delta to pet level exists in CONSTANTS.
+- 3 training actions per day per pet (TRAINING_ACTIONS_PER_DAY = 3, enforced by PRD AC-006-5); the count of today's actions (UTC) is computed as `COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`.
+- The stat delta per action is a uniformly random integer in [1, 3] points (TRAINING_STAT_POINTS_MIN = 1, TRAINING_STAT_POINTS_MAX = 3, enforced by PRD AC-006-1); no formula linking delta to pet level exists in CONSTANTS.
 
 ### §4.6 LeaderboardSnapshot
 

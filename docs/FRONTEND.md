@@ -629,6 +629,12 @@ router.beforeEach((to) => {
 });
 ```
 
+**Admin Session Timeout:**  
+Admin sessions expire after 4 hours of inactivity (`admin_session_inactivity_expiry_hours = 4`). The session TTL is refreshed with each request to the admin API. After 8 hours absolute time (`admin_session_absolute_expiry_hours = 8`), the session is forcibly invalidated regardless of activity. On expiry, the server responds with HTTP 401; the client clears the session and redirects to `/admin/login`.
+
+**Admin Route Prefix Configuration:**  
+The admin portal route prefix `/admin` is configurable via the `VITE_ADMIN_BASE_URL` environment variable. This allows deployment-time configuration of the admin portal subdomain or path without rebuilding the application.
+
 ### 3.6 API Client (Admin)
 
 Admin requests use session cookies — no Authorization header. Axios is configured with `withCredentials: true` so the browser sends the httpOnly session cookie on every request.
@@ -820,7 +826,67 @@ ClaimPage renders ClaimFlow
 - `MAX_ATTEMPTS_REACHED` (HTTP 429): All inputs disabled after reaching the 10-attempt session limit (`auth_rate_limit_code_entry_attempts_per_session = 10`); `Retry-After` countdown shown
 - `RATE_LIMIT_EXCEEDED` (HTTP 429): Email claim rate limit reached; `claim_email_retry_cooldown_seconds = 60` second cooldown countdown shown
 
-### 5.2 Training Interaction
+### 5.2 Token Recovery Flow (Lost URL Recovery)
+
+Players who have lost their bookmarked pet URL may recover access via the recovery flow. Recovery is triggered from the LandingPage via a "Forgot Your Pet?" link or from the ClaimPage.
+
+```
+Guest on LandingPage or ClaimPage
+  ↓ clicks "Forgot Your Pet?" or recovery link
+TokenRecoveryPage /claim/recover
+  │
+  ├─ Step 1: RecoveryEmailForm
+  │    User enters email + petId (pet ID displayed on the original pet page if still available)
+  │    → POST /api/v1/claim/recover  { email, petId }
+  │    ← { claimId, expiresAt }
+  │    Note: Returns HTTP 200 regardless of email/petId match to prevent account enumeration (AC-004-2)
+  │    Rate limit: same auth_rate_limit_claim_attempts_per_hour = 5 as initial claim
+  │
+  ├─ Step 2: RecoveryCodeForm
+  │    User enters 6-digit OTP sent to registered email
+  │    → POST /api/v1/claim/verify  { claimId, code }
+  │    ← { petToken, petId, petUrl }
+  │    Code expires after claim_code_expiry_minutes = 15 min
+  │
+  └─ Step 3: URLReveal
+       petToken → setPetToken(petToken)  [localStorage]
+       Old token immediately invalidated via Redis blacklist (token:blacklist:{old_hash}, TTL 72h)
+       petUrl displayed with copy button
+       → navigate to /pet/:petId
+```
+
+**State Management:**
+- Zustand store (`recoverySlice`): tracks `claimId`, `email`, `petId`, `recoveryStep`, `recoveryAttempts`
+- On success, Zustand `petSlice.setPetToken()` is called to update localStorage
+- Old token automatically blacklisted on server; no client-side token invalidation needed
+
+**Error states handled in UI:**
+- `CODE_EXPIRED` (HTTP 400): "Recovery code has expired. Please request a new one." + re-request button
+- `INVALID_CODE` (HTTP 400): Red shake animation on digit boxes + error message
+- `MAX_ATTEMPTS_REACHED` (HTTP 429): All inputs disabled after reaching the 10-attempt limit
+- `RATE_LIMIT_EXCEEDED` (HTTP 429): Email recovery rate limit reached; countdown shown
+- `EMAIL_NOT_FOUND` (HTTP 400): No pet found for this email/petId combination (returned as HTTP 200 with claimId but OTP code delivery fails silently to prevent enumeration)
+
+**Component diagram:**
+```
+TokenRecoveryPage
+├── RecoveryEmailForm
+│   ├── EmailInput
+│   ├── PetIdInput (optional if pet ID is known)
+│   └── RecoverButton
+├── RecoveryCodeForm (shown after email submission)
+│   ├── CodeDigitInput × 6
+│   ├── ExpiryWarning (when ≤ 2 min remain)
+│   └── ResendCodeButton
+└── TokenRevealModal (shown on success)
+    ├── PetUrlDisplay
+    ├── CopyButton
+    └── NavigateToPetButton
+```
+
+**Related AC:** AC-004-2 (player can request new access link), AC-004-3 (link sent within 60s)
+
+### 5.3 Training Interaction
 
 ```
 PetPage (owner authenticated via Bearer token)
@@ -858,7 +924,7 @@ TrainingPage /pet/:petId/train
     → NeglectedState overlay renders on PetCanvas
 ```
 
-### 5.3 Feed Interaction
+### 5.4 Feed Interaction
 
 ```
 PetPage (owner authenticated via Bearer token)
@@ -886,7 +952,7 @@ PetPage (owner authenticated via Bearer token)
        HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)
 ```
 
-### 5.4 Arena Battle Flow
+### 5.5 Arena Battle Flow
 
 ```
 PetPage
@@ -938,7 +1004,7 @@ ArenaPage /arena
        HTTP 429 RATE_LIMIT_EXCEEDED → show cooldown timer (arena_rate_limit_battles_per_hour_default = 10 battles/hour)
 ```
 
-### 5.5 Marketplace Browse / List / Buy (FF_MARKETPLACE)
+### 5.6 Marketplace Browse / List / Buy (FF_MARKETPLACE)
 
 This flow is only active when the `FF_MARKETPLACE` feature flag is `true`.
 
@@ -974,7 +1040,7 @@ MarketplacePage /marketplace
        HTTP 404 NOT_FOUND → toast: "Listing not found. It may have been removed."
 ```
 
-### 5.6 Leaderboard View
+### 5.7 Leaderboard View
 
 ```
 LeaderboardPage /leaderboard
@@ -996,7 +1062,7 @@ LeaderboardPage /leaderboard
        BattleHistoryTable shows last arena_battle_records_display_count = 20 battles
 ```
 
-### 5.7 GDPR Self-Service Flow (Player)
+### 5.8 GDPR Self-Service Flow (Player)
 
 ```
 PetPage (owner authenticated via Bearer token)
@@ -1027,7 +1093,7 @@ GdprPage /gdpr
        HTTP 404 NOT_FOUND → "Request not found."
 ```
 
-### 5.8 Admin Login (TOTP)
+### 5.9 Admin Login (TOTP)
 
 ```
 AdminLoginPage /admin/login

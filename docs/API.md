@@ -878,6 +878,9 @@ Returns the last 20 arena battles for a pet. Public endpoint.
 | Field | Description |
 |-------|-------------|
 | `opponentPetId` | UUID of the opponent pet. `null` when `isAiOpponent` is `true`. |
+
+**Open Graph Metadata Source:**  
+This endpoint (`GET /api/v1/arena/history/:petId`) is the authoritative source for Open Graph metadata generation when creating social share cards for a pet's battle records page. The client should extract `petId`, `wins` (from `summary.wins`), and combine with pet metadata (pet name, rarity, sprite image) from `GET /api/v1/pets/:petId` to construct OG tags (og:title, og:description, og:image, etc.). The win count summary (`summary.wins`) provides the win count aggregate for the OG card without needing to count individual battles.
 | `isAiOpponent` | `true` when this battle was resolved against an AI fallback opponent. |
 
 The last **20 battles** are shown publicly (`arena_battle_records_display_count = 20`).
