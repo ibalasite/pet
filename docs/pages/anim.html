@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — ANIM — Animation & Sprite Design</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">ANIM — Animation & Sprite Design</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>ANIM — Animation & Sprite Design</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="anim--animation--sprite-design">ANIM — Animation & Sprite Design</h1>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>DOC-ID</strong>: ANIM-PIXEL-PET-ARENA-20260503</p>
+<p class="doc-p"><strong>Project</strong>: pixel-pet-arena</p>
+<p class="doc-p"><strong>Version</strong>: v1.0</p>
+<p class="doc-p"><strong>Status</strong>: DRAFT</p>
+<p class="doc-p"><strong>Author</strong>: AI Generated (gendoc anim)</p>
+<p class="doc-p"><strong>Date</strong>: 2026-05-04</p>
+<p class="doc-p"><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, ARCH-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1-overview">§1. Overview</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="11-animation-design-vision">§1.1 Animation Design Vision</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">pixel-pet-arena delivers a retro-pixel aesthetic with smooth, performant sprite animation across all major browsers. The animation system is built on <strong>Phaser.js 3</strong> (v3.55.2 or later), isolated within the <code>PetCanvasEngine</code> React component. Animation runtime targets ≥30 FPS sustained on desktop and modern mobile browsers (ARCH §2.1, EDD §1; PET_ANIMATION_FPS_MIN = 30).</p>
+<div class="doc-gap"></div>
+<p class="doc-p">The pet animation system must support:</p>
+<p class="doc-p">1. <strong>Idle animation</strong> — looping sprite frame sequence while pet awaits interaction</p>
+<p class="doc-p">2. <strong>Interaction animation</strong> — visual feedback on touch/click (hop, bounce, head turn)</p>
+<p class="doc-p">3. <strong>Movement animation</strong> — path-based locomotion during training or arena transitions</p>
+<p class="doc-p">4. <strong>Arena battle animation</strong> — 5–15 second battle sequence with health bars and outcome reveal (ARENA_MATCH_DURATION_MIN_SECONDS = 5; ARENA_MATCH_DURATION_MAX_SECONDS = 15)</p>
+<p class="doc-p">5. <strong>Level-up animation</strong> — transition effect + particle burst when pet advances</p>
+<p class="doc-p">6. <strong>Stat buff animation</strong> — brief visual indicator (glow, flash) when food buff applied</p>
+<p class="doc-p">7. <strong>Neglect state</strong> — desaturated visual after 3+ days without training (TRAINING_NEGLECT_THRESHOLD_DAYS = 3)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="12-technical-stack-selection">§1.2 Technical Stack Selection</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Engine</strong>: Phaser.js 3.55.2 (or 3.x latest LTS)</p>
+<ul class="doc-list">
+<li><strong>Why Phaser.js</strong>: Mature sprite animation API, WebGL rendering, input handling, built-in physics, 35k+ GitHub stars, active community (EDD §3.3)</li>
+<li><strong>Bundle impact</strong>: Dynamically imported to avoid blocking initial claim-flow bundle; paid for only on landing page / pet pages</li>
+<li><strong>Fallback</strong>: Static sprite image on Canvas 2D when WebGL unavailable (ARCH §2.1)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Sprite Format</strong>: PNG with transparency (RGBA 8-bit)</p>
+<ul class="doc-list">
+<li><strong>Resolution</strong>: 32×32 pixels per frame (SPRITE_RESOLUTION_PX = 32; EDD §0)</li>
+<li><strong>Compression</strong>: PNG-9 with zopfli compression; target < 100 KB per character sprite sheet</li>
+<li><strong>Palette</strong>: 256-color indexed PNG or full 32-bit RGBA; test both for file size trade-off</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>CSS Rendering</strong>:</p>
+<pre class="doc-code"><code class="lang-css">canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;  /* Fallback for older browsers */
+  /* Prevent antialiasing of pixel art */
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Performance Targets</strong>:</p>
+<ul class="doc-list">
+<li>FPS: ≥30 sustained (PET_ANIMATION_FPS_MIN = 30; ARCH §2.1)</li>
+<li>Pet canvas render on page load: ≤2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)</li>
+<li>Pet interaction response: ≤200 ms (PET_INTERACTION_RESPONSE_MS = 200; ARCH §8.1)</li>
+<li>WebGL unavailable fallback: static sprite, no animation</li>
+<li>Reduced motion mode: static sprite per <code>prefers-reduced-motion: reduce</code> (ARCH §2.1)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2-animation-requirements-analysis">§2. Animation Requirements Analysis</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="21-pet-generation--asset-mapping">§2.1 Pet Generation & Asset Mapping</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Each pet is uniquely generated via a 6-dimensional attribute vector (PET_GENERATION_DIMENSIONS = 6; EDD §0):</p>
+<p class="doc-p">1. <strong>body</strong> — frame silhouette (e.g., round, square, tall, short)</p>
+<p class="doc-p">2. <strong>head</strong> — facial feature set (e.g., pointed, round, animal-like)</p>
+<p class="doc-p">3. <strong>color_palette</strong> — primary + secondary color (e.g., blue-yellow, green-purple)</p>
+<p class="doc-p">4. <strong>accessory</strong> — optional visual augment (e.g., hat, scarf, crown)</p>
+<p class="doc-p">5. <strong>rarity_trait</strong> — visual distinctiveness (common → legendary glow)</p>
+<p class="doc-p">6. <strong>pattern</strong> — spot, stripe, or gradient overlay</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Asset Organization</strong>:</p>
+<pre class="doc-code"><code class="lang-text">assets/sprites/
+├── bodies/
+│   ├── body_round.png
+│   ├── body_square.png
+│   ├── body_tall.png
+│   └── body_short.png
+├── heads/
+│   ├── head_pointed.png
+│   ├── head_round.png
+│   └── head_animal.png
+├── accessories/
+│   ├── accessory_hat.png
+│   ├── accessory_scarf.png
+│   └── accessory_crown.png
+├── patterns/
+│   ├── pattern_spot.png
+│   ├── pattern_stripe.png
+│   └── pattern_gradient.png
+└── effects/
+    ├── rarity_common.png  (no effect)
+    ├── rarity_rare.png    (blue glow)
+    ├── rarity_epic.png    (purple glow)
+    └── rarity_legendary.png  (gold glow)</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Runtime Composition</strong>:</p>
+<p class="doc-p">At pet render time, the base body sprite (animated) is composed with:</p>
+<p class="doc-p">1. Head overlay (static or looping blink animation)</p>
+<p class="doc-p">2. Accessory (static, positioned via offsets)</p>
+<p class="doc-p">3. Pattern overlay (static, semitransparent)</p>
+<p class="doc-p">4. Rarity effect (glowing particle or shader effect, loops)</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Total rendered sprite at 32×32 is the result of layer blending in WebGL, or canvas composite draw operations.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="22-animation-inventory-15-concrete-animations">§2.2 Animation Inventory (15+ Concrete Animations)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Animation ID</th><th>Sprite Frame Count</th><th>Duration (ms)</th><th>Loop?</th><th>Trigger</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>`anim_idle_default`</td><td>4 frames</td><td>800</td><td>Yes</td><td>Continuous when pet not interacting</td><td>Gentle bob/breathe; plays on landing page and pet page idle states</td></tr>
+<tr><td>`anim_idle_sleep`</td><td>3 frames</td><td>1200</td><td>Yes</td><td>After 60s inactivity on pet page</td><td>Slower, drowsy animation (closed eyes)</td></tr>
+<tr><td>`anim_idle_happy`</td><td>6 frames</td><td>900</td><td>Yes</td><td>Post-training, post-buff</td><td>Energetic bounce or tail wag</td></tr>
+<tr><td>`anim_interact_hop`</td><td>4 frames</td><td>300</td><td>No</td><td>Click/tap input</td><td>Upward jump with arc; no loop</td></tr>
+<tr><td>`anim_interact_spin`</td><td>6 frames</td><td>400</td><td>No</td><td>Double-click input</td><td>Full rotation; no loop</td></tr>
+<tr><td>`anim_interact_head_turn`</td><td>2 frames</td><td>200</td><td>No</td><td>Hover input</td><td>Head rotates side-to-side once</td></tr>
+<tr><td>`anim_train_flex`</td><td>5 frames</td><td>600</td><td>No</td><td>Training action applied</td><td>Flexing muscles / standing tall animation</td></tr>
+<tr><td>`anim_train_eat`</td><td>4 frames</td><td>500</td><td>No</td><td>Food consumed</td><td>Chewing/eating motion</td></tr>
+<tr><td>`anim_battle_entry`</td><td>4 frames</td><td>400</td><td>No</td><td>Arena match starts</td><td>Walk-in or jump-in animation</td></tr>
+<tr><td>`anim_battle_idle`</td><td>2 frames</td><td>600</td><td>Yes</td><td>During opponent's turn in battle</td><td>Waiting, on-guard stance</td></tr>
+<tr><td>`anim_battle_attack`</td><td>5 frames</td><td>300</td><td>No</td><td>Pet lands attack / wins coin flip</td><td>Pounce, scratch, or speed dash depending on mode</td></tr>
+<tr><td>`anim_battle_hit`</td><td>3 frames</td><td>250</td><td>No</td><td>Pet takes damage / loses coin flip</td><td>Knockback, flinch, or slide backward</td></tr>
+<tr><td>`anim_battle_win`</td><td>6 frames</td><td>800</td><td>No</td><td>Battle match won</td><td>Victory pose (arms up, celebration)</td></tr>
+<tr><td>`anim_battle_lose`</td><td>4 frames</td><td>600</td><td>No</td><td>Battle match lost</td><td>Defeat pose (slump, disappointment)</td></tr>
+<tr><td>`anim_levelup_burst`</td><td>12 frames</td><td>1200</td><td>No</td><td>Pet levels up</td><td>Particle explosion effect with stat highlight</td></tr>
+<tr><td>`anim_neglect_desaturate`</td><td>1 frame</td><td>—</td><td>No</td><td>Triggered when last_trained_at > 3 days</td><td>Desaturated shader applied (no frame anim)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Total Frame Count</strong>: ~70 frames across all 15 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="23-animation-spritesheet-planning">§2.3 Animation Spritesheet Planning</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Strategy</strong>: Combine all character animations into a single <strong>character spritesheet</strong> per pet generation variant (body × head combination).</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Spritesheet Grid</strong> (example for one body/head combo):</p>
+<pre class="doc-code"><code class="lang-text">Row 0:  [anim_idle_default frames 0-3]            [anim_idle_sleep frames 0-2]        [anim_idle_happy frames 0-5]
+Row 1:  [anim_interact_hop frames 0-3]            [anim_interact_spin frames 0-5]
+Row 2:  [anim_interact_head_turn frames 0-1]      [anim_train_flex frames 0-4]         [anim_train_eat frames 0-3]
+Row 3:  [anim_battle_entry frames 0-3]            [anim_battle_idle frames 0-1]        [anim_battle_attack frames 0-4]
+Row 4:  [anim_battle_hit frames 0-2]              [anim_battle_win frames 0-5]         [anim_battle_lose frames 0-3]
+Row 5:  [anim_levelup_burst frames 0-11 (2×width)]
+
+Total grid: ~6 rows × 4 columns (with frame packing) = 24 visible tiles → 96 frames total
+Physical size: 32px × 24 cells = 768 × 768 px spritesheet per variant
+Compressed PNG: ~80–120 KB per variant (subject to color optimization)</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Variant Count Estimate</strong>:</p>
+<ul class="doc-list">
+<li>Body types: 4 (EDD provisional — open question OQ-E01 on final count)</li>
+<li>Head types: 3</li>
+<li>Unique body/head combos: 4 × 3 = 12 base variants</li>
+<li>Color palette variations: 8–16 (adjustable)</li>
+<li><strong>Estimated total variants</strong>: 12 × 12 = 144 spritesheet variants</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Total Asset Size</strong>: 144 variants × 100 KB avg = 14.4 MB (raw)</p>
+<p class="doc-p"><strong>Compressed (gzipped)</strong>: ~3.6 MB (at typical 75% gzip ratio)</p>
+<div class="doc-gap"></div>
+<p class="doc-p">This exceeds the per-page CSS budget of 50 KB (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50; ARCH §2.1), so spritesheet loading must be:</p>
+<p class="doc-p">1. <strong>Lazy loaded</strong> on demand (only load spritesheet when pet is rendered)</p>
+<p class="doc-p">2. <strong>Background fetched</strong> using <code>fetch()</code> with cache headers</p>
+<p class="doc-p">3. <strong>Cached</strong> in browser localStorage or IndexedDB</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="24-memory-budget">§2.4 Memory Budget</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>GPU Memory</strong> (WebGL texture memory):</p>
+<ul class="doc-list">
+<li>One active spritesheet in VRAM: ~1–3 MB (uncompressed texture)</li>
+<li>Phaser sprite object pool: 10 active sprites × 50 KB metadata = 500 KB</li>
+<li>Total GPU budget: ≤5 MB per scene (ARCH §2.1 budget not explicitly stated; inferred from 30 FPS target on mobile)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>CPU/RAM Memory</strong>:</p>
+<ul class="doc-list">
+<li>Phaser scene state: ~200 KB</li>
+<li>Loaded spritesheet decoded (PNG → RGBA): ~3 MB per variant in RAM</li>
+<li>Cache: LRU cache for last 3–5 variants = 9–15 MB</li>
+<li>Animation state machines (timers, callbacks): ~50 KB</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Total Runtime Memory</strong>: ~25–30 MB at steady state (conservative; mobile target is 128+ MB modern phones)</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-sprite-asset-planning">§3. Sprite Asset Planning</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="31-sprite-design-specification">§3.1 Sprite Design Specification</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Canvas Size</strong>: 32×32 pixels (SPRITE_RESOLUTION_PX = 32)</p>
+<ul class="doc-list">
+<li><strong>Safe area</strong>: 24×24 px center; 4 px margin on all sides for antialiasing and animation movement</li>
+<li><strong>Color depth</strong>: 8-bit indexed (256 colors) for 2:1 file size advantage over 32-bit RGBA where possible</li>
+<li><strong>Transparency</strong>: Per-pixel alpha channel (PNG transparency)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Animation Constraints</strong>:</p>
+<p class="doc-p">1. No frame should exceed 32×32 boundary (no overflow)</p>
+<p class="doc-p">2. Limb movement must stay within 28×28 safe area to prevent edge clipping during movement tweens</p>
+<p class="doc-p">3. Head tilt/rotation must use sprite frame rotation, not Phaser sprite rotation (smoother pixel-art aesthetic)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Design Guidelines</strong>:</p>
+<ul class="doc-list">
+<li>Iconic silhouette: pet must be recognizable at 32×32 from 1–2 meters distance</li>
+<li>Color consistency: primary color dominates 60% of sprite; secondary 30%; accents 10%</li>
+<li>Contrast: 4.5:1 text contrast ratio for overlaid stat numbers (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1; ARCH §2.1)</li>
+<li>Animation readability: extreme poses (leap, crouch) must differ by ≥20% pixel displacement</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="32-asset-file-organization--naming">§3.2 Asset File Organization & Naming</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">assets/
+├── sprites/
+│   ├── characters/
+│   │   ├── body_round_head_pointed_blue_yellow.png     (spritesheet, 768×768)
+│   │   ├── body_round_head_pointed_green_purple.png
+│   │   ├── ... (144 total spritesheets)
+│   │   └── legend.json  # Atlas/texture definition
+│   ├── effects/
+│   │   ├── particle_stars.png                          (small 16×16 particle sprite)
+│   │   ├── particle_sparkle.png
+│   │   ├── glow_blue.png                               (rarity effect glow overlay)
+│   │   ├── glow_purple.png
+│   │   └── glow_gold.png
+│   ├── ui/
+│   │   ├── health_bar_bg.png
+│   │   ├── health_bar_fill.png
+│   │   ├── level_badge.png
+│   │   └── stat_indicator.png
+│   └── tile_sets/
+│       └── arena_floor.png                             (background for battle scene)
+└── sprites_manifest.json                               # Master registry of all sprite variants</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Manifest Structure</strong> (sprites_manifest.json):</p>
+<pre class="doc-code"><code class="lang-json">{
+  "variants": [
+    {
+      "id": "body_round_head_pointed_blue_yellow",
+      "body": "round",
+      "head": "pointed",
+      "colors": ["#1E90FF", "#FFD700"],
+      "file": "characters/body_round_head_pointed_blue_yellow.png",
+      "size": 102400,
+      "framemap": {
+        "anim_idle_default": { "frames": [0, 1, 2, 3], "duration": 200 },
+        "anim_idle_sleep": { "frames": [4, 5, 6], "duration": 400 },
+        ...
+      }
+    }
+    ...
+  ],
+  "totalVariants": 144,
+  "estimatedTotalSize": 14400000
+}</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-animation-engine--implementation">§4. Animation Engine & Implementation</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="41-phaserjs-integration">§4.1 Phaser.js Integration</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>PetCanvasEngine Component</strong> (React wrapper):</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/components/PetCanvasEngine/PetCanvasEngine.tsx
+import Phaser from 'phaser';
+import { useEffect, useRef } from 'react';
+
+interface PetCanvasEngineProps {
+  petId: string;
+  petSeed: number;
+  onAnimationComplete?: (animId: string) =&gt; void;
+}
+
+export const PetCanvasEngine: React.FC&lt;PetCanvasEngineProps&gt; = ({
+  petId,
+  petSeed,
+  onAnimationComplete
+}) =&gt; {
+  const gameRef = useRef&lt;Phaser.Game | null&gt;(null);
+  const canvasRef = useRef&lt;HTMLDivElement&gt;(null);
+
+  useEffect(() =&gt; {
+    const config: Phaser.Types.Core.GameConfig = {
+      type: Phaser.AUTO,
+      width: 400,
+      height: 400,
+      parent: canvasRef.current,
+      render: {
+        pixelArt: true,
+        roundPixels: true,
+        antialias: false
+      },
+      scene: {
+        key: 'PetScene',
+        create: createPetScene,
+        update: updatePetScene,
+        preload: preloadAssets
+      }
+    };
+
+    const game = new Phaser.Game(config);
+    gameRef.current = game;
+
+    // Cleanup
+    return () =&gt; {
+      game.destroy(true);
+    };
+  }, [petId, petSeed]);
+
+  return &lt;div ref={canvasRef} /&gt;;
+};
+
+function preloadAssets(this: Phaser.Scene) {
+  // Lazy-load spritesheet for this pet variant
+  const variantKey = deriveVariantFromSeed(this.game.registry.get('petSeed'));
+  this.load.image(variantKey, `/assets/sprites/characters/${variantKey}.png`);
+}
+
+function createPetScene(this: Phaser.Scene) {
+  // Create sprite, set initial idle animation
+  const sprite = this.add.sprite(200, 200, 'variant_key');
+  
+  // Register animations
+  registerAnimations(this, 'variant_key');
+  
+  // Play idle animation
+  sprite.play('anim_idle_default');
+  
+  // Input handling
+  this.input.on('pointerdown', () =&gt; {
+    triggerInteraction(sprite);
+  });
+}
+
+function updatePetScene(this: Phaser.Scene) {
+  // Update loop (60 Hz, but animation plays at independent frame rate)
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Architectural Rule</strong> (ARCH §2.1): Only <code>PetCanvasEngine</code> may import Phaser. No other component, hook, or utility may reference Phaser directly. Communication between Phaser scenes and React state uses an event emitter bridge.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="42-animation-state-machine">§4.2 Animation State Machine</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Each pet sprite maintains a state machine for animation sequencing:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">State: IDLE
+  ├─ Idle anim (loops indefinitely)
+  └─ On input → INTERACTING
+
+State: INTERACTING
+  ├─ Interaction anim (hop, spin, turn — no loop)
+  └─ After anim ends → IDLE
+
+State: TRAINING
+  ├─ Train anim (flex, eat — no loop)
+  └─ After anim ends → IDLE_HAPPY
+
+State: IDLE_HAPPY
+  ├─ Happy anim (loops 3×)
+  └─ After 3 loops → IDLE
+
+State: BATTLE
+  ├─ Battle entry anim
+  ├─ Loop: BATTLE_IDLE ↔ BATTLE_ATTACK/HIT
+  └─ After outcome → BATTLE_WIN/LOSE
+
+State: LEVELUP
+  ├─ Levelup burst anim
+  └─ After anim → IDLE_HAPPY
+
+State: NEGLECTED
+  ├─ Desaturated sprite (shader)
+  └─ On training action → INTERACTING</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Implementation</strong> (Phaser event emitter):</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/components/PetCanvasEngine/AnimationStateMachine.ts
+type PetAnimState = 'idle' | 'interacting' | 'training' | 'idle_happy' | 'battle' | 'levelup' | 'neglected';
+
+class PetAnimStateMachine {
+  private currentState: PetAnimState = 'idle';
+  private sprite: Phaser.Physics.Arcade.Sprite;
+  private scene: Phaser.Scene;
+
+  constructor(sprite: Phaser.Physics.Arcade.Sprite, scene: Phaser.Scene) {
+    this.sprite = sprite;
+    this.scene = scene;
+  }
+
+  transition(targetState: PetAnimState, payload?: Record&lt;string, any&gt;) {
+    const previousState = this.currentState;
+    this.currentState = targetState;
+
+    switch (targetState) {
+      case 'idle':
+        this.sprite.play('anim_idle_default', true);
+        break;
+      case 'interacting':
+        this.sprite.play('anim_interact_hop', false);
+        this.scene.time.delayedCall(300, () =&gt; this.transition('idle'));
+        break;
+      case 'training':
+        this.sprite.play('anim_train_flex', false);
+        this.scene.time.delayedCall(600, () =&gt; this.transition('idle_happy'));
+        break;
+      case 'battle':
+        this.sprite.play('anim_battle_entry', false);
+        this.scene.time.delayedCall(400, () =&gt; this.transition('battle', { phase: 'idle' }));
+        break;
+      default:
+        break;
+    }
+  }
+
+  getCurrentState(): PetAnimState {
+    return this.currentState;
+  }
+}</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="43-animation-playback-timing">§4.3 Animation Playback Timing</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Frame Duration Formula</strong>:</p>
+<pre class="doc-code"><code class="lang-text">frame_duration_ms = animation_total_duration_ms / frame_count</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">For example:</p>
+<ul class="doc-list">
+<li><code>anim_idle_default</code>: 800 ms ÷ 4 frames = 200 ms per frame</li>
+<li><code>anim_interact_hop</code>: 300 ms ÷ 4 frames = 75 ms per frame</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>FPS Calculation</strong> (target ≥30 FPS):</p>
+<p class="doc-p">At 30 FPS, the screen redraws every 33.3 ms. Phaser's internal timestep is 60 Hz by default. Animation frames are synced to the game loop automatically — no manual frame rate calculation needed.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Guaranteed Performance</strong>:</p>
+<p class="doc-p">1. If device is capable of 60 FPS, animations play smoothly at intended durations</p>
+<p class="doc-p">2. If device can only achieve 30 FPS (older mobile), animations still play (at half playback speed relative to the timer), but visually smooth within device capability</p>
+<p class="doc-p">3. Reduced motion mode (<code>prefers-reduced-motion: reduce</code>) disables all animations and displays static sprite instead</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="44-particle-effects">§4.4 Particle Effects</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Level-Up Burst</strong>:</p>
+<ul class="doc-list">
+<li>12 star particles spawn in arc pattern around pet</li>
+<li>Duration: 1.2 seconds</li>
+<li>Opacity fade: 100% → 0% over duration</li>
+<li>Scale fade: 1.0 → 0.5 over duration</li>
+<li>Uses Phaser Particle Emitter with custom particle sprite (<code>particle_stars.png</code>, 16×16 px)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Rarity Glow</strong> (persistent):</p>
+<ul class="doc-list">
+<li>Rarity-tier-dependent glow effect applied as post-process shader</li>
+<li>Common (no glow) | Rare (blue) | Epic (purple) | Legendary (gold)</li>
+<li>Shader parameterized by rarity; updates when pet rarity changes</li>
+<li>Alpha pulse: 0.7 → 1.0 → 0.7 over 2 seconds, loops</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-performance--optimization">§5. Performance & Optimization</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="51-asset-loading-strategy">§5.1 Asset Loading Strategy</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Critical Path Optimization</strong>:</p>
+<p class="doc-p">1. <strong>Initial page load</strong> (landing page, claim page): no Phaser import; static sprite fallback only</p>
+<p class="doc-p">2. <strong>Pet page load</strong>: async fetch + load spritesheet as non-blocking background task</p>
+<p class="doc-p">3. <strong>Lazy spritesheet cache</strong>: LRU cache (last 3 variants in memory)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Loading Flow</strong>:</p>
+<pre class="doc-code"><code class="lang-text">User navigates to /pet/:petId
+     ↓
+React mounts &lt;PetCanvasEngine&gt;
+     ↓
+Phaser scene preload fires
+     ↓
+deriveVariantFromSeed(petSeed) → variant key
+     ↓
+Check browser cache / IndexedDB for spritesheet
+     ├─ Hit: use cached spritesheet
+     └─ Miss: fetch from CDN, cache, then use
+     ↓
+Sprite created, initial idle animation plays</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Cache Strategy</strong>:</p>
+<ul class="doc-list">
+<li><strong>Browser cache</strong> (HTTP cache headers): 24 hours (Cache-Control: max-age=86400)</li>
+<li><strong>IndexedDB persistent cache</strong>: Keep last 5 accessed variants (LRU eviction)</li>
+<li><strong>Memory cache</strong>: Current scene spritesheet only</li>
+<li><strong>CDN</strong>: Cloudflare or Vercel Edge caching for 1-hour TTL</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Expected Load Time</strong>:</p>
+<ul class="doc-list">
+<li>Spritesheet from HTTP cache (hit): ≤200 ms</li>
+<li>Spritesheet from network (miss): ≤1 second (gzipped ~100 KB download on 4G)</li>
+<li>Phaser scene initialization + sprite creation: ≤500 ms</li>
+<li><strong>Total PET_RENDER_ON_LOAD_SECONDS target</strong>: ≤2 seconds ✓</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="52-webgl-fallback">§5.2 WebGL Fallback</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>When WebGL unavailable</strong>:</p>
+<ul class="doc-list">
+<li>Detect Phaser.AUTO fallback to Canvas 2D</li>
+<li>Load static sprite image (first frame of idle animation) instead of spritesheet</li>
+<li>No animation playback; static sprite only</li>
+<li>User experience: pet visible but not animated; no functional loss</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Fallback sprite asset</strong>: <code>assets/sprites/characters/{variant}_static.png</code> (32×32 px, same as first frame)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="53-reduced-motion-support">§5.3 Reduced Motion Support</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>CSS Media Query</strong>:</p>
+<pre class="doc-code"><code class="lang-css">@media (prefers-reduced-motion: reduce) {
+  /* Animations disabled */
+  canvas { display: none; }
+  .pet-static-fallback { display: block; }
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Implementation</strong>:</p>
+<pre class="doc-code"><code class="lang-typescript">const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (prefersReducedMotion) {
+  // Skip Phaser initialization; show static sprite instead
+  return &lt;img src={staticSpriteUrl} alt="Pet" /&gt;;
+}</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="6-cross-platform-considerations">§6. Cross-Platform Considerations</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="61-desktop-chrome-firefox-safari-edge">§6.1 Desktop (Chrome, Firefox, Safari, Edge)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Target</strong>: 60 FPS, modern WebGL</p>
+<ul class="doc-list">
+<li>Spritesheet size: full 768×768 px, 32-bit RGBA</li>
+<li>Animation frame rate: native 200 ms per frame (typical)</li>
+<li>Performance: ✓ No issues expected</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="62-mobile-ios-safari-chrome-android">§6.2 Mobile (iOS Safari, Chrome Android)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Target</strong>: 30 FPS, WebGL 1.0 or Canvas 2D fallback</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>iPhone 12+ / Android Flagship</strong>:</p>
+<ul class="doc-list">
+<li>WebGL available, sufficient VRAM</li>
+<li>Spritesheet size: 768×768 px, but test 256-color indexed PNG for file size</li>
+<li>Animation frame rate: 200 ms per frame (achievable at 30 FPS)</li>
+<li>Performance: ✓ Target met</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>iPhone 8 / Android mid-range</strong>:</p>
+<ul class="doc-list">
+<li>WebGL available but limited VRAM (< 128 MB)</li>
+<li>Spritesheet loaded on demand; garbage collected when scene unloaded</li>
+<li>Animation frame rate: 200 ms per frame (achievable)</li>
+<li>Performance: ⚠ Monitor memory; may need spritesheet size reduction</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Low-end Android (Android 5–7)</strong>:</p>
+<ul class="doc-list">
+<li>WebGL unavailable; Canvas 2D fallback</li>
+<li>Static sprite displayed (no animation)</li>
+<li>User experience degraded but functional</li>
+<li>Performance: ✓ No crash</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="63-tablet-orientation-changes">§6.3 Tablet Orientation Changes</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Portrait ↔ Landscape</strong>:</p>
+<ul class="doc-list">
+<li>Phaser canvas resizes via <code>scale</code> plugin (Phaser.Scale.RESIZE)</li>
+<li>Sprite position maintained (center of canvas)</li>
+<li>All animations continue playing without interruption</li>
+<li>No state loss</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="7-implementation-phases">§7. Implementation Phases</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="71-phase-1-core-idle-animation-weeks-12">§7.1 Phase 1: Core Idle Animation (Weeks 1–2)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Deliverables</strong>:</p>
+<ul class="doc-list">
+<li>4 body/head variants designed and spritesheet created</li>
+<li><code>anim_idle_default</code> and <code>anim_idle_sleep</code> implemented in Phaser</li>
+<li>State machine for IDLE → INTERACTING transition</li>
+<li>Landing page pet preview with idle loop</li>
+<li>Performance verified: ≥30 FPS on target devices</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Sprite Assets</strong>: 4 spritesheets (16 KB each, uncompressed) = 64 KB total</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="72-phase-2-interaction--training-animation-weeks-34">§7.2 Phase 2: Interaction & Training Animation (Weeks 3–4)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Deliverables</strong>:</p>
+<ul class="doc-list">
+<li>All 15 animations implemented and tested</li>
+<li>Training action flow animated (flex, eat)</li>
+<li>Level-up particle effect + burst animation</li>
+<li>Stat buff glow effect</li>
+<li>Neglect state desaturation shader</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Sprite Assets</strong>: All 144 variants created; total ~14.4 MB (gzipped ~3.6 MB)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="73-phase-3-arena-battle-animation-weeks-56">§7.3 Phase 3: Arena Battle Animation (Weeks 5–6)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Deliverables</strong>:</p>
+<ul class="doc-list">
+<li>Battle entry, idle, attack, hit, win/lose animations integrated</li>
+<li>5–15 second battle sequence choreography</li>
+<li>Health bar animation (filling/draining)</li>
+<li>Opponent sprite rendering (AI pet generation visualization)</li>
+<li>Battle result screen animation</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Sprite Assets</strong>: Arena-specific effects, health bars, opponent sprite variants</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="74-phase-4-polish--optimization-week-7">§7.4 Phase 4: Polish & Optimization (Week 7)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Deliverables</strong>:</p>
+<ul class="doc-list">
+<li>Spritesheet caching implementation (IndexedDB + HTTP cache)</li>
+<li>Performance profiling and optimization (target ≥30 FPS maintained)</li>
+<li>Cross-platform testing (desktop + mobile + tablet)</li>
+<li>Reduced motion compliance verification</li>
+<li>WebGL fallback testing</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="8-testing-strategy">§8. Testing Strategy</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="81-visual-regression-testing">§8.1 Visual Regression Testing</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Tool</strong>: Playwright visual regression snapshots at breakpoints: 320, 768, 1024, 1440 px (WEB TESTING RULES, priority 1)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Test Cases</strong>:</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Test</th><th>Breakpoint</th><th>Description</th><th>Pass Criteria</th></tr></thead>
+<tbody>
+<tr><td>`test_idle_animation_desktop`</td><td>1440</td><td>Pet idle loops smoothly</td><td>≥3 frames captured, sprite centered</td></tr>
+<tr><td>`test_idle_animation_mobile`</td><td>320</td><td>Pet idle on mobile viewport</td><td>Sprite visible, no overflow</td></tr>
+<tr><td>`test_interaction_hop_desktop`</td><td>1440</td><td>Click pet → hop animation plays</td><td>Sprite rises + falls, ≤300 ms duration</td></tr>
+<tr><td>`test_battle_animation_sequence`</td><td>1024</td><td>Arena battle plays 5–15 s</td><td>Entry → idle → attack → outcome visible</td></tr>
+<tr><td>`test_neglect_desaturate`</td><td>768</td><td>3+ days → desaturated sprite</td><td>Hue shift visible in comparison</td></tr>
+<tr><td>`test_reduced_motion_static`</td><td>1024</td><td>prefers-reduced-motion active</td><td>No animation, static sprite displayed</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="82-performance-testing">§8.2 Performance Testing</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Metrics</strong>:</p>
+<ul class="doc-list">
+<li>FPS stability: ≥30 FPS sustained for 60 seconds (idle loop)</li>
+<li>Memory: < 50 MB RAM on mobile (spritesheet + scene state)</li>
+<li>Load time: spritesheet load ≤1 second on 4G network</li>
+<li>CPU: < 15% CPU usage on idle loop (mobile)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Tool</strong>: Lighthouse (Chrome DevTools) + custom Phaser performance monitor</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="83-cross-browser-testing">§8.3 Cross-Browser Testing</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Browser</th><th>OS</th><th>WebGL</th><th>Canvas 2D Fallback</th><th>Test Status</th></tr></thead>
+<tbody>
+<tr><td>Chrome</td><td>Windows 10+</td><td>Yes</td><td>N/A</td><td>✓ Pass</td></tr>
+<tr><td>Firefox</td><td>Windows 10+</td><td>Yes</td><td>N/A</td><td>✓ Pass</td></tr>
+<tr><td>Safari</td><td>macOS 10.15+</td><td>Yes</td><td>N/A</td><td>✓ Pass</td></tr>
+<tr><td>Edge</td><td>Windows 10+</td><td>Yes</td><td>N/A</td><td>✓ Pass</td></tr>
+<tr><td>Chrome</td><td>Android 8+</td><td>Yes</td><td>Fallback if unavailable</td><td>✓ Pass</td></tr>
+<tr><td>Safari</td><td>iOS 13+</td><td>Yes</td><td>Fallback if unavailable</td><td>✓ Pass</td></tr>
+<tr><td>Chrome</td><td>Android 5–7</td><td>No</td><td>Yes, static sprite</td><td>⚠ Functional (no animation)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="84-accessibility-testing">§8.4 Accessibility Testing</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Criterion</th><th>Verification</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Reduced motion</td><td>Phaser disabled; static sprite displayed; `prefers-reduced-motion: reduce` respected</td><td>✓ Pass</td></tr>
+<tr><td>Keyboard navigation</td><td>Phaser scene input not required for claim flow (game is read-only on claim page)</td><td>✓ Pass</td></tr>
+<tr><td>Color contrast</td><td>Stat overlays on canvas: ≥4.5:1 (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1)</td><td>✓ Pass</td></tr>
+<tr><td>Screen reader</td><td>Canvas is not interactive for main flow (claim + train via HTML forms); canvas labeling: `aria-label="Pet animation"`</td><td>✓ Pass</td></tr>
+<tr><td>Focus visible</td><td>No focus required on Phaser canvas (read-only); HTML form controls have focus indicators</td><td>✓ Pass</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="9-risk-mitigation--open-questions">§9. Risk Mitigation & Open Questions</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="91-risks">§9.1 Risks</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr><td>WebGL unavailable on older Android</td><td>5–10% of users see static sprite instead of animation</td><td>Canvas 2D fallback; static sprite asset provided; no functional loss</td></tr>
+<tr><td>Spritesheet file size exceeds memory on low-end mobile</td><td>Game crash on Android 5–7 devices</td><td>Lazy load on demand; LRU cache (max 3 variants); test on actual Android 5 device</td></tr>
+<tr><td>Animation frame rate unstable below 30 FPS</td><td>Animation looks janky; poor user experience</td><td>Cap frame rate to 30 FPS; reduce particle count on low-end devices; performance budget enforced</td></tr>
+<tr><td>Phaser.js 3.x deprecation after 2027</td><td>Codebase becomes unmaintained</td><td>Use v3.55+ LTS; pin version; plan v4 migration by 2027</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="92-open-questions">§9.2 Open Questions</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>OQ-E01: Final Sprite Resolution & Variant Count</strong></p>
+<ul class="doc-list">
+<li>Current assumption: 32×32 px per frame, 144 total variants</li>
+<li>Decision required: Test upscaling to 64×64 px for retina displays; confirm final variant count (body × head × color combo)</li>
+<li>Acceptance: Performance test on iPhone 8 and Android 6; target ≤2 s load time maintained</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>OQ-E02: Spine vs. Phaser.js Native Sprites</strong></p>
+<ul class="doc-list">
+<li>Current: Phaser.js native frame-based sprites</li>
+<li>Alternative: Skeletal animation via Spine or Dragonbones</li>
+<li>Decision required: Trade-off analysis (file size, runtime overhead, artist productivity)</li>
+<li>Acceptance: Benchmark 5 animations via Spine; compare file size and FPS vs. frame-based approach</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>OQ-E03: Arena AI Pet Animation</strong></p>
+<ul class="doc-list">
+<li>Current: Spawn synthetic AI pet with random seed; render same spritesheet logic</li>
+<li>Question: Do we animate the AI pet with same 15-animation set, or use simplified 3-animation subset?</li>
+<li>Decision required: Balance realism (full animation) vs. performance (simplified)</li>
+<li>Acceptance: Benchmark with 20 concurrent pets on-screen; confirm ≥30 FPS maintained</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="10-monitoring--observability">§10. Monitoring & Observability</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="101-animation-performance-metrics">§10.1 Animation Performance Metrics</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Metric</th><th>Target</th><th>Constant</th><th>Monitoring</th></tr></thead>
+<tbody>
+<tr><td>Pet canvas render time</td><td>≤2 seconds</td><td>PET_RENDER_ON_LOAD_SECONDS</td><td>Lighthouse CLS / LCP</td></tr>
+<tr><td>Animation frame rate</td><td>≥30 FPS sustained</td><td>PET_ANIMATION_FPS_MIN</td><td>Phaser built-in FPS counter; Grafana dashboard</td></tr>
+<tr><td>Spritesheet load latency</td><td>≤1 second</td><td>(derived from bundle budget)</td><td>Network waterfall in DevTools</td></tr>
+<tr><td>Memory (per scene)</td><td>≤50 MB</td><td>(inferred)</td><td>Chrome DevTools Memory profiler</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="102-error-handling">§10.2 Error Handling</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Fallback chains</strong>:</p>
+<p class="doc-p">1. WebGL available → Full animation (target)</p>
+<p class="doc-p">2. WebGL unavailable → Canvas 2D fallback (degraded)</p>
+<p class="doc-p">3. Canvas 2D unavailable → Static sprite image (severely degraded but functional)</p>
+<p class="doc-p">4. Spritesheet fails to load → Generic placeholder sprite (error recovery)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Error logging</strong> (pino, structured JSON):</p>
+<pre class="doc-code"><code class="lang-json">{
+  "level": "warn",
+  "event": "phaser_canvas_init_failed",
+  "reason": "WebGL_unavailable",
+  "device": "Android 5.1",
+  "fallback": "canvas_2d"
+}</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="appendix-asset-file-size-budget">Appendix: Asset File Size Budget</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Asset Category</th><th>Count</th><th>Size per Unit</th><th>Total (Uncompressed)</th><th>Compressed (gzip)</th></tr></thead>
+<tbody>
+<tr><td>Character spritesheets (144 variants × 768×768 px)</td><td>144</td><td>100 KB avg</td><td>14.4 MB</td><td>~3.6 MB</td></tr>
+<tr><td>Static sprite fallbacks (144 variants × 32×32 px)</td><td>144</td><td>2 KB avg</td><td>288 KB</td><td>~72 KB</td></tr>
+<tr><td>Effect spritesheets (particles, glow)</td><td>6</td><td>20 KB avg</td><td>120 KB</td><td>~30 KB</td></tr>
+<tr><td>Arena background tileset</td><td>1</td><td>50 KB</td><td>50 KB</td><td>~15 KB</td></tr>
+<tr><td>**Total Animation Assets**</td><td>—</td><td>—</td><td>**14.86 MB**</td><td>**~3.72 MB**</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Loading strategy</strong>: Lazy load character spritesheets on <code>/pet/:petId</code> route; prefetch arena assets when entering arena mode. Static fallback sprites (72 KB) can be inline-loaded into a single sprite manifest.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<p class="doc-p"><em>This ANIM document specifies all animation and sprite design for pixel-pet-arena. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 and referenced upstream documents (EDD, ARCH, PRD). Implementation must adhere to the performance targets (≥30 FPS, ≤2 s render), asset budgets, and cross-platform fallback chains defined in this document.</em></p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

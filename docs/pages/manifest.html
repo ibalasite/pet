@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — MANIFEST — gendoc Pipeline Execution Plan</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">MANIFEST — gendoc Pipeline Execution Plan</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>MANIFEST — gendoc Pipeline Execution Plan</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="manifest--gendoc-pipeline-execution-plan">MANIFEST — gendoc Pipeline Execution Plan</h1>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Project</strong>: pixel-pet-arena</p>
+<p class="doc-p"><strong>Generated</strong>: 2026-05-03</p>
+<p class="doc-p"><strong>Pipeline Version</strong>: 3.0</p>
+<p class="doc-p"><strong>Status</strong>: ✅ COMPLETE</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1-baseline-metrics">§1 Baseline Metrics</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Metric</th><th>Value</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Domain entity count</td><td>13</td><td>EDD.md §4 Data Models (13 subsections)</td></tr>
+<tr><td>REST endpoint count</td><td>53</td><td>API.md (53 `#### \`METHOD /...\`` definitions)</td></tr>
+<tr><td>User story count</td><td>18</td><td>PRD.md (18 unique US-xxx-nnn IDs)</td></tr>
+<tr><td>Architecture layer count</td><td>8</td><td>ARCH.md (8 top-level §§ sections)</td></tr>
+<tr><td>BDD scenario minimum</td><td>15</td><td>ceil(18 × 0.8)</td></tr>
+<tr><td>Test plan minimum sections</td><td>10</td><td>arch_layers + 2</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2-pipeline-configuration">§2 Pipeline Configuration</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="21-session-config">§2.1 Session Config</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Setting</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>`client_type`</td><td>`web`</td></tr>
+<tr><td>`has_admin_backend`</td><td>`true`</td></tr>
+<tr><td>`execution_mode`</td><td>`full-auto`</td></tr>
+<tr><td>`review_strategy`</td><td>`exhaustive`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="22-active-vs-skipped-steps">§2.2 Active vs Skipped Steps</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Active steps (32)</strong>: All steps execute for <code>client_type=web, has_admin_backend=true</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Skipped steps (2)</strong>:</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Step</th><th>Condition</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>AUDIO</td><td>`client_type == game`</td><td>`client_type=web` — not a game project</td></tr>
+<tr><td>ANIM</td><td>`client_type == game`</td><td>`client_type=web` — not a game project</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-mandatory-steps-checklist">§3 Mandatory Steps Checklist</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>#</th><th>Step ID</th><th>Type</th><th>Output</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>IDEA</td><td>Concept</td><td>docs/IDEA.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>2</td><td>BRD</td><td>Business</td><td>docs/BRD.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>3</td><td>PRD</td><td>Product</td><td>docs/PRD.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>4</td><td>CONSTANTS</td><td>Constants</td><td>docs/CONSTANTS.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>5</td><td>PDD</td><td>Design</td><td>docs/PDD.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>6</td><td>VDD</td><td>Visual</td><td>docs/VDD.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>7</td><td>EDD</td><td>Engineering</td><td>docs/EDD.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>8</td><td>ARCH</td><td>Architecture</td><td>docs/ARCH.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>9</td><td>DRYRUN</td><td>Special</td><td>docs/MANIFEST.md + .gendoc-rules/</td><td>✅ COMPLETE</td></tr>
+<tr><td>10</td><td>API</td><td>API</td><td>docs/API.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>11</td><td>SCHEMA</td><td>Schema</td><td>docs/SCHEMA.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>12</td><td>FRONTEND</td><td>Frontend</td><td>docs/FRONTEND.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>13</td><td>CLIENT_IMPL</td><td>Implementation</td><td>docs/CLIENT_IMPL.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>14</td><td>ADMIN_IMPL</td><td>Implementation</td><td>docs/ADMIN_IMPL.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>15</td><td>RESOURCE</td><td>Infrastructure</td><td>docs/RESOURCE.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>16</td><td>UML</td><td>Diagrams</td><td>docs/diagrams/ (≥9 files)</td><td>✅ COMPLETE</td></tr>
+<tr><td>17</td><td>test-plan</td><td>Testing</td><td>docs/test-plan.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>18</td><td>BDD-server</td><td>features/server/ (6 files, 18 scenarios)</td><td>✅ COMPLETE</td></tr>
+<tr><td>19</td><td>BDD-client</td><td>BDD</td><td>features/client/ (≥15 scenarios)</td><td>✅ COMPLETE</td></tr>
+<tr><td>20</td><td>RTM</td><td>Traceability</td><td>docs/RTM.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>21</td><td>runbook</td><td>Operations</td><td>docs/runbook.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>22</td><td>LOCAL_DEPLOY</td><td>DevEx</td><td>docs/LOCAL_DEPLOY.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>23</td><td>CICD</td><td>CI/CD</td><td>docs/CICD.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>24</td><td>DEVELOPER_GUIDE</td><td>DevEx</td><td>docs/DEVELOPER_GUIDE.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>25</td><td>UML-CICD</td><td>Diagrams</td><td>docs/diagrams/cicd-*.md (≥5 files)</td><td>✅ COMPLETE</td></tr>
+<tr><td>26</td><td>ALIGN</td><td>Alignment</td><td>docs/ALIGN-REPORT.md</td><td>✅ COMPLETE</td></tr>
+<tr><td>27</td><td>ALIGN-FIX</td><td>Alignment</td><td>docs/ALIGN-REPORT.md (fixed)</td><td>✅ COMPLETE</td></tr>
+<tr><td>28</td><td>ALIGN-VERIFY</td><td>Alignment</td><td>docs/ALIGN-REPORT.md (verified)</td><td>✅ COMPLETE</td></tr>
+<tr><td>29</td><td>CONTRACTS</td><td>Contracts</td><td>docs/contracts/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
+<tr><td>30</td><td>MOCK</td><td>Mock Data</td><td>docs/mock-data/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
+<tr><td>31</td><td>PROTOTYPE</td><td>Prototype</td><td>docs/prototype/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
+<tr><td>32</td><td>HTML</td><td>HTML</td><td>docs/pages/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-per-step-completeness-standards">§4 Per-Step Completeness Standards</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Each step must pass the following gate checks before being marked COMPLETE.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="41-document-steps">§4.1 Document Steps</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Step</th><th>Output</th><th>Min §§</th><th>Required Sections</th><th>Special Rules</th></tr></thead>
+<tbody>
+<tr><td>IDEA</td><td>docs/IDEA.md</td><td>3</td><td>Problem Statement, Target Users, Core Value</td><td>—</td></tr>
+<tr><td>BRD</td><td>docs/BRD.md</td><td>5</td><td>Business Objectives, Stakeholders, Success Metrics</td><td>—</td></tr>
+<tr><td>PRD</td><td>docs/PRD.md</td><td>5</td><td>User Stories, Acceptance Criteria, Out of Scope</td><td>—</td></tr>
+<tr><td>CONSTANTS</td><td>docs/CONSTANTS.md</td><td>3</td><td>Business Rules, System Parameters</td><td>—</td></tr>
+<tr><td>PDD</td><td>docs/PDD.md</td><td>4</td><td>Product Vision, Feature List, Roadmap</td><td>—</td></tr>
+<tr><td>VDD</td><td>docs/VDD.md</td><td>3</td><td>Design Principles, Visual Language</td><td>—</td></tr>
+<tr><td>EDD</td><td>docs/EDD.md</td><td>8</td><td>Domain Model, Service Architecture, Data Flow</td><td>—</td></tr>
+<tr><td>ARCH</td><td>docs/ARCH.md</td><td>5</td><td>Architecture Overview, Tech Stack, Component Design</td><td>—</td></tr>
+<tr><td>API</td><td>docs/API.md</td><td>6</td><td>API Overview, Authentication, Endpoints, Error Codes</td><td>min_endpoint_count = 53</td></tr>
+<tr><td>SCHEMA</td><td>docs/SCHEMA.md</td><td>5</td><td>Overview, Tables, Indexes</td><td>min_table_count = 13</td></tr>
+<tr><td>FRONTEND</td><td>docs/FRONTEND.md</td><td>4</td><td>Page Structure, Component Design, State Management</td><td>—</td></tr>
+<tr><td>CLIENT_IMPL</td><td>docs/CLIENT_IMPL.md</td><td>4</td><td>Technology Stack, Project Structure, Build Process</td><td>—</td></tr>
+<tr><td>ADMIN_IMPL</td><td>docs/ADMIN_IMPL.md</td><td>4</td><td>Admin Architecture, Feature Modules, Access Control</td><td>—</td></tr>
+<tr><td>RESOURCE</td><td>docs/RESOURCE.md</td><td>3</td><td>Infrastructure Overview, Resource Allocation</td><td>—</td></tr>
+<tr><td>test-plan</td><td>docs/test-plan.md</td><td>10</td><td>Test Objectives, Test Scope, Test Cases</td><td>—</td></tr>
+<tr><td>RTM</td><td>docs/RTM.md</td><td>3</td><td>Requirements, Test Cases, Coverage</td><td>min_row_count = 18</td></tr>
+<tr><td>runbook</td><td>docs/runbook.md</td><td>4</td><td>Deployment, Incident Response, Rollback</td><td>—</td></tr>
+<tr><td>LOCAL_DEPLOY</td><td>docs/LOCAL_DEPLOY.md</td><td>5</td><td>Prerequisites, Setup Steps, Verification</td><td>—</td></tr>
+<tr><td>CICD</td><td>docs/CICD.md</td><td>6</td><td>Pipeline Overview, Jenkinsfile, PR Gate, ArgoCD</td><td>—</td></tr>
+<tr><td>DEVELOPER_GUIDE</td><td>docs/DEVELOPER_GUIDE.md</td><td>5</td><td>Daily Scenarios, CI/CD Diagnosis, Quick Reference</td><td>—</td></tr>
+<tr><td>ALIGN</td><td>docs/ALIGN-REPORT.md</td><td>3</td><td>Alignment Issues, Cross-Document Gaps</td><td>—</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="42-multi-file-steps">§4.2 Multi-File Steps</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Step</th><th>Output Glob</th><th>Min Files</th><th>Special Rules</th></tr></thead>
+<tbody>
+<tr><td>UML</td><td>docs/diagrams/*.md</td><td>9</td><td>—</td></tr>
+<tr><td>BDD-server</td><td>features/server/*.feature</td><td>—</td><td>min_scenario_count = 15</td></tr>
+<tr><td>BDD-client</td><td>features/client/*.feature</td><td>—</td><td>min_scenario_count = 15</td></tr>
+<tr><td>UML-CICD</td><td>docs/diagrams/cicd-*.md</td><td>5</td><td>—</td></tr>
+<tr><td>CONTRACTS</td><td>docs/contracts/*.md</td><td>3</td><td>min_h2_per_file = 3</td></tr>
+<tr><td>MOCK</td><td>docs/mock-data/*</td><td>3</td><td>—</td></tr>
+<tr><td>PROTOTYPE</td><td>docs/prototype/*</td><td>3</td><td>—</td></tr>
+<tr><td>HTML</td><td>docs/pages/*.html</td><td>3</td><td>—</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="43-universal-anti-fake-rules-all-steps">§4.3 Universal Anti-Fake Rules (All Steps)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">All generated documents must pass:</p>
+<div class="doc-gap"></div>
+<p class="doc-p">1. <strong>No bare placeholders</strong>: No unfilled template placeholder strings in output</p>
+<p class="doc-p">2. <strong>No duplicate paragraphs</strong>: Paragraphs ≥150 chars must not repeat verbatim</p>
+<p class="doc-p">3. <strong>Minimum section words</strong>: Each section must contain ≥30 words</p>
+<p class="doc-p">4. <strong>No trivial entity names</strong>: No generic names like "Entity1", "Component2"</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-gate-check-rules-location">§5 Gate Check Rules Location</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Individual gate rules are stored in <code>.gendoc-rules/<STEP-ID>-rules.json</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">These files are used by <code>gate-check.sh</code> before each step's review loop begins.</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>File</th><th>Step</th><th>Key Rule</th></tr></thead>
+<tbody>
+<tr><td>`.gendoc-rules/API-rules.json`</td><td>API</td><td>min_endpoint_count = 53</td></tr>
+<tr><td>`.gendoc-rules/SCHEMA-rules.json`</td><td>SCHEMA</td><td>min_table_count = 13</td></tr>
+<tr><td>`.gendoc-rules/RTM-rules.json`</td><td>RTM</td><td>min_row_count = 18</td></tr>
+<tr><td>`.gendoc-rules/BDD-server-rules.json`</td><td>BDD-server</td><td>min_scenario_count = 15</td></tr>
+<tr><td>`.gendoc-rules/BDD-client-rules.json`</td><td>BDD-client</td><td>min_scenario_count = 15</td></tr>
+<tr><td>`.gendoc-rules/test-plan-rules.json`</td><td>test-plan</td><td>min_h2_sections = 10</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

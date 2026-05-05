@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — CLIENT_IMPL — Client Implementation Specification</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">CLIENT_IMPL — Client Implementation Specification</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>CLIENT_IMPL — Client Implementation Specification</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="clientimpl--client-implementation-specification">CLIENT_IMPL — Client Implementation Specification</h1>
+<p class="doc-p"><!-- SDLC Layer 4: Implementation Engineering --></p>
+<p class="doc-p"><!-- Upstream: EDD.md (tech stack, architecture) + FRONTEND.md (design) + VDD.md (visual) + ARCH.md (system) --></p>
+<p class="doc-p"><!-- Scope: Player App (React 18 + Phaser 3). Admin Portal (Vue 3 + Element Plus) is excluded — see ADMIN_IMPL.md if generated. --></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="document-control">Document Control</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Field</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td>**DOC-ID**</td><td>CLIENT_IMPL-PIXEL-PET-ARENA-20260503</td></tr>
+<tr><td>**Project Name**</td><td>pixel-pet-arena</td></tr>
+<tr><td>**Client Engine / Framework**</td><td>React 18 + Phaser 3 (Player App)</td></tr>
+<tr><td>**Engine Version**</td><td>React 18.x · Phaser 3.x · TypeScript 5.x · Vite 5.x</td></tr>
+<tr><td>**Target Platform**</td><td>Web (HTML5 SPA — Vercel CDN)</td></tr>
+<tr><td>**Document Version**</td><td>v1.0</td></tr>
+<tr><td>**Status**</td><td>DRAFT</td></tr>
+<tr><td>**Author**</td><td>AI Generated (gendoc CLIENT_IMPL)</td></tr>
+<tr><td>**Date**</td><td>2026-05-03</td></tr>
+<tr><td>**Upstream EDD**</td><td>[EDD.md](EDD.md)</td></tr>
+<tr><td>**Upstream VDD**</td><td>[VDD.md](VDD.md)</td></tr>
+<tr><td>**Upstream ARCH**</td><td>[ARCH.md](ARCH.md)</td></tr>
+<tr><td>**Upstream FRONTEND**</td><td>[FRONTEND.md](FRONTEND.md)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="change-log">Change Log</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Version</th><th>Date</th><th>Author</th><th>Change Summary</th></tr></thead>
+<tbody>
+<tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (gendoc CLIENT_IMPL)</td><td>Initial draft</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1-client-overview">§1 Client Overview</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="11-engine--framework-summary">§1.1 Engine / Framework Summary</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Item</th><th>Spec</th></tr></thead>
+<tbody>
+<tr><td>**Engine / Framework**</td><td>React 18 + Phaser.js 3</td></tr>
+<tr><td>**Version**</td><td>React 18.x, Phaser 3.x</td></tr>
+<tr><td>**Language**</td><td>TypeScript 5.x</td></tr>
+<tr><td>**Build Tool**</td><td>Vite 5.x</td></tr>
+<tr><td>**Target Platform**</td><td>Web (HTML5, browser SPA — no SSR)</td></tr>
+<tr><td>**Minimum Browser Support**</td><td>Chrome 100+, Firefox 100+, Safari 15+; WebGL with Canvas 2D fallback</td></tr>
+<tr><td>**Package Manager**</td><td>pnpm (workspace-aware monorepo)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="12-selection-rationale">§1.2 Selection Rationale</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">React 18 handles all UI chrome — accessible forms (claim, GDPR), stat tables, navigation, leaderboard, and route-level code splitting. Phaser.js 3 handles the HTML5 Canvas game surface — per-frame sprite animation, WebGL rendering, interaction physics, and the arena battle animation. Dynamic <code>import()</code> of Phaser ensures it never enters the initial JS bundle, keeping FCP inside the ≤ 1.5 s target (<code>FCP_SECONDS = 1.5</code>) even though Phaser itself is ~1 MB minified.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">The pixel-art design system (dark navy, rarity color tiers, <code>Press Start 2P</code> font, 8px grid) is implemented entirely in CSS custom properties (<code>tokens.css</code>). All rarity shimmers and glow effects run as CSS animations on paint-only properties (<code>box-shadow</code>, <code>border-color</code>) and compositor properties (<code>opacity</code>) — no layout reflow and no Phaser involvement for purely decorative effects.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">The admin portal (Vue 3 + Element Plus) is a completely separate Vite application. No code from the player app leaks into the admin portal build. Both apps are served from Vercel CDN as independent SPA deployments.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="13-backend-integration">§1.3 Backend Integration</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Integration Point</th><th>Method</th></tr></thead>
+<tbody>
+<tr><td>API calls</td><td>REST over HTTPS — `axios` with request/response interceptors in `src/lib/apiClient.ts`</td></tr>
+<tr><td>Player auth</td><td>`Authorization: Bearer <pet_access_token>` — token stored in `localStorage`, read per-request</td></tr>
+<tr><td>Admin auth</td><td>httpOnly session cookie (`SameSite=Strict`) — not applicable to player app</td></tr>
+<tr><td>Leaderboard polling</td><td>TanStack Query `refetchInterval: 30_000` ms mirrors `LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30`</td></tr>
+<tr><td>Arena matchmaking</td><td>HTTP long-poll on `POST /api/v1/arena/enter` — server holds connection ≤ 30 s</td></tr>
+<tr><td>Feature flags</td><td>Build-time environment variables (`import.meta.env.VITE_FF_*`) — no runtime API fetch in Phase 1; `config:runtime` Redis key (TTL 300 s) is a server-side cache used only by the API server</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2-project-structure">§2 Project Structure</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="21-directory-structure">§2.1 Directory Structure</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">pixel-pet-arena/                         ← monorepo root
+├── package.json                         ← pnpm workspace root
+├── pnpm-workspace.yaml
+├── packages/
+│   └── shared/                          ← Zod schemas, domain types, constants bridge
+│       ├── src/
+│       │   ├── schemas/                 ← Shared Zod schemas (Pet, ArenaMatch, etc.)
+│       │   ├── types/                   ← Shared TypeScript interfaces
+│       │   └── constants.ts             ← Re-exported typed constants from constants.json
+│       └── package.json
+└── apps/
+    ├── api/                             ← Node.js / Fastify game + admin API
+    ├── admin/                           ← Vue 3 + Element Plus (separate build — not in scope here)
+    └── player/                          ← React 18 + Phaser.js player application
+        ├── index.html
+        ├── vite.config.ts
+        ├── tsconfig.json
+        ├── vitest.config.ts
+        ├── playwright.config.ts
+        └── src/
+            ├── main.tsx                 ← React root; QueryClient + router providers
+            ├── App.tsx                  ← createBrowserRouter + Layout wrapper
+            ├── constants.ts             ← Re-exports from packages/shared/constants.ts
+            ├── components/
+            │   ├── layout/
+            │   │   ├── Layout.tsx       ← Header + Outlet wrapper
+            │   │   └── NavBar.tsx       ← Visibility driven by hasPetToken prop
+            │   ├── landing/
+            │   │   ├── LandingPage.tsx
+            │   │   ├── ClaimCTA.tsx
+            │   │   ├── RarityHint.tsx
+            │   │   └── SocialProofCounter.tsx
+            │   ├── claim/
+            │   │   ├── ClaimPage.tsx
+            │   │   ├── ClaimFlow.tsx    ← Compound, max 3 steps (EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+            │   │   ├── ClaimEmailForm.tsx
+            │   │   ├── ClaimCodeForm.tsx
+            │   │   ├── ExpiryWarning.tsx
+            │   │   └── URLReveal.tsx
+            │   ├── pet/
+            │   │   ├── PetPage.tsx
+            │   │   ├── RarityBadge.tsx
+            │   │   ├── StatsPanel.tsx
+            │   │   ├── StatBar.tsx
+            │   │   ├── TrainingEntry.tsx
+            │   │   ├── FoodInventory.tsx
+            │   │   ├── FoodItem.tsx
+            │   │   ├── ArenaEntry.tsx
+            │   │   └── NeglectedState.tsx
+            │   ├── training/
+            │   │   ├── TrainingPage.tsx
+            │   │   ├── TrainingActions.tsx
+            │   │   ├── TrainingActionCard.tsx
+            │   │   ├── StatChangeIndicator.tsx
+            │   │   ├── DailyResetTimer.tsx
+            │   │   └── TrainingStreak.tsx
+            │   ├── arena/
+            │   │   ├── ArenaPage.tsx
+            │   │   ├── ArenaScene.tsx   ← React host for Phaser arena scene
+            │   │   ├── ModeSelector.tsx
+            │   │   ├── PreBattlePanel.tsx
+            │   │   ├── MatchmakingStatus.tsx
+            │   │   ├── AIOfferModal.tsx
+            │   │   ├── RateLimitBanner.tsx
+            │   │   ├── BattleResultPage.tsx
+            │   │   ├── BattleResultCard.tsx
+            │   │   ├── StatComparison.tsx
+            │   │   └── ShareBattleButton.tsx
+            │   ├── leaderboard/
+            │   │   ├── LeaderboardPage.tsx
+            │   │   ├── LeaderboardTable.tsx
+            │   │   ├── LeaderboardRow.tsx
+            │   │   ├── RarityFilter.tsx
+            │   │   └── OwnerRankBanner.tsx
+            │   ├── records/
+            │   │   ├── BattleRecordsPage.tsx
+            │   │   ├── PetSummaryCard.tsx
+            │   │   └── BattleHistoryTable.tsx
+            │   ├── gdpr/
+            │   │   ├── GdprPage.tsx
+            │   │   ├── GdprRequestForm.tsx
+            │   │   └── GdprStatusBanner.tsx
+            │   ├── marketplace/         ← FF_MARKETPLACE only
+            │   │   └── MarketplacePage.tsx
+            │   └── canvas/
+            │       ├── PetCanvas.tsx    ← React host div; manages Phaser lifecycle
+            │       └── PetCanvasEngine.ts  ← SOLE Phaser import boundary
+            ├── hooks/
+            │   ├── usePet.ts            ← TanStack Query: GET /api/v1/pets/:petId
+            │   ├── useLeaderboard.ts    ← TanStack Query + refetchInterval: 30_000
+            │   ├── useArenaHistory.ts
+            │   ├── useTraining.ts       ← Mutation: POST /api/v1/pets/:petId/train
+            │   ├── useFeed.ts           ← Mutation: POST /api/v1/pets/:petId/feed
+            │   ├── useClaim.ts          ← Mutations: POST /api/v1/claim + /verify
+            │   ├── useReducedMotion.ts  ← window.matchMedia prefers-reduced-motion
+            │   └── usePetToken.ts       ← localStorage read/write helpers
+            ├── store/
+            │   └── useAppStore.ts       ← Zustand: arena slice, claim slice, toast slice
+            ├── lib/
+            │   ├── apiClient.ts         ← Axios instance; Bearer token interceptor
+            │   ├── tokenStorage.ts      ← getPetToken / setPetToken / clearPetToken
+            │   ├── petGeneration.ts     ← seed → AttributeVector (deterministic, 6 dims)
+            │   └── spriteLoader.ts      ← Phaser preload helper utilities
+            ├── schemas/
+            │   ├── pet.ts               ← Zod schema: PetResponse
+            │   ├── claim.ts             ← Zod schema: ClaimResponse, VerifyResponse
+            │   ├── arena.ts             ← Zod schema: ArenaEnterResponse
+            │   └── leaderboard.ts       ← Zod schema: LeaderboardResponse
+            ├── styles/
+            │   ├── tokens.css           ← CSS custom properties (design tokens from VDD §6)
+            │   ├── typography.css       ← Press Start 2P + Inter font declarations
+            │   ├── rarity.css           ← Rarity tier animations (legendary-shimmer, epic-shimmer)
+            │   └── global.css           ← Reset + base element styles
+            └── types/
+                └── index.ts             ← Shared TypeScript types for player app</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="22-naming-conventions">§2.2 Naming Conventions</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Type</th><th>Convention</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>**Pages / Components**</td><td>`PascalCase.tsx`</td><td>`PetPage.tsx`, `TrainingActionCard.tsx`</td></tr>
+<tr><td>**Hooks**</td><td>`useCamelCase.ts`</td><td>`usePet.ts`, `useReducedMotion.ts`</td></tr>
+<tr><td>**Zustand Store**</td><td>`useCamelCaseStore.ts`</td><td>`useAppStore.ts`</td></tr>
+<tr><td>**API Service / Lib**</td><td>`camelCase.ts`</td><td>`apiClient.ts`, `tokenStorage.ts`</td></tr>
+<tr><td>**Zod Schema files**</td><td>`camelCase.ts` in `schemas/`</td><td>`pet.ts`, `arena.ts`</td></tr>
+<tr><td>**CSS Modules**</td><td>`ComponentName.module.css`</td><td>`PetPage.module.css`</td></tr>
+<tr><td>**Phaser Scene classes**</td><td>`PascalCaseScene` inside `PetCanvasEngine.ts`</td><td>`PetIdleScene`, `ArenaBattleScene`</td></tr>
+<tr><td>**Sprite sheets**</td><td>`pet-{seed}-sheet.png`</td><td>`pet-1234567890-sheet.png`</td></tr>
+<tr><td>**CSS tokens**</td><td>`--color-*`, `--text-*`, `--space-*`</td><td>`--color-brand-primary`, `--text-h1`</td></tr>
+<tr><td>**Constants (TS)**</td><td>`UPPER_SNAKE_CASE`</td><td>`SPRITE_RESOLUTION_PX`, `TRAINING_ACTIONS_PER_DAY`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-page--view-structure">§3 Page / View Structure</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="31-page-list">§3.1 Page List</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>ID</th><th>Route</th><th>Component</th><th>Description</th><th>Auth Required</th></tr></thead>
+<tbody>
+<tr><td>P-01</td><td>`/`</td><td>`LandingPage`</td><td>Guest entry; animated pet canvas, rarity hint, claim CTA</td><td>None</td></tr>
+<tr><td>P-02</td><td>`/claim`</td><td>`ClaimPage` → `ClaimFlow`</td><td>3-step compound: email → OTP → URL reveal</td><td>None</td></tr>
+<tr><td>P-03</td><td>`/pet/:petId`</td><td>`PetPage`</td><td>Pet stats, training entry, food, arena entry</td><td>Optional (Bearer token for owner features)</td></tr>
+<tr><td>P-04</td><td>`/pet/:petId/train`</td><td>`TrainingPage`</td><td>3 training actions/day; stat change indicator</td><td>Required (owner)</td></tr>
+<tr><td>P-05</td><td>`/pet/:petId/records`</td><td>`BattleRecordsPage`</td><td>Last 20 battle history</td><td>None (public)</td></tr>
+<tr><td>P-06</td><td>`/arena`</td><td>`ArenaPage`</td><td>Mode select, matchmaking, arena animation</td><td>Required (owner)</td></tr>
+<tr><td>P-07</td><td>`/arena/result/:matchId`</td><td>`BattleResultPage`</td><td>WIN/LOSS card, stat comparison, share</td><td>None (public)</td></tr>
+<tr><td>P-08</td><td>`/leaderboard`</td><td>`LeaderboardPage`</td><td>Top 100 pets, rarity filter, owner rank banner</td><td>None (public)</td></tr>
+<tr><td>P-09</td><td>`/gdpr`</td><td>`GdprPage`</td><td>GDPR self-service request form + status</td><td>Required (owner); route loader guard</td></tr>
+<tr><td>P-10</td><td>`/marketplace`</td><td>`MarketplacePage`</td><td>Browse/list/buy — `FF_MARKETPLACE` only</td><td>Optional</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="32-component-tree-structure">§3.2 Component Tree Structure</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">&lt;App&gt;  (App.tsx — createBrowserRouter, React Router v6)
+└── &lt;Layout&gt;  (Layout.tsx)
+    ├── &lt;header&gt;
+    │   └── &lt;NavBar hasPetToken={boolean}&gt;
+    │         ├── Logo (Press Start 2P wordmark)
+    │         ├── &lt;nav aria-label="Main navigation"&gt;
+    │         │   ├── Link: Leaderboard
+    │         │   ├── Link: Arena (hasPetToken only)
+    │         │   └── Link: My Pet (hasPetToken only)
+    │         └── ClaimCTA (no token) | PetAvatarLink (has token)
+    └── &lt;main&gt;
+        └── &lt;Outlet /&gt;  ← React Router renders page chunk here
+            │
+            ├── &lt;LandingPage&gt;  [/]
+            │   ├── &lt;PetCanvas seed rarity interactive /&gt;   ← Phaser instance via PetCanvasEngine
+            │   ├── &lt;RarityHint /&gt;
+            │   ├── &lt;ClaimCTA /&gt;
+            │   └── &lt;SocialProofCounter /&gt;
+            │
+            ├── &lt;ClaimPage&gt;  [/claim]
+            │   └── &lt;ClaimFlow&gt;  (3 steps — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+            │       ├── step="email"  → &lt;ClaimEmailForm /&gt;  + &lt;ExpiryWarning /&gt;
+            │       ├── step="code"   → &lt;ClaimCodeForm /&gt;   + &lt;ExpiryWarning minutesRemaining /&gt;
+            │       └── step="reveal" → &lt;URLReveal petUrl petToken /&gt;
+            │
+            ├── &lt;PetPage&gt;  [/pet/:petId]
+            │   ├── &lt;PetCanvas seed rarity /&gt;
+            │   ├── &lt;RarityBadge rarity /&gt;
+            │   ├── &lt;StatsPanel&gt;
+            │   │   ├── &lt;StatBar stat="speed" value max /&gt;
+            │   │   ├── &lt;StatBar stat="strength" value max /&gt;
+            │   │   └── &lt;StatBar stat="stamina" value max /&gt;
+            │   ├── &lt;TrainingEntry /&gt;       (owner only — links to /pet/:petId/train)
+            │   ├── &lt;FoodInventory&gt;
+            │   │   └── &lt;FoodItem /&gt; × N
+            │   ├── &lt;ArenaEntry battlesRemaining /&gt;
+            │   └── &lt;NeglectedState /&gt;      (conditional: last_trained_at &gt; TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)
+            │
+            ├── &lt;TrainingPage&gt;  [/pet/:petId/train]
+            │   ├── &lt;TrainingActions&gt;
+            │   │   └── &lt;TrainingActionCard type stat value remaining /&gt; × 3
+            │   ├── &lt;StatChangeIndicator delta stat /&gt;   (visible 2 s — TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2)
+            │   ├── &lt;DailyResetTimer /&gt;    (aria-live="polite", throttled announcements)
+            │   └── &lt;TrainingStreak /&gt;
+            │
+            ├── &lt;BattleRecordsPage&gt;  [/pet/:petId/records]
+            │   ├── &lt;PetSummaryCard /&gt;
+            │   └── &lt;BattleHistoryTable battles={last20} /&gt;   (ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
+            │
+            ├── &lt;ArenaPage&gt;  [/arena]
+            │   ├── &lt;RateLimitBanner /&gt;    (role="alert" — shown on 429)
+            │   ├── &lt;ModeSelector mode onChange /&gt;   (RACE | SUMO)
+            │   ├── &lt;PreBattlePanel /&gt;
+            │   ├── &lt;MatchmakingStatus /&gt;  (aria-live="polite" aria-busy="true")
+            │   ├── &lt;AIOfferModal /&gt;       (role="dialog" aria-modal focus trap — after 30 s timeout)
+            │   └── &lt;ArenaScene /&gt;         ← Phaser battle animation scene (dynamically loaded)
+            │
+            ├── &lt;BattleResultPage&gt;  [/arena/result/:matchId]
+            │   ├── &lt;BattleResultCard result="WIN"|"LOSS" /&gt;
+            │   ├── &lt;StatComparison /&gt;
+            │   ├── &lt;ShareBattleButton /&gt;
+            │   └── ActionButtons (Play Again / View Leaderboard)
+            │
+            ├── &lt;LeaderboardPage&gt;  [/leaderboard]
+            │   ├── &lt;RarityFilter /&gt;       (URL state: ?rarity=EPIC)
+            │   ├── &lt;LeaderboardTable&gt;
+            │   │   └── &lt;LeaderboardRow /&gt; × 100   (LEADERBOARD_TOP_DISPLAY = 100)
+            │   └── &lt;OwnerRankBanner /&gt;    (role="status" — if pet token present)
+            │
+            ├── &lt;GdprPage&gt;  [/gdpr]   (route loader: redirects to / if no token)
+            │   ├── &lt;GdprRequestForm types=[erasure|data_access|...] /&gt;
+            │   └── &lt;GdprStatusBanner jobId status /&gt;   (polls GET /api/v1/gdpr/request/status)
+            │
+            └── &lt;MarketplacePage&gt;  [/marketplace]   (FF_MARKETPLACE only)</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="33-page-transition-logic">§3.3 Page Transition Logic</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>From</th><th>To</th><th>Trigger</th><th>Transition</th></tr></thead>
+<tbody>
+<tr><td>LandingPage</td><td>ClaimPage</td><td>`ClaimCTA` click</td><td>React Router `navigate('/claim')`</td></tr>
+<tr><td>ClaimFlow step=email</td><td>ClaimFlow step=code</td><td>`POST /api/v1/claim` success</td><td>Zustand `setClaimStep('code')`</td></tr>
+<tr><td>ClaimFlow step=code</td><td>ClaimFlow step=reveal</td><td>`POST /api/v1/claim/verify` success</td><td>`setClaimStep('reveal')` + `setPetToken(token)`</td></tr>
+<tr><td>ClaimFlow step=reveal</td><td>PetPage</td><td>Auto-navigate after token stored</td><td>`navigate('/pet/:petId')`</td></tr>
+<tr><td>PetPage</td><td>TrainingPage</td><td>`TrainingEntry` click</td><td>`navigate('/pet/:petId/train')`</td></tr>
+<tr><td>PetPage</td><td>ArenaPage</td><td>`ArenaEntry` click</td><td>`navigate('/arena')`</td></tr>
+<tr><td>ArenaPage</td><td>BattleResultPage</td><td>Arena match complete</td><td>`navigate('/arena/result/:matchId')`</td></tr>
+<tr><td>Any authenticated page</td><td>LandingPage (`/`)</td><td>HTTP 401 from API</td><td>`clearPetToken()` + `navigate('/')`</td></tr>
+<tr><td>GdprPage (no token)</td><td>LandingPage</td><td>Route loader guard</td><td>`throw redirect('/')`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-asset-pipeline">§4 Asset Pipeline</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="41-asset-directory-structure">§4.1 Asset Directory Structure</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">apps/player/src/
+└── assets/
+    ├── images/
+    │   ├── ui/                      ← Non-sprite UI images (logos, icons)
+    │   │   └── logo.png
+    │   └── backgrounds/
+    │       ├── bg_arena_race.png    ← 16×8px tile, repeating pattern
+    │       └── bg_arena_sumo.png
+    ├── fonts/                       ← Local font fallbacks (optional; primary from Google Fonts)
+    └── sprites/                     ← Served from /public/sprites/ for Phaser dynamic load
+        └── pet-{seed}-sheet.png     ← Generated sprite sheets; 32×32 px per frame</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Sprite sheets are served from Vercel's CDN <code>/public/sprites/</code> directory and are loaded dynamically by Phaser's <code>this.load.spritesheet()</code> call — they are never bundled into the Vite output.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="42-asset-naming-conventions">§4.2 Asset Naming Conventions</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Asset Type</th><th>Prefix / Rule</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>UI image</td><td>`ui_{name}`</td><td>`ui_logo.png`</td></tr>
+<tr><td>Background</td><td>`bg_{context}_{layer}`</td><td>`bg_arena_race.png`</td></tr>
+<tr><td>Pet sprite sheet</td><td>`pet-{seed}-sheet.png`</td><td>`pet-1234567890123456789-sheet.png`</td></tr>
+<tr><td>CSS token file</td><td>`{category}.css`</td><td>`tokens.css`, `rarity.css`</td></tr>
+<tr><td>Font (local)</td><td>`{family}-{weight}.woff2`</td><td>`press-start-2p-regular.woff2`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="43-asset-loading-strategy">§4.3 Asset Loading Strategy</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Asset Type</th><th>Load Method</th><th>Timing</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>CSS tokens / global styles</td><td>Imported in `main.tsx`</td><td>Eager (entry bundle)</td><td>Zero runtime cost; critical path</td></tr>
+<tr><td>`Press Start 2P` font</td><td>`<link rel="preload">` + Google Fonts</td><td>Above-fold preload</td><td>`font-display: swap`; fallback stack prevents CLS</td></tr>
+<tr><td>`Inter` 400 + 600</td><td>`<link rel="preload">` + Google Fonts async</td><td>Async load</td><td>Two weights only; `font-display: swap`</td></tr>
+<tr><td>Page components</td><td>React Router v6 `lazy()`</td><td>Route activation</td><td>One chunk per route; loading boundary internal to Router</td></tr>
+<tr><td>`PetCanvasEngine` (Phaser)</td><td>Dynamic `import('./PetCanvasEngine')` inside `useEffect`</td><td>On `PetCanvas` mount</td><td>Phaser is excluded from all eager chunks</td></tr>
+<tr><td>Pet sprite sheet</td><td>`this.load.spritesheet()` inside Phaser `preload()`</td><td>Phaser preload phase</td><td>Fetched from CDN; cached by browser</td></tr>
+<tr><td>Arena Phaser scene</td><td>Dynamic import inside `ArenaScene.tsx` `useEffect`</td><td>On arena route entry</td><td>Same isolation pattern as PetCanvasEngine</td></tr>
+<tr><td>Lazy route chunks</td><td>Vite code splitting (manualChunks)</td><td>On navigation</td><td>`react-vendor`, `query-vendor`, `form-vendor` chunks</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="44-asset-budget">§4.4 Asset Budget</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Type</th><th>Limit</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Single sprite sheet</td><td>≤ 1920 px wide (WebP/PNG)</td><td>32 px frame grid; ≤ 16 colors per sprite (pixel art constraint — VDD §4.2)</td></tr>
+<tr><td>Audio SFX (single file)</td><td>≤ 200 KB</td><td>OGG format preferred (engine default)</td></tr>
+<tr><td>Background music</td><td>≤ 5 MB per track</td><td>Streamed; not used in Phase 1</td></tr>
+<tr><td>Entry bundle (eager JS, gzipped)</td><td>≤ 150 KB</td><td>React + Router + TanStack Query + Zustand + Zod</td></tr>
+<tr><td>Total JS bundle (gzipped)</td><td>≤ 300 KB</td><td>`TOTAL_JS_BUNDLE_GZIPPED_KB = 300` from CONSTANTS</td></tr>
+<tr><td>Total CSS bundle (gzipped)</td><td>≤ 50 KB</td><td>`TOTAL_CSS_BUNDLE_GZIPPED_KB = 50` from CONSTANTS</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-animation-integration">§5 Animation Integration</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="51-animation-list">§5.1 Animation List</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Anim ID</th><th>Name</th><th>Target</th><th>Duration</th><th>Loop</th><th>Trigger</th></tr></thead>
+<tbody>
+<tr><td>ANIM-01</td><td>Pet Idle</td><td>`PetIdleScene` sprite</td><td>Continuous (≥ 4 frames at 30 FPS)</td><td>Yes</td><td>`PetCanvas` mount</td></tr>
+<tr><td>ANIM-02</td><td>Pet Bounce (Interaction)</td><td>`PetIdleScene` sprite</td><td>200 ms (2-frame: scale 1.15× → 1×)</td><td>No</td><td>Click / tap on canvas</td></tr>
+<tr><td>ANIM-03</td><td>Pet Training Effort</td><td>`PetIdleScene` sprite</td><td>400 ms (3-frame)</td><td>No</td><td>Successful training action</td></tr>
+<tr><td>ANIM-04</td><td>Neglected State</td><td>PetCanvas container CSS</td><td>Persistent while neglected</td><td>Yes (`filter` held)</td><td>`isNeglected = true` (> `TRAINING_NEGLECT_THRESHOLD_DAYS = 3` days without training)</td></tr>
+<tr><td>ANIM-05</td><td>Legendary Shimmer</td><td>RarityBadge / PetCanvas border</td><td>2 s ease-in-out infinite</td><td>Yes</td><td>LEGENDARY rarity pet displayed</td></tr>
+<tr><td>ANIM-06</td><td>Epic Shimmer</td><td>RarityBadge / PetCanvas border</td><td>3 s linear infinite</td><td>Yes</td><td>EPIC rarity pet displayed</td></tr>
+<tr><td>ANIM-07</td><td>Stat Change Indicator</td><td>`StatChangeIndicator` DOM</td><td>2 s (`translateY` + `opacity` fade out)</td><td>No</td><td>Training action success (`TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2`)</td></tr>
+<tr><td>ANIM-08</td><td>Battle Race Cycle</td><td>`ArenaBattleScene` sprites</td><td>5–15 s window (8-frame run loop)</td><td>Until result</td><td>Arena match active (`ARENA_MATCH_DURATION_MIN/MAX_SECONDS = 5–15 s`)</td></tr>
+<tr><td>ANIM-09</td><td>Battle Victory Burst</td><td>`ArenaBattleScene` particles</td><td>~1 s (24-particle gold burst, 2×2 px)</td><td>No</td><td>Winner determined</td></tr>
+<tr><td>ANIM-10</td><td>Pre-Battle Countdown</td><td>`ArenaPage` CSS / DOM</td><td>3 s (3-2-1 pixel font countdown)</td><td>No</td><td>Opponent found, before match starts</td></tr>
+<tr><td>ANIM-11</td><td>Matchmaking Dots</td><td>`MatchmakingStatus` CSS</td><td>Loop during queue wait</td><td>Yes</td><td>Arena long-poll in flight</td></tr>
+<tr><td>ANIM-12</td><td>Daily Reset Timer Countdown</td><td>`DailyResetTimer` DOM</td><td>Live seconds countdown</td><td>Yes (every 1 s)</td><td>Training actions exhausted (`actionsRemainingToday = 0`)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="52-animation-trigger-map">§5.2 Animation Trigger Map</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Game / UI Event</th><th>Animation Triggered</th><th>Implementation</th></tr></thead>
+<tbody>
+<tr><td>`PetCanvas` mounts</td><td>ANIM-01 Pet Idle</td><td>`PetCanvasEngine.create()` calls `sprite.play('idle')`</td></tr>
+<tr><td>Click / tap on `PetCanvas`</td><td>ANIM-02 Pet Bounce</td><td>Phaser `this.input.on('pointerdown')` → tween scale 1.15× then 1× over 200 ms</td></tr>
+<tr><td>`submitTraining` mutation succeeds</td><td>ANIM-03 Training Effort + ANIM-07 Stat Indicator</td><td>Phaser event emitter → idle scene plays effort; React: `setShowIndicator(true)` — hides after `TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s`</td></tr>
+<tr><td>`isNeglected = true`</td><td>ANIM-04 Neglected</td><td>CSS class `.pet-canvas--neglected` applies `filter: grayscale(60%) brightness(0.8)`</td></tr>
+<tr><td>LEGENDARY pet loaded</td><td>ANIM-05 Legendary Shimmer</td><td>CSS class `rarity-legendary` — `legendary-shimmer 2s ease-in-out infinite` from `rarity.css`</td></tr>
+<tr><td>EPIC pet loaded</td><td>ANIM-06 Epic Shimmer</td><td>CSS class `rarity-epic` — `epic-shimmer 3s linear infinite` from `rarity.css`</td></tr>
+<tr><td>Arena match active</td><td>ANIM-08 Battle Race Cycle</td><td>`ArenaBattleScene.create()` starts 8-frame run cycle anims on both sprites</td></tr>
+<tr><td>Winner determined</td><td>ANIM-09 Victory Burst</td><td>`ArenaBattleScene` emits 24 gold 2×2 particles from winner sprite via `Phaser.GameObjects.Particles`</td></tr>
+<tr><td>Opponent found</td><td>ANIM-10 Countdown</td><td>React state drives DOM countdown: "3" → "2" → "1" with CSS `transform: scale` pulse</td></tr>
+<tr><td>Long-poll in flight</td><td>ANIM-11 Matchmaking Dots</td><td>CSS `@keyframes dots` on `MatchmakingStatus` text</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="53-animation-state-machine">§5.3 Animation State Machine</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">PetIdleScene Phaser animation states:
+
+  IDLE ──────────────────────► IDLE
+  (looping, 4–8 frames, 30 FPS)
+
+  IDLE ─── pointerdown ───────► BOUNCE ─── 200 ms ──► IDLE
+  (scale 1.15× frame 1, return to 1× frame 2)
+
+  IDLE ─── train success ─────► EFFORT ─── 400 ms ──► IDLE
+  (3-frame effort sequence)
+
+  IDLE ─── isNeglected=true ──► NEGLECTED
+  (CSS filter overlay — Phaser animation continues paused on static frame if reducedMotion=true)
+
+  ANY ──── useReducedMotion() ─► STATIC
+  (Phaser animation loop paused; static first frame rendered; no particles)
+
+ArenaBattleScene states:
+
+  WAIT ──── match start ──────► RUNNING (both pets: 8-frame run cycle loop)
+  RUNNING ─ result received ──► VICTORY (winner: 4-frame victory; loser: exit left/right)
+  VICTORY ─ 1 s elapsed ──────► DONE (scene destroyed; React navigates to /arena/result/:matchId)</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="54-animation-performance-rules">§5.4 Animation Performance Rules</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Rule</th><th>Limit</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Simultaneous Phaser animations on screen</td><td>≤ 20 (React / web target)</td><td>Typically 1–2 sprites active; arena scene adds 2</td></tr>
+<tr><td>Simultaneous CSS animations</td><td>≤ 20</td><td>Rarity shimmers animate paint-only properties (`box-shadow`, `border-color`); no layout reflow</td></tr>
+<tr><td>Particle count per burst</td><td>≤ 200</td><td>Victory burst is 24 particles — well within budget (Phaser `GameObjects.Particles` built-in system; no tsparticles dependency)</td></tr>
+<tr><td>Animation clip max duration</td><td>15 s</td><td>Arena match max is `ARENA_MATCH_DURATION_MAX_SECONDS = 15 s`</td></tr>
+<tr><td>`prefers-reduced-motion: reduce`</td><td>Pause all Phaser loops; suppress CSS shimmers</td><td>`useReducedMotion()` hook; `@media (prefers-reduced-motion: reduce) { .rarity-legendary, .rarity-epic { animation: none; } }`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="6-audio-integration">§6 Audio Integration</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Audio is not part of Phase 1 scope. No background music or SFX library is included in the player app build. The audio sections below document the planned Phase 2 integration approach for reference.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="61-audio-list-phase-2--planned">§6.1 Audio List (Phase 2 — Planned)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Audio ID</th><th>Name</th><th>Type</th><th>File</th><th>Trigger</th><th>Volume</th><th>Loop</th></tr></thead>
+<tbody>
+<tr><td>SFX-01</td><td>UI Click</td><td>SFX</td><td>`sfx_ui_click.ogg`</td><td>Button / CTA click</td><td>0.5</td><td>No</td></tr>
+<tr><td>SFX-02</td><td>Claim Success</td><td>SFX</td><td>`sfx_claim_success.ogg`</td><td>`URLReveal` mount</td><td>0.8</td><td>No</td></tr>
+<tr><td>SFX-03</td><td>Training Complete</td><td>SFX</td><td>`sfx_training_done.ogg`</td><td>Training mutation success</td><td>0.7</td><td>No</td></tr>
+<tr><td>SFX-04</td><td>Battle Victory</td><td>SFX</td><td>`sfx_battle_win.ogg`</td><td>WIN result received</td><td>0.9</td><td>No</td></tr>
+<tr><td>SFX-05</td><td>Battle Defeat</td><td>SFX</td><td>`sfx_battle_loss.ogg`</td><td>LOSS result received</td><td>0.6</td><td>No</td></tr>
+<tr><td>BGM-01</td><td>Arena BGM</td><td>BGM</td><td>`bgm_arena.ogg`</td><td>Arena route enter</td><td>0.4</td><td>Yes</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="62-audio-trigger-map-phase-2--planned">§6.2 Audio Trigger Map (Phase 2 — Planned)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Game / UI Event</th><th>Play Audio</th><th>Stop Audio</th><th>Implementation</th></tr></thead>
+<tbody>
+<tr><td>Button / CTA click</td><td>SFX-01</td><td>—</td><td>`useAudio().play('sfx_ui_click')`</td></tr>
+<tr><td>Claim step=reveal mounts</td><td>SFX-02</td><td>—</td><td>`useEffect` in `URLReveal`</td></tr>
+<tr><td>Training mutation success</td><td>SFX-03</td><td>—</td><td>`useMutation onSuccess` callback</td></tr>
+<tr><td>Battle WIN result</td><td>SFX-04</td><td>BGM-01</td><td>`BattleResultCard` WIN variant `useEffect`</td></tr>
+<tr><td>Battle LOSS result</td><td>SFX-05</td><td>BGM-01</td><td>`BattleResultCard` LOSS variant `useEffect`</td></tr>
+<tr><td>Arena route enter</td><td>BGM-01</td><td>—</td><td>`ArenaPage` `useEffect` on mount</td></tr>
+<tr><td>Arena route leave</td><td>—</td><td>BGM-01</td><td>`ArenaPage` `useEffect` cleanup</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="63-audio-manager-architecture-phase-2--planned">§6.3 Audio Manager Architecture (Phase 2 — Planned)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/hooks/useAudio.ts — Howler.js-based hook
+// const { play, stop, setVolume } = useAudio()
+// Howl instances cached in Map&lt;string, Howl&gt;:
+//   BGM: { loop: true, html5: true }   ← streaming, not decoded into memory
+//   SFX: { preload: true }             ← decoded AudioBuffer in memory
+//
+// Only initialized AFTER first user gesture (Web Audio API autoplay policy)
+// useReducedMotion() = true → setVolume(0) on all channels (silent mode)</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="64-audio-performance-rules-phase-2--planned">§6.4 Audio Performance Rules (Phase 2 — Planned)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Rule</th><th>Limit</th></tr></thead>
+<tbody>
+<tr><td>Simultaneous SFX</td><td>≤ 16 concurrent Howl instances</td></tr>
+<tr><td>Howl instance cache</td><td>≤ 50 cached instances</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="7-visual-effects-integration">§7 Visual Effects Integration</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="71-vfx-list">§7.1 VFX List</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>VFX ID</th><th>Name</th><th>Type</th><th>Timing</th><th>Trigger</th><th>Lifecycle</th></tr></thead>
+<tbody>
+<tr><td>VFX-01</td><td>Legendary CRT Glow</td><td>CSS box-shadow pulse</td><td>Continuous while Legendary pet visible</td><td>`rarity === 'LEGENDARY'`</td><td>Tied to component mount/unmount</td></tr>
+<tr><td>VFX-02</td><td>Epic Border Shimmer</td><td>CSS border-color sweep</td><td>Continuous while Epic pet visible</td><td>`rarity === 'EPIC'`</td><td>Tied to component mount/unmount</td></tr>
+<tr><td>VFX-03</td><td>Rare Teal Glow</td><td>CSS static box-shadow</td><td>Always on while Rare pet visible</td><td>`rarity === 'RARE'`</td><td>Static — no animation; just a shadow value</td></tr>
+<tr><td>VFX-04</td><td>Victory Particle Burst</td><td>Phaser GameObjects.Particles</td><td>On arena win</td><td>Winner determined</td><td>24 gold 2×2px squares, ~1 s duration, then destroyed</td></tr>
+<tr><td>VFX-05</td><td>Stat Change Float</td><td>CSS `translateY` + `opacity` fade</td><td>2 s, single play</td><td>Training action success</td><td>Component hidden after `TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s`</td></tr>
+<tr><td>VFX-06</td><td>Neglect Desaturation</td><td>CSS `filter`</td><td>Persistent</td><td>`isNeglected = true`</td><td>Removed when pet trains (`usePet` cache invalidated)</td></tr>
+<tr><td>VFX-07</td><td>Hard-offset pixel shadow</td><td>CSS `box-shadow: 4px 4px 0px #0d0d1a`</td><td>Static</td><td>All raised card / panel elements</td><td>VDD §2.5 elevation model — never animated</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="72-vfx-trigger-map">§7.2 VFX Trigger Map</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Game / UI Event</th><th>Effect Applied</th><th>Implementation</th></tr></thead>
+<tbody>
+<tr><td>LEGENDARY pet rendered</td><td>VFX-01 CRT Glow</td><td>CSS class `rarity-legendary` on PetCanvas wrapper; `box-shadow: 0 0 12px rgba(253,203,110,0.4), 0 0 24px rgba(253,203,110,0.2)` pulsing via `legendary-shimmer` keyframe</td></tr>
+<tr><td>EPIC pet rendered</td><td>VFX-02 Epic Shimmer</td><td>CSS class `rarity-epic`; `border-color` sweeps hue 280 → 290 → 270 via `epic-shimmer` keyframe</td></tr>
+<tr><td>RARE pet rendered</td><td>VFX-03 Teal Glow</td><td>CSS class `rarity-rare`; static `box-shadow: 0 0 8px rgba(78,205,196,0.4)`</td></tr>
+<tr><td>Arena win determined</td><td>VFX-04 Particle Burst</td><td>`ArenaBattleScene.onResult('WIN')` → `this.add.particles(x, y, 'gold-2x2', { ... })` with `lifespan: 1000`</td></tr>
+<tr><td>Training stat delta</td><td>VFX-05 Stat Float</td><td>React: `StatChangeIndicator` CSS `@keyframes stat-float` — `translateY(-32px)` + `opacity 0 → 1 → 0`</td></tr>
+<tr><td>`isNeglected = true`</td><td>VFX-06 Desaturation</td><td>CSS class `.pet-canvas--neglected` applies `filter: grayscale(60%) brightness(0.8)`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="73-vfx-performance-rules">§7.3 VFX Performance Rules</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Rule</th><th>Limit</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Simultaneous CSS / Canvas effects</td><td>≤ 10 on screen</td><td>Rarity effects are one per visible pet</td></tr>
+<tr><td>Particle count per burst</td><td>≤ 200</td><td>Victory burst = 24 particles (well below limit)</td></tr>
+<tr><td>CSS animation properties</td><td>`box-shadow`, `border-color`, `opacity`, `transform` only</td><td>No layout-affecting properties — VDD §1.2 Principle 4</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="8-ui-flow-state-machine">§8 UI Flow State Machine</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="81-ui-state-list">§8.1 UI State List</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>State ID</th><th>Name</th><th>Description</th><th>Visible UI</th></tr></thead>
+<tbody>
+<tr><td>UI-01</td><td>GuestLanding</td><td>No pet token; guest browsing</td><td>LandingPage, PetCanvas (random pet), ClaimCTA</td></tr>
+<tr><td>UI-02</td><td>ClaimEmail</td><td>Claim step 1</td><td>ClaimEmailForm, ExpiryWarning (if ≤ 2 min remain)</td></tr>
+<tr><td>UI-03</td><td>ClaimCode</td><td>Claim step 2 — OTP entry</td><td>ClaimCodeForm, ExpiryWarning</td></tr>
+<tr><td>UI-04</td><td>ClaimReveal</td><td>Claim step 3 — URL reveal</td><td>URLReveal with copy button</td></tr>
+<tr><td>UI-05</td><td>PetOwner</td><td>Has pet token; viewing own pet</td><td>PetPage with all owner-only sections (TrainingEntry, FoodInventory, ArenaEntry)</td></tr>
+<tr><td>UI-06</td><td>Training</td><td>Training session active</td><td>TrainingPage, TrainingActionCard ×3, DailyResetTimer</td></tr>
+<tr><td>UI-07</td><td>TrainingExhausted</td><td>All 3 daily actions used</td><td>TrainingPage with cards disabled, DailyResetTimer</td></tr>
+<tr><td>UI-08</td><td>ArenaMatchmaking</td><td>Waiting for opponent</td><td>ArenaPage: MatchmakingStatus, animated dots; long-poll in flight</td></tr>
+<tr><td>UI-09</td><td>ArenaBattle</td><td>Battle animation playing</td><td>ArenaScene (Phaser), countdown → battle sequence</td></tr>
+<tr><td>UI-10</td><td>ArenaResult</td><td>Battle concluded</td><td>BattleResultPage: WIN/LOSS card, StatComparison, ShareButton</td></tr>
+<tr><td>UI-11</td><td>ArenaRateLimited</td><td>429 from arena endpoint</td><td>RateLimitBanner, Retry-After countdown; arena entry blocked</td></tr>
+<tr><td>UI-12</td><td>LeaderboardView</td><td>Public leaderboard</td><td>LeaderboardTable, RarityFilter, optional OwnerRankBanner</td></tr>
+<tr><td>UI-13</td><td>GdprForm</td><td>GDPR request form</td><td>GdprPage, GdprRequestForm</td></tr>
+<tr><td>UI-14</td><td>GdprStatus</td><td>GDPR request submitted</td><td>GdprStatusBanner polling</td></tr>
+<tr><td>UI-15</td><td>Loading</td><td>Route chunk or API loading</td><td>Suspense fallback / loading skeleton</td></tr>
+<tr><td>UI-16</td><td>Error</td><td>API failure or unhandled error</td><td>Toast notification or inline error message</td></tr>
+<tr><td>UI-17</td><td>NetworkLost</td><td>Browser offline</td><td>Offline banner (`navigator.onLine = false`); all API calls suspended</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="82-state-transition-rules">§8.2 State Transition Rules</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Current State</th><th>Event</th><th>Next State</th><th>Side Effects</th></tr></thead>
+<tbody>
+<tr><td>UI-01</td><td>Click ClaimCTA</td><td>UI-02</td><td>`navigate('/claim')`; `setClaimStep('email')`</td></tr>
+<tr><td>UI-02</td><td>POST /claim success</td><td>UI-03</td><td>`setClaimId(claimId)`; `setClaimStep('code')`</td></tr>
+<tr><td>UI-03</td><td>POST /claim/verify success</td><td>UI-04</td><td>`setPetToken(petToken)`; `setClaimStep('reveal')`</td></tr>
+<tr><td>UI-04</td><td>Navigate after reveal</td><td>UI-05</td><td>`navigate('/pet/:petId')`</td></tr>
+<tr><td>UI-05</td><td>Click TrainingEntry</td><td>UI-06</td><td>`navigate('/pet/:petId/train')`</td></tr>
+<tr><td>UI-06</td><td>All actions exhausted</td><td>UI-07</td><td>Action cards disabled; `DailyResetTimer` activates</td></tr>
+<tr><td>UI-07</td><td>UTC 00:00 reset</td><td>UI-06</td><td>`usePet` cache invalidated; `actionsRemainingToday = TRAINING_ACTIONS_PER_DAY = 3`</td></tr>
+<tr><td>UI-05</td><td>Click ArenaEntry</td><td>UI-08</td><td>`navigate('/arena')`; POST /api/v1/arena/enter begins</td></tr>
+<tr><td>UI-08</td><td>Opponent found</td><td>UI-09</td><td>3-2-1 countdown → `ArenaScene` mounts</td></tr>
+<tr><td>UI-08</td><td>30 s timeout, no AI</td><td>UI-08</td><td>`AIOfferModal` shown; `ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30` elapsed</td></tr>
+<tr><td>UI-08</td><td>Accept AI</td><td>UI-09</td><td>Re-POST with `acceptAI: true`</td></tr>
+<tr><td>UI-08</td><td>429 response</td><td>UI-11</td><td>`RateLimitBanner` shown; `Retry-After` countdown</td></tr>
+<tr><td>UI-09</td><td>Battle result received</td><td>UI-10</td><td>`navigate('/arena/result/:matchId')`</td></tr>
+<tr><td>UI-11</td><td>Retry-After elapsed</td><td>UI-08</td><td>Banner dismissed; arena entry re-enabled</td></tr>
+<tr><td>Any</td><td>HTTP 401</td><td>UI-01</td><td>`clearPetToken()`; `navigate('/')`</td></tr>
+<tr><td>Any</td><td>Network lost</td><td>UI-17</td><td>Offline banner; retry on reconnect</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="83-loading--error--network-state-handling">§8.3 Loading / Error / Network State Handling</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>State</th><th>Display Method</th><th>Timeout Handling</th><th>Retry Strategy</th></tr></thead>
+<tbody>
+<tr><td>Loading</td><td>React Router v6 internal loading state → skeleton shimmer or spinner in Suspense boundary</td><td>Route lazy load: 10 s browser timeout</td><td>Hard refresh suggested</td></tr>
+<tr><td>API Error</td><td>Toast notification via Zustand `pushToast` — typed `AppError` message from `apiClient.ts` interceptor</td><td>—</td><td>User-initiated retry (explicit button)</td></tr>
+<tr><td>429 Rate Limit</td><td>`RateLimitBanner` with `Retry-After` countdown</td><td>Countdown to `retryAt`; auto-dismiss</td><td>Automatic re-enable after cooldown</td></tr>
+<tr><td>Network Lost</td><td>Top-bar offline banner (`navigator.onLine` + `window.addEventListener('offline')`)</td><td>Indefinite until reconnect</td><td>Auto-retry on `online` event for in-flight TanStack Query</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="9-api-integration">§9 API Integration</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="91-api-call-list">§9.1 API Call List</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>API</th><th>Trigger</th><th>Request</th><th>Response Handling</th><th>Error Handling</th></tr></thead>
+<tbody>
+<tr><td>`POST /api/v1/claim`</td><td>`ClaimEmailForm` submit</td><td>`{ email, petId, ageConfirmed }`</td><td>`setClaimId(claimId)`; advance to OTP step</td><td>`ALREADY_CLAIMED` → inline message; `429` → cooldown banner</td></tr>
+<tr><td>`POST /api/v1/claim/verify`</td><td>`ClaimCodeForm` submit</td><td>`{ claimId, code }`</td><td>`setPetToken(petToken)`; advance to reveal</td><td>`INVALID_CODE` → shake anim; `CODE_EXPIRED` → re-request flow; `429` → disable inputs + countdown</td></tr>
+<tr><td>`GET /api/v1/pets/random`</td><td>LandingPage mount</td><td>—</td><td>Seed + rarity → `PetCanvas` props</td><td>Show placeholder sprite on error</td></tr>
+<tr><td>`GET /api/v1/pets/:petId`</td><td>`usePet` hook (TanStack Query)</td><td>Bearer token (if owner)</td><td>Pet stats, `isOwner`, `isNeglected` → render page</td><td>404 → "Pet not found" toast; 401 → `clearPetToken` + redirect</td></tr>
+<tr><td>`POST /api/v1/pets/:petId/train`</td><td>`TrainingActionCard` Train button</td><td>`{ trainingType }`</td><td>`StatChangeIndicator`; invalidate `usePet` cache</td><td>`TRAINING_LIMIT_REACHED` → disable cards + timer; `STAT_AT_MAXIMUM` → toast</td></tr>
+<tr><td>`POST /api/v1/pets/:petId/feed`</td><td>`FoodItem` click</td><td>`{ buffType, stat, magnitude, isPermanent }`</td><td>Animate stat bar; invalidate `usePet` cache</td><td>`STAT_AT_MAXIMUM` → toast; 401 → global handler</td></tr>
+<tr><td>`POST /api/v1/arena/enter`</td><td>`PreBattlePanel` confirm</td><td>`{ petId, mode, acceptAI? }`</td><td>Navigate to result on success; timeout → `AIOfferModal`</td><td>`PET_BANNED` → ban notice; `429` → `RateLimitBanner`</td></tr>
+<tr><td>`GET /api/v1/arena/match/:matchId`</td><td>`BattleResultPage` mount</td><td>—</td><td>Render WIN/LOSS card + stats</td><td>404 → "Match not found" inline</td></tr>
+<tr><td>`GET /api/v1/arena/history/:petId`</td><td>`BattleRecordsPage` mount</td><td>—</td><td>Render `BattleHistoryTable`</td><td>Empty state if no battles</td></tr>
+<tr><td>`GET /api/v1/leaderboard`</td><td>`useLeaderboard` hook (refetchInterval: 30 s)</td><td>`?rarity=&page=&limit=100`</td><td>Render `LeaderboardTable`</td><td>Stale data shown; error toast</td></tr>
+<tr><td>`GET /api/v1/leaderboard/rank/:petId`</td><td>`OwnerRankBanner` (if token present)</td><td>—</td><td>Render rank badge</td><td>Null rank → hide banner</td></tr>
+<tr><td>`POST /api/v1/gdpr/request`</td><td>`GdprRequestForm` submit</td><td>`{ type }`</td><td>`jobId` stored; `GdprStatusBanner` activates</td><td>400 → inline form error; 401 → redirect</td></tr>
+<tr><td>`GET /api/v1/gdpr/request/status`</td><td>`GdprStatusBanner` polling</td><td>`?jobId=`</td><td>Render status (`pending/processing/completed/failed`)</td><td>404 → "Request not found"</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="92-state-synchronisation-strategy">§9.2 State Synchronisation Strategy</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Data Type</th><th>Sync Method</th><th>Frequency / Event</th><th>Conflict Handling</th></tr></thead>
+<tbody>
+<tr><td>Pet stats</td><td>TanStack Query `staleTime: 30_000`</td><td>On mount + `invalidateQueries` on train/feed mutations</td><td>Server wins; optimistic update not used (stat deltas are server-computed)</td></tr>
+<tr><td>Leaderboard</td><td>TanStack Query `refetchInterval: 30_000`</td><td>Every 30 s + on mount</td><td>Latest response replaces cache; no merge</td></tr>
+<tr><td>Arena rate-limit state</td><td>Zustand `arena` slice</td><td>Set on 429 response; cleared on timer expiry</td><td>Client-side countdown; server is authoritative on next request</td></tr>
+<tr><td>Claim flow step</td><td>Zustand `claimStep`</td><td>Mutation success callbacks</td><td>No conflict — linear state machine</td></tr>
+<tr><td>Token</td><td>`localStorage` via `tokenStorage.ts`</td><td>Written on verify success; cleared on 401</td><td>No conflict — single token per browser</td></tr>
+<tr><td>Feature flags</td><td>Environment variable at build time (`import.meta.env.VITE_FF_*`)</td><td>Build-time; no runtime hot-swap in Phase 1</td><td>N/A — static per build</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="93-offline--weak-network-handling">§9.3 Offline / Weak Network Handling</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Scenario</th><th>Client Behaviour</th><th>Retry Strategy</th><th>User Notification</th></tr></thead>
+<tbody>
+<tr><td>**Request timeout** (10 s default Axios timeout)</td><td>`apiClient` rejects with `AppError(NETWORK_TIMEOUT)`; TanStack Query marks query as `error` state</td><td>Exponential backoff: 1 s → 2 s → 4 s; max 3 retry attempts (`retry: 3` in QueryClient config)</td><td>Toast: "Request timed out. Retrying…"; after 3 failures: "Could not reach server. Please check your connection."</td></tr>
+<tr><td>**Fully offline** (`navigator.onLine = false`)</td><td>All outgoing Axios requests are blocked immediately; TanStack Query `paused` (no new fetches)</td><td>No active retries while offline; TanStack Query resumes automatically on `window.addEventListener('online')`</td><td>Persistent top-bar banner: "You are offline. Changes will sync when reconnected." Banner dismissed automatically on reconnect</td></tr>
+<tr><td>**Weak network / high latency**</td><td>Axios timeout: 10 s; arena long-poll timeout: 35 s (5 s margin over `ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30`)</td><td>TanStack Query `retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30_000)`</td><td>`MatchmakingStatus` shows "Slow connection detected. Waiting…" after 20 s in queue; no retry for arena (user must re-enter)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="10-performance-budget">§10 Performance Budget</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="101-rendering-performance">§10.1 Rendering Performance</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Metric</th><th>Target</th><th>Minimum Acceptable</th><th>Constant Key</th></tr></thead>
+<tbody>
+<tr><td>FCP (First Contentful Paint)</td><td>≤ 1.5 s</td><td>≤ 2.0 s</td><td>`FCP_SECONDS = 1.5`</td></tr>
+<tr><td>LCP (Largest Contentful Paint)</td><td>≤ 2.5 s</td><td>≤ 3.0 s</td><td>`LCP_SECONDS = 2.5`</td></tr>
+<tr><td>CLS (Cumulative Layout Shift)</td><td>≤ 0.1</td><td>≤ 0.15</td><td>`CLS_SCORE = 0.1`</td></tr>
+<tr><td>INP (Interaction to Next Paint)</td><td>≤ 200 ms</td><td>≤ 300 ms</td><td>`INP_MS = 200`</td></tr>
+<tr><td>Pet canvas render on load</td><td>≤ 2 s</td><td>≤ 3 s</td><td>`PET_RENDER_ON_LOAD_SECONDS = 2`</td></tr>
+<tr><td>Pet interaction response (click/tap)</td><td>≤ 200 ms</td><td>≤ 300 ms</td><td>`PET_INTERACTION_RESPONSE_MS = 200`</td></tr>
+<tr><td>Pet animation frame rate</td><td>≥ 30 FPS sustained</td><td>≥ 24 FPS</td><td>`PET_ANIMATION_FPS_MIN = 30`</td></tr>
+<tr><td>Arena battle E2E render</td><td>≤ 2 s</td><td>—</td><td>`ARENA_BATTLE_E2E_SECONDS = 2`</td></tr>
+<tr><td>Scene / route transition</td><td>≤ 300 ms</td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="102-memory-budget">§10.2 Memory Budget</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Type</th><th>Limit</th></tr></thead>
+<tbody>
+<tr><td>Total JS heap (player app, typical session)</td><td>< 150 MB</td></tr>
+<tr><td>Phaser game instance texture memory</td><td>< 50 MB (1–2 sprite sheets loaded)</td></tr>
+<tr><td>Audio buffer cache (Phase 2)</td><td>< 20 MB</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="103-bundle-budget">§10.3 Bundle Budget</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Bundle</th><th>Size Limit (gzipped)</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Entry / eager bundle</td><td>≤ 150 KB</td><td>React + Router + TanStack Query + Zustand + Zod only</td></tr>
+<tr><td>Total JS (all chunks combined)</td><td>≤ 300 KB</td><td>`TOTAL_JS_BUNDLE_GZIPPED_KB = 300` — Phaser excluded</td></tr>
+<tr><td>Total CSS</td><td>≤ 50 KB</td><td>`TOTAL_CSS_BUNDLE_GZIPPED_KB = 50`</td></tr>
+<tr><td>Phaser.js (lazy, separate chunk)</td><td>~400 KB gzipped</td><td>Served from CDN; cached after first load; not counted in total JS budget</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="104-code-splitting-configuration">§10.4 Code Splitting Configuration</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// apps/player/vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor':  ['react', 'react-dom', 'react-router-dom'],
+          'query-vendor':  ['@tanstack/react-query'],
+          'form-vendor':   ['react-hook-form', 'zod'],
+          // Phaser is NOT listed here — dynamically imported only inside PetCanvasEngine.ts
+        },
+      },
+    },
+  },
+});</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">All page components use React Router v6 <code>lazy()</code> — one chunk per route, handled by the Router loading boundary.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="11-test-specification">§11 Test Specification</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="111-unit-test-scope">§11.1 Unit Test Scope</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Module</th><th>Test Focus</th><th>Coverage Target</th></tr></thead>
+<tbody>
+<tr><td>`petGeneration.ts`</td><td>`buildAttributeVector(seed)` determinism; all 6 dimensions; boundary seeds (0n, BigInt max)</td><td>100%</td></tr>
+<tr><td>`tokenStorage.ts`</td><td>`getPetToken`, `setPetToken`, `clearPetToken`; `localStorage` mock</td><td>100%</td></tr>
+<tr><td>`apiClient.ts`</td><td>Token attachment interceptor; error normalization (`AppError`); 401 → token clear</td><td>90%</td></tr>
+<tr><td>`useAppStore.ts` (Zustand)</td><td>All slice actions: `setSelectedMode`, `setClaimStep`, `setClaimId`, `pushToast`, `dismissToast`</td><td>90%</td></tr>
+<tr><td>Zod schemas (`schemas/*.ts`)</td><td>Valid / invalid API response shapes; parse error messages</td><td>90%</td></tr>
+<tr><td>`useReducedMotion.ts`</td><td>`matchMedia` mock: `true` / `false` / change event</td><td>100%</td></tr>
+<tr><td>`ClaimEmailForm.tsx`</td><td>Email validation, age confirmation required; form submission with mock mutation</td><td>85%</td></tr>
+<tr><td>`ClaimCodeForm.tsx`</td><td>6-digit input constraint (`CLAIM_CODE_DIGITS = 6`); shake on `INVALID_CODE`</td><td>85%</td></tr>
+<tr><td>`ExpiryWarning.tsx`</td><td>Renders when `minutesRemaining ≤ 2`; `role="alert"` present</td><td>100%</td></tr>
+<tr><td>`StatBar.tsx`</td><td>Correct width percentage; `aria-label` values</td><td>90%</td></tr>
+<tr><td>`DailyResetTimer.tsx`</td><td>Countdown to UTC 00:00; `aria-live="polite"` throttled at 60 s and ≤ 5 min</td><td>85%</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p">Minimum coverage target: <strong>80%</strong> (<code>UNIT_TEST_COVERAGE_MIN_PERCENT = 80</code>) enforced by Vitest <code>coverage.thresholds</code>.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="112-integration-test-scenarios">§11.2 Integration Test Scenarios</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Scenario</th><th>Precondition</th><th>Expected Result</th></tr></thead>
+<tbody>
+<tr><td>Claim flow: happy path</td><td>Guest on landing page; mocked `POST /api/v1/claim` and `POST /api/v1/claim/verify` succeed</td><td>Token written to `localStorage`; user on `/pet/:petId`</td></tr>
+<tr><td>Claim flow: invalid OTP</td><td>`POST /api/v1/claim/verify` returns `INVALID_CODE`</td><td>Shake animation on digit boxes; error message visible; inputs remain enabled</td></tr>
+<tr><td>Claim flow: 429 on code entry</td><td>10th attempt returns 429</td><td>All inputs disabled; Retry-After countdown rendered; `aria-live="assertive"` announcement</td></tr>
+<tr><td>Training: action exhausted</td><td>`POST /api/v1/pets/:petId/train` returns `TRAINING_LIMIT_REACHED`</td><td>All action cards disabled; `DailyResetTimer` visible</td></tr>
+<tr><td>Training: stat at max</td><td>`POST /api/v1/pets/:petId/train` returns `STAT_AT_MAXIMUM`</td><td>Toast: "Stat is already at maximum"; card for exhausted stat disabled; others remain enabled</td></tr>
+<tr><td>Arena: matchmaking timeout, AI accepted</td><td>`POST /api/v1/arena/enter` returns 408; user clicks Accept in `AIOfferModal`</td><td>Re-POST with `acceptAI: true`; proceed to battle</td></tr>
+<tr><td>Arena: 429 rate limit</td><td>Arena endpoint returns 429</td><td>`RateLimitBanner` renders; Retry-After timer displayed</td></tr>
+<tr><td>Global 401</td><td>Any authenticated endpoint returns 401</td><td>`localStorage` token cleared; redirect to `/`</td></tr>
+<tr><td>GDPR request submission</td><td>`POST /api/v1/gdpr/request` returns `{ jobId }`</td><td>`GdprStatusBanner` activates; polls `/api/v1/gdpr/request/status?jobId=`</td></tr>
+<tr><td>Reduced motion</td><td>`prefers-reduced-motion: reduce` media query active</td><td>Phaser animation paused; rarity CSS shimmers suppressed; `StatChangeIndicator` uses opacity-only</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="113-e2e-test-scenarios-playwright">§11.3 E2E Test Scenarios (Playwright)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Test File</th><th>Scenario</th><th>Breakpoints</th></tr></thead>
+<tbody>
+<tr><td>`e2e/claim.spec.ts`</td><td>Full claim flow (email → OTP → token stored → PetPage renders)</td><td>375, 768, 1440</td></tr>
+<tr><td>`e2e/training.spec.ts`</td><td>Training action → `StatChangeIndicator` appears → counter decrements</td><td>375, 1440</td></tr>
+<tr><td>`e2e/arena.spec.ts`</td><td>Arena entry → matchmaking wait → AI accept → battle → result page</td><td>768, 1440</td></tr>
+<tr><td>`e2e/leaderboard.spec.ts`</td><td>Leaderboard loads; rarity filter updates URL; `OwnerRankBanner` visible with token</td><td>375, 768, 1440</td></tr>
+<tr><td>`e2e/gdpr.spec.ts`</td><td>GDPR form submit → `GdprStatusBanner` polls correctly</td><td>768, 1440</td></tr>
+<tr><td>`e2e/visual.spec.ts`</td><td>Screenshot tests for LandingPage, PetPage ×4 rarities, BattleResultPage WIN+LOSS</td><td>320, 768, 1024, 1440</td></tr>
+<tr><td>`e2e/auth.spec.ts`</td><td>HTTP 401 → token cleared + redirect to `/`; HTTP 429 → banner renders</td><td>375, 1440</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="114-performance-test-conditions">§11.4 Performance Test Conditions</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Test Item</th><th>Tool</th><th>Pass Condition</th></tr></thead>
+<tbody>
+<tr><td>Core Web Vitals — Landing page</td><td>Playwright Lighthouse plugin</td><td>FCP ≤ 1.5 s; LCP ≤ 2.5 s; CLS ≤ 0.1; INP ≤ 200 ms</td></tr>
+<tr><td>Bundle size check</td><td>Vite `build --reporter` + custom CI step</td><td>Entry bundle ≤ 150 KB gzipped; total JS ≤ 300 KB gzipped</td></tr>
+<tr><td>Pet canvas render time</td><td>Playwright `page.evaluate` performance API</td><td>Canvas ready ≤ 2 s after navigation</td></tr>
+<tr><td>Memory leak (Phaser destroy)</td><td>Playwright + Chrome DevTools protocol heap snapshot</td><td>No retained `Phaser.Game` instances after component unmount</td></tr>
+<tr><td>Phaser animation FPS</td><td>`game.loop.actualFps` assertion in integration test (instance property — not `Phaser.Game.loop.actualFps`)</td><td>≥ 30 FPS over 10-frame window</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="12-local-development-workflow">§12 Local Development Workflow</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="121-prerequisites">§12.1 Prerequisites</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Node.js 20 LTS</li>
+<li>pnpm 8+ (<code>npm install -g pnpm</code>)</li>
+<li>Access to <code>.env.local</code> with <code>VITE_API_BASE_URL</code> set (or local Fastify running on port 3000)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="122-setup">§12.2 Setup</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Clone monorepo and install all workspace dependencies
+git clone https://github.com/your-org/pixel-pet-arena.git
+cd pixel-pet-arena
+pnpm install
+
+# Copy environment template
+cp apps/player/.env.example apps/player/.env.local
+# Set VITE_API_BASE_URL=http://localhost:3000</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="123-development-server">§12.3 Development Server</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Start player app dev server (HMR on http://localhost:5173)
+pnpm --filter player-app dev
+
+# Start API server (separate terminal — needed for API calls)
+pnpm --filter api dev
+
+# Start both concurrently from monorepo root
+pnpm dev</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Vite HMR provides instant TypeScript feedback. Phaser.js is loaded via dynamic import — the first load of any page with <code>PetCanvas</code> will fetch Phaser from the CDN (or <code>node_modules</code> in dev mode).</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="124-unit-tests">§12.4 Unit Tests</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Run Vitest unit tests in watch mode
+pnpm --filter player-app test
+
+# Run with coverage report
+pnpm --filter player-app test:coverage
+# Coverage output: apps/player/coverage/index.html
+# Threshold: 80% (UNIT_TEST_COVERAGE_MIN_PERCENT = 80)</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="125-e2e-tests-playwright">§12.5 E2E Tests (Playwright)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Install Playwright browsers (first time only)
+pnpm --filter player-app exec playwright install
+
+# Run all E2E tests headless
+pnpm --filter player-app e2e
+
+# Run with UI mode (interactive)
+pnpm --filter player-app e2e:ui
+
+# Run visual regression tests only
+pnpm --filter player-app e2e --grep visual</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Playwright screenshots are saved to <code>apps/player/e2e/screenshots/</code> and compared against baselines stored in <code>apps/player/e2e/snapshots/</code>. Update baselines with <code>--update-snapshots</code> flag when intentional visual changes are made.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="126-build">§12.6 Build</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Production build for player app
+pnpm --filter player-app build
+# Output: apps/player/dist/
+
+# Preview production build locally
+pnpm --filter player-app preview</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="127-type-checking">§12.7 Type Checking</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Type-check player app (no emit)
+pnpm --filter player-app typecheck
+
+# Type-check all workspace packages
+pnpm typecheck</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="13-known-limitations-and-technical-debt">§13 Known Limitations and Technical Debt</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Item</th><th>Description</th><th>Impact</th><th>Target Version</th></tr></thead>
+<tbody>
+<tr><td>LIM-01</td><td>Phaser.js version lock</td><td>Phaser 3.x does not support React 18 Concurrent Mode features natively; `PetCanvasEngine` must never use `React.startTransition` to defer its mount</td><td>Medium — Phaser lifecycle must be carefully tested on React 18 concurrent renders</td><td>Phase 2 review</td></tr>
+<tr><td>LIM-02</td><td>`localStorage` token storage XSS exposure</td><td>`pet_access_token` in `localStorage` is accessible by any JS on the same origin; mitigated by CSP (`script-src 'self' https://cdn.jsdelivr.net`) but not eliminated</td><td>Low-Medium — CSP blocks inline scripts; risk accepted per FRONTEND.md §8.1 design decision</td><td>Phase 3 security hardening</td></tr>
+<tr><td>LIM-03</td><td>Sprite sheets generated server-side</td><td>Phase 1 uses placeholder sprite sheets; procedural generation from `AttributeVector` is a Phase 2 asset pipeline task</td><td>High visual fidelity gap in Phase 1 — pets appear as placeholder pixels</td><td>Phase 2</td></tr>
+<tr><td>LIM-04</td><td>Feature flags are build-time env vars</td><td>`FF_MARKETPLACE`, `FF_ARENA_SUMO` etc. require a new Vite build to change; no runtime hot-swap</td><td>Medium — requires redeployment for flag changes; LaunchDarkly integration deferred to Phase 3 (OQ-E07)</td><td>Phase 3</td></tr>
+<tr><td>LIM-05</td><td>No audio in Phase 1</td><td>Audio integration (Howler.js, SFX, BGM) is planned for Phase 2</td><td>Low — game is playable without audio; competitive experience diminished</td><td>Phase 2</td></tr>
+<tr><td>LIM-06</td><td>Open Graph card generation method TBD</td><td>`BattleResultPage` shareable OG card strategy is unresolved (OQ-E05 in ARCH.md)</td><td>Medium — social shareability is a growth mechanic; placeholder `og:image` used</td><td>Phase 2</td></tr>
+<tr><td>LIM-07</td><td>`PetCanvas` SSR incompatible</td><td>`PetCanvasEngine` imports browser APIs (`window`, `document`) — renders only client-side; Vercel SPA deployment has no SSR so this is not currently an issue</td><td>Low — would block any future SSR migration</td><td>Phase 3 (if SSR adopted)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<p class="doc-p">STEP_COMPLETE: CLIENT_IMPL</p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

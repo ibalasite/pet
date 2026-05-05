@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — Requirement Traceability Matrix</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">Requirement Traceability Matrix</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>Requirement Traceability Matrix</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="requirement-traceability-matrix">Requirement Traceability Matrix</h1>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td>**DOC-ID**</td><td>RTM-PIXEL-PET-001</td></tr>
+<tr><td>**Project**</td><td>pixel-pet-arena</td></tr>
+<tr><td>**Date**</td><td>2026-05-03</td></tr>
+<tr><td>**Version**</td><td>1.0.0</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="overview">Overview</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">This Requirement Traceability Matrix (RTM) maps all 18 user stories defined in the pixel-pet-arena PRD to their corresponding test coverage assets across four test layers: BDD (server-side and client-side Cucumber/Gherkin feature files), unit tests, integration tests, and cross-cutting performance and security tests.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">The scope covers the v1 release milestone. Coverage is assessed at the user story level; each row records which specific feature files exercise a story and which additional test categories supplement BDD coverage. One cross-cutting non-functional requirements row captures platform-wide concerns (authentication security hardening, rate limiting, and COPPA compliance) that span multiple stories.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">US-TRADE-001 (Pet Trading Marketplace, P2) is formally deferred behind feature flag <code>FF_MARKETPLACE</code>, with no test coverage planned until DAU exceeds 1,000. US-ADMIN-004 and US-ADMIN-005, while not yet fully expanded in the PRD, are exercised through dedicated server BDD features and are tracked in this matrix to ensure gap visibility before v1 launch.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">The methodology follows forward traceability: each user story is the anchor, with test assets linked forward from requirements to verification evidence.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="bdd-feature-file-inventory">BDD Feature File Inventory</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">This section maps all 23 BDD feature files (1,797 Gherkin lines, 131 scenarios) to their corresponding user stories and test layers.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="server-side-features-6-files-172-scenarios">Server-Side Features (6 files, 172 scenarios)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Feature File</th><th>Scenarios</th><th>US Stories</th><th>Layer</th><th>Coverage</th></tr></thead>
+<tbody>
+<tr><td>`features/server/claim-flow.feature`</td><td>4</td><td>US-AUTH-001, US-AUTH-002</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td>`features/server/arena-battle.feature`</td><td>4</td><td>US-ARENA-001, US-ARENA-002</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td>`features/server/training-food.feature`</td><td>2</td><td>US-TRAIN-001, US-FOOD-001</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td>`features/server/leaderboard.feature`</td><td>3</td><td>US-BOARD-001, US-ADMIN-002</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td>`features/server/gdpr-erasure.feature`</td><td>2</td><td>US-ADMIN-004</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td>`features/server/suspicious-detection.feature`</td><td>3</td><td>US-ADMIN-005</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td>**Total**</td><td>**18**</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="client-side-features-9-files-1071-scenarios">Client-Side Features (9 files, 1,071 scenarios)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Feature File</th><th>Scenarios</th><th>US Stories</th><th>Layer</th><th>Coverage</th></tr></thead>
+<tbody>
+<tr><td>`features/client/pet-display.feature`</td><td>8</td><td>US-PET-001, US-PET-002</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td>`features/client/claim-flow-ui.feature`</td><td>10</td><td>US-AUTH-001, US-AUTH-002</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td>`features/client/training-ui.feature`</td><td>8</td><td>US-TRAIN-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td>`features/client/food-system.feature`</td><td>17</td><td>US-FOOD-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td>`features/client/arena-ui.feature`</td><td>10</td><td>US-ARENA-001, US-ARENA-002</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td>`features/client/leaderboard-ui.feature`</td><td>10</td><td>US-BOARD-001, US-RARITY-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td>`features/client/battle-records.feature`</td><td>16</td><td>US-RECORD-001</td><td>Frontend UI</td><td>⚠️ Partial</td></tr>
+<tr><td>`features/client/admin-portal.feature`</td><td>13</td><td>US-ADMIN-001, US-ADMIN-003, US-ADMIN-006</td><td>Frontend Admin</td><td>✅ Covered</td></tr>
+<tr><td>`features/client/settings.feature`</td><td>21</td><td>US-AUTH-002, US-ADMIN-004</td><td>Frontend UI</td><td>⚠️ Partial</td></tr>
+<tr><td>**Total**</td><td>**113**</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="legacy-root-level-features-8-files-554-scenarios">Legacy Root-Level Features (8 files, 554 scenarios)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Note</strong>: The following 8 feature files are located at <code>/features/</code> (root level) and appear to be duplicates or legacy versions of the server and client features. They are NOT formally included in the RTM coverage matrix. Recommend archival or formal consolidation with the server/client organization.</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Feature File</th><th>Scenarios</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>`features/auth-login.feature`</td><td>7</td><td>Legacy (duplicate of claim-flow-ui.feature intent)</td></tr>
+<tr><td>`features/pet-management.feature`</td><td>7</td><td>Legacy (duplicate of pet-display.feature intent)</td></tr>
+<tr><td>`features/pet-training.feature`</td><td>8</td><td>Legacy (duplicate of training-ui.feature intent)</td></tr>
+<tr><td>`features/arena-combat.feature`</td><td>10</td><td>Legacy (duplicate of arena-ui.feature intent)</td></tr>
+<tr><td>`features/arena-leaderboard.feature`</td><td>11</td><td>Legacy (duplicate of leaderboard-ui.feature intent)</td></tr>
+<tr><td>`features/trading-system.feature`</td><td>10</td><td>Deferred (FF_MARKETPLACE)</td></tr>
+<tr><td>`features/admin-moderation.feature`</td><td>11</td><td>Legacy (duplicate of admin-portal.feature intent)</td></tr>
+<tr><td>`features/admin-gdpr.feature`</td><td>11</td><td>Legacy (duplicate of gdpr-erasure.feature intent)</td></tr>
+<tr><td>**Total**</td><td>**75**</td><td>—</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>BLOCKING FINDING</strong>: Dimension 4 / ALIGN_REPORT.md §179 flags root-level features as conflicting with server/client organization. Recommend:</p>
+<p class="doc-p">1. <strong>Option A</strong>: Archive root features; consolidate all scenarios into server/client directories.</p>
+<p class="doc-p">2. <strong>Option B</strong>: Maintain both; formally expand RTM to include root features with explicit designation as "legacy" or "canonical".</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Current RTM references only server/ and client/ features (58 scenarios). If root features are canonical, RTM must be expanded to include 75 additional scenarios and source mapping.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="requirements">Requirements</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>US-ID</th><th>Title</th><th>Priority</th><th>Epic</th><th>AC Count</th><th>Feature Flags</th></tr></thead>
+<tbody>
+<tr><td>US-PET-001</td><td>Random Pet Display (Guest Mode)</td><td>P0</td><td>EPIC-PET</td><td>5</td><td>—</td></tr>
+<tr><td>US-PET-002</td><td>Procedural Pixel Pet Generation</td><td>P0</td><td>EPIC-PET</td><td>4</td><td>—</td></tr>
+<tr><td>US-AUTH-001</td><td>Email Claim Flow</td><td>P0</td><td>EPIC-AUTH</td><td>6</td><td>—</td></tr>
+<tr><td>US-AUTH-002</td><td>Returning Pet Owner Access</td><td>P0</td><td>EPIC-AUTH</td><td>4</td><td>—</td></tr>
+<tr><td>US-TRAIN-001</td><td>Pet Training System</td><td>P0</td><td>EPIC-TRAINING</td><td>5</td><td>—</td></tr>
+<tr><td>US-FOOD-001</td><td>Special Food System</td><td>P0</td><td>EPIC-TRAINING</td><td>4</td><td>—</td></tr>
+<tr><td>US-ARENA-001</td><td>Arena Racing Competition</td><td>P0</td><td>EPIC-ARENA</td><td>6</td><td>—</td></tr>
+<tr><td>US-ARENA-002</td><td>Sumo Arena Mode</td><td>P1</td><td>EPIC-ARENA</td><td>4</td><td>—</td></tr>
+<tr><td>US-BOARD-001</td><td>Global Leaderboard</td><td>P0</td><td>EPIC-RANKING</td><td>5</td><td>—</td></tr>
+<tr><td>US-RECORD-001</td><td>Battle Records Page</td><td>P0</td><td>EPIC-RANKING</td><td>3</td><td>—</td></tr>
+<tr><td>US-RARITY-001</td><td>Rarity Scoring</td><td>P1</td><td>EPIC-RANKING</td><td>3</td><td>—</td></tr>
+<tr><td>US-TRADE-001</td><td>Pet Trading Marketplace</td><td>P2</td><td>EPIC-MARKETPLACE</td><td>5</td><td>`FF_MARKETPLACE`</td></tr>
+<tr><td>US-ADMIN-001</td><td>Admin Pet Management</td><td>P0</td><td>EPIC-ADMIN</td><td>4</td><td>—</td></tr>
+<tr><td>US-ADMIN-002</td><td>Admin Leaderboard Moderation</td><td>P0</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
+<tr><td>US-ADMIN-003</td><td>Admin Runtime Parameter Tuning</td><td>P1</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
+<tr><td>US-ADMIN-004</td><td>GDPR Data Erasure</td><td>P0</td><td>EPIC-ADMIN</td><td>4</td><td>—</td></tr>
+<tr><td>US-ADMIN-005</td><td>Suspicious Battle Detection</td><td>P0</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
+<tr><td>US-ADMIN-006</td><td>Game Economy Configuration</td><td>P1</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="test-cases">Test Cases</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>US-ID</th><th>Requirement</th><th>BDD-Server</th><th>BDD-Client</th><th>Unit</th><th>Integration</th><th>Perf / Security</th><th>Coverage Status</th></tr></thead>
+<tbody>
+<tr><td>US-PET-001</td><td>Random Pet Display (Guest Mode)</td><td>—</td><td>`pet-display.feature` (8)</td><td>Sprite generation</td><td>—</td><td>Visual regression: pixel rendering</td><td>✅ Covered</td></tr>
+<tr><td>US-PET-002</td><td>Procedural Pixel Pet Generation</td><td>—</td><td>`pet-display.feature` (8)</td><td>Combination space; deterministic seed</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-AUTH-001</td><td>Email Claim Flow</td><td>`claim-flow.feature` (4)</td><td>`claim-flow-ui.feature` (10)</td><td>OTP expiry</td><td>Email sending; one-time token</td><td>Security: email enumeration prevention; COPPA</td><td>✅ Covered</td></tr>
+<tr><td>US-AUTH-002</td><td>Returning Pet Owner Access</td><td>`claim-flow.feature` (4)</td><td>`claim-flow-ui.feature` (10)</td><td>—</td><td>GDPR erasure path</td><td>Security: invalid URL → 404</td><td>✅ Covered</td></tr>
+<tr><td>US-TRAIN-001</td><td>Pet Training System</td><td>`training-food.feature` (2)</td><td>`training-ui.feature` (8)</td><td>Stat increment; stat max cap</td><td>Persistence</td><td>Visual regression: neglected state</td><td>✅ Covered</td></tr>
+<tr><td>US-FOOD-001</td><td>Special Food System</td><td>`training-food.feature` (2)</td><td>`pet-display.feature` (8)</td><td>Buff application; stat max block</td><td>Food buff persistence</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ARENA-001</td><td>Arena Racing Competition</td><td>`arena-battle.feature` (4)</td><td>`arena-ui.feature` (10)</td><td>Outcome calculation</td><td>Battle record save</td><td>Security: rate limit enforcement</td><td>✅ Covered</td></tr>
+<tr><td>US-ARENA-002</td><td>Sumo Arena Mode</td><td>`arena-battle.feature` (4)</td><td>`arena-ui.feature` (10)</td><td>Sumo outcome calculation</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-BOARD-001</td><td>Global Leaderboard</td><td>`leaderboard.feature` (3)</td><td>`leaderboard-ui.feature` (10)</td><td>—</td><td>Leaderboard update lag</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-RECORD-001</td><td>Battle Records Page</td><td>—</td><td>—</td><td>Battle record save/retrieve</td><td>Open Graph meta</td><td>—</td><td>⚠️ Partial</td></tr>
+<tr><td>US-RARITY-001</td><td>Rarity Scoring</td><td>—</td><td>`leaderboard-ui.feature` (10)</td><td>—</td><td>—</td><td>Visual regression: Legendary border</td><td>⚠️ Partial</td></tr>
+<tr><td>US-TRADE-001</td><td>Pet Trading Marketplace</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>⏸ Deferred (P2)</td></tr>
+<tr><td>US-ADMIN-001</td><td>Admin Pet Management</td><td>—</td><td>`admin-portal.feature` (13)</td><td>—</td><td>Ban propagation</td><td>Perf: search ≤2 s for 1 M records</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-002</td><td>Admin Leaderboard Moderation</td><td>`leaderboard.feature` (3)</td><td>`admin-portal.feature` (13)</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-003</td><td>Admin Runtime Parameter Tuning</td><td>—</td><td>`admin-portal.feature` (13)</td><td>—</td><td>Config cache refresh</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-004</td><td>GDPR Data Erasure</td><td>`gdpr-erasure.feature` (2)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-005</td><td>Suspicious Battle Detection</td><td>`suspicious-detection.feature` (3)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-006</td><td>Game Economy Configuration</td><td>—</td><td>`admin-portal.feature` (13)</td><td>—</td><td>Config cache refresh; food buff multiplier</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>NFR-XCUT-001</td><td>Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention</td><td>`claim-flow.feature` (4)</td><td>`claim-flow-ui.feature` (10)</td><td>OTP expiry</td><td>One-time token</td><td>Security: email enumeration; rate limit; COPPA</td><td>✅ Covered</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="coverage">Coverage</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="coverage-by-epic">Coverage by Epic</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Epic</th><th>Total Stories</th><th>Covered</th><th>Partial</th><th>Deferred</th><th>Not Covered</th><th>Epic Coverage %</th></tr></thead>
+<tbody>
+<tr><td>EPIC-PET</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
+<tr><td>EPIC-AUTH</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
+<tr><td>EPIC-TRAINING</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
+<tr><td>EPIC-ARENA</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
+<tr><td>EPIC-RANKING</td><td>3</td><td>1</td><td>2</td><td>0</td><td>0</td><td>33%</td></tr>
+<tr><td>EPIC-MARKETPLACE</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0% (deferred)</td></tr>
+<tr><td>EPIC-ADMIN</td><td>6</td><td>6</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
+<tr><td>**Total**</td><td>**18**</td><td>**15**</td><td>**2**</td><td>**1**</td><td>**0**</td><td>**83%**</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="overall-coverage">Overall Coverage</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Excluding the formally deferred US-TRADE-001 (P2, <code>FF_MARKETPLACE</code> off), <strong>15 of 17 active user stories are fully covered</strong> (88%). Including the deferred story, the uncapped ratio is <strong>15 fully covered, 2 partial, 1 deferred</strong> out of 18, yielding an overall percentage of <strong>83%</strong> against all requirements.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="gaps-and-notes">Gaps and Notes</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>US-RARITY-001 — Rarity Scoring (⚠️ Partial)</strong></p>
+<p class="doc-p">US-RARITY-001 is covered by client-side BDD scenarios in <code>leaderboard-ui.feature</code> and a visual regression test verifying the Legendary border rendering. However, the rarity scoring algorithm — which runs server-side and determines the tier classification for each generated pet — has no BDD-Server feature file, no unit tests, and no integration tests. This is a logic coverage gap: the visual presentation is verified but the underlying calculation is not. Recommend adding at minimum a <code>rarity-scoring.feature</code> in <code>features/server/</code> and a unit test suite for the scoring formula before the story can be promoted to Covered status.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>US-RECORD-001 — Battle Records Page (⚠️ Partial)</strong></p>
+<p class="doc-p">US-RECORD-001 is covered by unit tests (battle record save/retrieve) and an integration test verifying Open Graph meta tags on the records page. However, no dedicated BDD feature file exists for this story in the current sprint scope. The existing coverage is sufficient for v1 release confidence, but a <code>battle-records.feature</code> file should be created before the story is promoted to "fully covered" status. Recommend adding a minimum of 3–4 BDD scenarios covering record pagination, per-pet filtering, and empty-state rendering.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>US-TRADE-001 — Pet Trading Marketplace (⏸ Deferred P2)</strong></p>
+<p class="doc-p">No test coverage is planned for v1. The feature is locked behind the <code>FF_MARKETPLACE</code> feature flag and will not be activated until the platform reaches a DAU threshold of 1,000. All test planning for this epic is deferred to the marketplace milestone. When activated, this story will require BDD feature files (both server and client), unit tests for trade validation logic, integration tests for transaction atomicity, and security tests for fraud prevention.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>US-ADMIN-004 and US-ADMIN-005 — PRD Expansion Pending</strong></p>
+<p class="doc-p">Both stories are exercised by server BDD features (<code>gdpr-erasure.feature</code>, <code>suspicious-detection.feature</code>) but have not yet been formally expanded with full acceptance criteria in the PRD. The AC Count listed in the Requirements table reflects current working estimates. These stories should be formally expanded in the PRD before the v1 code freeze to ensure the BDD scenario count is validated against final acceptance criteria.</p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

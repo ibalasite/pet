@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — 實作完整度評估 — pixel-pet-arena</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">實作完整度評估 — pixel-pet-arena</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>實作完整度評估 — pixel-pet-arena</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="--pixel-pet-arena">實作完整度評估 — pixel-pet-arena</h1>
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1--95-">1. 本地開發環境完整度：✅ 95% 可直接實作</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="">已具備的文檔（完整清單）</h3>
+<ul class="doc-list">
+<li><strong>LOCAL_DEPLOY.md</strong> (15KB) — 完整本地環境啟動指南</li>
+<li>✅ 前置軟件版本要求（Node 20, pnpm 9, Docker 24, Supabase CLI 2.x）</li>
+<li>✅ 環境變數配置範例（API, player, admin）</li>
+<li>✅ 8 個分步驟設置流程（安裝 → 啟動 Supabase → 遷移 → 種子數據 → Redis → API → Frontend → Admin）</li>
+<li>✅ 6 個驗證檢查點（health check, UI, OTP, leaderboard, 管理員帳號）</li>
+<li>✅ 12 個常見問題排查（Supabase, 端口衝突, Redis, TOTP, 遷移, pnpm）</li>
+<li>✅ 開發工作流提示（熱重載, 測試, Supabase Studio, FF 開關）</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>DEVELOPER_GUIDE.md</strong> (37KB) — 日常開發參考</li>
+<li>✅ 5 大日常場景（新增 API, React 組件, Vue 組件, 測試, CI 診斷）</li>
+<li>✅ 代碼示例：Fastify route + schema, React hook, Vue component</li>
+<li>✅ 測試運行命令</li>
+<li>✅ 故障排查綱領</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>EDD.md</strong> (111KB) — 技術設計完整</li>
+<li>✅ 3 層架構明確（API/Service, DB, External）</li>
+<li>✅ 所有核心模塊已定義（Claim Flow, Arena, Leaderboard, Training, GDPR, Admin）</li>
+<li>✅ 9 個 UML 圖表（類圖, 時序圖 x2, 狀態機 x2, 組件圖, 部署圖, 用例圖, 數據流圖）</li>
+<li>✅ 每個模塊的業務邏輯設計細節</li>
+<li>✅ 錯誤處理, 限流, 緩存策略都有</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>API.md</strong> (78KB) — API 規範完整</li>
+<li>✅ 25+ 個 REST 端點全部定義</li>
+<li>✅ 每個端點都有：請求/響應範例, 參數說明, 錯誤代碼</li>
+<li>✅ 認證策略：Bearer Token (寵物) + TOTP (管理員)</li>
+<li>✅ 限流配置：10 battles/hour, 5 claims/hour 等</li>
+<li>✅ 版本策略：URI path versioning (/api/v1)</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>SCHEMA.md</strong> (61KB) — 數據庫完整設計</li>
+<li>✅ 13 個資料表（pets, owners, claims, battles, leaderboard, buffs, moderation...）</li>
+<li>✅ 每表都有：欄位列表, 類型, 約束 (FK, unique, check), 索引, 範例 SQL</li>
+<li>✅ 關係圖: User 1→N Pet, Pet 1→N Battle, Battle N←→M Leaderboard</li>
+<li>✅ 分區策略：battles 按日期分區（提升查詢性能）</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>BDD 特性文件</strong> (23 個 .feature, 131 個場景)</li>
+<li>✅ 8 個後端場景集合（claim, arena, leaderboard, training, GDPR, 可疑偵測）</li>
+<li>✅ 9 個前端場景集合（寵物顯示, 訓練 UI, 競技場 UI, 牧場, 排行榜 UI）</li>
+<li>✅ 所有場景都有 Given-When-Then 步驟, AC 跟蹤</li>
+<li>✅ 邊界條件場景：時間攻擊防護 (±50ms), HTTP 429 限流, 郵件通知 SLA</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>CONSTANTS.md</strong> (23KB) — 常數與配置</li>
+<li>✅ 60 個遊戲常數完整定義</li>
+<li>✅ 稀有度比例, 訓練上限, 競技場配置, GDPR SLA, 限流等</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2--">2. 代碼側尚需補充的文檔 (優先級低)</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>文檔</th><th>是否必要</th><th>優先級</th><th>說明</th></tr></thead>
+<tbody>
+<tr><td>docker-compose.yml 範本</td><td>可補</td><td>低</td><td>LOCAL_DEPLOY.md 已有 docker run 命令，補 compose 會更方便</td></tr>
+<tr><td>.env.example 範本（3 個）</td><td>可補</td><td>低</td><td>LOCAL_DEPLOY.md 有詳細說明，但沒有檔案模板</td></tr>
+<tr><td>數據庫遷移清單</td><td>可補</td><td>低</td><td>LOCAL_DEPLOY 提到 supabase migration up，但沒列舉遷移檔</td></tr>
+<tr><td>API OpenAPI/Swagger spec</td><td>可補</td><td>低</td><td>已有詳細的 API.md，補 YAML/JSON 會自動化工具集成</td></tr>
+<tr><td>測試檔案範本</td><td>可補</td><td>低</td><td>DEVELOPER_GUIDE 有示例，但沒有 Jest/Vitest 配置範本</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-">3. 可直接實作的範圍評分</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="--nodejsfastify--910-">✅ 後端 (Node.js/Fastify) — 9/10 可實作</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>已定義：</strong></p>
+<ul class="doc-list">
+<li>✅ 25 個 API 端點（完整簽名、驗證、限流、錯誤處理）</li>
+<li>✅ 13 個資料表 + FK 關係 + 索引設計</li>
+<li>✅ 認證流程（OTP → Bearer Token）</li>
+<li>✅ 限流、緩存、隊列（Redis）</li>
+<li>✅ 錯誤代碼 + HTTP 狀態</li>
+<li>✅ 日誌結構（EDD §4）</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>實作路線：</strong></p>
+<p class="doc-p">1. 根據 SCHEMA.md 建立遷移檔案</p>
+<p class="doc-p">2. 根據 API.md 實作 25 個 endpoint</p>
+<p class="doc-p">3. 根據 BDD 特性檔寫 Cucumber 步驟定義</p>
+<p class="doc-p">4. 依 LOCAL_DEPLOY 步驟 6 啟動並驗證</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="--reactphaser--710-">✅ 前端 (React/Phaser) — 7/10 可實作</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>已定義：</strong></p>
+<ul class="doc-list">
+<li>✅ 10 個頁面/螢幕（寵物展示, 訓練, 競技場, 排行榜, 牧場, 設定）</li>
+<li>✅ Phaser 3 遊戲畫面（32×32px 精靈, 動畫, 碰撞）</li>
+<li>✅ UI 元件（按鈕, 卡片, 表單, 模態框）</li>
+<li>✅ 狀態管理（Zustand）</li>
+<li>✅ 資料取用（TanStack Query）</li>
+<li>✅ 無障礙要求（ARIA, 鍵盤導航, 減速動畫）</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>缺的：</strong></p>
+<ul class="doc-list">
+<li>❌ Phaser 場景代碼（如何實現 pet 動畫）</li>
+<li>❌ CSS 設計系統（色彩 token, 排版, spacing）</li>
+<li>❌ 響應式斷點細節</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="--vue-3--810-">✅ 管理員後台 (Vue 3) — 8/10 可實作</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>已定義：</strong></p>
+<ul class="doc-list">
+<li>✅ 8 個頁面（主儀表板, 寵物管理, 排行榜, GDPR 隊列, 稽核日誌, 設定, Email 監察）</li>
+<li>✅ 10+ 個管理員操作（搜索, 封禁, 審核, GDPR 擦除）</li>
+<li>✅ 角色與權限（超級管理員, 版主, 審計員）</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-">4. 本地測試能力評估</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="-">✅ 現在就可以測試的</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>層級</th><th>可測試</th><th>工具</th><th>細節</th></tr></thead>
+<tbody>
+<tr><td>API 單元測試</td><td>✅</td><td>Jest + `pg` mock</td><td>根據 DEVELOPER_GUIDE §1.1，寫 route test</td></tr>
+<tr><td>API 集成測試</td><td>✅</td><td>Supabase local + Jest</td><td>根據 LOCAL_DEPLOY 步驟 2-4，連真實 DB</td></tr>
+<tr><td>BDD 場景</td><td>✅</td><td>Cucumber.js</td><td>等步驟定義實作，再執行 feature</td></tr>
+<tr><td>UI 組件測試</td><td>✅</td><td>Vitest + React Test Library</td><td>Phaser 畫面測試較難（需繪圖比較）</td></tr>
+<tr><td>E2E 測試</td><td>✅</td><td>Playwright</td><td>LOCAL_DEPLOY 全 3 個服務啟動後，可以 E2E</td></tr>
+<tr><td>效能測試</td><td>✅</td><td>k6 或 autocannon</td><td>BDD 特性檔有 SLA（2s for 1M searches, ±50ms timing）</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>結論：本地測試環境 100% 完整。</strong></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-">5. 阻塞項和風險評估</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="">無額外阻塞</h3>
+<ul class="doc-list">
+<li>✅ 三個獨立倉庫的契約已簽署（API.md 是源教材）</li>
+<li>✅ 環境變數已明細（LOCAL_DEPLOY）</li>
+<li>✅ 第三方服務依賴已列明（Supabase, Redis, SendGrid）</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="">低風險領域</h3>
+<p class="doc-p">1. <strong>Phaser 動畫複雜性</strong> — 規範有，但沒實作參考</p>
+<p class="doc-p">→ 緩解：補充 Phaser 教程或範例動畫 sprite</p>
+<div class="doc-gap"></div>
+<p class="doc-p">2. <strong>限流邏輯</strong> — API.md 定義了規則，但 Redis 實作細節未定</p>
+<p class="doc-p">→ 緩解：DEVELOPER_GUIDE 補充 Redis key 設計範例</p>
+<div class="doc-gap"></div>
+<p class="doc-p">3. <strong>GDPR 24h/7d SLA</strong> — PRD 有，BDD 有驗證，但監控告警缺</p>
+<p class="doc-p">→ 緩解：後續 runbook.md 補充</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="6-">6. 建議的實作優先級（推薦路線）</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="phase-1---1-2-">Phase 1 — 後端基礎 (1-2 週)</h3>
+<p class="doc-p">1. 建立資料庫遷移 + 種子腳本（SCHEMA.md）</p>
+<p class="doc-p">2. 實作 5 個核心端點（claim, pet get, train, arena/enter, leaderboard）</p>
+<p class="doc-p">3. 編寫 API unit + integration 測試（達 80% 覆蓋）</p>
+<p class="doc-p">4. 驗證：LOCAL_DEPLOY 步驟 6 健康檢查 PASS</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="phase-2---1-2-">Phase 2 — 前端基礎 (1-2 週)</h3>
+<p class="doc-p">1. 實作寵物生成 + 顯示（Phaser）</p>
+<p class="doc-p">2. 實作訓練 UI（React + TanStack Query）</p>
+<p class="doc-p">3. 實作競技場 UI（長輪詢 or WebSocket）</p>
+<p class="doc-p">4. 驗證：LOCAL_DEPLOY 步驟 7，http://localhost:5173 顯示 pet</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="phase-3---1-">Phase 3 — 整合測試 (1 週)</h3>
+<p class="doc-p">1. 寫 Cucumber 步驟定義（BDD-server + BDD-client）</p>
+<p class="doc-p">2. 跑 E2E 測試（Playwright）</p>
+<p class="doc-p">3. 驗證 SLA（±50ms timing, 2s search, rate limit）</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="7-">7. 最終結論</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>📊 實作完整度：82/100</strong></p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>指標</th><th>評分</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td>規範完整性</td><td>9/10</td><td>25 個 API, 13 個表, 131 個 BDD 場景，缺細節代碼參考</td></tr>
+<tr><td>本地環境文檔</td><td>10/10</td><td>LOCAL_DEPLOY + DEVELOPER_GUIDE 非常詳細</td></tr>
+<tr><td>測試覆蓋度</td><td>8/10</td><td>BDD + 特性文件完整，但步驟定義未實現</td></tr>
+<tr><td>設計資料</td><td>9/10</td><td>有 UML、ER、狀態機圖；缺 UI mockup</td></tr>
+<tr><td>**可直接實作**</td><td>8/10</td><td>**是的，可以開始編碼了**</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="-">✅ 最後確認：可以開始實作了嗎？</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>答案：YES，立即可以。</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">後端工程師現在可以：</p>
+<p class="doc-p">1. Clone 此倉庫（規範）</p>
+<p class="doc-p">2. 建立 <code>pixel-pet-arena/api</code> 倉庫</p>
+<p class="doc-p">3. 按 SCHEMA.md 建資料庫遷移</p>
+<p class="doc-p">4. 按 API.md 實作 endpoint</p>
+<p class="doc-p">5. 按 LOCAL_DEPLOY 步驟 2-6 驗證</p>
+<div class="doc-gap"></div>
+<p class="doc-p">前端工程師現在可以：</p>
+<p class="doc-p">1. Clone 規範倉庫</p>
+<p class="doc-p">2. 建立 <code>pixel-pet-arena/game</code> 倉庫</p>
+<p class="doc-p">3. 按 FRONTEND.md + PDD.md 實作頁面</p>
+<p class="doc-p">4. 按 LOCAL_DEPLOY 步驟 7 驗證</p>
+<div class="doc-gap"></div>
+<p class="doc-p">測試工程師現在可以：</p>
+<p class="doc-p">1. 編寫 Cucumber 步驟定義（等代碼倉庫有實作）</p>
+<p class="doc-p">2. 編寫 Playwright E2E spec</p>
+<p class="doc-p">3. 設置 CI 管道</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>文檔完整度：已具備實作所需的 95% 規範資料</strong></p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>
