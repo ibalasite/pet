@@ -1,0 +1,138 @@
+[
+  {
+    "id": "a3f7c2d1-84e5-4b9f-b6a2-1d0e3c7f9b4e",
+    "name": "FlameWisp",
+    "rarity": "LEGENDARY",
+    "level": 28,
+    "element": "FIRE",
+    "stats": {
+      "attack": 78,
+      "defense": 52,
+      "speed": 74,
+      "stamina": 61
+    },
+    "ownerId": "u1a2b3c4-d5e6-7f8a-9b0c-d1e2f3a4b5c6",
+    "ownerName": "PixelKnight99",
+    "createdAt": "2026-04-03T09:14:22Z",
+    "updatedAt": "2026-05-01T18:30:05Z"
+  },
+  {
+    "id": "b5e8d4a2-c7f1-4e3b-a9d6-2c1f5a8e0b7d",
+    "name": "GlacierFang",
+    "rarity": "EPIC",
+    "level": 22,
+    "element": "ICE",
+    "stats": {
+      "attack": 64,
+      "defense": 70,
+      "speed": 48,
+      "stamina": 72
+    },
+    "ownerId": "u2b3c4d5-e6f7-8a9b-0c1d-e2f3a4b5c6d7",
+    "ownerName": "ArcticBlaze",
+    "createdAt": "2026-04-07T14:25:11Z",
+    "updatedAt": "2026-04-29T11:12:43Z"
+  },
+  {
+    "id": "c9a1e6b3-f2d8-4c7a-b0e5-3d4g6b9c2e1f",
+    "name": "VoltMane",
+    "rarity": "EPIC",
+    "level": 19,
+    "element": "LIGHTNING",
+    "stats": {
+      "attack": 70,
+      "defense": 38,
+      "speed": 80,
+      "stamina": 45
+    },
+    "ownerId": "u3c4d5e6-f7a8-9b0c-1d2e-f3a4b5c6d7e8",
+    "ownerName": "StormRider7",
+    "createdAt": "2026-04-10T07:55:34Z",
+    "updatedAt": "2026-05-02T09:44:17Z"
+  },
+  {
+    "id": "d2f4b8c5-a1e9-4d6c-b3f7-4e5h7c0d3f2g",
+    "name": "StonePaw",
+    "rarity": "RARE",
+    "level": 14,
+    "element": "EARTH",
+    "stats": {
+      "attack": 42,
+      "defense": 68,
+      "speed": 28,
+      "stamina": 75
+    },
+    "ownerId": "u4d5e6f7-a8b9-0c1d-2e3f-a4b5c6d7e8f9",
+    "ownerName": "RockSolid44",
+    "createdAt": "2026-04-12T16:08:50Z",
+    "updatedAt": "2026-04-25T14:22:31Z"
+  },
+  {
+    "id": "e6c3a9d7-b4f0-4e8d-c2g8-5f6i8d1e4g3h",
+    "name": "CinderClaw",
+    "rarity": "RARE",
+    "level": 11,
+    "element": "FIRE",
+    "stats": {
+      "attack": 55,
+      "defense": 33,
+      "speed": 58,
+      "stamina": 40
+    },
+    "ownerId": "u5e6f7a8-b9c0-1d2e-3f4a-b5c6d7e8f9a0",
+    "ownerName": "EmberCore",
+    "createdAt": "2026-04-15T11:30:07Z",
+    "updatedAt": "2026-04-28T16:55:09Z"
+  },
+  {
+    "id": "f8d5b2e9-c6a1-4f9e-d4h9-6g7j9e2f5h4i",
+    "name": "IronTusk",
+    "rarity": "UNCOMMON",
+    "level": 8,
+    "element": "METAL",
+    "stats": {
+      "attack": 38,
+      "defense": 62,
+      "speed": 22,
+      "stamina": 58
+    },
+    "ownerId": "u6f7a8b9-c0d1-2e3f-4a5b-c6d7e8f9a0b1",
+    "ownerName": "SteelForge",
+    "createdAt": "2026-04-18T08:42:19Z",
+    "updatedAt": "2026-05-03T10:18:44Z"
+  },
+  {
+    "id": "g1e7c4f0-d8b2-4a0f-e5i0-7h8k0f3g6i5j",
+    "name": "MossHaven",
+    "rarity": "UNCOMMON",
+    "level": 5,
+    "element": "NATURE",
+    "stats": {
+      "attack": 20,
+      "defense": 45,
+      "speed": 35,
+      "stamina": 65
+    },
+    "ownerId": "u7a8b9c0-d1e2-3f4a-5b6c-d7e8f9a0b1c2",
+    "ownerName": "GreenThumb",
+    "createdAt": "2026-04-21T13:19:55Z",
+    "updatedAt": "2026-04-30T07:36:28Z"
+  },
+  {
+    "id": "h4f9d6g2-e0c3-4b1g-f7j1-8i9l1g4h7j6k",
+    "name": "SkyDrift",
+    "rarity": "COMMON",
+    "level": 3,
+    "element": "WIND",
+    "stats": {
+      "attack": 18,
+      "defense": 15,
+      "speed": 55,
+      "stamina": 30
+    },
+    "ownerId": "u8b9c0d1-e2f3-4a5b-6c7d-e8f9a0b1c2d3",
+    "ownerName": "CloudWatcher",
+    "createdAt": "2026-04-25T10:05:33Z",
+    "updatedAt": "2026-05-04T15:50:12Z"
+  }
+]
