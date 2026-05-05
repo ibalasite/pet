@@ -1,125 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — CONSTANTS — Global Quantitative Truth Source</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>業務常數文件 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">CONSTANTS — Global Quantitative Truth Source</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>CONSTANTS — Global Quantitative Truth Source</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="constants--global-quantitative-truth-source">CONSTANTS — Global Quantitative Truth Source</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><!-- 跨文件數值一致性的唯一真相來源（由 EDD Pass-0 生成） --></p>
-<p class="doc-p"><!-- 所有下游文件（EDD/BDD/test-plan/runbook）必須讀取此文件並引用，不得自行填寫未驗證數字 --></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="document-control">Document Control</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>欄位</th><th>內容</th></tr></thead>
-<tbody>
-<tr><td>**DOC-ID**</td><td>CONSTANTS-PIXEL-PET-ARENA-20260503</td></tr>
-<tr><td>**產品名稱**</td><td>Pixel Pet Arena</td></tr>
-<tr><td>**文件版本**</td><td>v1.0</td></tr>
-<tr><td>**狀態**</td><td>DRAFT</td></tr>
-<tr><td>**日期**</td><td>2026-05-03</td></tr>
-<tr><td>**上游 PRD**</td><td>[PRD.md](PRD.md)</td></tr>
-<tr><td>**上游 BRD**</td><td>[BRD.md](BRD.md)</td></tr>
-<tr><td>**同步輸出**</td><td>[constants.json](constants.json)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="change-log">Change Log</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>版本</th><th>日期</th><th>作者</th><th>變更摘要</th></tr></thead>
-<tbody>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 業務常數文件</p>
+    <h1 class="banner-title">業務常數文件</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link active" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>CONSTANTS — Global Quantitative Truth Source</h1>
+<p>&lt;!-- 跨文件數值一致性的唯一真相來源（由 EDD Pass-0 生成） --&gt;</p>
+<p>&lt;!-- 所有下游文件（EDD/BDD/test-plan/runbook）必須讀取此文件並引用，不得自行填寫未驗證數字 --&gt;</p>
+<hr>
+<h2>Document Control</h2>
+<table>
+<tr><th>欄位</th><th>內容</th></tr>
+<tr><td><strong>DOC-ID</strong></td><td>CONSTANTS-PIXEL-PET-ARENA-20260503</td></tr>
+<tr><td><strong>產品名稱</strong></td><td>Pixel Pet Arena</td></tr>
+<tr><td><strong>文件版本</strong></td><td>v1.0</td></tr>
+<tr><td><strong>狀態</strong></td><td>DRAFT</td></tr>
+<tr><td><strong>日期</strong></td><td>2026-05-03</td></tr>
+<tr><td><strong>上游 PRD</strong></td><td><a href="PRD.md" target="_blank" rel="noopener">PRD.md</a></td></tr>
+<tr><td><strong>上游 BRD</strong></td><td><a href="BRD.md" target="_blank" rel="noopener">BRD.md</a></td></tr>
+<tr><td><strong>同步輸出</strong></td><td><a href="constants.json" target="_blank" rel="noopener">constants.json</a></td></tr>
+</table>
+<hr>
+<h2>Change Log</h2>
+<table>
+<tr><th>版本</th><th>日期</th><th>作者</th><th>變更摘要</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>gendoc</td><td>初稿（從 PRD-PIXEL-PET-ARENA-20260503 及 BRD-PIXEL-PET-ARENA-20260503 提取所有量化常數）</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="">使用指引</h2>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote">⚠️ <strong>唯一真相來源</strong>：本文件中所有數值均來源於 PRD 及 BRD，</blockquote>
-<blockquote class="doc-quote">下游文件（EDD/BDD/test-plan/runbook/ARCH）必須引用此文件中的數值，</blockquote>
-<blockquote class="doc-quote"><strong>不得在下游文件中自行定義任何量化數值</strong>。</blockquote>
-<blockquote class="doc-quote">若發現 PRD 與本文件有衝突，以 PRD 為準並更新本文件。</blockquote>
-<blockquote class="doc-quote"></blockquote>
-<blockquote class="doc-quote">- <strong>§1</strong>：產品核心數值（pet 生成、訓練、戰鬥、排行榜、認證等核心常數）</blockquote>
-<blockquote class="doc-quote">- <strong>§2</strong>：倍率與乘算器（稀有度倍率、交易價格公式、食物 buff 示例值）</blockquote>
-<blockquote class="doc-quote">- <strong>§3</strong>：閾值與觸發條件（bot 偵測、快取刷新、A11y、資料庫 failover 等觸發點）</blockquote>
-<blockquote class="doc-quote">- <strong>§4</strong>：SLO/SLI 目標（可用性、延遲、錯誤率、Core Web Vitals）</blockquote>
-<blockquote class="doc-quote">- <strong>§5</strong>：RTP / 機率設計（稀有度機率分布，四檔必須加總 100%）</blockquote>
-<blockquote class="doc-quote">- <strong>§6</strong>：Rate Limit 設定（戰鬥、認證、管理員各端點）</blockquote>
-<blockquote class="doc-quote">- <strong>§7</strong>：業務規則數值（GDPR 時限、交易費率、成長目標、A/B 測試參數）</blockquote>
-<blockquote class="doc-quote">- <strong>§8</strong>：系統容量規劃（RPS、DAU、連線池、基礎設施成本）</blockquote>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="1-product-core-constants">§1 Product Core Constants</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>使用指引</h2>
+<blockquote><p>⚠️ <strong>唯一真相來源</strong>：本文件中所有數值均來源於 PRD 及 BRD，</p></blockquote>
+<blockquote><p>下游文件（EDD/BDD/test-plan/runbook/ARCH）必須引用此文件中的數值，</p></blockquote>
+<blockquote><p><strong>不得在下游文件中自行定義任何量化數值</strong>。</p></blockquote>
+<blockquote><p>若發現 PRD 與本文件有衝突，以 PRD 為準並更新本文件。</p></blockquote>
+<p>&gt;</p>
+<blockquote><p>- <strong>§1</strong>：產品核心數值（pet 生成、訓練、戰鬥、排行榜、認證等核心常數）</p></blockquote>
+<blockquote><p>- <strong>§2</strong>：倍率與乘算器（稀有度倍率、交易價格公式、食物 buff 示例值）</p></blockquote>
+<blockquote><p>- <strong>§3</strong>：閾值與觸發條件（bot 偵測、快取刷新、A11y、資料庫 failover 等觸發點）</p></blockquote>
+<blockquote><p>- <strong>§4</strong>：SLO/SLI 目標（可用性、延遲、錯誤率、Core Web Vitals）</p></blockquote>
+<blockquote><p>- <strong>§5</strong>：RTP / 機率設計（稀有度機率分布，四檔必須加總 100%）</p></blockquote>
+<blockquote><p>- <strong>§6</strong>：Rate Limit 設定（戰鬥、認證、管理員各端點）</p></blockquote>
+<blockquote><p>- <strong>§7</strong>：業務規則數值（GDPR 時限、交易費率、成長目標、A/B 測試參數）</p></blockquote>
+<blockquote><p>- <strong>§8</strong>：系統容量規劃（RPS、DAU、連線池、基礎設施成本）</p></blockquote>
+<hr>
+<h2>§1 Product Core Constants</h2>
+<table>
+<tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr>
 <tr><td>PET_GENERATION_COMBINATIONS_MIN</td><td>1,000,000,000</td><td>combinations</td><td>PRD §5 US-PET-002 AC-002-1</td><td>Must exceed 1 billion distinct combinations across (body × head × color × accessory × rarity_trait × pattern)</td></tr>
 <tr><td>PET_GENERATION_DIMENSIONS</td><td>6</td><td>dimensions</td><td>PRD §5 US-PET-001 AC-001-3</td><td>body, head, color palette, accessory, rarity trait, pattern</td></tr>
 <tr><td>PET_STAT_DEFAULT</td><td>10</td><td>points</td><td>PRD §11.2 data dictionary</td><td>DEFAULT 10 for stat_speed, stat_strength, stat_stamina</td></tr>
@@ -131,8 +190,8 @@
 <tr><td>TRAINING_ACTIONS_PER_DAY</td><td>3</td><td>actions/day</td><td>PRD §5 US-TRAIN-001 AC-005-1</td><td>run, strength, stamina training; reset UTC 00:00</td></tr>
 <tr><td>TRAINING_STAT_POINTS_MIN</td><td>1</td><td>points/action</td><td>PRD §5 US-TRAIN-001 AC-005-1</td><td>Lower bound of per-action stat increment</td></tr>
 <tr><td>TRAINING_STAT_POINTS_MAX</td><td>3</td><td>points/action</td><td>PRD §5 US-TRAIN-001 AC-005-1</td><td>Based on current pet level</td></tr>
-<tr><td>TRAINING_STAT_DISPLAY_DURATION</td><td>2</td><td>seconds</td><td>PRD §5 US-TRAIN-001 AC-005-3</td><td>"+X Speed" indicator display time</td></tr>
-<tr><td>TRAINING_NEGLECT_THRESHOLD</td><td>3</td><td>consecutive days</td><td>PRD §5 US-TRAIN-001 AC-005-5</td><td>Triggers "hungry/neglected" visual state</td></tr>
+<tr><td>TRAINING_STAT_DISPLAY_DURATION</td><td>2</td><td>seconds</td><td>PRD §5 US-TRAIN-001 AC-005-3</td><td>&quot;+X Speed&quot; indicator display time</td></tr>
+<tr><td>TRAINING_NEGLECT_THRESHOLD</td><td>3</td><td>consecutive days</td><td>PRD §5 US-TRAIN-001 AC-005-5</td><td>Triggers &quot;hungry/neglected&quot; visual state</td></tr>
 <tr><td>ARENA_RATE_LIMIT_BATTLES_PER_HOUR</td><td>10</td><td>battles/hour</td><td>PRD §5 US-ARENA-001 AC-007-6; PRD §15 RTM</td><td>Default; admin-tunable</td></tr>
 <tr><td>ARENA_RATE_LIMIT_ADMIN_MIN</td><td>1</td><td>battles/hour</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Admin-tunable lower bound</td></tr>
 <tr><td>ARENA_RATE_LIMIT_ADMIN_MAX</td><td>50</td><td>battles/hour</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Admin-tunable upper bound</td></tr>
@@ -156,15 +215,11 @@
 <tr><td>ARENA_ENTRY_COOLDOWN_ADMIN_MAX</td><td>60</td><td>minutes</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable upper bound</td></tr>
 <tr><td>ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT</td><td>0</td><td>credits</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Default arena entry cost</td></tr>
 <tr><td>ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX</td><td>10</td><td>credits</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable upper bound</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="2-multipliers--modifiers">§2 Multipliers & Modifiers</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§2 Multipliers &amp; Modifiers</h2>
+<table>
+<tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr>
 <tr><td>RARITY_MULTIPLIER_COMMON</td><td>1</td><td>multiplier</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>Used in minimum price formula</td></tr>
 <tr><td>RARITY_MULTIPLIER_RARE</td><td>2</td><td>multiplier</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>Used in minimum price formula</td></tr>
 <tr><td>RARITY_MULTIPLIER_EPIC</td><td>4</td><td>multiplier</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>Used in minimum price formula</td></tr>
@@ -172,21 +227,17 @@
 <tr><td>TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF</td><td>100</td><td>credits/level</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>min_price = (pet_level × 100) + (rarity_multiplier × 500)</td></tr>
 <tr><td>TRADE_MIN_PRICE_FORMULA_RARITY_COEFF</td><td>500</td><td>credits</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>min_price = (pet_level × 100) + (rarity_multiplier × 500)</td></tr>
 <tr><td>ARENA_SCORE_FORMULA</td><td>win_rate × battles_played × level_multiplier</td><td>formula</td><td>PRD §5 US-BOARD-001 AC-009-1</td><td>Composite leaderboard score</td></tr>
-<tr><td>FOOD_BUFF_EXAMPLE_TEMP_AMOUNT</td><td>5</td><td>stat points</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example: "Speed Berry +5 Speed for 24h"</td></tr>
+<tr><td>FOOD_BUFF_EXAMPLE_TEMP_AMOUNT</td><td>5</td><td>stat points</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example: &quot;Speed Berry +5 Speed for 24h&quot;</td></tr>
 <tr><td>FOOD_BUFF_EXAMPLE_TEMP_DURATION</td><td>24</td><td>hours</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example temporary food buff duration</td></tr>
-<tr><td>FOOD_BUFF_EXAMPLE_PERM_AMOUNT</td><td>3</td><td>stat points</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example: "Power Mushroom +3 Strength permanently"</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="3-thresholds--triggers">§3 Thresholds & Triggers</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td>BOT_DETECTION_BATTLES_THRESHOLD</td><td>50</td><td>battles</td><td>PRD §5 US-ADMIN-005 AC-017-1; PRD §7.9 analytics; PRD §19.3</td><td>Auto-flag as SUSPICIOUS if >50 battles within any 60-min window</td></tr>
+<tr><td>FOOD_BUFF_EXAMPLE_PERM_AMOUNT</td><td>3</td><td>stat points</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example: &quot;Power Mushroom +3 Strength permanently&quot;</td></tr>
+</table>
+<hr>
+<h2>§3 Thresholds &amp; Triggers</h2>
+<table>
+<tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr>
+<tr><td>BOT_DETECTION_BATTLES_THRESHOLD</td><td>50</td><td>battles</td><td>PRD §5 US-ADMIN-005 AC-017-1; PRD §7.9 analytics; PRD §19.3</td><td>Auto-flag as SUSPICIOUS if &gt;50 battles within any 60-min window</td></tr>
 <tr><td>BOT_DETECTION_WINDOW</td><td>60</td><td>minutes</td><td>PRD §5 US-ADMIN-005 AC-017-1; PRD §7.9 analytics</td><td>Rolling window for bot detection</td></tr>
-<tr><td>LEADERBOARD_ADMIN_SUSPICIOUS_FLAG</td><td>50</td><td>battles/hour</td><td>PRD §5 US-ADMIN-002 AC-014-1</td><td>Admin leaderboard view flags >50 battles/hour</td></tr>
+<tr><td>LEADERBOARD_ADMIN_SUSPICIOUS_FLAG</td><td>50</td><td>battles/hour</td><td>PRD §5 US-ADMIN-002 AC-014-1</td><td>Admin leaderboard view flags &gt;50 battles/hour</td></tr>
 <tr><td>LEADERBOARD_BAN_REFLECTION_TIME</td><td>5</td><td>minutes</td><td>PRD §5 US-BOARD-001 AC-009-6; PRD §5 US-ADMIN-002 AC-014-3</td><td>Banned pet removed from leaderboard within 5 minutes</td></tr>
 <tr><td>LEADERBOARD_UPDATE_LAG_MAX</td><td>30</td><td>seconds</td><td>PRD §5 US-BOARD-001 AC-009-2; PRD §7.1 NFR-PERF-09</td><td>Maximum eventual consistency lag</td></tr>
 <tr><td>CONFIG_CACHE_REFRESH_TIME</td><td>5</td><td>minutes</td><td>PRD §5 US-ADMIN-003 AC-015-2; US-ADMIN-006 AC-018-3</td><td>Config changes take effect within 5 minutes</td></tr>
@@ -202,12 +253,12 @@
 <tr><td>ADMIN_DAILY_MODERATION_ACTIONS</td><td>100</td><td>actions/day</td><td>PRD §19.6 NFR-ADMIN-06</td><td>Single moderator capacity without degradation</td></tr>
 <tr><td>ADMIN_PAGE_LOAD_TIME</td><td>3</td><td>seconds</td><td>PRD §19.6 NFR-ADMIN-06</td><td>With up to 1 million pet records</td></tr>
 <tr><td>ARENA_RATE_LIMIT_COUNTER_WINDOW</td><td>1</td><td>hour</td><td>PRD §7.2 NFR-SEC-10</td><td>Redis-backed counter TTL</td></tr>
-<tr><td>OBSERVABILITY_ERROR_RATE_ALERT_WINDOW</td><td>5</td><td>minutes</td><td>PRD §7.8 NFR-OBS-03</td><td>Alert trigger window for >1% error rate</td></tr>
+<tr><td>OBSERVABILITY_ERROR_RATE_ALERT_WINDOW</td><td>5</td><td>minutes</td><td>PRD §7.8 NFR-OBS-03</td><td>Alert trigger window for &gt;1% error rate</td></tr>
 <tr><td>OBSERVABILITY_LATENCY_ALERT_THRESHOLD</td><td>1000</td><td>ms</td><td>PRD §7.8 NFR-OBS-04</td><td>Alert if any endpoint exceeds P99 1000ms</td></tr>
-<tr><td>OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW</td><td>30</td><td>minutes</td><td>PRD §7.8 NFR-OBS-05</td><td>Alert window for >2% SendGrid failure rate</td></tr>
+<tr><td>OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW</td><td>30</td><td>minutes</td><td>PRD §7.8 NFR-OBS-05</td><td>Alert window for &gt;2% SendGrid failure rate</td></tr>
 <tr><td>OBSERVABILITY_LEADERBOARD_LAG_ALERT</td><td>60</td><td>seconds</td><td>PRD §7.8 metrics table</td><td>Alert threshold for leaderboard_update_lag_seconds</td></tr>
-<tr><td>OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD</td><td>5</td><td>claims/hour</td><td>PRD §7.8 metrics table</td><td>Alert if <5/hour for 2h (engagement drop)</td></tr>
-<tr><td>OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD</td><td>10</td><td>battles/hour</td><td>PRD §7.8 metrics table</td><td>Alert if <10/hour for 2h</td></tr>
+<tr><td>OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD</td><td>5</td><td>claims/hour</td><td>PRD §7.8 metrics table</td><td>Alert if &lt;5/hour for 2h (engagement drop)</td></tr>
+<tr><td>OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD</td><td>10</td><td>battles/hour</td><td>PRD §7.8 metrics table</td><td>Alert if &lt;10/hour for 2h</td></tr>
 <tr><td>INFRA_REDIS_ALERT_THRESHOLD</td><td>80</td><td>percent</td><td>PRD §7.8 metrics table</td><td>redis_memory_usage_percent alert</td></tr>
 <tr><td>INFRA_DB_POOL_ALERT_THRESHOLD</td><td>80</td><td>percent</td><td>PRD §7.8 metrics table</td><td>db_connection_pool_utilization alert</td></tr>
 <tr><td>A11Y_FOCUS_CONTRAST_RATIO</td><td>3</td><td>:1</td><td>PRD §7.7 NFR-A11Y-01; PRD §18 A11y-01</td><td>Minimum focus indicator contrast ratio</td></tr>
@@ -228,58 +279,46 @@
 <tr><td>CODE_FUNCTION_MAX_LINES</td><td>50</td><td>lines</td><td>PRD §7.5 NFR-MAINT-03</td><td>Functions do not exceed 50 lines</td></tr>
 <tr><td>API_BACKWARD_COMPAT_VERSIONS</td><td>1</td><td>major version</td><td>PRD §7.5 NFR-MAINT-06; PRD §8.5</td><td>Backward compatibility maintained for at least 1 major version</td></tr>
 <tr><td>API_DEPRECATION_NOTICE_DAYS</td><td>90</td><td>days</td><td>PRD §8.5</td><td>Notice required before breaking changes</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="4-slosli-targets">§4 SLO/SLI Targets</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Metric</th><th>Target</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§4 SLO/SLI Targets</h2>
+<table>
+<tr><th>Metric</th><th>Target</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr>
 <tr><td>Availability</td><td>99.9%</td><td>monthly</td><td>PRD §7.3 NFR-AVAIL-01</td><td>Maximum 43.8 minutes downtime per month</td></tr>
-<tr><td>P99 API Latency (read endpoints)</td><td>< 200</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-01</td><td>All read endpoints</td></tr>
-<tr><td>P99 API Latency (write endpoints)</td><td>< 500</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-02</td><td>Training, arena entry write endpoints</td></tr>
-<tr><td>First Contentful Paint (FCP)</td><td>< 1.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-03</td><td>Lighthouse / Core Web Vitals</td></tr>
-<tr><td>Largest Contentful Paint (LCP)</td><td>< 2.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-04</td><td>Core Web Vitals</td></tr>
-<tr><td>Cumulative Layout Shift (CLS)</td><td>< 0.1</td><td>score</td><td>PRD §7.1 NFR-PERF-05</td><td>Core Web Vitals</td></tr>
-<tr><td>Interaction to Next Paint (INP)</td><td>< 200</td><td>ms</td><td>PRD §7.1 NFR-PERF-06</td><td>Core Web Vitals</td></tr>
+<tr><td>P99 API Latency (read endpoints)</td><td>&lt; 200</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-01</td><td>All read endpoints</td></tr>
+<tr><td>P99 API Latency (write endpoints)</td><td>&lt; 500</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-02</td><td>Training, arena entry write endpoints</td></tr>
+<tr><td>First Contentful Paint (FCP)</td><td>&lt; 1.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-03</td><td>Lighthouse / Core Web Vitals</td></tr>
+<tr><td>Largest Contentful Paint (LCP)</td><td>&lt; 2.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-04</td><td>Core Web Vitals</td></tr>
+<tr><td>Cumulative Layout Shift (CLS)</td><td>&lt; 0.1</td><td>score</td><td>PRD §7.1 NFR-PERF-05</td><td>Core Web Vitals</td></tr>
+<tr><td>Interaction to Next Paint (INP)</td><td>&lt; 200</td><td>ms</td><td>PRD §7.1 NFR-PERF-06</td><td>Core Web Vitals</td></tr>
 <tr><td>Pet Animation Frame Rate</td><td>≥ 30</td><td>FPS sustained</td><td>PRD §7.1 NFR-PERF-07</td><td>Mid-range devices</td></tr>
-<tr><td>Arena Battle Result E2E</td><td>< 2</td><td>seconds</td><td>PRD §7.1 NFR-PERF-08</td><td>Calculation + storage</td></tr>
+<tr><td>Arena Battle Result E2E</td><td>&lt; 2</td><td>seconds</td><td>PRD §7.1 NFR-PERF-08</td><td>Calculation + storage</td></tr>
 <tr><td>Leaderboard Update Lag</td><td>≤ 30</td><td>seconds</td><td>PRD §7.1 NFR-PERF-09</td><td>From battle completion</td></tr>
 <tr><td>Email Delivery (P90)</td><td>≤ 60</td><td>seconds</td><td>PRD §7.1 NFR-PERF-10</td><td>Claim password email</td></tr>
-<tr><td>Error Rate</td><td>< 1%</td><td>of requests / 5 min</td><td>PRD §7.8 NFR-OBS-03</td><td>Alert trigger threshold</td></tr>
-<tr><td>Observability P99 Alert</td><td>> 1000</td><td>ms / 5 min</td><td>PRD §7.8 NFR-OBS-04</td><td>Alert threshold</td></tr>
-<tr><td>Email Delivery Failure Rate</td><td>< 2%</td><td>/ 30 min</td><td>PRD §7.8 NFR-OBS-05; PRD §9.2 guardrails</td><td>SendGrid failure rate alert</td></tr>
-<tr><td>Spam Complaint Rate</td><td>< 0.1%</td><td>SendGrid</td><td>PRD §9.2 guardrail metrics</td><td>Prevents SendGrid IP throttling</td></tr>
+<tr><td>Error Rate</td><td>&lt; 1%</td><td>of requests / 5 min</td><td>PRD §7.8 NFR-OBS-03</td><td>Alert trigger threshold</td></tr>
+<tr><td>Observability P99 Alert</td><td>&gt; 1000</td><td>ms / 5 min</td><td>PRD §7.8 NFR-OBS-04</td><td>Alert threshold</td></tr>
+<tr><td>Email Delivery Failure Rate</td><td>&lt; 2%</td><td>/ 30 min</td><td>PRD §7.8 NFR-OBS-05; PRD §9.2 guardrails</td><td>SendGrid failure rate alert</td></tr>
+<tr><td>Spam Complaint Rate</td><td>&lt; 0.1%</td><td>SendGrid</td><td>PRD §9.2 guardrail metrics</td><td>Prevents SendGrid IP throttling</td></tr>
 <tr><td>Test Unit Coverage</td><td>≥ 80%</td><td>percent</td><td>PRD §7.5 NFR-MAINT-01</td><td>All business logic modules</td></tr>
-<tr><td>Pet Interaction Response</td><td>< 200</td><td>ms</td><td>PRD §5 US-PET-001 AC-001-2</td><td>Click/tap animation response</td></tr>
-<tr><td>Pet Render on Load</td><td>< 2</td><td>seconds</td><td>PRD §5 US-PET-001 AC-001-1</td><td>Canvas render on page load</td></tr>
-<tr><td>Total JS Bundle (gzipped)</td><td>< 300</td><td>KB</td><td>PRD §7.1 bundle size limits</td><td>App page type</td></tr>
-<tr><td>Total CSS Bundle (gzipped)</td><td>< 50</td><td>KB</td><td>PRD §7.1 bundle size limits</td><td>App page type</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="5-rtp--probability-design">§5 RTP / Probability Design</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Rarity</th><th>Probability</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
+<tr><td>Pet Interaction Response</td><td>&lt; 200</td><td>ms</td><td>PRD §5 US-PET-001 AC-001-2</td><td>Click/tap animation response</td></tr>
+<tr><td>Pet Render on Load</td><td>&lt; 2</td><td>seconds</td><td>PRD §5 US-PET-001 AC-001-1</td><td>Canvas render on page load</td></tr>
+<tr><td>Total JS Bundle (gzipped)</td><td>&lt; 300</td><td>KB</td><td>PRD §7.1 bundle size limits</td><td>App page type</td></tr>
+<tr><td>Total CSS Bundle (gzipped)</td><td>&lt; 50</td><td>KB</td><td>PRD §7.1 bundle size limits</td><td>App page type</td></tr>
+</table>
+<hr>
+<h2>§5 RTP / Probability Design</h2>
+<table>
+<tr><th>Rarity</th><th>Probability</th><th>PRD Source</th><th>Notes</th></tr>
 <tr><td>Common</td><td>60%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
 <tr><td>Rare</td><td>25%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
 <tr><td>Epic</td><td>12%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
 <tr><td>Legendary</td><td>3%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
 <tr><td>Total</td><td>100%</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Four values must always sum to 100%; admin-tunable</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="6-rate-limits">§6 Rate Limits</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Endpoint/Feature</th><th>Limit</th><th>Window</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§6 Rate Limits</h2>
+<table>
+<tr><th>Endpoint/Feature</th><th>Limit</th><th>Window</th><th>PRD Source</th><th>Notes</th></tr>
 <tr><td>Arena battles per pet</td><td>10 (default)</td><td>1 hour</td><td>PRD §5 US-ARENA-001 AC-007-6; PRD §7.2 NFR-SEC-10</td><td>Redis-backed counter with TTL; HTTP 429 + Retry-After on breach</td></tr>
 <tr><td>Arena battles per pet (admin-tunable range)</td><td>1–50</td><td>1 hour</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Integer; default 10</td></tr>
 <tr><td>Email claim attempts</td><td>5</td><td>1 hour per email</td><td>PRD §7.2 NFR-SEC-04</td><td>Per email address</td></tr>
@@ -288,15 +327,11 @@
 <tr><td>Email re-send on delivery failure</td><td>3</td><td>retries</td><td>PRD §6.2 error flow</td><td>Retry queue over 15 minutes</td></tr>
 <tr><td>Email re-send retry duration</td><td>15</td><td>minutes</td><td>PRD §6.2 error flow</td><td>Total retry window for failed delivery</td></tr>
 <tr><td>Admin portal requests per admin</td><td>100</td><td>per minute</td><td>PRD §19.6 NFR-ADMIN-04</td><td>Separately rate-limited from player API</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="7-business-rules">§7 Business Rules</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Rule Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§7 Business Rules</h2>
+<table>
+<tr><th>Rule Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr>
 <tr><td>GDPR_EMAIL_DELETION_WINDOW</td><td>7</td><td>days</td><td>PRD §7.2 NFR-SEC-07; PRD §17.3; PRD §17.2 PII inventory</td><td>Email replaced with SHA-256 hash within 7 days of deletion request</td></tr>
 <tr><td>GDPR_EMAIL_HASHING_INTERNAL_SLA</td><td>24</td><td>hours</td><td>PRD §19.4 US-ADMIN-004 AC-016-2</td><td>Actual system completes within 24 hours; reported compliant within 7 days</td></tr>
 <tr><td>GDPR_DATA_ACCESS_RESPONSE</td><td>30</td><td>days</td><td>PRD §17.3 GDPR rights matrix</td><td>Right of Access (Art. 15)</td></tr>
@@ -347,15 +382,11 @@
 <tr><td>AB_TEST_DURATION</td><td>2</td><td>weeks</td><td>PRD §9.4</td><td>Duration for all A/B tests</td></tr>
 <tr><td>ALPHA_BETA_TESTERS</td><td>20</td><td>people</td><td>PRD §10.1</td><td>Invited testers for Alpha phase</td></tr>
 <tr><td>BETA_AUDIENCE</td><td>500</td><td>users</td><td>PRD §10.1</td><td>itch.io + Discord beta rollout</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="8-capacity-planning">§8 Capacity Planning</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Parameter</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§8 Capacity Planning</h2>
+<table>
+<tr><th>Parameter</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr>
 <tr><td>NORMAL_OPERATION_RPS</td><td>100</td><td>RPS</td><td>PRD §7.1 capacity targets</td><td>Sustained normal operation</td></tr>
 <tr><td>NORMAL_OPERATION_DAU_MIN</td><td>2000</td><td>DAU</td><td>PRD §7.1 capacity targets; BRD §3.1 O3</td><td>Normal DAU range lower bound; intentionally equal to DAU_12_MONTH_TARGET — infrastructure sized to meet 12-month business objective</td></tr>
 <tr><td>NORMAL_OPERATION_DAU_MAX</td><td>5000</td><td>DAU</td><td>PRD §7.1 capacity targets; BRD §3.1 O3</td><td>Normal DAU range upper bound</td></tr>
@@ -372,55 +403,64 @@
 <tr><td>EMAIL_SENDGRID_MONTHLY_LIMIT</td><td>10000</td><td>emails</td><td>BRD §11.1 cost structure</td><td>~$20/month</td></tr>
 <tr><td>INFRA_COST_ANNUAL_BASE</td><td>8000</td><td>USD/year</td><td>BRD §3.3 base scenario</td><td>Server + maintenance labor</td></tr>
 <tr><td>VENDOR_MIGRATION_PLAN_DAYS</td><td>14</td><td>days</td><td>PRD §8.3; BRD §13.1</td><td>SendGrid and PostgreSQL vendor migration plan window</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>Data retention constants</strong> (ANALYTICS_EVENT_HOT_RETENTION, ANALYTICS_EVENT_COLD_ARCHIVE, ADMIN_AUDIT_LOG_RETENTION) are defined in §7 Business Rules.</blockquote>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="appendix-aconstantsjson-">Appendix A：constants.json 同步格式</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">本文件生成後，必須同步輸出 <code>docs/constants.json</code>，格式如下（節選關鍵欄位）：</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-json">{
-  "version": "1.0",
-  "generated_from": "docs/PRD.md",
-  "last_updated": "2026-05-03",
-  "core": {
-    "PET_GENERATION_COMBINATIONS_MIN": 1000000000,
-    "PET_STAT_MAX": 100,
-    "PET_LEVEL_MAX": 100,
-    "TRAINING_ACTIONS_PER_DAY": 3,
-    "ARENA_RATE_LIMIT_BATTLES_PER_HOUR": 10,
-    "CLAIM_CODE_DIGITS": 6,
-    "CLAIM_CODE_EXPIRY": 15
+</table>
+<blockquote><p><strong>Data retention constants</strong> (ANALYTICS_EVENT_HOT_RETENTION, ANALYTICS_EVENT_COLD_ARCHIVE, ADMIN_AUDIT_LOG_RETENTION) are defined in §7 Business Rules.</p></blockquote>
+<hr>
+<h2>Appendix A：constants.json 同步格式</h2>
+<p>本文件生成後，必須同步輸出 <code>docs/constants.json</code>，格式如下（節選關鍵欄位）：</p>
+<pre><code class="language-json">{
+  &quot;version&quot;: &quot;1.0&quot;,
+  &quot;generated_from&quot;: &quot;docs/PRD.md&quot;,
+  &quot;last_updated&quot;: &quot;2026-05-03&quot;,
+  &quot;core&quot;: {
+    &quot;PET_GENERATION_COMBINATIONS_MIN&quot;: 1000000000,
+    &quot;PET_STAT_MAX&quot;: 100,
+    &quot;PET_LEVEL_MAX&quot;: 100,
+    &quot;TRAINING_ACTIONS_PER_DAY&quot;: 3,
+    &quot;ARENA_RATE_LIMIT_BATTLES_PER_HOUR&quot;: 10,
+    &quot;CLAIM_CODE_DIGITS&quot;: 6,
+    &quot;CLAIM_CODE_EXPIRY&quot;: 15
   },
-  "slo": {
-    "availability_pct": 99.9,
-    "p99_latency_read_ms": 200,
-    "p99_latency_write_ms": 500,
-    "error_rate_pct": 1.0,
-    "leaderboard_update_lag_s": 30
+  &quot;slo&quot;: {
+    &quot;availability_pct&quot;: 99.9,
+    &quot;p99_latency_read_ms&quot;: 200,
+    &quot;p99_latency_write_ms&quot;: 500,
+    &quot;error_rate_pct&quot;: 1.0,
+    &quot;leaderboard_update_lag_s&quot;: 30
   },
-  "rtp": {
-    "COMMON_PCT": 60,
-    "RARE_PCT": 25,
-    "EPIC_PCT": 12,
-    "LEGENDARY_PCT": 3
+  &quot;rtp&quot;: {
+    &quot;COMMON_PCT&quot;: 60,
+    &quot;RARE_PCT&quot;: 25,
+    &quot;EPIC_PCT&quot;: 12,
+    &quot;LEGENDARY_PCT&quot;: 3
   },
-  "rate_limits": {
-    "arena_battles_per_pet": {"limit": 10, "window": "1h"},
-    "email_claim_attempts": {"limit": 5, "window": "1h"},
-    "admin_requests_per_account": {"limit": 100, "window": "1m"}
+  &quot;rate_limits&quot;: {
+    &quot;arena_battles_per_pet&quot;: {&quot;limit&quot;: 10, &quot;window&quot;: &quot;1h&quot;},
+    &quot;email_claim_attempts&quot;: {&quot;limit&quot;: 5, &quot;window&quot;: &quot;1h&quot;},
+    &quot;admin_requests_per_account&quot;: {&quot;limit&quot;: 100, &quot;window&quot;: &quot;1m&quot;}
   },
-  "capacity": {
-    "NORMAL_OPERATION_RPS": 100,
-    "PEAK_OPERATION_RPS": 500,
-    "DAU_12_MONTH_TARGET": 2000
+  &quot;capacity&quot;: {
+    &quot;NORMAL_OPERATION_RPS&quot;: 100,
+    &quot;PEAK_OPERATION_RPS&quot;: 500,
+    &quot;DAU_12_MONTH_TARGET&quot;: 2000
   }
-}</code></pre>
-<div class="doc-gap"></div>
-    </div>
+}</code></pre></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

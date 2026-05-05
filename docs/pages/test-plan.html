@@ -1,142 +1,175 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — Test Plan — pixel-pet-arena</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>測試計畫 (Test Plan) — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">Test Plan — pixel-pet-arena</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>Test Plan — pixel-pet-arena</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="test-plan--pixel-pet-arena">Test Plan — pixel-pet-arena</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>DOC-ID</strong>: TEST-PLAN-PIXEL-PET-ARENA-20260503</p>
-<p class="doc-p"><strong>Project</strong>: pixel-pet-arena</p>
-<p class="doc-p"><strong>Version</strong>: v1.0</p>
-<p class="doc-p"><strong>Status</strong>: DRAFT</p>
-<p class="doc-p"><strong>Author</strong>: AI Generated (gendoc test-plan)</p>
-<p class="doc-p"><strong>Date</strong>: 2026-05-03</p>
-<p class="doc-p"><strong>Upstream</strong>: ARCH-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20260503, EDD-PIXEL-PET-ARENA-20260503, SCHEMA-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="table-of-contents">Table of Contents</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <a href="#1-test-objectives">Test Objectives</a></p>
-<p class="doc-p">2. <a href="#2-test-scope">Test Scope</a></p>
-<p class="doc-p">3. <a href="#3-test-environment-setup">Test Environment Setup</a></p>
-<p class="doc-p">4. <a href="#4-test-data-strategy">Test Data Strategy</a></p>
-<p class="doc-p">5. <a href="#5-unit-tests">Unit Tests</a></p>
-<p class="doc-p">6. <a href="#6-integration-tests">Integration Tests</a></p>
-<p class="doc-p">7. <a href="#7-end-to-end-tests">End-to-End Tests</a></p>
-<p class="doc-p">8. <a href="#8-performance-tests">Performance Tests</a></p>
-<p class="doc-p">9. <a href="#9-security-tests">Security Tests</a></p>
-<p class="doc-p">10. <a href="#10-accessibility-tests">Accessibility Tests</a></p>
-<p class="doc-p">11. <a href="#11-bdd-scenario-coverage">BDD Scenario Coverage</a></p>
-<p class="doc-p">12. <a href="#12-cicd-integration">CI/CD Integration</a></p>
-<p class="doc-p">13. <a href="#13-test-cases">Test Cases</a></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="1-test-objectives">1. Test Objectives</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="11-primary-objectives">1.1 Primary Objectives</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">This test plan governs quality assurance for the pixel-pet-arena platform across all 8 architecture layers: Frontend (React + Phaser.js player app), Frontend (Vue 3 + Element Plus admin portal), Backend API (Node.js + Fastify), Database (PostgreSQL/Supabase), Cache (Redis/Upstash), Email Service (SendGrid + Nodemailer), Deployment Infrastructure, and Cross-Cutting Concerns.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">The objectives are ordered by criticality to the product's core value proposition:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>Correctness</strong>: Every acceptance criterion from the 18 user stories (US-PET-001, US-PET-002, US-AUTH-001, US-AUTH-002, US-TRAIN-001, US-FOOD-001, US-ARENA-001, US-ARENA-002, US-BOARD-001, US-RECORD-001, US-RARITY-001, US-TRADE-001, US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006) is verifiable by at least one automated test.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">2. <strong>Coverage</strong>: Unit test coverage for all business logic modules must reach or exceed (unit_test_coverage_min_percent = 80)%. This threshold is enforced as a hard CI gate; builds fail below this line.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">3. <strong>Performance</strong>: The API meets the SLO targets: P99 read latency below (p99_api_latency_read_ms_at_100_rps = 200) ms and P99 write latency below (p99_api_latency_write_ms_at_100_rps = 500) ms at (normal_operation_rps = 100) RPS sustained load. Frontend meets Core Web Vitals: FCP below (fcp_seconds = 1.5) s, LCP below (lcp_seconds = 2.5) s, CLS below (cls_score = 0.1), INP below (inp_ms = 200) ms.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">4. <strong>Security</strong>: No OWASP Top 10 vulnerabilities exist in the claim flow, admin authentication, or data-handling endpoints. All rate limits and token-handling behaviors are verified under adversarial conditions.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">5. <strong>Reliability</strong>: Degraded-mode behavior (Redis unavailable, SendGrid failure, PostgreSQL primary failover) is validated in integration and E2E tests so the system behaves predictably in production incidents.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">6. <strong>Compliance</strong>: GDPR erasure ((gdpr_email_deletion_window_days = 7)-day SLA, internal 24-hour processing — gdpr_email_hashing_internal_sla_hours = 24), COPPA age-confirmation, and CAN-SPAM transactional-only email constraints are covered by dedicated test cases.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">7. <strong>Accessibility</strong>: All P0 user flows conform to WCAG 2.1 Level AA. Focus contrast meets (a11y_focus_contrast_ratio = 3:1) and text contrast meets (a11y_text_contrast_normal = 4.5:1).</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="12-out-of-scope-test-objectives">1.2 Out-of-Scope Test Objectives</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The following areas are explicitly excluded from this test plan version:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>Phase 3 marketplace features (covered by FF_MARKETPLACE = false; basic smoke tests for feature-flag gate only)</li>
-<li>Native mobile app testing (project is HTML5 browser-only)</li>
-<li>Voice chat or MMORPG combat mechanics (out of project scope per PRD §4.4)</li>
-<li>Blockchain or P2E mechanics (out of project scope per PRD §4.4)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="2-test-scope">2. Test Scope</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="21-in-scope-architecture-layers">2.1 In-Scope Architecture Layers</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All 8 architecture layers identified in ARCH.md are covered:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Layer</th><th>Components</th><th>Test Types Applied</th></tr></thead>
-<tbody>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 測試計畫 (Test Plan)</p>
+    <h1 class="banner-title">測試計畫 (Test Plan)</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link active" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Test Plan — pixel-pet-arena</h1>
+<p><strong>DOC-ID</strong>: TEST-PLAN-PIXEL-PET-ARENA-20260503</p>
+<p><strong>Project</strong>: pixel-pet-arena</p>
+<p><strong>Version</strong>: v1.0</p>
+<p><strong>Status</strong>: DRAFT</p>
+<p><strong>Author</strong>: AI Generated (gendoc test-plan)</p>
+<p><strong>Date</strong>: 2026-05-03</p>
+<p><strong>Upstream</strong>: ARCH-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20260503, EDD-PIXEL-PET-ARENA-20260503, SCHEMA-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
+<hr>
+<h2>Table of Contents</h2>
+<ol><li><a href="#1-test-objectives" target="_blank" rel="noopener">Test Objectives</a></li><li><a href="#2-test-scope" target="_blank" rel="noopener">Test Scope</a></li><li><a href="#3-test-environment-setup" target="_blank" rel="noopener">Test Environment Setup</a></li><li><a href="#4-test-data-strategy" target="_blank" rel="noopener">Test Data Strategy</a></li><li><a href="#5-unit-tests" target="_blank" rel="noopener">Unit Tests</a></li><li><a href="#6-integration-tests" target="_blank" rel="noopener">Integration Tests</a></li><li><a href="#7-end-to-end-tests" target="_blank" rel="noopener">End-to-End Tests</a></li><li><a href="#8-performance-tests" target="_blank" rel="noopener">Performance Tests</a></li><li><a href="#9-security-tests" target="_blank" rel="noopener">Security Tests</a></li><li><a href="#10-accessibility-tests" target="_blank" rel="noopener">Accessibility Tests</a></li><li><a href="#11-bdd-scenario-coverage" target="_blank" rel="noopener">BDD Scenario Coverage</a></li><li><a href="#12-cicd-integration" target="_blank" rel="noopener">CI/CD Integration</a></li><li><a href="#13-test-cases" target="_blank" rel="noopener">Test Cases</a></li></ol>
+<hr>
+<h2>1. Test Objectives</h2>
+<h3>1.1 Primary Objectives</h3>
+<p>This test plan governs quality assurance for the pixel-pet-arena platform across all 8 architecture layers: Frontend (React + Phaser.js player app), Frontend (Vue 3 + Element Plus admin portal), Backend API (Node.js + Fastify), Database (PostgreSQL/Supabase), Cache (Redis/Upstash), Email Service (SendGrid + Nodemailer), Deployment Infrastructure, and Cross-Cutting Concerns.</p>
+<p>The objectives are ordered by criticality to the product&#x27;s core value proposition:</p>
+<ol><li><strong>Correctness</strong>: Every acceptance criterion from the 18 user stories (US-PET-001, US-PET-002, US-AUTH-001, US-AUTH-002, US-TRAIN-001, US-FOOD-001, US-ARENA-001, US-ARENA-002, US-BOARD-001, US-RECORD-001, US-RARITY-001, US-TRADE-001, US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006) is verifiable by at least one automated test.</li></ol>
+<ol><li><strong>Coverage</strong>: Unit test coverage for all business logic modules must reach or exceed (unit_test_coverage_min_percent = 80)%. This threshold is enforced as a hard CI gate; builds fail below this line.</li></ol>
+<ol><li><strong>Performance</strong>: The API meets the SLO targets: P99 read latency below (p99_api_latency_read_ms_at_100_rps = 200) ms and P99 write latency below (p99_api_latency_write_ms_at_100_rps = 500) ms at (normal_operation_rps = 100) RPS sustained load. Frontend meets Core Web Vitals: FCP below (fcp_seconds = 1.5) s, LCP below (lcp_seconds = 2.5) s, CLS below (cls_score = 0.1), INP below (inp_ms = 200) ms.</li></ol>
+<ol><li><strong>Security</strong>: No OWASP Top 10 vulnerabilities exist in the claim flow, admin authentication, or data-handling endpoints. All rate limits and token-handling behaviors are verified under adversarial conditions.</li></ol>
+<ol><li><strong>Reliability</strong>: Degraded-mode behavior (Redis unavailable, SendGrid failure, PostgreSQL primary failover) is validated in integration and E2E tests so the system behaves predictably in production incidents.</li></ol>
+<ol><li><strong>Compliance</strong>: GDPR erasure ((gdpr_email_deletion_window_days = 7)-day SLA, internal 24-hour processing — gdpr_email_hashing_internal_sla_hours = 24), COPPA age-confirmation, and CAN-SPAM transactional-only email constraints are covered by dedicated test cases.</li></ol>
+<ol><li><strong>Accessibility</strong>: All P0 user flows conform to WCAG 2.1 Level AA. Focus contrast meets (a11y_focus_contrast_ratio = 3:1) and text contrast meets (a11y_text_contrast_normal = 4.5:1).</li></ol>
+<h3>1.2 Out-of-Scope Test Objectives</h3>
+<p>The following areas are explicitly excluded from this test plan version:</p>
+<ul><li>Phase 3 marketplace features (covered by FF_MARKETPLACE = false; basic smoke tests for feature-flag gate only)</li><li>Native mobile app testing (project is HTML5 browser-only)</li><li>Voice chat or MMORPG combat mechanics (out of project scope per PRD §4.4)</li><li>Blockchain or P2E mechanics (out of project scope per PRD §4.4)</li></ul>
+<hr>
+<h2>2. Test Scope</h2>
+<h3>2.1 In-Scope Architecture Layers</h3>
+<p>All 8 architecture layers identified in ARCH.md are covered:</p>
+<table>
+<tr><th>Layer</th><th>Components</th><th>Test Types Applied</th></tr>
 <tr><td>L1 — Frontend Player App</td><td>React 18, Phaser.js 3, Vite 5, TanStack Query, Zustand</td><td>Unit, E2E, Visual Regression, Accessibility, Performance</td></tr>
 <tr><td>L2 — Frontend Admin Portal</td><td>Vue 3, Element Plus, Vite 5, Pinia, Axios, ECharts</td><td>Unit, E2E, Accessibility</td></tr>
 <tr><td>L3 — Backend API</td><td>Node.js 20, Fastify 4, TypeScript 5, Zod</td><td>Unit, Integration, E2E, Performance, Security</td></tr>
@@ -145,15 +178,11 @@
 <tr><td>L6 — Email Service</td><td>SendGrid v3, Nodemailer SMTP fallback</td><td>Integration, Failover testing</td></tr>
 <tr><td>L7 — Deployment</td><td>Railway, Vercel, Docker, GitHub Actions</td><td>Smoke tests, Container health checks</td></tr>
 <tr><td>L8 — Cross-Cutting Concerns</td><td>Logging (pino), observability, GDPR, config management</td><td>Unit, Integration, Compliance</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="22-user-story-coverage-matrix">2.2 User Story Coverage Matrix</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All 18 user stories are covered by at least one automated test. The complete traceability mapping is:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>User Story</th><th>Priority</th><th>Epic</th><th>Test Types Required</th></tr></thead>
-<tbody>
+</table>
+<h3>2.2 User Story Coverage Matrix</h3>
+<p>All 18 user stories are covered by at least one automated test. The complete traceability mapping is:</p>
+<table>
+<tr><th>User Story</th><th>Priority</th><th>Epic</th><th>Test Types Required</th></tr>
 <tr><td>US-PET-001 — Random Pet Display</td><td>P0</td><td>EPIC-PET</td><td>E2E, Accessibility, Visual Regression</td></tr>
 <tr><td>US-PET-002 — Procedural Pet Generation</td><td>P0</td><td>EPIC-PET</td><td>Unit, Integration</td></tr>
 <tr><td>US-AUTH-001 — Email Claim Flow</td><td>P0</td><td>EPIC-AUTH</td><td>Unit, Integration, E2E, Security</td></tr>
@@ -172,18 +201,14 @@
 <tr><td>US-ADMIN-004 — GDPR Data Deletion Processing</td><td>P0</td><td>EPIC-ADMIN</td><td>Integration, E2E, Compliance</td></tr>
 <tr><td>US-ADMIN-005 — Suspicious Battle Detection</td><td>P0</td><td>EPIC-ADMIN</td><td>Integration, E2E</td></tr>
 <tr><td>US-ADMIN-006 — Game Economy Configuration</td><td>P1</td><td>EPIC-ADMIN</td><td>Integration, E2E</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="23-feature-flag-coverage">2.3 Feature Flag Coverage</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Every feature flag has a dedicated test that validates the kill-switch behavior (disabled state returns the correct error or placeholder, not a raw exception):</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Feature Flag</th><th>Kill-Switch Test</th><th>Live-Path Test</th></tr></thead>
-<tbody>
+</table>
+<h3>2.3 Feature Flag Coverage</h3>
+<p>Every feature flag has a dedicated test that validates the kill-switch behavior (disabled state returns the correct error or placeholder, not a raw exception):</p>
+<table>
+<tr><th>Feature Flag</th><th>Kill-Switch Test</th><th>Live-Path Test</th></tr>
 <tr><td>FF_GUEST_PET_DISPLAY</td><td>Static placeholder rendered when disabled</td><td>Random pet rendered on load</td></tr>
 <tr><td>FF_PET_GENERATION</td><td>Pet generation pipeline disabled; random-pet endpoint returns 503</td><td>Procedural pet generated on demand</td></tr>
-<tr><td>FF_EMAIL_CLAIM</td><td>Claim button shows "Feature temporarily unavailable"</td><td>Full claim flow succeeds</td></tr>
+<tr><td>FF_EMAIL_CLAIM</td><td>Claim button shows &quot;Feature temporarily unavailable&quot;</td><td>Full claim flow succeeds</td></tr>
 <tr><td>FF_TRAINING_SYSTEM</td><td>Training buttons disabled with tooltip</td><td>Training stat increments correctly</td></tr>
 <tr><td>FF_FOOD_SYSTEM</td><td>Food inventory hidden; existing buffs still calculated</td><td>Feed action applies stat buff</td></tr>
 <tr><td>FF_ARENA_RACE</td><td>Arena entry disabled with maintenance message</td><td>Race match completes</td></tr>
@@ -193,35 +218,24 @@
 <tr><td>FF_RARITY_DISPLAY</td><td>Rarity badge and animated border hidden; no rarity metadata in pet API response</td><td>Rarity badge and tier-specific effects visible</td></tr>
 <tr><td>FF_ADMIN_PORTAL</td><td>Admin routes return 503</td><td>Admin login + dashboard accessible</td></tr>
 <tr><td>FF_MARKETPLACE</td><td>Marketplace hidden from nav and routes</td><td>Listing page accessible (FF = true, staging only)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="3-test-environment-setup">3. Test Environment Setup</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="31-environment-strategy">3.1 Environment Strategy</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Three isolated environments mirror the deployment architecture from ARCH §7.3:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Environment</th><th>Purpose</th><th>Database</th><th>Redis</th><th>Trigger</th></tr></thead>
-<tbody>
-<tr><td>`test` (CI)</td><td>Automated test runs</td><td>PostgreSQL in Docker (CI service)</td><td>Redis in Docker (CI service)</td><td>Every pull request push</td></tr>
-<tr><td>`staging`</td><td>Pre-production integration + E2E</td><td>Supabase staging project</td><td>Upstash staging namespace</td><td>Auto on main branch merge</td></tr>
-<tr><td>`production`</td><td>Live smoke tests only</td><td>Supabase production</td><td>Upstash production</td><td>Post-deployment verification</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="32-local-development-test-setup">3.2 Local Development Test Setup</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Prerequisites for local test execution:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Node.js 20 LTS
+</table>
+<hr>
+<h2>3. Test Environment Setup</h2>
+<h3>3.1 Environment Strategy</h3>
+<p>Three isolated environments mirror the deployment architecture from ARCH §7.3:</p>
+<table>
+<tr><th>Environment</th><th>Purpose</th><th>Database</th><th>Redis</th><th>Trigger</th></tr>
+<tr><td><code>test</code> (CI)</td><td>Automated test runs</td><td>PostgreSQL in Docker (CI service)</td><td>Redis in Docker (CI service)</td><td>Every pull request push</td></tr>
+<tr><td><code>staging</code></td><td>Pre-production integration + E2E</td><td>Supabase staging project</td><td>Upstash staging namespace</td><td>Auto on main branch merge</td></tr>
+<tr><td><code>production</code></td><td>Live smoke tests only</td><td>Supabase production</td><td>Upstash production</td><td>Post-deployment verification</td></tr>
+</table>
+<h3>3.2 Local Development Test Setup</h3>
+<p>Prerequisites for local test execution:</p>
+<pre><code class="">Node.js 20 LTS
 pnpm 9+
 Docker Desktop (for PostgreSQL + Redis services)</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Bootstrap commands:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash"># Start dependent services
+<p>Bootstrap commands:</p>
+<pre><code class="language-bash"># Start dependent services
 docker compose up -d postgres redis
 
 # Install all workspace dependencies
@@ -234,12 +248,9 @@ pnpm run db:migrate --env test
 pnpm run test:unit
 pnpm run test:integration
 pnpm run test:e2e</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="33-ci-service-configuration">3.3 CI Service Configuration</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">GitHub Actions CI matrix uses Docker service containers:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-yaml">services:
+<h3>3.3 CI Service Configuration</h3>
+<p>GitHub Actions CI matrix uses Docker service containers:</p>
+<pre><code class="language-yaml">services:
   postgres:
     image: postgres:15-alpine
     env:
@@ -255,107 +266,48 @@ pnpm run test:e2e</code></pre>
   redis:
     image: redis:7-alpine
     options: &gt;-
-      --health-cmd "redis-cli ping"
+      --health-cmd &quot;redis-cli ping&quot;
       --health-interval 10s
       --health-timeout 5s
       --health-retries 5</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Required environment variables in CI secrets:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><code>TEST_DATABASE_URL</code>: PostgreSQL connection string for CI test database</li>
-<li><code>TEST_REDIS_URL</code>: Redis connection string for CI test instance</li>
-<li><code>TEST_SENDGRID_API_KEY</code>: SendGrid test-mode key (no real emails sent)</li>
-<li><code>TEST_EMAIL_ENCRYPTION_KEY</code>: AES-256-GCM key for email encryption tests</li>
-<li><code>TEST_JWT_SECRET</code>: HMAC secret for admin TOTP setup token tests</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="34-playwright-browser-configuration">3.4 Playwright Browser Configuration</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">E2E tests run on three browser engines to satisfy cross-browser requirements:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-typescript">// playwright.config.ts
+<p>Required environment variables in CI secrets:</p>
+<ul><li><code>TEST_DATABASE_URL</code>: PostgreSQL connection string for CI test database</li><li><code>TEST_REDIS_URL</code>: Redis connection string for CI test instance</li><li><code>TEST_SENDGRID_API_KEY</code>: SendGrid test-mode key (no real emails sent)</li><li><code>TEST_EMAIL_ENCRYPTION_KEY</code>: AES-256-GCM key for email encryption tests</li><li><code>TEST_JWT_SECRET</code>: HMAC secret for admin TOTP setup token tests</li></ul>
+<h3>3.4 Playwright Browser Configuration</h3>
+<p>E2E tests run on three browser engines to satisfy cross-browser requirements:</p>
+<pre><code class="language-typescript">// playwright.config.ts
 projects: [
-  { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-  { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  { name: &#x27;chromium&#x27;, use: { ...devices[&#x27;Desktop Chrome&#x27;] } },
+  { name: &#x27;firefox&#x27;, use: { ...devices[&#x27;Desktop Firefox&#x27;] } },
+  { name: &#x27;webkit&#x27;, use: { ...devices[&#x27;Desktop Safari&#x27;] } },
 ]</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Visual regression breakpoints tested: 320px, 768px, 1024px, 1440px (per web testing rules).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="4-test-data-strategy">4. Test Data Strategy</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="41-fixture-categories">4.1 Fixture Categories</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Test fixtures are organized into four categories matching the domain model:</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Static Fixtures</strong> (committed to repository, deterministic):</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><code>fixtures/pets/</code>: 20 pre-seeded pet records at known seeds covering all rarity tiers (Common × 12, Rare × 5, Epic × 2, Legendary × 1)</li>
-<li><code>fixtures/admin_users/</code>: 3 admin accounts — one per role (super_admin, moderator, read_only)</li>
-<li><code>fixtures/battle_records/</code>: 25 battle records (race × 15, sumo × 10, including AI matches)</li>
-<li><code>fixtures/food_buffs/</code>: 12 food buff records (temporary × 6, permanent × 4, expired × 2)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Generated Fixtures</strong> (created at test setup, cleaned up after):</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>Random pet tokens for each authenticated test: <code>crypto.randomBytes(32)</code> — mirrors production generation using (pet_access_token_min_bytes = 32)</li>
-<li>Claim codes: deterministic 6-digit integers in the 100000–999999 range generated via seeded pseudo-random for repeatability</li>
-<li>Admin sessions: Redis entries created with known session IDs and expiry timestamps</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Boundary Fixtures</strong> (edge-case values):</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>Pet with <code>stat_speed = 100</code> (at maximum — (pet_stat_max = 100)) to test the training-blocked path</li>
-<li>Pet with <code>last_trained_at</code> set to 4 days ago (exceeds (training_neglect_threshold_days = 3)) for neglected-state tests</li>
-<li>Claim code with <code>expires_at = NOW() - 1 second</code> to test the expired-code path</li>
-<li>Admin account with <code>locked_until = NOW() + (admin_login_lockout_duration_minutes = 30) minutes</code> for lockout state tests</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Negative Fixtures</strong> (invalid data, must produce errors):</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>Pet access token with length below (pet_access_token_min_bytes = 32) bytes</li>
-<li>Claim code with non-numeric characters (format violation)</li>
-<li>Admin password without uppercase, lowercase, and digit (validation rule)</li>
-<li>Rarity weights that do not sum to 100% (constraint violation for admin config)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="42-test-data-isolation">4.2 Test Data Isolation</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Each integration test suite runs inside a database transaction that is rolled back after the test completes, preventing state accumulation between tests. Redis keys created during tests use a test-specific namespace prefix (<code>test:{suite_id}:*</code>) and are flushed via <code>FLUSHDB</code> on the test Redis instance after each suite run.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="43-seed-data-for-performance-tests">4.3 Seed Data for Performance Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Load tests require a representative data set to produce realistic query plans:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>100,000 pet records with randomized seeds and stats</li>
-<li>500,000 battle records distributed across pets</li>
-<li>10,000 training log entries</li>
-<li>Redis <code>leaderboard:global</code> sorted set populated with 50,000 entries</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p">Seed data is generated by a dedicated script (<code>scripts/seed-perf-data.ts</code>) and loaded once into the staging environment before performance test runs.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="5-unit-tests">5. Unit Tests</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="51-test-framework-and-configuration">5.1 Test Framework and Configuration</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All unit tests use Vitest with the following configuration:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-typescript">// vitest.config.ts
+<p>Visual regression breakpoints tested: 320px, 768px, 1024px, 1440px (per web testing rules).</p>
+<hr>
+<h2>4. Test Data Strategy</h2>
+<h3>4.1 Fixture Categories</h3>
+<p>Test fixtures are organized into four categories matching the domain model:</p>
+<p><strong>Static Fixtures</strong> (committed to repository, deterministic):</p>
+<ul><li><code>fixtures/pets/</code>: 20 pre-seeded pet records at known seeds covering all rarity tiers (Common × 12, Rare × 5, Epic × 2, Legendary × 1)</li><li><code>fixtures/admin_users/</code>: 3 admin accounts — one per role (super_admin, moderator, read_only)</li><li><code>fixtures/battle_records/</code>: 25 battle records (race × 15, sumo × 10, including AI matches)</li><li><code>fixtures/food_buffs/</code>: 12 food buff records (temporary × 6, permanent × 4, expired × 2)</li></ul>
+<p><strong>Generated Fixtures</strong> (created at test setup, cleaned up after):</p>
+<ul><li>Random pet tokens for each authenticated test: <code>crypto.randomBytes(32)</code> — mirrors production generation using (pet_access_token_min_bytes = 32)</li><li>Claim codes: deterministic 6-digit integers in the 100000–999999 range generated via seeded pseudo-random for repeatability</li><li>Admin sessions: Redis entries created with known session IDs and expiry timestamps</li></ul>
+<p><strong>Boundary Fixtures</strong> (edge-case values):</p>
+<ul><li>Pet with <code>stat_speed = 100</code> (at maximum — (pet_stat_max = 100)) to test the training-blocked path</li><li>Pet with <code>last_trained_at</code> set to 4 days ago (exceeds (training_neglect_threshold_days = 3)) for neglected-state tests</li><li>Claim code with <code>expires_at = NOW() - 1 second</code> to test the expired-code path</li><li>Admin account with <code>locked_until = NOW() + (admin_login_lockout_duration_minutes = 30) minutes</code> for lockout state tests</li></ul>
+<p><strong>Negative Fixtures</strong> (invalid data, must produce errors):</p>
+<ul><li>Pet access token with length below (pet_access_token_min_bytes = 32) bytes</li><li>Claim code with non-numeric characters (format violation)</li><li>Admin password without uppercase, lowercase, and digit (validation rule)</li><li>Rarity weights that do not sum to 100% (constraint violation for admin config)</li></ul>
+<h3>4.2 Test Data Isolation</h3>
+<p>Each integration test suite runs inside a database transaction that is rolled back after the test completes, preventing state accumulation between tests. Redis keys created during tests use a test-specific namespace prefix (<code>test:{suite_id}:*</code>) and are flushed via <code>FLUSHDB</code> on the test Redis instance after each suite run.</p>
+<h3>4.3 Seed Data for Performance Tests</h3>
+<p>Load tests require a representative data set to produce realistic query plans:</p>
+<ul><li>100,000 pet records with randomized seeds and stats</li><li>500,000 battle records distributed across pets</li><li>10,000 training log entries</li><li>Redis <code>leaderboard:global</code> sorted set populated with 50,000 entries</li></ul>
+<p>Seed data is generated by a dedicated script (<code>scripts/seed-perf-data.ts</code>) and loaded once into the staging environment before performance test runs.</p>
+<hr>
+<h2>5. Unit Tests</h2>
+<h3>5.1 Test Framework and Configuration</h3>
+<p>All unit tests use Vitest with the following configuration:</p>
+<pre><code class="language-typescript">// vitest.config.ts
 export default defineConfig({
   test: {
     coverage: {
-      provider: 'v8',
+      provider: &#x27;v8&#x27;,
       thresholds: {
         global: {
           branches: 80,   // unit_test_coverage_min_percent = 80
@@ -367,1204 +319,900 @@ export default defineConfig({
     },
   },
 });</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit_test_coverage_min_percent = 80)%.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="52-pet-generation-unit-tests-us-pet-001-us-pet-002">5.2 Pet Generation Unit Tests (US-PET-001, US-PET-002)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/domain/pet/__tests__/pet-generation.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-001</th><th>Combination space exceeds minimum</th></tr></thead>
-<tbody>
+<p>Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit_test_coverage_min_percent = 80)%.</p>
+<h3>5.2 Pet Generation Unit Tests (US-PET-001, US-PET-002)</h3>
+<p><strong>File</strong>: <code>apps/api/src/domain/pet/<strong>tests</strong>/pet-generation.test.ts</code></p>
+<table>
+<tr><th>TC-UNIT-001</th><th>Combination space exceeds minimum</th></tr>
 <tr><td>Given</td><td>The generation algorithm with dimension counts from constants</td></tr>
 <tr><td>When</td><td>Combination space is calculated as body × head × color_palette × accessory × rarity_trait × pattern</td></tr>
 <tr><td>Then</td><td>Result exceeds (pet_generation_combinations_min = 1000000000)</td></tr>
 <tr><td>Linked AC</td><td>AC-002-1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-002</th><th>Deterministic generation from seed</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-002</th><th>Deterministic generation from seed</th></tr>
 <tr><td>Given</td><td>A fixed seed value (e.g. 123456789)</td></tr>
-<tr><td>When</td><td>`generatePet(seed)` is called twice</td></tr>
+<tr><td>When</td><td><code>generatePet(seed)</code> is called twice</td></tr>
 <tr><td>Then</td><td>Both calls return identical attribute objects</td></tr>
 <tr><td>Linked AC</td><td>AC-002-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-003</th><th>Rarity distribution matches probability weights</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-003</th><th>Rarity distribution matches probability weights</th></tr>
 <tr><td>Given</td><td>10,000 generated pets with random seeds</td></tr>
 <tr><td>When</td><td>Rarity distribution is computed</td></tr>
 <tr><td>Then</td><td>Common ≈ (rarity_common_percent = 60)%, Rare ≈ (rarity_rare_percent = 25)%, Epic ≈ (rarity_epic_percent = 12)%, Legendary ≈ (rarity_legendary_percent = 3)%, all within ±2% statistical tolerance</td></tr>
 <tr><td>Linked AC</td><td>AC-002-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-004</th><th>Default stat values</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-004</th><th>Default stat values</th></tr>
 <tr><td>Given</td><td>A newly generated pet</td></tr>
 <tr><td>When</td><td>Stats are inspected</td></tr>
 <tr><td>Then</td><td>speed = strength = stamina = (pet_stat_default = 10)</td></tr>
 <tr><td>Linked AC</td><td>US-PET-002 (data model correctness)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="53-claim-flow-unit-tests-us-auth-001-us-auth-002">5.3 Claim Flow Unit Tests (US-AUTH-001, US-AUTH-002)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/domain/auth/__tests__/claim-flow.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-005</th><th>OTP code expiry enforcement</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A claim code created with `expires_at = NOW() - 1 second`</td></tr>
-<tr><td>When</td><td>`verifyClaimCode(code, claimId)` is called</td></tr>
-<tr><td>Then</td><td>Throws `ClaimCodeExpiredError` with code `CODE_EXPIRED`</td></tr>
+</table>
+<h3>5.3 Claim Flow Unit Tests (US-AUTH-001, US-AUTH-002)</h3>
+<p><strong>File</strong>: <code>apps/api/src/domain/auth/<strong>tests</strong>/claim-flow.test.ts</code></p>
+<table>
+<tr><th>TC-UNIT-005</th><th>OTP code expiry enforcement</th></tr>
+<tr><td>Given</td><td>A claim code created with <code>expires_at = NOW() - 1 second</code></td></tr>
+<tr><td>When</td><td><code>verifyClaimCode(code, claimId)</code> is called</td></tr>
+<tr><td>Then</td><td>Throws <code>ClaimCodeExpiredError</code> with code <code>CODE_EXPIRED</code></td></tr>
 <tr><td>Linked AC</td><td>AC-003-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-006</th><th>OTP code one-time-use enforcement</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A claim code with `used_at` already set</td></tr>
-<tr><td>When</td><td>`verifyClaimCode(code, claimId)` is called</td></tr>
-<tr><td>Then</td><td>Throws `ClaimCodeAlreadyUsedError` with code `INVALID_CODE`</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-006</th><th>OTP code one-time-use enforcement</th></tr>
+<tr><td>Given</td><td>A claim code with <code>used_at</code> already set</td></tr>
+<tr><td>When</td><td><code>verifyClaimCode(code, claimId)</code> is called</td></tr>
+<tr><td>Then</td><td>Throws <code>ClaimCodeAlreadyUsedError</code> with code <code>INVALID_CODE</code></td></tr>
 <tr><td>Linked AC</td><td>AC-003-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-007</th><th>Pet access token minimum entropy</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A call to `generatePetAccessToken()`</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-007</th><th>Pet access token minimum entropy</th></tr>
+<tr><td>Given</td><td>A call to <code>generatePetAccessToken()</code></td></tr>
 <tr><td>When</td><td>The raw token is inspected</td></tr>
-<tr><td>Then</td><td>`Buffer.from(token, 'base64url').length >= (pet_access_token_min_bytes = 32)`</td></tr>
+<tr><td>Then</td><td><code>Buffer.from(token, &#x27;base64url&#x27;).length &gt;= (pet_access_token_min_bytes = 32)</code></td></tr>
 <tr><td>Linked AC</td><td>PRD NFR-SEC-05</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-008</th><th>Token stored as SHA-256 hash only</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-008</th><th>Token stored as SHA-256 hash only</th></tr>
 <tr><td>Given</td><td>A pet with an assigned access token</td></tr>
-<tr><td>When</td><td>The `pets.owner_token_hash` column is read</td></tr>
+<tr><td>When</td><td>The <code>pets.owner_token_hash</code> column is read</td></tr>
 <tr><td>Then</td><td>Value is a 64-character hex string (SHA-256 digest); raw token is absent from all persisted fields</td></tr>
 <tr><td>Linked AC</td><td>PRD NFR-SEC-01</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="54-training-system-unit-tests-us-train-001-us-food-001">5.4 Training System Unit Tests (US-TRAIN-001, US-FOOD-001)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/domain/training/__tests__/training.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-009</th><th>Stat increment range</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `stat_speed = 15` (any level; stat delta is level-independent per constants)</td></tr>
-<tr><td>When</td><td>`applyTrainingAction(pet, 'RUN')` is called</td></tr>
-<tr><td>Then</td><td>`stat_speed` increases by an integer in `[training_stat_points_min = 1, training_stat_points_max = 3]`; the delta is uniformly random and not level-dependent</td></tr>
+</table>
+<h3>5.4 Training System Unit Tests (US-TRAIN-001, US-FOOD-001)</h3>
+<p><strong>File</strong>: <code>apps/api/src/domain/training/<strong>tests</strong>/training.test.ts</code></p>
+<table>
+<tr><th>TC-UNIT-009</th><th>Stat increment range</th></tr>
+<tr><td>Given</td><td>A pet with <code>stat_speed = 15</code> (any level; stat delta is level-independent per constants)</td></tr>
+<tr><td>When</td><td><code>applyTrainingAction(pet, &#x27;RUN&#x27;)</code> is called</td></tr>
+<tr><td>Then</td><td><code>stat_speed</code> increases by an integer in <code>[training_stat_points_min = 1, training_stat_points_max = 3]</code>; the delta is uniformly random and not level-dependent</td></tr>
 <tr><td>Linked AC</td><td>AC-005-1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-010</th><th>Stat cap enforcement — training blocked at maximum</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `stat_speed = (pet_stat_max = 100)`</td></tr>
-<tr><td>When</td><td>`applyTrainingAction(pet, 'RUN')` is called</td></tr>
-<tr><td>Then</td><td>Throws `StatAtMaximumError`; when serialized by the API handler the response is HTTP 400 with `{ "code": "STAT_AT_MAXIMUM", "message": "This stat has reached the maximum value of 100" }`</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-010</th><th>Stat cap enforcement — training blocked at maximum</th></tr>
+<tr><td>Given</td><td>A pet with <code>stat_speed = (pet_stat_max = 100)</code></td></tr>
+<tr><td>When</td><td><code>applyTrainingAction(pet, &#x27;RUN&#x27;)</code> is called</td></tr>
+<tr><td>Then</td><td>Throws <code>StatAtMaximumError</code>; when serialized by the API handler the response is HTTP 400 with <code>{ &quot;code&quot;: &quot;STAT_AT_MAXIMUM&quot;, &quot;message&quot;: &quot;This stat has reached the maximum value of 100&quot; }</code></td></tr>
 <tr><td>Linked AC</td><td>AC-005-6</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-011</th><th>Stat cap enforcement — food feed blocked at maximum</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `stat_strength = (pet_stat_max = 100)` and a permanent strength-boost food item</td></tr>
-<tr><td>When</td><td>`feedFoodItem(pet, foodItem)` is called</td></tr>
-<tr><td>Then</td><td>Throws `StatAtMaximumError`; when serialized by the API handler the response is HTTP 400 with `{ "code": "STAT_AT_MAXIMUM", "stat": "strength" }`</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-011</th><th>Stat cap enforcement — food feed blocked at maximum</th></tr>
+<tr><td>Given</td><td>A pet with <code>stat_strength = (pet_stat_max = 100)</code> and a permanent strength-boost food item</td></tr>
+<tr><td>When</td><td><code>feedFoodItem(pet, foodItem)</code> is called</td></tr>
+<tr><td>Then</td><td>Throws <code>StatAtMaximumError</code>; when serialized by the API handler the response is HTTP 400 with <code>{ &quot;code&quot;: &quot;STAT_AT_MAXIMUM&quot;, &quot;stat&quot;: &quot;strength&quot; }</code></td></tr>
 <tr><td>Linked AC</td><td>AC-006-6</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-012</th><th>Neglected state threshold</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `last_trained_at = NOW() - (training_neglect_threshold_days = 3) days - 1 hour`</td></tr>
-<tr><td>When</td><td>`isNeglected(pet)` is called</td></tr>
-<tr><td>Then</td><td>Returns `true`</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-012</th><th>Neglected state threshold</th></tr>
+<tr><td>Given</td><td>A pet with <code>last_trained_at = NOW() - (training_neglect_threshold_days = 3) days - 1 hour</code></td></tr>
+<tr><td>When</td><td><code>isNeglected(pet)</code> is called</td></tr>
+<tr><td>Then</td><td>Returns <code>true</code></td></tr>
 <tr><td>Linked AC</td><td>AC-005-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-013</th><th>Daily training action limit</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-013</th><th>Daily training action limit</th></tr>
 <tr><td>Given</td><td>A pet that has already completed (training_actions_per_day = 3) training actions in the current UTC day</td></tr>
-<tr><td>When</td><td>`canTrain(pet)` is called</td></tr>
-<tr><td>Then</td><td>Returns `false`</td></tr>
+<tr><td>When</td><td><code>canTrain(pet)</code> is called</td></tr>
+<tr><td>Then</td><td>Returns <code>false</code></td></tr>
 <tr><td>Linked AC</td><td>AC-005-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="55-arena-battle-unit-tests-us-arena-001-us-arena-002">5.5 Arena Battle Unit Tests (US-ARENA-001, US-ARENA-002)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/domain/arena/__tests__/battle-calculation.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-014</th><th>Race outcome determinism with seed</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>Two pets with known stats and a fixed `random_seed`</td></tr>
-<tr><td>When</td><td>`calculateBattleOutcome('RACE', petA, petB, seed)` is called twice</td></tr>
+</table>
+<h3>5.5 Arena Battle Unit Tests (US-ARENA-001, US-ARENA-002)</h3>
+<p><strong>File</strong>: <code>apps/api/src/domain/arena/<strong>tests</strong>/battle-calculation.test.ts</code></p>
+<table>
+<tr><th>TC-UNIT-014</th><th>Race outcome determinism with seed</th></tr>
+<tr><td>Given</td><td>Two pets with known stats and a fixed <code>random_seed</code></td></tr>
+<tr><td>When</td><td><code>calculateBattleOutcome(&#x27;RACE&#x27;, petA, petB, seed)</code> is called twice</td></tr>
 <tr><td>Then</td><td>Both calls return the same winner</td></tr>
 <tr><td>Linked AC</td><td>AC-007-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-015</th><th>Random modifier bounds</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-015</th><th>Random modifier bounds</th></tr>
 <tr><td>Given</td><td>1,000 battle calculations with varied seeds</td></tr>
 <tr><td>When</td><td>The effective speed modifier is extracted from each result</td></tr>
-<tr><td>Then</td><td>All modifiers are within `[-15%, +15%]` — (arena_battle_outcome_random_modifier_percent = 15)</td></tr>
+<tr><td>Then</td><td>All modifiers are within <code>[-15%, +15%]</code> — (arena_battle_outcome_random_modifier_percent = 15)</td></tr>
 <tr><td>Linked AC</td><td>AC-007-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-016</th><th>Sumo mode uses strength stat</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>PetA with `stat_speed = 100`, `stat_strength = 1`; PetB with `stat_speed = 1`, `stat_strength = 100`; fixed seed</td></tr>
-<tr><td>When</td><td>`calculateBattleOutcome('SUMO', petA, petB, seed)` is called</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-016</th><th>Sumo mode uses strength stat</th></tr>
+<tr><td>Given</td><td>PetA with <code>stat_speed = 100</code>, <code>stat_strength = 1</code>; PetB with <code>stat_speed = 1</code>, <code>stat_strength = 100</code>; fixed seed</td></tr>
+<tr><td>When</td><td><code>calculateBattleOutcome(&#x27;SUMO&#x27;, petA, petB, seed)</code> is called</td></tr>
 <tr><td>Then</td><td>PetB wins (strength-dominant); race mode would have petA winning</td></tr>
 <tr><td>Linked AC</td><td>AC-008-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-017</th><th>Arena score formula</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-017</th><th>Arena score formula</th></tr>
 <tr><td>Given</td><td>A pet with win_rate = 0.75, battles_played = 40, level = 5</td></tr>
-<tr><td>When</td><td>`calculateArenaScore(pet)` is called</td></tr>
-<tr><td>Then</td><td>Result = 0.75 × 40 × level_multiplier(5), matching `(arena_score_formula = win_rate * battles_played * level_multiplier)`</td></tr>
+<tr><td>When</td><td><code>calculateArenaScore(pet)</code> is called</td></tr>
+<tr><td>Then</td><td>Result = 0.75 × 40 × level_multiplier(5), matching <code>(arena_score_formula = win_rate <em> battles_played </em> level_multiplier)</code></td></tr>
 <tr><td>Linked AC</td><td>AC-009-1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="56-level-formula-unit-tests">5.6 Level Formula Unit Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/domain/pet/__tests__/level.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-018</th><th>Level formula derivation</th></tr></thead>
-<tbody>
+</table>
+<h3>5.6 Level Formula Unit Tests</h3>
+<p><strong>File</strong>: <code>apps/api/src/domain/pet/<strong>tests</strong>/level.test.ts</code></p>
+<table>
+<tr><th>TC-UNIT-018</th><th>Level formula derivation</th></tr>
 <tr><td>Given</td><td>A pet with 35 total training actions</td></tr>
-<tr><td>When</td><td>`calculateLevel(totalTrainingActions)` is called</td></tr>
-<tr><td>Then</td><td>Returns `FLOOR(35 / (pet_level_formula_divisor = 10)) = 3`</td></tr>
+<tr><td>When</td><td><code>calculateLevel(totalTrainingActions)</code> is called</td></tr>
+<tr><td>Then</td><td>Returns <code>FLOOR(35 / (pet_level_formula_divisor = 10)) = 3</code></td></tr>
 <tr><td>Linked AC</td><td>US-TRAIN-001 (level growth)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-019</th><th>Level cap enforcement</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-UNIT-019</th><th>Level cap enforcement</th></tr>
 <tr><td>Given</td><td>A pet with 1,500 total training actions</td></tr>
-<tr><td>When</td><td>`calculateLevel(totalTrainingActions)` is called</td></tr>
-<tr><td>Then</td><td>Returns `(pet_level_max = 100)`, not 150</td></tr>
+<tr><td>When</td><td><code>calculateLevel(totalTrainingActions)</code> is called</td></tr>
+<tr><td>Then</td><td>Returns <code>(pet_level_max = 100)</code>, not 150</td></tr>
 <tr><td>Linked AC</td><td>US-TRAIN-001</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="57-security-unit-tests">5.7 Security Unit Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/security/__tests__/</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-020</th><th>Email enumeration prevention</th></tr></thead>
-<tbody>
+</table>
+<h3>5.7 Security Unit Tests</h3>
+<p><strong>File</strong>: <code>apps/api/src/security/<strong>tests</strong>/</code></p>
+<table>
+<tr><th>TC-UNIT-020</th><th>Email enumeration prevention</th></tr>
 <tr><td>Given</td><td>Two calls to the claim handler — one with a registered email, one with an unregistered email</td></tr>
 <tr><td>When</td><td>Response objects are compared</td></tr>
 <tr><td>Then</td><td>Both responses have identical structure, HTTP status code, and response body text</td></tr>
 <tr><td>Linked AC</td><td>AC-003-6, PRD NFR-SEC-03</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-021</th><th>Recovery endpoint anti-enumeration</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>`POST /api/v1/claim/recover` with an email that matches no pet</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-021</th><th>Recovery endpoint anti-enumeration</th></tr>
+<tr><td>Given</td><td><code>POST /api/v1/claim/recover</code> with an email that matches no pet</td></tr>
 <tr><td>When</td><td>Response is inspected</td></tr>
-<tr><td>Then</td><td>HTTP 200 returned with a synthetic `claimId`; no `NOT_FOUND` status exposed</td></tr>
+<tr><td>Then</td><td>HTTP 200 returned with a synthetic <code>claimId</code>; no <code>NOT_FOUND</code> status exposed</td></tr>
 <tr><td>Linked AC</td><td>ARCH §5.2 anti-enumeration</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-UNIT-022</th><th>Error sanitization in production mode</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>`NODE_ENV = production` and an internal server error thrown during request handling</td></tr>
+</table>
+<table>
+<tr><th>TC-UNIT-022</th><th>Error sanitization in production mode</th></tr>
+<tr><td>Given</td><td><code>NODE_ENV = production</code> and an internal server error thrown during request handling</td></tr>
 <tr><td>When</td><td>The error response is serialized</td></tr>
-<tr><td>Then</td><td>`stack`, internal `code`, and path details are absent; only public `code`, user-safe `message`, and optional `retryAfter` are present</td></tr>
+<tr><td>Then</td><td><code>stack</code>, internal <code>code</code>, and path details are absent; only public <code>code</code>, user-safe <code>message</code>, and optional <code>retryAfter</code> are present</td></tr>
 <tr><td>Linked AC</td><td>ARCH §8.2 production error sanitization</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="6-integration-tests">6. Integration Tests</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="61-claim-flow-integration-tests-us-auth-001-us-auth-002">6.1 Claim Flow Integration Tests (US-AUTH-001, US-AUTH-002)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/__tests__/integration/claim-flow.integration.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-001</th><th>Full claim flow persists ownership</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>6. Integration Tests</h2>
+<h3>6.1 Claim Flow Integration Tests (US-AUTH-001, US-AUTH-002)</h3>
+<p><strong>File</strong>: <code>apps/api/src/<strong>tests</strong>/integration/claim-flow.integration.test.ts</code></p>
+<table>
+<tr><th>TC-INT-001</th><th>Full claim flow persists ownership</th></tr>
 <tr><td>Given</td><td>A guest pet record in PostgreSQL and a valid claim code</td></tr>
-<tr><td>When</td><td>`POST /api/v1/claim/verify` is called with the correct OTP</td></tr>
-<tr><td>Then</td><td>`pets.owner_token_hash` is set; `claim_codes.used_at` is set; response includes `petToken` and `petUrl`</td></tr>
+<tr><td>When</td><td><code>POST /api/v1/claim/verify</code> is called with the correct OTP</td></tr>
+<tr><td>Then</td><td><code>pets.owner_token_hash</code> is set; <code>claim_codes.used_at</code> is set; response includes <code>petToken</code> and <code>petUrl</code></td></tr>
 <tr><td>Linked AC</td><td>AC-003-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-002</th><th>Claim rate limit enforced via Redis</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>Redis `rl:claim:{email_hash}` counter at (auth_rate_limit_claim_attempts_per_hour = 5)</td></tr>
-<tr><td>When</td><td>`POST /api/v1/claim` is submitted for the same email</td></tr>
-<tr><td>Then</td><td>HTTP 429 returned with `Retry-After` header; counter not incremented further</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-002</th><th>Claim rate limit enforced via Redis</th></tr>
+<tr><td>Given</td><td>Redis <code>rl:claim:{email_hash}</code> counter at (auth_rate_limit_claim_attempts_per_hour = 5)</td></tr>
+<tr><td>When</td><td><code>POST /api/v1/claim</code> is submitted for the same email</td></tr>
+<tr><td>Then</td><td>HTTP 429 returned with <code>Retry-After</code> header; counter not incremented further</td></tr>
 <tr><td>Linked AC</td><td>PRD NFR-SEC-04</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-003</th><th>Seed collision retry mechanism</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>The first 2 generated seeds already exist in `pets.seed`</td></tr>
-<tr><td>When</td><td>`GET /api/v1/pets/random` is called</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-003</th><th>Seed collision retry mechanism</th></tr>
+<tr><td>Given</td><td>The first 2 generated seeds already exist in <code>pets.seed</code></td></tr>
+<tr><td>When</td><td><code>GET /api/v1/pets/random</code> is called</td></tr>
 <tr><td>Then</td><td>A unique seed is found on the 3rd attempt; HTTP 200 returned</td></tr>
 <tr><td>Linked AC</td><td>AC-002-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-004</th><th>Seed collision max retries exceeded</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-INT-004</th><th>Seed collision max retries exceeded</th></tr>
 <tr><td>Given</td><td>All attempts up to (pet_seed_collision_max_retries = 3) produce colliding seeds</td></tr>
-<tr><td>When</td><td>`GET /api/v1/pets/random` is called</td></tr>
-<tr><td>Then</td><td>HTTP 500 with `INTERNAL_SERVER_ERROR`</td></tr>
+<tr><td>When</td><td><code>GET /api/v1/pets/random</code> is called</td></tr>
+<tr><td>Then</td><td>HTTP 500 with <code>INTERNAL_SERVER_ERROR</code></td></tr>
 <tr><td>Linked AC</td><td>ARCH §6.1 collision retry</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-024</th><th>Seed uniqueness guarantee across large batch</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-INT-024</th><th>Seed uniqueness guarantee across large batch</th></tr>
 <tr><td>Given</td><td>10,000 pet records generated with random seeds</td></tr>
-<tr><td>When</td><td>All `pets.seed` values are collected</td></tr>
+<tr><td>When</td><td>All <code>pets.seed</code> values are collected</td></tr>
 <tr><td>Then</td><td>No two pets share the same seed value; the uniqueness constraint holds across the full generated set</td></tr>
 <tr><td>Linked AC</td><td>AC-002-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-005</th><th>OTP code entry fail-closed on Redis unavailability</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-INT-005</th><th>OTP code entry fail-closed on Redis unavailability</th></tr>
 <tr><td>Given</td><td>Redis is unavailable (connection refused)</td></tr>
-<tr><td>When</td><td>`POST /api/v1/claim/verify` is called with a valid code</td></tr>
+<tr><td>When</td><td><code>POST /api/v1/claim/verify</code> is called with a valid code</td></tr>
 <tr><td>Then</td><td>HTTP 503 or 429 is returned; claim is NOT completed; alert is logged</td></tr>
 <tr><td>Linked AC</td><td>ARCH §5.3 fail-closed OTP entry</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="62-training-and-food-integration-tests-us-train-001-us-food-001">6.2 Training and Food Integration Tests (US-TRAIN-001, US-FOOD-001)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/__tests__/integration/training.integration.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-006</th><th>Training stat persisted across reads</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `stat_speed = 15`</td></tr>
-<tr><td>When</td><td>`POST /api/v1/pets/:petId/train` is called with `{ trainingType: "RUN" }`</td></tr>
-<tr><td>Then</td><td>Subsequent `GET /api/v1/pets/:petId` returns `stat_speed` in range `[16, 18]`</td></tr>
+</table>
+<h3>6.2 Training and Food Integration Tests (US-TRAIN-001, US-FOOD-001)</h3>
+<p><strong>File</strong>: <code>apps/api/src/<strong>tests</strong>/integration/training.integration.test.ts</code></p>
+<table>
+<tr><th>TC-INT-006</th><th>Training stat persisted across reads</th></tr>
+<tr><td>Given</td><td>A pet with <code>stat_speed = 15</code></td></tr>
+<tr><td>When</td><td><code>POST /api/v1/pets/:petId/train</code> is called with <code>{ trainingType: &quot;RUN&quot; }</code></td></tr>
+<tr><td>Then</td><td>Subsequent <code>GET /api/v1/pets/:petId</code> returns <code>stat_speed</code> in range <code>[16, 18]</code></td></tr>
 <tr><td>Linked AC</td><td>AC-005-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-007</th><th>Food buff active during arena combat</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `stat_speed = 20` and an active temporary speed buff of +(food_buff_example_temp_amount_stat_points = 5)</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-007</th><th>Food buff active during arena combat</th></tr>
+<tr><td>Given</td><td>A pet with <code>stat_speed = 20</code> and an active temporary speed buff of +(food_buff_example_temp_amount_stat_points = 5)</td></tr>
 <tr><td>When</td><td>Arena battle calculation reads pet stats</td></tr>
 <tr><td>Then</td><td>Effective speed = 25 (base + buff applied) and buff indicator is included in pre-battle response</td></tr>
 <tr><td>Linked AC</td><td>AC-006-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-008</th><th>Permanent food buff increments base stat</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `stat_strength = 30` and a permanent +(food_buff_example_perm_amount_stat_points = 3) strength food item</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-008</th><th>Permanent food buff increments base stat</th></tr>
+<tr><td>Given</td><td>A pet with <code>stat_strength = 30</code> and a permanent +(food_buff_example_perm_amount_stat_points = 3) strength food item</td></tr>
 <tr><td>When</td><td>Feed action is confirmed</td></tr>
-<tr><td>Then</td><td>`pets.stat_strength` = 33; food_buff record has no `expires_at`; `food_buffs.is_permanent = true`</td></tr>
+<tr><td>Then</td><td><code>pets.stat_strength</code> = 33; food_buff record has no <code>expires_at</code>; <code>food_buffs.is_permanent = true</code></td></tr>
 <tr><td>Linked AC</td><td>AC-006-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="63-arena-integration-tests-us-arena-001-us-arena-002-us-board-001">6.3 Arena Integration Tests (US-ARENA-001, US-ARENA-002, US-BOARD-001)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/__tests__/integration/arena.integration.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-009</th><th>Battle record saved for both pets</th></tr></thead>
-<tbody>
+</table>
+<h3>6.3 Arena Integration Tests (US-ARENA-001, US-ARENA-002, US-BOARD-001)</h3>
+<p><strong>File</strong>: <code>apps/api/src/<strong>tests</strong>/integration/arena.integration.test.ts</code></p>
+<table>
+<tr><th>TC-INT-009</th><th>Battle record saved for both pets</th></tr>
 <tr><td>Given</td><td>Two pets matched in a Race arena battle</td></tr>
 <tr><td>When</td><td>Battle completes</td></tr>
-<tr><td>Then</td><td>`arena_matches` table has one row; both pet IDs referenced; `random_seed` stored for replay</td></tr>
+<tr><td>Then</td><td><code>arena_matches</code> table has one row; both pet IDs referenced; <code>random_seed</code> stored for replay</td></tr>
 <tr><td>Linked AC</td><td>AC-007-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-010</th><th>Leaderboard updated within update lag</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A battle completes and both pets' arena scores are recalculated</td></tr>
-<tr><td>When</td><td>Redis `leaderboard:global` ZADD is executed</td></tr>
-<tr><td>Then</td><td>Updated scores are visible via `ZRANGE leaderboard:global 0 99 REV WITHSCORES` within (leaderboard_update_lag_max_seconds = 30) seconds</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-010</th><th>Leaderboard updated within update lag</th></tr>
+<tr><td>Given</td><td>A battle completes and both pets&#x27; arena scores are recalculated</td></tr>
+<tr><td>When</td><td>Redis <code>leaderboard:global</code> ZADD is executed</td></tr>
+<tr><td>Then</td><td>Updated scores are visible via <code>ZRANGE leaderboard:global 0 99 REV WITHSCORES</code> within (leaderboard_update_lag_max_seconds = 30) seconds</td></tr>
 <tr><td>Linked AC</td><td>AC-009-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-011</th><th>Arena rate limit enforced per pet per hour</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet with `rl:arena:{pet_id}` counter at (arena_rate_limit_battles_per_hour_default = 10)</td></tr>
-<tr><td>When</td><td>`POST /api/v1/arena/enter` is called</td></tr>
-<tr><td>Then</td><td>HTTP 429 with `Retry-After` header; rate limit NOT incremented on timeout</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-011</th><th>Arena rate limit enforced per pet per hour</th></tr>
+<tr><td>Given</td><td>A pet with <code>rl:arena:{pet_id}</code> counter at (arena_rate_limit_battles_per_hour_default = 10)</td></tr>
+<tr><td>When</td><td><code>POST /api/v1/arena/enter</code> is called</td></tr>
+<tr><td>Then</td><td>HTTP 429 with <code>Retry-After</code> header; rate limit NOT incremented on timeout</td></tr>
 <tr><td>Linked AC</td><td>AC-007-6, AC-007-8</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-012</th><th>AI opponent fallback after matchmaking timeout</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>No opposing pet in `matchmaking:queue:RACE` for (arena_matchmaking_timeout_seconds = 30) seconds</td></tr>
-<tr><td>When</td><td>Request includes `acceptAI: true`</td></tr>
-<tr><td>Then</td><td>Match completes with `is_ai_opponent = true`; player pet's leaderboard score updated; AI synthetic pet not added to leaderboard</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-012</th><th>AI opponent fallback after matchmaking timeout</th></tr>
+<tr><td>Given</td><td>No opposing pet in <code>matchmaking:queue:RACE</code> for (arena_matchmaking_timeout_seconds = 30) seconds</td></tr>
+<tr><td>When</td><td>Request includes <code>acceptAI: true</code></td></tr>
+<tr><td>Then</td><td>Match completes with <code>is_ai_opponent = true</code>; player pet&#x27;s leaderboard score updated; AI synthetic pet not added to leaderboard</td></tr>
 <tr><td>Linked AC</td><td>AC-007-7</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-013</th><th>Leaderboard fallback to PostgreSQL snapshot when Redis unavailable</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>Redis is unavailable; `leaderboard_snapshots` table has a recent entry</td></tr>
-<tr><td>When</td><td>`GET /api/v1/leaderboard` is called</td></tr>
-<tr><td>Then</td><td>HTTP 200 with `degraded: true`; data sourced from PostgreSQL snapshot</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-013</th><th>Leaderboard fallback to PostgreSQL snapshot when Redis unavailable</th></tr>
+<tr><td>Given</td><td>Redis is unavailable; <code>leaderboard_snapshots</code> table has a recent entry</td></tr>
+<tr><td>When</td><td><code>GET /api/v1/leaderboard</code> is called</td></tr>
+<tr><td>Then</td><td>HTTP 200 with <code>degraded: true</code>; data sourced from PostgreSQL snapshot</td></tr>
 <tr><td>Linked AC</td><td>ARCH §4.3 fallback flow</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="64-gdpr-integration-tests-us-auth-002-us-admin-004">6.4 GDPR Integration Tests (US-AUTH-002, US-ADMIN-004)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/__tests__/integration/gdpr.integration.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-014</th><th>Erasure request nulls email within internal SLA</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A claimed pet with a linked `claim_identity_id`</td></tr>
-<tr><td>When</td><td>`POST /api/v1/gdpr/request` with `type: "erasure"` is processed by the background job</td></tr>
-<tr><td>Then</td><td>`claim_identities.email_encrypted` is NULL within (gdpr_email_hashing_internal_sla_hours = 24) hours; `email_hash` retained; `pets` rows retained</td></tr>
+</table>
+<h3>6.4 GDPR Integration Tests (US-AUTH-002, US-ADMIN-004)</h3>
+<p><strong>File</strong>: <code>apps/api/src/<strong>tests</strong>/integration/gdpr.integration.test.ts</code></p>
+<table>
+<tr><th>TC-INT-014</th><th>Erasure request nulls email within internal SLA</th></tr>
+<tr><td>Given</td><td>A claimed pet with a linked <code>claim_identity_id</code></td></tr>
+<tr><td>When</td><td><code>POST /api/v1/gdpr/request</code> with <code>type: &quot;erasure&quot;</code> is processed by the background job</td></tr>
+<tr><td>Then</td><td><code>claim_identities.email_encrypted</code> is NULL within (gdpr_email_hashing_internal_sla_hours = 24) hours; <code>email_hash</code> retained; <code>pets</code> rows retained</td></tr>
 <tr><td>Linked AC</td><td>AC-004-4, AC-016-1, AC-016-2, ARCH §4.4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-015</th><th>Erased pet removed from Redis leaderboard</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>An erased identity whose pet exists in `leaderboard:global` sorted set</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-015</th><th>Erased pet removed from Redis leaderboard</th></tr>
+<tr><td>Given</td><td>An erased identity whose pet exists in <code>leaderboard:global</code> sorted set</td></tr>
 <tr><td>When</td><td>GDPR erasure background job completes</td></tr>
-<tr><td>Then</td><td>`ZRANK leaderboard:global {petId}` returns null</td></tr>
+<tr><td>Then</td><td><code>ZRANK leaderboard:global {petId}</code> returns null</td></tr>
 <tr><td>Linked AC</td><td>ARCH §4.4 GDPR flow</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-016</th><th>Email hash retained for anti-re-registration</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-INT-016</th><th>Email hash retained for anti-re-registration</th></tr>
 <tr><td>Given</td><td>A GDPR-erased email</td></tr>
 <tr><td>When</td><td>The same email is submitted in a new claim attempt</td></tr>
-<tr><td>Then</td><td>`email_hash` lookup finds the existing record; duplicate is prevented</td></tr>
+<tr><td>Then</td><td><code>email_hash</code> lookup finds the existing record; duplicate is prevented</td></tr>
 <tr><td>Linked AC</td><td>ARCH §5.4 data minimization</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="65-admin-integration-tests-us-admin-001-through-us-admin-006">6.5 Admin Integration Tests (US-ADMIN-001 through US-ADMIN-006)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/__tests__/integration/admin.integration.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-017</th><th>Admin pet ban removes from leaderboard within SLA</th></tr></thead>
-<tbody>
+</table>
+<h3>6.5 Admin Integration Tests (US-ADMIN-001 through US-ADMIN-006)</h3>
+<p><strong>File</strong>: <code>apps/api/src/<strong>tests</strong>/integration/admin.integration.test.ts</code></p>
+<table>
+<tr><th>TC-INT-017</th><th>Admin pet ban removes from leaderboard within SLA</th></tr>
 <tr><td>Given</td><td>A pet with an active leaderboard entry</td></tr>
-<tr><td>When</td><td>`POST /admin/api/pets/:petId/ban` is called</td></tr>
-<tr><td>Then</td><td>`ZRANK leaderboard:global {petId}` returns null within (leaderboard_ban_reflection_time_minutes = 5) minutes (synchronous ZREM)</td></tr>
+<tr><td>When</td><td><code>POST /admin/api/pets/:petId/ban</code> is called</td></tr>
+<tr><td>Then</td><td><code>ZRANK leaderboard:global {petId}</code> returns null within (leaderboard_ban_reflection_time_minutes = 5) minutes (synchronous ZREM)</td></tr>
 <tr><td>Linked AC</td><td>AC-013-3, ARCH §5.3 ban reflection</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-018</th><th>Config change propagates within cache TTL</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>Arena rate limit is updated via `PUT /admin/api/config/runtime`</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-018</th><th>Config change propagates within cache TTL</th></tr>
+<tr><td>Given</td><td>Arena rate limit is updated via <code>PUT /admin/api/config/runtime</code></td></tr>
 <tr><td>When</td><td>(config_cache_refresh_time_minutes = 5) minutes elapse</td></tr>
 <tr><td>Then</td><td>All API replicas apply the new rate limit</td></tr>
 <tr><td>Linked AC</td><td>AC-015-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-019</th><th>Audit log written for every admin mutation</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-INT-019</th><th>Audit log written for every admin mutation</th></tr>
 <tr><td>Given</td><td>An admin performs a ban, config change, and GDPR deletion in sequence</td></tr>
-<tr><td>When</td><td>`GET /admin/api/audit?limit=10` is called</td></tr>
-<tr><td>Then</td><td>Three distinct audit records exist with correct `action`, `admin_id`, and `detail` (JSONB payload) fields</td></tr>
+<tr><td>When</td><td><code>GET /admin/api/audit?limit=10</code> is called</td></tr>
+<tr><td>Then</td><td>Three distinct audit records exist with correct <code>action</code>, <code>admin_id</code>, and <code>detail</code> (JSONB payload) fields</td></tr>
 <tr><td>Linked AC</td><td>AC-015-3, AC-016-4, AC-017-4, AC-018-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-020</th><th>Suspicious pet auto-flagged at threshold</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-INT-020</th><th>Suspicious pet auto-flagged at threshold</th></tr>
 <tr><td>Given</td><td>A pet that has completed more than (bot_detection_battles_threshold = 50) battles within a (bot_detection_window_minutes = 60)-minute rolling window</td></tr>
 <tr><td>When</td><td>The detection job or inline check runs</td></tr>
-<tr><td>Then</td><td>Pet appears in `GET /admin/api/suspicious` with a `SUSPICIOUS` badge</td></tr>
+<tr><td>Then</td><td>Pet appears in <code>GET /admin/api/suspicious</code> with a <code>SUSPICIOUS</code> badge</td></tr>
 <tr><td>Linked AC</td><td>AC-017-1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-021</th><th>Economy config applied within cache TTL</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>Food buff multiplier updated to 2.5x via `PUT /admin/api/config/economy`</td></tr>
+</table>
+<table>
+<tr><th>TC-INT-021</th><th>Economy config applied within cache TTL</th></tr>
+<tr><td>Given</td><td>Food buff multiplier updated to 2.5x via <code>PUT /admin/api/config/economy</code></td></tr>
 <tr><td>When</td><td>A pet is fed a temporary food item after the cache refreshes</td></tr>
 <tr><td>Then</td><td>The applied stat bonus reflects the 2.5x multiplier (within range: (food_buff_multiplier_admin_min = 0.5) to (food_buff_multiplier_admin_max = 5.0))</td></tr>
 <tr><td>Linked AC</td><td>AC-018-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="66-email-service-integration-tests-us-auth-001">6.6 Email Service Integration Tests (US-AUTH-001)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/api/src/__tests__/integration/email-service.integration.test.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-022</th><th>SendGrid failover after consecutive failures</th></tr></thead>
-<tbody>
+</table>
+<h3>6.6 Email Service Integration Tests (US-AUTH-001)</h3>
+<p><strong>File</strong>: <code>apps/api/src/<strong>tests</strong>/integration/email-service.integration.test.ts</code></p>
+<table>
+<tr><th>TC-INT-022</th><th>SendGrid failover after consecutive failures</th></tr>
 <tr><td>Given</td><td>SendGrid mock returns HTTP 500 for (sendgrid_failover_consecutive_failures = 3) consecutive calls</td></tr>
 <tr><td>When</td><td>The 4th email send is triggered</td></tr>
 <tr><td>Then</td><td>Nodemailer SMTP fallback is used; delivery succeeds</td></tr>
 <tr><td>Linked AC</td><td>ARCH §6.4 failover flow</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-INT-023</th><th>Claim email contains 6-digit code, no URL</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-INT-023</th><th>Claim email contains 6-digit code, no URL</th></tr>
 <tr><td>Given</td><td>A claim initiation for a valid email</td></tr>
 <tr><td>When</td><td>The email body is inspected via mock transport</td></tr>
-<tr><td>Then</td><td>Body contains exactly a (claim_code_digits = 6)-digit numeric code; no `https://` or clickable link present</td></tr>
+<tr><td>Then</td><td>Body contains exactly a (claim_code_digits = 6)-digit numeric code; no <code>https://</code> or clickable link present</td></tr>
 <tr><td>Linked AC</td><td>ARCH §2.6 email security design, ARCH §5.2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="7-end-to-end-tests">7. End-to-End Tests</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="71-e2e-framework-configuration">7.1 E2E Framework Configuration</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All E2E tests use Playwright with the configuration defined in Section 3.4. Tests are organized by critical user flow and are always executed against the staging environment before production.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="72-guest-pet-interaction-flow-us-pet-001">7.2 Guest Pet Interaction Flow (US-PET-001)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/player/tests/e2e/guest-pet.spec.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-001</th><th>Pet renders within SLO on page load</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A new browser tab navigating to `https://staging.pixel-pet-arena.com/`</td></tr>
+</table>
+<hr>
+<h2>7. End-to-End Tests</h2>
+<h3>7.1 E2E Framework Configuration</h3>
+<p>All E2E tests use Playwright with the configuration defined in Section 3.4. Tests are organized by critical user flow and are always executed against the staging environment before production.</p>
+<h3>7.2 Guest Pet Interaction Flow (US-PET-001)</h3>
+<p><strong>File</strong>: <code>apps/player/tests/e2e/guest-pet.spec.ts</code></p>
+<table>
+<tr><th>TC-E2E-001</th><th>Pet renders within SLO on page load</th></tr>
+<tr><td>Given</td><td>A new browser tab navigating to <code>https://staging.pixel-pet-arena.com/</code></td></tr>
 <tr><td>When</td><td>Page load completes</td></tr>
 <tr><td>Then</td><td>Pet canvas element is visible within (pet_render_on_load_seconds = 2) seconds; no COPPA modal blocking view</td></tr>
 <tr><td>Linked AC</td><td>AC-001-1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-002</th><th>Pet interaction response time</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-002</th><th>Pet interaction response time</th></tr>
 <tr><td>Given</td><td>A loaded pet canvas</td></tr>
 <tr><td>When</td><td>User clicks the pet canvas element</td></tr>
 <tr><td>Then</td><td>An interaction animation begins within (pet_interaction_response_ms = 200) ms</td></tr>
 <tr><td>Linked AC</td><td>AC-001-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-003</th><th>Page refresh generates a different pet</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A guest with a rendered pet having `petId = X`</td></tr>
-<tr><td>When</td><td>The page is refreshed via `F5`</td></tr>
-<tr><td>Then</td><td>A new pet with a different `petId` is rendered</td></tr>
+</table>
+<table>
+<tr><th>TC-E2E-003</th><th>Page refresh generates a different pet</th></tr>
+<tr><td>Given</td><td>A guest with a rendered pet having <code>petId = X</code></td></tr>
+<tr><td>When</td><td>The page is refreshed via <code>F5</code></td></tr>
+<tr><td>Then</td><td>A new pet with a different <code>petId</code> is rendered</td></tr>
 <tr><td>Linked AC</td><td>AC-001-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="73-email-claim-flow-us-auth-001-us-auth-002">7.3 Email Claim Flow (US-AUTH-001, US-AUTH-002)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/player/tests/e2e/claim-flow.spec.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-004</th><th>Complete claim flow — happy path</th></tr></thead>
-<tbody>
+</table>
+<h3>7.3 Email Claim Flow (US-AUTH-001, US-AUTH-002)</h3>
+<p><strong>File</strong>: <code>apps/player/tests/e2e/claim-flow.spec.ts</code></p>
+<table>
+<tr><th>TC-E2E-004</th><th>Complete claim flow — happy path</th></tr>
 <tr><td>Given</td><td>A guest with an unclaimed pet on screen</td></tr>
-<tr><td>When</td><td>User clicks "Claim This Pet", enters email + checks COPPA checkbox, submits, enters correct OTP</td></tr>
+<tr><td>When</td><td>User clicks &quot;Claim This Pet&quot;, enters email + checks COPPA checkbox, submits, enters correct OTP</td></tr>
 <tr><td>Then</td><td>Pet URL is displayed; navigating to that URL shows the pet page with owner controls</td></tr>
 <tr><td>Linked AC</td><td>AC-003-3, AC-003-7</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-005</th><th>COPPA age confirmation prevents submit</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-005</th><th>COPPA age confirmation prevents submit</th></tr>
 <tr><td>Given</td><td>Email entered but COPPA checkbox unchecked</td></tr>
 <tr><td>When</td><td>User attempts to submit the claim form</td></tr>
-<tr><td>Then</td><td>Form submission is blocked; inline error "Please confirm you are at least 13 years old" is visible</td></tr>
+<tr><td>Then</td><td>Form submission is blocked; inline error &quot;Please confirm you are at least 13 years old&quot; is visible</td></tr>
 <tr><td>Linked AC</td><td>AC-003-8</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-006</th><th>Expired claim code shows correct error</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-006</th><th>Expired claim code shows correct error</th></tr>
 <tr><td>Given</td><td>A valid email submitted but the test waits until OTP is past expiry (test uses a backdated code)</td></tr>
 <tr><td>When</td><td>User enters the expired code</td></tr>
-<tr><td>Then</td><td>Error message reads "Claim code has expired. Please request a new claim link." and a re-send button is visible</td></tr>
+<tr><td>Then</td><td>Error message reads &quot;Claim code has expired. Please request a new claim link.&quot; and a re-send button is visible</td></tr>
 <tr><td>Linked AC</td><td>AC-003-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-007</th><th>Invalid pet URL returns 404</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A browser navigates to `/pet/invalid-token-that-does-not-exist`</td></tr>
+</table>
+<table>
+<tr><th>TC-E2E-007</th><th>Invalid pet URL returns 404</th></tr>
+<tr><td>Given</td><td>A browser navigates to <code>/pet/invalid-token-that-does-not-exist</code></td></tr>
 <tr><td>When</td><td>Page loads</td></tr>
-<tr><td>Then</td><td>HTTP 404 displayed with message "This pet URL is not valid or has been revoked" and a link to home page</td></tr>
+<tr><td>Then</td><td>HTTP 404 displayed with message &quot;This pet URL is not valid or has been revoked&quot; and a link to home page</td></tr>
 <tr><td>Linked AC</td><td>AC-004-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-008</th><th>Pet URL works cross-device (multi-context test)</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-008</th><th>Pet URL works cross-device (multi-context test)</th></tr>
 <tr><td>Given</td><td>A pet claimed in one browser context (Chromium)</td></tr>
 <tr><td>When</td><td>The pet URL is accessed in a second browser context (Firefox)</td></tr>
 <tr><td>Then</td><td>Correct pet page loads with current stats; owner action buttons visible</td></tr>
 <tr><td>Linked AC</td><td>AC-004-1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="74-training-and-food-e2e-tests-us-train-001-us-food-001">7.4 Training and Food E2E Tests (US-TRAIN-001, US-FOOD-001)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/player/tests/e2e/training.spec.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-009</th><th>Three training actions per day</th></tr></thead>
-<tbody>
+</table>
+<h3>7.4 Training and Food E2E Tests (US-TRAIN-001, US-FOOD-001)</h3>
+<p><strong>File</strong>: <code>apps/player/tests/e2e/training.spec.ts</code></p>
+<table>
+<tr><th>TC-E2E-009</th><th>Three training actions per day</th></tr>
 <tr><td>Given</td><td>A freshly claimed pet</td></tr>
 <tr><td>When</td><td>User completes 3 training actions (speed, strength, stamina) in sequence</td></tr>
 <tr><td>Then</td><td>After 3rd action, all training buttons are disabled; countdown timer is visible</td></tr>
 <tr><td>Linked AC</td><td>AC-005-1, AC-005-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-010</th><th>Stat change indicator displays for correct duration</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-010</th><th>Stat change indicator displays for correct duration</th></tr>
 <tr><td>Given</td><td>A training action is submitted</td></tr>
 <tr><td>When</td><td>Server responds with success</td></tr>
-<tr><td>Then</td><td>Stat indicator `+X Speed` appears and disappears after (training_stat_display_duration_seconds = 2) seconds</td></tr>
+<tr><td>Then</td><td>Stat indicator <code>+X Speed</code> appears and disappears after (training_stat_display_duration_seconds = 2) seconds</td></tr>
 <tr><td>Linked AC</td><td>AC-005-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-011</th><th>Food inventory and feed animation</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-011</th><th>Food inventory and feed animation</th></tr>
 <tr><td>Given</td><td>A pet owner with food items in inventory</td></tr>
 <tr><td>When</td><td>User clicks a food item in the inventory</td></tr>
 <tr><td>Then</td><td>Feeding animation plays; item removed from inventory; buff visible on stats panel</td></tr>
 <tr><td>Linked AC</td><td>AC-006-1, AC-006-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-025</th><th>Food inventory empty — get more food prompt</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-025</th><th>Food inventory empty — get more food prompt</th></tr>
 <tr><td>Given</td><td>A pet owner whose food inventory is empty</td></tr>
 <tr><td>When</td><td>Owner views the food inventory section</td></tr>
-<tr><td>Then</td><td>"Get more food" prompt is visible with two earning mechanisms highlighted: (a) arena battle food drop on battle completion, (b) food reward on (training_actions_per_day = 3)-session training streak; no error or broken state shown</td></tr>
+<tr><td>Then</td><td>&quot;Get more food&quot; prompt is visible with two earning mechanisms highlighted: (a) arena battle food drop on battle completion, (b) food reward on (training_actions_per_day = 3)-session training streak; no error or broken state shown</td></tr>
 <tr><td>Linked AC</td><td>AC-006-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="75-arena-e2e-tests-us-arena-001-us-arena-002">7.5 Arena E2E Tests (US-ARENA-001, US-ARENA-002)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/player/tests/e2e/arena.spec.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-012</th><th>Arena battle complete cycle</th></tr></thead>
-<tbody>
+</table>
+<h3>7.5 Arena E2E Tests (US-ARENA-001, US-ARENA-002)</h3>
+<p><strong>File</strong>: <code>apps/player/tests/e2e/arena.spec.ts</code></p>
+<table>
+<tr><th>TC-E2E-012</th><th>Arena battle complete cycle</th></tr>
 <tr><td>Given</td><td>Two pets in the matchmaking pool for Race mode</td></tr>
-<tr><td>When</td><td>Both pets enter via `POST /api/v1/arena/enter`</td></tr>
+<tr><td>When</td><td>Both pets enter via <code>POST /api/v1/arena/enter</code></td></tr>
 <tr><td>Then</td><td>Match found within (arena_matchmaking_timeout_seconds = 30) seconds; animation plays (duration between (arena_match_duration_min_seconds = 5) and (arena_match_duration_max_seconds = 15) s); result screen shows Win/Loss and stat comparison</td></tr>
 <tr><td>Linked AC</td><td>AC-007-1, AC-007-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-013</th><th>Share battle result URL generated</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-013</th><th>Share battle result URL generated</th></tr>
 <tr><td>Given</td><td>A completed arena battle</td></tr>
-<tr><td>When</td><td>User clicks "Share Battle Result"</td></tr>
+<tr><td>When</td><td>User clicks &quot;Share Battle Result&quot;</td></tr>
 <tr><td>Then</td><td>A unique shareable URL is generated and displayed; navigating to the URL loads the battle record page publicly</td></tr>
 <tr><td>Linked AC</td><td>AC-007-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-014</th><th>Rate limit UI — countdown and disabled button</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-014</th><th>Rate limit UI — countdown and disabled button</th></tr>
 <tr><td>Given</td><td>A pet that has completed (arena_rate_limit_battles_per_hour_default = 10) battles this hour</td></tr>
 <tr><td>When</td><td>User attempts to enter arena again</td></tr>
-<tr><td>Then</td><td>Message "Arena rate limit reached. You can enter again in X minutes" displayed; Enter Arena button is disabled; API returns HTTP 429 with `Retry-After` header</td></tr>
+<tr><td>Then</td><td>Message &quot;Arena rate limit reached. You can enter again in X minutes&quot; displayed; Enter Arena button is disabled; API returns HTTP 429 with <code>Retry-After</code> header</td></tr>
 <tr><td>Linked AC</td><td>AC-007-8</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="76-leaderboard-battle-records-and-rarity-e2e-tests-us-board-001-us-record-001-us-rarity-001">7.6 Leaderboard, Battle Records, and Rarity E2E Tests (US-BOARD-001, US-RECORD-001, US-RARITY-001)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/player/tests/e2e/leaderboard.spec.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-015</th><th>Leaderboard publicly accessible without login</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A guest browser navigates to `/leaderboard`</td></tr>
+</table>
+<h3>7.6 Leaderboard, Battle Records, and Rarity E2E Tests (US-BOARD-001, US-RECORD-001, US-RARITY-001)</h3>
+<p><strong>File</strong>: <code>apps/player/tests/e2e/leaderboard.spec.ts</code></p>
+<table>
+<tr><th>TC-E2E-015</th><th>Leaderboard publicly accessible without login</th></tr>
+<tr><td>Given</td><td>A guest browser navigates to <code>/leaderboard</code></td></tr>
 <tr><td>When</td><td>Page loads</td></tr>
 <tr><td>Then</td><td>Top (leaderboard_top_display = 100) pets displayed in rank order; no auth required</td></tr>
 <tr><td>Linked AC</td><td>AC-009-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-016</th><th>Owner rank banner visible outside top 100</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-016</th><th>Owner rank banner visible outside top 100</th></tr>
 <tr><td>Given</td><td>A pet owner whose pet is ranked 250th</td></tr>
 <tr><td>When</td><td>Owner accesses leaderboard via their pet URL token</td></tr>
-<tr><td>Then</td><td>Their pet's rank (250) is highlighted in an OwnerRankBanner below the top 100 table</td></tr>
+<tr><td>Then</td><td>Their pet&#x27;s rank (250) is highlighted in an OwnerRankBanner below the top 100 table</td></tr>
 <tr><td>Linked AC</td><td>AC-009-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-026</th><th>Rarity badge shows occurrence rate</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-026</th><th>Rarity badge shows occurrence rate</th></tr>
 <tr><td>Given</td><td>A pet page for a Legendary pet</td></tr>
 <tr><td>When</td><td>The page loads</td></tr>
-<tr><td>Then</td><td>Rarity badge text reads "Legendary — (rarity_legendary_percent = 3)% of all pets"</td></tr>
+<tr><td>Then</td><td>Rarity badge text reads &quot;Legendary — (rarity_legendary_percent = 3)% of all pets&quot;</td></tr>
 <tr><td>Linked AC</td><td>AC-011-2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-027</th><th>Leaderboard filterable by rarity tier</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-027</th><th>Leaderboard filterable by rarity tier</th></tr>
 <tr><td>Given</td><td>The leaderboard page with pets of all four rarity tiers present</td></tr>
-<tr><td>When</td><td>User selects the "Epic" rarity filter</td></tr>
+<tr><td>When</td><td>User selects the &quot;Epic&quot; rarity filter</td></tr>
 <tr><td>Then</td><td>Only Epic-rarity pets are shown in the filtered results; pets of other rarities are hidden</td></tr>
 <tr><td>Linked AC</td><td>AC-011-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-017</th><th>Battle records page — public access and display cap</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-017</th><th>Battle records page — public access and display cap</th></tr>
 <tr><td>Given</td><td>A pet with 25 battle records (exceeds (arena_battle_records_display_count = 20) cap)</td></tr>
-<tr><td>When</td><td>Guest navigates to `/pet/:petId/records`</td></tr>
+<tr><td>When</td><td>Guest navigates to <code>/pet/:petId/records</code></td></tr>
 <tr><td>Then</td><td>Exactly (arena_battle_records_display_count = 20) battles displayed (oldest omitted); each shows date, mode (Race/Sumo), opponent name, Win/Loss outcome; no auth prompt</td></tr>
 <tr><td>Linked AC</td><td>AC-010-1, AC-010-2, AC-010-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-018</th><th>Battle records page — fewer than 20 battles prompt</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-018</th><th>Battle records page — fewer than 20 battles prompt</th></tr>
 <tr><td>Given</td><td>A pet with 8 battle records</td></tr>
 <tr><td>When</td><td>Records page loads</td></tr>
-<tr><td>Then</td><td>8 entries shown; message "More battles coming — enter the arena to build your records!" visible below last entry</td></tr>
+<tr><td>Then</td><td>8 entries shown; message &quot;More battles coming — enter the arena to build your records!&quot; visible below last entry</td></tr>
 <tr><td>Linked AC</td><td>AC-010-6</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-019</th><th>Battle records page invalid pet ID</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A visitor navigates to `/pet/nonexistent-uuid/records`</td></tr>
+</table>
+<table>
+<tr><th>TC-E2E-019</th><th>Battle records page invalid pet ID</th></tr>
+<tr><td>Given</td><td>A visitor navigates to <code>/pet/nonexistent-uuid/records</code></td></tr>
 <tr><td>When</td><td>Page attempts to load</td></tr>
-<tr><td>Then</td><td>HTTP 404 with message "This pet could not be found" and home page link</td></tr>
+<tr><td>Then</td><td>HTTP 404 with message &quot;This pet could not be found&quot; and home page link</td></tr>
 <tr><td>Linked AC</td><td>AC-010-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-024</th><th>Battle records page Open Graph meta tags</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-024</th><th>Battle records page Open Graph meta tags</th></tr>
 <tr><td>Given</td><td>A pet with a completed battle record</td></tr>
-<tr><td>When</td><td>The battle records page HTML `<head>` is inspected</td></tr>
-<tr><td>Then</td><td>Open Graph meta tags are present: `og:title` = pet name, `og:description` contains rarity and win count, `og:image` = pet sprite URL</td></tr>
+<tr><td>When</td><td>The battle records page HTML <code>&lt;head&gt;</code> is inspected</td></tr>
+<tr><td>Then</td><td>Open Graph meta tags are present: <code>og:title</code> = pet name, <code>og:description</code> contains rarity and win count, <code>og:image</code> = pet sprite URL</td></tr>
 <tr><td>Linked AC</td><td>AC-010-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="77-admin-portal-e2e-tests-us-admin-001-through-us-admin-006">7.7 Admin Portal E2E Tests (US-ADMIN-001 through US-ADMIN-006)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>File</strong>: <code>apps/admin/tests/e2e/admin.spec.ts</code></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-020</th><th>Admin TOTP login flow</th></tr></thead>
-<tbody>
+</table>
+<h3>7.7 Admin Portal E2E Tests (US-ADMIN-001 through US-ADMIN-006)</h3>
+<p><strong>File</strong>: <code>apps/admin/tests/e2e/admin.spec.ts</code></p>
+<table>
+<tr><th>TC-E2E-020</th><th>Admin TOTP login flow</th></tr>
 <tr><td>Given</td><td>A super_admin account with TOTP configured</td></tr>
 <tr><td>When</td><td>Admin logs in with correct password and TOTP token</td></tr>
 <tr><td>Then</td><td>Session cookie set (httpOnly, SameSite=Strict); admin dashboard accessible</td></tr>
 <tr><td>Linked AC</td><td>PRD NFR-ADMIN-01</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-021</th><th>Admin pet search within SLA</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-021</th><th>Admin pet search within SLA</th></tr>
 <tr><td>Given</td><td>1,000,000 pet records in the database (staging performance data)</td></tr>
 <tr><td>When</td><td>Admin searches by exact pet ID or exact email hash (SHA-256; fragment search is not supported)</td></tr>
 <tr><td>Then</td><td>Results returned within (admin_search_response_time_seconds = 2) seconds</td></tr>
 <tr><td>Linked AC</td><td>AC-013-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-022</th><th>Admin ban + leaderboard removal</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-022</th><th>Admin ban + leaderboard removal</th></tr>
 <tr><td>Given</td><td>A pet visible on the public leaderboard</td></tr>
 <tr><td>When</td><td>Admin bans the pet with a reason (max (admin_moderation_reason_max_chars = 500) chars)</td></tr>
 <tr><td>Then</td><td>Pet no longer appears on public leaderboard within (leaderboard_ban_reflection_time_minutes = 5) minutes; audit log entry created</td></tr>
 <tr><td>Linked AC</td><td>AC-013-2, AC-013-3, AC-014-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-023</th><th>GDPR deletion E2E</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-023</th><th>GDPR deletion E2E</th></tr>
 <tr><td>Given</td><td>A super_admin and a user who submitted a deletion request</td></tr>
 <tr><td>When</td><td>Super admin processes deletion via admin portal</td></tr>
-<tr><td>Then</td><td>`email_encrypted` becomes NULL; pet page still loads with pseudonymous owner; audit log shows `GDPR_DELETION` action</td></tr>
+<tr><td>Then</td><td><code>email_encrypted</code> becomes NULL; pet page still loads with pseudonymous owner; audit log shows <code>GDPR_DELETION</code> action</td></tr>
 <tr><td>Linked AC</td><td>AC-016-1, AC-016-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-028</th><th>Admin runtime parameter tuning — arena rate limit update</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-028</th><th>Admin runtime parameter tuning — arena rate limit update</th></tr>
 <tr><td>Given</td><td>A super_admin authenticated in the admin portal and the System Config page</td></tr>
 <tr><td>When</td><td>Admin sets max battles per hour to a new value in the allowed range [(arena_rate_limit_admin_min = 1), (arena_rate_limit_admin_max = 50)] and clicks Save</td></tr>
-<tr><td>Then</td><td>Success toast displayed; updated value is visible in the config panel; audit log contains a record with `action = CONFIG_UPDATE`, the old value, and the new value</td></tr>
+<tr><td>Then</td><td>Success toast displayed; updated value is visible in the config panel; audit log contains a record with <code>action = CONFIG_UPDATE</code>, the old value, and the new value</td></tr>
 <tr><td>Linked AC</td><td>AC-015-1, AC-015-3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-029</th><th>Admin suspicious activity — flagged pet review and moderation</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-029</th><th>Admin suspicious activity — flagged pet review and moderation</th></tr>
 <tr><td>Given</td><td>A pet that has been auto-flagged SUSPICIOUS (more than (bot_detection_battles_threshold = 50) battles in a (bot_detection_window_minutes = 60)-minute window)</td></tr>
-<tr><td>When</td><td>Moderator navigates to the Suspicious Activity page, clicks the flagged pet, reviews its battle timeline, and selects "Ban from Arena" with a reason</td></tr>
+<tr><td>When</td><td>Moderator navigates to the Suspicious Activity page, clicks the flagged pet, reviews its battle timeline, and selects &quot;Ban from Arena&quot; with a reason</td></tr>
 <tr><td>Then</td><td>SUSPICIOUS badge visible in the list; battle timeline for the suspicious window is displayed; ban action succeeds; pet removed from arena queue; audit log records moderator ID, timestamp, action, and reason (max (admin_moderation_reason_max_chars = 500) chars)</td></tr>
 <tr><td>Linked AC</td><td>AC-017-2, AC-017-3, AC-017-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-E2E-030</th><th>Admin game economy config — food buff multiplier update with preview</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-E2E-030</th><th>Admin game economy config — food buff multiplier update with preview</th></tr>
 <tr><td>Given</td><td>A super_admin authenticated in the admin portal and the Game Economy Config page</td></tr>
 <tr><td>When</td><td>Admin changes a food buff multiplier to a value in the allowed range [(food_buff_multiplier_admin_min = 0.5), (food_buff_multiplier_admin_max = 5.0)], reviews the old-value → new-value preview, and confirms save</td></tr>
 <tr><td>Then</td><td>Preview dialog shows old and new values before save; after confirmation, updated multiplier visible in config panel; audit log records Super Admin ID, field name, old value, and new value</td></tr>
 <tr><td>Linked AC</td><td>AC-018-1, AC-018-2, AC-018-4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="8-performance-tests">8. Performance Tests</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="81-api-load-tests">8.1 API Load Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Tool</strong>: k6 with threshold assertions. Load test scripts are in <code>tests/performance/</code>.</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-001</th><th>P99 read latency under sustained load</th></tr></thead>
-<tbody>
-<tr><td>Target</td><td>`GET /api/v1/leaderboard`, `GET /api/v1/pets/:petId`</td></tr>
+</table>
+<hr>
+<h2>8. Performance Tests</h2>
+<h3>8.1 API Load Tests</h3>
+<p><strong>Tool</strong>: k6 with threshold assertions. Load test scripts are in <code>tests/performance/</code>.</p>
+<table>
+<tr><th>TC-PERF-001</th><th>P99 read latency under sustained load</th></tr>
+<tr><td>Target</td><td><code>GET /api/v1/leaderboard</code>, <code>GET /api/v1/pets/:petId</code></td></tr>
 <tr><td>Load</td><td>(normal_operation_rps = 100) RPS sustained for 5 minutes</td></tr>
-<tr><td>Pass Threshold</td><td>P99 < (p99_api_latency_read_ms_at_100_rps = 200) ms; error rate < (error_rate_max_percent = 1)%</td></tr>
+<tr><td>Pass Threshold</td><td>P99 &lt; (p99_api_latency_read_ms_at_100_rps = 200) ms; error rate &lt; (error_rate_max_percent = 1)%</td></tr>
 <tr><td>Linked NFR</td><td>NFR-PERF-01</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-002</th><th>P99 write latency under sustained load</th></tr></thead>
-<tbody>
-<tr><td>Target</td><td>`POST /api/v1/pets/:petId/train`, `POST /api/v1/arena/enter`</td></tr>
+</table>
+<table>
+<tr><th>TC-PERF-002</th><th>P99 write latency under sustained load</th></tr>
+<tr><td>Target</td><td><code>POST /api/v1/pets/:petId/train</code>, <code>POST /api/v1/arena/enter</code></td></tr>
 <tr><td>Load</td><td>(normal_operation_rps = 100) RPS sustained for 5 minutes</td></tr>
-<tr><td>Pass Threshold</td><td>P99 < (p99_api_latency_write_ms_at_100_rps = 500) ms; error rate < (error_rate_max_percent = 1)%</td></tr>
+<tr><td>Pass Threshold</td><td>P99 &lt; (p99_api_latency_write_ms_at_100_rps = 500) ms; error rate &lt; (error_rate_max_percent = 1)%</td></tr>
 <tr><td>Linked NFR</td><td>NFR-PERF-02</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-003</th><th>Peak viral load — 500 RPS</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-PERF-003</th><th>Peak viral load — 500 RPS</th></tr>
 <tr><td>Target</td><td>All player-facing endpoints combined</td></tr>
 <tr><td>Load</td><td>Ramp from 100 to (peak_operation_rps = 500) RPS over 2 minutes; sustain 500 RPS for 5 minutes</td></tr>
-<tr><td>Pass Threshold</td><td>System remains available (no HTTP 500 spikes > 1%); P99 < 1,000 ms (observability_latency_alert_threshold_ms = 1000)</td></tr>
+<tr><td>Pass Threshold</td><td>System remains available (no HTTP 500 spikes &gt; 1%); P99 &lt; 1,000 ms (observability_latency_alert_threshold_ms = 1000)</td></tr>
 <tr><td>Linked NFR</td><td>NFR-SCALE-01, NFR-SCALE-02</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-004</th><th>Matchmaking concurrent entries</th></tr></thead>
-<tbody>
-<tr><td>Target</td><td>`POST /api/v1/arena/enter` with (arena_matchmaking_concurrent_entries = 100) simultaneous entries</td></tr>
+</table>
+<table>
+<tr><th>TC-PERF-004</th><th>Matchmaking concurrent entries</th></tr>
+<tr><td>Target</td><td><code>POST /api/v1/arena/enter</code> with (arena_matchmaking_concurrent_entries = 100) simultaneous entries</td></tr>
 <tr><td>Load</td><td>100 concurrent arena enter requests for RACE mode</td></tr>
 <tr><td>Pass Threshold</td><td>All 100 entries queued without error; pairs resolved within (arena_matchmaking_timeout_seconds = 30) seconds</td></tr>
 <tr><td>Linked NFR</td><td>NFR-SCALE-04</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-005</th><th>Pet generation batch concurrency</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-PERF-005</th><th>Pet generation batch concurrency</th></tr>
 <tr><td>Target</td><td>Internal batch generation pipeline</td></tr>
 <tr><td>Load</td><td>Generate (pet_generation_concurrent_batch = 1000) pets simultaneously</td></tr>
 <tr><td>Pass Threshold</td><td>All 1,000 pets generated within (pet_generation_concurrent_batch_time_seconds = 10) seconds</td></tr>
 <tr><td>Linked NFR</td><td>NFR-SCALE-05</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="82-frontend-performance-tests">8.2 Frontend Performance Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Tool</strong>: Playwright + Lighthouse CI</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-006</th><th>Core Web Vitals — Landing Page</th></tr></thead>
-<tbody>
-<tr><td>URL</td><td>`https://staging.pixel-pet-arena.com/`</td></tr>
-<tr><td>Pass Threshold</td><td>FCP < (fcp_seconds = 1.5) s; LCP < (lcp_seconds = 2.5) s; CLS < (cls_score = 0.1); INP < (inp_ms = 200) ms</td></tr>
+</table>
+<h3>8.2 Frontend Performance Tests</h3>
+<p><strong>Tool</strong>: Playwright + Lighthouse CI</p>
+<table>
+<tr><th>TC-PERF-006</th><th>Core Web Vitals — Landing Page</th></tr>
+<tr><td>URL</td><td><code>https://staging.pixel-pet-arena.com/</code></td></tr>
+<tr><td>Pass Threshold</td><td>FCP &lt; (fcp_seconds = 1.5) s; LCP &lt; (lcp_seconds = 2.5) s; CLS &lt; (cls_score = 0.1); INP &lt; (inp_ms = 200) ms</td></tr>
 <tr><td>Linked NFR</td><td>NFR-PERF-03 through NFR-PERF-06</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-007</th><th>JS bundle size within budget</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-PERF-007</th><th>JS bundle size within budget</th></tr>
 <tr><td>Target</td><td>Vite production build</td></tr>
 <tr><td>Pass Threshold</td><td>Total gzipped JS ≤ (total_js_bundle_gzipped_kb = 300) KB; total gzipped CSS ≤ (total_css_bundle_gzipped_kb = 50) KB</td></tr>
 <tr><td>Linked NFR</td><td>PRD §7.1 bundle budgets</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-008</th><th>Pet canvas animation FPS</th></tr></thead>
-<tbody>
-<tr><td>Tool</td><td>Playwright `page.evaluate(() => performance.measure(...))`</td></tr>
+</table>
+<table>
+<tr><th>TC-PERF-008</th><th>Pet canvas animation FPS</th></tr>
+<tr><td>Tool</td><td>Playwright <code>page.evaluate(() =&gt; performance.measure(...))</code></td></tr>
 <tr><td>Pass Threshold</td><td>Sustained FPS ≥ (pet_animation_fps_min = 30) on mid-range device emulation (Pixel 5 profile)</td></tr>
 <tr><td>Linked NFR</td><td>NFR-PERF-07</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-009</th><th>Pet render on load within SLO</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-PERF-009</th><th>Pet render on load within SLO</th></tr>
 <tr><td>Given</td><td>Cold page load</td></tr>
 <tr><td>When</td><td>Pet canvas first frame renders</td></tr>
 <tr><td>Then</td><td>Elapsed time ≤ (pet_render_on_load_seconds = 2) seconds</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §2.1 render SLO</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="83-admin-portal-performance-tests">8.3 Admin Portal Performance Tests</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-010</th><th>Admin pet search with 1M records</th></tr></thead>
-<tbody>
-<tr><td>Target</td><td>`GET /admin/api/pets?search={petId}`</td></tr>
+</table>
+<h3>8.3 Admin Portal Performance Tests</h3>
+<table>
+<tr><th>TC-PERF-010</th><th>Admin pet search with 1M records</th></tr>
+<tr><td>Target</td><td><code>GET /admin/api/pets?search={petId}</code></td></tr>
 <tr><td>Precondition</td><td>1,000,000 pets seeded in staging database</td></tr>
 <tr><td>Pass Threshold</td><td>Response time ≤ (admin_search_response_time_seconds = 2) seconds</td></tr>
 <tr><td>Linked AC</td><td>AC-013-4, PRD NFR-ADMIN-06</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-011</th><th>Admin page load SLO</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-PERF-011</th><th>Admin page load SLO</th></tr>
 <tr><td>Target</td><td>All admin portal pages</td></tr>
 <tr><td>Pass Threshold</td><td>Any admin page with up to 1,000,000 pet records loads within (admin_page_load_time_seconds = 3) seconds</td></tr>
 <tr><td>Linked NFR</td><td>PRD NFR-ADMIN-06</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-012</th><th>Audit log search across 12-month window</th></tr></thead>
-<tbody>
-<tr><td>Target</td><td>`GET /admin/api/audit?from={12MonthsAgo}&to={now}`</td></tr>
+</table>
+<table>
+<tr><th>TC-PERF-012</th><th>Audit log search across 12-month window</th></tr>
+<tr><td>Target</td><td><code>GET /admin/api/audit?from={12MonthsAgo}&amp;to={now}</code></td></tr>
 <tr><td>Pass Threshold</td><td>Response within (admin_audit_log_search_response_time_seconds = 3) seconds</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §5.4 audit log search</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="84-database-performance-tests">8.4 Database Performance Tests</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-013</th><th>PostgreSQL autofailover recovery</th></tr></thead>
-<tbody>
+</table>
+<h3>8.4 Database Performance Tests</h3>
+<table>
+<tr><th>TC-PERF-013</th><th>PostgreSQL autofailover recovery</th></tr>
 <tr><td>Given</td><td>PostgreSQL primary is terminated (simulated)</td></tr>
 <tr><td>When</td><td>Failover to read replica initiates</td></tr>
 <tr><td>Then</td><td>Write availability restored within (db_autofailover_time_seconds = 60) seconds</td></tr>
 <tr><td>Linked NFR</td><td>NFR-AVAIL-03</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-PERF-014</th><th>Health check response time</th></tr></thead>
-<tbody>
-<tr><td>Target</td><td>`GET /health`</td></tr>
+</table>
+<table>
+<tr><th>TC-PERF-014</th><th>Health check response time</th></tr>
+<tr><td>Target</td><td><code>GET /health</code></td></tr>
 <tr><td>Pass Threshold</td><td>Response ≤ (health_check_response_time_ms = 500) ms including database and cache connectivity status</td></tr>
 <tr><td>Linked NFR</td><td>NFR-AVAIL-06</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="9-security-tests">9. Security Tests</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="91-authentication-and-token-security-tests">9.1 Authentication and Token Security Tests</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-001</th><th>Pet token minimum entropy</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>(pet_access_token_min_bytes = 32) bytes from `crypto.randomBytes(32)`</td></tr>
+</table>
+<hr>
+<h2>9. Security Tests</h2>
+<h3>9.1 Authentication and Token Security Tests</h3>
+<table>
+<tr><th>TC-SEC-001</th><th>Pet token minimum entropy</th></tr>
+<tr><td>Given</td><td>(pet_access_token_min_bytes = 32) bytes from <code>crypto.randomBytes(32)</code></td></tr>
 <tr><td>When</td><td>Token uniqueness is checked across 100,000 generated tokens</td></tr>
 <tr><td>Then</td><td>Zero collisions; all tokens are URL-safe base64; all have byte length ≥ 32</td></tr>
 <tr><td>Linked NFR</td><td>NFR-SEC-01, NFR-SEC-05</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-002</th><th>Token revocation via blacklist</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-002</th><th>Token revocation via blacklist</th></tr>
 <tr><td>Given</td><td>A valid pet access token</td></tr>
-<tr><td>When</td><td>Admin initiates a recovery flow (new token issued); old token hash written to `token:blacklist:{hash}` with TTL = (claim_token_cleanup_ttl_hours = 72) hours</td></tr>
+<tr><td>When</td><td>Admin initiates a recovery flow (new token issued); old token hash written to <code>token:blacklist:{hash}</code> with TTL = (claim_token_cleanup_ttl_hours = 72) hours</td></tr>
 <tr><td>Then</td><td>Any request using the old token within the (claim_token_cleanup_ttl_hours = 72)-hour window returns HTTP 401</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §2.5 token blacklist</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-003</th><th>Admin TOTP required — no bypass</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-003</th><th>Admin TOTP required — no bypass</th></tr>
 <tr><td>Given</td><td>Admin submits correct username + password only (no TOTP)</td></tr>
 <tr><td>When</td><td>Login endpoint is called</td></tr>
-<tr><td>Then</td><td>HTTP 403 `TOTP_SETUP_REQUIRED` (if TOTP not yet enrolled) or HTTP 401 `UNAUTHORIZED` (if TOTP is enrolled but no code submitted); no session cookie issued in either case</td></tr>
+<tr><td>Then</td><td>HTTP 403 <code>TOTP_SETUP_REQUIRED</code> (if TOTP not yet enrolled) or HTTP 401 <code>UNAUTHORIZED</code> (if TOTP is enrolled but no code submitted); no session cookie issued in either case</td></tr>
 <tr><td>Linked NFR</td><td>NFR-SEC-11</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-004</th><th>Admin session absolute expiry</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-004</th><th>Admin session absolute expiry</th></tr>
 <tr><td>Given</td><td>An admin session created (admin_session_absolute_expiry_hours = 8) hours ago with continuous activity</td></tr>
 <tr><td>When</td><td>Admin makes any authenticated request</td></tr>
 <tr><td>Then</td><td>Session is invalidated; HTTP 401 returned</td></tr>
 <tr><td>Linked NFR</td><td>PRD NFR-ADMIN-02</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-005</th><th>Admin IP allowlist enforcement</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>`ADMIN_ALLOWED_IPS` set to a specific CIDR; request originating from outside that CIDR</td></tr>
-<tr><td>When</td><td>`POST /admin/api/auth/login` is called</td></tr>
-<tr><td>Then</td><td>HTTP 403 `FORBIDDEN` before any credential check</td></tr>
+</table>
+<table>
+<tr><th>TC-SEC-005</th><th>Admin IP allowlist enforcement</th></tr>
+<tr><td>Given</td><td><code>ADMIN_ALLOWED_IPS</code> set to a specific CIDR; request originating from outside that CIDR</td></tr>
+<tr><td>When</td><td><code>POST /admin/api/auth/login</code> is called</td></tr>
+<tr><td>Then</td><td>HTTP 403 <code>FORBIDDEN</code> before any credential check</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §5.1 IP allowlist</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="92-rate-limiting-and-brute-force-prevention-tests">9.2 Rate Limiting and Brute Force Prevention Tests</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-006</th><th>Claim rate limit enforced per email hash</th></tr></thead>
-<tbody>
+</table>
+<h3>9.2 Rate Limiting and Brute Force Prevention Tests</h3>
+<table>
+<tr><th>TC-SEC-006</th><th>Claim rate limit enforced per email hash</th></tr>
 <tr><td>Given</td><td>(auth_rate_limit_claim_attempts_per_hour = 5) claim attempts for the same email</td></tr>
 <tr><td>When</td><td>A 6th attempt is submitted within the rolling hour</td></tr>
-<tr><td>Then</td><td>HTTP 429 with `Retry-After`; counter not incremented beyond limit</td></tr>
+<tr><td>Then</td><td>HTTP 429 with <code>Retry-After</code>; counter not incremented beyond limit</td></tr>
 <tr><td>Linked NFR</td><td>NFR-SEC-04</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-007</th><th>OTP code entry fail-closed</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-007</th><th>OTP code entry fail-closed</th></tr>
 <tr><td>Given</td><td>Redis unavailable</td></tr>
-<tr><td>When</td><td>`POST /api/v1/claim/verify` is called</td></tr>
+<tr><td>When</td><td><code>POST /api/v1/claim/verify</code> is called</td></tr>
 <tr><td>Then</td><td>HTTP 503 or 429 returned; code NOT treated as valid; alert logged</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §5.3 fail-closed</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-008</th><th>Admin login IP rate limit</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-008</th><th>Admin login IP rate limit</th></tr>
 <tr><td>Given</td><td>(admin_login_ip_rate_limit_attempts = 10) failed logins from the same IP within (admin_login_ip_rate_limit_window_seconds = 900) seconds</td></tr>
 <tr><td>When</td><td>An 11th attempt originates from the same IP</td></tr>
-<tr><td>Then</td><td>HTTP 429 with `Retry-After`</td></tr>
+<tr><td>Then</td><td>HTTP 429 with <code>Retry-After</code></td></tr>
 <tr><td>Linked NFR</td><td>ARCH §5.3 admin rate limits</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-009</th><th>Admin account lockout</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-009</th><th>Admin account lockout</th></tr>
 <tr><td>Given</td><td>(admin_login_lockout_threshold = 10) consecutive failed login attempts for the same admin account</td></tr>
 <tr><td>When</td><td>The 11th attempt is made</td></tr>
-<tr><td>Then</td><td>HTTP 403 `ACCOUNT_LOCKED`; `locked_until = NOW() + (admin_login_lockout_duration_minutes = 30) minutes` in DB</td></tr>
+<tr><td>Then</td><td>HTTP 403 <code>ACCOUNT_LOCKED</code>; <code>locked_until = NOW() + (admin_login_lockout_duration_minutes = 30) minutes</code> in DB</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §5.3 account lockout</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-010</th><th>Arena rate limit not incremented on matchmaking timeout</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A pet enters arena and times out (no opponent in (arena_matchmaking_timeout_seconds = 30) seconds), `acceptAI = false`</td></tr>
-<tr><td>When</td><td>HTTP 408 `MATCHMAKING_TIMEOUT` is returned</td></tr>
-<tr><td>Then</td><td>`rl:arena:{pet_id}` counter is NOT incremented</td></tr>
+</table>
+<table>
+<tr><th>TC-SEC-010</th><th>Arena rate limit not incremented on matchmaking timeout</th></tr>
+<tr><td>Given</td><td>A pet enters arena and times out (no opponent in (arena_matchmaking_timeout_seconds = 30) seconds), <code>acceptAI = false</code></td></tr>
+<tr><td>When</td><td>HTTP 408 <code>MATCHMAKING_TIMEOUT</code> is returned</td></tr>
+<tr><td>Then</td><td><code>rl:arena:{pet_id}</code> counter is NOT incremented</td></tr>
 <tr><td>Linked AC</td><td>ARCH §4.2 arena battle flow</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="93-data-handling-and-privacy-tests">9.3 Data Handling and Privacy Tests</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-011</th><th>Email never logged in plaintext</th></tr></thead>
-<tbody>
+</table>
+<h3>9.3 Data Handling and Privacy Tests</h3>
+<table>
+<tr><th>TC-SEC-011</th><th>Email never logged in plaintext</th></tr>
 <tr><td>Given</td><td>A complete claim flow from email submission through OTP verification</td></tr>
 <tr><td>When</td><td>All log entries from pino are captured</td></tr>
-<tr><td>Then</td><td>No log entry contains a raw email address; only `email_hash` (SHA-256) is present in log fields</td></tr>
+<tr><td>Then</td><td>No log entry contains a raw email address; only <code>email_hash</code> (SHA-256) is present in log fields</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §8.1 PII rules</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-012</th><th>Raw IP never written to database</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-012</th><th>Raw IP never written to database</th></tr>
 <tr><td>Given</td><td>A request that triggers an audit log entry</td></tr>
-<tr><td>When</td><td>`admin_audit_log.ip_address_hash` is inspected</td></tr>
+<tr><td>When</td><td><code>admin_audit_log.ip_address_hash</code> is inspected</td></tr>
 <tr><td>Then</td><td>Value is a 64-character hex string (SHA-256 hash); no dotted-decimal or IPv6 literal</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §8.1 PII rules</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-013</th><th>SQL injection prevention — parameterized queries</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-013</th><th>SQL injection prevention — parameterized queries</th></tr>
 <tr><td>Given</td><td>An endpoint that accepts user-supplied pet ID or search parameters</td></tr>
-<tr><td>When</td><td>SQL injection payloads (e.g. `'; DROP TABLE pets; --`) are submitted as query parameters</td></tr>
-<tr><td>Then</td><td>HTTP 400 `VALIDATION_ERROR` or clean empty result; no SQL error exposed; database unchanged</td></tr>
+<tr><td>When</td><td>SQL injection payloads (e.g. <code>&#x27;; DROP TABLE pets; --</code>) are submitted as query parameters</td></tr>
+<tr><td>Then</td><td>HTTP 400 <code>VALIDATION_ERROR</code> or clean empty result; no SQL error exposed; database unchanged</td></tr>
 <tr><td>Linked NFR</td><td>NFR-SEC-09</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-014</th><th>Security headers present on all responses</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-014</th><th>Security headers present on all responses</th></tr>
 <tr><td>Given</td><td>Any API or frontend response</td></tr>
 <tr><td>When</td><td>Response headers are inspected</td></tr>
-<tr><td>Then</td><td>All of the following are present: `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`</td></tr>
+<tr><td>Then</td><td>All of the following are present: <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>, <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code>, <code>Referrer-Policy: strict-origin-when-cross-origin</code>, <code>Permissions-Policy: camera=(), microphone=(), geolocation=()</code></td></tr>
 <tr><td>Linked NFR</td><td>ARCH §5.5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-SEC-015</th><th>Pet tokens absent from all log output</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-SEC-015</th><th>Pet tokens absent from all log output</th></tr>
 <tr><td>Given</td><td>A complete sequence of authenticated pet requests</td></tr>
 <tr><td>When</td><td>All pino log entries captured over the sequence are scanned</td></tr>
-<tr><td>Then</td><td>No log entry contains the raw 32-byte token; only `token_length` or boolean presence flags are permitted</td></tr>
+<tr><td>Then</td><td>No log entry contains the raw 32-byte token; only <code>token_length</code> or boolean presence flags are permitted</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §8.1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="10-accessibility-tests">10. Accessibility Tests</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="101-automated-accessibility-scans">10.1 Automated Accessibility Scans</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Tool</strong>: axe-core integrated into Playwright tests. All P0 page routes are scanned on each CI run.</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-001</th><th>axe-core: no violations on landing page</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>Guest visits `https://staging.pixel-pet-arena.com/`</td></tr>
+</table>
+<hr>
+<h2>10. Accessibility Tests</h2>
+<h3>10.1 Automated Accessibility Scans</h3>
+<p><strong>Tool</strong>: axe-core integrated into Playwright tests. All P0 page routes are scanned on each CI run.</p>
+<table>
+<tr><th>TC-A11Y-001</th><th>axe-core: no violations on landing page</th></tr>
+<tr><td>Given</td><td>Guest visits <code>https://staging.pixel-pet-arena.com/</code></td></tr>
 <tr><td>When</td><td>axe-core analysis runs</td></tr>
 <tr><td>Then</td><td>Zero critical or serious violations reported</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-01</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-002</th><th>axe-core: no violations on claim flow</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>Each step of the 3-step claim flow (`/claim`, email form, OTP entry, URL reveal)</td></tr>
+</table>
+<table>
+<tr><th>TC-A11Y-002</th><th>axe-core: no violations on claim flow</th></tr>
+<tr><td>Given</td><td>Each step of the 3-step claim flow (<code>/claim</code>, email form, OTP entry, URL reveal)</td></tr>
 <tr><td>When</td><td>axe-core analysis runs at each step</td></tr>
 <tr><td>Then</td><td>Zero critical or serious violations reported</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-01 through NFR-A11Y-03</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-003</th><th>Focus indicator contrast ratio</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-A11Y-003</th><th>Focus indicator contrast ratio</th></tr>
 <tr><td>Given</td><td>Any focusable interactive element on any P0 page</td></tr>
 <tr><td>When</td><td>Contrast ratio between focus indicator and surrounding background is measured</td></tr>
 <tr><td>Then</td><td>All ratios ≥ (a11y_focus_contrast_ratio = 3:1)</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-01</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-004</th><th>Normal text contrast ratio</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-A11Y-004</th><th>Normal text contrast ratio</th></tr>
 <tr><td>Given</td><td>All normal-size text across P0 pages</td></tr>
 <tr><td>When</td><td>Contrast ratio measured using Playwright colour inspector</td></tr>
 <tr><td>Then</td><td>All ratios ≥ (a11y_text_contrast_normal = 4.5:1)</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-01</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-005</th><th>Alt text on pixel pet sprites</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-A11Y-005</th><th>Alt text on pixel pet sprites</th></tr>
 <tr><td>Given</td><td>Pet canvas and sprite image elements across all P0 pages</td></tr>
-<tr><td>When</td><td>`alt` attribute is inspected</td></tr>
-<tr><td>Then</td><td>Descriptive alt text is present (e.g., "Legendary blue dragon pixel pet with fire accessory"); decorative animations use `alt=""`</td></tr>
+<tr><td>When</td><td><code>alt</code> attribute is inspected</td></tr>
+<tr><td>Then</td><td>Descriptive alt text is present (e.g., &quot;Legendary blue dragon pixel pet with fire accessory&quot;); decorative animations use <code>alt=&quot;&quot;</code></td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-02</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="102-keyboard-navigation-tests">10.2 Keyboard Navigation Tests</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-006</th><th>Full claim flow keyboard-only navigation</th></tr></thead>
-<tbody>
+</table>
+<h3>10.2 Keyboard Navigation Tests</h3>
+<table>
+<tr><th>TC-A11Y-006</th><th>Full claim flow keyboard-only navigation</th></tr>
 <tr><td>Given</td><td>A fresh browser session with mouse events disabled (keyboard only)</td></tr>
 <tr><td>When</td><td>User navigates entire claim flow using Tab, Enter, Space</td></tr>
 <tr><td>Then</td><td>Every interactive element receives focus in logical order; form submits correctly without mouse</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-03</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-007</th><th>Arena entry keyboard operable</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-A11Y-007</th><th>Arena entry keyboard operable</th></tr>
 <tr><td>Given</td><td>A pet owner navigates to Arena page using keyboard only</td></tr>
-<tr><td>When</td><td>User presses Tab to reach "Enter Arena" button and Enter to activate</td></tr>
+<tr><td>When</td><td>User presses Tab to reach &quot;Enter Arena&quot; button and Enter to activate</td></tr>
 <tr><td>Then</td><td>Arena entry initiated; mode selector reachable via Tab and Arrow keys</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-03</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-008</th><th>Leaderboard keyboard navigation</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-A11Y-008</th><th>Leaderboard keyboard navigation</th></tr>
 <tr><td>Given</td><td>Leaderboard page loaded</td></tr>
 <tr><td>When</td><td>User navigates rows using Tab and Arrow keys</td></tr>
-<tr><td>Then</td><td>Each row receives focus; Enter activates the link to the pet's battle records page</td></tr>
+<tr><td>Then</td><td>Each row receives focus; Enter activates the link to the pet&#x27;s battle records page</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-03</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="103-reduced-motion-tests">10.3 Reduced-Motion Tests</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-009</th><th>Prefers-reduced-motion suppresses idle animation</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>OS reduced-motion preference is active (Playwright `--force-prefers-reduced-motion`)</td></tr>
+</table>
+<h3>10.3 Reduced-Motion Tests</h3>
+<table>
+<tr><th>TC-A11Y-009</th><th>Prefers-reduced-motion suppresses idle animation</th></tr>
+<tr><td>Given</td><td>OS reduced-motion preference is active (Playwright <code>--force-prefers-reduced-motion</code>)</td></tr>
 <tr><td>When</td><td>Guest views the pet canvas</td></tr>
 <tr><td>Then</td><td>Pet animation is a static sprite; no particle effects; no looping movement</td></tr>
 <tr><td>Linked AC</td><td>AC-001-5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-010</th><th>Leaderboard transitions suppressed with reduced motion</th></tr></thead>
-<tbody>
+</table>
+<table>
+<tr><th>TC-A11Y-010</th><th>Leaderboard transitions suppressed with reduced motion</th></tr>
 <tr><td>Given</td><td>OS reduced-motion preference active</td></tr>
 <tr><td>When</td><td>Leaderboard row order updates on the page</td></tr>
 <tr><td>Then</td><td>No CSS animation or JavaScript motion applied to rows; content updates instantaneously</td></tr>
 <tr><td>Linked NFR</td><td>NFR-A11Y-04</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="104-claim-code-expiry-warning">10.4 Claim Code Expiry Warning</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-A11Y-011</th><th>Expiry warning at 2 minutes remaining</th></tr></thead>
-<tbody>
+</table>
+<h3>10.4 Claim Code Expiry Warning</h3>
+<table>
+<tr><th>TC-A11Y-011</th><th>Expiry warning at 2 minutes remaining</th></tr>
 <tr><td>Given</td><td>A claim code created at T=0 expires at T+(claim_code_expiry_minutes = 15) minutes</td></tr>
 <tr><td>When</td><td>The time remaining reaches (a11y_claim_code_warning_before_expiry_minutes = 2) minutes</td></tr>
-<tr><td>Then</td><td>An `aria-live="assertive"` warning region becomes visible: "Your claim code expires in 2 minutes. Enter it now or request a new one."</td></tr>
+<tr><td>Then</td><td>An <code>aria-live=&quot;assertive&quot;</code> warning region becomes visible: &quot;Your claim code expires in 2 minutes. Enter it now or request a new one.&quot;</td></tr>
 <tr><td>Linked NFR</td><td>ARCH §2.1 accessibility claim warning</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="105-visual-regression-tests">10.5 Visual Regression Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Visual regression snapshots are taken at 320px, 768px, 1024px, and 1440px viewports. Snapshots are committed to the repository and compared on each CI run.</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-VR-001</th><th>Landing page — all 4 breakpoints</th></tr></thead>
-<tbody>
+</table>
+<h3>10.5 Visual Regression Tests</h3>
+<p>Visual regression snapshots are taken at 320px, 768px, 1024px, and 1440px viewports. Snapshots are committed to the repository and compared on each CI run.</p>
+<table>
+<tr><th>TC-VR-001</th><th>Landing page — all 4 breakpoints</th></tr>
+<tr><td>TC-VR-002</td><td>Claim flow 3 steps — all 4 breakpoints</td></tr>
 <tr><td>TC-VR-003</td><td>Pet page with active food buffs — all 4 breakpoints</td></tr>
 <tr><td>TC-VR-004</td><td>Arena page mode selector — all 4 breakpoints</td></tr>
 <tr><td>TC-VR-005</td><td>Leaderboard top 100 table — all 4 breakpoints</td></tr>
 <tr><td>TC-VR-006</td><td>Battle records page — all 4 breakpoints</td></tr>
 <tr><td>TC-VR-007</td><td>Legendary pet with animated border effect — 1024px, 1440px</td></tr>
 <tr><td>TC-VR-008</td><td>Rarity badge variants (Common / Rare / Epic / Legendary) — 1024px</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="11-bdd-scenario-coverage">11. BDD Scenario Coverage</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="111-bdd-coverage-overview">11.1 BDD Coverage Overview</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The minimum number of BDD scenarios is calculated as <code>ceil(18 × 0.8) = 15</code>. This plan documents 17 scenarios covering the highest-priority user stories (US-PET-001, US-AUTH-001, US-AUTH-002, US-TRAIN-001, US-ARENA-001, US-BOARD-001, US-RARITY-001, US-ADMIN-004, US-ADMIN-005). Remaining user stories are covered at the required level by unit, integration, and E2E tests. Full scenario text lives in <code>features/server/</code> and <code>features/client/</code> Gherkin files.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="112-server-side-bdd-scenarios">11.2 Server-Side BDD Scenarios</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Email Claim Flow (US-AUTH-001)
+</table>
+<hr>
+<h2>11. BDD Scenario Coverage</h2>
+<h3>11.1 BDD Coverage Overview</h3>
+<p>The minimum number of BDD scenarios is calculated as <code>ceil(18 × 0.8) = 15</code>. This plan documents 17 scenarios covering the highest-priority user stories (US-PET-001, US-AUTH-001, US-AUTH-002, US-TRAIN-001, US-ARENA-001, US-BOARD-001, US-RARITY-001, US-ADMIN-004, US-ADMIN-005). Remaining user stories are covered at the required level by unit, integration, and E2E tests. Full scenario text lives in <code>features/server/</code> and <code>features/client/</code> Gherkin files.</p>
+<h3>11.2 Server-Side BDD Scenarios</h3>
+<pre><code class="language-gherkin">Feature: Email Claim Flow (US-AUTH-001)
 
 Scenario: Guest successfully claims a pet via email OTP
   Given a guest has viewed a randomly generated pet
   And the pet is not yet claimed
   When the guest submits a valid email and checks the age confirmation
   And the guest enters the correct 6-digit OTP within (claim_code_expiry_minutes = 15) minutes
-  Then the pet's owner_token_hash is stored in the database
+  Then the pet&#x27;s owner_token_hash is stored in the database
   And a unique pet URL is returned containing a (pet_access_token_min_bytes = 32)-byte token
   And the claim code is marked as used and cannot be reused
 
@@ -1579,8 +1227,7 @@ Scenario: Claim rate limit blocks after (auth_rate_limit_claim_attempts_per_hour
   When a 6th claim attempt is submitted for the same email
   Then HTTP 429 is returned with a Retry-After header
   And the counter is not incremented further</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Arena Battle System (US-ARENA-001)
+<pre><code class="language-gherkin">Feature: Arena Battle System (US-ARENA-001)
 
 Scenario: Two pets match and complete a race battle
   Given two claimed pets both enter Race arena mode
@@ -1595,7 +1242,7 @@ Scenario: AI fallback when no opponent available
   And no real opponent joins within (arena_matchmaking_timeout_seconds = 30) seconds
   When the player accepts the AI opponent offer
   Then a battle result is recorded with is_ai_opponent = true
-  And the player pet's arena score is updated in the leaderboard
+  And the player pet&#x27;s arena score is updated in the leaderboard
   And no leaderboard entry is created for the AI synthetic pet
 
 Scenario: Arena rate limit prevents excessive battles
@@ -1603,8 +1250,7 @@ Scenario: Arena rate limit prevents excessive battles
   When the pet owner attempts to enter another arena battle
   Then HTTP 429 is returned with a Retry-After header
   And the arena rate limit counter is not incremented on matchmaking timeout</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: GDPR Erasure (US-AUTH-002, US-ADMIN-004)
+<pre><code class="language-gherkin">Feature: GDPR Erasure (US-AUTH-002, US-ADMIN-004)
 
 Scenario: Player requests email erasure
   Given a pet owner with a linked claim identity
@@ -1620,8 +1266,7 @@ Scenario: Super admin processes GDPR deletion via admin portal
   Then email_encrypted is set to NULL
   And an audit log entry records the action with actor ID and timestamp
   And the pet displays with a pseudonymous identifier</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Leaderboard Resilience (US-BOARD-001)
+<pre><code class="language-gherkin">Feature: Leaderboard Resilience (US-BOARD-001)
 
 Scenario: Leaderboard falls back to PostgreSQL when Redis unavailable
   Given Redis is unavailable
@@ -1629,8 +1274,7 @@ Scenario: Leaderboard falls back to PostgreSQL when Redis unavailable
   When a player requests the leaderboard
   Then HTTP 200 is returned with degraded: true
   And data is sourced from the PostgreSQL snapshot</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Admin Suspicious Battle Detection (US-ADMIN-005)
+<pre><code class="language-gherkin">Feature: Admin Suspicious Battle Detection (US-ADMIN-005)
 
 Scenario: Pet auto-flagged after exceeding battle threshold
   Given a pet completes more than (bot_detection_battles_threshold = 50) battles within a (bot_detection_window_minutes = 60)-minute rolling window
@@ -1644,10 +1288,8 @@ Scenario: Moderator reviews and bans suspicious pet
   Then the pet is removed from the leaderboard within (leaderboard_ban_reflection_time_minutes = 5) minutes
   And the ban reason is persisted in the audit log (max (admin_moderation_reason_max_chars = 500) characters)
   And the pet cannot enter future arena matches</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="113-client-side-bdd-scenarios">11.3 Client-Side BDD Scenarios</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Guest Pet Display (US-PET-001)
+<h3>11.3 Client-Side BDD Scenarios</h3>
+<pre><code class="language-gherkin">Feature: Guest Pet Display (US-PET-001)
 
 Scenario: Guest sees animated pet on first visit
   Given a new guest browser session
@@ -1661,14 +1303,13 @@ Scenario: Pet interaction animates within (pet_interaction_response_ms = 200) ms
   When the guest clicks or taps the pet canvas
   Then an interaction animation begins within (pet_interaction_response_ms = 200) milliseconds
   And the interaction is accessible via keyboard (Enter key on focused canvas)</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Training System (US-TRAIN-001)
+<pre><code class="language-gherkin">Feature: Training System (US-TRAIN-001)
 
 Scenario: Owner trains pet and sees stat change indicator
   Given a pet owner on the training page
   And the pet has at least one training action available today
-  When the owner clicks "Run Training"
-  Then a stat change indicator "+X Speed" appears on screen
+  When the owner clicks &quot;Run Training&quot;
+  Then a stat change indicator &quot;+X Speed&quot; appears on screen
   And the indicator disappears after (training_stat_display_duration_seconds = 2) seconds
   And the updated stat is reflected in the stats panel
 
@@ -1677,151 +1318,101 @@ Scenario: Training disabled after (training_actions_per_day = 3) daily actions
   When the owner views the training page
   Then all training buttons are disabled
   And a countdown timer shows time until UTC midnight reset</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Arena Rate Limit UX (US-ARENA-001)
+<pre><code class="language-gherkin">Feature: Arena Rate Limit UX (US-ARENA-001)
 
 Scenario: Rate-limited owner sees countdown and disabled button
   Given a pet owner whose pet has reached the hourly arena limit
   When the owner navigates to the arena page
   Then the Enter Arena button is disabled
-  And the message "Arena rate limit reached. You can enter again in X minutes." is displayed
+  And the message &quot;Arena rate limit reached. You can enter again in X minutes.&quot; is displayed
   And the countdown timer updates in real time</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-gherkin">Feature: Rarity Display (US-RARITY-001)
+<pre><code class="language-gherkin">Feature: Rarity Display (US-RARITY-001)
 
 Scenario: Legendary pet displays animated border effect
   Given a pet with rarity = LEGENDARY
   When the pet page is loaded
   Then a special animated border effect is visible around the sprite
-  And the rarity badge reads "Legendary — (rarity_legendary_percent = 3)% of all pets"
+  And the rarity badge reads &quot;Legendary — (rarity_legendary_percent = 3)% of all pets&quot;
   And when reduced-motion is active, the border animation is replaced with a static glow</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="12-cicd-integration">12. CI/CD Integration</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="121-pipeline-gates">12.1 Pipeline Gates</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The CI/CD pipeline defined in ARCH §7.2 enforces the following test gates in order:</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Gate 1 — Type Check and Lint (blocks all downstream steps)</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash">pnpm run type-check       # TypeScript 5 strict — zero errors
+<hr>
+<h2>12. CI/CD Integration</h2>
+<h3>12.1 Pipeline Gates</h3>
+<p>The CI/CD pipeline defined in ARCH §7.2 enforces the following test gates in order:</p>
+<p><strong>Gate 1 — Type Check and Lint (blocks all downstream steps)</strong></p>
+<pre><code class="language-bash">pnpm run type-check       # TypeScript 5 strict — zero errors
 pnpm run lint             # ESLint: max-lines = 800 (code_module_max_lines = 800),
                           #          max-lines-per-function = 50 (code_function_max_lines = 50)</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Gate 2 — Unit Tests with Coverage (blocks build on failure)</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash">pnpm run test:unit        # Vitest
+<p><strong>Gate 2 — Unit Tests with Coverage (blocks build on failure)</strong></p>
+<pre><code class="language-bash">pnpm run test:unit        # Vitest
                           # Branch/line/function/statement coverage ≥ 80% (unit_test_coverage_min_percent = 80)
                           # Any module below threshold fails the gate</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Gate 3 — Integration Tests (blocks deploy on failure)</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash">pnpm run test:integration # Vitest + Docker PostgreSQL + Docker Redis
+<p><strong>Gate 3 — Integration Tests (blocks deploy on failure)</strong></p>
+<pre><code class="language-bash">pnpm run test:integration # Vitest + Docker PostgreSQL + Docker Redis
                           # All 24 TC-INT-* cases must pass</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Gate 4 — Build (blocks staging deploy on failure)</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash">pnpm run build            # Vite builds for player-app and admin-app
+<p><strong>Gate 4 — Build (blocks staging deploy on failure)</strong></p>
+<pre><code class="language-bash">pnpm run build            # Vite builds for player-app and admin-app
 docker build --target runtime  # Multi-stage Docker build for API</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Gate 5 — Staging Deploy + Playwright Smoke Tests (blocks production deploy)</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">After successful build and staging deployment, Playwright smoke tests run:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash">pnpm run test:e2e --project=chromium --grep="@smoke"</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Smoke test tags (<code>@smoke</code>) cover the minimal set of P0 happy paths: guest pet display, email claim, training, arena race, leaderboard, battle records page, and admin login.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Gate 6 — Production Deploy + Smoke Tests (manual approval required)</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">Post-production-deployment smoke tests run identically to staging smoke tests but against production URLs. Manual approval is required before this gate executes.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="122-performance-test-integration">12.2 Performance Test Integration</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Performance tests do NOT run on every pull request (too slow and resource-intensive). They run on a schedule:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Test Suite</th><th>Schedule</th><th>Environment</th><th>Alert on Failure</th></tr></thead>
-<tbody>
+<p><strong>Gate 5 — Staging Deploy + Playwright Smoke Tests (blocks production deploy)</strong></p>
+<p>After successful build and staging deployment, Playwright smoke tests run:</p>
+<pre><code class="language-bash">pnpm run test:e2e --project=chromium --grep=&quot;@smoke&quot;</code></pre>
+<p>Smoke test tags (<code>@smoke</code>) cover the minimal set of P0 happy paths: guest pet display, email claim, training, arena race, leaderboard, battle records page, and admin login.</p>
+<p><strong>Gate 6 — Production Deploy + Smoke Tests (manual approval required)</strong></p>
+<p>Post-production-deployment smoke tests run identically to staging smoke tests but against production URLs. Manual approval is required before this gate executes.</p>
+<h3>12.2 Performance Test Integration</h3>
+<p>Performance tests do NOT run on every pull request (too slow and resource-intensive). They run on a schedule:</p>
+<table>
+<tr><th>Test Suite</th><th>Schedule</th><th>Environment</th><th>Alert on Failure</th></tr>
 <tr><td>k6 read latency (TC-PERF-001)</td><td>Nightly (main branch only)</td><td>Staging</td><td>PagerDuty + Slack</td></tr>
 <tr><td>k6 write latency (TC-PERF-002)</td><td>Nightly (main branch only)</td><td>Staging</td><td>PagerDuty + Slack</td></tr>
 <tr><td>Lighthouse CI (TC-PERF-006)</td><td>On every PR targeting main</td><td>Staging preview</td><td>Slack (warning only)</td></tr>
 <tr><td>JS bundle size check (TC-PERF-007)</td><td>On every PR</td><td>CI build artifacts</td><td>CI failure if exceeded</td></tr>
 <tr><td>k6 peak load (TC-PERF-003)</td><td>Weekly (Sunday UTC 02:00)</td><td>Staging</td><td>PagerDuty</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="123-security-scan-integration">12.3 Security Scan Integration</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Tool</th><th>Trigger</th><th>Scope</th><th>Gate Behavior</th></tr></thead>
-<tbody>
-<tr><td>`pnpm audit`</td><td>Every PR</td><td>All workspace packages</td><td>Fail on high/critical vulnerabilities</td></tr>
-<tr><td>OWASP ZAP baseline scan</td><td>Nightly on main</td><td>`https://staging.pixel-pet-arena.com`</td><td>Alert on MEDIUM+; fail on HIGH+</td></tr>
-<tr><td>Semgrep (TypeScript ruleset)</td><td>Every PR</td><td>`apps/api/src/`</td><td>Fail on security rules (SQL injection, hardcoded secrets)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="124-observability-verification-tests">12.4 Observability Verification Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Post-deployment smoke tests include a subset of observability checks to verify the monitoring layer is functional:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-OBS-001</th><th>Error rate metric emitted</th></tr></thead>
-<tbody>
+</table>
+<h3>12.3 Security Scan Integration</h3>
+<table>
+<tr><th>Tool</th><th>Trigger</th><th>Scope</th><th>Gate Behavior</th></tr>
+<tr><td><code>pnpm audit</code></td><td>Every PR</td><td>All workspace packages</td><td>Fail on high/critical vulnerabilities</td></tr>
+<tr><td>OWASP ZAP baseline scan</td><td>Nightly on main</td><td><code>https://staging.pixel-pet-arena.com</code></td><td>Alert on MEDIUM+; fail on HIGH+</td></tr>
+<tr><td>Semgrep (TypeScript ruleset)</td><td>Every PR</td><td><code>apps/api/src/</code></td><td>Fail on security rules (SQL injection, hardcoded secrets)</td></tr>
+</table>
+<h3>12.4 Observability Verification Tests</h3>
+<p>Post-deployment smoke tests include a subset of observability checks to verify the monitoring layer is functional:</p>
+<table>
+<tr><th>TC-OBS-001</th><th>Error rate metric emitted</th></tr>
 <tr><td>Given</td><td>10 requests to a valid endpoint followed by 1 request to a nonexistent endpoint</td></tr>
 <tr><td>When</td><td>Prometheus metrics are scraped</td></tr>
-<tr><td>Then</td><td>`api_error_rate` counter increments for the 404</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-OBS-002</th><th>Leaderboard update lag metric emitted</th></tr></thead>
-<tbody>
+<tr><td>Then</td><td><code>api_error_rate</code> counter increments for the 404</td></tr>
+</table>
+<table>
+<tr><th>TC-OBS-002</th><th>Leaderboard update lag metric emitted</th></tr>
 <tr><td>Given</td><td>A battle is completed and leaderboard ZADD executes</td></tr>
 <tr><td>When</td><td>The lag measurement is recorded</td></tr>
-<tr><td>Then</td><td>`leaderboard_update_lag_seconds` gauge value is ≤ (leaderboard_update_lag_max_seconds = 30)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>TC-OBS-003</th><th>Structured log correlation ID threaded</th></tr></thead>
-<tbody>
-<tr><td>Given</td><td>A request with `X-Request-Id: test-correlation-id` header</td></tr>
+<tr><td>Then</td><td><code>leaderboard_update_lag_seconds</code> gauge value is ≤ (leaderboard_update_lag_max_seconds = 30)</td></tr>
+</table>
+<table>
+<tr><th>TC-OBS-003</th><th>Structured log correlation ID threaded</th></tr>
+<tr><td>Given</td><td>A request with <code>X-Request-Id: test-correlation-id</code> header</td></tr>
 <tr><td>When</td><td>Log output from pino is inspected</td></tr>
-<tr><td>Then</td><td>Every log entry for that request includes `requestId: "test-correlation-id"`</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="125-test-coverage-reporting">12.5 Test Coverage Reporting</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Coverage reports are generated by Vitest's V8 provider and uploaded to the CI artifacts store on every run. The coverage summary is posted as a pull request comment. The following thresholds are enforced:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Package</th><th>Minimum Coverage</th></tr></thead>
-<tbody>
-<tr><td>`apps/api/src/domain/` (core business logic)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
-<tr><td>`apps/api/src/routes/` (API handlers)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
-<tr><td>`apps/shared/` (domain types + constants bridge)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
-<tr><td>`apps/player/src/` (React components + hooks)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
-<tr><td>`apps/admin/src/` (Vue components + Pinia stores)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p">Coverage exemptions (excluded from threshold calculation):</p>
-<ul class="doc-list">
-<li>Auto-generated files (Vite build outputs, type stubs)</li>
-<li><code>apps/api/src/migrations/</code> (SQL migration files — covered by integration tests, not unit tests)</li>
-<li>Phaser.js <code>PetCanvasEngine</code> class internals (covered by E2E and visual regression tests)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="13-test-cases">13. Test Cases</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">This section provides a consolidated index of all test case identifiers defined in this plan, organized by test type. Full test case details are in their respective sections above.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="131-unit-test-cases-tc-unit-">13.1 Unit Test Cases (TC-UNIT-*)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>Title</th><th>Section</th></tr></thead>
-<tbody>
+<tr><td>Then</td><td>Every log entry for that request includes <code>requestId: &quot;test-correlation-id&quot;</code></td></tr>
+</table>
+<h3>12.5 Test Coverage Reporting</h3>
+<p>Coverage reports are generated by Vitest&#x27;s V8 provider and uploaded to the CI artifacts store on every run. The coverage summary is posted as a pull request comment. The following thresholds are enforced:</p>
+<table>
+<tr><th>Package</th><th>Minimum Coverage</th></tr>
+<tr><td><code>apps/api/src/domain/</code> (core business logic)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
+<tr><td><code>apps/api/src/routes/</code> (API handlers)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
+<tr><td><code>apps/shared/</code> (domain types + constants bridge)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
+<tr><td><code>apps/player/src/</code> (React components + hooks)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
+<tr><td><code>apps/admin/src/</code> (Vue components + Pinia stores)</td><td>(unit_test_coverage_min_percent = 80)%</td></tr>
+</table>
+<p>Coverage exemptions (excluded from threshold calculation):</p>
+<ul><li>Auto-generated files (Vite build outputs, type stubs)</li><li><code>apps/api/src/migrations/</code> (SQL migration files — covered by integration tests, not unit tests)</li><li>Phaser.js <code>PetCanvasEngine</code> class internals (covered by E2E and visual regression tests)</li></ul>
+<hr>
+<h2>13. Test Cases</h2>
+<p>This section provides a consolidated index of all test case identifiers defined in this plan, organized by test type. Full test case details are in their respective sections above.</p>
+<h3>13.1 Unit Test Cases (TC-UNIT-*)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Section</th></tr>
 <tr><td>TC-UNIT-001</td><td>Combination space exceeds minimum</td><td>§5.2</td></tr>
 <tr><td>TC-UNIT-002</td><td>Deterministic generation from seed</td><td>§5.2</td></tr>
 <tr><td>TC-UNIT-003</td><td>Rarity distribution matches probability weights</td><td>§5.2</td></tr>
@@ -1844,13 +1435,10 @@ docker build --target runtime  # Multi-stage Docker build for API</code></pre>
 <tr><td>TC-UNIT-020</td><td>Email enumeration prevention</td><td>§5.7</td></tr>
 <tr><td>TC-UNIT-021</td><td>Recovery endpoint anti-enumeration</td><td>§5.7</td></tr>
 <tr><td>TC-UNIT-022</td><td>Error sanitization in production mode</td><td>§5.7</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="132-integration-test-cases-tc-int-">13.2 Integration Test Cases (TC-INT-*)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>Title</th><th>Section</th></tr></thead>
-<tbody>
+</table>
+<h3>13.2 Integration Test Cases (TC-INT-*)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Section</th></tr>
 <tr><td>TC-INT-001</td><td>Full claim flow persists ownership</td><td>§6.1</td></tr>
 <tr><td>TC-INT-002</td><td>Claim rate limit enforced via Redis</td><td>§6.1</td></tr>
 <tr><td>TC-INT-003</td><td>Seed collision retry mechanism</td><td>§6.1</td></tr>
@@ -1875,13 +1463,10 @@ docker build --target runtime  # Multi-stage Docker build for API</code></pre>
 <tr><td>TC-INT-022</td><td>SendGrid failover after consecutive failures</td><td>§6.6</td></tr>
 <tr><td>TC-INT-023</td><td>Claim email contains 6-digit code, no URL</td><td>§6.6</td></tr>
 <tr><td>TC-INT-024</td><td>Seed uniqueness guarantee across large batch</td><td>§6.1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="133-end-to-end-test-cases-tc-e2e-">13.3 End-to-End Test Cases (TC-E2E-*)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>Title</th><th>Section</th></tr></thead>
-<tbody>
+</table>
+<h3>13.3 End-to-End Test Cases (TC-E2E-*)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Section</th></tr>
 <tr><td>TC-E2E-001</td><td>Pet renders within SLO on page load</td><td>§7.2</td></tr>
 <tr><td>TC-E2E-002</td><td>Pet interaction response time</td><td>§7.2</td></tr>
 <tr><td>TC-E2E-003</td><td>Page refresh generates a different pet</td><td>§7.2</td></tr>
@@ -1912,13 +1497,10 @@ docker build --target runtime  # Multi-stage Docker build for API</code></pre>
 <tr><td>TC-E2E-028</td><td>Admin runtime parameter tuning — arena rate limit update</td><td>§7.7</td></tr>
 <tr><td>TC-E2E-029</td><td>Admin suspicious activity — flagged pet review and moderation</td><td>§7.7</td></tr>
 <tr><td>TC-E2E-030</td><td>Admin game economy config — food buff multiplier update with preview</td><td>§7.7</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="134-performance-test-cases-tc-perf-">13.4 Performance Test Cases (TC-PERF-*)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>Title</th><th>Section</th></tr></thead>
-<tbody>
+</table>
+<h3>13.4 Performance Test Cases (TC-PERF-*)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Section</th></tr>
 <tr><td>TC-PERF-001</td><td>P99 read latency under sustained load</td><td>§8.1</td></tr>
 <tr><td>TC-PERF-002</td><td>P99 write latency under sustained load</td><td>§8.1</td></tr>
 <tr><td>TC-PERF-003</td><td>Peak viral load — 500 RPS</td><td>§8.1</td></tr>
@@ -1933,13 +1515,10 @@ docker build --target runtime  # Multi-stage Docker build for API</code></pre>
 <tr><td>TC-PERF-012</td><td>Audit log search across 12-month window</td><td>§8.3</td></tr>
 <tr><td>TC-PERF-013</td><td>PostgreSQL autofailover recovery</td><td>§8.4</td></tr>
 <tr><td>TC-PERF-014</td><td>Health check response time</td><td>§8.4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="135-security-test-cases-tc-sec-">13.5 Security Test Cases (TC-SEC-*)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>Title</th><th>Section</th></tr></thead>
-<tbody>
+</table>
+<h3>13.5 Security Test Cases (TC-SEC-*)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Section</th></tr>
 <tr><td>TC-SEC-001</td><td>Pet token minimum entropy</td><td>§9.1</td></tr>
 <tr><td>TC-SEC-002</td><td>Token revocation via blacklist</td><td>§9.1</td></tr>
 <tr><td>TC-SEC-003</td><td>Admin TOTP required — no bypass</td><td>§9.1</td></tr>
@@ -1955,13 +1534,10 @@ docker build --target runtime  # Multi-stage Docker build for API</code></pre>
 <tr><td>TC-SEC-013</td><td>SQL injection prevention — parameterized queries</td><td>§9.3</td></tr>
 <tr><td>TC-SEC-014</td><td>Security headers present on all responses</td><td>§9.3</td></tr>
 <tr><td>TC-SEC-015</td><td>Pet tokens absent from all log output</td><td>§9.3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="136-accessibility-test-cases-tc-a11y-">13.6 Accessibility Test Cases (TC-A11Y-*)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>Title</th><th>Section</th></tr></thead>
-<tbody>
+</table>
+<h3>13.6 Accessibility Test Cases (TC-A11Y-*)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Section</th></tr>
 <tr><td>TC-A11Y-001</td><td>axe-core: no violations on landing page</td><td>§10.1</td></tr>
 <tr><td>TC-A11Y-002</td><td>axe-core: no violations on claim flow</td><td>§10.1</td></tr>
 <tr><td>TC-A11Y-003</td><td>Focus indicator contrast ratio</td><td>§10.1</td></tr>
@@ -1973,13 +1549,10 @@ docker build --target runtime  # Multi-stage Docker build for API</code></pre>
 <tr><td>TC-A11Y-009</td><td>Prefers-reduced-motion suppresses idle animation</td><td>§10.3</td></tr>
 <tr><td>TC-A11Y-010</td><td>Leaderboard transitions suppressed with reduced motion</td><td>§10.3</td></tr>
 <tr><td>TC-A11Y-011</td><td>Expiry warning at 2 minutes remaining</td><td>§10.4</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="137-visual-regression-test-cases-tc-vr-">13.7 Visual Regression Test Cases (TC-VR-*)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>Title</th><th>Section</th></tr></thead>
-<tbody>
+</table>
+<h3>13.7 Visual Regression Test Cases (TC-VR-*)</h3>
+<table>
+<tr><th>ID</th><th>Title</th><th>Section</th></tr>
 <tr><td>TC-VR-001</td><td>Landing page — all 4 breakpoints</td><td>§10.5</td></tr>
 <tr><td>TC-VR-002</td><td>Claim flow 3 steps — all 4 breakpoints</td><td>§10.5</td></tr>
 <tr><td>TC-VR-003</td><td>Pet page with active food buffs — all 4 breakpoints</td><td>§10.5</td></tr>
@@ -1988,13 +1561,25 @@ docker build --target runtime  # Multi-stage Docker build for API</code></pre>
 <tr><td>TC-VR-006</td><td>Battle records page — all 4 breakpoints</td><td>§10.5</td></tr>
 <tr><td>TC-VR-007</td><td>Legendary pet with animated border effect — 1024px, 1440px</td><td>§10.5</td></tr>
 <tr><td>TC-VR-008</td><td>Rarity badge variants (Common / Rare / Epic / Legendary) — 1024px</td><td>§10.5</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<p class="doc-p"><em>This test plan is the authoritative quality assurance specification for pixel-pet-arena v1.0. All numeric constants are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 (constants.json). Any change to a constant value requires updating both constants.json and any test cases that reference the affected threshold. Conflicts between this plan and upstream PRD, EDD, or ARCH documents shall be resolved by filing an Engineering Change Request against the relevant upstream document.</em></p>
-<div class="doc-gap"></div>
-    </div>
+</table>
+<hr>
+<p><em>This test plan is the authoritative quality assurance specification for pixel-pet-arena v1.0. All numeric constants are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 (constants.json). Any change to a constant value requires updating both constants.json and any test cases that reference the affected threshold. Conflicts between this plan and upstream PRD, EDD, or ARCH documents shall be resolved by filing an Engineering Change Request against the relevant upstream document.</em></p></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

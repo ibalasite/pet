@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Api Player Contract — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › contracts/ › Api Player Contract</p>
+    <h1 class="banner-title">contracts/ › Api Player Contract</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details open>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link active" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>API–Player Frontend Contract</h1>
+<p>This document defines the stable interface contract between the Fastify 4 API backend (<code>apps/api</code>) and the React 18 + Phaser 3 player frontend (<code>apps/player</code>). Both teams must treat this contract as authoritative. Any deviation from the shapes described here constitutes a breaking change and must follow the versioning policy in the final section.</p>
+<hr>
+<h2>Authentication Contract</h2>
+<p>Player authentication uses raw opaque bearer tokens issued by the API. When a player claims a pet session via <code>POST /api/v1/auth/claim</code>, the API returns a single-use token string. The frontend <strong>must</strong> persist this token in <code>localStorage</code> under the key <code>ppa_player_token</code>. Every subsequent authenticated request must include the header:</p>
+<pre><code class="">Authorization: Bearer &lt;token&gt;</code></pre>
+<p>There is no refresh mechanism; tokens do not expire on a fixed schedule but may be revoked server-side (e.g., after a GDPR erasure). When the API returns <code>401 Unauthorized</code>, the frontend must clear <code>ppa_player_token</code> from <code>localStorage</code> and redirect the player to the claim screen. Tokens are opaque strings—the frontend must never attempt to parse or decode them. The backend validates tokens against PostgreSQL/Supabase; no JWT libraries are involved on either side.</p>
+<hr>
+<h2>Core Endpoint Contracts</h2>
+<h3>POST /api/v1/auth/claim</h3>
+<p>Issues a new bearer token, optionally associating it with an existing player identity.</p>
+<p><strong>Request body</strong> (<code>application/json</code>):</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>displayName</code></td><td><code>string</code></td><td>No</td><td>Preferred display name (max 32 chars)</td></tr>
+<tr><td><code>referralCode</code></td><td><code>string</code></td><td>No</td><td>Optional referral code</td></tr>
+</table>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;token&quot;: &quot;ppa_t_a1b2c3d4e5f6...&quot;,
+  &quot;playerId&quot;: &quot;uuid-v4&quot;,
+  &quot;displayName&quot;: &quot;PixelWarrior&quot;
+}</code></pre>
+<p><strong>Error responses</strong>: <code>400</code> for validation failures, <code>429</code> for rate-limit exceeded.</p>
+<hr>
+<h3>GET /api/v1/pet</h3>
+<p>Returns the authenticated player&#x27;s current active pet.</p>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;petId&quot;: &quot;uuid-v4&quot;,
+  &quot;name&quot;: &quot;Frostbyte&quot;,
+  &quot;species&quot;: &quot;glacicat&quot;,
+  &quot;level&quot;: 7,
+  &quot;experience&quot;: 2340,
+  &quot;stats&quot;: {
+    &quot;hp&quot;: 120,
+    &quot;attack&quot;: 45,
+    &quot;defense&quot;: 38,
+    &quot;speed&quot;: 62
+  },
+  &quot;spriteKey&quot;: &quot;glacicat_blue_lv2&quot;,
+  &quot;createdAt&quot;: &quot;2026-01-15T10:23:00Z&quot;
+}</code></pre>
+<p>Returns <code>404</code> with error body if the player has no active pet (must call generate first).</p>
+<hr>
+<h3>POST /api/v1/pet/generate</h3>
+<p>Enqueues a new pet generation job and returns immediately with a job reference. Pet generation is asynchronous; the frontend must poll or use a WebSocket subscription to detect completion.</p>
+<p><strong>Request body</strong>: empty or <code>{}</code>.</p>
+<p><strong>Success response</strong> <code>202 Accepted</code>:</p>
+<pre><code class="language-json">{
+  &quot;jobId&quot;: &quot;job_uuid-v4&quot;,
+  &quot;status&quot;: &quot;queued&quot;,
+  &quot;estimatedWaitMs&quot;: 3000
+}</code></pre>
+<p><strong>Conflict response</strong> <code>409</code>: Player already has an active pet. The frontend must offer an explicit &quot;release pet&quot; action before generating a new one.</p>
+<hr>
+<h3>GET /api/v1/arena/challenge</h3>
+<p>Returns the current arena challenge available to the authenticated player—an opponent pet drawn from the matchmaking pool.</p>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;challengeId&quot;: &quot;uuid-v4&quot;,
+  &quot;opponent&quot;: {
+    &quot;petId&quot;: &quot;uuid-v4&quot;,
+    &quot;name&quot;: &quot;Emberclaw&quot;,
+    &quot;species&quot;: &quot;pyrofox&quot;,
+    &quot;level&quot;: 7,
+    &quot;stats&quot;: { &quot;hp&quot;: 115, &quot;attack&quot;: 52, &quot;defense&quot;: 30, &quot;speed&quot;: 58 },
+    &quot;spriteKey&quot;: &quot;pyrofox_red_lv2&quot;
+  },
+  &quot;expiresAt&quot;: &quot;2026-05-04T12:05:00Z&quot;
+}</code></pre>
+<p>Returns <code>404</code> if no suitable opponent is available (frontend should display &quot;no challengers&quot; state).</p>
+<hr>
+<h3>POST /api/v1/arena/battle</h3>
+<p>Submits the player&#x27;s move selection to resolve an arena battle. The battle engine runs server-side; the response includes the full turn-by-turn log for Phaser 3 to animate.</p>
+<p><strong>Request body</strong>:</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>challengeId</code></td><td><code>string</code></td><td>Yes</td><td>From the challenge endpoint</td></tr>
+<tr><td><code>moveId</code></td><td><code>string</code></td><td>Yes</td><td>One of the player pet&#x27;s available move IDs</td></tr>
+</table>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;battleId&quot;: &quot;uuid-v4&quot;,
+  &quot;outcome&quot;: &quot;win&quot;,
+  &quot;turns&quot;: [
+    { &quot;turn&quot;: 1, &quot;actor&quot;: &quot;player&quot;, &quot;move&quot;: &quot;ice_shard&quot;, &quot;damage&quot;: 18, &quot;targetHpAfter&quot;: 97 },
+    { &quot;turn&quot;: 2, &quot;actor&quot;: &quot;opponent&quot;, &quot;move&quot;: &quot;ember&quot;, &quot;damage&quot;: 12, &quot;targetHpAfter&quot;: 108 }
+  ],
+  &quot;rewards&quot;: {
+    &quot;experienceGained&quot;: 320,
+    &quot;newLevel&quot;: 8
+  }
+}</code></pre>
+<p><code>outcome</code> is one of <code>&quot;win&quot;</code>, <code>&quot;loss&quot;</code>, or <code>&quot;draw&quot;</code>.</p>
+<hr>
+<h3>GET /api/v1/leaderboard</h3>
+<p>Returns the global leaderboard, paginated.</p>
+<p><strong>Query params</strong>:</p>
+<table>
+<tr><th>Param</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>page</code></td><td><code>integer</code></td><td><code>1</code></td><td>Page number (1-indexed)</td></tr>
+<tr><td><code>limit</code></td><td><code>integer</code></td><td><code>20</code></td><td>Entries per page (max 100)</td></tr>
+</table>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;entries&quot;: [
+    { &quot;rank&quot;: 1, &quot;playerId&quot;: &quot;uuid&quot;, &quot;displayName&quot;: &quot;PixelWarrior&quot;, &quot;petName&quot;: &quot;Frostbyte&quot;, &quot;wins&quot;: 142, &quot;rating&quot;: 2150 }
+  ],
+  &quot;pagination&quot;: { &quot;page&quot;: 1, &quot;limit&quot;: 20, &quot;total&quot;: 850 }
+}</code></pre>
+<hr>
+<h2>Error Response Format Contract</h2>
+<p>All API errors follow a single envelope regardless of HTTP status code. The frontend must read <code>error.code</code> for machine-readable handling and <code>error.message</code> for display.</p>
+<pre><code class="language-json">{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;PET_NOT_FOUND&quot;,
+    &quot;message&quot;: &quot;No active pet found for this player.&quot;,
+    &quot;statusCode&quot;: 404,
+    &quot;requestId&quot;: &quot;req_abc123xyz&quot;
+  }
+}</code></pre>
+<p>Standard error codes used by player-facing endpoints:</p>
+<table>
+<tr><th>Code</th><th>HTTP Status</th><th>Meaning</th></tr>
+<tr><td><code>UNAUTHORIZED</code></td><td>401</td><td>Token missing, invalid, or revoked</td></tr>
+<tr><td><code>FORBIDDEN</code></td><td>403</td><td>Authenticated but not allowed (e.g., banned)</td></tr>
+<tr><td><code>PET_NOT_FOUND</code></td><td>404</td><td>Player has no active pet</td></tr>
+<tr><td><code>CHALLENGE_EXPIRED</code></td><td>410</td><td>Challenge window has passed</td></tr>
+<tr><td><code>RATE_LIMITED</code></td><td>429</td><td>Too many requests; respect <code>Retry-After</code> header</td></tr>
+<tr><td><code>INTERNAL_ERROR</code></td><td>500</td><td>Unexpected server failure</td></tr>
+</table>
+<p>The <code>requestId</code> field is always present and should be surfaced in error UI to assist support.</p>
+<hr>
+<h2>Breaking Change Policy</h2>
+<p>A change is <strong>breaking</strong> if it removes a field, changes a field&#x27;s type, renames an endpoint path, or alters authentication semantics. Breaking changes require a new API version path prefix (e.g., <code>/api/v2/</code>) and a minimum 30-day deprecation notice communicated via the <code>Deprecation</code> and <code>Sunset</code> HTTP response headers on the old endpoints. Additive changes—new optional fields, new endpoints, new optional query params—are non-breaking and do not require a version bump. The frontend must be tolerant of unknown fields in responses (never fail hard on unrecognised JSON keys).</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

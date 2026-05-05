@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本地部署指南 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 本地部署指南</p>
+    <h1 class="banner-title">本地部署指南</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link active" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Local Development Setup — pixel-pet-arena</h1>
+<p>This guide walks a developer joining the project for the first time through every step required to run all three services locally: the Fastify API, the React/Phaser player frontend, and the Vue 3 admin portal.</p>
+<hr>
+<h2>Prerequisites</h2>
+<p>Before you begin, make sure the following software is installed and available on your <code>PATH</code>.</p>
+<h3>Required versions</h3>
+<table>
+<tr><th>Tool</th><th>Minimum version</th><th>Notes</th></tr>
+<tr><td>Node.js</td><td>20.x</td><td>Use <a href="https://github.com/nvm-sh/nvm" target="_blank" rel="noopener">nvm</a> or <a href="https://github.com/Schniz/fnm" target="_blank" rel="noopener">fnm</a> to manage versions</td></tr>
+<tr><td>pnpm</td><td>9.x</td><td>Install with <code>npm install -g pnpm@latest</code></td></tr>
+<tr><td>Docker Desktop</td><td>24.x or higher</td><td>Required to run the Supabase local stack; must be running before <code>supabase start</code></td></tr>
+<tr><td>Git</td><td>2.x</td><td>Any modern version works</td></tr>
+</table>
+<p>Check your versions before continuing:</p>
+<pre><code class="language-bash">node --version   # should print v20.x.x or higher
+pnpm --version   # should print 9.x.x or higher
+docker --version # should print Docker version 24.x or higher</code></pre>
+<h3>Supabase CLI (required for local setup)</h3>
+<p>The Supabase CLI is required for Steps 2 and 3 (<code>supabase start</code>, <code>supabase migration up</code>). Install it before proceeding:</p>
+<pre><code class="language-bash"># macOS — Homebrew
+brew install supabase/tap/supabase
+
+# Linux — Homebrew (recommended)
+brew install supabase/tap/supabase</code></pre>
+<p>Verify installation:</p>
+<pre><code class="language-bash">supabase --version   # should print 2.x.x or higher</code></pre>
+<h3>Optional tools</h3>
+<ul><li><strong>Redis CLI</strong> — useful for inspecting cache state. Install via Homebrew (<code>brew install redis</code>) on macOS; on Linux, install the <code>redis-tools</code> package. You do not need a locally installed Redis server — the Docker container is sufficient.</li></ul>
+<h3>Platform notes</h3>
+<ul><li><strong>macOS</strong> is the primary development environment assumed throughout this guide. All commands are written for zsh/bash on macOS.</li><li><strong>Linux</strong> users: all commands work without modification. Ensure Docker Engine (not just Docker CLI) is running. You may need to prefix Docker commands with <code>sudo</code> depending on your group membership.</li><li><strong>Windows (WSL2)</strong>: run all commands inside a WSL2 terminal (Ubuntu 22.04 recommended). Docker Desktop for Windows with the WSL2 backend must be enabled. Paths and line endings should be handled automatically inside WSL2.</li></ul>
+<hr>
+<h2>Environment Setup</h2>
+<p>Each application in the monorepo has its own environment file. You must copy and populate all three before starting any service.</p>
+<h3>Clone the repository</h3>
+<pre><code class="language-bash">git clone https://github.com/&lt;your-org&gt;/pixel-pet-arena.git
+cd pixel-pet-arena</code></pre>
+<h3>Copy environment files</h3>
+<pre><code class="language-bash">cp apps/api/.env.example     apps/api/.env.local
+cp apps/player/.env.example  apps/player/.env.local
+cp apps/admin/.env.example   apps/admin/.env.local</code></pre>
+<h3>Key environment variables</h3>
+<p>Open each <code>.env.local</code> file and set the values listed below. Variables marked <strong>required</strong> will cause the service to fail on startup if missing or empty.</p>
+<h4><code>apps/api/.env.local</code></h4>
+<table>
+<tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>DATABASE_URL</code></td><td>Yes</td><td>Leave blank for now — the value is printed by <code>supabase start</code> in Setup Steps step 2 (looks like <code>postgresql://postgres:postgres@localhost:54322/postgres</code>)</td></tr>
+<tr><td><code>REDIS_URL</code></td><td>Yes</td><td>Redis connection string; use <code>redis://localhost:6379</code> for the local Docker container</td></tr>
+<tr><td><code>JWT_SECRET</code></td><td>Yes</td><td>Used to sign the short-lived TOTP setup token returned during first-time admin account enrollment; not used for player authentication (players use raw bearer tokens)</td></tr>
+<tr><td><code>EMAIL_ENCRYPTION_KEY</code></td><td>Yes</td><td>A 32-byte AES-256-GCM key used to encrypt and decrypt stored email addresses; generate with <code>node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(32).toString(&#x27;hex&#x27;))&quot;</code></td></tr>
+<tr><td><code>SENDGRID_API_KEY</code></td><td>No</td><td>Can be any non-empty dummy string locally; emails are captured by the Supabase Inbucket testing inbox and viewable at <code>http://localhost:54324</code></td></tr>
+<tr><td><code>ADMIN_TOTP_ISSUER</code></td><td>Yes</td><td>The issuer name shown in your authenticator app, e.g. <code>pixel-pet-arena-local</code></td></tr>
+</table>
+<h4><code>apps/player/.env.local</code></h4>
+<table>
+<tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>VITE_API_BASE_URL</code></td><td>Yes</td><td>Set to <code>http://localhost:3000</code></td></tr>
+</table>
+<h4><code>apps/admin/.env.local</code></h4>
+<table>
+<tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>VITE_API_BASE_URL</code></td><td>Yes</td><td>Set to <code>http://localhost:3000</code></td></tr>
+</table>
+<h3>Generating a JWT_SECRET</h3>
+<p>Use Node.js to generate a cryptographically random secret. Run this command and paste the output into <code>apps/api/.env.local</code>:</p>
+<pre><code class="language-bash">node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(64).toString(&#x27;base64url&#x27;))&quot;</code></pre>
+<p>The output will be a base64url-encoded string of 64 random bytes. Keep this value private and never commit it to source control.</p>
+<h3>Feature flags</h3>
+<p>The following feature flags have recommended local defaults. Set them in <code>apps/api/.env.local</code> to override behaviour without changing application code:</p>
+<pre><code class="language-bash">FF_MARKETPLACE=false
+FF_ARENA_SUMO=true</code></pre>
+<hr>
+<h2>Setup Steps</h2>
+<p>Follow these steps in order. Each step depends on the previous one completing successfully.</p>
+<ol><li><strong>Install all workspace dependencies.</strong></li></ol>
+<p>Run this from the repository root. pnpm will link workspace packages via symlinks and resolve shared dependencies through its virtual store.</p>
+<pre><code class="language-bash">   pnpm install</code></pre>
+<ol><li><strong>Start the Supabase local stack.</strong></li></ol>
+<p>This starts a PostgreSQL database, the Supabase Studio web UI, a local email testing inbox, and several supporting services inside Docker containers. Docker Desktop must be running before executing this command.</p>
+<pre><code class="language-bash">   supabase start</code></pre>
+<p>The command prints connection details when it finishes, including a <code>DB URL</code> value. Copy the <code>DB URL</code> (it will look like <code>postgresql://postgres:postgres@localhost:54322/postgres</code>) and set it as <code>DATABASE_URL</code> in <code>apps/api/.env.local</code>.</p>
+<p>Supabase Studio is accessible at <code>http://localhost:54323</code> once the stack is running.</p>
+<ol><li><strong>Run database migrations.</strong></li></ol>
+<p>Apply all pending schema migrations to the local PostgreSQL database. The canonical command is:</p>
+<pre><code class="language-bash">   supabase migration up</code></pre>
+<p>If the repository defines a <code>pnpm db:migrate</code> script in the root <code>package.json</code>, use that instead of running <code>supabase migration up</code> directly — do <strong>not</strong> run both, as this will double-apply migrations. The <code>db:migrate</code> script may use a different migration driver (such as <code>node-pg-migrate</code>) rather than the Supabase CLI directly. Check <code>package.json</code> to see which is available:</p>
+<pre><code class="language-bash">   grep -A2 &#x27;&quot;db:&#x27; package.json</code></pre>
+<ol><li><strong>Seed the database.</strong></li></ol>
+<p>This command inserts initial data including a default admin account, starter pets, and arena configuration. The seed script prints the username, initial password, and TOTP secret for the local admin account — <strong>save this entire output now</strong>. You will need all three values in the Verification section to log into the admin portal. If you lose them, run <code>pnpm db:seed --reset-admin</code> to regenerate a new TOTP secret (see <em>TOTP setup for the local admin account</em> in Troubleshooting).</p>
+<pre><code class="language-bash">   pnpm db:seed</code></pre>
+<ol><li><strong>Start the local Redis container.</strong></li></ol>
+<p>The API uses Redis for caching and the job queue. Pull and run the official <code>redis:7-alpine</code> image on the default port:</p>
+<pre><code class="language-bash">   docker run -d --name pixel-pet-redis -p 6379:6379 redis:7-alpine</code></pre>
+<p>If you already have a Redis container from a previous session, start it again with:</p>
+<pre><code class="language-bash">   docker start pixel-pet-redis</code></pre>
+<p>Confirm Redis is reachable:</p>
+<pre><code class="language-bash">   docker exec -it pixel-pet-redis redis-cli ping
+   # Expected output: PONG</code></pre>
+<ol><li><strong>Start the backend API.</strong></li></ol>
+<p>The API runs on port 3000 with hot reload enabled via <code>ts-node-dev</code> or the equivalent configured in the <code>api</code> package.</p>
+<pre><code class="language-bash">   pnpm --filter api dev</code></pre>
+<p>Wait until the console prints something like <code>Server listening at http://0.0.0.0:3000</code> before proceeding.</p>
+<ol><li><strong>Start the player frontend.</strong></li></ol>
+<p>The React + Phaser frontend runs on Vite&#x27;s dev server at port 5173 with hot module replacement enabled.</p>
+<pre><code class="language-bash">   pnpm --filter player-app dev</code></pre>
+<ol><li><strong>Start the admin portal.</strong></li></ol>
+<p>The Vue 3 admin portal runs on its own Vite dev server at port 5174.</p>
+<pre><code class="language-bash">   pnpm --filter admin-app dev</code></pre>
+<p>Each of the three services in steps 6–8 should be run in separate terminal tabs or panes so you can observe their output simultaneously.</p>
+<hr>
+<h2>Verification</h2>
+<p>Once all three services are running, use the following checks to confirm a healthy local environment.</p>
+<h3>API health check</h3>
+<pre><code class="language-bash">curl http://localhost:3000/health</code></pre>
+<p>Expected response:</p>
+<pre><code class="language-json">{&quot;status&quot;:&quot;healthy&quot;,&quot;checks&quot;:{&quot;database&quot;:&quot;ok&quot;,&quot;redis&quot;:&quot;ok&quot;},&quot;timestamp&quot;:&quot;2026-05-03T12:00:00Z&quot;}</code></pre>
+<p>Any non-200 response or a connection refusal indicates the API is not running or one or more upstream dependencies (database or Redis) are unhealthy.</p>
+<h3>Player frontend</h3>
+<p>Open <code>http://localhost:5173</code> in your browser. You should see either a pet displayed on a pixel-art background, or a prompt asking you to generate your first pet. If the page is blank or shows a network error, check that the API is running and that <code>VITE_API_BASE_URL</code> is set correctly in <code>apps/player/.env.local</code>.</p>
+<h3>Admin portal login page</h3>
+<p>Open <code>http://localhost:5174/admin/login</code> in your browser. A TOTP login form should appear with fields for username and one-time password. If the page does not load, check that the admin dev server started without errors on port 5174.</p>
+<h3>Leaderboard endpoint</h3>
+<pre><code class="language-bash">curl http://localhost:3000/api/v1/leaderboard</code></pre>
+<p>Expected response: a JSON array (empty <code>[]</code> is fine on a freshly seeded database). A 500 error here usually indicates a database connectivity problem.</p>
+<h3>Test admin account</h3>
+<p>The <code>pnpm db:seed</code> command creates a default admin user. The seed script prints the username, initial password, and TOTP secret to the console. To log in to the admin portal:</p>
+<ol><li>Open <code>http://localhost:5174/admin/login</code>.</li><li>Enter the seeded credentials (username and password printed by <code>db:seed</code>).</li><li>Open your authenticator app (Google Authenticator, Authy, 1Password, etc.) and manually enter the TOTP secret printed by <code>db:seed</code>. The issuer name will match the <code>ADMIN_TOTP_ISSUER</code> value you set in the environment file.</li><li>Enter the six-digit TOTP code from your authenticator app to complete login.</li></ol>
+<hr>
+<h2>Common Issues and Troubleshooting</h2>
+<h3>Supabase will not start</h3>
+<p><strong>Symptom:</strong> <code>supabase start</code> hangs or prints a Docker-related error.</p>
+<ul><li>Verify Docker Desktop is running. On macOS, the Docker icon should be visible in the menu bar. On Linux, run <code>systemctl status docker</code> (or <code>sudo service docker status</code>) to confirm the daemon is active.</li><li>Run <code>docker info</code> to confirm the Docker daemon is responsive.</li><li>If a previous Supabase session left containers running in a broken state, stop and reset everything:</li></ul>
+<pre><code class="language-bash">  supabase stop --no-backup
+  supabase start</code></pre>
+<ul><li>Check for port conflicts. Supabase uses ports <code>54321</code> (API), <code>54322</code> (PostgreSQL), <code>54323</code> (Studio), and <code>54324</code> (email). Run <code>lsof -i :54322</code> to see if anything else is using that port and stop it before retrying.</li></ul>
+<h3>Port already in use (3000, 5173, 5174)</h3>
+<p><strong>Symptom:</strong> A service fails to start with <code>EADDRINUSE</code> or a similar error.</p>
+<p>Find and kill the conflicting process:</p>
+<pre><code class="language-bash">lsof -ti :3000 | xargs kill -9
+lsof -ti :5173 | xargs kill -9
+lsof -ti :5174 | xargs kill -9</code></pre>
+<p>On Linux, substitute <code>fuser</code> if <code>lsof</code> is not installed: <code>fuser -k 3000/tcp</code>, <code>fuser -k 5173/tcp</code>, <code>fuser -k 5174/tcp</code>.</p>
+<h3>Redis connection refused or port 6379 already in use</h3>
+<p><strong>Symptom A — <code>docker run</code> fails with <code>port is already allocated</code>:</strong></p>
+<p>Port 6379 is already bound by a native Redis installation (e.g. installed via Homebrew or <code>apt</code>). Stop it before starting the Docker container:</p>
+<pre><code class="language-bash"># macOS (Homebrew)
+brew services stop redis
+
+# Linux (systemd)
+sudo systemctl stop redis</code></pre>
+<p>Then re-run <code>docker run -d --name pixel-pet-redis -p 6379:6379 redis:7-alpine</code>.</p>
+<p><strong>Symptom B — The API logs <code>Error: connect ECONNREFUSED 127.0.0.1:6379</code>:</strong></p>
+<ul><li>Check that the Redis Docker container is running:</li></ul>
+<pre><code class="language-bash">  docker ps --filter name=pixel-pet-redis</code></pre>
+<ul><li>If the container is not listed, start it again (see Setup Steps, step 5).</li><li>If the container is listed but the API still cannot connect, verify that <code>REDIS_URL=redis://localhost:6379</code> is set in <code>apps/api/.env.local</code>.</li></ul>
+<h3>TOTP setup for the local admin account</h3>
+<p>If you lose the seed output or need to reset the admin TOTP:</p>
+<ol><li>Reset the admin account&#x27;s TOTP secret by running the seed command again:</li></ol>
+<pre><code class="language-bash">   pnpm db:seed --reset-admin</code></pre>
+<ol><li>The new TOTP secret will be printed to the console. Remove the old entry from your authenticator app and add the new secret.</li><li>Alternatively, query the <code>admin_users</code> table directly in Supabase Studio (<code>http://localhost:54323</code>) to retrieve the raw TOTP secret for manual entry.</li></ol>
+<h3>Database migration errors</h3>
+<p><strong>Symptom:</strong> <code>supabase migration up</code> fails with schema conflicts or missing tables.</p>
+<p>The safest fix for a local database is a full reset. This wipes all local data and re-applies every migration from scratch:</p>
+<pre><code class="language-bash">supabase db reset
+pnpm db:seed</code></pre>
+<p>Do not run <code>db reset</code> against any shared or staging environment — it is destructive.</p>
+<h3>pnpm workspace dependency issues</h3>
+<p><strong>Symptom:</strong> Imports from workspace packages fail, or you see <code>Cannot find module</code> errors after adding a new package.</p>
+<ul><li>Re-run <code>pnpm install</code> from the repository root. This rebuilds the workspace symlinks.</li><li>If a specific package was added to a sub-app, ensure the version specifier in that app&#x27;s <code>package.json</code> uses the <code>workspace:*</code> protocol:</li></ul>
+<pre><code class="language-json">  &quot;dependencies&quot;: {
+    &quot;@pixel-pet-arena/shared&quot;: &quot;workspace:*&quot;
+  }</code></pre>
+<ul><li>Clear the pnpm cache and reinstall if problems persist:</li></ul>
+<pre><code class="language-bash">  pnpm store prune
+  pnpm install --force</code></pre>
+<hr>
+<h2>Development Workflow Tips</h2>
+<h3>Hot reload</h3>
+<ul><li><strong>Player frontend</strong> (<code>apps/player</code>): Vite HMR is enabled by default. Changes to <code>.tsx</code>, <code>.ts</code>, <code>.css</code>, and Phaser scene files are reflected in the browser within milliseconds without a full page reload.</li><li><strong>Admin portal</strong> (<code>apps/admin</code>): Vite HMR is also enabled. Vue single-file components update in place.</li><li><strong>Backend API</strong> (<code>apps/api</code>): The API process is managed by <code>ts-node-dev</code> (or an equivalent nodemon configuration). The process restarts automatically when any <code>.ts</code> source file changes. Allow one to two seconds for the TypeScript compiler to pick up changes.</li></ul>
+<h3>Running tests</h3>
+<p>Run the full test suite from the repository root:</p>
+<pre><code class="language-bash">pnpm test</code></pre>
+<p>Run end-to-end tests (requires all three services to be running):</p>
+<pre><code class="language-bash">pnpm test:e2e</code></pre>
+<p>Run tests for a specific workspace package:</p>
+<pre><code class="language-bash">pnpm --filter api test
+pnpm --filter player-app test
+pnpm --filter admin-app test</code></pre>
+<h3>Supabase Studio</h3>
+<p>The Supabase Studio web interface is available at <code>http://localhost:54323</code> while <code>supabase start</code> is running. Use it to:</p>
+<ul><li>Browse and edit table data directly.</li><li>Inspect the <code>admin_users</code> table for TOTP secrets.</li><li>Monitor SQL query activity in the Logs section.</li><li>Manage Row Level Security policies during development.</li></ul>
+<h3>Feature flag overrides</h3>
+<p>Feature flags are read from environment variables at API startup. Override them in <code>apps/api/.env.local</code> without touching any application code:</p>
+<pre><code class="language-bash"># Enable the marketplace feature locally
+FF_MARKETPLACE=true
+
+# Disable the arena sumo mode locally
+FF_ARENA_SUMO=false</code></pre>
+<p>Restart the API process after changing flag values for them to take effect.</p>
+<h3>Useful one-liners</h3>
+<pre><code class="language-bash"># Tail API logs
+pnpm --filter api dev 2&gt;&amp;1 | tee /tmp/api.log
+
+# Check Supabase service status
+supabase status
+
+# Inspect Redis keys
+docker exec -it pixel-pet-redis redis-cli KEYS &quot;*&quot;
+
+# Reset everything and start fresh
+supabase db reset &amp;&amp; pnpm db:seed</code></pre></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cicd Pipeline Overview — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Cicd Pipeline Overview</p>
+    <h1 class="banner-title">Cicd Pipeline Overview</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link active" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>CI/CD Pipeline Overview</h1>
+<p>This document provides a high-level view of the complete CI/CD pipeline for the pixel-pet-arena monorepo, from a developer pushing code through PR validation, staging deployment, and production release to Kubernetes via ArgoCD GitOps. It covers PR gate enforcement, environment promotion, health check gates, and the rollback paths available at each stage of the pipeline.</p>
+<h2>Pipeline Stages</h2>
+<p>The pipeline consists of four major stages: PR Gate (ci.yml), Staging Deployment (deploy-staging.yml), Production Deployment (deploy-production.yml), and Rollback recovery. Each stage builds on the previous, ensuring only validated artifacts reach production.</p>
+<div class="diagram-container"><pre class="mermaid">flowchart TD
+    DEV([Developer Push / PR])
+    PR_GATE{PR Gate\nci.yml}
+    GATE_FAIL([PR Blocked\nFix Required])
+    GATE_PASS([PR Approved\nMerge to main])
+
+    BUILD_IMGS[Build Docker Images\napi · player-app · admin-app]
+    PUSH_GHCR[Push to ghcr.io\nTagged :staging-SHA]
+    UPDATE_KUST_STG[Update Kustomize\nk8s/staging/ manifests]
+    ARGOCD_STG[ArgoCD Sync\nStaging Cluster]
+    STG_HEALTH{Staging Health\nCheck}
+    STG_FAIL([Staging Rollback\nk8s rollout undo])
+    STG_OK([Staging Verified\nNotify Team])
+
+    TAG_TRIGGER([Git Tag Push\nvX.Y.Z])
+    BUILD_PROD[Build Docker Images\napi · player-app · admin-app]
+    PUSH_PROD[Push to ghcr.io\nTagged :vX.Y.Z]
+    APPROVAL{Manual Approval\nGitHub Environment Gate}
+    REJECTED([Deployment Rejected\nHold])
+    UPDATE_KUST_PROD[Update Kustomize\nk8s/production/ manifests]
+    ARGOCD_PROD[ArgoCD Sync\nProduction Cluster]
+    PROD_HEALTH{Production Health\nCheck}
+    PROD_FAIL([Production Rollback\nArgoCD Rollback SHA])
+    PROD_OK([Production Live\nRelease Tagged])
+
+    DEV --&gt; PR_GATE
+    PR_GATE -- Checks Fail --&gt; GATE_FAIL
+    PR_GATE -- Checks Pass --&gt; GATE_PASS
+    GATE_PASS --&gt; BUILD_IMGS
+    BUILD_IMGS --&gt; PUSH_GHCR
+    PUSH_GHCR --&gt; UPDATE_KUST_STG
+    UPDATE_KUST_STG --&gt; ARGOCD_STG
+    ARGOCD_STG --&gt; STG_HEALTH
+    STG_HEALTH -- Unhealthy --&gt; STG_FAIL
+    STG_HEALTH -- Healthy --&gt; STG_OK
+
+    STG_OK -.-&gt;|Release decision| TAG_TRIGGER
+    TAG_TRIGGER --&gt; BUILD_PROD
+    BUILD_PROD --&gt; PUSH_PROD
+    PUSH_PROD --&gt; APPROVAL
+    APPROVAL -- Rejected --&gt; REJECTED
+    APPROVAL -- Approved --&gt; UPDATE_KUST_PROD
+    UPDATE_KUST_PROD --&gt; ARGOCD_PROD
+    ARGOCD_PROD --&gt; PROD_HEALTH
+    PROD_HEALTH -- Unhealthy --&gt; PROD_FAIL
+    PROD_HEALTH -- Healthy --&gt; PROD_OK
+
+    STG_FAIL -.-&gt;|Re-push fix| DEV
+    PROD_FAIL -.-&gt;|Hotfix branch| DEV
+
+    style PR_GATE fill:#f0a500,color:#000
+    style STG_HEALTH fill:#f0a500,color:#000
+    style PROD_HEALTH fill:#f0a500,color:#000
+    style APPROVAL fill:#d62828,color:#fff
+    style GATE_FAIL fill:#e63946,color:#fff
+    style STG_FAIL fill:#e63946,color:#fff
+    style PROD_FAIL fill:#e63946,color:#fff
+    style PROD_OK fill:#2a9d8f,color:#fff
+    style STG_OK fill:#2a9d8f,color:#fff</pre></div>
+<h2>Environment Promotion Strategy</h2>
+<p>Promotion between environments is controlled by Git artifacts rather than manual triggers where possible. Merging to <code>main</code> triggers staging deployment automatically. Production deployment requires a semver Git tag (<code>vX.Y.Z</code>) and a manual approval gate configured in the GitHub Actions environment protection rules. This ensures every production deployment has an explicit human sign-off and a traceable release artifact.</p>
+<table>
+<tr><th>Trigger</th><th>Target Environment</th><th>Approval Required</th></tr>
+<tr><td>PR merged to <code>main</code></td><td>Staging</td><td>No</td></tr>
+<tr><td>Git tag <code>vX.Y.Z</code> pushed</td><td>Production</td><td>Yes — GitHub Environment gate</td></tr>
+<tr><td>Hotfix branch + tag</td><td>Production</td><td>Yes — expedited review</td></tr>
+</table>
+<h2>Rollback Paths</h2>
+<p>Two rollback mechanisms are available depending on the failure point:</p>
+<ul><li><strong>Staging rollback</strong>: <code>kubectl rollout undo deployment/&lt;name&gt; -n staging</code> reverts the Kubernetes Deployment to the previous ReplicaSet. ArgoCD detects drift and re-syncs to the last known-good manifest stored in Git.</li><li><strong>Production rollback</strong>: ArgoCD supports rollback to any prior synced revision via <code>argocd app rollback pixel-pet-arena-prod &lt;revision&gt;</code>. The Kustomize overlay in <code>k8s/production/</code> is also reverted via a revert commit to maintain GitOps source-of-truth.</li></ul>
+<h2>Feature Flag Integration</h2>
+<p>Feature flags (<code>FF_MARKETPLACE=false</code>, <code>FF_ARENA_SUMO=true</code>) are injected as environment variables in the Kubernetes manifests managed by Kustomize overlays. Staging and production overlays can carry different flag values, enabling safe validation of new features in staging before they are promoted to production without requiring a separate code deployment.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Services — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Class Services</p>
+    <h1 class="banner-title">Class Services</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link active" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Service Layer Class Diagram — pixel-pet-arena</h1>
+<h2>Overview</h2>
+<p>This diagram models the backend service layer that sits between the Fastify route handlers and the</p>
+<p>data layer (PostgreSQL + Redis). Each service encapsulates one bounded domain and exposes typed</p>
+<p>methods called by route plugins. Services are injected via Fastify&#x27;s <code>fastify.decorate()</code> plugin</p>
+<p>pattern; they share the same <code>pg</code> pool and <code>redis</code> client instances.</p>
+<p>The architecture follows the monorepo single-language principle (P3): Game API Server and Admin API</p>
+<p>Server are two Fastify processes that share these service classes through a shared <code>packages/services</code></p>
+<p>workspace package.</p>
+<h2>Diagram</h2>
+<div class="diagram-container"><pre class="mermaid">classDiagram
+    direction TB
+
+    class PetService {
+        -pgPool: Pool
+        -redis: Redis
+        +generateRandom() Promise~PetDto~
+        +findById(petId: UUID) Promise~PetDto~
+        +verifyOwnership(petId: UUID, token: string) Promise~boolean~
+        +train(petId: UUID, type: TrainingType) Promise~TrainResult~
+        +feed(petId: UUID, req: FeedRequest) Promise~FeedResult~
+        +computeLevel(totalActions: number) SMALLINT
+        +isNeglected(lastTrainedAt: Date) boolean
+        +cleanupReserved() Promise~number~
+    }
+
+    class ClaimService {
+        -pgPool: Pool
+        -redis: Redis
+        -emailService: EmailService
+        +initiate(email: string, petId: UUID, ageConfirmed: boolean) Promise~ClaimInitResult~
+        +verify(claimId: UUID, code: string, sessionId: string) Promise~ClaimVerifyResult~
+        +recover(email: string, petId: UUID) Promise~ClaimInitResult~
+        +checkRateLimit(emailHash: string) Promise~void~
+        +checkCodeEntryLimit(sessionId: string) Promise~void~
+        +cleanup() Promise~number~
+    }
+
+    class ArenaService {
+        -pgPool: Pool
+        -redis: Redis
+        +enter(petId: UUID, mode: ArenaMode, acceptAI: boolean) Promise~BattleResult~
+        +enqueue(petId: UUID, mode: ArenaMode) Promise~void~
+        +dequeue(mode: ArenaMode) Promise~string | null~
+        +runBattle(petA: PetDto, petB: PetDto, mode: ArenaMode, seed: bigint) BattleOutcome
+        +resolveAI(petA: PetDto, mode: ArenaMode) BattleOutcome
+        +checkRateLimit(petId: UUID) Promise~void~
+        +getMatch(matchId: UUID) Promise~ArenaMatchDto~
+        +getHistory(petId: UUID) Promise~BattleHistoryDto~
+    }
+
+    class LeaderboardService {
+        -pgPool: Pool
+        -redis: Redis
+        +getTopN(rarity: Rarity, page: number, limit: number) Promise~LeaderboardPage~
+        +getRank(petId: UUID) Promise~RankDto~
+        +updateScore(petId: UUID, newScore: number) Promise~void~
+        +removeEntry(petId: UUID) Promise~void~
+        +snapshot() Promise~void~
+        +fallbackToPostgres(rarity: Rarity) Promise~LeaderboardPage~
+    }
+
+    class TrainingService {
+        -pgPool: Pool
+        +submitAction(petId: UUID, type: TrainingType) Promise~TrainResult~
+        +countTodayActions(petId: UUID) Promise~number~
+        +computeStatDelta() SMALLINT
+        +getHistory(petId: UUID) Promise~TrainingLog[]~
+    }
+
+    class EmailService {
+        -sendgridClient: MailService
+        -nodemailerTransport: Transporter
+        -consecutiveFailures: number
+        +sendClaimCode(to: string, code: string, petName: string) Promise~void~
+        +sendRecoveryCode(to: string, code: string, petName: string) Promise~void~
+        +checkFailover() boolean
+        +useMailer() Transporter
+        +useSendGrid() MailService
+    }
+
+    class AdminService {
+        -pgPool: Pool
+        -redis: Redis
+        +login(username: string, password: string, totpCode: string) Promise~AdminSessionDto~
+        +logout(sessionId: string) Promise~void~
+        +createAdmin(req: CreateAdminRequest) Promise~AdminDto~
+        +deactivateAdmin(adminId: UUID) Promise~void~
+        +resetTotp(adminId: UUID) Promise~void~
+        +banPet(petId: UUID, reason: string, adminId: UUID) Promise~void~
+        +unbanPet(petId: UUID, reason: string, adminId: UUID) Promise~void~
+        +flagMatch(matchId: UUID, reason: string, adminId: UUID) Promise~void~
+        +unflagMatch(matchId: UUID, adminId: UUID) Promise~void~
+    }
+
+    class ConfigService {
+        -pgPool: Pool
+        -redis: Redis
+        +getRuntimeConfig() Promise~RuntimeConfig~
+        +updateRuntimeConfig(patch: Partial~RuntimeConfig~, adminId: UUID) Promise~RuntimeConfig~
+        +getEconomyConfig() Promise~EconomyConfig~
+        +updateEconomyConfig(patch: Partial~EconomyConfig~, adminId: UUID) Promise~EconomyConfig~
+        +invalidateCache() Promise~void~
+    }
+
+    class AuditService {
+        -pgPool: Pool
+        +log(entry: AuditEntry) Promise~bigint~
+        +query(filters: AuditFilters) Promise~AuditPage~
+        +purgeExpired() Promise~number~
+    }
+
+    class GdprService {
+        -pgPool: Pool
+        -emailService: EmailService
+        +submitRequest(type: GdprRequestType, petToken: string) Promise~GdprJobDto~
+        +processErasure(requestId: UUID) Promise~void~
+        +processDataAccess(requestId: UUID) Promise~void~
+        +updateStatus(requestId: UUID, status: GdprStatus, notes: string) Promise~void~
+        +listQueue(status: GdprStatus) Promise~GdprRequestPage~
+    }
+
+    class MarketplaceService {
+        -pgPool: Pool
+        +createListing(petId: UUID, token: string, price: number) Promise~ListingDto~
+        +cancelListing(listingId: UUID, token: string) Promise~void~
+        +buyListing(listingId: UUID, buyerToken: string) Promise~TransactionDto~
+        +checkAntiFlip(petId: UUID) Promise~void~
+        +computeMinPrice(level: number, rarity: Rarity) number
+        +applyFee(price: number) number
+    }
+
+    %% Dependencies
+    ClaimService --&gt; PetService : resolves pet ownership
+    ClaimService --&gt; EmailService : sends OTP emails
+    ArenaService --&gt; PetService : loads pet stats + active food buffs
+    ArenaService --&gt; LeaderboardService : updates scores after match
+    AdminService --&gt; AuditService : writes every mutation
+    AdminService --&gt; LeaderboardService : removes banned pet entries
+    ConfigService --&gt; AuditService : logs config changes
+    GdprService --&gt; AuditService : logs GDPR actions
+    GdprService --&gt; EmailService : delivers data-access packages
+    GdprService --&gt; LeaderboardService : ZREM erased pet entries on erasure / object_leaderboard
+    MarketplaceService --&gt; PetService : verifies ownership
+    MarketplaceService --&gt; AuditService : logs trade events</pre></div>
+<h2>Notes</h2>
+<ul><li><strong>ConfigService</strong> caches runtime config in Redis with a 300 s TTL (<code>config_cache_refresh_time_minutes = 5</code>).</li></ul>
+<p>Admin changes to arena rate limits take effect within that window.</p>
+<ul><li><strong>EmailService</strong> failover: after 3 consecutive SendGrid failures (<code>sendgrid_failover_consecutive_failures = 3</code>)</li></ul>
+<p>it switches to Nodemailer SMTP automatically, with no service interruption.</p>
+<ul><li><strong>ArenaService.runBattle</strong> applies a ±15% random modifier seeded by <code>random_seed</code></li></ul>
+<p>(<code>arena_battle_outcome_random_modifier_percent = 15</code>). Tie-breaking uses the challenger&#x27;s</p>
+<p>enqueue epoch (earlier enqueue wins), making outcomes deterministic for replay.</p>
+<ul><li><strong>MarketplaceService.computeMinPrice</strong> uses the formula:</li></ul>
+<p><code>(level × 100) + (rarity_multiplier × 500)</code> (<code>trade_min_price_formula_level_coeff = 100</code>,</p>
+<p><code>trade_min_price_formula_rarity_coeff = 500</code>). <code>applyFee</code> computes <code>FLOOR(price × 0.05)</code></p>
+<p>(<code>trade_transaction_fee_percent = 5</code>).</p>
+<ul><li><strong>GdprService.processErasure</strong> sets <code>claim_identities.email_encrypted = NULL</code> within 24 hours</li></ul>
+<p>(<code>gdpr_email_hashing_internal_sla_hours = 24</code>) and completes full erasure within 7 days</p>
+<p>(<code>gdpr_email_deletion_window_days = 7</code>). As part of erasure it also calls</p>
+<p><code>LeaderboardService.removeEntry</code> for every pet belonging to the erased identity (ZREM</p>
+<p><code>leaderboard:global &lt;pet_id&gt;</code>) — see EDD §4.13 and SCHEMA §4.4. The same ZREM path is</p>
+<p>used for <code>object_leaderboard</code> GDPR requests.</p>
+<ul><li>All services are instantiated once per process and shared across route handlers via Fastify</li></ul>
+<p>decorators, ensuring connection pool (<code>db_connection_pool_min_connections = 20</code>) is not</p>
+<p>re-created per request.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

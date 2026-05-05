@@ -784,7 +784,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Pet owner clicks 'Enter Arena'] --> A1{Rate limit<br/>reached?}
+    A["Pet owner clicks 'Enter Arena'"] --> A1{"Rate limit reached?"}
     A1 -->|Yes| A2[Show rate limit<br/>countdown message<br/>Disable button]
     A2 --> P2[Return to arena lobby]
     A1 -->|No| B[Select arena mode: Race or Sumo]

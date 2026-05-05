@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Guide — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Developer Guide</p>
+    <h1 class="banner-title">Developer Guide</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link active" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Developer Guide — pixel-pet-arena</h1>
+<p><strong>DOC-ID</strong>: DEVGUIDE-PIXEL-PET-ARENA-20260504</p>
+<p><strong>Status</strong>: ACTIVE</p>
+<p><strong>Last Updated</strong>: 2026-05-04</p>
+<p><strong>Audience</strong>: Engineers working day-to-day on the pixel-pet-arena monorepo</p>
+<p>This guide is your practical day-to-day reference. It covers the most common tasks you will encounter, how to diagnose CI failures, and a quick-reference cheat sheet. For deep architecture detail see <code>docs/ARCH.md</code>; for deployment runbooks see <code>docs/runbook.md</code>; for CI pipeline specs see <code>docs/CICD.md</code>.</p>
+<hr>
+<h2>Table of Contents</h2>
+<p>This guide covers the most common development workflows for pixel-pet-arena. Use the sections below to quickly navigate to daily tasks, CI/CD diagnosis, or the command reference.</p>
+<ol><li><a href="#1-daily-scenarios" target="_blank" rel="noopener">Daily Scenarios</a></li><li><a href="#2-architecture-overview" target="_blank" rel="noopener">Architecture Overview</a></li><li><a href="#3-testing-guide" target="_blank" rel="noopener">Testing Guide</a></li><li><a href="#4-cicd-diagnosis" target="_blank" rel="noopener">CI/CD Diagnosis</a></li><li><a href="#5-quick-reference" target="_blank" rel="noopener">Quick Reference</a></li><li><a href="#6-troubleshooting-runbook" target="_blank" rel="noopener">Troubleshooting Runbook</a></li></ol>
+<hr>
+<h2>1. Daily Scenarios</h2>
+<p>This section walks you through the most common engineering tasks step by step. Each scenario names the exact files to touch, the commands to run, and how to verify your work is correct before opening a pull request.</p>
+<hr>
+<h3>1.1 Adding a New API Endpoint</h3>
+<p>The API lives in <code>apps/api/</code> and is built on Fastify 4 with TypeScript. Routes are organised by domain under <code>apps/api/src/</code>.</p>
+<p><strong>Step 1 — Create the route file.</strong></p>
+<p>Place a new file alongside its domain siblings. For example, a new endpoint on the arena resource goes in <code>apps/api/src/arena/arena.routes.ts</code>. Follow the existing pattern: a default-exported async function that accepts a <code>FastifyInstance</code> and registers routes on it.</p>
+<pre><code class="language-typescript">// apps/api/src/arena/arena.routes.ts
+import type { FastifyInstance } from &#x27;fastify&#x27;;
+import { ArenaService } from &#x27;./arena.service&#x27;;
+import { getBattleSchema } from &#x27;./arena.schema&#x27;;
+
+export default async function arenaRoutes(app: FastifyInstance) {
+  const service = new ArenaService(app.db, app.redis);
+
+  app.get(&#x27;/arena/battles/:battleId&#x27;, {
+    schema: getBattleSchema,
+  }, async (request, reply) =&gt; {
+    const { battleId } = request.params as { battleId: string };
+    const battle = await service.getBattle(battleId);
+    return reply.send(battle);
+  });
+}</code></pre>
+<p><strong>Step 2 — Define the JSON schema.</strong></p>
+<p>All request and response shapes are defined as Fastify/JSON Schema objects in a co-located schema file, e.g. <code>apps/api/src/arena/arena.schema.ts</code>. This drives automatic validation and OpenAPI generation. Import shared Zod schemas from <code>packages/shared/src/</code> and convert them with <code>zodToJsonSchema</code> where applicable.</p>
+<p><strong>Step 3 — Register the route plugin.</strong></p>
+<p>Open the router index (typically <code>apps/api/src/router.ts</code> or <code>apps/api/src/app.ts</code>) and register your new route module under the correct prefix:</p>
+<pre><code class="language-typescript">await app.register(arenaRoutes, { prefix: &#x27;/api/v1&#x27; });</code></pre>
+<p><strong>Step 4 — Implement the service layer.</strong></p>
+<p>Business logic belongs in <code>apps/api/src/arena/arena.service.ts</code>. The service constructor receives <code>db</code> (the <code>pg</code> pool) and <code>redis</code> (the ioredis client) via dependency injection from the Fastify instance. Never put SQL directly in a route handler.</p>
+<p><strong>Step 5 — Write tests before committing.</strong></p>
+<p>Create <code>apps/api/src/arena/arena.service.test.ts</code> for unit tests and <code>apps/api/src/arena/arena.routes.test.ts</code> for integration tests that spin up the full Fastify app against the local Supabase stack. Run the new test in watch mode while you implement:</p>
+<pre><code class="language-bash">pnpm --filter api test -- --watch src/arena/arena.routes.test.ts</code></pre>
+<p><strong>Step 6 — Verify end-to-end locally.</strong></p>
+<p>With the API running (<code>pnpm --filter api dev</code>), hit the new endpoint:</p>
+<pre><code class="language-bash">curl -X GET http://localhost:3000/api/v1/arena/battles/&lt;uuid&gt;</code></pre>
+<hr>
+<h3>1.2 Adding a React Component to the Player Frontend</h3>
+<p>The player frontend is <code>apps/player/</code> — React 18 + Phaser 3, bundled by Vite 5.</p>
+<p><strong>Step 1 — Create the component directory.</strong></p>
+<p>Organise components by feature, not by file type. A new pet status card goes under <code>apps/player/src/components/pet-status/</code>:</p>
+<pre><code class="">apps/player/src/components/pet-status/
+├── PetStatusCard.tsx
+├── PetStatusCard.test.tsx
+└── pet-status.css</code></pre>
+<p><strong>Step 2 — Write the component with TypeScript props.</strong></p>
+<pre><code class="language-typescript">// apps/player/src/components/pet-status/PetStatusCard.tsx
+import type { Pet } from &#x27;@pixel-pet-arena/shared&#x27;;
+import &#x27;./pet-status.css&#x27;;
+
+interface PetStatusCardProps {
+  pet: Pet;
+  onTrain: (statType: &#x27;speed&#x27; | &#x27;strength&#x27; | &#x27;stamina&#x27;) =&gt; void;
+}
+
+export function PetStatusCard({ pet, onTrain }: PetStatusCardProps) {
+  return (
+    &lt;section className=&quot;pet-status-card&quot; aria-label={`${pet.name} status`}&gt;
+      &lt;h2&gt;{pet.name}&lt;/h2&gt;
+      &lt;p&gt;Level {pet.level}&lt;/p&gt;
+      &lt;button onClick={() =&gt; onTrain(&#x27;speed&#x27;)}&gt;Train Speed&lt;/button&gt;
+    &lt;/section&gt;
+  );
+}</code></pre>
+<p><strong>Step 3 — Connect to the API via TanStack Query.</strong></p>
+<p>Data fetching belongs in a custom hook in <code>apps/player/src/hooks/</code>. Use <code>useQuery</code> for reads and <code>useMutation</code> for writes. The API base URL comes from <code>import.meta.env.VITE_API_BASE_URL</code>.</p>
+<pre><code class="language-typescript">// apps/player/src/hooks/usePet.ts
+import { useQuery } from &#x27;@tanstack/react-query&#x27;;
+
+export function usePet(petToken: string) {
+  return useQuery({
+    queryKey: [&#x27;pet&#x27;, petToken],
+    queryFn: async () =&gt; {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/pets/${petToken}`
+      );
+      if (!res.ok) throw new Error(&#x27;Failed to fetch pet&#x27;);
+      return res.json();
+    },
+  });
+}</code></pre>
+<p><strong>Step 4 — Validate hot reload is working.</strong></p>
+<p>The Vite dev server is already running at <code>http://localhost:5173</code>. Edit the component source — changes should appear in the browser within a few hundred milliseconds without a full page reload. If HMR stops working, see the <a href="#6-troubleshooting-runbook" target="_blank" rel="noopener">Troubleshooting Runbook</a>.</p>
+<p><strong>Step 5 — Use shared types from <code>@pixel-pet-arena/shared</code>.</strong></p>
+<p>Always import domain types from the shared package rather than duplicating them. The shared package is linked via pnpm workspaces so changes to <code>packages/shared/src/</code> are available immediately without a separate build step in dev mode.</p>
+<hr>
+<h3>1.3 Adding a Vue Component to the Admin Portal</h3>
+<p>The admin portal is <code>apps/admin/</code> — Vue 3 with the Composition API, Element Plus, Pinia, and Vite 5.</p>
+<p><strong>Step 1 — Create the component file.</strong></p>
+<p>Use PascalCase filenames and single-file components. A new ban-management card goes under:</p>
+<pre><code class="">apps/admin/src/components/ban-management/
+├── BanManagementCard.vue
+└── ban-management.css</code></pre>
+<p><strong>Step 2 — Write the component using <code>&lt;script setup&gt;</code> syntax.</strong></p>
+<pre><code class="language-vue">&lt;!-- apps/admin/src/components/ban-management/BanManagementCard.vue --&gt;
+&lt;template&gt;
+  &lt;el-card class=&quot;ban-management-card&quot;&gt;
+    &lt;template #header&gt;
+      &lt;span&gt;Moderation — {{ pet.name }}&lt;/span&gt;
+    &lt;/template&gt;
+    &lt;el-button type=&quot;danger&quot; @click=&quot;handleBan&quot;&gt;Ban Pet&lt;/el-button&gt;
+  &lt;/el-card&gt;
+&lt;/template&gt;
+
+&lt;script setup lang=&quot;ts&quot;&gt;
+import { ElCard, ElButton } from &#x27;element-plus&#x27;;
+import type { Pet } from &#x27;@pixel-pet-arena/shared&#x27;;
+import { useModerationStore } from &#x27;@/stores/moderation&#x27;;
+
+const props = defineProps&lt;{ pet: Pet }&gt;();
+const store = useModerationStore();
+
+function handleBan() {
+  store.banPet(props.pet.id);
+}
+&lt;/script&gt;</code></pre>
+<p><strong>Step 3 — Update the Pinia store if new state is needed.</strong></p>
+<p>Pinia stores live in <code>apps/admin/src/stores/</code>. Each store is a composable defined with <code>defineStore</code>. Add a new action for any API call you introduce:</p>
+<pre><code class="language-typescript">// apps/admin/src/stores/moderation.ts
+import { defineStore } from &#x27;pinia&#x27;;
+import { ref } from &#x27;vue&#x27;;
+
+export const useModerationStore = defineStore(&#x27;moderation&#x27;, () =&gt; {
+  const bannedPetIds = ref&lt;string[]&gt;([]);
+
+  async function banPet(petId: string) {
+    await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/api/pets/${petId}/ban`, {
+      method: &#x27;POST&#x27;,
+      credentials: &#x27;include&#x27;,
+    });
+    bannedPetIds.value.push(petId);
+  }
+
+  return { bannedPetIds, banPet };
+});</code></pre>
+<p><strong>Step 4 — Follow Element Plus conventions.</strong></p>
+<p>Import Element Plus components explicitly rather than using global registration. This keeps the bundle size predictable. Use <code>el-form</code> + <code>el-form-item</code> for all admin input forms, and <code>el-table</code> for data tables. Admin sessions use httpOnly cookies — always pass <code>credentials: &#x27;include&#x27;</code> in fetch calls to the admin API.</p>
+<p><strong>Step 5 — Start the admin dev server and verify.</strong></p>
+<pre><code class="language-bash">pnpm --filter admin-app dev</code></pre>
+<p>Open <code>http://localhost:5174</code>. Changes hot-reload automatically.</p>
+<hr>
+<h3>1.4 Adding a New Database Table</h3>
+<p>The database is PostgreSQL 15 managed via Supabase. All schema changes are tracked as migration files under <code>supabase/migrations/</code>.</p>
+<p><strong>Step 1 — Generate a new migration file.</strong></p>
+<p>Use the Supabase CLI to create a timestamped migration file:</p>
+<pre><code class="language-bash">supabase migration new add_food_inventory_table</code></pre>
+<p>This creates <code>supabase/migrations/&lt;timestamp&gt;_add_food_inventory_table.sql</code>.</p>
+<p><strong>Step 2 — Write the DDL.</strong></p>
+<p>Open the generated file and write your <code>CREATE TABLE</code> statement. Follow the existing schema conventions: UUID primary keys with <code>gen_random_uuid()</code>, <code>snake_case</code> column names, and explicit <code>NOT NULL</code> or <code>NULL</code> declarations on every column. Add <code>created_at</code> and <code>updated_at</code> timestamp columns with defaults.</p>
+<pre><code class="language-sql">CREATE TABLE food_inventory (
+    id           UUID        NOT NULL DEFAULT gen_random_uuid(),
+    pet_id       UUID        NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+    food_type    TEXT        NOT NULL,
+    quantity     INTEGER     NOT NULL DEFAULT 0 CHECK (quantity &gt;= 0),
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT pk_food_inventory PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_food_inventory_pet_id ON food_inventory (pet_id);</code></pre>
+<p><strong>Step 3 — Apply the migration to your local database.</strong></p>
+<pre><code class="language-bash">supabase migration up</code></pre>
+<p>Supabase CLI applies all pending migrations in chronological order. Verify the table appeared in Supabase Studio at <code>http://localhost:54323</code>.</p>
+<p><strong>Step 4 — Generate TypeScript types.</strong></p>
+<p>After applying the migration, regenerate the TypeScript database types so application code can reference the new table with full type safety:</p>
+<pre><code class="language-bash">supabase gen types typescript --local &gt; packages/shared/src/database.types.ts</code></pre>
+<p>Commit both the migration file and the updated <code>database.types.ts</code> in the same PR.</p>
+<p><strong>Step 5 — Verify the migration runs cleanly from scratch.</strong></p>
+<p>Reset the local database and re-apply all migrations to confirm the new migration does not conflict with earlier ones:</p>
+<pre><code class="language-bash">supabase db reset
+pnpm db:seed</code></pre>
+<hr>
+<h3>1.5 Enabling or Disabling a Feature Flag</h3>
+<p>Feature flags are environment variables read at runtime. Two flags are defined:</p>
+<table>
+<tr><th>Flag</th><th>Default</th><th>Purpose</th></tr>
+<tr><td><code>FF_MARKETPLACE</code></td><td><code>false</code></td><td>Pet trading marketplace UI and API routes</td></tr>
+<tr><td><code>FF_ARENA_SUMO</code></td><td><code>true</code></td><td>Sumo battle mode in the arena</td></tr>
+</table>
+<p><strong>Step 1 — Edit the API environment file.</strong></p>
+<p>Feature flags are consumed by the API. Open <code>apps/api/.env.local</code> and set the value:</p>
+<pre><code class="language-bash"># Enable the marketplace during local development
+FF_MARKETPLACE=true
+
+# Disable sumo mode if you&#x27;re working on race-only flows
+FF_ARENA_SUMO=false</code></pre>
+<p><strong>Step 2 — Restart the API.</strong></p>
+<p>The API reads environment variables at startup. Kill the running dev server and restart it:</p>
+<pre><code class="language-bash"># Stop with Ctrl+C, then:
+pnpm --filter api dev</code></pre>
+<p><strong>Step 3 — Confirm the flag took effect.</strong></p>
+<p>Check the <code>/health</code> endpoint or look for a log line during startup that lists active feature flags. Alternatively, call a flag-gated endpoint — if <code>FF_MARKETPLACE=false</code> and you call a marketplace route, the API should return <code>404</code> or <code>503</code>.</p>
+<p><strong>Deployment implications</strong>: Feature flags are set as environment variables in the production deployment environment (Railway dashboard or Kubernetes secret). The <code>FF_MARKETPLACE</code> flag must not be enabled in production until the DAU threshold of 1,000 sustained users for two consecutive weeks is met. Changes to production feature flags require a deployment restart or a dynamic config reload if the API supports it — check <code>apps/api/src/config.ts</code> for the reload mechanism.</p>
+<hr>
+<h3>1.6 Resetting the Local Development Environment</h3>
+<p>Run through this sequence any time your local environment is in an inconsistent state — after pulling a branch with new migrations, after a Supabase upgrade, or when debugging unexplained test failures.</p>
+<pre><code class="language-bash"># 1. Reset the Supabase database — drops all data, replays all migrations
+supabase db reset
+
+# 2. Re-seed the database with initial data (save the username, initial password, and TOTP secret printed to stdout)
+pnpm db:seed
+
+# 3. Confirm the Redis container is running
+docker start pixel-pet-redis
+
+# 4. Verify Redis responds
+docker exec -it pixel-pet-redis redis-cli ping
+# Expected: PONG
+
+# 5. Restart the API
+pnpm --filter api dev
+
+# 6. Confirm the API is healthy
+curl http://localhost:3000/health
+# Expected: {&quot;status&quot;:&quot;healthy&quot;,&quot;checks&quot;:{&quot;database&quot;:&quot;ok&quot;,&quot;redis&quot;:&quot;ok&quot;},...}
+
+# 7. Restart the frontends (in separate terminals)
+pnpm --filter player-app dev
+pnpm --filter admin-app dev</code></pre>
+<p>Save the username, initial password, and TOTP secret printed by <code>pnpm db:seed</code>. You need them to log into the admin portal at <code>http://localhost:5174/admin/login</code>. If you lose them, run <code>pnpm db:seed --reset-admin</code> to regenerate all three.</p>
+<hr>
+<h2>2. Architecture Overview</h2>
+<p>This section gives a practical map of &quot;where does X live?&quot; For full architectural detail and design rationale, read <code>docs/ARCH.md</code>.</p>
+<h3>2.1 Request Lifecycle — Player Browser to API</h3>
+<pre><code class="">Player browser
+  │  HTTPS
+  ▼
+Vite dev server (localhost:5173)  ← HMR websocket for .tsx/.ts/.css changes
+  │  fetch() to localhost:3000
+  ▼
+Fastify API (localhost:3000)
+  │
+  ├── Route plugin (apps/api/src/&lt;domain&gt;/&lt;domain&gt;.routes.ts)
+  ├── JSON Schema validation (Fastify built-in, schema from &lt;domain&gt;.schema.ts)
+  ├── Service layer (apps/api/src/&lt;domain&gt;/&lt;domain&gt;.service.ts)
+  │
+  ├── PostgreSQL (Supabase local, port 54322)  ← durable data
+  └── Redis (Docker container, port 6379)      ← caching / leaderboard / rate limits / job queue</code></pre>
+<p>In production the Vite dev server is replaced by Vercel CDN serving the built static assets, and the API runs as a containerised Node.js process behind a load balancer.</p>
+<h3>2.2 Request Lifecycle — Admin Portal to API</h3>
+<pre><code class="">Admin browser
+  │  HTTPS
+  ▼
+Vite dev server (localhost:5174)
+  │  fetch() with credentials:include → localhost:3000/admin/api/*
+  ▼
+Fastify API — Admin namespace plugin
+  │  httpOnly + SameSite=Strict cookie auth
+  │
+  ├── TOTP session validation
+  ├── Admin service layer (apps/api/src/admin/&lt;feature&gt;.service.ts)
+  │
+  ├── PostgreSQL (same database, restricted admin queries)
+  └── Redis (leaderboard admin view, rate-limit config, admin session store, caching, job queue)</code></pre>
+<p>The admin portal always communicates with the same Fastify process as the player API; the admin routes are scoped under <code>/admin/api/</code> and protected by a separate authentication mechanism (TOTP session cookies rather than player bearer tokens). (Player bearer tokens are raw opaque tokens, not JWTs — the API validates them by lookup, not signature verification.)</p>
+<h3>2.3 Shared Types</h3>
+<p>The <code>@pixel-pet-arena/shared</code> package lives in <code>packages/shared/</code>. It exports:</p>
+<ul><li><strong>Database types</strong> — auto-generated from the Supabase schema in <code>src/database.types.ts</code></li><li><strong>Domain types</strong> — hand-authored TypeScript interfaces in <code>src/types/</code></li><li><strong>Zod schemas</strong> — validation schemas shared between the API (server-side validation) and the frontends (client-side form validation)</li><li><strong>Constants</strong> — numeric and string constants that must be consistent across the stack</li></ul>
+<p>All three of <code>apps/api</code>, <code>apps/player</code>, and <code>apps/admin</code> import from <code>@pixel-pet-arena/shared</code>. Because pnpm workspaces link the package via symlinks, changes to <code>packages/shared/src/</code> are available immediately in all consumers during development — no separate build step is needed in watch mode.</p>
+<h3>2.4 Environment File Priority</h3>
+<p>Each app reads its own <code>.env.local</code> file. Vite apps also support <code>.env.development</code> and <code>.env.production</code>. The precedence order from highest to lowest is:</p>
+<table>
+<tr><th>Priority</th><th>File</th><th>Scope</th></tr>
+<tr><td>1 (highest)</td><td>Process environment variables</td><td>Already set when the process starts — not overridden by .env files</td></tr>
+<tr><td>2</td><td><code>apps/&lt;name&gt;/.env.local</code></td><td>Local machine only, gitignored</td></tr>
+<tr><td>3</td><td><code>apps/&lt;name&gt;/.env.development</code></td><td>Shared dev defaults, committed</td></tr>
+<tr><td>4 (lowest)</td><td><code>apps/&lt;name&gt;/.env</code></td><td>Fallback defaults, committed</td></tr>
+</table>
+<p>For the API, Node.js does not load <code>.env</code> files automatically — the API uses <code>dotenv</code> or equivalent. Check <code>apps/api/src/config.ts</code> to confirm the exact load order. Never commit <code>.env.local</code> files — they are in <code>.gitignore</code> and contain secrets.</p>
+<hr>
+<h2>3. Testing Guide</h2>
+<p>The project uses Vitest for unit and integration tests and Playwright for end-to-end tests. All three packages must maintain at least 80% line coverage for the CI gate to pass.</p>
+<h3>3.1 Running All Tests</h3>
+<pre><code class="language-bash"># Run all Vitest tests across all packages
+pnpm --recursive test run
+
+# Run all Vitest tests in watch mode during development
+pnpm --recursive test</code></pre>
+<h3>3.2 Running Tests for a Specific Package</h3>
+<pre><code class="language-bash"># API unit + integration tests
+pnpm --filter api test
+
+# Player frontend tests
+pnpm --filter player-app test
+
+# Admin portal tests
+pnpm --filter admin-app test</code></pre>
+<h3>3.3 Running a Single Test File</h3>
+<p>Pass the file path as a positional argument after <code>--</code>:</p>
+<pre><code class="language-bash"># Run a single file in the api package
+pnpm --filter api test -- src/arena/arena.service.test.ts
+
+# Run a single file in the player-app package
+pnpm --filter player-app test -- src/components/pet-status/PetStatusCard.test.tsx</code></pre>
+<h3>3.4 Running E2E Tests</h3>
+<p>Playwright E2E tests require all three services to be running. Start them first:</p>
+<pre><code class="language-bash"># Terminal 1
+pnpm --filter api dev
+
+# Terminal 2
+pnpm --filter player-app dev
+
+# Terminal 3
+pnpm --filter admin-app dev</code></pre>
+<p>Then in a fourth terminal:</p>
+<pre><code class="language-bash">pnpm test:e2e</code></pre>
+<p>To run only a specific E2E spec file:</p>
+<pre><code class="language-bash">pnpm exec playwright test tests/e2e/arena.spec.ts</code></pre>
+<h3>3.5 Writing a New Vitest Test</h3>
+<p><strong>File naming convention</strong>: test files must end in <code>.test.ts</code> (or <code>.test.tsx</code> for React components). Place the test file adjacent to the source file it tests.</p>
+<pre><code class="">apps/api/src/arena/
+├── arena.routes.ts
+├── arena.routes.test.ts   ← integration test (Fastify app + Supabase)
+├── arena.service.ts
+└── arena.service.test.ts  ← unit test (mock db/redis)</code></pre>
+<p><strong>Fixtures</strong>: shared test fixtures belong in <code>apps/&lt;name&gt;/src/<strong>fixtures</strong>/</code> or co-located <code><strong>fixtures</strong>/</code> directories next to the test file.</p>
+<p><strong>Using the Supabase test client</strong>: Integration tests that require a real database connection use the local Supabase stack. The test setup file (typically <code>apps/api/src/test-setup.ts</code>) exports a pre-configured <code>pg</code> pool pointed at <code>localhost:54322</code>. Import it directly:</p>
+<pre><code class="language-typescript">import { testDb } from &#x27;../test-setup&#x27;;
+
+describe(&#x27;ArenaService&#x27;, () =&gt; {
+  it(&#x27;creates a battle record&#x27;, async () =&gt; {
+    // Arrange
+    const service = new ArenaService(testDb, mockRedis);
+
+    // Act
+    const battle = await service.createBattle(petId1, petId2);
+
+    // Assert
+    expect(battle.id).toBeDefined();
+    expect(battle.status).toBe(&#x27;pending&#x27;);
+  });
+});</code></pre>
+<h3>3.6 Coverage Report</h3>
+<pre><code class="language-bash"># Generate coverage report for the API
+pnpm --filter api test:coverage
+
+# Coverage HTML report opens at apps/api/coverage/index.html</code></pre>
+<p>CI enforces 80% minimum line coverage across all three packages. If you add new code, add matching tests.</p>
+<h3>3.7 Updating Playwright Snapshots</h3>
+<p>When a UI change intentionally alters visual output, update the Playwright visual regression snapshots:</p>
+<pre><code class="language-bash">pnpm exec playwright test --update-snapshots</code></pre>
+<p>Review the diff images in the <code>playwright-report/</code> directory before committing the updated snapshots. Never bulk-update snapshots without reviewing each changed image.</p>
+<hr>
+<h2>4. CI/CD Diagnosis</h2>
+<p>When a PR gate fails or a deploy goes wrong, use this section to reproduce the failure locally and understand the fix.</p>
+<h3>4.1 PR Gate Failed — Lint or Type Errors</h3>
+<p><strong>What CI runs:</strong></p>
+<pre><code class="language-yaml">pnpm --recursive lint
+pnpm --recursive exec tsc --noEmit</code></pre>
+<p><strong>How to reproduce locally:</strong></p>
+<pre><code class="language-bash"># Run ESLint across all packages
+pnpm --recursive lint
+
+# Run TypeScript type-check across all packages
+pnpm --recursive exec tsc --noEmit</code></pre>
+<p><strong>Reading tsc output</strong>: Each error line shows <code>&lt;file&gt;(&lt;line&gt;,&lt;col&gt;): error TS&lt;code&gt;: &lt;message&gt;</code>. The most common CI-only failures are:</p>
+<ul><li>Missing return types on exported functions — add explicit return type annotations</li><li>Implicit <code>any</code> in new files — the strict tsconfig in CI may differ from VS Code defaults; run <code>pnpm --filter api exec tsc --noEmit --strict</code> to check</li><li>Type errors in generated files (<code>database.types.ts</code>) — regenerate types with <code>supabase gen types typescript --local</code></li></ul>
+<p>Fix all errors, then re-run both commands locally to confirm zero output before pushing.</p>
+<h3>4.2 PR Gate Failed — Unit Tests</h3>
+<p><strong>What CI runs:</strong></p>
+<pre><code class="language-bash">pnpm --recursive test run --coverage</code></pre>
+<p><strong>How to reproduce locally:</strong></p>
+<pre><code class="language-bash"># Exact equivalent of the CI command
+pnpm --recursive test run --coverage</code></pre>
+<p>If a specific package is failing, isolate it:</p>
+<pre><code class="language-bash">pnpm --filter api test run --coverage</code></pre>
+<p>Check that <code>supabase start</code> is running locally for integration tests. If you see database connection errors in test output, the Supabase local stack is likely not running or the <code>DATABASE_URL</code> environment variable is not set. Run <code>supabase status</code> to check.</p>
+<p>If a test is flaky (fails intermittently), check for shared mutable state between tests. Vitest runs tests in parallel by default — use <code>vi.restoreAllMocks()</code> in <code>afterEach</code> and avoid global state.</p>
+<h3>4.3 PR Gate Failed — Build</h3>
+<p><strong>What CI runs:</strong></p>
+<pre><code class="language-bash">pnpm --filter @pixel-pet-arena/shared build
+pnpm --filter api build
+pnpm --filter player-app build
+pnpm --filter admin-app build</code></pre>
+<p>Followed by Docker builds for each app.</p>
+<p><strong>How to reproduce the TypeScript build locally:</strong></p>
+<pre><code class="language-bash">pnpm --filter @pixel-pet-arena/shared build &amp;&amp; \
+pnpm --filter api build &amp;&amp; \
+pnpm --filter player-app build &amp;&amp; \
+pnpm --filter admin-app build</code></pre>
+<p><strong>How to reproduce the Docker build locally:</strong></p>
+<pre><code class="language-bash"># API
+docker build -t pixel-pet-arena/api:local apps/api
+
+# Player frontend (VITE_API_BASE_URL is a build-time arg)
+docker build \
+  --build-arg VITE_API_BASE_URL=http://localhost:3000 \
+  -t pixel-pet-arena/player-app:local \
+  apps/player
+
+# Admin portal
+docker build \
+  --build-arg VITE_API_BASE_URL=http://localhost:3000 \
+  -t pixel-pet-arena/admin-app:local \
+  apps/admin</code></pre>
+<p>Common Docker build failures:</p>
+<ul><li>Missing <code>COPY</code> of <code>packages/shared</code> in the Dockerfile — the shared package must be available inside the build context</li><li><code>pnpm install --frozen-lockfile</code> fails because <code>pnpm-lock.yaml</code> is out of date — run <code>pnpm install</code> locally and commit the updated lockfile</li></ul>
+<h3>4.4 PR Gate Failed — Secrets Detection</h3>
+<p>CI runs <code>detect-secrets</code> against the full git history using <code>.secrets.baseline</code> as the baseline.</p>
+<p><strong>How to update the baseline after a false positive:</strong></p>
+<pre><code class="language-bash"># Install detect-secrets
+pip install detect-secrets
+
+# Audit the current scan results interactively
+detect-secrets audit .secrets.baseline
+
+# After marking false positives as non-secrets in the audit, regenerate the baseline
+detect-secrets scan --baseline .secrets.baseline</code></pre>
+<p>Commit the updated <code>.secrets.baseline</code>. Never mark a real secret as a false positive — if a genuine secret was committed, rotate it immediately in the relevant service dashboard and remove it from the git history using <code>git filter-repo</code>.</p>
+<h3>4.5 Staging Deploy Failed — Migration</h3>
+<p><strong>Where to find migration logs:</strong></p>
+<ol><li>In GitHub Actions, open the <code>deploy-staging.yml</code> run and expand the <strong>Run db:migrate</strong> step.</li><li>In Supabase, connect to the staging project and run <code>SELECT * FROM supabase_migrations.schema_migrations ORDER BY version DESC LIMIT 10;</code> to see which migrations have been applied.</li></ol>
+<p><strong>Check migration status locally (against staging, read-only):</strong></p>
+<pre><code class="language-bash">supabase db diff --linked</code></pre>
+<p><strong>Rollback procedure:</strong></p>
+<p>If a migration caused data corruption or a production outage, the safest rollback path is to revert the migration manually using a down migration script (if one exists in <code>supabase/migrations/</code>) and then roll back the application image via ArgoCD (see §4.6). Supabase does not automatically reverse migrations — you must write and apply a compensating migration. Co-ordinate with the team lead before touching production data directly.</p>
+<h3>4.6 Staging Deploy Failed — ArgoCD Sync</h3>
+<p><strong>Check ArgoCD app status:</strong></p>
+<pre><code class="language-bash">argocd app get pixel-pet-arena-staging</code></pre>
+<p>Look for <code>Sync Status</code> and <code>Health Status</code>. Common failure reasons:</p>
+<ul><li><code>OutOfSync</code> — the k8s manifest in the repo diverged from the live cluster; this is expected mid-deploy</li><li><code>Degraded</code> — a pod is crash-looping; check pod logs with <code>kubectl logs -n pixel-pet-arena-staging &lt;pod-name&gt; --previous</code></li></ul>
+<p><strong>Diff the manifests:</strong></p>
+<pre><code class="language-bash">argocd app diff pixel-pet-arena-staging</code></pre>
+<p><strong>Force a sync</strong> (use only when ArgoCD is stuck, not as a substitute for diagnosing the root cause):</p>
+<pre><code class="language-bash">argocd app sync pixel-pet-arena-staging --force</code></pre>
+<p><strong>Rollback via ArgoCD</strong> (reverts to the last successful sync):</p>
+<pre><code class="language-bash">argocd app history pixel-pet-arena-staging
+# Find the ID of the last known-good sync
+argocd app rollback pixel-pet-arena-staging &lt;history-id&gt;</code></pre>
+<h3>4.7 Production Deploy Blocked — Manual Approval</h3>
+<p>Production deploys require a manual approval via the GitHub Environment protection rule on the <code>production</code> environment.</p>
+<p><strong>Who approves</strong>: the designated release approver (see your team&#x27;s Notion runbook for the current on-call approver list). Approvals can be granted from the GitHub Actions UI on the blocked workflow run.</p>
+<p><strong>What to check before approving:</strong></p>
+<ul><li>Staging smoke tests passed within the last 24 hours</li><li>No active P0/P1 incidents on staging or production</li><li>Feature flags are set to their intended values for this release</li><li>The migration (if any) has been reviewed and a rollback plan exists</li><li>The PR was reviewed and merged by at least one reviewer other than the author</li></ul>
+<p><strong>How to reject</strong>: click &quot;Reject&quot; on the pending approval in the GitHub Actions UI. Leave a comment explaining the reason. The deploy workflow will be cancelled and the team notified.</p>
+<h3>4.8 Post-Deploy Health Check Failed</h3>
+<p>The health check polls <code>GET /health</code> and expects HTTP 200 with the following JSON body:</p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;healthy&quot;,
+  &quot;checks&quot;: {
+    &quot;database&quot;: &quot;ok&quot;,
+    &quot;redis&quot;: &quot;ok&quot;
+  },
+  &quot;timestamp&quot;: &quot;2026-05-04T12:00:00Z&quot;
+}</code></pre>
+<p><strong>Diagnosing a non-200 response:</strong></p>
+<table>
+<tr><th>Symptom</th><th>Likely cause</th><th>Action</th></tr>
+<tr><td><code>&quot;database&quot;: &quot;error&quot;</code></td><td>PostgreSQL connection failed</td><td>Check <code>DATABASE_URL</code> env var; check Supabase service health in Supabase dashboard</td></tr>
+<tr><td><code>&quot;redis&quot;: &quot;error&quot;</code></td><td>Redis connection failed</td><td>Check <code>REDIS_URL</code> env var; check Upstash Redis dashboard; API operates in degraded mode (leaderboard falls back to DB)</td></tr>
+<tr><td>Connection refused</td><td>API process did not start</td><td>Check pod logs: <code>kubectl logs -n pixel-pet-arena &lt;pod&gt;</code></td></tr>
+<tr><td>HTTP 500</td><td>Unhandled startup error</td><td>Check pod logs for a stack trace; common cause is a missing required env var</td></tr>
+</table>
+<p><strong>Check locally:</strong></p>
+<pre><code class="language-bash">curl -v http://localhost:3000/health</code></pre>
+<p>If the database check fails locally, run <code>supabase status</code> to confirm the local stack is running, and check that <code>DATABASE_URL</code> in <code>apps/api/.env.local</code> matches the URL printed by <code>supabase start</code>.</p>
+<hr>
+<h2>5. Quick Reference</h2>
+<h3>5.1 Ports</h3>
+<table>
+<tr><th>Service</th><th>Port</th><th>URL</th></tr>
+<tr><td>API (Fastify)</td><td>3000</td><td><code>http://localhost:3000</code></td></tr>
+<tr><td>Player frontend (Vite)</td><td>5173</td><td><code>http://localhost:5173</code></td></tr>
+<tr><td>Admin portal (Vite)</td><td>5174</td><td><code>http://localhost:5174</code></td></tr>
+<tr><td>Supabase Studio</td><td>54323</td><td><code>http://localhost:54323</code></td></tr>
+<tr><td>Supabase API</td><td>54321</td><td><code>http://localhost:54321</code></td></tr>
+<tr><td>Supabase PostgreSQL</td><td>54322</td><td><code>postgresql://postgres:postgres@localhost:54322/postgres</code></td></tr>
+<tr><td>Inbucket (email testing)</td><td>54324</td><td><code>http://localhost:54324</code></td></tr>
+<tr><td>Redis</td><td>6379</td><td><code>redis://localhost:6379</code></td></tr>
+</table>
+<h3>5.2 Key Commands</h3>
+<pre><code class="language-bash"># Start all services (three separate terminals)
+pnpm --filter api dev              # Terminal 1 — API on :3000
+pnpm --filter player-app dev       # Terminal 2 — Player frontend on :5173
+pnpm --filter admin-app dev        # Terminal 3 — Admin portal on :5174
+
+# Run all tests
+pnpm --recursive test run
+
+# Run tests for one package
+pnpm --filter api test
+pnpm --filter player-app test
+pnpm --filter admin-app test
+
+# Reset the local database
+supabase db reset
+
+# Re-seed the database
+pnpm db:seed
+
+# Apply pending migrations
+supabase migration up
+
+# Generate a new migration file
+supabase migration new &lt;migration_name&gt;
+
+# Regenerate TypeScript types from schema
+supabase gen types typescript --local &gt; packages/shared/src/database.types.ts
+
+# API health check
+curl http://localhost:3000/health
+
+# Install all workspace dependencies
+pnpm install
+
+# Build all packages
+pnpm --filter @pixel-pet-arena/shared build &amp;&amp; \
+pnpm --filter api build &amp;&amp; \
+pnpm --filter player-app build &amp;&amp; \
+pnpm --filter admin-app build
+
+# Run E2E tests
+pnpm test:e2e
+
+# Coverage report (API)
+pnpm --filter api test:coverage</code></pre>
+<h3>5.3 Environment Files</h3>
+<table>
+<tr><th>File</th><th>Who reads it</th><th>What it configures</th></tr>
+<tr><td><code>apps/api/.env.local</code></td><td>API (dotenv at startup)</td><td><code>DATABASE_URL</code>, <code>REDIS_URL</code>, <code>JWT_SECRET</code> (used exclusively to sign the short-lived TOTP setup token returned during first-time admin account enrollment — not used for player authentication or admin sessions), <code>EMAIL_ENCRYPTION_KEY</code>, <code>SENDGRID_API_KEY</code>, <code>ADMIN_TOTP_ISSUER</code>, feature flags</td></tr>
+<tr><td><code>apps/player/.env.local</code></td><td>Vite (build + dev server)</td><td><code>VITE_API_BASE_URL</code></td></tr>
+<tr><td><code>apps/admin/.env.local</code></td><td>Vite (build + dev server)</td><td><code>VITE_API_BASE_URL</code></td></tr>
+</table>
+<p>All <code>.env.local</code> files are gitignored. Copy from the corresponding <code>.env.example</code> file on first setup.</p>
+<h3>5.4 Feature Flags</h3>
+<table>
+<tr><th>Flag</th><th>Default</th><th>Where to set</th><th>Effect</th></tr>
+<tr><td><code>FF_MARKETPLACE</code></td><td><code>false</code></td><td><code>apps/api/.env.local</code></td><td>Enables pet trading marketplace routes and UI. Do not enable in production until DAU ≥ 1,000 for 2 weeks.</td></tr>
+<tr><td><code>FF_ARENA_SUMO</code></td><td><code>true</code></td><td><code>apps/api/.env.local</code></td><td>Enables sumo battle mode in the arena. Set <code>false</code> to show race mode only.</td></tr>
+</table>
+<p>To toggle a flag locally: edit <code>apps/api/.env.local</code>, then restart the API with <code>pnpm --filter api dev</code>.</p>
+<h3>5.5 Useful One-Liners</h3>
+<pre><code class="language-bash"># Tail API logs (when running pnpm --filter api dev, logs are in the terminal)
+# For a running Docker container:
+docker logs -f pixel-pet-redis
+
+# Inspect Redis — list all keys
+docker exec -it pixel-pet-redis redis-cli KEYS &#x27;*&#x27;
+
+# Inspect a specific Redis key
+docker exec -it pixel-pet-redis redis-cli GET &#x27;leaderboard:global&#x27;
+
+# Check Supabase local stack status
+supabase status
+
+# Kill a stuck process on a specific port (macOS/Linux)
+lsof -ti:3000 | xargs kill -9   # Kill whatever is on port 3000
+lsof -ti:5173 | xargs kill -9   # Kill whatever is on port 5173
+lsof -ti:5174 | xargs kill -9   # Kill whatever is on port 5174
+
+# Check which process is using a port
+lsof -i :3000
+
+# Generate a JWT_SECRET
+node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(64).toString(&#x27;base64url&#x27;))&quot;
+
+# Generate an EMAIL_ENCRYPTION_KEY — 32 bytes = 256-bit key for AES-256-GCM (used to encrypt and decrypt stored email addresses)
+node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(32).toString(&#x27;hex&#x27;))&quot;
+
+# Flush all Redis keys (local dev only — never run in production)
+docker exec -it pixel-pet-redis redis-cli FLUSHALL</code></pre>
+<h3>5.6 Git Workflow</h3>
+<p><strong>Branch naming:</strong></p>
+<table>
+<tr><th>Type</th><th>Pattern</th><th>Example</th></tr>
+<tr><td>Feature</td><td><code>feature/&lt;short-description&gt;</code></td><td><code>feature/arena-sumo-mode</code></td></tr>
+<tr><td>Bug fix</td><td><code>fix/&lt;short-description&gt;</code></td><td><code>fix/leaderboard-cache-miss</code></td></tr>
+<tr><td>Chore / maintenance</td><td><code>chore/&lt;short-description&gt;</code></td><td><code>chore/upgrade-fastify-4.2</code></td></tr>
+<tr><td>Documentation</td><td><code>docs/&lt;short-description&gt;</code></td><td><code>docs/update-developer-guide</code></td></tr>
+</table>
+<p><strong>Commit message format</strong> (Conventional Commits):</p>
+<pre><code class="">&lt;type&gt;: &lt;description&gt;
+
+&lt;optional body — explain the why, not the what&gt;</code></pre>
+<p>Types: <code>feat</code>, <code>fix</code>, <code>refactor</code>, <code>docs</code>, <code>test</code>, <code>chore</code>, <code>perf</code>, <code>ci</code></p>
+<p>Examples:</p>
+<pre><code class="">feat: add sumo battle outcome calculation
+fix: handle Redis timeout in leaderboard fallback path
+chore: bump pnpm to 9.5</code></pre>
+<p><strong>Merge strategy</strong>: squash-merge feature branches into <code>develop</code>. Use merge commits when promoting <code>develop</code> → <code>main</code>. Never force-push to <code>develop</code> or <code>main</code>.</p>
+<p><strong>PR template</strong>: opening a PR automatically populates the template from <code>.github/pull_request_template.md</code>. Fill in all sections — summary, test plan, and any migration notes — before requesting review.</p>
+<hr>
+<h2>6. Troubleshooting Runbook</h2>
+<h3>6.1 Port Already in Use (EADDRINUSE)</h3>
+<p>A service fails to start with <code>Error: listen EADDRINUSE :::3000</code> (or 5173, 5174).</p>
+<pre><code class="language-bash"># Find what is using the port
+lsof -i :3000
+
+# Kill the process by PID
+kill -9 &lt;PID&gt;
+
+# Or kill all processes on the port in one step
+lsof -ti:3000 | xargs kill -9</code></pre>
+<p>If the port keeps being claimed after restart, check whether a previous dev server is still running in a background terminal pane.</p>
+<h3>6.2 Supabase Won&#x27;t Start</h3>
+<p>Symptoms: <code>supabase start</code> hangs or prints Docker errors.</p>
+<pre><code class="language-bash"># Ensure Docker Desktop is running
+docker info
+
+# If Docker is running but Supabase is stuck, stop and restart the stack
+supabase stop --no-backup
+supabase start
+
+# If containers are in a broken state, remove them and retry
+docker ps -a | grep supabase
+docker rm -f $(docker ps -aq --filter &quot;name=supabase&quot;)
+supabase start</code></pre>
+<p>If you upgraded the Supabase CLI and the local stack version changed, you may need to reset:</p>
+<pre><code class="language-bash">supabase db reset
+pnpm db:seed</code></pre>
+<h3>6.3 Redis Connection Refused</h3>
+<p>The API starts but logs <code>Redis connection refused</code> or the health check shows <code>&quot;redis&quot;: &quot;error&quot;</code>.</p>
+<pre><code class="language-bash"># Check whether the container is running
+docker ps | grep pixel-pet-redis
+
+# Start it if it is stopped
+docker start pixel-pet-redis
+
+# If the container does not exist, create it
+docker run -d --name pixel-pet-redis -p 6379:6379 redis:7-alpine
+
+# Verify Redis responds
+docker exec -it pixel-pet-redis redis-cli ping
+# Expected: PONG</code></pre>
+<p>Confirm that <code>REDIS_URL=redis://localhost:6379</code> is set in <code>apps/api/.env.local</code>.</p>
+<h3>6.4 pnpm Workspace Symlink Issues</h3>
+<p>After pulling changes or switching branches, imports from <code>@pixel-pet-arena/shared</code> fail with <code>Cannot find module</code> errors, or you see stale type definitions.</p>
+<pre><code class="language-bash"># Force a clean reinstall of all workspace dependencies
+pnpm install --force
+
+# If the problem persists, clear the pnpm cache and reinstall
+pnpm store prune
+pnpm install --force</code></pre>
+<h3>6.5 Hot Reload Not Working</h3>
+<p>The Vite dev server is running but changes to <code>.tsx</code>, <code>.ts</code>, or <code>.css</code> files do not appear in the browser without a full page refresh.</p>
+<ol><li>Check the Vite dev server terminal for HMR errors — these are usually printed inline.</li><li>Confirm your editor is writing files to disk (some editors write to a temp file first).</li><li>Verify <code>vite.config.ts</code> in the affected app has <code>server.watch</code> set to use the polling strategy if you are running inside a Docker container or a network-mounted filesystem:</li></ol>
+<pre><code class="language-typescript">   server: {
+     watch: {
+       usePolling: true,
+     },
+   }</code></pre>
+<ol><li>If HMR breaks only for React components, ensure each component file exports the component as a named export (not only as a default export with an anonymous function) — React Fast Refresh requires stable component identities.</li></ol>
+<h3>6.6 TypeScript Errors After Pulling Latest</h3>
+<p>You pull changes and suddenly see TypeScript errors that were not present before.</p>
+<p><strong>Most likely causes and fixes:</strong></p>
+<ol><li><strong>New dependencies added</strong> — run <code>pnpm install</code> to link new packages.</li><li><strong>Schema changed</strong> — run <code>supabase gen types typescript --local &gt; packages/shared/src/database.types.ts</code> to regenerate types, then apply pending migrations with <code>supabase migration up</code>.</li><li><strong>Shared package API changed</strong> — check <code>packages/shared/CHANGELOG.md</code> (if present) for breaking type changes. Update your call sites accordingly.</li><li><strong>tsconfig.json changed</strong> — review the diff of any <code>tsconfig*.json</code> files in the PR you pulled; a stricter setting may now flag previously passing code.</li></ol>
+<p>After any of the above, run <code>pnpm --recursive exec tsc --noEmit</code> to confirm zero errors before continuing.</p>
+<h3>6.7 TOTP Login Failing for Admin</h3>
+<p>The admin portal at <code>http://localhost:5174/admin/login</code> rejects your TOTP code.</p>
+<p><strong>Cause 1 — Lost the TOTP secret.</strong> Re-run the seed with the reset flag to generate a new admin account and TOTP secret:</p>
+<pre><code class="language-bash">pnpm db:seed --reset-admin</code></pre>
+<p>Save the username, initial password, and TOTP secret printed to stdout, then enter the TOTP secret manually into your authenticator app.</p>
+<p><strong>Cause 2 — Clock skew.</strong> TOTP codes are time-based and valid for a 30-second window. If your system clock is more than 30 seconds out of sync, codes will be rejected. On macOS: <code>sudo sntp -sS time.apple.com</code>. On Linux: <code>sudo timedatectl set-ntp true</code>.</p>
+<p><strong>Cause 3 — Database was reset without re-seeding.</strong> After <code>supabase db reset</code>, always run <code>pnpm db:seed</code> to recreate the admin account. Without it there is no admin account in the database and all TOTP attempts will return <code>401</code>.</p>
+<p><strong>Cause 4 — Using the wrong issuer in your authenticator app.</strong> The issuer name for local development is set by <code>ADMIN_TOTP_ISSUER</code> in <code>apps/api/.env.local</code> (default: <code>pixel-pet-arena-local</code>). If you enrolled the token under a different issuer, delete the old entry from your authenticator app and re-scan.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

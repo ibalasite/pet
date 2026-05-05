@@ -1,227 +1,835 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — BDD — Server Feature Specifications</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server BDD — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">BDD — Server Feature Specifications</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>BDD — Server Feature Specifications</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="bdd--server-feature-specifications">BDD — Server Feature Specifications</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><!-- Server-side Gherkin test specifications for pixel-pet-arena backend --></p>
-<p class="doc-p"><!-- Authored by: gendoc-align-fix --></p>
-<p class="doc-p"><!-- Date: 2026-05-04 --></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="overview">Overview</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">This document summarizes the 6 server-side BDD feature files that specify the backend API and business logic for pixel-pet-arena. Each feature file contains Gherkin scenarios that validate acceptance criteria from the PRD.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Total Coverage:</strong> 6 server features, 18 core scenarios, 8 PRD user stories linked</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="1-arena-battle-system-codefeaturesserverarena-battlefeaturecode">1. Arena Battle System (<code>features/server/arena-battle.feature</code>)</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-ARENA-001, US-ARENA-002</p>
-<p class="doc-p"><strong>Scenarios:</strong> 5</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates the core battle matchmaking and battle resolution system.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Race Battle</strong>: Two pets match and complete a race battle, with speed stat determining winner</li>
-<li><strong>AI Fallback</strong>: Matchmaking timeout triggers AI opponent when queue has only 1 pet</li>
-<li><strong>Rate Limiting</strong>: Arena battles capped at 10 per hour; HTTP 429 returned when exceeded (AC-007-8)</li>
-<li><strong>Sumo Mode</strong>: Alternative battle mode using strength stat instead of speed</li>
-<li><strong>Speed Modifier</strong>: Winner determined using base stat + ±15% random modifier</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>arena_match_duration_max_seconds = 15</code>, <code>arena_matchmaking_timeout_seconds = 30</code>, <code>arena_rate_limit_battles_per_hour_default = 10</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="2-email-claim-flow-codefeaturesserverclaim-flowfeaturecode">2. Email Claim Flow (<code>features/server/claim-flow.feature</code>)</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-AUTH-001, US-AUTH-002</p>
-<p class="doc-p"><strong>Scenarios:</strong> 4</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates the email-based pet ownership claim process (zero-account-barrier).</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>OTP Verification</strong>: Guest claims pet via 6-digit code; email links to pet token (AC-003-1, AC-003-2)</li>
-<li><strong>Code Expiry</strong>: Claim code expires after 15 minutes (AC-003-3)</li>
-<li><strong>Claim Rate Limit</strong>: 5 OTP requests per hour; HTTP 429 with Retry-After header on 6th attempt (AC-007-1)</li>
-<li><strong>One-Time Use</strong>: Claim code cannot be reused after first successful verification (AC-003-4)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>pet_access_token_min_bytes = 32</code>, <code>claim_code_digits = 6</code>, <code>claim_code_expiry_minutes = 15</code>, <code>auth_rate_limit_claim_attempts_per_hour = 5</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="3-gdpr-data-erasure-codefeaturesservergdpr-erasurefeaturecode">3. GDPR Data Erasure (<code>features/server/gdpr-erasure.feature</code>)</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-AUTH-002, US-ADMIN-004</p>
-<p class="doc-p"><strong>Scenarios:</strong> 2</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates user data erasure and privacy compliance (GDPR Article 17).</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Player Erasure Request</strong>: Pet owner requests email erasure; email_encrypted nulled within 24h SLA (AC-004-6, AC-016-2)</li>
-<li><strong>Admin Deletion</strong>: Super admin triggers GDPR deletion via admin portal; audit logged with admin_id and ip_address_hash (AC-004-6)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>gdpr_email_hashing_internal_sla_hours = 24</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="4-global-leaderboard-codefeaturesserverleaderboardfeaturecode">4. Global Leaderboard (<code>features/server/leaderboard.feature</code>)</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-BOARD-001, US-ADMIN-002</p>
-<p class="doc-p"><strong>Scenarios:</strong> 3</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates the global leaderboard ranking system and admin moderation integration.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Redis Fallback</strong>: When Redis is unavailable, leaderboard falls back to PostgreSQL snapshot with "degraded": true flag (AC-009-1)</li>
-<li><strong>Score Update Lag</strong>: Leaderboard score updates within 30 seconds of a battle win (AC-009-2)</li>
-<li><strong>Admin Ban Reflection</strong>: Banning a pet removes it from leaderboard within 5 minutes (AC-005-8)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>leaderboard_update_lag_max_seconds = 30</code>, <code>leaderboard_ban_reflection_time_minutes = 5</code>, <code>admin_moderation_reason_max_chars = 500</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="5-training-and-food-system-codefeaturesservertraining-foodfeaturecode">5. Training and Food System (<code>features/server/training-food.feature</code>)</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-TRAIN-001, US-FOOD-001</p>
-<p class="doc-p"><strong>Scenarios:</strong> 2</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates pet stat progression and temporary buff mechanics.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Training Action Bounds</strong>: Training increments a stat by 1–3 points; 3 training actions per day allowed (AC-006-1, AC-006-5)</li>
-<li><strong>Food Buff Expiry</strong>: Temporary food buff (e.g., +5 speed) applies bonus during battle; expires after 24h duration (AC-008-1)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>training_stat_points_min = 1</code>, <code>training_stat_points_max = 3</code>, <code>training_actions_per_day = 3</code>, <code>food_buff_example_temp_amount_stat_points = 5</code>, <code>food_buff_example_temp_duration_hours = 24</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="6-suspicious-battle-detection-codefeaturesserversuspicious-detectionfeaturecode">6. Suspicious Battle Detection (<code>features/server/suspicious-detection.feature</code>)</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-ADMIN-005</p>
-<p class="doc-p"><strong>Scenarios:</strong> 3</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates bot/spam detection and admin moderation workflow.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Auto-Flag SUSPICIOUS</strong>: Pet auto-flagged SUSPICIOUS after 50+ battles within 60 minutes (AC-013-1)</li>
-<li><strong>Moderator Ban Action</strong>: Moderator bans a SUSPICIOUS pet with reason; audit logged (AC-013-2, AC-013-3)</li>
-<li><strong>Ban Enforcement</strong>: Banned pet cannot enter future arena matches; HTTP 403 "PET_BANNED" (AC-013-4)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>bot_detection_battles_threshold = 50</code>, <code>bot_detection_window_minutes = 60</code>, <code>admin_moderation_reason_max_chars = 500</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="cross-reference-prd-acceptance-criteria">Cross-Reference: PRD Acceptance Criteria</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>AC ID</th><th>Story</th><th>Covered By</th><th>Status</th></tr></thead>
-<tbody>
-<tr><td>AC-003-1</td><td>US-AUTH-001</td><td>Email Claim Flow</td><td>✓</td></tr>
-<tr><td>AC-003-2</td><td>US-AUTH-001</td><td>Email Claim Flow</td><td>✓</td></tr>
-<tr><td>AC-003-3</td><td>US-AUTH-001</td><td>Email Claim Flow</td><td>✓</td></tr>
-<tr><td>AC-003-4</td><td>US-AUTH-001</td><td>Email Claim Flow</td><td>✓</td></tr>
-<tr><td>AC-004-6</td><td>US-AUTH-002</td><td>GDPR Erasure</td><td>✓</td></tr>
-<tr><td>AC-005-8</td><td>US-ADMIN-002</td><td>Leaderboard</td><td>✓</td></tr>
-<tr><td>AC-006-1</td><td>US-TRAIN-001</td><td>Training & Food</td><td>✓</td></tr>
-<tr><td>AC-006-5</td><td>US-TRAIN-001</td><td>Training & Food</td><td>✓</td></tr>
-<tr><td>AC-007-1</td><td>US-ARENA-001</td><td>Email Claim Flow</td><td>✓</td></tr>
-<tr><td>AC-007-8</td><td>US-ARENA-001</td><td>Arena Battle</td><td>✓</td></tr>
-<tr><td>AC-008-1</td><td>US-FOOD-001</td><td>Training & Food</td><td>✓</td></tr>
-<tr><td>AC-009-1</td><td>US-BOARD-001</td><td>Leaderboard</td><td>✓</td></tr>
-<tr><td>AC-009-2</td><td>US-BOARD-001</td><td>Leaderboard</td><td>✓</td></tr>
-<tr><td>AC-013-1</td><td>US-ADMIN-005</td><td>Bot Detection</td><td>✓</td></tr>
-<tr><td>AC-013-2</td><td>US-ADMIN-005</td><td>Bot Detection</td><td>✓</td></tr>
-<tr><td>AC-013-3</td><td>US-ADMIN-005</td><td>Bot Detection</td><td>✓</td></tr>
-<tr><td>AC-013-4</td><td>US-ADMIN-005</td><td>Bot Detection</td><td>✓</td></tr>
-<tr><td>AC-016-2</td><td>US-AUTH-002</td><td>GDPR Erasure</td><td>✓</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="how-to-use-this-document">How to Use This Document</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>For Developers</strong>: Use this as a quick reference for what backend functionality is specified.</p>
-<p class="doc-p">2. <strong>For QA</strong>: Cross-reference scenario steps against the feature files in <code>features/server/</code> to understand expected behavior.</p>
-<p class="doc-p">3. <strong>For Product</strong>: Use AC mapping above to verify all PRD requirements are covered by test specifications.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Generated:</strong> 2026-05-04</p>
-<p class="doc-p"><strong>Last Updated:</strong> 2026-05-04</p>
-<p class="doc-p"><strong>Maintainer:</strong> Product Engineering Team</p>
-<div class="doc-gap"></div>
-    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Server BDD Scenarios</p>
+    <h1 class="banner-title">Server BDD Scenarios</h1>
   </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link active" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link active" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h2>admin-moderation.feature</h2>
+<pre><code class="language-gherkin">Feature: Admin Moderation — Pet Banning and Battle Flagging
+  As an admin moderator
+  I want to ban disruptive pets and flag suspicious battles
+  So that the game environment remains fair and enjoyable
+
+  Scenario: Moderator bans pet with reason
+    Given a pet with is_banned = false
+    And a moderator_alice with role = &#x27;moderator&#x27;
+    When POST /admin/api/pets/:petId/ban is called with reason = &quot;Automated bot behavior detected: 52 battles in 60-minute window&quot;
+    Then the system returns HTTP 200
+    And pets.is_banned is updated to true
+    And pets.banned_at is set to current timestamp
+    And pets.banned_reason is stored (max 500 characters)
+    And an audit_log entry is created with:
+      | Field | Value |
+      | admin_id | moderator_alice.id |
+      | action | pet.ban |
+      | target_type | pet |
+      | target_id | pet_id |
+      | detail | {&quot;reason&quot;: &quot;...&quot;, &quot;previous_is_banned&quot;: false} |
+
+  Scenario: Banned pet removed from leaderboard within SLA
+    Given a pet currently ranked 15th on the leaderboard
+    When POST /admin/api/pets/:petId/ban is called
+    Then within 5 minutes (leaderboard_ban_reflection_time_minutes):
+      | Check | Expected |
+      | Redis ZRANK | returns null |
+      | GET /api/v1/leaderboard | pet is not in top 100 |
+      | pet appearance | pet is removed from results |
+
+  Scenario: Banned pet blocked from arena entry
+    Given a pet with is_banned = true
+    And the pet owner with a valid petToken
+    When POST /api/v1/arena/enter is called with the banned pet&#x27;s ID
+    Then the system returns HTTP 403 with error code PET_BANNED
+    And the matchmaking entry is NOT created
+    And error message is &quot;This pet has been banned from the arena&quot;
+
+  Scenario: Moderator unbans pet
+    Given a pet with is_banned = true and a ban reason on file
+    When POST /admin/api/pets/:petId/unban is called with reason = &quot;Manual review confirmed legitimate play&quot;
+    Then the system returns HTTP 200
+    And pets.is_banned is updated to false
+    And pets.banned_reason is cleared (set to NULL)
+    And pets.banned_at is NOT reset (immutable for audit)
+    And an audit_log entry is created with action = &quot;pet.unban&quot;
+
+  Scenario: Unban requires moderator role
+    Given a read_only admin user
+    When POST /admin/api/pets/:petId/unban is called
+    Then the system returns HTTP 403 with error code FORBIDDEN
+    And error message is &quot;Your role does not have permission for this action&quot;
+    And the ban status is NOT changed
+
+  Scenario: Flag suspicious battle with reason
+    Given a completed arena_match with matchId &quot;match-uuid-001&quot;
+    And a moderator with role = &#x27;moderator&#x27;
+    When POST /admin/api/battles/:matchId/flag is called with reason = &quot;Abnormally fast victory; possible stat manipulation&quot;
+    Then the system returns HTTP 200
+    And arena_matches.is_flagged is updated to true
+    And arena_matches.flagged_at is set to current timestamp
+    And an audit_log entry is created with action = &quot;arena_match.flag&quot;
+
+  Scenario: Unflag battle
+    Given a flagged battle with is_flagged = true
+    When DELETE /admin/api/battles/:matchId/flag is called with reason = &quot;Manual review confirmed legitimate outcome&quot;
+    Then the system returns HTTP 200
+    And arena_matches.is_flagged is updated to false
+    And arena_matches.flagged_at is cleared (set to NULL)
+    And an audit_log entry is created with action = &quot;arena_match.unflag&quot;
+
+  Scenario: Only moderator+ can flag battles
+    Given a read_only admin user
+    And a battle to flag
+    When POST /admin/api/battles/:matchId/flag is called
+    Then the system returns HTTP 403 with error code FORBIDDEN
+    And the battle remains unflagged
+
+  Scenario: Admin can view flagged battles list
+    Given 25 flagged battles and 100 unflagged battles in the database
+    When GET /admin/api/battles?flagged=true is called
+    Then the system returns HTTP 200 with:
+      | Field | Value |
+      | battles | filtered to flagged = true only |
+      | meta.total | 25 |
+    And each battle includes: matchId, petAId, petBId, winnerId, is_flagged
+
+  Scenario: Ban reason stored with character limit
+    Given a moderator with a 600-character ban reason (exceeds 500-char limit)
+    When POST /admin/api/pets/:petId/ban is called
+    Then the system returns HTTP 400 with error code VALIDATION_ERROR
+    And error message indicates &quot;Reason must not exceed 500 characters&quot;
+    And no ban is applied
+
+  Scenario: Audit log captures all ban/unban/flag operations
+    Given a moderator performs: ban pet_A, flag battle_B, unban pet_C
+    When GET /admin/api/audit?limit=10 is called
+    Then at least 3 audit_log entries exist with:
+      | action | admin_id | target_type | target_id | detail |
+      | pet.ban | moderator.id | pet | pet_A.id | {...} |
+      | arena_match.flag | moderator.id | arena_match | battle_B.id | {...} |
+      | pet.unban | moderator.id | pet | pet_C.id | {...} |
+</code></pre>
+<h2>admin-search-performance.feature</h2>
+<pre><code class="language-gherkin">Feature: Admin Search Performance SLA (US-ADMIN-003)
+  As an admin
+  I want to search through pet records quickly
+  So that moderation tasks complete within reasonable time
+
+  Scenario: Search returns results within 2 seconds for 1 million pet records
+    Given the database contains 1,000,000 pet records
+    And search index on (owner_email, pet_name, status) is active
+    And the index covers the filtering conditions (status in BANNED, FLAGGED; rarity in EPIC, LEGENDARY; created_after)
+    When an admin searches for pets matching query &quot;rare&quot; with filters:
+      | Filter | Value |
+      | status | BANNED or FLAGGED |
+      | rarity | Epic or Legendary |
+      | created_after | 2026-01-01 |
+    Then the search returns results within 2 seconds
+    And the result set includes up to 50 matching records
+    And pagination cursor is provided for additional results
+    And search logs query time, result count, and index hit rate for monitoring
+
+  Scenario: Search performance consistent across query patterns
+    Given the admin search index is active
+    When multiple search queries are executed:
+      | Query Pattern | Expected Time |
+      | Single filter (status=BANNED) | &lt; 500ms |
+      | Dual filter (status + rarity) | &lt; 1s |
+      | Triple filter (status + rarity + date) | &lt; 2s |
+      | Full-text search on pet_name | &lt; 1.5s |
+    Then all queries return within the specified time envelope
+    And P95 latency remains consistent across the test run
+
+  Scenario: Search does not cause table-level locks
+    Given concurrent search queries are running (admin1 searches, admin2 searches)
+    When both searches are executed simultaneously
+    Then both complete within 2 seconds
+    And neither query blocks the other
+    And no &quot;table is locked&quot; errors are returned
+    And query logs show no lock contention
+
+  Scenario: Search with no results returns quickly
+    Given a query that matches zero pets (e.g., rarity=NONEXISTENT)
+    When the query is executed
+    Then the response returns within 500ms
+    And an empty result set is returned
+    And error message indicates &quot;No results found&quot; (not a database error)
+
+  Scenario: Search index hit rate is monitored
+    Given the admin performs 100 searches over a 5-minute period
+    When the search log is analyzed
+    Then index_hit_rate &gt;= 95% (at least 95 queries used the index)
+    And any index scans (sequential table scans) are logged as warnings
+    And DBA is alerted if hit_rate drops below 90%
+
+  Scenario: Large result sets paginated efficiently
+    Given a search returns 5000 matching records
+    When the first page (50 records) is requested
+    Then the response returns within 2 seconds
+    When the pagination cursor is used to fetch page 2
+    Then the next page also returns within 2 seconds
+    And cursor-based pagination does not require recalculating the entire result set
+</code></pre>
+<h2>arena-battle.feature</h2>
+<pre><code class="language-gherkin">Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
+
+  Scenario: Two pets match and complete a Race battle
+    Given pet &quot;alpha-token-abc&quot; and pet &quot;beta-token-xyz&quot; are both in the matchmaking queue
+    And both pets have valid speed stats recorded in the database
+    When the matchmaking service pairs the two pets via ZPOPMIN from the Redis queue
+    Then a Race battle record is created with status &quot;IN_PROGRESS&quot; and mode &quot;RACE&quot;
+    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
+    And the pet with the higher effective speed (base stat plus up to ±15% random modifier) is recorded as the winner
+    And both pets receive updated win/loss counts in their profiles
+
+  Scenario: AI fallback when no real opponent is available after timeout
+    Given pet &quot;alpha-token-abc&quot; has entered the matchmaking queue via POST /api/v1/arena/enter and is the only pet present
+    And (arena_matchmaking_timeout_seconds = 30) seconds pass without a second pet joining
+    When the matchmaking service triggers the AI fallback logic
+    Then a Race battle is created pairing &quot;alpha-token-abc&quot; against an AI bot opponent
+    And the battle record includes is_ai_opponent = true
+    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
+
+  Scenario: Arena rate limit prevents excessive battles per hour
+    Given pet &quot;alpha-token-abc&quot; has already completed (arena_rate_limit_battles_per_hour_default = 10) battles within the current hour
+    When pet &quot;alpha-token-abc&quot; attempts to enter the matchmaking queue via POST /api/v1/arena/enter
+    Then the server responds with HTTP 429
+    And the response body contains error code &quot;RATE_LIMIT_EXCEEDED&quot;
+    And pet &quot;alpha-token-abc&quot; is not added to the matchmaking queue
+
+  Scenario: Sumo mode resolves outcome using strength stat instead of speed
+    Given pet &quot;sumo-token-001&quot; with strength 85 and speed 40 is queued for a Sumo battle
+    And pet &quot;sumo-token-002&quot; with strength 60 and speed 90 is queued for a Sumo battle
+    When the matchmaking service pairs the two pets for a Sumo match
+    Then a Sumo battle record is created with mode &quot;SUMO&quot;
+    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
+    And &quot;sumo-token-001&quot; is recorded as the winner because its strength stat is higher
+    And the outcome is determined solely by the raw strength stat with no random modifier applied
+
+  Scenario: Player receives HTTP 429 when exceeding 10 battles per hour limit
+    Given a player has played 10 battles in the current hour
+    When the player attempts to start another battle via POST /api/v1/arena/enter
+    Then the API returns HTTP 429 Too Many Requests
+    And the response includes a Retry-After header with value in seconds
+    And the response body contains the message &quot;Battle rate limit exceeded. Please wait [countdown] minutes before your next battle.&quot;
+    And the client displays a countdown timer showing remaining wait time
+    And the countdown is accurate within ±5 seconds
+
+  Scenario: Battle outcome is deterministic with same seed
+    Given petA (stat_speed = 50) and petB (stat_speed = 45) battle with fixed random_seed = 12345
+    When the battle is calculated twice independently
+    Then both calculations return the same winner and stat_delta values
+    And battleLog event sequences are identical
+    And the outcome can be replayed deterministically for viewing
+
+  Scenario: Arena entry with authentication failures
+    Given a request to POST /api/v1/arena/enter WITHOUT authentication header
+    When the request is submitted
+    Then the system returns HTTP 401 with error code UNAUTHORIZED
+    And no matchmaking entry is created
+</code></pre>
+<h2>battle-records.feature</h2>
+<pre><code class="language-gherkin">Feature: Battle Records API and History (US-RECORD-001)
+
+  Scenario: Battle records page returns last 20 battles with pagination
+    Given a player has 45 public battle records
+    When the player requests GET /api/v1/arena/history/:petId
+    Then the API returns the 20 most recent battles
+    And the response includes a pagination cursor for the next batch
+    And each battle record includes: match_id, opponent_pet_id, result (WIN/LOSS), reward, timestamp
+    And the response structure includes meta.total = 45 and meta.hasMore = true
+
+  Scenario: Battle records page with fewer than 20 records shows all records
+    Given a player has 8 public battle records
+    When the player requests GET /api/v1/arena/history/:petId
+    Then the API returns all 8 records
+    And the response indicates &quot;hasMore&quot;: false or no pagination cursor
+    And total_count = 8
+
+  Scenario: Battle records pagination cursor for next batch
+    Given a player has 45 battle records
+    And the first page returned 20 records with pagination_cursor = &quot;offset_20&quot;
+    When the client requests GET /api/v1/arena/history/:petId?cursor=offset_20
+    Then the API returns battles 21-40 (next 20 records)
+    And a new pagination_cursor is provided for the next batch
+    And the response includes meta.hasMore = true
+
+  Scenario: Open Graph meta tags are correctly generated for a battle record
+    Given a battle was fought between Pet A (Rare, 12 wins) and Pet B (Common, 3 wins)
+    When the battle record page is rendered as a social share link
+    Then the meta tags include:
+      | Tag | Value |
+      | og:title | &quot;Pet A vs Pet B&quot; |
+      | og:image | [sprite_image_url] |
+      | og:description | &quot;Pet A won with 12 total wins&quot; |
+      | og:url | https://pixel-pet-arena.com/battles/[match_id] |
+      | og:type | website |
+    And all OG URLs are absolute and properly encoded
+    And og:image points to a valid image URL with correct dimensions (1200x630 recommended)
+
+  Scenario: Battle record details include all required fields
+    Given a battle record from GET /api/v1/arena/history/:petId
+    When the response is parsed
+    Then each battle record contains:
+      | Field | Type | Presence |
+      | match_id | UUID | required |
+      | opponent_pet_id | UUID | required |
+      | opponent_name | string | required |
+      | opponent_rarity | enum | required |
+      | result | WIN\|LOSS | required |
+      | reward_xp | integer | required |
+      | reward_coins | integer | required |
+      | timestamp | ISO-8601 | required |
+      | mode | RACE\|SUMO | required |
+    And no sensitive fields (opponent owner email) are exposed
+
+  Scenario: Battle records endpoint enforces public access without authentication
+    Given a battle record for a pet with public_battles = true
+    When GET /api/v1/arena/history/:petId is called WITHOUT Authorization header
+    Then HTTP 200 is returned
+    And the battle records are visible to any visitor
+    And no authentication is required
+
+  Scenario: AI opponent battles are marked in battle records
+    Given a battle record where opponent is an AI-generated pet
+    When GET /api/v1/arena/history/:petId is called
+    Then the response includes is_ai_opponent = true
+    And opponent_pet_id is NULL or omitted for AI battles
+    And opponent_name indicates AI status (e.g., &quot;AI Bot&quot; or &quot;Computer&quot;)
+</code></pre>
+<h2>claim-flow.feature</h2>
+<pre><code class="language-gherkin">Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
+  As a guest player
+  I want to claim a randomly generated pet with my email address
+  So that I can access the pet across devices and sessions
+
+  Scenario: Guest successfully claims a pet via email OTP happy path
+    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
+    And the guest has already requested an OTP via POST /api/v1/claim/request and received a (claim_code_digits = 6)-digit code at &quot;player@example.com&quot;
+    When the guest POSTs the correct 6-digit code via POST /api/v1/claim/verify within (claim_code_expiry_minutes = 15) minutes
+    Then the server links the email to the pet token and responds with HTTP 200
+    And the pets record has owner_token_hash populated and the claim_codes record has used_at set
+
+  Scenario: Claim code expires after the configured window
+    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
+    And the server issued a (claim_code_digits = 6)-digit OTP to &quot;player@example.com&quot;
+    When the guest POSTs the correct OTP via POST /api/v1/claim/verify after (claim_code_expiry_minutes = 15) minutes have elapsed
+    Then the server responds with HTTP 400
+    And the response body contains error code &quot;CODE_EXPIRED&quot;
+
+  Scenario: Claim rate limit blocks requests after the hourly threshold
+    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
+    And the guest has already requested (auth_rate_limit_claim_attempts_per_hour = 5) OTP codes within the current hour
+    When the guest submits a sixth claim request for &quot;player@example.com&quot;
+    Then the server responds with HTTP 429
+    And the response body contains error code &quot;RATE_LIMIT_EXCEEDED&quot;
+    And the Retry-After header is present
+
+  Scenario: One-time claim code cannot be reused after first verification
+    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
+    And the server issued a (claim_code_digits = 6)-digit OTP to &quot;player@example.com&quot;
+    And the guest successfully verified the OTP on the first attempt
+    When the guest POSTs the same OTP a second time via POST /api/v1/claim/verify
+    Then the server responds with HTTP 400
+    And the response body contains error code &quot;INVALID_CODE&quot;
+
+  Scenario: Claim initiation requires age confirmation
+    Given a guest with an unclaimed pet
+    When the guest submits a claim request with email &quot;player@example.com&quot; and ageConfirmed = false
+    Then the system returns HTTP 400 with error code AGE_CONFIRMATION_REQUIRED
+    And the pet remains unclaimed
+
+  Scenario: Pet already claimed by another player prevents re-claim
+    Given a pet that is already claimed (owner_token_hash is set, claimed_at is set)
+    When a guest submits a new claim request with a different email
+    Then the system returns HTTP 400 with error code ALREADY_CLAIMED
+    And the existing owner&#x27;s token remains valid
+
+  Scenario: Claim code entry enforces fail-closed rate limit on Redis unavailability
+    Given Redis is unavailable (connection refused or timeout)
+    When a POST /api/v1/claim/verify request is submitted with a code
+    Then the system returns HTTP 503 Service Unavailable
+    And the claim is NOT completed
+    And an alert is logged for Redis connectivity failure
+    And no session is created
+
+  Scenario: Email enumeration prevention — timing attack defense with ±50ms variance
+    Given a test harness makes 100 claim requests with valid pet IDs at time series T_valid[]
+    And the harness makes 100 claim requests with invalid pet IDs at time series T_invalid[]
+    When the responses are measured (time from request submission to HTTP 200 reception)
+    Then response_time_valid[i] ∈ [50ms, 300ms] for all i (typical network + processing)
+    And response_time_invalid[i] ∈ [50ms, 300ms] for all i (same range as valid requests)
+    And |response_time_valid[i] - response_time_invalid[i]| &lt;= 50ms for ≥95% of request pairs
+    And the timing difference is attributable to network jitter, not business logic branching
+    And statistical t-test (paired samples, α=0.05) shows no significant difference between valid and invalid response times
+</code></pre>
+<h2>gdpr-erasure.feature</h2>
+<pre><code class="language-gherkin">Feature: GDPR Data Erasure (US-AUTH-002, US-ADMIN-004)
+
+  Scenario: Player requests email erasure and email_encrypted is nulled within the SLA
+    Given a pet owner with pet token &quot;owner-token-gdpr&quot; has a linked email &quot;erasure@example.com&quot; stored in email_encrypted
+    When the owner submits a GDPR erasure request to POST /api/v1/gdpr/request with body { &quot;type&quot;: &quot;erasure&quot; }
+    Then the server enqueues an erasure job and responds with HTTP 202
+    And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column is set to NULL
+
+  Scenario: Super admin processes GDPR deletion via the admin portal
+    Given a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
+    And a GDPR deletion request exists for pet token &quot;owner-token-gdpr-admin&quot;
+    When the admin submits a deletion action via POST /admin/api/gdpr/delete with the email hash and a reason
+    Then the server enqueues an erasure job and responds with HTTP 202
+    And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column for &quot;owner-token-gdpr-admin&quot; is set to NULL
+    And an entry is written to admin_audit_log with action &quot;GDPR_DELETE&quot; and the admin_id and ip_address_hash populated
+
+  Scenario: GDPR email deletion completes within internal SLA and reports within external SLA
+    Given a player requests account deletion via email
+    When the GDPR request is processed
+    Then the email_encrypted column is set to NULL within (gdpr_email_hashing_internal_sla_hours = 24) hours
+    And the player receives deletion confirmation email within (gdpr_deletion_external_sla_days = 7) days
+    And all personal data is either:
+      - Anonymized (pet names → &quot;Pet #123&quot;, player name removed)
+      - Deleted (claim codes, session tokens)
+      - Archived (audit logs for fraud detection, encrypted and no longer linked to player)
+
+  Scenario: Player submits GDPR erasure request
+    Given a pet owner with a claimed pet and linked claim_identity_id
+    And a valid petToken for the pet
+    When POST /api/v1/gdpr/request is called with type = &quot;erasure&quot;
+    Then the system returns HTTP 202 with jobId and &quot;Your GDPR request has been received...&quot; message
+    And a gdpr_requests row is created with status = &#x27;pending&#x27;
+
+  Scenario: GDPR-erased email cannot be re-registered immediately
+    Given an email &quot;erased@example.com&quot; that has been GDPR-deleted
+    And the email_hash is retained in claim_identities
+    When a new claim attempt is submitted with email = &quot;erased@example.com&quot;
+    Then the system rejects the claim request
+
+  Scenario: Erased pet displays with pseudonymous owner
+    Given a pet whose owner email has been erased
+    And the pet still has an arena history with visible battles
+    When GET /api/v1/pets/:petId is called
+    Then the pet data is returned (not deleted)
+    And owner email is not displayed
+
+  Scenario: Player checks GDPR request status
+    Given a submitted GDPR erasure request with jobId = &quot;job-uuid-001&quot;
+    And the player&#x27;s petToken that initiated the request
+    When GET /api/v1/gdpr/request/status?jobId=job-uuid-001 is called
+    Then the system returns HTTP 200 with status, submittedAt, and completedAt fields
+
+  Scenario: GDPR request status transitions
+    Given a GDPR erasure request initially in &#x27;pending&#x27; status
+    When the background job begins processing
+    Then status transitions to &#x27;processing&#x27;
+    When the background job completes successfully
+    Then status transitions to &#x27;completed&#x27; and completed_at is set
+</code></pre>
+<h2>leaderboard.feature</h2>
+<pre><code class="language-gherkin">Feature: Global Leaderboard (US-BOARD-001, US-ADMIN-002)
+
+  Scenario: Leaderboard falls back to PostgreSQL snapshot when Redis is unavailable
+    Given the Redis Upstash instance is unreachable
+    And a PostgreSQL snapshot of leaderboard scores exists from the last sync
+    When a client requests GET /api/v1/leaderboard
+    Then the server responds with HTTP 200 using the PostgreSQL snapshot data
+    And the response body contains &quot;degraded&quot;: true
+
+  Scenario: Leaderboard score is updated within the configured lag window after a battle
+    Given pet &quot;fast-pet-token&quot; completes a Race battle and wins
+    And the win increments the battles_won counter on pet &quot;fast-pet-token&quot; in the pets table
+    When the leaderboard sync job runs against Redis using ZRANGE REV WITHSCORES
+    Then the updated score for &quot;fast-pet-token&quot; is visible in GET /api/v1/leaderboard within (leaderboard_update_lag_max_seconds = 30) seconds
+    And &quot;fast-pet-token&quot; appears at the correct rank position
+
+  Scenario: Admin ban removes pet from leaderboard within the reflection time
+    Given pet &quot;cheating-pet-token&quot; currently holds rank 3 on the leaderboard
+    And a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
+    When the admin issues a ban action via POST /admin/api/pets/cheating-pet-token/ban with a moderation reason under (admin_moderation_reason_max_chars = 500) characters
+    Then &quot;cheating-pet-token&quot; is removed from the Redis leaderboard sorted set
+    And within (leaderboard_ban_reflection_time_minutes = 5) minutes the pet no longer appears in GET /api/v1/leaderboard responses
+    And an entry is written to admin_audit_log with action &quot;BAN&quot; and detail containing the moderation reason
+
+  Scenario: Leaderboard displays top 100 pets publicly
+    Given 200 pets with varying leaderboard scores in Redis leaderboard:global sorted set
+    When GET /api/v1/leaderboard with page=1, limit=100 is called without authentication
+    Then the system returns HTTP 200 with entries.length = 100
+    And each entry contains: rank, petId, petName, rarity, level, score, winRate
+    And entries are sorted by score descending (highest rank first)
+    And meta fields include total leaderboard size, page number, and limit
+
+  Scenario: Leaderboard filterable by rarity tier
+    Given the leaderboard contains pets of all rarity tiers (COMMON, RARE, EPIC, LEGENDARY)
+    When GET /api/v1/leaderboard?rarity=EPIC is called
+    Then only EPIC-rarity pets are returned in the entries array
+    And meta.total reflects the filtered count
+
+  Scenario: Leaderboard score calculation from formula
+    Given a pet with win_rate = 0.75, battles_played = 40, level = 5
+    When arena_score is calculated using: win_rate × battles_played × level_multiplier(5)
+    Then this score is used for leaderboard ranking
+
+  Scenario: Pet rank query for individual pet
+    Given a pet with petId &quot;pet-uuid-005&quot; ranked 42nd on the leaderboard
+    When GET /api/v1/leaderboard/rank/pet-uuid-005 is called without authentication
+    Then the system returns HTTP 200 with rank = 42 and the calculated_score_value
+
+  Scenario: Erased GDPR pet removed from leaderboard
+    Given a pet belonging to a user who submitted GDPR erasure request
+    And the pet is currently ranked on the leaderboard
+    When the GDPR erasure background job completes
+    Then Redis ZREM is called to remove the pet from leaderboard:global
+    And subsequent GET /api/v1/leaderboard queries no longer include that pet
+</code></pre>
+<h2>rarity-distribution.feature</h2>
+<pre><code class="language-gherkin">Feature: Pet Rarity Distribution Algorithm (US-GEN-001)
+  As a game designer
+  I want to verify that pet rarity follows the specified probability distribution
+  So that players get a balanced experience without gaming the system
+
+  Scenario: Pet generation follows 60-25-12-3 rarity distribution
+    Given a test harness generates 10000 pets
+    When the generation completes
+    Then the distribution is within acceptable bounds:
+      | Rarity    | Target | Min   | Max   |
+      | Common    | 60%    | 58%   | 62%   |
+      | Rare      | 25%    | 23%   | 27%   |
+      | Epic      | 12%    | 10%   | 14%   |
+      | Legendary | 3%     | 1.5%  | 4.5%  |
+    And the chi-square test (α=0.05) confirms distribution is not statistically biased
+    And no single rarity bucket deviates more than 2 percentage points from target
+
+  Scenario: Individual rarity probabilities sum to 100%
+    Given the rarity weights are defined as:
+      | Rarity    | Weight |
+      | Common    | 0.60   |
+      | Rare      | 0.25   |
+      | Epic      | 0.12   |
+      | Legendary | 0.03   |
+    When the weights are summed
+    Then the total equals 1.00 (100%)
+    And no negative or inverted weights are present
+
+  Scenario: Rarity seed determinism with same random seed
+    Given a pet generation request with random_seed = 12345
+    When the pet is generated and rarity is determined
+    And a second pet is generated with the same random_seed = 12345
+    Then both pets have the SAME rarity value
+    And the rarity determination is reproducible
+
+  Scenario: Rarity distribution holds across population samples
+    Given multiple samples of 5000 pets each
+    When the rarity distribution is calculated for each sample
+    Then each sample distribution remains within the acceptable bounds
+    And no sample exhibits statistical anomalies (e.g., all Legendary)
+
+  Scenario: Legendary rarity cap enforcement
+    Given a large batch of 50000 pets is generated
+    When the rarity distribution is calculated
+    Then Legendary rarity count remains within the acceptable bounds: 1.5% to 4.5%
+    And the 3% baseline (1500 pets) is maintained as the expected value
+    And statistical variance is due to random distribution, not algorithm bias
+</code></pre>
+<h2>suspicious-detection.feature</h2>
+<pre><code class="language-gherkin">Feature: Suspicious Battle Detection (US-ADMIN-005)
+
+  Scenario: Pet is auto-flagged SUSPICIOUS after exceeding the battle threshold in the detection window
+    Given pet &quot;spammer-token-001&quot; has completed more than (bot_detection_battles_threshold = 50) battles within the last (bot_detection_window_minutes = 60) minutes
+    When the background detection job evaluates battle counts for all active pets
+    Then pet &quot;spammer-token-001&quot; status is updated to &quot;SUSPICIOUS&quot; in the database
+    And a moderation alert is created in the admin review queue for &quot;spammer-token-001&quot;
+    And no automatic ban is applied — the pet remains able to battle until a moderator acts
+
+  Scenario: Moderator reviews a SUSPICIOUS pet and submits an arena ban with a reason
+    Given a moderator is authenticated with a valid httpOnly SameSite=Strict admin session cookie
+    And pet &quot;spammer-token-001&quot; has status &quot;SUSPICIOUS&quot; in the moderation queue
+    When the moderator submits a ban action via POST /admin/api/pets/spammer-token-001/ban with reason &quot;Automated rapid-fire battles consistent with scripted bot behaviour&quot;
+    And the reason text is fewer than (admin_moderation_reason_max_chars = 500) characters
+    Then the pet status is updated to &quot;BANNED&quot; in the database
+    And an entry is written to admin_audit_log with action &quot;BAN&quot;, admin_id, ip_address_hash, and the reason in the detail JSONB column
+    And the server responds with HTTP 200
+
+  Scenario: Banned pet cannot enter future arena matches
+    Given pet &quot;banned-token-002&quot; has status &quot;BANNED&quot; in the database
+    When &quot;banned-token-002&quot; attempts to join the matchmaking queue via POST /api/v1/arena/enter
+    Then the server responds with HTTP 403
+    And the response body contains error code &quot;PET_BANNED&quot;
+    And &quot;banned-token-002&quot; is not added to the Redis matchmaking sorted set
+</code></pre>
+<h2>trading-system.feature</h2>
+<pre><code class="language-gherkin">Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection
+  As a pet owner
+  I want to list my pet for sale in the marketplace
+  So that I can trade pets with other players
+
+  Scenario: Feature flag controls marketplace access
+    Given FF_MARKETPLACE = false (feature disabled)
+    When POST /api/v1/marketplace/listings is called with a valid petToken
+    Then the system returns HTTP 403 with error code FEATURE_DISABLED
+    And error message is &quot;The marketplace feature is not currently available&quot;
+    When FF_MARKETPLACE is set to true
+    And the same request is resubmitted
+    Then the system returns HTTP 201 with created listing
+
+  Scenario: Create marketplace listing with price validation
+    Given a pet owned by player A with petToken_A
+    And pet stats: level = 5, rarity = RARE
+    And minimum price formula: (level × 100) + (rarity_multiplier × 500) = (5 × 100) + (2 × 500) = 1500
+    When POST /api/v1/marketplace/listings is called with price_credits = 2000
+    Then the system returns HTTP 201 with:
+      | Field | Value |
+      | id | listing_uuid |
+      | status | active |
+      | price_credits | 2000 |
+      | listed_at | ISO-8601 timestamp |
+    And marketplace_listings row is created in PostgreSQL
+
+  Scenario: Listing price below minimum rejected
+    Given a pet with minimum required price = 1500 credits
+    When POST /api/v1/marketplace/listings is called with price_credits = 1400
+    Then the system returns HTTP 400 with error code VALIDATION_ERROR
+    And error message indicates minimum price requirement
+    And no listing is created
+
+  Scenario: Anti-flip protection prevents rapid re-listing
+    Given a pet sold in marketplace_transactions 3 days ago (within 7-day anti-flip window)
+    And the same pet is owned by a new buyer (marketplace_trade_antiflip_protection_days = 7)
+    When POST /api/v1/marketplace/listings is called to list the pet again
+    Then the system returns HTTP 400 with error code VALIDATION_ERROR
+    And error message is &quot;This pet cannot be re-listed within 7 days of purchase&quot;
+    And no new listing is created
+
+  Scenario: Purchase listing transfers ownership and applies platform fee
+    Given an active listing with price_credits = 1000 owned by seller_A
+    And buyer_B with a valid petToken and sufficient credits
+    And platform fee = 5% of price (trade_transaction_fee_percent = 5)
+    When POST /api/v1/marketplace/listings/:listingId/buy is called with buyer_B&#x27;s token
+    Then the system returns HTTP 200
+    And marketplace_transactions record is created with:
+      | Field | Value |
+      | listing_id | listing_uuid |
+      | pet_id | pet_uuid |
+      | price_credits | 1000 |
+      | fee_credits | FLOOR(1000 × 0.05) = 50 |
+      | seller_token_hash | SHA-256(seller_A_token) |
+      | buyer_token_hash | SHA-256(buyer_B_token) |
+      | completed_at | current timestamp |
+    And marketplace_listings.status is updated to &#x27;sold&#x27;
+    And marketplace_listings.completed_at is set
+    And seller_A receives 950 credits (1000 - 50 fee)
+    And buyer_B receives ownership of the pet
+
+  Scenario: Cancel active listing
+    Given an active listing created by player_A
+    When DELETE /api/v1/marketplace/listings/:listingId is called with player_A&#x27;s petToken
+    Then the system returns HTTP 200
+    And marketplace_listings.status is updated to &#x27;cancelled&#x27;
+    And marketplace_listings.completed_at is set to NOW()
+    And the pet remains owned by player_A
+
+  Scenario: Only listing owner can cancel
+    Given an active listing owned by player_A with listingId &quot;list-001&quot;
+    And player_B with a different petToken
+    When DELETE /api/v1/marketplace/listings/list-001 is called with player_B&#x27;s token
+    Then the system returns HTTP 403 with error code NOT_OWNER
+    And the listing remains active
+
+  Scenario: Purchase endpoint requires buyer authentication
+    Given an active listing
+    When POST /api/v1/marketplace/listings/:listingId/buy is called WITHOUT authentication
+    Then the system returns HTTP 401 with error code UNAUTHORIZED
+    And the listing is not marked as sold
+
+  Scenario: Browse marketplace listings
+    Given 50 active marketplace listings with varying prices and rarities
+    When GET /api/v1/marketplace/listings?page=1&amp;limit=20&amp;sortBy=price&amp;order=asc is called
+    Then the system returns HTTP 200 with:
+      | Field | Value |
+      | listings.length | 20 |
+      | meta.total | 50 |
+      | meta.page | 1 |
+    And listings are sorted by price ascending (lowest to highest)
+    And each listing includes pet summary: petId, rarity, level, owner name (masked)
+
+  Scenario: Trade history private to pet owner
+    Given a pet with completed sale in marketplace_transactions
+    And the pet is now owned by a new buyer
+    When GET /api/v1/marketplace/history/:petId is called without authentication
+    Then the system returns HTTP 401 with error code UNAUTHORIZED
+    When GET /api/v1/marketplace/history/:petId is called with current owner&#x27;s petToken
+    Then the system returns HTTP 200 with complete transaction history
+    And includes: price_credits, fee_credits, seller_name (masked), completed_at
+    And transaction history is private to current owner only
+</code></pre>
+<h2>training-food.feature</h2>
+<pre><code class="language-gherkin">Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
+
+  Scenario: Training action increments a stat within bounds and enforces the daily action cap
+    Given pet &quot;trainee-token-001&quot; has used 0 training actions today
+    When the owner submits a training request via POST /api/v1/training with body { &quot;training_type&quot;: &quot;STRENGTH&quot; } for &quot;trainee-token-001&quot;
+    Then the server increments the strength stat by a value between (training_stat_points_min = 1) and (training_stat_points_max = 3) points
+    And a training_logs row is written for &quot;trainee-token-001&quot; bringing today&#x27;s training log count to 1
+    When the owner submits two more valid POST /api/v1/training requests for &quot;trainee-token-001&quot; on the same day
+    Then the count of training_logs rows today for &quot;trainee-token-001&quot; reaches (training_actions_per_day = 3)
+    When the owner submits a fourth POST /api/v1/training request for &quot;trainee-token-001&quot; on the same day
+    Then the server responds with HTTP 400 and error code &quot;TRAINING_LIMIT_REACHED&quot;
+
+  Scenario: Temporary food buff applies bonus stat during an arena battle and expires after duration
+    Given pet &quot;buffed-pet-token&quot; has a base speed stat of 50
+    And a food buff of (food_buff_example_temp_amount_stat_points = 5) speed points has been applied to &quot;buffed-pet-token&quot; via POST /api/v1/food/apply with the food_buffs row recording expires_at (food_buff_example_temp_duration_hours = 24) hours from now
+    When a Race battle begins for &quot;buffed-pet-token&quot; within the buff duration window
+    Then the battle engine reads &quot;buffed-pet-token&quot; effective speed as 55 for the duration of that match
+    And the opponent pet&#x27;s stats are read without any buff modifier
+    When (food_buff_example_temp_duration_hours = 24) hours have elapsed since the buff was applied
+    Then the food_buffs row for &quot;buffed-pet-token&quot; has expired_at set to a non-null timestamp and &quot;buffed-pet-token&quot; effective speed reverts to the base value of 50
+</code></pre></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

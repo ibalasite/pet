@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>類別圖：領域模型 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 類別圖：領域模型</p>
+    <h1 class="banner-title">類別圖：領域模型</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link active" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Domain Class Diagram — pixel-pet-arena</h1>
+<h2>Overview</h2>
+<p>This diagram covers all 12 domain entities defined in EDD §4 and SCHEMA.md §2. It models the</p>
+<p>structural relationships between pets, identities, claims, training, arena matches, leaderboard</p>
+<p>snapshots, food buffs, marketplace tables, admin accounts, audit log, and GDPR requests.</p>
+<p>Key design constraints reflected here:</p>
+<ul><li>Pet access tokens (≥32 bytes; <code>pet_access_token_min_bytes = 32</code>) are <strong>never</strong> stored; only the</li></ul>
+<p>SHA-256 hash appears as <code>owner_token_hash</code>.</p>
+<ul><li>Email is stored only as AES-256-GCM ciphertext plus a SHA-256 lookup hash (GDPR P6 principle).</li><li><code>level</code> is a derived column: <code>MAX(1, FLOOR(total_training_actions / 10))</code> capped at 100</li></ul>
+<p>(<code>pet_level_formula_divisor = 10</code>, <code>pet_level_max = 100</code>).</p>
+<h2>Diagram</h2>
+<div class="diagram-container"><pre class="mermaid">classDiagram
+    direction TB
+
+    class ClaimIdentity {
+        +UUID id
+        +VARCHAR(64) email_hash
+        +BYTEA email_encrypted
+        +TIMESTAMPTZ deletion_requested_at
+        +TIMESTAMPTZ created_at
+        +TIMESTAMPTZ updated_at
+    }
+
+    class Pet {
+        +UUID id
+        +BIGINT seed
+        +rarity_enum rarity
+        +VARCHAR(64) pet_name
+        +SMALLINT stat_speed
+        +SMALLINT stat_strength
+        +SMALLINT stat_stamina
+        +SMALLINT level
+        +INTEGER total_training_actions
+        +TIMESTAMPTZ last_trained_at
+        +VARCHAR(64) owner_token_hash
+        +TIMESTAMPTZ claimed_at
+        +UUID claim_identity_id
+        +TIMESTAMPTZ reserved_until
+        +BOOLEAN is_banned
+        +TEXT banned_reason
+        +TIMESTAMPTZ banned_at
+        +JSONB generation_meta
+        +TIMESTAMPTZ created_at
+        +TIMESTAMPTZ updated_at
+        +deriveLevel() SMALLINT
+    }
+
+    class ClaimCode {
+        +UUID id
+        +UUID pet_id
+        +VARCHAR(64) email_hash
+        +VARCHAR(64) code_hash
+        +TIMESTAMPTZ expires_at
+        +TIMESTAMPTZ used_at
+        +SMALLINT attempts
+        +TIMESTAMPTZ created_at
+    }
+
+    class ArenaMatch {
+        +UUID id
+        +UUID pet_a_id
+        +UUID pet_b_id
+        +BOOLEAN is_ai_opponent
+        +arena_mode_enum mode
+        +UUID winner_pet_id
+        +BIGINT random_seed
+        +SMALLINT stat_delta_a
+        +SMALLINT stat_delta_b
+        +SMALLINT duration_seconds
+        +JSONB battle_log
+        +BOOLEAN is_flagged
+        +TIMESTAMPTZ flagged_at
+        +TIMESTAMPTZ completed_at
+        +TIMESTAMPTZ updated_at
+    }
+
+    class TrainingLog {
+        +UUID id
+        +UUID pet_id
+        +training_type_enum training_type
+        +SMALLINT stat_delta
+        +SMALLINT stat_after
+        +TIMESTAMPTZ completed_at
+    }
+
+    class LeaderboardSnapshot {
+        +UUID id
+        +TIMESTAMPTZ snapshot_time
+        +JSONB entries
+        +TIMESTAMPTZ created_at
+    }
+
+    class FoodBuff {
+        +UUID id
+        +UUID pet_id
+        +VARCHAR(50) food_type
+        +buff_stat_enum buff_stat
+        +SMALLINT magnitude
+        +BOOLEAN is_permanent
+        +TIMESTAMPTZ expires_at
+        +TIMESTAMPTZ consumed_at
+        +TIMESTAMPTZ record_expires_at
+    }
+
+    class MarketplaceListing {
+        +UUID id
+        +UUID pet_id
+        +VARCHAR(64) seller_token_hash
+        +INTEGER price_credits
+        +listing_status_enum status
+        +TIMESTAMPTZ listed_at
+        +TIMESTAMPTZ expires_at
+        +TIMESTAMPTZ completed_at
+        +TIMESTAMPTZ updated_at
+    }
+
+    class MarketplaceTransaction {
+        +UUID id
+        +UUID listing_id
+        +UUID pet_id
+        +VARCHAR(64) seller_token_hash
+        +VARCHAR(64) buyer_token_hash
+        +INTEGER price_credits
+        +INTEGER fee_credits
+        +TIMESTAMPTZ listed_at
+        +TIMESTAMPTZ completed_at
+    }
+
+    class AdminAccount {
+        +UUID id
+        +VARCHAR(64) username
+        +TEXT password_hash
+        +TEXT totp_secret_encrypted
+        +JSONB totp_backup_codes_hash
+        +admin_role_enum role
+        +TIMESTAMPTZ last_login_at
+        +SMALLINT failed_attempts
+        +TIMESTAMPTZ locked_until
+        +TIMESTAMPTZ deactivated_at
+        +TIMESTAMPTZ created_at
+        +TIMESTAMPTZ updated_at
+    }
+
+    class AdminAuditLog {
+        +BIGSERIAL id
+        +UUID admin_id
+        +VARCHAR(128) action
+        +VARCHAR(64) target_type
+        +TEXT target_id
+        +JSONB detail
+        +VARCHAR(64) ip_address_hash
+        +TIMESTAMPTZ created_at
+    }
+
+    class GdprRequest {
+        +UUID id
+        +UUID claim_identity_id
+        +UUID initiating_pet_id
+        +gdpr_request_type_enum request_type
+        +gdpr_request_status_enum status
+        +TIMESTAMPTZ submitted_at
+        +TIMESTAMPTZ completed_at
+        +TIMESTAMPTZ updated_at
+        +TEXT admin_notes
+    }
+
+    %% Relationships
+    ClaimIdentity &quot;1&quot; --&gt; &quot;0..*&quot; Pet : claim_identity_id (SET NULL on delete)
+    ClaimIdentity &quot;1&quot; --&gt; &quot;0..*&quot; GdprRequest : claim_identity_id (RESTRICT on delete)
+
+    Pet &quot;1&quot; --&gt; &quot;0..*&quot; ClaimCode : pet_id (CASCADE on delete)
+    Pet &quot;1&quot; --&gt; &quot;0..*&quot; TrainingLog : pet_id (CASCADE on delete)
+    Pet &quot;1&quot; --&gt; &quot;0..*&quot; FoodBuff : pet_id (CASCADE on delete)
+    Pet &quot;1&quot; --&gt; &quot;0..*&quot; ArenaMatch : pet_a_id (RESTRICT on delete)
+    Pet &quot;0..1&quot; --&gt; &quot;0..*&quot; ArenaMatch : pet_b_id (SET NULL on delete)
+    Pet &quot;0..1&quot; --&gt; &quot;0..*&quot; ArenaMatch : winner_pet_id (SET NULL on delete)
+    Pet &quot;1&quot; --&gt; &quot;0..*&quot; MarketplaceListing : pet_id (RESTRICT on delete)
+    Pet &quot;1&quot; --&gt; &quot;0..*&quot; MarketplaceTransaction : pet_id (RESTRICT on delete)
+    Pet &quot;0..1&quot; --&gt; &quot;0..*&quot; GdprRequest : initiating_pet_id (SET NULL on delete)
+
+    MarketplaceListing &quot;1&quot; --&gt; &quot;0..1&quot; MarketplaceTransaction : listing_id (RESTRICT on delete)
+
+    AdminAccount &quot;0..1&quot; --&gt; &quot;0..*&quot; AdminAuditLog : admin_id (RESTRICT on delete, nullable)</pre></div>
+<h2>Notes</h2>
+<ul><li><strong>Rarity weights</strong> (admin-tunable, must sum to 100%): COMMON = 60% (<code>rarity_common_percent = 60</code>),</li></ul>
+<p>RARE = 25% (<code>rarity_rare_percent = 25</code>), EPIC = 12% (<code>rarity_epic_percent = 12</code>),</p>
+<p>LEGENDARY = 3% (<code>rarity_legendary_percent = 3</code>).</p>
+<ul><li><strong>Stat range</strong>: all three stats default to 10 (<code>pet_stat_default = 10</code>) and are capped at</li></ul>
+<p>1–100 (<code>pet_stat_min = 1</code>, <code>pet_stat_max = 100</code>).</p>
+<ul><li><strong>Arena duration</strong>: <code>duration_seconds</code> constrained to 5–15 s (<code>arena_match_duration_min_seconds = 5</code>,</li></ul>
+<p><code>arena_match_duration_max_seconds = 15</code>); <code>random_seed</code> enables deterministic ±15% replay</p>
+<p>(<code>arena_battle_outcome_random_modifier_percent = 15</code>).</p>
+<ul><li><strong>MarketplaceListing / MarketplaceTransaction</strong> are Phase 3 features gated by <code>FF_MARKETPLACE</code>.</li></ul>
+<p>The platform fee is 5% (<code>trade_transaction_fee_percent = 5</code>).</p>
+<ul><li><strong>AdminAuditLog</strong> retention is 2 years (<code>admin_audit_log_retention_years = 2</code>); the table uses</li></ul>
+<p><code>BIGSERIAL</code> for monotonic ordering rather than UUID.</p>
+<ul><li><strong>GdprRequest</strong> <code>request_type</code> values: erasure, data_access, restrict_processing,</li></ul>
+<p>object_leaderboard, rectification.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

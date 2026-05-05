@@ -1,127 +1,182 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — MANIFEST — gendoc Pipeline Execution Plan</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manifest — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">MANIFEST — gendoc Pipeline Execution Plan</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>MANIFEST — gendoc Pipeline Execution Plan</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="manifest--gendoc-pipeline-execution-plan">MANIFEST — gendoc Pipeline Execution Plan</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Project</strong>: pixel-pet-arena</p>
-<p class="doc-p"><strong>Generated</strong>: 2026-05-03</p>
-<p class="doc-p"><strong>Pipeline Version</strong>: 3.0</p>
-<p class="doc-p"><strong>Status</strong>: ✅ COMPLETE</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="1-baseline-metrics">§1 Baseline Metrics</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Metric</th><th>Value</th><th>Source</th></tr></thead>
-<tbody>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Manifest</p>
+    <h1 class="banner-title">Manifest</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link active" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>MANIFEST — gendoc Pipeline Execution Plan</h1>
+<p><strong>Project</strong>: pixel-pet-arena</p>
+<p><strong>Generated</strong>: 2026-05-03</p>
+<p><strong>Pipeline Version</strong>: 3.0</p>
+<p><strong>Status</strong>: ✅ COMPLETE</p>
+<hr>
+<h2>§1 Baseline Metrics</h2>
+<p>Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):</p>
+<table>
+<tr><th>Metric</th><th>Value</th><th>Source</th></tr>
 <tr><td>Domain entity count</td><td>13</td><td>EDD.md §4 Data Models (13 subsections)</td></tr>
-<tr><td>REST endpoint count</td><td>53</td><td>API.md (53 `#### \`METHOD /...\`` definitions)</td></tr>
+<tr><td>REST endpoint count</td><td>53</td><td>API.md (53 <code>#### \</code>METHOD /...\`` definitions)</td></tr>
 <tr><td>User story count</td><td>18</td><td>PRD.md (18 unique US-xxx-nnn IDs)</td></tr>
 <tr><td>Architecture layer count</td><td>8</td><td>ARCH.md (8 top-level §§ sections)</td></tr>
 <tr><td>BDD scenario minimum</td><td>15</td><td>ceil(18 × 0.8)</td></tr>
 <tr><td>Test plan minimum sections</td><td>10</td><td>arch_layers + 2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="2-pipeline-configuration">§2 Pipeline Configuration</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="21-session-config">§2.1 Session Config</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Setting</th><th>Value</th></tr></thead>
-<tbody>
-<tr><td>`client_type`</td><td>`web`</td></tr>
-<tr><td>`has_admin_backend`</td><td>`true`</td></tr>
-<tr><td>`execution_mode`</td><td>`full-auto`</td></tr>
-<tr><td>`review_strategy`</td><td>`exhaustive`</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="22-active-vs-skipped-steps">§2.2 Active vs Skipped Steps</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Active steps (32)</strong>: All steps execute for <code>client_type=web, has_admin_backend=true</code>.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Skipped steps (2)</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Step</th><th>Condition</th><th>Reason</th></tr></thead>
-<tbody>
-<tr><td>AUDIO</td><td>`client_type == game`</td><td>`client_type=web` — not a game project</td></tr>
-<tr><td>ANIM</td><td>`client_type == game`</td><td>`client_type=web` — not a game project</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="3-mandatory-steps-checklist">§3 Mandatory Steps Checklist</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>#</th><th>Step ID</th><th>Type</th><th>Output</th><th>Status</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§2 Pipeline Configuration</h2>
+<h3>§2.1 Session Config</h3>
+<table>
+<tr><th>Setting</th><th>Value</th></tr>
+<tr><td><code>client_type</code></td><td><code>web</code></td></tr>
+<tr><td><code>has_admin_backend</code></td><td><code>true</code></td></tr>
+<tr><td><code>execution_mode</code></td><td><code>full-auto</code></td></tr>
+<tr><td><code>review_strategy</code></td><td><code>exhaustive</code></td></tr>
+</table>
+<h3>§2.2 Active vs Skipped Steps</h3>
+<p><strong>Active steps (32)</strong>: All steps execute for <code>client_type=web, has_admin_backend=true</code>.</p>
+<p><strong>Skipped steps (2)</strong>:</p>
+<table>
+<tr><th>Step</th><th>Condition</th><th>Reason</th></tr>
+<tr><td>AUDIO</td><td><code>client_type == game</code></td><td><code>client_type=web</code> — not a game project</td></tr>
+<tr><td>ANIM</td><td><code>client_type == game</code></td><td><code>client_type=web</code> — not a game project</td></tr>
+</table>
+<hr>
+<h2>§3 Mandatory Steps Checklist</h2>
+<table>
+<tr><th>#</th><th>Step ID</th><th>Type</th><th>Output</th><th>Status</th></tr>
 <tr><td>1</td><td>IDEA</td><td>Concept</td><td>docs/IDEA.md</td><td>✅ COMPLETE</td></tr>
 <tr><td>2</td><td>BRD</td><td>Business</td><td>docs/BRD.md</td><td>✅ COMPLETE</td></tr>
 <tr><td>3</td><td>PRD</td><td>Product</td><td>docs/PRD.md</td><td>✅ COMPLETE</td></tr>
@@ -154,19 +209,13 @@
 <tr><td>30</td><td>MOCK</td><td>Mock Data</td><td>docs/mock-data/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
 <tr><td>31</td><td>PROTOTYPE</td><td>Prototype</td><td>docs/prototype/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
 <tr><td>32</td><td>HTML</td><td>HTML</td><td>docs/pages/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="4-per-step-completeness-standards">§4 Per-Step Completeness Standards</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">Each step must pass the following gate checks before being marked COMPLETE.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="41-document-steps">§4.1 Document Steps</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Step</th><th>Output</th><th>Min §§</th><th>Required Sections</th><th>Special Rules</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§4 Per-Step Completeness Standards</h2>
+<p>Each step must pass the following gate checks before being marked COMPLETE.</p>
+<h3>§4.1 Document Steps</h3>
+<table>
+<tr><th>Step</th><th>Output</th><th>Min §§</th><th>Required Sections</th><th>Special Rules</th></tr>
 <tr><td>IDEA</td><td>docs/IDEA.md</td><td>3</td><td>Problem Statement, Target Users, Core Value</td><td>—</td></tr>
 <tr><td>BRD</td><td>docs/BRD.md</td><td>5</td><td>Business Objectives, Stakeholders, Success Metrics</td><td>—</td></tr>
 <tr><td>PRD</td><td>docs/PRD.md</td><td>5</td><td>User Stories, Acceptance Criteria, Out of Scope</td><td>—</td></tr>
@@ -188,13 +237,10 @@
 <tr><td>CICD</td><td>docs/CICD.md</td><td>6</td><td>Pipeline Overview, Jenkinsfile, PR Gate, ArgoCD</td><td>—</td></tr>
 <tr><td>DEVELOPER_GUIDE</td><td>docs/DEVELOPER_GUIDE.md</td><td>5</td><td>Daily Scenarios, CI/CD Diagnosis, Quick Reference</td><td>—</td></tr>
 <tr><td>ALIGN</td><td>docs/ALIGN-REPORT.md</td><td>3</td><td>Alignment Issues, Cross-Document Gaps</td><td>—</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="42-multi-file-steps">§4.2 Multi-File Steps</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Step</th><th>Output Glob</th><th>Min Files</th><th>Special Rules</th></tr></thead>
-<tbody>
+</table>
+<h3>§4.2 Multi-File Steps</h3>
+<table>
+<tr><th>Step</th><th>Output Glob</th><th>Min Files</th><th>Special Rules</th></tr>
 <tr><td>UML</td><td>docs/diagrams/*.md</td><td>9</td><td>—</td></tr>
 <tr><td>BDD-server</td><td>features/server/*.feature</td><td>—</td><td>min_scenario_count = 15</td></tr>
 <tr><td>BDD-client</td><td>features/client/*.feature</td><td>—</td><td>min_scenario_count = 15</td></tr>
@@ -203,37 +249,39 @@
 <tr><td>MOCK</td><td>docs/mock-data/*</td><td>3</td><td>—</td></tr>
 <tr><td>PROTOTYPE</td><td>docs/prototype/*</td><td>3</td><td>—</td></tr>
 <tr><td>HTML</td><td>docs/pages/*.html</td><td>3</td><td>—</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="43-universal-anti-fake-rules-all-steps">§4.3 Universal Anti-Fake Rules (All Steps)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All generated documents must pass:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>No bare placeholders</strong>: No unfilled template placeholder strings in output</p>
-<p class="doc-p">2. <strong>No duplicate paragraphs</strong>: Paragraphs ≥150 chars must not repeat verbatim</p>
-<p class="doc-p">3. <strong>Minimum section words</strong>: Each section must contain ≥30 words</p>
-<p class="doc-p">4. <strong>No trivial entity names</strong>: No generic names like "Entity1", "Component2"</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="5-gate-check-rules-location">§5 Gate Check Rules Location</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">Individual gate rules are stored in <code>.gendoc-rules/<STEP-ID>-rules.json</code>.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">These files are used by <code>gate-check.sh</code> before each step's review loop begins.</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>File</th><th>Step</th><th>Key Rule</th></tr></thead>
-<tbody>
-<tr><td>`.gendoc-rules/API-rules.json`</td><td>API</td><td>min_endpoint_count = 53</td></tr>
-<tr><td>`.gendoc-rules/SCHEMA-rules.json`</td><td>SCHEMA</td><td>min_table_count = 13</td></tr>
-<tr><td>`.gendoc-rules/RTM-rules.json`</td><td>RTM</td><td>min_row_count = 18</td></tr>
-<tr><td>`.gendoc-rules/BDD-server-rules.json`</td><td>BDD-server</td><td>min_scenario_count = 15</td></tr>
-<tr><td>`.gendoc-rules/BDD-client-rules.json`</td><td>BDD-client</td><td>min_scenario_count = 15</td></tr>
-<tr><td>`.gendoc-rules/test-plan-rules.json`</td><td>test-plan</td><td>min_h2_sections = 10</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-    </div>
+</table>
+<h3>§4.3 Universal Anti-Fake Rules (All Steps)</h3>
+<p>All generated documents must pass:</p>
+<ol><li><strong>No bare placeholders</strong>: No unfilled template placeholder strings in output</li><li><strong>No duplicate paragraphs</strong>: Paragraphs ≥150 chars must not repeat verbatim</li><li><strong>Minimum section words</strong>: Each section must contain ≥30 words</li><li><strong>No trivial entity names</strong>: No generic names like &quot;Entity1&quot;, &quot;Component2&quot;</li></ol>
+<hr>
+<h2>§5 Gate Check Rules Location</h2>
+<p>Individual gate rules are stored in <code>.gendoc-rules/&lt;STEP-ID&gt;-rules.json</code>.</p>
+<p>These files are used by <code>gate-check.sh</code> before each step&#x27;s review loop begins.</p>
+<table>
+<tr><th>File</th><th>Step</th><th>Key Rule</th></tr>
+<tr><td><code>.gendoc-rules/API-rules.json</code></td><td>API</td><td>min_endpoint_count = 53</td></tr>
+<tr><td><code>.gendoc-rules/SCHEMA-rules.json</code></td><td>SCHEMA</td><td>min_table_count = 13</td></tr>
+<tr><td><code>.gendoc-rules/RTM-rules.json</code></td><td>RTM</td><td>min_row_count = 18</td></tr>
+<tr><td><code>.gendoc-rules/BDD-server-rules.json</code></td><td>BDD-server</td><td>min_scenario_count = 15</td></tr>
+<tr><td><code>.gendoc-rules/BDD-client-rules.json</code></td><td>BDD-client</td><td>min_scenario_count = 15</td></tr>
+<tr><td><code>.gendoc-rules/test-plan-rules.json</code></td><td>test-plan</td><td>min_h2_sections = 10</td></tr>
+</table></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

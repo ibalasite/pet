@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Api Admin Contract — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › contracts/ › Api Admin Contract</p>
+    <h1 class="banner-title">contracts/ › Api Admin Contract</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details open>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link active" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>API–Admin Portal Contract</h1>
+<p>This document defines the stable interface contract between the Fastify 4 API backend (<code>apps/api</code>) and the Vue 3 + Element Plus admin portal (<code>apps/admin</code>). Admin users have elevated privileges and access a separate endpoint namespace (<code>/api/v1/admin/*</code>). All admin routes require an authenticated session established via TOTP login; bearer tokens used by the player frontend are not accepted here.</p>
+<hr>
+<h2>Admin Authentication Contract</h2>
+<p>Admin authentication is a two-step TOTP flow entirely distinct from the player bearer-token system. Step one: the admin submits their username and TOTP code to <code>POST /api/v1/admin/auth/login</code>. On success the API creates a Redis-backed session record and responds with a <code>Set-Cookie</code> header:</p>
+<pre><code class="">Set-Cookie: ppa_admin_session=&lt;opaque-session-id&gt;; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/admin</code></pre>
+<p>The cookie is <code>HttpOnly</code> (JavaScript in the admin portal cannot read it), <code>Secure</code> (HTTPS only), and scoped to <code>Path=/api/v1/admin</code> so it is never sent to player endpoints. The Vue 3 frontend must be configured with <code>withCredentials: true</code> on its Axios/fetch instance so the browser attaches the cookie automatically to every admin API call. Session records are stored in Redis under <code>session:admin:&lt;sessionId&gt;</code> with a TTL of 8 hours. When the session expires Redis deletes the key and subsequent requests receive <code>401 Unauthorized</code>; the portal must redirect the user back to the login screen.</p>
+<p><strong>Login request</strong> (<code>POST /api/v1/admin/auth/login</code>):</p>
+<pre><code class="language-json">{ &quot;username&quot;: &quot;admin_alice&quot;, &quot;totpCode&quot;: &quot;482031&quot; }</code></pre>
+<p><strong>Login success</strong> <code>200 OK</code> — body is minimal:</p>
+<pre><code class="language-json">{ &quot;adminId&quot;: &quot;uuid-v4&quot;, &quot;username&quot;: &quot;admin_alice&quot;, &quot;role&quot;: &quot;moderator&quot; }</code></pre>
+<p><code>role</code> is one of <code>&quot;superadmin&quot;</code> or <code>&quot;moderator&quot;</code>. Some destructive endpoints (GDPR erasure, config updates) require <code>superadmin</code>.</p>
+<p><strong>Logout</strong> (<code>POST /api/v1/admin/auth/logout</code>) invalidates the Redis session immediately and responds <code>204 No Content</code> with a <code>Set-Cookie</code> header that expires the cookie.</p>
+<hr>
+<h2>Core Admin Endpoint Contracts</h2>
+<h3>GET /api/v1/admin/pets</h3>
+<p>Returns a paginated list of all pets in the system, with moderation metadata.</p>
+<p><strong>Query params</strong>:</p>
+<table>
+<tr><th>Param</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>page</code></td><td><code>integer</code></td><td><code>1</code></td><td>Page number</td></tr>
+<tr><td><code>limit</code></td><td><code>integer</code></td><td><code>50</code></td><td>Max 200</td></tr>
+<tr><td><code>status</code></td><td><code>string</code></td><td><code>all</code></td><td><code>all</code>, <code>active</code>, <code>banned</code></td></tr>
+<tr><td><code>species</code></td><td><code>string</code></td><td>—</td><td>Filter by species slug</td></tr>
+</table>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;pets&quot;: [
+    {
+      &quot;petId&quot;: &quot;uuid-v4&quot;,
+      &quot;name&quot;: &quot;Frostbyte&quot;,
+      &quot;species&quot;: &quot;glacicat&quot;,
+      &quot;ownerId&quot;: &quot;uuid-v4&quot;,
+      &quot;ownerDisplayName&quot;: &quot;PixelWarrior&quot;,
+      &quot;level&quot;: 7,
+      &quot;status&quot;: &quot;active&quot;,
+      &quot;bannedAt&quot;: null,
+      &quot;bannedBy&quot;: null,
+      &quot;createdAt&quot;: &quot;2026-01-15T10:23:00Z&quot;
+    }
+  ],
+  &quot;pagination&quot;: { &quot;page&quot;: 1, &quot;limit&quot;: 50, &quot;total&quot;: 3140 }
+}</code></pre>
+<hr>
+<h3>PUT /api/v1/admin/pets/:id/ban</h3>
+<p>Bans a pet from arena participation. Banned pets remain visible to their owner but cannot enter battles or the leaderboard.</p>
+<p><strong>Path param</strong>: <code>id</code> — pet UUID.</p>
+<p><strong>Request body</strong>:</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>reason</code></td><td><code>string</code></td><td>Yes</td><td>Human-readable reason (max 255 chars)</td></tr>
+<tr><td><code>notifyOwner</code></td><td><code>boolean</code></td><td>No</td><td>Default <code>true</code>; sends in-app notification</td></tr>
+</table>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;petId&quot;: &quot;uuid-v4&quot;,
+  &quot;status&quot;: &quot;banned&quot;,
+  &quot;bannedAt&quot;: &quot;2026-05-04T09:12:00Z&quot;,
+  &quot;bannedBy&quot;: &quot;admin_alice&quot;
+}</code></pre>
+<p>Returns <code>404</code> if the pet does not exist, <code>409</code> if already banned.</p>
+<hr>
+<h3>GET /api/v1/admin/leaderboard</h3>
+<p>Returns the full leaderboard including banned and shadow-banned entries, with flags invisible to the player endpoint.</p>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;entries&quot;: [
+    {
+      &quot;rank&quot;: 1,
+      &quot;playerId&quot;: &quot;uuid&quot;,
+      &quot;displayName&quot;: &quot;PixelWarrior&quot;,
+      &quot;petName&quot;: &quot;Frostbyte&quot;,
+      &quot;wins&quot;: 142,
+      &quot;rating&quot;: 2150,
+      &quot;flagged&quot;: false,
+      &quot;shadowBanned&quot;: false
+    }
+  ],
+  &quot;pagination&quot;: { &quot;page&quot;: 1, &quot;limit&quot;: 50, &quot;total&quot;: 850 }
+}</code></pre>
+<p>The <code>flagged</code> and <code>shadowBanned</code> fields are stripped from the player-facing <code>/api/v1/leaderboard</code> endpoint.</p>
+<hr>
+<h3>DELETE /api/v1/admin/users/:id/gdpr-erase</h3>
+<p>Enqueues a GDPR erasure job for the specified player. This endpoint is restricted to <code>superadmin</code> role. The erasure is asynchronous: all player data (account, pets, battle history, display name) is scheduled for deletion. The endpoint returns immediately with a job reference.</p>
+<p><strong>Path param</strong>: <code>id</code> — player UUID.</p>
+<p><strong>Request body</strong>: empty.</p>
+<p><strong>Success response</strong> <code>202 Accepted</code> (superadmin only):</p>
+<pre><code class="language-json">{
+  &quot;jobId&quot;: &quot;job_uuid-v4&quot;,
+  &quot;playerId&quot;: &quot;uuid-v4&quot;,
+  &quot;status&quot;: &quot;queued&quot;,
+  &quot;estimatedCompletionMs&quot;: 15000
+}</code></pre>
+<p>Returns <code>403 Forbidden</code> for moderator-role sessions. Returns <code>404</code> if the player does not exist. The portal must display a confirmation dialog before issuing this request because it is irreversible.</p>
+<hr>
+<h3>GET /api/v1/admin/battles/suspicious</h3>
+<p>Returns battles flagged by the anomaly-detection system as potentially exploited (unusual win rates, stat manipulation, repeated identical turn sequences).</p>
+<p><strong>Query params</strong>:</p>
+<table>
+<tr><th>Param</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>page</code></td><td><code>integer</code></td><td><code>1</code></td><td>Page number</td></tr>
+<tr><td><code>limit</code></td><td><code>integer</code></td><td><code>20</code></td><td>Max 100</td></tr>
+<tr><td><code>reviewStatus</code></td><td><code>string</code></td><td><code>pending</code></td><td><code>pending</code>, <code>cleared</code>, <code>actioned</code></td></tr>
+</table>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;battles&quot;: [
+    {
+      &quot;battleId&quot;: &quot;uuid-v4&quot;,
+      &quot;playerPetId&quot;: &quot;uuid-v4&quot;,
+      &quot;opponentPetId&quot;: &quot;uuid-v4&quot;,
+      &quot;suspicionScore&quot;: 0.92,
+      &quot;suspicionReasons&quot;: [&quot;identical_turn_sequence&quot;, &quot;stat_overflow&quot;],
+      &quot;reviewStatus&quot;: &quot;pending&quot;,
+      &quot;occurredAt&quot;: &quot;2026-05-03T22:14:00Z&quot;
+    }
+  ],
+  &quot;pagination&quot;: { &quot;page&quot;: 1, &quot;limit&quot;: 20, &quot;total&quot;: 7 }
+}</code></pre>
+<hr>
+<h3>PUT /api/v1/admin/config</h3>
+<p>Updates runtime configuration values. Restricted to <code>superadmin</code> role. Only keys listed in the API&#x27;s allowlist can be modified; unknown keys return <code>400</code>.</p>
+<p><strong>Request body</strong> (partial update; omit keys to leave unchanged):</p>
+<pre><code class="language-json">{
+  &quot;arenaMatchmakingRatingBand&quot;: 150,
+  &quot;petGenerationCooldownMs&quot;: 86400000,
+  &quot;leaderboardPageSize&quot;: 20
+}</code></pre>
+<p><strong>Success response</strong> <code>200 OK</code>:</p>
+<pre><code class="language-json">{
+  &quot;updated&quot;: [&quot;arenaMatchmakingRatingBand&quot;, &quot;petGenerationCooldownMs&quot;],
+  &quot;config&quot;: {
+    &quot;arenaMatchmakingRatingBand&quot;: 150,
+    &quot;petGenerationCooldownMs&quot;: 86400000,
+    &quot;leaderboardPageSize&quot;: 20
+  }
+}</code></pre>
+<hr>
+<h2>Session Expiry Handling</h2>
+<p>The Redis session TTL is 8 hours from the time of login; there is no sliding-window refresh. The admin portal must handle <code>401 Unauthorized</code> responses from any admin endpoint gracefully by clearing any locally cached admin state (Pinia store), displaying a &quot;session expired, please log in again&quot; message, and navigating to the TOTP login screen. The portal must not cache session status in localStorage; session validity is determined entirely by whether the backend accepts the cookie. A <code>GET /api/v1/admin/auth/me</code> endpoint is available for the portal to validate session status on app mount without performing a destructive action.</p>
+<hr>
+<h2>Breaking Change Policy</h2>
+<p>Admin endpoints follow the same versioning semantics as the player API: any removal, type change, or authentication-mechanism change is breaking and requires a path version bump (<code>/api/v2/admin/</code>) with a 30-day deprecation period. Because the admin portal is an internal tool deployed together with the API, a shorter 14-day deprecation window is acceptable with explicit team sign-off. Additive changes (new optional fields, new optional query params, new endpoints) are non-breaking. The portal must tolerate unknown fields in responses. Configuration key additions to the <code>PUT /api/v1/admin/config</code> allowlist are non-breaking; removals are breaking.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

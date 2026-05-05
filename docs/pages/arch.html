@@ -1,151 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — ARCH — System Architecture</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>架構設計 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">ARCH — System Architecture</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>ARCH — System Architecture</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="arch--system-architecture">ARCH — System Architecture</h1>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="document-control">Document Control</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>欄位</th><th>內容</th></tr></thead>
-<tbody>
-<tr><td>**DOC-ID**</td><td>ARCH-PIXEL-PET-ARENA-20260503</td></tr>
-<tr><td>**產品名稱**</td><td>Pixel Pet Arena</td></tr>
-<tr><td>**文件版本**</td><td>v1.0</td></tr>
-<tr><td>**狀態**</td><td>DRAFT</td></tr>
-<tr><td>**作者**</td><td>AI Generated (gendoc arch)</td></tr>
-<tr><td>**建立日期**</td><td>2026-05-03</td></tr>
-<tr><td>**上游文件**</td><td>EDD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="change-log">Change Log</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>版本</th><th>日期</th><th>作者</th><th>變更摘要</th></tr></thead>
-<tbody>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 架構設計</p>
+    <h1 class="banner-title">架構設計</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link active" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>ARCH — System Architecture</h1>
+<hr>
+<h2>Document Control</h2>
+<table>
+<tr><th>欄位</th><th>內容</th></tr>
+<tr><td><strong>DOC-ID</strong></td><td>ARCH-PIXEL-PET-ARENA-20260503</td></tr>
+<tr><td><strong>產品名稱</strong></td><td>Pixel Pet Arena</td></tr>
+<tr><td><strong>文件版本</strong></td><td>v1.0</td></tr>
+<tr><td><strong>狀態</strong></td><td>DRAFT</td></tr>
+<tr><td><strong>作者</strong></td><td>AI Generated (gendoc arch)</td></tr>
+<tr><td><strong>建立日期</strong></td><td>2026-05-03</td></tr>
+<tr><td><strong>上游文件</strong></td><td>EDD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</td></tr>
+</table>
+<hr>
+<h2>Change Log</h2>
+<table>
+<tr><th>版本</th><th>日期</th><th>作者</th><th>變更摘要</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (gendoc arch)</td><td>初稿：完整系統架構設計文件</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="">目錄</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <a href="#§1-architecture-overview">§1. Architecture Overview</a></p>
-<p class="doc-p">2. <a href="#§2-component-architecture">§2. Component Architecture</a></p>
-<p class="doc-p">3. <a href="#§3-key-architectural-decisions">§3. Key Architectural Decisions</a></p>
-<p class="doc-p">4. <a href="#§4-data-flow-diagrams">§4. Data Flow Diagrams</a></p>
-<p class="doc-p">5. <a href="#§5-security-architecture">§5. Security Architecture</a></p>
-<p class="doc-p">6. <a href="#§6-scalability-and-reliability">§6. Scalability and Reliability</a></p>
-<p class="doc-p">7. <a href="#§7-deployment-architecture">§7. Deployment Architecture</a></p>
-<p class="doc-p">8. <a href="#§8-cross-cutting-concerns">§8. Cross-Cutting Concerns</a></p>
-<p class="doc-p">9. <a href="#§9-高可用設計">§9. 高可用設計</a></p>
-<p class="doc-p">10. <a href="#§10-災難恢復dr">§10. 災難恢復（DR）</a></p>
-<p class="doc-p">11. <a href="#§11-技術棧全覽">§11. 技術棧全覽</a></p>
-<p class="doc-p">12. <a href="#§12-observability-架構">§12. Observability 架構</a></p>
-<p class="doc-p">13. <a href="#§13-外部依賴地圖">§13. 外部依賴地圖</a></p>
-<p class="doc-p">14. <a href="#§14-architecture-decision-records">§14. Architecture Decision Records</a></p>
-<p class="doc-p">15. <a href="#§15-架構審查檢查清單">§15. 架構審查檢查清單</a></p>
-<p class="doc-p">16. <a href="#§16-cost-optimization--finops">§16. Cost Optimization & FinOps</a></p>
-<p class="doc-p">17. <a href="#§17-marketplace-feature-成本影響評估">§17. Marketplace Feature 成本影響評估</a></p>
-<p class="doc-p">18. <a href="#§18-api-gateway--service-mesh-architecture">§18. API Gateway & Service Mesh Architecture</a></p>
-<p class="doc-p">19. <a href="#§19-admin-portal-架構">§19. Admin Portal 架構</a></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="1-architecture-overview">§1. Architecture Overview</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="11-design-principles">§1.1 Design Principles</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The pixel-pet-arena architecture is governed by six first-order principles derived from the upstream documents:</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>P1 — Accountless Persistence</strong></p>
-<p class="doc-p">Identity equals a 32-byte cryptographic URL token (PET_ACCESS_TOKEN_MIN_BYTES = 32) produced by a 6-digit email OTP claim (CLAIM_CODE_DIGITS = 6). No session cookie, no password, no user table governs player identity. All architectural choices in the auth and data tiers flow from this constraint.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>P2 — Dual-Store Authority</strong></p>
-<p class="doc-p">Redis is the authoritative real-time source for the leaderboard sorted set and rate-limit counters; PostgreSQL is the authoritative durable store for all other data. Neither store is a pure replica of the other. Redis degradation (availability loss) triggers a read fallback to PostgreSQL for the leaderboard — a degraded-not-down posture.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>P3 — Monorepo, Single Language</strong></p>
-<p class="doc-p">Backend Game API and Admin API are two Fastify processes within one Node.js 20 LTS monorepo. Sharing TypeScript types, Zod schemas, and domain constants between all sub-packages reduces surface area for divergence within the MVP budget hard cap of $40,000 (MVP_BUDGET_USD = 40,000).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>P4 — Deliberate Stack Separation</strong></p>
-<p class="doc-p">The player app (React 18 + Phaser.js 3) and the admin portal (Vue 3 + Element Plus) are separate Vite applications deployed to Vercel as separate builds. This prevents the pixel-art CSS design system from bleeding into the data-dense admin UI and allows independent release cycles.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>P5 — Fail-Closed Security</strong></p>
-<p class="doc-p">Every authentication boundary is fail-closed: if Redis is unavailable, OTP code entry is blocked (not allowed through). If a rate-limit counter cannot be checked, player-facing rate limits degrade gracefully (fail-open, logged as alert); only OTP code entry is fail-closed (blocked). Admin sessions use httpOnly + SameSite=Strict cookies; pet tokens are transmitted once over HTTPS and stored only as SHA-256 hashes in the database.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>P6 — GDPR by Architecture</strong></p>
-<p class="doc-p">Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash. Raw email is never written to logs, databases, or analytics events. All five GDPR SLAs are first-class data-pipeline concerns: erasure (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days), restrict processing (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 hours), data access (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 days), object leaderboard (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5 business days), and rectification (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24 hours). See §5.4 for the complete SLA table.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="12-system-context-diagram-ascii">§1.2 System Context Diagram (ASCII)</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text"> ┌────────────────────────────────────────────────────────────────────────────────────┐
+</table>
+<hr>
+<h2>目錄</h2>
+<ol><li><a href="#§1-architecture-overview" target="_blank" rel="noopener">§1. Architecture Overview</a></li><li><a href="#§2-component-architecture" target="_blank" rel="noopener">§2. Component Architecture</a></li><li><a href="#§3-key-architectural-decisions" target="_blank" rel="noopener">§3. Key Architectural Decisions</a></li><li><a href="#§4-data-flow-diagrams" target="_blank" rel="noopener">§4. Data Flow Diagrams</a></li><li><a href="#§5-security-architecture" target="_blank" rel="noopener">§5. Security Architecture</a></li><li><a href="#§6-scalability-and-reliability" target="_blank" rel="noopener">§6. Scalability and Reliability</a></li><li><a href="#§7-deployment-architecture" target="_blank" rel="noopener">§7. Deployment Architecture</a></li><li><a href="#§8-cross-cutting-concerns" target="_blank" rel="noopener">§8. Cross-Cutting Concerns</a></li><li><a href="#§9-高可用設計" target="_blank" rel="noopener">§9. 高可用設計</a></li><li><a href="#§10-災難恢復dr" target="_blank" rel="noopener">§10. 災難恢復（DR）</a></li><li><a href="#§11-技術棧全覽" target="_blank" rel="noopener">§11. 技術棧全覽</a></li><li><a href="#§12-observability-架構" target="_blank" rel="noopener">§12. Observability 架構</a></li><li><a href="#§13-外部依賴地圖" target="_blank" rel="noopener">§13. 外部依賴地圖</a></li><li><a href="#§14-architecture-decision-records" target="_blank" rel="noopener">§14. Architecture Decision Records</a></li><li><a href="#§15-架構審查檢查清單" target="_blank" rel="noopener">§15. 架構審查檢查清單</a></li><li><a href="#§16-cost-optimization--finops" target="_blank" rel="noopener">§16. Cost Optimization &amp; FinOps</a></li><li><a href="#§17-marketplace-feature-成本影響評估" target="_blank" rel="noopener">§17. Marketplace Feature 成本影響評估</a></li><li><a href="#§18-api-gateway--service-mesh-architecture" target="_blank" rel="noopener">§18. API Gateway &amp; Service Mesh Architecture</a></li><li><a href="#§19-admin-portal-架構" target="_blank" rel="noopener">§19. Admin Portal 架構</a></li></ol>
+<hr>
+<h2>§1. Architecture Overview</h2>
+<h3>§1.1 Design Principles</h3>
+<p>The pixel-pet-arena architecture is governed by six first-order principles derived from the upstream documents:</p>
+<p><strong>P1 — Accountless Persistence</strong></p>
+<p>Identity equals a 32-byte cryptographic URL token (PET_ACCESS_TOKEN_MIN_BYTES = 32) produced by a 6-digit email OTP claim (CLAIM_CODE_DIGITS = 6). No session cookie, no password, no user table governs player identity. All architectural choices in the auth and data tiers flow from this constraint.</p>
+<p><strong>P2 — Dual-Store Authority</strong></p>
+<p>Redis is the authoritative real-time source for the leaderboard sorted set and rate-limit counters; PostgreSQL is the authoritative durable store for all other data. Neither store is a pure replica of the other. Redis degradation (availability loss) triggers a read fallback to PostgreSQL for the leaderboard — a degraded-not-down posture.</p>
+<p><strong>P3 — Monorepo, Single Language</strong></p>
+<p>Backend Game API and Admin API are two Fastify processes within one Node.js 20 LTS monorepo. Sharing TypeScript types, Zod schemas, and domain constants between all sub-packages reduces surface area for divergence within the MVP budget hard cap of $40,000 (MVP_BUDGET_USD = 40,000).</p>
+<p><strong>P4 — Deliberate Stack Separation</strong></p>
+<p>The player app (React 18 + Phaser.js 3) and the admin portal (Vue 3 + Element Plus) are separate Vite applications deployed to Vercel as separate builds. This prevents the pixel-art CSS design system from bleeding into the data-dense admin UI and allows independent release cycles.</p>
+<p><strong>P5 — Fail-Closed Security</strong></p>
+<p>Every authentication boundary is fail-closed: if Redis is unavailable, OTP code entry is blocked (not allowed through). If a rate-limit counter cannot be checked, player-facing rate limits degrade gracefully (fail-open, logged as alert); only OTP code entry is fail-closed (blocked). Admin sessions use httpOnly + SameSite=Strict cookies; pet tokens are transmitted once over HTTPS and stored only as SHA-256 hashes in the database.</p>
+<p><strong>P6 — GDPR by Architecture</strong></p>
+<p>Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash. Raw email is never written to logs, databases, or analytics events. All five GDPR SLAs are first-class data-pipeline concerns: erasure (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days), restrict processing (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 hours), data access (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 days), object leaderboard (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5 business days), and rectification (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24 hours). See §5.4 for the complete SLA table.</p>
+<hr>
+<h3>§1.2 System Context Diagram (ASCII)</h3>
+<pre><code class=""> ┌────────────────────────────────────────────────────────────────────────────────────┐
  │  EXTERNAL ACTORS                                                                   │
  │                                                                                    │
  │  ┌─────────────┐  ┌──────────────────┐  ┌───────────────────┐  ┌───────────────┐ │
@@ -207,33 +240,22 @@
  │  │  Test → Build → Deploy     │  │  Supabase automated daily     │  │
  │  └────────────────────────────┘  └───────────────────────────────┘  │
  └──────────────────────────────────────────────────────────────────────┘</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="2-component-architecture">§2. Component Architecture</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="21-frontend-architecture-react--phaserjs-player-app">§2.1 Frontend Architecture (React + Phaser.js Player App)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Technology</strong>: React 18, Vite 5, TypeScript 5, Phaser.js 3 (dynamically imported)</p>
-<div class="doc-gap"></div>
-<p class="doc-p">The player app is a client-side SPA served from Vercel's global CDN. No server-side rendering is required; all routes are client-rendered via React Router v6. Phaser.js is dynamically imported to avoid blocking the initial claim-flow bundle.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Bundle Budget</strong>: JS ≤ 300 KB gzipped (TOTAL_JS_BUNDLE_GZIPPED_KB = 300); CSS ≤ 50 KB gzipped (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>State Management Tiers</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Tier</th><th>Library</th><th>Scope</th></tr></thead>
-<tbody>
-<tr><td>Server state</td><td>TanStack Query v5 (`staleTime: 30_000` ms = LEADERBOARD_UPDATE_LAG_SECONDS × 1000 — leaderboard-driven; applies globally to all server state)</td><td>Pet stats, leaderboard, battle history</td></tr>
+<hr>
+<h2>§2. Component Architecture</h2>
+<h3>§2.1 Frontend Architecture (React + Phaser.js Player App)</h3>
+<p><strong>Technology</strong>: React 18, Vite 5, TypeScript 5, Phaser.js 3 (dynamically imported)</p>
+<p>The player app is a client-side SPA served from Vercel&#x27;s global CDN. No server-side rendering is required; all routes are client-rendered via React Router v6. Phaser.js is dynamically imported to avoid blocking the initial claim-flow bundle.</p>
+<p><strong>Bundle Budget</strong>: JS ≤ 300 KB gzipped (TOTAL_JS_BUNDLE_GZIPPED_KB = 300); CSS ≤ 50 KB gzipped (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50).</p>
+<p><strong>State Management Tiers</strong>:</p>
+<table>
+<tr><th>Tier</th><th>Library</th><th>Scope</th></tr>
+<tr><td>Server state</td><td>TanStack Query v5 (<code>staleTime: 30_000</code> ms = LEADERBOARD_UPDATE_LAG_SECONDS × 1000 — leaderboard-driven; applies globally to all server state)</td><td>Pet stats, leaderboard, battle history</td></tr>
 <tr><td>Client state</td><td>Zustand (sliced store)</td><td>Arena mode, claim flow step, toast queue</td></tr>
 <tr><td>URL state</td><td>URLSearchParams / route segments</td><td>Leaderboard rarity filter, pagination</td></tr>
 <tr><td>Form state</td><td>React Hook Form + Zod</td><td>ClaimEmailForm, ClaimCodeForm</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Component Hierarchy Summary</strong>:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">App
+</table>
+<p><strong>Component Hierarchy Summary</strong>:</p>
+<pre><code class="">App
 ├── Layout
 │   ├── NavBar (hasPetToken prop — shows/hides pet links)
 │   └── Router (React Router v6)
@@ -275,54 +297,27 @@
 │       │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100) → LeaderboardRow ×100
 │       │   └── OwnerRankBanner
 │       └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Pixel Art Rendering</strong>:</p>
-<ul class="doc-list">
-<li>Engine: Phaser.js 3, isolated in <code>PetCanvasEngine</code> class. No other component may import Phaser directly.</li>
-<li>Sprites: 32×32 px per frame (SPRITE_RESOLUTION_PX = 32), PNG with transparency</li>
-<li>CSS: <code>image-rendering: pixelated</code> + <code>image-rendering: crisp-edges</code> on canvas element</li>
-<li>FPS target: ≥ 30 FPS sustained (PET_ANIMATION_FPS_MIN = 30)</li>
-<li>Reduced motion: <code>prefers-reduced-motion: reduce</code> → static sprite, no particles</li>
-<li>WebGL unavailable: Canvas 2D fallback rendering with static sprite image (no animation)</li>
-<li>Pet render on load: ≤ 2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Performance Targets</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Metric</th><th>Target</th><th>Constant</th></tr></thead>
-<tbody>
-<tr><td>FCP</td><td>< 1.5 s</td><td>FCP_SECONDS</td></tr>
-<tr><td>LCP</td><td>< 2.5 s</td><td>LCP_SECONDS</td></tr>
-<tr><td>CLS</td><td>< 0.1</td><td>CLS_SCORE</td></tr>
-<tr><td>INP</td><td>< 200 ms</td><td>INP_MS</td></tr>
+<p><strong>Pixel Art Rendering</strong>:</p>
+<ul><li>Engine: Phaser.js 3, isolated in <code>PetCanvasEngine</code> class. No other component may import Phaser directly.</li><li>Sprites: 32×32 px per frame (SPRITE_RESOLUTION_PX = 32), PNG with transparency</li><li>CSS: <code>image-rendering: pixelated</code> + <code>image-rendering: crisp-edges</code> on canvas element</li><li>FPS target: ≥ 30 FPS sustained (PET_ANIMATION_FPS_MIN = 30)</li><li>Reduced motion: <code>prefers-reduced-motion: reduce</code> → static sprite, no particles</li><li>WebGL unavailable: Canvas 2D fallback rendering with static sprite image (no animation)</li><li>Pet render on load: ≤ 2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)</li></ul>
+<p><strong>Performance Targets</strong>:</p>
+<table>
+<tr><th>Metric</th><th>Target</th><th>Constant</th></tr>
+<tr><td>FCP</td><td>&lt; 1.5 s</td><td>FCP_SECONDS</td></tr>
+<tr><td>LCP</td><td>&lt; 2.5 s</td><td>LCP_SECONDS</td></tr>
+<tr><td>CLS</td><td>&lt; 0.1</td><td>CLS_SCORE</td></tr>
+<tr><td>INP</td><td>&lt; 200 ms</td><td>INP_MS</td></tr>
 <tr><td>Pet interaction response</td><td>≤ 200 ms</td><td>PET_INTERACTION_RESPONSE_MS</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Accessibility (WCAG 2.1 AA)</strong>:</p>
-<ul class="doc-list">
-<li>Focus indicator contrast ratio ≥ 3:1 (A11Y_FOCUS_CONTRAST_RATIO = 3:1)</li>
-<li>Normal text contrast ratio ≥ 4.5:1 (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1)</li>
-<li>Large text contrast ratio ≥ 3:1 (A11Y_TEXT_CONTRAST_LARGE = 3:1)</li>
-<li>Claim code expiry warning at 2 minutes remaining (A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES = 2)</li>
-<li>All interactive elements are keyboard-navigable; focus is trapped in modal dialogs; <code>aria-live</code> regions used for dynamic content (EDD §8.4)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="22-admin-portal-architecture-vue-3--element-plus">§2.2 Admin Portal Architecture (Vue 3 + Element Plus)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Technology</strong>: Vue 3 (Composition API), Element Plus, Vite 5, TypeScript 5, Pinia, Axios, ECharts (vue-echarts)</p>
-<div class="doc-gap"></div>
-<p class="doc-p">The admin portal is a separate Vite application, deployed to Vercel independently from the player app. It connects exclusively to <code>/admin/api/*</code> endpoints. Deliberate stack separation prevents the pixel-art CSS design system from bleeding into the data-dense admin UI.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Deployment</strong>: Separate Vercel project, separate route prefix or subdomain (<code>admin.pixel-pet-arena.com</code> — OQ-E03 open).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Modules and Routes</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Module</th><th>Route</th><th>Role Required</th></tr></thead>
-<tbody>
+</table>
+<p><strong>Accessibility (WCAG 2.1 AA)</strong>:</p>
+<ul><li>Focus indicator contrast ratio ≥ 3:1 (A11Y_FOCUS_CONTRAST_RATIO = 3:1)</li><li>Normal text contrast ratio ≥ 4.5:1 (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1)</li><li>Large text contrast ratio ≥ 3:1 (A11Y_TEXT_CONTRAST_LARGE = 3:1)</li><li>Claim code expiry warning at 2 minutes remaining (A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES = 2)</li><li>All interactive elements are keyboard-navigable; focus is trapped in modal dialogs; <code>aria-live</code> regions used for dynamic content (EDD §8.4)</li></ul>
+<hr>
+<h3>§2.2 Admin Portal Architecture (Vue 3 + Element Plus)</h3>
+<p><strong>Technology</strong>: Vue 3 (Composition API), Element Plus, Vite 5, TypeScript 5, Pinia, Axios, ECharts (vue-echarts)</p>
+<p>The admin portal is a separate Vite application, deployed to Vercel independently from the player app. It connects exclusively to <code>/admin/api/*</code> endpoints. Deliberate stack separation prevents the pixel-art CSS design system from bleeding into the data-dense admin UI.</p>
+<p><strong>Deployment</strong>: Separate Vercel project, separate route prefix or subdomain (<code>admin.pixel-pet-arena.com</code> — OQ-E03 open).</p>
+<p><strong>Key Modules and Routes</strong>:</p>
+<table>
+<tr><th>Module</th><th>Route</th><th>Role Required</th></tr>
 <tr><td>Dashboard</td><td>/admin/dashboard</td><td>Moderator+ / Read Only</td></tr>
 <tr><td>Pet Management</td><td>/admin/pets</td><td>Moderator+ / Read Only (GET)</td></tr>
 <tr><td>Leaderboard</td><td>/admin/leaderboard</td><td>Moderator+ / Read Only (GET)</td></tr>
@@ -335,406 +330,210 @@
 <tr><td>Analytics</td><td>/admin/analytics</td><td>Moderator+ / Read Only</td></tr>
 <tr><td>Audit Log</td><td>/admin/audit</td><td>Super Admin</td></tr>
 <tr><td>Roles</td><td>/admin/roles</td><td>Super Admin</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>State</strong>: Pinia (Vue-native) for local portal state. Axios with request/response interceptors for session expiry (4h inactivity — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4; 8h absolute — ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Performance</strong>: Pages load ≤ 3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3; PRD NFR-ADMIN-06). Pet search returns up to 1 million records in ≤ 2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2; PRD NFR-ADMIN-06). Single moderator handles 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="23-backend-api-architecture-nodejs-20--fastify-4">§2.3 Backend API Architecture (Node.js 20 + Fastify 4)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Technology</strong>: Node.js 20 LTS, Fastify 4, TypeScript 5</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Two Fastify processes share the same codebase and database credentials via environment variables:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Game API Server</strong>: ≥ 2 replicas on Railway; handles all <code>/api/v1/*</code> player-facing routes.</li>
-<li><strong>Admin API Server</strong>: 1 replica; handles all <code>/admin/api/*</code> routes via a dedicated Fastify plugin registered under the <code>/admin</code> prefix.</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Horizontal Autoscale</strong>: CPU threshold 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70). Railway autoscaling or Kubernetes HPA. Baseline resource limits: 512 MB RAM, 0.5 CPU per replica; burst ceiling: 2 GB / 2 CPU (EDD §10.2 infrastructure constraints).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Request Handling</strong>:</p>
-<ul class="doc-list">
-<li>JSON Schema / Zod validation on all routes (schema-based validation built into Fastify — no extra middleware dependency)</li>
-<li>Structured JSON logging via <code>pino</code> with correlation ID (<code>X-Request-Id</code>) threaded through all log entries</li>
-<li><code>fast-json-stringify</code> for schema-defined response serialization</li>
-<li>Production error sanitization: strips <code>stack</code>, internal <code>code</code>, and path details from HTTP 500 responses</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>API Envelope Format</strong>:</p>
-<pre class="doc-code"><code class="lang-json">{
-  "success": true,
-  "data": { "..." },
-  "error": null,
-  "meta": { "total": 0, "page": 1, "limit": 100 }
+</table>
+<p><strong>State</strong>: Pinia (Vue-native) for local portal state. Axios with request/response interceptors for session expiry (4h inactivity — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4; 8h absolute — ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8).</p>
+<p><strong>Performance</strong>: Pages load ≤ 3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3; PRD NFR-ADMIN-06). Pet search returns up to 1 million records in ≤ 2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2; PRD NFR-ADMIN-06). Single moderator handles 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100).</p>
+<hr>
+<h3>§2.3 Backend API Architecture (Node.js 20 + Fastify 4)</h3>
+<p><strong>Technology</strong>: Node.js 20 LTS, Fastify 4, TypeScript 5</p>
+<p>Two Fastify processes share the same codebase and database credentials via environment variables:</p>
+<ul><li><strong>Game API Server</strong>: ≥ 2 replicas on Railway; handles all <code>/api/v1/*</code> player-facing routes.</li><li><strong>Admin API Server</strong>: 1 replica; handles all <code>/admin/api/*</code> routes via a dedicated Fastify plugin registered under the <code>/admin</code> prefix.</li></ul>
+<p><strong>Horizontal Autoscale</strong>: CPU threshold 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70). Railway autoscaling or Kubernetes HPA. Baseline resource limits: 512 MB RAM, 0.5 CPU per replica; burst ceiling: 2 GB / 2 CPU (EDD §10.2 infrastructure constraints).</p>
+<p><strong>Request Handling</strong>:</p>
+<ul><li>JSON Schema / Zod validation on all routes (schema-based validation built into Fastify — no extra middleware dependency)</li><li>Structured JSON logging via <code>pino</code> with correlation ID (<code>X-Request-Id</code>) threaded through all log entries</li><li><code>fast-json-stringify</code> for schema-defined response serialization</li><li>Production error sanitization: strips <code>stack</code>, internal <code>code</code>, and path details from HTTP 500 responses</li></ul>
+<p><strong>API Envelope Format</strong>:</p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: { &quot;...&quot; },
+  &quot;error&quot;: null,
+  &quot;meta&quot;: { &quot;total&quot;: 0, &quot;page&quot;: 1, &quot;limit&quot;: 100 }
 }</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>API Versioning</strong>: All player routes use <code>/api/v1/</code> prefix. Backward compatibility maintained for at least 1 major version (API_BACKWARD_COMPAT_VERSIONS = 1). Deprecated versions receive 90-day advance notice (API_DEPRECATION_NOTICE_DAYS = 90).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Capacity</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Mode</th><th>RPS</th><th>DAU</th></tr></thead>
-<tbody>
+<p><strong>API Versioning</strong>: All player routes use <code>/api/v1/</code> prefix. Backward compatibility maintained for at least 1 major version (API_BACKWARD_COMPAT_VERSIONS = 1). Deprecated versions receive 90-day advance notice (API_DEPRECATION_NOTICE_DAYS = 90).</p>
+<p><strong>Capacity</strong>:</p>
+<table>
+<tr><th>Mode</th><th>RPS</th><th>DAU</th></tr>
 <tr><td>Normal operation</td><td>100 RPS sustained (NORMAL_OPERATION_RPS)</td><td>2,000–5,000 (NORMAL_OPERATION_DAU_MIN / MAX)</td></tr>
 <tr><td>Peak (viral)</td><td>500 RPS (PEAK_OPERATION_RPS)</td><td>2,000 PCU arena (PEAK_CONCURRENT_USERS)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Containerization</strong>: Multi-stage Docker build (<code>node:20-alpine</code>), non-root user, < 150 MB image target (EDD §10.2 infrastructure constraints). Health check: <code>GET /health</code> ≤ 500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500). Images stored in GitHub Container Registry (ghcr.io).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="24-database-architecture-postgresqlsupabase">§2.4 Database Architecture (PostgreSQL/Supabase)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Technology</strong>: PostgreSQL 15+ managed by Supabase</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Core Tables</strong> (Impl Phase = EDD implementation phase 1/2/3, distinct from PRD priority P0/P1/P2):</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Table</th><th>Purpose</th><th>Phase</th></tr></thead>
-<tbody>
-<tr><td>`pets`</td><td>Pet generation metadata, stats, token hash, reservation</td><td>Phase 1</td></tr>
-<tr><td>`claim_identities`</td><td>Email hash + AES-256-GCM encrypted email</td><td>Phase 1</td></tr>
-<tr><td>`claim_codes`</td><td>OTP hashes with TTL</td><td>Phase 1</td></tr>
-<tr><td>`admin_users`</td><td>Admin credentials, TOTP, roles</td><td>Phase 1</td></tr>
-<tr><td>`audit_logs`</td><td>Immutable admin action trail (2-year retention)</td><td>Phase 1</td></tr>
-<tr><td>`gdpr_requests`</td><td>GDPR request lifecycle</td><td>Phase 1</td></tr>
-<tr><td>`training_logs`</td><td>Per-pet training event log</td><td>Phase 2</td></tr>
-<tr><td>`arena_matches`</td><td>Battle records with seeded random</td><td>Phase 2</td></tr>
-<tr><td>`food_buffs`</td><td>Temporary and permanent stat buffs</td><td>Phase 2</td></tr>
-<tr><td>`leaderboard_snapshots`</td><td>Hourly PostgreSQL backups of Redis sorted set; top 500 entries per snapshot (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500); rolling 12-month retention (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12)</td><td>Phase 2</td></tr>
-<tr><td>`marketplace_listings`</td><td>Active trade listings (FF_MARKETPLACE)</td><td>Phase 3</td></tr>
-<tr><td>`trade_records`</td><td>Completed trade history (FF_MARKETPLACE)</td><td>Phase 3</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Access Patterns</strong>:</p>
-<ul class="doc-list">
-<li>All writes go to the primary writer</li>
-<li>Leaderboard, public pet page, and admin list views route to the read replica (NFR-SCALE-03)</li>
-<li>Connection pool: minimum 20 connections (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst to 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS = 50)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Index Strategies</strong>:</p>
-<ul class="doc-list">
-<li><code>idx_pets_owner_token_hash</code> — partial index (WHERE NOT NULL) — auth on every authenticated request</li>
-<li><code>idx_pets_reserved_until</code> — partial index (WHERE NOT NULL) — unclaimed pet cleanup job</li>
-<li><code>idx_arena_matches_pet_a_history ON (pet_a_id, completed_at DESC)</code> — battle records queries (pet as challenger)</li>
-<li><code>idx_arena_matches_pet_b_history ON (pet_b_id, completed_at DESC)</code> — battle records queries (pet as challenged party)</li>
-<li><code>idx_claim_identities_email_hash UNIQUE</code> — email claim lookup</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Reliability</strong>:</p>
-<ul class="doc-list">
-<li>Automated failover to read replica within 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60)</li>
-<li>Maximum maintenance window: 2 hours/month (DB_MAINTENANCE_WINDOW_MAX_HOURS_PER_MONTH = 2)</li>
-<li>48-hour advance maintenance notice (DB_MAINTENANCE_NOTICE_HOURS = 48)</li>
-<li>Daily full backup to S3-compatible storage (Supabase automated); point-in-time recovery enabled</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>GDPR Data Design</strong>:</p>
-<ul class="doc-list">
-<li>Raw email never written to any column or log</li>
-<li><code>claim_identities.email_encrypted</code>: AES-256-GCM ciphertext (nulled within 24h of erasure request — GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24)</li>
-<li><code>claim_identities.email_hash</code>: SHA-256 of lowercased email (retained permanently for anti-re-registration)</li>
-<li><code>pets.claim_identity_id</code> FK enables GDPR self-service endpoint to locate the identity without querying ephemeral <code>claim_codes</code> (purged after CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="25-cache-architecture-redisupstash">§2.5 Cache Architecture (Redis/Upstash)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Technology</strong>: Redis 7+ via Upstash (serverless, pay-per-request)</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Redis serves six distinct responsibilities, each with its own key-pattern and TTL discipline:</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>1. Leaderboard (Authoritative Real-Time)</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Key:   leaderboard:global
+</table>
+<p><strong>Containerization</strong>: Multi-stage Docker build (<code>node:20-alpine</code>), non-root user, &lt; 150 MB image target (EDD §10.2 infrastructure constraints). Health check: <code>GET /health</code> ≤ 500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500). Images stored in GitHub Container Registry (ghcr.io).</p>
+<hr>
+<h3>§2.4 Database Architecture (PostgreSQL/Supabase)</h3>
+<p><strong>Technology</strong>: PostgreSQL 15+ managed by Supabase</p>
+<p><strong>Core Tables</strong> (Impl Phase = EDD implementation phase 1/2/3, distinct from PRD priority P0/P1/P2):</p>
+<table>
+<tr><th>Table</th><th>Purpose</th><th>Phase</th></tr>
+<tr><td><code>pets</code></td><td>Pet generation metadata, stats, token hash, reservation</td><td>Phase 1</td></tr>
+<tr><td><code>claim_identities</code></td><td>Email hash + AES-256-GCM encrypted email</td><td>Phase 1</td></tr>
+<tr><td><code>claim_codes</code></td><td>OTP hashes with TTL</td><td>Phase 1</td></tr>
+<tr><td><code>admin_users</code></td><td>Admin credentials, TOTP, roles</td><td>Phase 1</td></tr>
+<tr><td><code>audit_logs</code></td><td>Immutable admin action trail (2-year retention)</td><td>Phase 1</td></tr>
+<tr><td><code>gdpr_requests</code></td><td>GDPR request lifecycle</td><td>Phase 1</td></tr>
+<tr><td><code>training_logs</code></td><td>Per-pet training event log</td><td>Phase 2</td></tr>
+<tr><td><code>arena_matches</code></td><td>Battle records with seeded random</td><td>Phase 2</td></tr>
+<tr><td><code>food_buffs</code></td><td>Temporary and permanent stat buffs</td><td>Phase 2</td></tr>
+<tr><td><code>leaderboard_snapshots</code></td><td>Hourly PostgreSQL backups of Redis sorted set; top 500 entries per snapshot (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500); rolling 12-month retention (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12)</td><td>Phase 2</td></tr>
+<tr><td><code>marketplace_listings</code></td><td>Active trade listings (FF_MARKETPLACE)</td><td>Phase 3</td></tr>
+<tr><td><code>trade_records</code></td><td>Completed trade history (FF_MARKETPLACE)</td><td>Phase 3</td></tr>
+</table>
+<p><strong>Access Patterns</strong>:</p>
+<ul><li>All writes go to the primary writer</li><li>Leaderboard, public pet page, and admin list views route to the read replica (NFR-SCALE-03)</li><li>Connection pool: minimum 20 connections (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst to 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS = 50)</li></ul>
+<p><strong>Key Index Strategies</strong>:</p>
+<ul><li><code>idx_pets_owner_token_hash</code> — partial index (WHERE NOT NULL) — auth on every authenticated request</li><li><code>idx_pets_reserved_until</code> — partial index (WHERE NOT NULL) — unclaimed pet cleanup job</li><li><code>idx_arena_matches_pet_a_history ON (pet_a_id, completed_at DESC)</code> — battle records queries (pet as challenger)</li><li><code>idx_arena_matches_pet_b_history ON (pet_b_id, completed_at DESC)</code> — battle records queries (pet as challenged party)</li><li><code>idx_claim_identities_email_hash UNIQUE</code> — email claim lookup</li></ul>
+<p><strong>Reliability</strong>:</p>
+<ul><li>Automated failover to read replica within 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60)</li><li>Maximum maintenance window: 2 hours/month (DB_MAINTENANCE_WINDOW_MAX_HOURS_PER_MONTH = 2)</li><li>48-hour advance maintenance notice (DB_MAINTENANCE_NOTICE_HOURS = 48)</li><li>Daily full backup to S3-compatible storage (Supabase automated); point-in-time recovery enabled</li></ul>
+<p><strong>GDPR Data Design</strong>:</p>
+<ul><li>Raw email never written to any column or log</li><li><code>claim_identities.email_encrypted</code>: AES-256-GCM ciphertext (nulled within 24h of erasure request — GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24)</li><li><code>claim_identities.email_hash</code>: SHA-256 of lowercased email (retained permanently for anti-re-registration)</li><li><code>pets.claim_identity_id</code> FK enables GDPR self-service endpoint to locate the identity without querying ephemeral <code>claim_codes</code> (purged after CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours)</li></ul>
+<hr>
+<h3>§2.5 Cache Architecture (Redis/Upstash)</h3>
+<p><strong>Technology</strong>: Redis 7+ via Upstash (serverless, pay-per-request)</p>
+<p>Redis serves six distinct responsibilities, each with its own key-pattern and TTL discipline:</p>
+<p><strong>1. Leaderboard (Authoritative Real-Time)</strong></p>
+<pre><code class="">Key:   leaderboard:global
 Type:  Sorted Set
 TTL:   No TTL (persistent)
 Score: arena_score = win_rate × battles_played × level_multiplier</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Public top 100 (LEADERBOARD_TOP_DISPLAY = 100); admin sees top 500 (LEADERBOARD_ADMIN_VIEW = 500). Update lag ≤ 30 seconds (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30). Fallback: if Redis unavailable, leaderboard reads from PostgreSQL <code>leaderboard_snapshots</code> (degraded, not down).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>2. Rate-Limit Counters</strong></p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Redis Key Pattern</th><th>TTL</th><th>Limit</th><th>Constant</th></tr></thead>
-<tbody>
-<tr><td>`rl:claim:{email_hash}`</td><td>3600s</td><td>5/hr</td><td>AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR</td></tr>
-<tr><td>`rl:claim:cooldown:{email_hash}`</td><td>60s</td><td>cooldown</td><td>CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS</td></tr>
-<tr><td>`rl:arena:{pet_id}`</td><td>3600s</td><td>10/hr default</td><td>ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT</td></tr>
-<tr><td>`rl:code_entry:{session_id}`</td><td>900s</td><td>10/session</td><td>AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION</td></tr>
-<tr><td>`rl:code_entry:cooldown:{session_id}`</td><td>60s</td><td>cooldown sentinel on MAX_ATTEMPTS_REACHED — HTTP 429 Retry-After: 60 while key exists</td><td>CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS</td></tr>
-<tr><td>`rl:admin_login:{ip_hash}`</td><td>900s</td><td>10/15 min</td><td>ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS; ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS</td></tr>
-<tr><td>`rl:admin:{admin_id}`</td><td>60s</td><td>100/min</td><td>ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p">Rate limiting is fail-open for operational traffic (counters not enforced on Redis unavailability — logged as alert), <strong>except</strong> OTP code entry which is fail-closed (blocked on Redis unavailability).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>3. Admin Sessions</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Key:   session:admin:{session_id}
+<p>Public top 100 (LEADERBOARD_TOP_DISPLAY = 100); admin sees top 500 (LEADERBOARD_ADMIN_VIEW = 500). Update lag ≤ 30 seconds (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30). Fallback: if Redis unavailable, leaderboard reads from PostgreSQL <code>leaderboard_snapshots</code> (degraded, not down).</p>
+<p><strong>2. Rate-Limit Counters</strong></p>
+<table>
+<tr><th>Redis Key Pattern</th><th>TTL</th><th>Limit</th><th>Constant</th></tr>
+<tr><td><code>rl:claim:{email_hash}</code></td><td>3600s</td><td>5/hr</td><td>AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR</td></tr>
+<tr><td><code>rl:claim:cooldown:{email_hash}</code></td><td>60s</td><td>cooldown</td><td>CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS</td></tr>
+<tr><td><code>rl:arena:{pet_id}</code></td><td>3600s</td><td>10/hr default</td><td>ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT</td></tr>
+<tr><td><code>rl:code_entry:{session_id}</code></td><td>900s</td><td>10/session</td><td>AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION</td></tr>
+<tr><td><code>rl:code_entry:cooldown:{session_id}</code></td><td>60s</td><td>cooldown sentinel on MAX_ATTEMPTS_REACHED — HTTP 429 Retry-After: 60 while key exists</td><td>CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS</td></tr>
+<tr><td><code>rl:admin_login:{ip_hash}</code></td><td>900s</td><td>10/15 min</td><td>ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS; ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS</td></tr>
+<tr><td><code>rl:admin:{admin_id}</code></td><td>60s</td><td>100/min</td><td>ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE</td></tr>
+</table>
+<p>Rate limiting is fail-open for operational traffic (counters not enforced on Redis unavailability — logged as alert), <strong>except</strong> OTP code entry which is fail-closed (blocked on Redis unavailability).</p>
+<p><strong>3. Admin Sessions</strong></p>
+<pre><code class="">Key:   session:admin:{session_id}
 TTL:   14400s (inactivity: ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4h)
 Value: JSON { adminId, role, createdAt, absExpiry: createdAt+(ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS×3600)s }</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Absolute expiry (ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8 hours) enforced via <code>absExpiry</code> field check on every request.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>4. Arena Matchmaking Queue</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Key:    matchmaking:queue:{mode}
+<p>Absolute expiry (ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8 hours) enforced via <code>absExpiry</code> field check on every request.</p>
+<p><strong>4. Arena Matchmaking Queue</strong></p>
+<pre><code class="">Key:    matchmaking:queue:{mode}
 Type:   Sorted Set
 Score:  enqueue epoch (ms)
-Member: "{petId}:{enqueue_epoch_ms}"</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Consumer uses <code>ZRANGEBYSCORE</code> for FIFO pairing. Stale entries older than ARENA_MATCHMAKING_TIMEOUT_SECONDS + 15s buffer (≈ 45s — EDD §7.3 operational margin) are discarded before pairing. Supports 100 concurrent entries (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>5. Config Cache</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Key:   config:runtime
+Member: &quot;{petId}:{enqueue_epoch_ms}&quot;</code></pre>
+<p>Consumer uses <code>ZRANGEBYSCORE</code> for FIFO pairing. Stale entries older than ARENA_MATCHMAKING_TIMEOUT_SECONDS + 15s buffer (≈ 45s — EDD §7.3 operational margin) are discarded before pairing. Supports 100 concurrent entries (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).</p>
+<p><strong>5. Config Cache</strong></p>
+<pre><code class="">Key:   config:runtime
 TTL:   300s (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5)
 Value: JSON blob of current admin-tunable runtime parameters</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>6. Token Blacklist</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Key:   token:blacklist:{token_hash}
+<p><strong>6. Token Blacklist</strong></p>
+<pre><code class="">Key:   token:blacklist:{token_hash}
 TTL:   259200s (72h — CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72)
-Value: "1"</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Written atomically when a recovery flow replaces a pet access token, ensuring in-flight requests using the old token are immediately rejected.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="26-email-service-architecture-sendgrid--nodemailer-fallback">§2.6 Email Service Architecture (SendGrid + Nodemailer Fallback)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Primary</strong>: SendGrid v3 API</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Transactional emails only: claim password delivery (6-digit OTP), access-link recovery. No marketing email without separate explicit opt-in (CAN-SPAM compliance).</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Configuration:</p>
-<ul class="doc-list">
-<li>SPF + DKIM configured on sending domain</li>
-<li>Delivery target ≥ 98% (CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98)</li>
-<li>Spam complaint rate target < 0.1% (SPAM_COMPLAINT_RATE_MAX_PERCENT = 0.1)</li>
-<li>P90 delivery ≤ 60 seconds (EMAIL_DELIVERY_P90_SECONDS)</li>
-<li>Retry: 3 retries over 15 minutes on delivery failure (EMAIL_DELIVERY_FAILURE_RETRIES = 3; EMAIL_DELIVERY_RETRY_WINDOW_MINUTES = 15)</li>
-<li>Monthly plan ceiling: 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Failover</strong>: Nodemailer + SMTP</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Activates automatically after 3 consecutive SendGrid failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3). Pre-configured SMTP credentials stored in environment variables only. Vendor migration window: 14 days (VENDOR_MIGRATION_PLAN_DAYS = 14).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Email Security Design</strong>:</p>
-<ul class="doc-list">
-<li>Claim email contains ONLY the 6-digit numeric code — no clickable URLs</li>
-<li>Rationale: Mitigates email-client pre-scanning attacks (Gmail/Outlook auto-clicking URLs would claim the pet without user intent)</li>
-<li>Players manually type the code into the browser claim form</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="3-key-architectural-decisions">§3. Key Architectural Decisions</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="31-adr-001-no-user-accounts--email-otp--url-token-identity">§3.1 ADR-001: No User Accounts — Email OTP + URL Token Identity</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status</strong>: Accepted</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Context</strong>:</p>
-<p class="doc-p">Casual browser games lose 85–95% of visitors at traditional account registration walls (industry data, BRD §2.3). The product's core hypothesis (BRD O1) is that an email claim conversion rate ≥ 10% (CLAIM_CONVERSION_TARGET_PERCENT = 10) is achievable if and only if the identity mechanism requires no password creation, no email verification link click, and no profile setup. Existing alternatives (LocalStorage, cookies) fail on multi-device persistence.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>:</p>
-<p class="doc-p">Identity = 32-byte cryptographically random URL token (PET_ACCESS_TOKEN_MIN_BYTES = 32), issued once at successful claim completion. The token is the pet URL. Players bookmark the URL; it IS the login.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">The claim flow has exactly 3 steps (EMAIL_CLAIM_FLOW_STEPS_MAX = 3):</p>
-<p class="doc-p">1. Player enters email on claim page → system sends 6-digit OTP (CLAIM_CODE_DIGITS = 6)</p>
-<p class="doc-p">2. Player manually types OTP into browser within 15 minutes (CLAIM_CODE_EXPIRY_MINUTES = 15)</p>
-<p class="doc-p">3. System generates token, reveals the bookmarkable pet URL</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Token is stored only as SHA-256 hash in <code>pets.owner_token_hash</code>. It is transmitted once in the URL reveal screen. All subsequent requests pass it as <code>Authorization: Bearer <token></code>. Recovery: re-claim flow issues a new token via the same OTP mechanism.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Consequences</strong>:</p>
-<ul class="doc-list">
-<li>Positive: Removes the #1 conversion barrier; enables viral URL sharing; simplifies auth infrastructure (no OAuth, no session table for players)</li>
-<li>Positive: GDPR-friendly — "email as identity" means erasure is a first-class, well-scoped operation</li>
-<li>Negative: Token loss requires a recovery flow (not self-service password reset); users who lose both their URL and email access are unrecoverable</li>
-<li>Negative: Bookmark-based access requires UX education; some users will not understand the mechanism</li>
-<li>Risk: If claim conversion stays below CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3% after 4 weeks, the product pivots to anonymous-token mode per BRD kill criteria</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="32-adr-002-monorepo-structure">§3.2 ADR-002: Monorepo Structure</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status</strong>: Accepted</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Context</strong>:</p>
-<p class="doc-p">Three independently deployable units (player app, admin portal, API server) share domain types (Pet, ArenaMatch, LeaderboardEntry), Zod validation schemas, and constants from CONSTANTS-PIXEL-PET-ARENA-20260503. Polyrepo approaches require either duplication or a separate shared-package publish cycle, both of which add friction within the MVP budget (MVP_BUDGET_USD = 40,000).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>:</p>
-<p class="doc-p">Single Git repository with pnpm workspaces, structured as:</p>
-<pre class="doc-code"><code class="lang-text">packages/
+Value: &quot;1&quot;</code></pre>
+<p>Written atomically when a recovery flow replaces a pet access token, ensuring in-flight requests using the old token are immediately rejected.</p>
+<hr>
+<h3>§2.6 Email Service Architecture (SendGrid + Nodemailer Fallback)</h3>
+<p><strong>Primary</strong>: SendGrid v3 API</p>
+<p>Transactional emails only: claim password delivery (6-digit OTP), access-link recovery. No marketing email without separate explicit opt-in (CAN-SPAM compliance).</p>
+<p>Configuration:</p>
+<ul><li>SPF + DKIM configured on sending domain</li><li>Delivery target ≥ 98% (CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98)</li><li>Spam complaint rate target &lt; 0.1% (SPAM_COMPLAINT_RATE_MAX_PERCENT = 0.1)</li><li>P90 delivery ≤ 60 seconds (EMAIL_DELIVERY_P90_SECONDS)</li><li>Retry: 3 retries over 15 minutes on delivery failure (EMAIL_DELIVERY_FAILURE_RETRIES = 3; EMAIL_DELIVERY_RETRY_WINDOW_MINUTES = 15)</li><li>Monthly plan ceiling: 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000)</li></ul>
+<p><strong>Failover</strong>: Nodemailer + SMTP</p>
+<p>Activates automatically after 3 consecutive SendGrid failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3). Pre-configured SMTP credentials stored in environment variables only. Vendor migration window: 14 days (VENDOR_MIGRATION_PLAN_DAYS = 14).</p>
+<p><strong>Email Security Design</strong>:</p>
+<ul><li>Claim email contains ONLY the 6-digit numeric code — no clickable URLs</li><li>Rationale: Mitigates email-client pre-scanning attacks (Gmail/Outlook auto-clicking URLs would claim the pet without user intent)</li><li>Players manually type the code into the browser claim form</li></ul>
+<hr>
+<h2>§3. Key Architectural Decisions</h2>
+<h3>§3.1 ADR-001: No User Accounts — Email OTP + URL Token Identity</h3>
+<p><strong>Status</strong>: Accepted</p>
+<p><strong>Context</strong>:</p>
+<p>Casual browser games lose 85–95% of visitors at traditional account registration walls (industry data, BRD §2.3). The product&#x27;s core hypothesis (BRD O1) is that an email claim conversion rate ≥ 10% (CLAIM_CONVERSION_TARGET_PERCENT = 10) is achievable if and only if the identity mechanism requires no password creation, no email verification link click, and no profile setup. Existing alternatives (LocalStorage, cookies) fail on multi-device persistence.</p>
+<p><strong>Decision</strong>:</p>
+<p>Identity = 32-byte cryptographically random URL token (PET_ACCESS_TOKEN_MIN_BYTES = 32), issued once at successful claim completion. The token is the pet URL. Players bookmark the URL; it IS the login.</p>
+<p>The claim flow has exactly 3 steps (EMAIL_CLAIM_FLOW_STEPS_MAX = 3):</p>
+<ol><li>Player enters email on claim page → system sends 6-digit OTP (CLAIM_CODE_DIGITS = 6)</li><li>Player manually types OTP into browser within 15 minutes (CLAIM_CODE_EXPIRY_MINUTES = 15)</li><li>System generates token, reveals the bookmarkable pet URL</li></ol>
+<p>Token is stored only as SHA-256 hash in <code>pets.owner_token_hash</code>. It is transmitted once in the URL reveal screen. All subsequent requests pass it as <code>Authorization: Bearer &lt;token&gt;</code>. Recovery: re-claim flow issues a new token via the same OTP mechanism.</p>
+<p><strong>Consequences</strong>:</p>
+<ul><li>Positive: Removes the #1 conversion barrier; enables viral URL sharing; simplifies auth infrastructure (no OAuth, no session table for players)</li><li>Positive: GDPR-friendly — &quot;email as identity&quot; means erasure is a first-class, well-scoped operation</li><li>Negative: Token loss requires a recovery flow (not self-service password reset); users who lose both their URL and email access are unrecoverable</li><li>Negative: Bookmark-based access requires UX education; some users will not understand the mechanism</li><li>Risk: If claim conversion stays below CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3% after 4 weeks, the product pivots to anonymous-token mode per BRD kill criteria</li></ul>
+<hr>
+<h3>§3.2 ADR-002: Monorepo Structure</h3>
+<p><strong>Status</strong>: Accepted</p>
+<p><strong>Context</strong>:</p>
+<p>Three independently deployable units (player app, admin portal, API server) share domain types (Pet, ArenaMatch, LeaderboardEntry), Zod validation schemas, and constants from CONSTANTS-PIXEL-PET-ARENA-20260503. Polyrepo approaches require either duplication or a separate shared-package publish cycle, both of which add friction within the MVP budget (MVP_BUDGET_USD = 40,000).</p>
+<p><strong>Decision</strong>:</p>
+<p>Single Git repository with pnpm workspaces, structured as:</p>
+<pre><code class="">packages/
   api/          Node.js 20 / Fastify 4 (Game API + Admin API plugin)
   player-app/   React 18 + Phaser.js 3
   admin-app/    Vue 3 + Element Plus
   shared/       Zod schemas, domain types, constants bridge</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Code quality hard limits enforced across all packages: CODE_MODULE_MAX_LINES = 800 lines per module; CODE_FUNCTION_MAX_LINES = 50 lines per function. ESLint <code>max-lines</code> and <code>max-lines-per-function</code> rules enforce these.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Consequences</strong>:</p>
-<ul class="doc-list">
-<li>Positive: Type-safe contract sharing between frontend and backend without publishing overhead</li>
-<li>Positive: Single CI pipeline; atomic cross-package changes</li>
-<li>Positive: Consistent toolchain (Vite 5, TypeScript 5, pnpm) across all packages</li>
-<li>Negative: A monorepo requires disciplined package boundary enforcement to prevent circular dependencies</li>
-<li>Negative: A single failing CI step blocks all deployments</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="33-adr-003-react--phaserjs-for-player-app">§3.3 ADR-003: React + Phaser.js for Player App</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status</strong>: Accepted</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Context</strong>:</p>
-<p class="doc-p">The player app requires two distinct rendering contexts: (1) pixel-art game canvas with frame animation, sprite physics, and touch interaction (Phaser.js domain); (2) standard web UI for forms, stat bars, leaderboard tables, and navigation chrome (React domain). Using only Phaser.js for everything would require rebuilding standard HTML form components. Using only React would require a custom canvas engine.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>:</p>
-<p class="doc-p">React 18 handles all UI chrome. Phaser.js 3 is instantiated as a React component (<code>PetCanvasEngine</code>) via <code>useEffect</code> and a canvas ref. Phaser is dynamically imported (<code>await import('phaser')</code>) to avoid blocking the initial claim-flow bundle.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Architectural isolation rule: Only <code>PetCanvasEngine</code> may import Phaser. No other component, hook, or utility may reference Phaser directly. Communication between Phaser scenes and React state uses an event emitter bridge (not React props or Zustand directly).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Consequences</strong>:</p>
-<ul class="doc-list">
-<li>Positive: Leverages Phaser.js 3's mature sprite animation and WebGL rendering (35k+ GitHub stars, active community — BRD §0)</li>
-<li>Positive: React handles accessible form flows, ARIA, and keyboard navigation while Phaser handles canvas</li>
-<li>Positive: Dynamic import of Phaser keeps the initial bundle within the 300 KB gzipped budget (TOTAL_JS_BUNDLE_GZIPPED_KB = 300)</li>
-<li>Negative: Two rendering contexts increase complexity; team must understand both React and Phaser lifecycles</li>
-<li>Negative: Phaser's internal game loop must be properly destroyed on React component unmount to prevent memory leaks</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="34-adr-004-vue-3--element-plus-for-admin-portal">§3.4 ADR-004: Vue 3 + Element Plus for Admin Portal</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status</strong>: Accepted</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Context</strong>:</p>
-<p class="doc-p">The admin portal is data-dense: paginated tables, complex forms, modals, and chart visualizations. Element Plus provides a production-grade data table with built-in sorting, filtering, and pagination that would require significant custom code in React. The admin portal has no need for Phaser.js, pixel-art design tokens, or the player-app design system.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>:</p>
-<p class="doc-p">Admin portal built with Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5. Pinia for state management. ECharts (vue-echarts) for analytics dashboards. Axios for API communication with request/response interceptors for session expiry handling.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">The admin portal shares NO frontend code with the player app — separate pnpm workspace, separate Vite build, separate Vercel deployment. Both communicate with the same backend API but at different route prefixes.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Consequences</strong>:</p>
-<ul class="doc-list">
-<li>Positive: Element Plus's <code>el-table</code> handles admin's data-density requirements with minimal custom code</li>
-<li>Positive: Vue 3's Composition API + Pinia is well-matched to form-heavy admin CRUD interfaces</li>
-<li>Positive: Complete isolation prevents admin CSS from bleeding into the pixel-art game UI</li>
-<li>Negative: Team must maintain proficiency in both React (player app) and Vue 3 (admin portal)</li>
-<li>Negative: Shared domain types must be carefully versioned in the <code>shared</code> package to prevent divergence</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="35-adr-005-nodejsfastify-over-gofiber">§3.5 ADR-005: Node.js/Fastify over Go/Fiber</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status</strong>: Accepted</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Context</strong>:</p>
-<p class="doc-p">Go/Fiber was evaluated for the arena service due to higher goroutine concurrency efficiency. At the projected load of PEAK_OPERATION_RPS = 500 RPS and PEAK_CONCURRENT_USERS = 2,000, Go would offer a measurable throughput advantage per core.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>:</p>
-<p class="doc-p">Node.js 20 LTS + Fastify 4 for all backend services. Fastify delivers ~30% lower overhead than Express at equivalent concurrency and provides JSON Schema-based route validation out of the box — eliminating a middleware dependency. At the projected load profile, Node.js async I/O (non-blocking, event-loop-based) is sufficient without the operational complexity of a Go microservice split.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Single-language monorepo (TypeScript throughout) reduces cognitive overhead and enables type sharing across API, player app, and admin portal — directly impacting delivery velocity within the MVP budget hard cap (MVP_BUDGET_USD = 40,000).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Consequences</strong>:</p>
-<ul class="doc-list">
-<li>Positive: TypeScript types and Zod schemas shared across frontend and backend without re-definition</li>
-<li>Positive: Fastify's plugin system cleanly separates game API and admin API as two plugins in one process</li>
-<li>Positive: Smaller team can maintain one language stack instead of two</li>
-<li>Negative: Node.js thread model limits CPU-intensive operations (pet generation for large batches); mitigated via worker threads for batch generation (PET_GENERATION_CONCURRENT_BATCH = 1,000 pets in PET_GENERATION_CONCURRENT_BATCH_TIME_SECONDS = 10s target)</li>
-<li>Negative: If load exceeds 500 RPS peak sustained, a Go microservice split may be required for the arena service</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="36-adr-006-postgresql--redis-dual-storage">§3.6 ADR-006: PostgreSQL + Redis Dual Storage</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status</strong>: Accepted</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Context</strong>:</p>
-<p class="doc-p">Two data access patterns exist with conflicting requirements: (1) Leaderboard reads must be O(log N) sorted-set operations at ≤ 30-second update lag (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30) with sub-millisecond ranking queries. (2) Pet ownership, battle history, GDPR compliance, and audit logging require ACID transactions, foreign key integrity, and point-in-time recovery.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>:</p>
-<p class="doc-p">Redis Sorted Set is the authoritative real-time leaderboard source. PostgreSQL <code>leaderboard_snapshots</code> table is the durable backup, written hourly. Arena rate-limiting, claim rate-limiting, admin sessions, and matchmaking queue also reside in Redis (dedicated key patterns with TTL discipline — rate-limit and session keys use explicit TTLs; leaderboard and matchmaking queue keys are persistent — see §2.5).</p>
-<div class="doc-gap"></div>
-<p class="doc-p">All durable business data (pets, claims, matches, training, food buffs, GDPR records, audit logs) lives exclusively in PostgreSQL.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Availability posture: Redis unavailability triggers fallback to PostgreSQL for leaderboard reads (degraded response, not outage) and blocks OTP code entry (fail-closed for security).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Consequences</strong>:</p>
-<ul class="doc-list">
-<li>Positive: Leaderboard ZRANGEBYSCORE is O(log N + M) — scales to millions of entries without query degradation</li>
-<li>Positive: Redis TTL-based rate limiting requires no background cleanup jobs (TTL expiry is automatic)</li>
-<li>Positive: Upstash serverless Redis has no fixed monthly cost floor — pay-per-request matches MVP budget discipline</li>
-<li>Negative: Two stores to monitor, back up, and reason about during incidents</li>
-<li>Negative: Leaderboard reconstruction from PostgreSQL snapshots after full Redis flush may exceed 30s during peak load (OQ-E06 — explicit SLA and drill required)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="37-adr-007-feature-flag-strategy-ffmarketplace">§3.7 ADR-007: Feature Flag Strategy (FF_MARKETPLACE)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status</strong>: Accepted (implementation approach partially open — OQ-E07)</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Context</strong>:</p>
-<p class="doc-p">The marketplace (Phase 3 — F-TRADE-01) requires DAU > 1,000 sustained for 2 weeks before activation (DAU_MARKETPLACE_TRIGGER = 1,000). The sumo arena mode (F-ARENA-02) is P1 scope. The admin portal itself is behind <code>FF_ADMIN_PORTAL</code> during alpha.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>:</p>
-<p class="doc-p">Phase 1-2: Environment variable-based feature flags sufficient for MVP. Complete flag inventory:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Flag</th><th>Default</th><th>Kill-switch scope</th></tr></thead>
-<tbody>
-<tr><td>`FF_GUEST_PET_DISPLAY`</td><td>`true`</td><td>Disable guest pet preview on landing page</td></tr>
-<tr><td>`FF_PET_GENERATION`</td><td>`true`</td><td>Disable pet generation pipeline</td></tr>
-<tr><td>`FF_EMAIL_CLAIM`</td><td>`true`</td><td>Disable email claim flow entirely</td></tr>
-<tr><td>`FF_TRAINING_SYSTEM`</td><td>`true`</td><td>Disable training actions</td></tr>
-<tr><td>`FF_FOOD_SYSTEM`</td><td>`true`</td><td>Disable food buff endpoints</td></tr>
-<tr><td>`FF_ARENA_RACE`</td><td>`true`</td><td>Disable Race arena mode</td></tr>
-<tr><td>`FF_ARENA_SUMO`</td><td>`false`</td><td>Enable/disable SUMO arena mode (P1 gate — EDD Phase 2)</td></tr>
-<tr><td>`FF_LEADERBOARD`</td><td>`true`</td><td>Disable public leaderboard</td></tr>
-<tr><td>`FF_BATTLE_RECORDS`</td><td>`true`</td><td>Disable battle history endpoints</td></tr>
-<tr><td>`FF_RARITY_DISPLAY`</td><td>`false`</td><td>Enable rarity UI elements when ready (P1 gate — EDD Phase 2)</td></tr>
-<tr><td>`FF_ADMIN_PORTAL`</td><td>`true`</td><td>Control admin portal availability</td></tr>
-<tr><td>`FF_MARKETPLACE`</td><td>`false`</td><td>Enable marketplace when DAU_MARKETPLACE_TRIGGER sustained 2 weeks</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><code>FF_MARKETPLACE</code> is promoted to <code>true</code> when product analytics confirm DAU > 1,000 for 2 consecutive weeks. The flag is a runtime environment variable (not a code branch) to allow activation without redeployment. Config cache TTL (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5) means flag changes propagate within 5 minutes.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Phase 3 consideration: LaunchDarkly or Flagsmith integration for runtime per-user rollout targeting (OQ-E07 — evaluated at Phase 2 exit).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Consequences</strong>:</p>
-<ul class="doc-list">
-<li>Positive: Environment variable flags require no additional infrastructure in Phase 1-2</li>
-<li>Positive: Marketplace code ships in Phase 1-2 builds (behind the flag) — no feature-branch divergence</li>
-<li>Negative: Environment variable flags cannot support per-user gradual rollout or A/B targeting without a third-party flag service</li>
-<li>Negative: Flag state is not visible in the admin portal until a feature flag management module is added</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="4-data-flow-diagrams">§4. Data Flow Diagrams</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="41-pet-claim-flow">§4.1 Pet Claim Flow</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Guest Browser                  Game API (Fastify)          PostgreSQL       Redis         SendGrid
+<p>Code quality hard limits enforced across all packages: CODE_MODULE_MAX_LINES = 800 lines per module; CODE_FUNCTION_MAX_LINES = 50 lines per function. ESLint <code>max-lines</code> and <code>max-lines-per-function</code> rules enforce these.</p>
+<p><strong>Consequences</strong>:</p>
+<ul><li>Positive: Type-safe contract sharing between frontend and backend without publishing overhead</li><li>Positive: Single CI pipeline; atomic cross-package changes</li><li>Positive: Consistent toolchain (Vite 5, TypeScript 5, pnpm) across all packages</li><li>Negative: A monorepo requires disciplined package boundary enforcement to prevent circular dependencies</li><li>Negative: A single failing CI step blocks all deployments</li></ul>
+<hr>
+<h3>§3.3 ADR-003: React + Phaser.js for Player App</h3>
+<p><strong>Status</strong>: Accepted</p>
+<p><strong>Context</strong>:</p>
+<p>The player app requires two distinct rendering contexts: (1) pixel-art game canvas with frame animation, sprite physics, and touch interaction (Phaser.js domain); (2) standard web UI for forms, stat bars, leaderboard tables, and navigation chrome (React domain). Using only Phaser.js for everything would require rebuilding standard HTML form components. Using only React would require a custom canvas engine.</p>
+<p><strong>Decision</strong>:</p>
+<p>React 18 handles all UI chrome. Phaser.js 3 is instantiated as a React component (<code>PetCanvasEngine</code>) via <code>useEffect</code> and a canvas ref. Phaser is dynamically imported (<code>await import(&#x27;phaser&#x27;)</code>) to avoid blocking the initial claim-flow bundle.</p>
+<p>Architectural isolation rule: Only <code>PetCanvasEngine</code> may import Phaser. No other component, hook, or utility may reference Phaser directly. Communication between Phaser scenes and React state uses an event emitter bridge (not React props or Zustand directly).</p>
+<p><strong>Consequences</strong>:</p>
+<ul><li>Positive: Leverages Phaser.js 3&#x27;s mature sprite animation and WebGL rendering (35k+ GitHub stars, active community — BRD §0)</li><li>Positive: React handles accessible form flows, ARIA, and keyboard navigation while Phaser handles canvas</li><li>Positive: Dynamic import of Phaser keeps the initial bundle within the 300 KB gzipped budget (TOTAL_JS_BUNDLE_GZIPPED_KB = 300)</li><li>Negative: Two rendering contexts increase complexity; team must understand both React and Phaser lifecycles</li><li>Negative: Phaser&#x27;s internal game loop must be properly destroyed on React component unmount to prevent memory leaks</li></ul>
+<hr>
+<h3>§3.4 ADR-004: Vue 3 + Element Plus for Admin Portal</h3>
+<p><strong>Status</strong>: Accepted</p>
+<p><strong>Context</strong>:</p>
+<p>The admin portal is data-dense: paginated tables, complex forms, modals, and chart visualizations. Element Plus provides a production-grade data table with built-in sorting, filtering, and pagination that would require significant custom code in React. The admin portal has no need for Phaser.js, pixel-art design tokens, or the player-app design system.</p>
+<p><strong>Decision</strong>:</p>
+<p>Admin portal built with Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5. Pinia for state management. ECharts (vue-echarts) for analytics dashboards. Axios for API communication with request/response interceptors for session expiry handling.</p>
+<p>The admin portal shares NO frontend code with the player app — separate pnpm workspace, separate Vite build, separate Vercel deployment. Both communicate with the same backend API but at different route prefixes.</p>
+<p><strong>Consequences</strong>:</p>
+<ul><li>Positive: Element Plus&#x27;s <code>el-table</code> handles admin&#x27;s data-density requirements with minimal custom code</li><li>Positive: Vue 3&#x27;s Composition API + Pinia is well-matched to form-heavy admin CRUD interfaces</li><li>Positive: Complete isolation prevents admin CSS from bleeding into the pixel-art game UI</li><li>Negative: Team must maintain proficiency in both React (player app) and Vue 3 (admin portal)</li><li>Negative: Shared domain types must be carefully versioned in the <code>shared</code> package to prevent divergence</li></ul>
+<hr>
+<h3>§3.5 ADR-005: Node.js/Fastify over Go/Fiber</h3>
+<p><strong>Status</strong>: Accepted</p>
+<p><strong>Context</strong>:</p>
+<p>Go/Fiber was evaluated for the arena service due to higher goroutine concurrency efficiency. At the projected load of PEAK_OPERATION_RPS = 500 RPS and PEAK_CONCURRENT_USERS = 2,000, Go would offer a measurable throughput advantage per core.</p>
+<p><strong>Decision</strong>:</p>
+<p>Node.js 20 LTS + Fastify 4 for all backend services. Fastify delivers ~30% lower overhead than Express at equivalent concurrency and provides JSON Schema-based route validation out of the box — eliminating a middleware dependency. At the projected load profile, Node.js async I/O (non-blocking, event-loop-based) is sufficient without the operational complexity of a Go microservice split.</p>
+<p>Single-language monorepo (TypeScript throughout) reduces cognitive overhead and enables type sharing across API, player app, and admin portal — directly impacting delivery velocity within the MVP budget hard cap (MVP_BUDGET_USD = 40,000).</p>
+<p><strong>Consequences</strong>:</p>
+<ul><li>Positive: TypeScript types and Zod schemas shared across frontend and backend without re-definition</li><li>Positive: Fastify&#x27;s plugin system cleanly separates game API and admin API as two plugins in one process</li><li>Positive: Smaller team can maintain one language stack instead of two</li><li>Negative: Node.js thread model limits CPU-intensive operations (pet generation for large batches); mitigated via worker threads for batch generation (PET_GENERATION_CONCURRENT_BATCH = 1,000 pets in PET_GENERATION_CONCURRENT_BATCH_TIME_SECONDS = 10s target)</li><li>Negative: If load exceeds 500 RPS peak sustained, a Go microservice split may be required for the arena service</li></ul>
+<hr>
+<h3>§3.6 ADR-006: PostgreSQL + Redis Dual Storage</h3>
+<p><strong>Status</strong>: Accepted</p>
+<p><strong>Context</strong>:</p>
+<p>Two data access patterns exist with conflicting requirements: (1) Leaderboard reads must be O(log N) sorted-set operations at ≤ 30-second update lag (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30) with sub-millisecond ranking queries. (2) Pet ownership, battle history, GDPR compliance, and audit logging require ACID transactions, foreign key integrity, and point-in-time recovery.</p>
+<p><strong>Decision</strong>:</p>
+<p>Redis Sorted Set is the authoritative real-time leaderboard source. PostgreSQL <code>leaderboard_snapshots</code> table is the durable backup, written hourly. Arena rate-limiting, claim rate-limiting, admin sessions, and matchmaking queue also reside in Redis (dedicated key patterns with TTL discipline — rate-limit and session keys use explicit TTLs; leaderboard and matchmaking queue keys are persistent — see §2.5).</p>
+<p>All durable business data (pets, claims, matches, training, food buffs, GDPR records, audit logs) lives exclusively in PostgreSQL.</p>
+<p>Availability posture: Redis unavailability triggers fallback to PostgreSQL for leaderboard reads (degraded response, not outage) and blocks OTP code entry (fail-closed for security).</p>
+<p><strong>Consequences</strong>:</p>
+<ul><li>Positive: Leaderboard ZRANGEBYSCORE is O(log N + M) — scales to millions of entries without query degradation</li><li>Positive: Redis TTL-based rate limiting requires no background cleanup jobs (TTL expiry is automatic)</li><li>Positive: Upstash serverless Redis has no fixed monthly cost floor — pay-per-request matches MVP budget discipline</li><li>Negative: Two stores to monitor, back up, and reason about during incidents</li><li>Negative: Leaderboard reconstruction from PostgreSQL snapshots after full Redis flush may exceed 30s during peak load (OQ-E06 — explicit SLA and drill required)</li></ul>
+<hr>
+<h3>§3.7 ADR-007: Feature Flag Strategy (FF_MARKETPLACE)</h3>
+<p><strong>Status</strong>: Accepted (implementation approach partially open — OQ-E07)</p>
+<p><strong>Context</strong>:</p>
+<p>The marketplace (Phase 3 — F-TRADE-01) requires DAU &gt; 1,000 sustained for 2 weeks before activation (DAU_MARKETPLACE_TRIGGER = 1,000). The sumo arena mode (F-ARENA-02) is P1 scope. The admin portal itself is behind <code>FF_ADMIN_PORTAL</code> during alpha.</p>
+<p><strong>Decision</strong>:</p>
+<p>Phase 1-2: Environment variable-based feature flags sufficient for MVP. Complete flag inventory:</p>
+<table>
+<tr><th>Flag</th><th>Default</th><th>Kill-switch scope</th></tr>
+<tr><td><code>FF_GUEST_PET_DISPLAY</code></td><td><code>true</code></td><td>Disable guest pet preview on landing page</td></tr>
+<tr><td><code>FF_PET_GENERATION</code></td><td><code>true</code></td><td>Disable pet generation pipeline</td></tr>
+<tr><td><code>FF_EMAIL_CLAIM</code></td><td><code>true</code></td><td>Disable email claim flow entirely</td></tr>
+<tr><td><code>FF_TRAINING_SYSTEM</code></td><td><code>true</code></td><td>Disable training actions</td></tr>
+<tr><td><code>FF_FOOD_SYSTEM</code></td><td><code>true</code></td><td>Disable food buff endpoints</td></tr>
+<tr><td><code>FF_ARENA_RACE</code></td><td><code>true</code></td><td>Disable Race arena mode</td></tr>
+<tr><td><code>FF_ARENA_SUMO</code></td><td><code>false</code></td><td>Enable/disable SUMO arena mode (P1 gate — EDD Phase 2)</td></tr>
+<tr><td><code>FF_LEADERBOARD</code></td><td><code>true</code></td><td>Disable public leaderboard</td></tr>
+<tr><td><code>FF_BATTLE_RECORDS</code></td><td><code>true</code></td><td>Disable battle history endpoints</td></tr>
+<tr><td><code>FF_RARITY_DISPLAY</code></td><td><code>false</code></td><td>Enable rarity UI elements when ready (P1 gate — EDD Phase 2)</td></tr>
+<tr><td><code>FF_ADMIN_PORTAL</code></td><td><code>true</code></td><td>Control admin portal availability</td></tr>
+<tr><td><code>FF_MARKETPLACE</code></td><td><code>false</code></td><td>Enable marketplace when DAU_MARKETPLACE_TRIGGER sustained 2 weeks</td></tr>
+</table>
+<p><code>FF_MARKETPLACE</code> is promoted to <code>true</code> when product analytics confirm DAU &gt; 1,000 for 2 consecutive weeks. The flag is a runtime environment variable (not a code branch) to allow activation without redeployment. Config cache TTL (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5) means flag changes propagate within 5 minutes.</p>
+<p>Phase 3 consideration: LaunchDarkly or Flagsmith integration for runtime per-user rollout targeting (OQ-E07 — evaluated at Phase 2 exit).</p>
+<p><strong>Consequences</strong>:</p>
+<ul><li>Positive: Environment variable flags require no additional infrastructure in Phase 1-2</li><li>Positive: Marketplace code ships in Phase 1-2 builds (behind the flag) — no feature-branch divergence</li><li>Negative: Environment variable flags cannot support per-user gradual rollout or A/B targeting without a third-party flag service</li><li>Negative: Flag state is not visible in the admin portal until a feature flag management module is added</li></ul>
+<hr>
+<h2>§4. Data Flow Diagrams</h2>
+<h3>§4.1 Pet Claim Flow</h3>
+<pre><code class="">Guest Browser                  Game API (Fastify)          PostgreSQL       Redis         SendGrid
      │                               │                          │               │               │
      │  GET /api/v1/pets/random       │                          │               │               │
      │──────────────────────────────&gt;│                          │               │               │
@@ -787,12 +586,9 @@ Value: "1"</code></pre>
      │&lt;──────────────────────────────│                          │               │               │
      │                               │                          │               │               │
      │  [Player bookmarks petUrl]    │                          │               │               │</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="42-arena-battle-flow">§4.2 Arena Battle Flow</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Pet Owner Browser              Game API                    PostgreSQL       Redis
+<hr>
+<h3>§4.2 Arena Battle Flow</h3>
+<pre><code class="">Pet Owner Browser              Game API                    PostgreSQL       Redis
      │                               │                          │               │
      │  POST /api/v1/arena/enter     │                          │               │
      │  {petId, mode, acceptAI}      │                          │               │
@@ -805,7 +601,7 @@ Value: "1"</code></pre>
      │                               │&lt;─────────────────────────────────────────│
      │                               │ [Rate limit OK]          │               │
      │                               │ ZADD matchmaking:queue:{mode}            │
-     │                               │   score=enqueue_epoch member="{petId}:epoch"
+     │                               │   score=enqueue_epoch member=&quot;{petId}:epoch&quot;
      │                               │─────────────────────────────────────────&gt;│
      │                               │                          │               │
      │                               │ [Poll for opponent — up to 30s ARENA_MATCHMAKING_TIMEOUT_SECONDS]
@@ -849,7 +645,7 @@ Value: "1"</code></pre>
      │                               │─────────────────────────&gt;│               │
      │                               │ ZADD leaderboard:global score member=playerPetId
      │                               │─────────────────────────&gt;│               │
-     │                               │ [AI matches DO update player pet's leaderboard score;
+     │                               │ [AI matches DO update player pet&#x27;s leaderboard score;
      │                               │  the AI synthetic pet does NOT get a leaderboard entry]
      │  {matchId, result, isAI=true} │                          │               │
      │&lt;──────────────────────────────│                          │               │
@@ -857,12 +653,9 @@ Value: "1"</code></pre>
      │  [No opponent, acceptAI=false]│                          │               │
      │  HTTP 408 MATCHMAKING_TIMEOUT │                          │               │
      │&lt;──────────────────────────────│ [Rate limit NOT incremented on timeout]   │</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="43-leaderboard-update-flow">§4.3 Leaderboard Update Flow</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Arena Match Completion         Game API                    PostgreSQL       Redis
+<hr>
+<h3>§4.3 Leaderboard Update Flow</h3>
+<pre><code class="">Arena Match Completion         Game API                    PostgreSQL       Redis
 (Post-battle write path)            │                          │               │
      │                               │                          │               │
      │  Arena match completed        │                          │               │
@@ -898,22 +691,19 @@ GET /api/v1/leaderboard        │                          │               �
      │                               │─────────────────────────&gt;│               │
      │  {entries[100], degraded=true}│                          │               │
      │&lt;──────────────────────────────│                          │               │</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="44-gdpr-erasure-flow">§4.4 GDPR Erasure Flow</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Pet Owner Browser              Game API                    PostgreSQL       Redis
+<hr>
+<h3>§4.4 GDPR Erasure Flow</h3>
+<pre><code class="">Pet Owner Browser              Game API                    PostgreSQL       Redis
      │                               │                          │               │
      │  POST /api/v1/gdpr/request    │                          │               │
-     │  {type: "erasure"}            │                          │               │
+     │  {type: &quot;erasure&quot;}            │                          │               │
      │  Authorization: Bearer &lt;token&gt;│                          │               │
      │──────────────────────────────&gt;│                          │               │
      │                               │ Verify pet token         │               │
      │                               │─────────────────────────&gt;│               │
      │                               │ Resolve claim_identity_id via pets row   │
      │                               │ INSERT gdpr_requests(claim_identity_id,  │
-     │                               │   request_type='erasure', status='pending')
+     │                               │   request_type=&#x27;erasure&#x27;, status=&#x27;pending&#x27;)
      │                               │─────────────────────────&gt;│               │
      │  HTTP 202 {jobId}             │                          │               │
      │&lt;──────────────────────────────│                          │               │
@@ -925,220 +715,130 @@ GET /api/v1/leaderboard        │                          │               �
      │                               │─────────────────────────&gt;│               │
      │                               │ ZREM leaderboard:global &lt;all pet_ids for identity&gt;
      │                               │─────────────────────────────────────────&gt;│
-     │                               │ UPDATE gdpr_requests SET status='completed'
+     │                               │ UPDATE gdpr_requests SET status=&#x27;completed&#x27;
      │                               │─────────────────────────&gt;│               │
      │                               │ [Full compliance within 7 days — GDPR_EMAIL_DELETION_WINDOW_DAYS]
      │                               │ [email_hash retained for anti-re-registration]
      │                               │ [pets rows retained with owner_token_hash NULL]</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="5-security-architecture">§5. Security Architecture</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="51-authentication-and-authorization-model">§5.1 Authentication and Authorization Model</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Player Identity Layer</strong>:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Players have no accounts. Identity is established by possession of a 32-byte URL-safe base64 pet access token. The token is:</p>
-<p class="doc-p">1. Generated once via <code>crypto.randomBytes(32)</code> at claim completion</p>
-<p class="doc-p">2. Transmitted exactly once (in the pet URL reveal screen)</p>
-<p class="doc-p">3. Never stored in plaintext — only its SHA-256 hash in <code>pets.owner_token_hash</code></p>
-<p class="doc-p">4. Verified on every authenticated request by hashing the received token and comparing to the stored hash</p>
-<p class="doc-p">5. Passed as <code>Authorization: Bearer <token></code> header or <code>?token=</code> query parameter</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Token revocation: Admin sets <code>owner_token_hash = NULL</code>. Recovery: new 32-byte token via OTP re-claim.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Admin Identity Layer</strong>:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Two-factor admin authentication (2FA per PRD NFR-SEC-11):</p>
-<ul class="doc-list">
-<li>Factor 1: Username + bcrypt password hash (minimum 12 rounds work factor — EDD §6.3 implementation constraint)</li>
-<li>Factor 2: RFC 6238 TOTP (6-digit, 30-second window); mandatory — no session without TOTP enrollment</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p">Session management (post-2FA): Server-side Redis session issued after successful 2FA (httpOnly + SameSite=Strict cookie). The Redis session is the session management mechanism, not a third authentication factor.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">TOTP enrollment is enforced at first login: <code>TOTP_SETUP_REQUIRED</code> error with a short-lived setup token (HS256 JWT, 15-minute TTL) is returned when <code>totp_secret_encrypted IS NULL</code>. No authenticated session can be established until TOTP setup is complete.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>IP Allowlist</strong>: The admin portal supports restriction to operator IP ranges via <code>ADMIN_ALLOWED_IPS</code> environment variable (comma-separated CIDR list). When set, requests from IPs outside the allowlist receive HTTP 403 <code>FORBIDDEN</code> before credential check. <strong>Accepted deviation from PRD NFR-ADMIN-07</strong>: NFR-ADMIN-07 mandates IP allowlist in production; the implementation keeps it optional (default disabled) to allow flexible deployment environments. This deviation is accepted risk — teams deploying to production are expected to set <code>ADMIN_ALLOWED_IPS</code>. Deviation accepted in ARCH §5.1; EDD §9.3 reflects the optional implementation choice.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Role Model</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Role</th><th>Scope</th></tr></thead>
-<tbody>
-<tr><td>`super_admin`</td><td>Full access: GDPR, config, roles, audit log</td></tr>
-<tr><td>`moderator`</td><td>Pet management, leaderboard, battles, suspicious activity, email monitor, analytics, dashboard</td></tr>
-<tr><td>`read_only`</td><td>GET-only access to dashboard, pet list, leaderboard, battle records, email monitor, analytics</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="52-token-security">§5.2 Token Security</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Token</th><th>Entropy</th><th>Storage</th><th>Transmission</th><th>Revocation</th></tr></thead>
-<tbody>
-<tr><td>Pet access token</td><td>32 bytes (PET_ACCESS_TOKEN_MIN_BYTES = 32)</td><td>SHA-256 hash only in `pets.owner_token_hash`</td><td>Once in pet URL; thereafter in `Authorization` header</td><td>`owner_token_hash = NULL` by admin or recovery</td></tr>
-<tr><td>OTP claim code</td><td>`crypto.randomInt(100000, 1000000)`</td><td>SHA-256 hash in `claim_codes.code_hash`</td><td>Via transactional email (plain 6 digits, no URL)</td><td>Single-use; expires after 15 min (CLAIM_CODE_EXPIRY_MINUTES = 15); cleanup job purges after 72h (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72)</td></tr>
-<tr><td>Admin session</td><td>Server-generated UUID</td><td>Redis server-side (`session:admin:{id}`)</td><td>httpOnly cookie only</td><td>Redis key deletion on logout; absolute TTL 8h</td></tr>
+<hr>
+<h2>§5. Security Architecture</h2>
+<h3>§5.1 Authentication and Authorization Model</h3>
+<p><strong>Player Identity Layer</strong>:</p>
+<p>Players have no accounts. Identity is established by possession of a 32-byte URL-safe base64 pet access token. The token is:</p>
+<ol><li>Generated once via <code>crypto.randomBytes(32)</code> at claim completion</li><li>Transmitted exactly once (in the pet URL reveal screen)</li><li>Never stored in plaintext — only its SHA-256 hash in <code>pets.owner_token_hash</code></li><li>Verified on every authenticated request by hashing the received token and comparing to the stored hash</li><li>Passed as <code>Authorization: Bearer &lt;token&gt;</code> header or <code>?token=</code> query parameter</li></ol>
+<p>Token revocation: Admin sets <code>owner_token_hash = NULL</code>. Recovery: new 32-byte token via OTP re-claim.</p>
+<p><strong>Admin Identity Layer</strong>:</p>
+<p>Two-factor admin authentication (2FA per PRD NFR-SEC-11):</p>
+<ul><li>Factor 1: Username + bcrypt password hash (minimum 12 rounds work factor — EDD §6.3 implementation constraint)</li><li>Factor 2: RFC 6238 TOTP (6-digit, 30-second window); mandatory — no session without TOTP enrollment</li></ul>
+<p>Session management (post-2FA): Server-side Redis session issued after successful 2FA (httpOnly + SameSite=Strict cookie). The Redis session is the session management mechanism, not a third authentication factor.</p>
+<p>TOTP enrollment is enforced at first login: <code>TOTP_SETUP_REQUIRED</code> error with a short-lived setup token (HS256 JWT, 15-minute TTL) is returned when <code>totp_secret_encrypted IS NULL</code>. No authenticated session can be established until TOTP setup is complete.</p>
+<p><strong>IP Allowlist</strong>: The admin portal supports restriction to operator IP ranges via <code>ADMIN_ALLOWED_IPS</code> environment variable (comma-separated CIDR list). When set, requests from IPs outside the allowlist receive HTTP 403 <code>FORBIDDEN</code> before credential check. <strong>Accepted deviation from PRD NFR-ADMIN-07</strong>: NFR-ADMIN-07 mandates IP allowlist in production; the implementation keeps it optional (default disabled) to allow flexible deployment environments. This deviation is accepted risk — teams deploying to production are expected to set <code>ADMIN_ALLOWED_IPS</code>. Deviation accepted in ARCH §5.1; EDD §9.3 reflects the optional implementation choice.</p>
+<p><strong>Role Model</strong>:</p>
+<table>
+<tr><th>Role</th><th>Scope</th></tr>
+<tr><td><code>super_admin</code></td><td>Full access: GDPR, config, roles, audit log</td></tr>
+<tr><td><code>moderator</code></td><td>Pet management, leaderboard, battles, suspicious activity, email monitor, analytics, dashboard</td></tr>
+<tr><td><code>read_only</code></td><td>GET-only access to dashboard, pet list, leaderboard, battle records, email monitor, analytics</td></tr>
+</table>
+<hr>
+<h3>§5.2 Token Security</h3>
+<table>
+<tr><th>Token</th><th>Entropy</th><th>Storage</th><th>Transmission</th><th>Revocation</th></tr>
+<tr><td>Pet access token</td><td>32 bytes (PET_ACCESS_TOKEN_MIN_BYTES = 32)</td><td>SHA-256 hash only in <code>pets.owner_token_hash</code></td><td>Once in pet URL; thereafter in <code>Authorization</code> header</td><td><code>owner_token_hash = NULL</code> by admin or recovery</td></tr>
+<tr><td>OTP claim code</td><td><code>crypto.randomInt(100000, 1000000)</code></td><td>SHA-256 hash in <code>claim_codes.code_hash</code></td><td>Via transactional email (plain 6 digits, no URL)</td><td>Single-use; expires after 15 min (CLAIM_CODE_EXPIRY_MINUTES = 15); cleanup job purges after 72h (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72)</td></tr>
+<tr><td>Admin session</td><td>Server-generated UUID</td><td>Redis server-side (<code>session:admin:{id}</code>)</td><td>httpOnly cookie only</td><td>Redis key deletion on logout; absolute TTL 8h</td></tr>
 <tr><td>TOTP setup token</td><td>HS256 signed JWT</td><td>Not stored</td><td>One-time, server validates signature</td><td>Short-lived (15 min); consumed once on setup</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Anti-enumeration</strong>: <code>POST /api/v1/claim/recover</code> always returns HTTP 200 with a synthetic <code>claimId</code> regardless of whether the email/petId combination is valid. This prevents an attacker from enumerating valid pet-owner email pairs.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Email OTP design</strong>: The claim email contains ONLY the 6-digit numeric code — no clickable link. This mitigates pre-scanning attacks where email clients (Gmail, Outlook) auto-fetch URLs and could inadvertently trigger claim.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="53-rate-limiting-architecture">§5.3 Rate Limiting Architecture</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All rate limits are enforced by Redis counters with automatic TTL expiry. If Redis is unavailable, rate limits on player endpoints are not enforced (logged as alert). OTP code entry is fail-closed (entry blocked on Redis unavailability).</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Endpoint</th><th>Limit</th><th>Window</th><th>Key Pattern</th></tr></thead>
-<tbody>
-<tr><td>`POST /api/v1/claim`</td><td>5 attempts (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5)</td><td>1 hour</td><td>`rl:claim:{email_hash}`</td></tr>
-<tr><td>`POST /api/v1/claim/verify`</td><td>10 attempts (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10)</td><td>15 min (900s)</td><td>`rl:code_entry:{session_id}`</td></tr>
-<tr><td>`POST /api/v1/arena/enter`</td><td>10 battles/hr default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT = 10); admin-tunable 1–50 (ARENA_RATE_LIMIT_ADMIN_MIN = 1; ARENA_RATE_LIMIT_ADMIN_MAX = 50)</td><td>1 hour</td><td>`rl:arena:{pet_id}`</td></tr>
-<tr><td>`POST /admin/api/auth/login`</td><td>10 attempts/IP (ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS = 10)</td><td>15 min (ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS = 900)</td><td>`rl:admin_login:{ip_hash}`</td></tr>
-<tr><td>Admin API (any)</td><td>100 req/min (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100)</td><td>1 min</td><td>`rl:admin:{admin_id}`</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Admin Account Lockout</strong>: After ADMIN_LOGIN_LOCKOUT_THRESHOLD = 10 consecutive failed login attempts, the account is locked for ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES = 30 minutes (<code>locked_until</code> timestamp set in <code>admin_users</code>). Lockout is distinct from <code>deactivated_at</code> (permanent deactivation).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Bot Detection</strong>: Pets exceeding BOT_DETECTION_BATTLES_THRESHOLD = 50 battles in a BOT_DETECTION_WINDOW_MINUTES = 60-minute rolling window are auto-flagged and appear in the <code>/admin/api/suspicious</code> endpoint. The admin leaderboard UI marks pets exceeding LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR = 50 battles/hr with a suspicious indicator (distinct visual flag, same threshold value but different architectural purpose from bot detection).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Leaderboard Ban Reflection</strong>: When a ban is applied via <code>POST /admin/api/pets/:petId/ban</code>, the banned pet must be removed from <code>leaderboard:global</code> (ZREM) within 5 minutes (LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5). This SLA is enforced as a synchronous ZREM in the ban transaction, not a background job.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Moderation Reason</strong>: All admin ban/unban/flag operations require a reason field with a maximum of 500 characters (ADMIN_MODERATION_REASON_MAX_CHARS = 500). The reason is stored in the <code>audit_logs.detail</code> JSONB field and validated at the API boundary.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="54-gdpr-compliance-architecture">§5.4 GDPR Compliance Architecture</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Data Minimization</strong>:</p>
-<ul class="doc-list">
-<li>Raw email is held in memory only during the claim transaction. Database stores only: AES-256-GCM ciphertext (<code>email_encrypted</code>) and SHA-256 hash (<code>email_hash</code>) for lookup.</li>
-<li>IP addresses are hashed on ingress. Raw IP never written to any log or database column. Hashed IP retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90).</li>
-<li>The <code>pets.claim_identity_id</code> FK is the durable link between a pet and its owner's identity record — maintained after <code>claim_codes</code> records are purged (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h).</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>GDPR SLA Table</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Right</th><th>Action</th><th>SLA</th><th>Constant</th></tr></thead>
-<tbody>
-<tr><td>Erasure (Art. 17)</td><td>Null `email_encrypted`; ZREM pet from leaderboard</td><td>7 days (internal 24h)</td><td>GDPR_EMAIL_DELETION_WINDOW_DAYS = 7; GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24</td></tr>
+</table>
+<p><strong>Anti-enumeration</strong>: <code>POST /api/v1/claim/recover</code> always returns HTTP 200 with a synthetic <code>claimId</code> regardless of whether the email/petId combination is valid. This prevents an attacker from enumerating valid pet-owner email pairs.</p>
+<p><strong>Email OTP design</strong>: The claim email contains ONLY the 6-digit numeric code — no clickable link. This mitigates pre-scanning attacks where email clients (Gmail, Outlook) auto-fetch URLs and could inadvertently trigger claim.</p>
+<hr>
+<h3>§5.3 Rate Limiting Architecture</h3>
+<p>All rate limits are enforced by Redis counters with automatic TTL expiry. If Redis is unavailable, rate limits on player endpoints are not enforced (logged as alert). OTP code entry is fail-closed (entry blocked on Redis unavailability).</p>
+<table>
+<tr><th>Endpoint</th><th>Limit</th><th>Window</th><th>Key Pattern</th></tr>
+<tr><td><code>POST /api/v1/claim</code></td><td>5 attempts (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5)</td><td>1 hour</td><td><code>rl:claim:{email_hash}</code></td></tr>
+<tr><td><code>POST /api/v1/claim/verify</code></td><td>10 attempts (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10)</td><td>15 min (900s)</td><td><code>rl:code_entry:{session_id}</code></td></tr>
+<tr><td><code>POST /api/v1/arena/enter</code></td><td>10 battles/hr default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT = 10); admin-tunable 1–50 (ARENA_RATE_LIMIT_ADMIN_MIN = 1; ARENA_RATE_LIMIT_ADMIN_MAX = 50)</td><td>1 hour</td><td><code>rl:arena:{pet_id}</code></td></tr>
+<tr><td><code>POST /admin/api/auth/login</code></td><td>10 attempts/IP (ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS = 10)</td><td>15 min (ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS = 900)</td><td><code>rl:admin_login:{ip_hash}</code></td></tr>
+<tr><td>Admin API (any)</td><td>100 req/min (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100)</td><td>1 min</td><td><code>rl:admin:{admin_id}</code></td></tr>
+</table>
+<p><strong>Admin Account Lockout</strong>: After ADMIN_LOGIN_LOCKOUT_THRESHOLD = 10 consecutive failed login attempts, the account is locked for ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES = 30 minutes (<code>locked_until</code> timestamp set in <code>admin_users</code>). Lockout is distinct from <code>deactivated_at</code> (permanent deactivation).</p>
+<p><strong>Bot Detection</strong>: Pets exceeding BOT_DETECTION_BATTLES_THRESHOLD = 50 battles in a BOT_DETECTION_WINDOW_MINUTES = 60-minute rolling window are auto-flagged and appear in the <code>/admin/api/suspicious</code> endpoint. The admin leaderboard UI marks pets exceeding LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR = 50 battles/hr with a suspicious indicator (distinct visual flag, same threshold value but different architectural purpose from bot detection).</p>
+<p><strong>Leaderboard Ban Reflection</strong>: When a ban is applied via <code>POST /admin/api/pets/:petId/ban</code>, the banned pet must be removed from <code>leaderboard:global</code> (ZREM) within 5 minutes (LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5). This SLA is enforced as a synchronous ZREM in the ban transaction, not a background job.</p>
+<p><strong>Moderation Reason</strong>: All admin ban/unban/flag operations require a reason field with a maximum of 500 characters (ADMIN_MODERATION_REASON_MAX_CHARS = 500). The reason is stored in the <code>audit_logs.detail</code> JSONB field and validated at the API boundary.</p>
+<hr>
+<h3>§5.4 GDPR Compliance Architecture</h3>
+<p><strong>Data Minimization</strong>:</p>
+<ul><li>Raw email is held in memory only during the claim transaction. Database stores only: AES-256-GCM ciphertext (<code>email_encrypted</code>) and SHA-256 hash (<code>email_hash</code>) for lookup.</li><li>IP addresses are hashed on ingress. Raw IP never written to any log or database column. Hashed IP retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90).</li><li>The <code>pets.claim_identity_id</code> FK is the durable link between a pet and its owner&#x27;s identity record — maintained after <code>claim_codes</code> records are purged (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h).</li></ul>
+<p><strong>GDPR SLA Table</strong>:</p>
+<table>
+<tr><th>Right</th><th>Action</th><th>SLA</th><th>Constant</th></tr>
+<tr><td>Erasure (Art. 17)</td><td>Null <code>email_encrypted</code>; ZREM pet from leaderboard</td><td>7 days (internal 24h)</td><td>GDPR_EMAIL_DELETION_WINDOW_DAYS = 7; GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24</td></tr>
 <tr><td>Data access / portability (Art. 15/20)</td><td>JSON export of pet, battles, training</td><td>30 days</td><td>GDPR_DATA_ACCESS_RESPONSE_DAYS = 30; GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30</td></tr>
 <tr><td>Restrict processing (Art. 18)</td><td>Flag identity for processing restriction</td><td>24 hours</td><td>GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24</td></tr>
 <tr><td>Object leaderboard (Art. 21)</td><td>ZREM pet from public leaderboard</td><td>5 business days</td><td>GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5</td></tr>
-<tr><td>Rectification (Art. 16)</td><td>Update `email_encrypted` field</td><td>24 hours</td><td>GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Open Question OQ-E04</strong>: GDPR ownership transfer — what happens when a player requests erasure of an email that was used to claim a pet that was subsequently traded? The current data model has no ownership-transfer record. Resolution required before GA: either add a <code>former_identity_id[]</code> array to <code>pets</code> or restrict GDPR erasure scope to current owner only (see EDD §14).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>COPPA</strong>: Age-13 confirmation checkbox required on all claim forms (COPPA_MINIMUM_AGE_YEARS = 13). Label text: "I am at least 13 years old" (PRD US-AUTH-001 AC-003-8).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>CAN-SPAM</strong>: All emails are transactional. No marketing email without separate explicit opt-in. Claim and recovery emails contain ONLY the 6-digit code — no promotional content.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Audit Log</strong>: All admin actions (mutations, GDPR operations, role changes) written to <code>audit_logs</code> with actor ID, action type, target entity, reason, and timestamp. Retention: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years. Search response time for any 12-month window: ≤ 3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="55-transport-and-header-security">§5.5 Transport and Header Security</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>TLS</strong>: Minimum TLS 1.2 at the API gateway; TLS 1.3 preferred (PRD NFR-SEC-06). TLS termination at the Nginx/Vercel Edge layer per §1.2 diagram. Downgrade to HTTP never permitted.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Security Response Headers</strong> (set on all API and frontend responses):</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Header</th><th>Value</th></tr></thead>
-<tbody>
-<tr><td>`Strict-Transport-Security`</td><td>`max-age=31536000; includeSubDomains; preload`</td></tr>
-<tr><td>`X-Content-Type-Options`</td><td>`nosniff`</td></tr>
-<tr><td>`X-Frame-Options`</td><td>`DENY`</td></tr>
-<tr><td>`Referrer-Policy`</td><td>`strict-origin-when-cross-origin`</td></tr>
-<tr><td>`Permissions-Policy`</td><td>`camera=(), microphone=(), geolocation=()`</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Content Security Policy</strong> (PRD NFR-SEC-08):</p>
-<ul class="doc-list">
-<li>Phase 1-2: <code>default-src 'self'; script-src 'self' 'unsafe-inline'</code> — <strong>accepted deviation from PRD NFR-SEC-08</strong> (<code>unsafe-inline</code> required by Phaser.js canvas rendering in Phase 1-2). Risk accepted: script injection surface is limited by Phaser.js's inline canvas model; all other NFR-SEC controls (TLS, HSTS, token hashing) remain enforced. Deviation documented as accepted risk in the project risk register.</li>
-<li>Phase 3 hardening: nonce-based CSP (<code>script-src 'self' 'nonce-{RANDOM}'</code>) with no <code>unsafe-inline</code> eliminates the deviation (EDD §13.3)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="6-scalability-and-reliability">§6. Scalability and Reliability</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="61-horizontal-scaling-strategy">§6.1 Horizontal Scaling Strategy</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>API Layer</strong>:</p>
-<ul class="doc-list">
-<li>Game API: minimum 2 replicas at all times (HA), autoscale on CPU ≥ 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70)</li>
-<li>Railway autoscaling or Kubernetes HPA handles scale-out</li>
-<li>Baseline per-replica: 512 MB RAM, 0.5 CPU; burst ceiling: 2 GB RAM, 2 CPU (EDD §10.2 infrastructure constraints)</li>
-<li>All replicas are stateless (no in-process session state; all state in Redis or PostgreSQL)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Statelessness Guarantee</strong>:</p>
-<p class="doc-p">No replica-local state. Pet access tokens are verified by hashing (no replica-shared JWT secret required). Admin sessions are in Redis. Config cache is in Redis (TTL 300s). Any replica can serve any request.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Pet Generation Concurrency</strong>:</p>
-<p class="doc-p">1,000 concurrent pet generations complete within 10 seconds (PET_GENERATION_CONCURRENT_BATCH = 1,000; PET_GENERATION_CONCURRENT_BATCH_TIME_SECONDS = 10). Seed collision retry: maximum 3 attempts before error (PET_SEED_COLLISION_MAX_RETRIES = 3).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Arena Matchmaking Concurrency</strong>:</p>
-<p class="doc-p">Redis Sorted Set queue supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100). ZADD is O(log N); ZRANGEBYSCORE for consumer is O(log N + M).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Database Read Scaling</strong>:</p>
-<p class="doc-p">Read replica handles: leaderboard queries, public pet page reads, admin list views. Primary writer handles: all inserts and updates. Connection pool: minimum 20 (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst maximum 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS = 50).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="62-database-reliability-supabase">§6.2 Database Reliability (Supabase)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Aspect</th><th>Specification</th><th>Constant</th></tr></thead>
-<tbody>
+<tr><td>Rectification (Art. 16)</td><td>Update <code>email_encrypted</code> field</td><td>24 hours</td><td>GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24</td></tr>
+</table>
+<p><strong>Open Question OQ-E04</strong>: GDPR ownership transfer — what happens when a player requests erasure of an email that was used to claim a pet that was subsequently traded? The current data model has no ownership-transfer record. Resolution required before GA: either add a <code>former_identity_id[]</code> array to <code>pets</code> or restrict GDPR erasure scope to current owner only (see EDD §14).</p>
+<p><strong>COPPA</strong>: Age-13 confirmation checkbox required on all claim forms (COPPA_MINIMUM_AGE_YEARS = 13). Label text: &quot;I am at least 13 years old&quot; (PRD US-AUTH-001 AC-003-8).</p>
+<p><strong>CAN-SPAM</strong>: All emails are transactional. No marketing email without separate explicit opt-in. Claim and recovery emails contain ONLY the 6-digit code — no promotional content.</p>
+<p><strong>Audit Log</strong>: All admin actions (mutations, GDPR operations, role changes) written to <code>audit_logs</code> with actor ID, action type, target entity, reason, and timestamp. Retention: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years. Search response time for any 12-month window: ≤ 3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3).</p>
+<hr>
+<h3>§5.5 Transport and Header Security</h3>
+<p><strong>TLS</strong>: Minimum TLS 1.2 at the API gateway; TLS 1.3 preferred (PRD NFR-SEC-06). TLS termination at the Nginx/Vercel Edge layer per §1.2 diagram. Downgrade to HTTP never permitted.</p>
+<p><strong>Security Response Headers</strong> (set on all API and frontend responses):</p>
+<table>
+<tr><th>Header</th><th>Value</th></tr>
+<tr><td><code>Strict-Transport-Security</code></td><td><code>max-age=31536000; includeSubDomains; preload</code></td></tr>
+<tr><td><code>X-Content-Type-Options</code></td><td><code>nosniff</code></td></tr>
+<tr><td><code>X-Frame-Options</code></td><td><code>DENY</code></td></tr>
+<tr><td><code>Referrer-Policy</code></td><td><code>strict-origin-when-cross-origin</code></td></tr>
+<tr><td><code>Permissions-Policy</code></td><td><code>camera=(), microphone=(), geolocation=()</code></td></tr>
+</table>
+<p><strong>Content Security Policy</strong> (PRD NFR-SEC-08):</p>
+<ul><li>Phase 1-2: <code>default-src &#x27;self&#x27;; script-src &#x27;self&#x27; &#x27;unsafe-inline&#x27;</code> — <strong>accepted deviation from PRD NFR-SEC-08</strong> (<code>unsafe-inline</code> required by Phaser.js canvas rendering in Phase 1-2). Risk accepted: script injection surface is limited by Phaser.js&#x27;s inline canvas model; all other NFR-SEC controls (TLS, HSTS, token hashing) remain enforced. Deviation documented as accepted risk in the project risk register.</li><li>Phase 3 hardening: nonce-based CSP (<code>script-src &#x27;self&#x27; &#x27;nonce-{RANDOM}&#x27;</code>) with no <code>unsafe-inline</code> eliminates the deviation (EDD §13.3)</li></ul>
+<hr>
+<h2>§6. Scalability and Reliability</h2>
+<h3>§6.1 Horizontal Scaling Strategy</h3>
+<p><strong>API Layer</strong>:</p>
+<ul><li>Game API: minimum 2 replicas at all times (HA), autoscale on CPU ≥ 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70)</li><li>Railway autoscaling or Kubernetes HPA handles scale-out</li><li>Baseline per-replica: 512 MB RAM, 0.5 CPU; burst ceiling: 2 GB RAM, 2 CPU (EDD §10.2 infrastructure constraints)</li><li>All replicas are stateless (no in-process session state; all state in Redis or PostgreSQL)</li></ul>
+<p><strong>Statelessness Guarantee</strong>:</p>
+<p>No replica-local state. Pet access tokens are verified by hashing (no replica-shared JWT secret required). Admin sessions are in Redis. Config cache is in Redis (TTL 300s). Any replica can serve any request.</p>
+<p><strong>Pet Generation Concurrency</strong>:</p>
+<p>1,000 concurrent pet generations complete within 10 seconds (PET_GENERATION_CONCURRENT_BATCH = 1,000; PET_GENERATION_CONCURRENT_BATCH_TIME_SECONDS = 10). Seed collision retry: maximum 3 attempts before error (PET_SEED_COLLISION_MAX_RETRIES = 3).</p>
+<p><strong>Arena Matchmaking Concurrency</strong>:</p>
+<p>Redis Sorted Set queue supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100). ZADD is O(log N); ZRANGEBYSCORE for consumer is O(log N + M).</p>
+<p><strong>Database Read Scaling</strong>:</p>
+<p>Read replica handles: leaderboard queries, public pet page reads, admin list views. Primary writer handles: all inserts and updates. Connection pool: minimum 20 (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst maximum 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS = 50).</p>
+<hr>
+<h3>§6.2 Database Reliability (Supabase)</h3>
+<table>
+<tr><th>Aspect</th><th>Specification</th><th>Constant</th></tr>
 <tr><td>Automated failover</td><td>≤ 60 seconds to promote read replica</td><td>DB_AUTOFAILOVER_TIME_SECONDS = 60</td></tr>
 <tr><td>Maintenance window</td><td>≤ 2 hours/month</td><td>DB_MAINTENANCE_WINDOW_MAX_HOURS_PER_MONTH = 2</td></tr>
 <tr><td>Advance notice</td><td>48 hours before maintenance</td><td>DB_MAINTENANCE_NOTICE_HOURS = 48</td></tr>
 <tr><td>Backup schedule</td><td>Daily full backup to S3-compatible storage</td><td>Supabase automated</td></tr>
 <tr><td>Point-in-time recovery</td><td>Enabled</td><td>Supabase managed</td></tr>
 <tr><td>Availability SLO contribution</td><td>PostgreSQL failover is within the 99.9% monthly target</td><td>AVAILABILITY_MONTHLY_PERCENT = 99.9; AVAILABILITY_MAX_DOWNTIME_MINUTES_PER_MONTH = 43.8</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Vendor Migration Contingency</strong>: Documented 14-day migration plan exists for moving PostgreSQL hosting to AWS RDS if Supabase availability SLAs are breached (VENDOR_MIGRATION_PLAN_DAYS = 14).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="63-redis-reliability-upstash">§6.3 Redis Reliability (Upstash)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Upstash Durability</strong>: Upstash provides built-in persistence across its serverless Redis infrastructure.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Leaderboard Reconstruction</strong>:</p>
-<p class="doc-p">On full Redis flush, the leaderboard sorted set is reconstructed from the most recent <code>leaderboard_snapshots</code> PostgreSQL entry (top 500 entries). This reconstruction path is tested in the staging environment. The reconstruction SLA under peak load (OQ-E06) is an open question requiring explicit drill and measurement before GA.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Alert Threshold</strong>: Redis memory usage alert fires at 80% capacity (INFRA_REDIS_ALERT_THRESHOLD_PERCENT = 80).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Degraded Mode Behavior</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Redis Failure Scenario</th><th>Player Impact</th><th>Admin Impact</th></tr></thead>
-<tbody>
+</table>
+<p><strong>Vendor Migration Contingency</strong>: Documented 14-day migration plan exists for moving PostgreSQL hosting to AWS RDS if Supabase availability SLAs are breached (VENDOR_MIGRATION_PLAN_DAYS = 14).</p>
+<hr>
+<h3>§6.3 Redis Reliability (Upstash)</h3>
+<p><strong>Upstash Durability</strong>: Upstash provides built-in persistence across its serverless Redis infrastructure.</p>
+<p><strong>Leaderboard Reconstruction</strong>:</p>
+<p>On full Redis flush, the leaderboard sorted set is reconstructed from the most recent <code>leaderboard_snapshots</code> PostgreSQL entry (top 500 entries). This reconstruction path is tested in the staging environment. The reconstruction SLA under peak load (OQ-E06) is an open question requiring explicit drill and measurement before GA.</p>
+<p><strong>Alert Threshold</strong>: Redis memory usage alert fires at 80% capacity (INFRA_REDIS_ALERT_THRESHOLD_PERCENT = 80).</p>
+<p><strong>Degraded Mode Behavior</strong>:</p>
+<table>
+<tr><th>Redis Failure Scenario</th><th>Player Impact</th><th>Admin Impact</th></tr>
 <tr><td>Full outage</td><td>Leaderboard falls back to PostgreSQL snapshot (stale); rate limits not enforced (logged); OTP code entry blocked (fail-closed); arena matchmaking unavailable</td><td>Admin sessions invalid; admin portal inaccessible</td></tr>
-<tr><td>High latency (>1s)</td><td>Arena matchmaking timeouts increase; leaderboard update lag may breach 30s SLO</td><td>Config cache stale until TTL expires (≤300s)</td></tr>
+<tr><td>High latency (&gt;1s)</td><td>Arena matchmaking timeouts increase; leaderboard update lag may breach 30s SLO</td><td>Config cache stale until TTL expires (≤300s)</td></tr>
 <tr><td>Partial key loss</td><td>Individual rate-limit counters lost (brief period of un-rate-limited access); blacklisted tokens briefly re-accessible (brief window)</td><td>Session tokens for logged-in admins lost (re-login required)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="64-email-reliability">§6.4 Email Reliability</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Dual-Provider Architecture</strong>:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">Request to send email
+</table>
+<hr>
+<h3>§6.4 Email Reliability</h3>
+<p><strong>Dual-Provider Architecture</strong>:</p>
+<pre><code class="">Request to send email
          │
          ▼
   SendGrid API v3 (primary)
@@ -1154,45 +854,29 @@ GET /api/v1/leaderboard        │                          │               �
          ▼
   Nodemailer SMTP (fallback)
   [Retry 3×, 15-min window  EMAIL_DELIVERY_FAILURE_RETRIES = 3 / EMAIL_DELIVERY_RETRY_WINDOW_MINUTES = 15]</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Reliability Targets</strong>:</p>
-<ul class="doc-list">
-<li>Delivery success rate ≥ 98% (CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98)</li>
-<li>P90 delivery latency ≤ 60 seconds (EMAIL_DELIVERY_P90_SECONDS)</li>
-<li>Email delivery failure rate alert fires at > 2% over 30-minute window (EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT = 2; OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES = 30)</li>
-<li>Spam complaint rate < 0.1% (SPAM_COMPLAINT_RATE_MAX_PERCENT = 0.1)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Monthly Capacity</strong>: SendGrid plan ceiling 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000). Upgrade trigger when projected monthly volume approaches this cap.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="7-deployment-architecture">§7. Deployment Architecture</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="71-infrastructure-overview">§7.1 Infrastructure Overview</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Component</th><th>Service</th><th>Configuration</th></tr></thead>
-<tbody>
-<tr><td>Player App (static)</td><td>Vercel — Global CDN</td><td>Vite build, auto-deploy from `main` branch</td></tr>
+<p><strong>Reliability Targets</strong>:</p>
+<ul><li>Delivery success rate ≥ 98% (CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98)</li><li>P90 delivery latency ≤ 60 seconds (EMAIL_DELIVERY_P90_SECONDS)</li><li>Email delivery failure rate alert fires at &gt; 2% over 30-minute window (EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT = 2; OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES = 30)</li><li>Spam complaint rate &lt; 0.1% (SPAM_COMPLAINT_RATE_MAX_PERCENT = 0.1)</li></ul>
+<p><strong>Monthly Capacity</strong>: SendGrid plan ceiling 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000). Upgrade trigger when projected monthly volume approaches this cap.</p>
+<hr>
+<h2>§7. Deployment Architecture</h2>
+<h3>§7.1 Infrastructure Overview</h3>
+<table>
+<tr><th>Component</th><th>Service</th><th>Configuration</th></tr>
+<tr><td>Player App (static)</td><td>Vercel — Global CDN</td><td>Vite build, auto-deploy from <code>main</code> branch</td></tr>
 <tr><td>Admin Portal (static)</td><td>Vercel — separate project</td><td>Same CDN, separate build and deploy</td></tr>
 <tr><td>Game API Server</td><td>Railway — containerized</td><td>Node.js 20, ≥ 2 replicas, autoscale at 70% CPU</td></tr>
-<tr><td>Admin API Server</td><td>Railway — same container</td><td>Node.js 20, 1 replica, `/admin` plugin namespace</td></tr>
+<tr><td>Admin API Server</td><td>Railway — same container</td><td>Node.js 20, 1 replica, <code>/admin</code> plugin namespace</td></tr>
 <tr><td>PostgreSQL</td><td>Supabase managed</td><td>PostgreSQL 15+, primary + 1 read replica</td></tr>
 <tr><td>Redis</td><td>Upstash serverless</td><td>Pay-per-request, built-in persistence</td></tr>
 <tr><td>Email (primary)</td><td>SendGrid v3 API</td><td>Transactional only</td></tr>
 <tr><td>Email (fallback)</td><td>Nodemailer SMTP</td><td>SMTP credentials in Railway environment secrets</td></tr>
 <tr><td>CI/CD</td><td>GitHub Actions</td><td>Test → build → deploy pipeline</td></tr>
 <tr><td>Container registry</td><td>GitHub Container Registry (ghcr.io)</td><td>Docker images for API servers</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Monthly Infrastructure Cost at DAU ≤ 5,000</strong>: $50–$200 (SERVER_COST_DAU5K_MONTHLY_MIN_USD = 50; SERVER_COST_DAU5K_MONTHLY_MAX_USD = 200). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="72-cicd-pipeline">§7.2 CI/CD Pipeline</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">GitHub Repository
+</table>
+<p><strong>Monthly Infrastructure Cost at DAU ≤ 5,000</strong>: $50–$200 (SERVER_COST_DAU5K_MONTHLY_MIN_USD = 50; SERVER_COST_DAU5K_MONTHLY_MAX_USD = 200). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000).</p>
+<hr>
+<h3>§7.2 CI/CD Pipeline</h3>
+<pre><code class="">GitHub Repository
        │
        │  git push to main / pull_request
        ▼
@@ -1232,271 +916,152 @@ GET /api/v1/leaderboard        │                          │               �
 │  4. Run Playwright smoke tests (production URLs)                     │
 │  5. Notify Slack channel on success / failure                        │
 └──────────────────────────────────────────────────────────────────────┘</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key CI Quality Gates</strong>:</p>
-<ul class="doc-list">
-<li>Unit test coverage minimum 80% (UNIT_TEST_COVERAGE_MIN_PERCENT = 80)</li>
-<li>Module line limit 800 (CODE_MODULE_MAX_LINES = 800); function line limit 50 (CODE_FUNCTION_MAX_LINES = 50) — enforced by ESLint, CI fails on violation</li>
-<li><code>EXPLAIN ANALYZE</code> gate for any new query touching tables > 10k rows</li>
-<li>Playwright E2E visual regression at breakpoints 320, 768, 1024, 1440px</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="73-environment-strategy">§7.3 Environment Strategy</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Environment</th><th>Purpose</th><th>Database</th><th>Redis</th><th>Deployment Trigger</th></tr></thead>
-<tbody>
-<tr><td>`development`</td><td>Local dev</td><td>PostgreSQL (Docker Compose)</td><td>Redis (Docker Compose)</td><td>Manual (`pnpm dev`)</td></tr>
-<tr><td>`staging`</td><td>Pre-production</td><td>Supabase staging project</td><td>Upstash staging namespace</td><td>Auto on `main` branch merge</td></tr>
-<tr><td>`production`</td><td>Live serving</td><td>Supabase production project</td><td>Upstash production namespace</td><td>Manual approval gate in GitHub Actions</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Secret Management</strong>:</p>
-<ul class="doc-list">
-<li>Vercel environment settings for frontend environment variables</li>
-<li>Railway secret management for API server credentials</li>
-<li>No secrets in source code, Dockerfiles, or build artifacts</li>
-<li>SMTP credentials for Nodemailer fallback stored exclusively as Railway environment secrets</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Feature Flag Promotion</strong>:</p>
-<ul class="doc-list">
-<li><code>FF_MARKETPLACE</code> promoted from <code>false</code> to <code>true</code> in production when DAU > 1,000 sustained for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000) — environment variable change, no redeployment required; config cache propagates within CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 minutes</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="8-cross-cutting-concerns">§8. Cross-Cutting Concerns</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="81-logging-and-observability">§8.1 Logging and Observability</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Structured Logging</strong>:</p>
-<ul class="doc-list">
-<li>Engine: <code>pino</code> (Fastify's native logger) — all logs emitted as JSON</li>
-<li>Correlation: <code>X-Request-Id</code> header generated at API gateway, threaded through all log entries for a request</li>
-<li>Log levels: ERROR (unhandled exceptions), WARN (rate limit breaches, Redis unavailable), INFO (request lifecycle, claim events), DEBUG (disabled in production)</li>
-<li>Transport: JSON logs → Railway log drain → Datadog (or equivalent external aggregator)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>PII in Logs — Hard Rules</strong>:</p>
-<ul class="doc-list">
-<li>Email addresses NEVER appear in any log line</li>
-<li>Only <code>email_hash</code> (SHA-256) may be logged for email-related events</li>
-<li>IP addresses logged only as SHA-256 hash; raw IP never written</li>
-<li>Pet tokens never logged; only token length or presence indicators</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Log Retention</strong>:</p>
-<ul class="doc-list">
-<li>Hot storage: 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90)</li>
-<li>Cold archive: 2 years (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2)</li>
-<li>Analytics events hot tier: 90 days (ANALYTICS_EVENT_HOT_RETENTION_DAYS = 90); cold archive: 2 years (ANALYTICS_EVENT_COLD_ARCHIVE_YEARS = 2)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Metrics and Alerting</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Alert</th><th>Threshold</th><th>Window</th><th>Channel</th></tr></thead>
-<tbody>
-<tr><td>API error rate</td><td>> 1% of requests (ERROR_RATE_MAX_PERCENT = 1)</td><td>5 min (OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES = 5)</td><td>PagerDuty + Slack</td></tr>
-<tr><td>P99 latency breach</td><td>> 1,000 ms any endpoint (OBSERVABILITY_LATENCY_ALERT_THRESHOLD_MS = 1,000)</td><td>5 min (OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES = 5)</td><td>Slack</td></tr>
-<tr><td>Email delivery failure</td><td>> 2% SendGrid failure (EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT = 2)</td><td>30 min (OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES = 30)</td><td>PagerDuty</td></tr>
-<tr><td>Leaderboard update lag</td><td>> 60 s (OBSERVABILITY_LEADERBOARD_LAG_ALERT_SECONDS = 60)</td><td>—</td><td>Slack</td></tr>
-<tr><td>Pet claim rate drop</td><td>< 5 claims/hour (OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD_PER_HOUR = 5)</td><td>2 hours</td><td>Slack</td></tr>
-<tr><td>Arena battle rate drop</td><td>< 10 battles/hour (OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD_PER_HOUR = 10)</td><td>2 hours</td><td>Slack</td></tr>
-<tr><td>Redis memory</td><td>> 80% (INFRA_REDIS_ALERT_THRESHOLD_PERCENT = 80)</td><td>—</td><td>Slack</td></tr>
-<tr><td>DB connection pool</td><td>> 80% utilized (INFRA_DB_POOL_ALERT_THRESHOLD_PERCENT = 80)</td><td>—</td><td>Slack</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p">Metrics collected via Prometheus exporters on API servers and Redis. Dashboard: Grafana.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>SLO Targets</strong>:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Metric</th><th>Target</th><th>Constant</th></tr></thead>
-<tbody>
+<p><strong>Key CI Quality Gates</strong>:</p>
+<ul><li>Unit test coverage minimum 80% (UNIT_TEST_COVERAGE_MIN_PERCENT = 80)</li><li>Module line limit 800 (CODE_MODULE_MAX_LINES = 800); function line limit 50 (CODE_FUNCTION_MAX_LINES = 50) — enforced by ESLint, CI fails on violation</li><li><code>EXPLAIN ANALYZE</code> gate for any new query touching tables &gt; 10k rows</li><li>Playwright E2E visual regression at breakpoints 320, 768, 1024, 1440px</li></ul>
+<hr>
+<h3>§7.3 Environment Strategy</h3>
+<table>
+<tr><th>Environment</th><th>Purpose</th><th>Database</th><th>Redis</th><th>Deployment Trigger</th></tr>
+<tr><td><code>development</code></td><td>Local dev</td><td>PostgreSQL (Docker Compose)</td><td>Redis (Docker Compose)</td><td>Manual (<code>pnpm dev</code>)</td></tr>
+<tr><td><code>staging</code></td><td>Pre-production</td><td>Supabase staging project</td><td>Upstash staging namespace</td><td>Auto on <code>main</code> branch merge</td></tr>
+<tr><td><code>production</code></td><td>Live serving</td><td>Supabase production project</td><td>Upstash production namespace</td><td>Manual approval gate in GitHub Actions</td></tr>
+</table>
+<p><strong>Secret Management</strong>:</p>
+<ul><li>Vercel environment settings for frontend environment variables</li><li>Railway secret management for API server credentials</li><li>No secrets in source code, Dockerfiles, or build artifacts</li><li>SMTP credentials for Nodemailer fallback stored exclusively as Railway environment secrets</li></ul>
+<p><strong>Feature Flag Promotion</strong>:</p>
+<ul><li><code>FF_MARKETPLACE</code> promoted from <code>false</code> to <code>true</code> in production when DAU &gt; 1,000 sustained for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000) — environment variable change, no redeployment required; config cache propagates within CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 minutes</li></ul>
+<hr>
+<h2>§8. Cross-Cutting Concerns</h2>
+<h3>§8.1 Logging and Observability</h3>
+<p><strong>Structured Logging</strong>:</p>
+<ul><li>Engine: <code>pino</code> (Fastify&#x27;s native logger) — all logs emitted as JSON</li><li>Correlation: <code>X-Request-Id</code> header generated at API gateway, threaded through all log entries for a request</li><li>Log levels: ERROR (unhandled exceptions), WARN (rate limit breaches, Redis unavailable), INFO (request lifecycle, claim events), DEBUG (disabled in production)</li><li>Transport: JSON logs → Railway log drain → Datadog (or equivalent external aggregator)</li></ul>
+<p><strong>PII in Logs — Hard Rules</strong>:</p>
+<ul><li>Email addresses NEVER appear in any log line</li><li>Only <code>email_hash</code> (SHA-256) may be logged for email-related events</li><li>IP addresses logged only as SHA-256 hash; raw IP never written</li><li>Pet tokens never logged; only token length or presence indicators</li></ul>
+<p><strong>Log Retention</strong>:</p>
+<ul><li>Hot storage: 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90)</li><li>Cold archive: 2 years (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2)</li><li>Analytics events hot tier: 90 days (ANALYTICS_EVENT_HOT_RETENTION_DAYS = 90); cold archive: 2 years (ANALYTICS_EVENT_COLD_ARCHIVE_YEARS = 2)</li></ul>
+<p><strong>Metrics and Alerting</strong>:</p>
+<table>
+<tr><th>Alert</th><th>Threshold</th><th>Window</th><th>Channel</th></tr>
+<tr><td>API error rate</td><td>&gt; 1% of requests (ERROR_RATE_MAX_PERCENT = 1)</td><td>5 min (OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES = 5)</td><td>PagerDuty + Slack</td></tr>
+<tr><td>P99 latency breach</td><td>&gt; 1,000 ms any endpoint (OBSERVABILITY_LATENCY_ALERT_THRESHOLD_MS = 1,000)</td><td>5 min (OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES = 5)</td><td>Slack</td></tr>
+<tr><td>Email delivery failure</td><td>&gt; 2% SendGrid failure (EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT = 2)</td><td>30 min (OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES = 30)</td><td>PagerDuty</td></tr>
+<tr><td>Leaderboard update lag</td><td>&gt; 60 s (OBSERVABILITY_LEADERBOARD_LAG_ALERT_SECONDS = 60)</td><td>—</td><td>Slack</td></tr>
+<tr><td>Pet claim rate drop</td><td>&lt; 5 claims/hour (OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD_PER_HOUR = 5)</td><td>2 hours</td><td>Slack</td></tr>
+<tr><td>Arena battle rate drop</td><td>&lt; 10 battles/hour (OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD_PER_HOUR = 10)</td><td>2 hours</td><td>Slack</td></tr>
+<tr><td>Redis memory</td><td>&gt; 80% (INFRA_REDIS_ALERT_THRESHOLD_PERCENT = 80)</td><td>—</td><td>Slack</td></tr>
+<tr><td>DB connection pool</td><td>&gt; 80% utilized (INFRA_DB_POOL_ALERT_THRESHOLD_PERCENT = 80)</td><td>—</td><td>Slack</td></tr>
+</table>
+<p>Metrics collected via Prometheus exporters on API servers and Redis. Dashboard: Grafana.</p>
+<p><strong>SLO Targets</strong>:</p>
+<table>
+<tr><th>Metric</th><th>Target</th><th>Constant</th></tr>
 <tr><td>Availability</td><td>99.9% monthly (≤ 43.8 min downtime)</td><td>AVAILABILITY_MONTHLY_PERCENT; AVAILABILITY_MAX_DOWNTIME_MINUTES_PER_MONTH = 43.8</td></tr>
-<tr><td>P99 read latency</td><td>< 200 ms at 100 RPS</td><td>P99_API_LATENCY_READ_MS_AT_100_RPS</td></tr>
-<tr><td>P99 write latency</td><td>< 500 ms at 100 RPS</td><td>P99_API_LATENCY_WRITE_MS_AT_100_RPS</td></tr>
-<tr><td>FCP</td><td>< 1.5 s</td><td>FCP_SECONDS</td></tr>
-<tr><td>LCP</td><td>< 2.5 s</td><td>LCP_SECONDS</td></tr>
-<tr><td>CLS</td><td>< 0.1</td><td>CLS_SCORE</td></tr>
-<tr><td>INP</td><td>< 200 ms</td><td>INP_MS</td></tr>
+<tr><td>P99 read latency</td><td>&lt; 200 ms at 100 RPS</td><td>P99_API_LATENCY_READ_MS_AT_100_RPS</td></tr>
+<tr><td>P99 write latency</td><td>&lt; 500 ms at 100 RPS</td><td>P99_API_LATENCY_WRITE_MS_AT_100_RPS</td></tr>
+<tr><td>FCP</td><td>&lt; 1.5 s</td><td>FCP_SECONDS</td></tr>
+<tr><td>LCP</td><td>&lt; 2.5 s</td><td>LCP_SECONDS</td></tr>
+<tr><td>CLS</td><td>&lt; 0.1</td><td>CLS_SCORE</td></tr>
+<tr><td>INP</td><td>&lt; 200 ms</td><td>INP_MS</td></tr>
 <tr><td>Pet animation FPS</td><td>≥ 30 FPS</td><td>PET_ANIMATION_FPS_MIN</td></tr>
 <tr><td>Pet canvas render</td><td>≤ 2 s on load</td><td>PET_RENDER_ON_LOAD_SECONDS</td></tr>
 <tr><td>Pet interaction response</td><td>≤ 200 ms</td><td>PET_INTERACTION_RESPONSE_MS</td></tr>
-<tr><td>Arena battle E2E</td><td>< 2 s</td><td>ARENA_BATTLE_E2E_SECONDS</td></tr>
+<tr><td>Arena battle E2E</td><td>&lt; 2 s</td><td>ARENA_BATTLE_E2E_SECONDS</td></tr>
 <tr><td>Leaderboard update</td><td>≤ 30 s</td><td>LEADERBOARD_UPDATE_LAG_SECONDS</td></tr>
 <tr><td>Email delivery P90</td><td>≤ 60 s</td><td>EMAIL_DELIVERY_P90_SECONDS</td></tr>
-<tr><td>Error rate</td><td>< 1%</td><td>ERROR_RATE_MAX_PERCENT</td></tr>
-<tr><td>Email delivery failure rate</td><td>< 2%</td><td>EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT</td></tr>
-<tr><td>Spam complaint rate</td><td>< 0.1%</td><td>SPAM_COMPLAINT_RATE_MAX_PERCENT</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="82-error-handling-strategy">§8.2 Error Handling Strategy</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>API Error Envelope</strong>:</p>
-<p class="doc-p">All API errors return a consistent envelope:</p>
-<pre class="doc-code"><code class="lang-json">{
-  "success": false,
-  "data": null,
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Arena rate limit reached. You can enter again in 23 minutes.",
-    "retryAfter": 1380
+<tr><td>Error rate</td><td>&lt; 1%</td><td>ERROR_RATE_MAX_PERCENT</td></tr>
+<tr><td>Email delivery failure rate</td><td>&lt; 2%</td><td>EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT</td></tr>
+<tr><td>Spam complaint rate</td><td>&lt; 0.1%</td><td>SPAM_COMPLAINT_RATE_MAX_PERCENT</td></tr>
+</table>
+<hr>
+<h3>§8.2 Error Handling Strategy</h3>
+<p><strong>API Error Envelope</strong>:</p>
+<p>All API errors return a consistent envelope:</p>
+<pre><code class="language-json">{
+  &quot;success&quot;: false,
+  &quot;data&quot;: null,
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;RATE_LIMIT_EXCEEDED&quot;,
+    &quot;message&quot;: &quot;Arena rate limit reached. You can enter again in 23 minutes.&quot;,
+    &quot;retryAfter&quot;: 1380
   }
 }</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Production Error Sanitization</strong>:</p>
-<p class="doc-p">In <code>NODE_ENV=production</code>, the Fastify global error handler strips <code>stack</code>, internal <code>code</code>, and path/detail fields from all HTTP 500 responses before serialization. Only public <code>code</code>, user-safe <code>message</code>, and optional <code>retryAfter</code> are returned.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Standard Error Codes</strong>: <code>VALIDATION_ERROR</code>, <code>NOT_FOUND</code>, <code>ALREADY_CLAIMED</code>, <code>INVALID_CODE</code>, <code>CODE_EXPIRED</code>, <code>MAX_ATTEMPTS_REACHED</code>, <code>STAT_AT_MAXIMUM</code>, <code>RATE_LIMIT_EXCEEDED</code>, <code>UNAUTHORIZED</code>, <code>FORBIDDEN</code>, <code>PET_BANNED</code>, <code>NOT_OWNER</code>, <code>MATCHMAKING_TIMEOUT</code>, <code>INTERNAL_SERVER_ERROR</code>, <code>ACCOUNT_LOCKED</code>, <code>WRONG_REQUEST_TYPE</code>, <code>OUT_OF_RANGE</code>, <code>CONFLICT</code>, <code>PET_NOT_FOUND</code>, <code>AGE_CONFIRMATION_REQUIRED</code>, <code>TOTP_SETUP_REQUIRED</code>, <code>FEATURE_DISABLED</code>, <code>TRAINING_LIMIT_REACHED</code>.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Global Defaults</strong>:</p>
-<ul class="doc-list">
-<li>All authenticated endpoints: HTTP 401 <code>UNAUTHORIZED</code> for missing/invalid tokens</li>
-<li>All write endpoints: HTTP 404 <code>NOT_FOUND</code> for unknown resource IDs</li>
-<li>All endpoints: HTTP 400 <code>VALIDATION_ERROR</code> for schema violations</li>
-<li>Admin mutation endpoints: HTTP 403 <code>FORBIDDEN</code> for insufficient role</li>
-<li>Admin config writes: HTTP 400 <code>OUT_OF_RANGE</code> when parameter exceeds admin-tunable range</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Circuit Breaking Posture</strong>:</p>
-<ul class="doc-list">
-<li>Redis unavailability: rate limits degrade gracefully (not enforced, alerted); OTP entry fails closed; leaderboard falls back to PostgreSQL</li>
-<li>SendGrid failure: Nodemailer SMTP activates after SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3 consecutive failures</li>
-<li>PostgreSQL primary failure: automated failover to read replica within DB_AUTOFAILOVER_TIME_SECONDS = 60 seconds; write operations return HTTP 503 during failover window</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="83-configuration-management">§8.3 Configuration Management</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Constants Governance</strong>:</p>
-<p class="doc-p">All numeric constants originate from <code>CONSTANTS-PIXEL-PET-ARENA-20260503</code> (constants.json). No magic numbers appear in implementation code. The <code>packages/shared/constants.ts</code> file is the single source of truth for all constant values in TypeScript, auto-generated from <code>constants.json</code> at build time. Any change to a business constant requires updating <code>constants.json</code> first and propagating through all downstream documents.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Runtime-Tunable Parameters</strong> (admin-configurable via <code>PUT /admin/api/config/runtime</code>):</p>
-<ul class="doc-list">
-<li>Arena battles per hour per pet: 1–50 (ARENA_RATE_LIMIT_ADMIN_MIN = 1 to ARENA_RATE_LIMIT_ADMIN_MAX = 50)</li>
-<li>Rarity weights: must sum to 100% (RARITY_COMMON/RARE/EPIC/LEGENDARY_PERCENT defaults: 60/25/12/3)</li>
-<li>Arena matchmaking timeout: configurable (default ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Economy-Tunable Parameters</strong> (admin-configurable via <code>PUT /admin/api/config/economy</code>):</p>
-<ul class="doc-list">
-<li>Food buff multiplier range: 0.5×–5.0× (FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5; FOOD_BUFF_MULTIPLIER_ADMIN_MAX = 5.0)</li>
-<li>Arena entry cost: 0–10 credits (ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT = 0; ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX = 10)</li>
-<li>Arena entry cooldown: 0–60 minutes (ARENA_ENTRY_COOLDOWN_ADMIN_MIN_MINUTES = 0; ARENA_ENTRY_COOLDOWN_ADMIN_MAX_MINUTES = 60)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p">Config changes are cached in Redis with a TTL of CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 minutes. All API replicas pick up changes within 5 minutes without redeployment.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Environment Variable Strategy</strong>:</p>
-<p class="doc-p">Secrets (database URLs, Redis URLs, SendGrid API keys, SMTP credentials, JWT signing secrets for admin TOTP setup tokens) are managed as:</p>
-<ul class="doc-list">
-<li>Vercel environment settings for frontend builds</li>
-<li>Railway secret management for API server runtime</li>
-<li>Docker Compose <code>.env.local</code> for local development</li>
-<li>No secrets in source code, Dockerfiles, or container images</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<p class="doc-p"><em>This ARCH document is the authoritative system architecture specification for pixel-pet-arena. All implementation must reference and comply with this document. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 (constants.json). Conflicts between this ARCH and upstream EDD/PRD/PDD shall be resolved by filing an Engineering Change Request (ECR) against the relevant upstream document.</em></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="9-">§9. 高可用設計</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">Pixel Pet Arena targets 99.9% monthly availability (CONSTANTS: Availability). The following design decisions support this target:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Component</th><th>HA Strategy</th><th>RTO</th><th>RPO</th></tr></thead>
-<tbody>
-<tr><td>Next.js frontend</td><td>Vercel edge network (global CDN)</td><td>< 30s</td><td>N/A (stateless)</td></tr>
-<tr><td>NestJS backend</td><td>Railway auto-restart + health check `/health` (500ms SLA)</td><td>< 60s</td><td>N/A</td></tr>
-<tr><td>PostgreSQL</td><td>Supabase managed with automated failover (CONSTANTS: DB_AUTOFAILOVER_TIME = 60s)</td><td>60s</td><td>< 1min</td></tr>
-<tr><td>Redis</td><td>Upstash serverless with durability enabled</td><td>< 30s</td><td>< 5s</td></tr>
+<p><strong>Production Error Sanitization</strong>:</p>
+<p>In <code>NODE_ENV=production</code>, the Fastify global error handler strips <code>stack</code>, internal <code>code</code>, and path/detail fields from all HTTP 500 responses before serialization. Only public <code>code</code>, user-safe <code>message</code>, and optional <code>retryAfter</code> are returned.</p>
+<p><strong>Standard Error Codes</strong>: <code>VALIDATION_ERROR</code>, <code>NOT_FOUND</code>, <code>ALREADY_CLAIMED</code>, <code>INVALID_CODE</code>, <code>CODE_EXPIRED</code>, <code>MAX_ATTEMPTS_REACHED</code>, <code>STAT_AT_MAXIMUM</code>, <code>RATE_LIMIT_EXCEEDED</code>, <code>UNAUTHORIZED</code>, <code>FORBIDDEN</code>, <code>PET_BANNED</code>, <code>NOT_OWNER</code>, <code>MATCHMAKING_TIMEOUT</code>, <code>INTERNAL_SERVER_ERROR</code>, <code>ACCOUNT_LOCKED</code>, <code>WRONG_REQUEST_TYPE</code>, <code>OUT_OF_RANGE</code>, <code>CONFLICT</code>, <code>PET_NOT_FOUND</code>, <code>AGE_CONFIRMATION_REQUIRED</code>, <code>TOTP_SETUP_REQUIRED</code>, <code>FEATURE_DISABLED</code>, <code>TRAINING_LIMIT_REACHED</code>.</p>
+<p><strong>Global Defaults</strong>:</p>
+<ul><li>All authenticated endpoints: HTTP 401 <code>UNAUTHORIZED</code> for missing/invalid tokens</li><li>All write endpoints: HTTP 404 <code>NOT_FOUND</code> for unknown resource IDs</li><li>All endpoints: HTTP 400 <code>VALIDATION_ERROR</code> for schema violations</li><li>Admin mutation endpoints: HTTP 403 <code>FORBIDDEN</code> for insufficient role</li><li>Admin config writes: HTTP 400 <code>OUT_OF_RANGE</code> when parameter exceeds admin-tunable range</li></ul>
+<p><strong>Circuit Breaking Posture</strong>:</p>
+<ul><li>Redis unavailability: rate limits degrade gracefully (not enforced, alerted); OTP entry fails closed; leaderboard falls back to PostgreSQL</li><li>SendGrid failure: Nodemailer SMTP activates after SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3 consecutive failures</li><li>PostgreSQL primary failure: automated failover to read replica within DB_AUTOFAILOVER_TIME_SECONDS = 60 seconds; write operations return HTTP 503 during failover window</li></ul>
+<hr>
+<h3>§8.3 Configuration Management</h3>
+<p><strong>Constants Governance</strong>:</p>
+<p>All numeric constants originate from <code>CONSTANTS-PIXEL-PET-ARENA-20260503</code> (constants.json). No magic numbers appear in implementation code. The <code>packages/shared/constants.ts</code> file is the single source of truth for all constant values in TypeScript, auto-generated from <code>constants.json</code> at build time. Any change to a business constant requires updating <code>constants.json</code> first and propagating through all downstream documents.</p>
+<p><strong>Runtime-Tunable Parameters</strong> (admin-configurable via <code>PUT /admin/api/config/runtime</code>):</p>
+<ul><li>Arena battles per hour per pet: 1–50 (ARENA_RATE_LIMIT_ADMIN_MIN = 1 to ARENA_RATE_LIMIT_ADMIN_MAX = 50)</li><li>Rarity weights: must sum to 100% (RARITY_COMMON/RARE/EPIC/LEGENDARY_PERCENT defaults: 60/25/12/3)</li><li>Arena matchmaking timeout: configurable (default ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)</li></ul>
+<p><strong>Economy-Tunable Parameters</strong> (admin-configurable via <code>PUT /admin/api/config/economy</code>):</p>
+<ul><li>Food buff multiplier range: 0.5×–5.0× (FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5; FOOD_BUFF_MULTIPLIER_ADMIN_MAX = 5.0)</li><li>Arena entry cost: 0–10 credits (ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT = 0; ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX = 10)</li><li>Arena entry cooldown: 0–60 minutes (ARENA_ENTRY_COOLDOWN_ADMIN_MIN_MINUTES = 0; ARENA_ENTRY_COOLDOWN_ADMIN_MAX_MINUTES = 60)</li></ul>
+<p>Config changes are cached in Redis with a TTL of CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 minutes. All API replicas pick up changes within 5 minutes without redeployment.</p>
+<p><strong>Environment Variable Strategy</strong>:</p>
+<p>Secrets (database URLs, Redis URLs, SendGrid API keys, SMTP credentials, JWT signing secrets for admin TOTP setup tokens) are managed as:</p>
+<ul><li>Vercel environment settings for frontend builds</li><li>Railway secret management for API server runtime</li><li>Docker Compose <code>.env.local</code> for local development</li><li>No secrets in source code, Dockerfiles, or container images</li></ul>
+<hr>
+<p><em>This ARCH document is the authoritative system architecture specification for pixel-pet-arena. All implementation must reference and comply with this document. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 (constants.json). Conflicts between this ARCH and upstream EDD/PRD/PDD shall be resolved by filing an Engineering Change Request (ECR) against the relevant upstream document.</em></p>
+<hr>
+<h2>§9. 高可用設計</h2>
+<p>Pixel Pet Arena targets 99.9% monthly availability (CONSTANTS: Availability). The following design decisions support this target:</p>
+<table>
+<tr><th>Component</th><th>HA Strategy</th><th>RTO</th><th>RPO</th></tr>
+<tr><td>Next.js frontend</td><td>Vercel edge network (global CDN)</td><td>&lt; 30s</td><td>N/A (stateless)</td></tr>
+<tr><td>NestJS backend</td><td>Railway auto-restart + health check <code>/health</code> (500ms SLA)</td><td>&lt; 60s</td><td>N/A</td></tr>
+<tr><td>PostgreSQL</td><td>Supabase managed with automated failover (CONSTANTS: DB_AUTOFAILOVER_TIME = 60s)</td><td>60s</td><td>&lt; 1min</td></tr>
+<tr><td>Redis</td><td>Upstash serverless with durability enabled</td><td>&lt; 30s</td><td>&lt; 5s</td></tr>
 <tr><td>Email</td><td>SendGrid primary + Nodemailer SMTP fallback (after 3 failures)</td><td>Automatic</td><td>N/A</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Maintenance windows</strong>: Max 2 hours/month (CONSTANTS: DB_MAINTENANCE_WINDOW_MAX), 48h advance notice required.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="10-dr">§10. 災難恢復（DR）</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="101-backup-strategy">§10.1 Backup Strategy</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Data</th><th>Backup Frequency</th><th>Retention</th><th>Location</th></tr></thead>
-<tbody>
+</table>
+<p><strong>Maintenance windows</strong>: Max 2 hours/month (CONSTANTS: DB_MAINTENANCE_WINDOW_MAX), 48h advance notice required.</p>
+<hr>
+<h2>§10. 災難恢復（DR）</h2>
+<h3>§10.1 Backup Strategy</h3>
+<table>
+<tr><th>Data</th><th>Backup Frequency</th><th>Retention</th><th>Location</th></tr>
 <tr><td>PostgreSQL (all tables)</td><td>Daily automated snapshot (Supabase)</td><td>7 days</td><td>Supabase managed</td></tr>
 <tr><td>Redis leaderboard</td><td>Upstash built-in durability (AOF)</td><td>Real-time</td><td>Upstash</td></tr>
 <tr><td>Pet sprites / static assets</td><td>Versioned via git + Vercel deployment</td><td>Indefinite</td><td>Vercel CDN</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="102-recovery-procedures">§10.2 Recovery Procedures</h3>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Database restore</strong>: Supabase point-in-time recovery; rebuild Redis from <code>leaderboard_snapshots</code> table if needed</li>
-<li><strong>Redis rebuild SLA</strong>: Full leaderboard rebuild from PostgreSQL within 60 seconds at normal load</li>
-<li><strong>Full disaster recovery test</strong>: Quarterly; simulate DB restore + Redis rebuild; document results in runbook</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="11-">§11. 技術棧全覽</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Layer</th><th>Technology</th><th>Version</th><th>Rationale</th></tr></thead>
-<tbody>
+</table>
+<h3>§10.2 Recovery Procedures</h3>
+<ul><li><strong>Database restore</strong>: Supabase point-in-time recovery; rebuild Redis from <code>leaderboard_snapshots</code> table if needed</li><li><strong>Redis rebuild SLA</strong>: Full leaderboard rebuild from PostgreSQL within 60 seconds at normal load</li><li><strong>Full disaster recovery test</strong>: Quarterly; simulate DB restore + Redis rebuild; document results in runbook</li></ul>
+<hr>
+<h2>§11. 技術棧全覽</h2>
+<table>
+<tr><th>Layer</th><th>Technology</th><th>Version</th><th>Rationale</th></tr>
 <tr><td>Frontend</td><td>Next.js + Phaser 3</td><td>Next 14 / Phaser 3.60</td><td>SSR for SEO; Canvas 2D for pet animation ≥ 30 FPS</td></tr>
 <tr><td>Backend</td><td>Node.js / NestJS</td><td>Node 20 LTS</td><td>TypeScript-first; modular; Railway deploy</td></tr>
 <tr><td>Database</td><td>PostgreSQL (Supabase)</td><td>PostgreSQL 15</td><td>Managed hosting; Row-level security; real-time subscriptions</td></tr>
 <tr><td>Cache / Queue</td><td>Redis (Upstash)</td><td>Serverless</td><td>Leaderboard; arena matchmaking queue; rate limit counters</td></tr>
 <tr><td>Email</td><td>SendGrid + Nodemailer</td><td>SendGrid v3 API</td><td>98% delivery SLA; SMTP fallback</td></tr>
 <tr><td>Deployment</td><td>Vercel (frontend) + Railway (backend)</td><td>—</td><td>Serverless + container-based; $50–200/month at DAU ≤ 5k</td></tr>
-<tr><td>Monitoring</td><td>Sentry + Datadog</td><td>—</td><td>Error tracking + metrics; alert on P99 > 1000ms</td></tr>
+<tr><td>Monitoring</td><td>Sentry + Datadog</td><td>—</td><td>Error tracking + metrics; alert on P99 &gt; 1000ms</td></tr>
 <tr><td>CDN</td><td>Vercel Edge</td><td>—</td><td>Static assets + sprite sheets; global edge caching</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="12-observability-">§12. Observability 架構</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="121-metrics-red-method">§12.1 Metrics (RED Method)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Metric</th><th>Tool</th><th>Alert Threshold</th><th>CONSTANTS Reference</th></tr></thead>
-<tbody>
+</table>
+<hr>
+<h2>§12. Observability 架構</h2>
+<h3>§12.1 Metrics (RED Method)</h3>
+<table>
+<tr><th>Metric</th><th>Tool</th><th>Alert Threshold</th><th>CONSTANTS Reference</th></tr>
 <tr><td>Request Rate</td><td>Datadog</td><td>—</td><td>—</td></tr>
-<tr><td>Error Rate</td><td>Datadog / Sentry</td><td>> 1% over 5 min</td><td>OBSERVABILITY_ERROR_RATE_ALERT_WINDOW</td></tr>
-<tr><td>Duration (P99)</td><td>Datadog</td><td>> 1000ms</td><td>OBSERVABILITY_LATENCY_ALERT_THRESHOLD</td></tr>
-<tr><td>Leaderboard lag</td><td>Custom metric</td><td>> 60s</td><td>OBSERVABILITY_LEADERBOARD_LAG_ALERT</td></tr>
-<tr><td>Redis memory</td><td>Upstash + Datadog</td><td>> 80%</td><td>INFRA_REDIS_ALERT_THRESHOLD</td></tr>
-<tr><td>DB connection pool</td><td>Supabase + Datadog</td><td>> 80%</td><td>INFRA_DB_POOL_ALERT_THRESHOLD</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="122-logs">§12.2 Logs</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Structured JSON logs from all services. Fields: <code>timestamp</code>, <code>level</code>, <code>service</code>, <code>trace_id</code>, <code>event</code>, <code>duration_ms</code>. PII (email, IP) never logged raw — hashed only.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="123-traces">§12.3 Traces</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><code>X-Trace-ID</code> header propagated across all boundaries. Used for debugging arena battle E2E latency (SLA: < 2s per CONSTANTS: <code>Arena Battle Result E2E</code>).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="13-">§13. 外部依賴地圖</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Service</th><th>Provider</th><th>Criticality</th><th>Failover</th><th>SLA</th></tr></thead>
-<tbody>
+<tr><td>Error Rate</td><td>Datadog / Sentry</td><td>&gt; 1% over 5 min</td><td>OBSERVABILITY_ERROR_RATE_ALERT_WINDOW</td></tr>
+<tr><td>Duration (P99)</td><td>Datadog</td><td>&gt; 1000ms</td><td>OBSERVABILITY_LATENCY_ALERT_THRESHOLD</td></tr>
+<tr><td>Leaderboard lag</td><td>Custom metric</td><td>&gt; 60s</td><td>OBSERVABILITY_LEADERBOARD_LAG_ALERT</td></tr>
+<tr><td>Redis memory</td><td>Upstash + Datadog</td><td>&gt; 80%</td><td>INFRA_REDIS_ALERT_THRESHOLD</td></tr>
+<tr><td>DB connection pool</td><td>Supabase + Datadog</td><td>&gt; 80%</td><td>INFRA_DB_POOL_ALERT_THRESHOLD</td></tr>
+</table>
+<h3>§12.2 Logs</h3>
+<p>Structured JSON logs from all services. Fields: <code>timestamp</code>, <code>level</code>, <code>service</code>, <code>trace_id</code>, <code>event</code>, <code>duration_ms</code>. PII (email, IP) never logged raw — hashed only.</p>
+<h3>§12.3 Traces</h3>
+<p><code>X-Trace-ID</code> header propagated across all boundaries. Used for debugging arena battle E2E latency (SLA: &lt; 2s per CONSTANTS: <code>Arena Battle Result E2E</code>).</p>
+<hr>
+<h2>§13. 外部依賴地圖</h2>
+<table>
+<tr><th>Service</th><th>Provider</th><th>Criticality</th><th>Failover</th><th>SLA</th></tr>
 <tr><td>Database</td><td>Supabase</td><td>CRITICAL</td><td>Read replica (manual)</td><td>99.9%</td></tr>
 <tr><td>Cache</td><td>Upstash Redis</td><td>HIGH</td><td>Rebuild from DB</td><td>99.99%</td></tr>
 <tr><td>Email</td><td>SendGrid</td><td>HIGH</td><td>Nodemailer SMTP fallback</td><td>99.9%</td></tr>
@@ -1504,114 +1069,62 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td>Backend hosting</td><td>Railway</td><td>HIGH</td><td>Redeploy from image</td><td>99.5%</td></tr>
 <tr><td>Error tracking</td><td>Sentry</td><td>LOW</td><td>Alert suppressed</td><td>—</td></tr>
 <tr><td>Metrics</td><td>Datadog</td><td>LOW</td><td>Alert suppressed</td><td>—</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Vendor migration plan</strong>: 14 days (CONSTANTS: VENDOR_MIGRATION_PLAN_DAYS) for SendGrid → alternative SMTP or PostgreSQL → alternative managed DB.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="14-architecture-decision-records">§14. Architecture Decision Records</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ADR #</th><th>Title</th><th>Status</th><th>Decision</th></tr></thead>
-<tbody>
+</table>
+<p><strong>Vendor migration plan</strong>: 14 days (CONSTANTS: VENDOR_MIGRATION_PLAN_DAYS) for SendGrid → alternative SMTP or PostgreSQL → alternative managed DB.</p>
+<hr>
+<h2>§14. Architecture Decision Records</h2>
+<table>
+<tr><th>ADR #</th><th>Title</th><th>Status</th><th>Decision</th></tr>
 <tr><td>ADR-001</td><td>Use Supabase (managed PostgreSQL) over self-hosted</td><td>Accepted</td><td>Reduces ops burden for MVP; acceptable vendor lock-in at DAU ≤ 5k</td></tr>
 <tr><td>ADR-002</td><td>Phaser 3 over Unity WebGL for browser game</td><td>Accepted</td><td>Smaller bundle; no plugin; native HTML5 Canvas</td></tr>
 <tr><td>ADR-003</td><td>NestJS over plain Express for backend</td><td>Accepted</td><td>Dependency injection; modular architecture; TypeScript-native</td></tr>
 <tr><td>ADR-004</td><td>Upstash Redis over ElastiCache</td><td>Accepted</td><td>Serverless billing; no idle cost; Vercel edge compatible</td></tr>
 <tr><td>ADR-005</td><td>ENV-variable feature flags over LaunchDarkly</td><td>Accepted</td><td>MVP scope; LaunchDarkly re-evaluated at beta if runtime toggles needed</td></tr>
-<tr><td>ADR-006</td><td>Admin portal on `/admin` route (same deployment)</td><td>Accepted</td><td>MVP simplicity; revisit for subdomain isolation post-GA security audit</td></tr>
+<tr><td>ADR-006</td><td>Admin portal on <code>/admin</code> route (same deployment)</td><td>Accepted</td><td>MVP simplicity; revisit for subdomain isolation post-GA security audit</td></tr>
 <tr><td>ADR-007</td><td>Email-based passwordless auth over OAuth</td><td>Accepted</td><td>PRD requirement; reduces friction; no third-party OAuth vendor risk</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="15-">§15. 架構審查檢查清單</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="151-">§15.1 安全性</h3>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>[x] 所有 API 端點有 authentication guard（admin routes + user routes）</li>
-<li>[x] Rate limiting 實作在 NestJS middleware（Redis 計數器）</li>
-<li>[x] SQL injection 防護：使用 Prisma ORM（parameterized queries）</li>
-<li>[x] CSRF 保護：stateless JWT + SameSite cookie</li>
-<li>[x] Secrets 在 ENV vars；不在 code 或 image 中</li>
-<li>[ ] Security audit（pre-launch）</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="152-">§15.2 可靠性</h3>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>[x] Health check endpoint <code>/health</code>（500ms SLA）</li>
-<li>[x] Email fallback（SendGrid → SMTP after 3 failures）</li>
-<li>[x] Database connection pool 設定（min 20 connections）</li>
-<li>[ ] DR test（quarterly）</li>
-<li>[ ] Load test at PEAK_OPERATION_RPS = 500</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="153-">§15.3 可觀察性</h3>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>[x] Structured JSON logging</li>
-<li>[x] Trace ID propagation</li>
-<li>[x] Error rate alerting（Sentry + Datadog）</li>
-<li>[ ] Custom dashboard for MAAPO / DAP metrics（post-launch）</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="16-cost-optimization--finops">§16. Cost Optimization & FinOps</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="161-mvp-cost-structure-dau--5k">§16.1 MVP Cost Structure (DAU ≤ 5k)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Service</th><th>Monthly Cost</th><th>Tier</th><th>Scale Trigger</th></tr></thead>
-<tbody>
-<tr><td>Vercel</td><td>$0–20</td><td>Hobby / Pro</td><td>Edge function invocations > 1M/month</td></tr>
-<tr><td>Supabase</td><td>$0–25</td><td>Free / Pro</td><td>DB size > 500MB or connections > 60</td></tr>
-<tr><td>Railway</td><td>$5–20</td><td>Starter</td><td>CPU > 70% sustained (CONSTANTS: HORIZONTAL_SCALE_CPU_THRESHOLD)</td></tr>
-<tr><td>Upstash Redis</td><td>$0–10</td><td>Pay-per-request</td><td>Commands > 10k/day</td></tr>
-<tr><td>SendGrid</td><td>$0–20</td><td>Free / Essentials</td><td>Emails > 10k/month (CONSTANTS: EMAIL_SENDGRID_MONTHLY_LIMIT)</td></tr>
+</table>
+<hr>
+<h2>§15. 架構審查檢查清單</h2>
+<h3>§15.1 安全性</h3>
+<ul><li style="list-style:none"><input type="checkbox" checked disabled> 所有 API 端點有 authentication guard（admin routes + user routes）</li><li style="list-style:none"><input type="checkbox" checked disabled> Rate limiting 實作在 NestJS middleware（Redis 計數器）</li><li style="list-style:none"><input type="checkbox" checked disabled> SQL injection 防護：使用 Prisma ORM（parameterized queries）</li><li style="list-style:none"><input type="checkbox" checked disabled> CSRF 保護：stateless JWT + SameSite cookie</li><li style="list-style:none"><input type="checkbox" checked disabled> Secrets 在 ENV vars；不在 code 或 image 中</li><li style="list-style:none"><input type="checkbox" disabled> Security audit（pre-launch）</li></ul>
+<h3>§15.2 可靠性</h3>
+<ul><li style="list-style:none"><input type="checkbox" checked disabled> Health check endpoint <code>/health</code>（500ms SLA）</li><li style="list-style:none"><input type="checkbox" checked disabled> Email fallback（SendGrid → SMTP after 3 failures）</li><li style="list-style:none"><input type="checkbox" checked disabled> Database connection pool 設定（min 20 connections）</li><li style="list-style:none"><input type="checkbox" disabled> DR test（quarterly）</li><li style="list-style:none"><input type="checkbox" disabled> Load test at PEAK_OPERATION_RPS = 500</li></ul>
+<h3>§15.3 可觀察性</h3>
+<ul><li style="list-style:none"><input type="checkbox" checked disabled> Structured JSON logging</li><li style="list-style:none"><input type="checkbox" checked disabled> Trace ID propagation</li><li style="list-style:none"><input type="checkbox" checked disabled> Error rate alerting（Sentry + Datadog）</li><li style="list-style:none"><input type="checkbox" disabled> Custom dashboard for MAAPO / DAP metrics（post-launch）</li></ul>
+<hr>
+<h2>§16. Cost Optimization &amp; FinOps</h2>
+<h3>§16.1 MVP Cost Structure (DAU ≤ 5k)</h3>
+<table>
+<tr><th>Service</th><th>Monthly Cost</th><th>Tier</th><th>Scale Trigger</th></tr>
+<tr><td>Vercel</td><td>$0–20</td><td>Hobby / Pro</td><td>Edge function invocations &gt; 1M/month</td></tr>
+<tr><td>Supabase</td><td>$0–25</td><td>Free / Pro</td><td>DB size &gt; 500MB or connections &gt; 60</td></tr>
+<tr><td>Railway</td><td>$5–20</td><td>Starter</td><td>CPU &gt; 70% sustained (CONSTANTS: HORIZONTAL_SCALE_CPU_THRESHOLD)</td></tr>
+<tr><td>Upstash Redis</td><td>$0–10</td><td>Pay-per-request</td><td>Commands &gt; 10k/day</td></tr>
+<tr><td>SendGrid</td><td>$0–20</td><td>Free / Essentials</td><td>Emails &gt; 10k/month (CONSTANTS: EMAIL_SENDGRID_MONTHLY_LIMIT)</td></tr>
 <tr><td>Sentry</td><td>$0</td><td>Developer</td><td>—</td></tr>
-<tr><td>Datadog</td><td>$15–30</td><td>Free</td><td>Metrics > 500/month</td></tr>
-<tr><td>**Total**</td><td>**$20–125**</td><td>—</td><td>Per CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MIN/MAX ($50–200)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="162-cost-guardrails">§16.2 Cost Guardrails</h3>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>Monthly cost alert at $150 (75% of CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX)</li>
-<li>Auto-scaling limited to Railway horizontal pod expansion (max 3 replicas for MVP)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="17-marketplace-feature-">§17. Marketplace Feature 成本影響評估</h2>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote">This section evaluates the cost impact of enabling <code>FF_MARKETPLACE</code> (pet trading feature).</blockquote>
-<blockquote class="doc-quote">Activation trigger: DAU ≥ 1000 sustained 2 weeks (CONSTANTS: DAU_MARKETPLACE_TRIGGER).</blockquote>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Impact Area</th><th>Current (no marketplace)</th><th>With Marketplace Enabled</th><th>Delta</th></tr></thead>
-<tbody>
+<tr><td>Datadog</td><td>$15–30</td><td>Free</td><td>Metrics &gt; 500/month</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>$20–125</strong></td><td>—</td><td>Per CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MIN/MAX ($50–200)</td></tr>
+</table>
+<h3>§16.2 Cost Guardrails</h3>
+<ul><li>Monthly cost alert at $150 (75% of CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX)</li><li>Auto-scaling limited to Railway horizontal pod expansion (max 3 replicas for MVP)</li></ul>
+<hr>
+<h2>§17. Marketplace Feature 成本影響評估</h2>
+<blockquote><p>This section evaluates the cost impact of enabling <code>FF_MARKETPLACE</code> (pet trading feature).</p></blockquote>
+<blockquote><p>Activation trigger: DAU ≥ 1000 sustained 2 weeks (CONSTANTS: DAU_MARKETPLACE_TRIGGER).</p></blockquote>
+<table>
+<tr><th>Impact Area</th><th>Current (no marketplace)</th><th>With Marketplace Enabled</th><th>Delta</th></tr>
 <tr><td>DB writes</td><td>~500/day</td><td>+300/day (trade records)</td><td>+60%</td></tr>
 <tr><td>Redis operations</td><td>~2k/day</td><td>+500/day (trade price cache)</td><td>+25%</td></tr>
 <tr><td>API calls</td><td>~5k/day</td><td>+2k/day (listing, bid, accept)</td><td>+40%</td></tr>
 <tr><td>Monthly infra cost</td><td>$50–125</td><td>$80–175</td><td>+$30–50</td></tr>
 <tr><td>SendGrid emails</td><td>~200/month</td><td>+50/month (trade notifications)</td><td>+25%</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Decision</strong>: Enable FF_MARKETPLACE when DAU ≥ 1000 sustained. Monitor Supabase connection pool utilization; upgrade to Pro tier if > 60%.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="18-api-gateway--service-mesh-architecture">§18. API Gateway & Service Mesh Architecture</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">Pixel Pet Arena uses a <strong>direct-call architecture</strong> for MVP (no API gateway or service mesh). All routing is handled by NestJS Router + Vercel Edge.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="181-request-flow">§18.1 Request Flow</h3>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">User Browser
+</table>
+<p><strong>Decision</strong>: Enable FF_MARKETPLACE when DAU ≥ 1000 sustained. Monitor Supabase connection pool utilization; upgrade to Pro tier if &gt; 60%.</p>
+<hr>
+<h2>§18. API Gateway &amp; Service Mesh Architecture</h2>
+<p>Pixel Pet Arena uses a <strong>direct-call architecture</strong> for MVP (no API gateway or service mesh). All routing is handled by NestJS Router + Vercel Edge.</p>
+<h3>§18.1 Request Flow</h3>
+<pre><code class="">User Browser
   → Vercel Edge (CDN / Next.js SSR)
     → NestJS API (/api/v1/*)        [Railway]
       → Supabase PostgreSQL         [Supabase]
@@ -1622,39 +1135,34 @@ Admin Browser
   → Vercel Edge (/admin/*)
     → NestJS API (/api/admin/*)     [Railway, same deployment]
       → Supabase PostgreSQL</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="182-future-api-gateway-post-ga">§18.2 Future API Gateway (Post-GA)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">If traffic exceeds PEAK_OPERATION_RPS = 500 or multi-region deployment is required, evaluate:</p>
-<ul class="doc-list">
-<li><strong>Cloudflare Workers</strong> for edge-side rate limiting and geo-routing</li>
-<li><strong>Kong Gateway</strong> for service mesh if microservices are introduced</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="19-admin-portal-">§19. Admin Portal 架構</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">The admin portal is deployed as part of the same Next.js application (route: <code>/admin/*</code>). Separation from player routes is enforced at the NestJS authentication layer.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="191-admin-authentication">§19.1 Admin Authentication</h3>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>Dedicated admin JWT (separate secret from player JWT)</li>
-<li>Session inactivity expiry: 4 hours (CONSTANTS: ADMIN_SESSION_INACTIVITY_EXPIRY)</li>
-<li>Absolute session expiry: 8 hours (CONSTANTS: ADMIN_SESSION_ABSOLUTE_EXPIRY)</li>
-<li>Rate limit: 100 requests/minute per admin (CONSTANTS: ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="192-admin-api-routes">§19.2 Admin API Routes</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All admin endpoints are prefixed <code>/api/admin/</code> and guarded by <code>AdminAuthGuard</code>. Response time SLA: 2 seconds for search (up to 1M pet records). See <code>docs/API.md §Admin</code> for full endpoint list.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="193-admin-data-access">§19.3 Admin Data Access</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Admin queries hit read replicas where available to reduce load on primary. Audit logs written for all admin moderation actions (retention: 2 years per CONSTANTS: ADMIN_AUDIT_LOG_RETENTION).</p>
-<div class="doc-gap"></div>
-    </div>
+<h3>§18.2 Future API Gateway (Post-GA)</h3>
+<p>If traffic exceeds PEAK_OPERATION_RPS = 500 or multi-region deployment is required, evaluate:</p>
+<ul><li><strong>Cloudflare Workers</strong> for edge-side rate limiting and geo-routing</li><li><strong>Kong Gateway</strong> for service mesh if microservices are introduced</li></ul>
+<hr>
+<h2>§19. Admin Portal 架構</h2>
+<p>The admin portal is deployed as part of the same Next.js application (route: <code>/admin/*</code>). Separation from player routes is enforced at the NestJS authentication layer.</p>
+<h3>§19.1 Admin Authentication</h3>
+<ul><li>Dedicated admin JWT (separate secret from player JWT)</li><li>Session inactivity expiry: 4 hours (CONSTANTS: ADMIN_SESSION_INACTIVITY_EXPIRY)</li><li>Absolute session expiry: 8 hours (CONSTANTS: ADMIN_SESSION_ABSOLUTE_EXPIRY)</li><li>Rate limit: 100 requests/minute per admin (CONSTANTS: ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE)</li></ul>
+<h3>§19.2 Admin API Routes</h3>
+<p>All admin endpoints are prefixed <code>/api/admin/</code> and guarded by <code>AdminAuthGuard</code>. Response time SLA: 2 seconds for search (up to 1M pet records). See <code>docs/API.md §Admin</code> for full endpoint list.</p>
+<h3>§19.3 Admin Data Access</h3>
+<p>Admin queries hit read replicas where available to reduce load on primary. Audit logs written for all admin moderation actions (retention: 2 years per CONSTANTS: ADMIN_AUDIT_LOG_RETENTION).</p></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

@@ -1,100 +1,294 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — Documentation Index</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>test 文件中心 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; }
-    header { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 2rem; text-align: center; position: relative; z-index: 1; }
-    header h1 { font-family: var(--pixel-font); font-size: 16px; color: var(--accent-cyan); line-height: 2; }
-    header p { color: #8888aa; font-size: 18px; margin-top: 0.5rem; }
-    .main { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .category { margin-bottom: 2rem; }
-    .cat-title { font-family: var(--pixel-font); font-size: 10px; color: var(--accent-purple); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); }
-    .cat-files { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
-    .doc-card { display: flex; align-items: center; gap: 0.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem; text-decoration: none; color: #c8c8e8; transition: border-color 0.2s, background 0.2s; }
-    .doc-card:hover { border-color: var(--accent-cyan); background: #1a1a3e; color: var(--accent-cyan); }
-    .doc-icon { font-size: 20px; }
-    .doc-name { font-family: var(--pixel-font); font-size: 7px; line-height: 1.5; }
-    .prototype-link { margin: 2rem 0; text-align: center; }
-    .prototype-link a { display: inline-block; background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%); color: #000; font-family: var(--pixel-font); font-size: 9px; padding: 1rem 2rem; border-radius: 4px; text-decoration: none; }
-    .prototype-link a:hover { opacity: 0.85; }
-    footer { text-align: center; padding: 2rem; color: #444466; font-size: 14px; border-top: 1px solid var(--border); margin-top: 2rem; position: relative; z-index: 1; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>PIXEL PET ARENA</h1>
-    <p>Engineering Documentation Index</p>
-  </header>
-  <div class="main">
-    <div class="prototype-link">
-      <a href="prototype/index.html">▶ Launch Interactive Prototype</a>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="category"><h2 class="cat-title">Core Business</h2><div class="cat-files">
-  <a href="brd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BRD</span></a>
-  <a href="idea.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">IDEA</span></a>
-  <a href="prd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PRD</span></a>
-</div></div>
-<div class="category"><h2 class="cat-title">Design & UX</h2><div class="cat-files">
-  <a href="pdd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PDD</span></a>
-  <a href="vdd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">VDD</span></a>
-  <a href="frontend.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">FRONTEND</span></a>
-  <a href="anim.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ANIM</span></a>
-  <a href="audio.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">AUDIO</span></a>
-</div></div>
-<div class="category"><h2 class="cat-title">Engineering</h2><div class="cat-files">
-  <a href="edd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">EDD</span></a>
-  <a href="arch.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ARCH</span></a>
-  <a href="api.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">API</span></a>
-  <a href="schema.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">SCHEMA</span></a>
-  <a href="constants.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CONSTANTS</span></a>
-</div></div>
-<div class="category"><h2 class="cat-title">Implementation</h2><div class="cat-files">
-  <a href="client-impl.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CLIENT IMPL</span></a>
-  <a href="admin-impl.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ADMIN IMPL</span></a>
-  <a href="contracts.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CONTRACTS</span></a>
-  <a href="cicd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CICD</span></a>
-</div></div>
-<div class="category"><h2 class="cat-title">Quality & Testing</h2><div class="cat-files">
-  <a href="bdd-client.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BDD CLIENT</span></a>
-  <a href="bdd-server.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BDD SERVER</span></a>
-  <a href="rtm.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">RTM</span></a>
-  <a href="test-plan.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">TEST PLAN</span></a>
-</div></div>
-<div class="category"><h2 class="cat-title">Operations</h2><div class="cat-files">
-  <a href="developer-guide.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">DEVELOPER GUIDE</span></a>
-  <a href="local-deploy.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">LOCAL DEPLOY</span></a>
-  <a href="runbook.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">RUNBOOK</span></a>
-  <a href="background-jobs.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BACKGROUND JOBS</span></a>
-  <a href="resource.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">RESOURCE</span></a>
-</div></div>
-<div class="category"><h2 class="cat-title">Reports</h2><div class="cat-files">
-  <a href="manifest.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">MANIFEST</span></a>
-  <a href="align-report.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ALIGN REPORT</span></a>
-  <a href="align-fix-complete.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ALIGN FIX COMPLETE</span></a>
-  <a href="align-fix-summary.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ALIGN FIX SUMMARY</span></a>
-  <a href="implementation-readiness.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">IMPLEMENTATION READINESS</span></a>
-</div></div>
-<div class="category"><h2 class="cat-title">Game Screens</h2><div class="cat-files">
-  <a href="player-arena.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PLAYER ARENA</span></a>
-  <a href="player-pet-display.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PLAYER PET DISPLAY</span></a>
-  <a href="admin-dashboard.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ADMIN DASHBOARD</span></a>
-</div></div>
-
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 文件中心</p>
+    <h1 class="banner-title">test 文件中心</h1>
   </div>
-  <footer>pixel-pet-arena · gendoc generated documentation</footer>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link active" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>pixel-pet-arena 🎮</h1>
+<p><strong>A pixel-art pet breeding, training, and battle arena game</strong> with cross-platform support (Web, iOS, Android) and competitive leaderboards.</p>
+<hr>
+<h2>📋 Project Overview</h2>
+<p>pixel-pet-arena combines pet NFT-like mechanics with real-time multiplayer arena battles. Players claim pets via email, train them daily with food buffs, breed to discover rare variants, and compete in speed (RACE) or strength (SUMO) arena tournaments.</p>
+<p><strong>Tech Stack:</strong></p>
+<ul><li><strong>Backend:</strong> Node.js 20 + Fastify + PostgreSQL + Redis</li><li><strong>Frontend:</strong> Phaser.js 3 (2D pixel canvas) + React + TypeScript + Vite</li><li><strong>Admin:</strong> Vue 3 + ElementPlus</li><li><strong>Audio:</strong> Web Audio API + HTML5 Audio fallback</li><li><strong>DevOps:</strong> Docker Compose (local), Kubernetes (production)</li></ul>
+<p><strong>Core Features:</strong></p>
+<ul><li>🐾 <strong>Pet System:</strong> Claim via email OTP, randomized stats/rarity (Common 60%, Rare 25%, Epic 12%, Legendary 3%)</li><li>📈 <strong>Training:</strong> Daily food buffs (temporary/permanent), stat progression caps</li><li>⚔️ <strong>Arena Battles:</strong> RACE (speed-based), SUMO (strength-based), anti-bot detection, public battle records</li><li>🏆 <strong>Leaderboards:</strong> Real-time ranking, cacheable snapshots, social share (Open Graph)</li><li>💱 <strong>Trading System:</strong> Player marketplace, anti-flip controls, dispute resolution</li><li>🔐 <strong>Admin:</strong> Moderation, GDPR erasure, feature flag config, suspicious activity detection</li></ul>
+<hr>
+<h2>📁 Repository Structure</h2>
+<p>This is a <strong>specification and design documentation repository</strong> — contains game design, API contracts, BDD test scenarios, but NOT implementation code.</p>
+<pre><code class="">pixel-pet-arena/
+├── docs/                      # Design &amp; specification documents
+│   ├── IDEA.md               # Initial concept &amp; problem statement
+│   ├── BRD.md                # Business requirements &amp; goals
+│   ├── PRD.md                # Product requirements &amp; user stories (91 ACs)
+│   ├── PDD.md                # Product/UI design specs (Phaser.js canvas, React components)
+│   ├── VDD.md                # Visual design tokens (color, typography, spacing)
+│   ├── EDD.md                # Technical architecture &amp; system design
+│   ├── ARCH.md               # Component &amp; service architecture
+│   ├── API.md                # REST API endpoint specifications (25+ endpoints)
+│   ├── SCHEMA.md             # Database schema &amp; ERD (13 tables)
+│   ├── AUDIO.md              # Audio design (11 SFX, Web Audio API)
+│   ├── ANIM.md               # Animation specs (15+ sprite animations, 32×32px)
+│   ├── FRONTEND.md           # Frontend tech architecture &amp; component design
+│   ├── ADMIN_IMPL.md         # Admin panel UI &amp; backend specs
+│   ├── test-plan.md          # Testing strategy &amp; RTM
+│   ├── BDD-server.md         # Server-side BDD strategy (8 feature files)
+│   ├── BDD-client.md         # Client-side BDD strategy (9 feature files)
+│   ├── RTM.md                # Requirements traceability matrix (131 BDD scenarios)
+│   ├── RTM.csv               # Machine-readable traceability matrix
+│   ├── background-jobs.md    # Recurring task specifications
+│   ├── ALIGN_REPORT.md       # Cross-file alignment audit report
+│   └── diagrams/             # Architecture diagrams (PlantUML, PNG)
+├── features/                  # BDD specifications in Gherkin
+│   ├── server/               # Backend feature files (6 files, 172 steps)
+│   │   ├── arena-battle.feature
+│   │   ├── claim-flow.feature
+│   │   ├── gdpr-erasure.feature
+│   │   ├── leaderboard.feature
+│   │   ├── suspicious-detection.feature
+│   │   └── training-food.feature
+│   ├── client/               # Frontend feature files (9 files, 1,071 steps)
+│   │   ├── admin-portal.feature
+│   │   ├── arena-ui.feature
+│   │   ├── battle-records.feature
+│   │   ├── claim-flow-ui.feature
+│   │   ├── food-system.feature
+│   │   ├── leaderboard-ui.feature
+│   │   ├── pet-display.feature
+│   │   ├── settings.feature
+│   │   └── training-ui.feature
+│   └── root/                 # Legacy root-level feature files (consolidate into server/client)
+│       ├── auth-login.feature
+│       ├── arena-combat.feature
+│       ├── pet-management.feature
+│       ├── pet-training.feature
+│       ├── arena-leaderboard.feature
+│       ├── trading-system.feature
+│       ├── admin-moderation.feature
+│       └── admin-gdpr.feature
+├── templates/                 # Pipeline configuration
+│   ├── pipeline.json         # gendoc step definitions
+│   ├── *.gen.md             # Generation rules for each doc type
+│   └── *.review.md          # Review standards for each doc type
+├── README.md                  # This file
+└── .gendoc-state.json        # Pipeline execution state
+</code></pre>
+<hr>
+<h2>🚀 Getting Started</h2>
+<h3>Prerequisites</h3>
+<ul><li>Node.js 20+</li><li>Docker &amp; Docker Compose (for local database)</li><li>Git</li></ul>
+<h3>For Documentation Review</h3>
+<pre><code class="language-bash"># Clone repository
+git clone https://github.com/pixel-pet-arena/docs.git
+cd pixel-pet-arena
+
+# Read the design docs in order
+1. docs/IDEA.md              # Understand the vision
+2. docs/BRD.md               # Business context
+3. docs/PRD.md               # Feature requirements
+4. docs/PDD.md + docs/VDD.md # UI/visual design
+5. docs/EDD.md               # Technical architecture
+6. docs/API.md               # API contracts
+7. docs/test-plan.md + RTM.md # Test strategy
+8. features/                 # BDD scenarios</code></pre>
+<h3>For Game Implementation</h3>
+<p>This repository is <strong>documentation-only</strong>. For actual game code (backend API, frontend game, admin panel), see:</p>
+<ul><li><strong>Backend Repository:</strong> <a href="https://github.com/pixel-pet-arena/api" target="_blank" rel="noopener">pixel-pet-arena/api</a> (Node.js + Fastify)</li><li><strong>Frontend Repository:</strong> <a href="https://github.com/pixel-pet-arena/game" target="_blank" rel="noopener">pixel-pet-arena/game</a> (Phaser.js + React)</li><li><strong>Admin Repository:</strong> <a href="https://github.com/pixel-pet-arena/admin" target="_blank" rel="noopener">pixel-pet-arena/admin</a> (Vue 3)</li></ul>
+<hr>
+<h2>📊 Documentation Quality</h2>
+<h3>Coverage (131 BDD Scenarios)</h3>
+<ul><li><strong>Server-side:</strong> 8 feature files, 172 Gherkin steps covering auth, arena, leaderboard, trading, moderation, GDPR</li><li><strong>Client-side:</strong> 9 feature files, 1,071 Gherkin steps covering UI, animations, forms, accessibility</li><li><strong>Requirements Traceability:</strong> 91 Product Requirements → 131 BDD Scenarios (RTM.csv)</li></ul>
+<h3>Known Issues / Pending Fixes</h3>
+<p>See <strong>docs/ALIGN_REPORT.md</strong> for:</p>
+<ul><li>30 cross-file alignment findings (4 CRITICAL, 12 HIGH, 10 MEDIUM, 4 LOW)</li><li>Auto-fixable documentation improvements</li><li>Blocking items (requires engineering decisions)</li></ul>
+<h3>Alignment Audit</h3>
+<p>Last run: 2026-05-04</p>
+<ul><li><strong>Dimension 0</strong> (File Existence): 1 HIGH — README.md created ✅</li><li><strong>Dimension 1</strong> (Doc ↔ Doc): 11 findings — In progress</li><li><strong>Dimension 2</strong> (Doc ↔ Code): Blocked (no src/ in this repo)</li><li><strong>Dimension 3</strong> (Code ↔ Test): Blocked (no tests in this repo)</li><li><strong>Dimension 4</strong> (Doc ↔ Test): 9 findings — In progress</li><li><strong>Dimension 5</strong> (UML/RTM): 5 findings — In progress</li></ul>
+<hr>
+<h2>🔄 Contributing</h2>
+<h3>Documentation Updates</h3>
+<ol><li>Read the relevant upstream documents first</li><li>Follow <a href="./docs/IDEA.md#gendoc-pipeline" target="_blank" rel="noopener">gendoc workflow</a></li><li>Run alignment audit: <code>/gendoc-align-check</code></li><li>Fix alignment issues: <code>/gendoc-align-fix docs</code></li><li>Commit with: <code>docs(gendoc)[&lt;step&gt;]: &lt;description&gt;</code></li></ol>
+<h3>Implementation</h3>
+<ul><li>Backend, frontend, and admin implementations live in separate repositories</li><li>All code must pass BDD scenarios in <code>features/</code></li><li>RTM.csv tracks requirement coverage</li></ul>
+<h3>Feedback</h3>
+<ul><li><strong>Design questions:</strong> Open issue in <a href="https://github.com/pixel-pet-arena/docs/discussions" target="_blank" rel="noopener">Discussions</a></li><li><strong>Bug reports:</strong> <a href="https://github.com/pixel-pet-arena/docs/issues" target="_blank" rel="noopener">Issues</a></li><li><strong>Alignment gaps:</strong> See <a href="./docs/ALIGN_REPORT.md" target="_blank" rel="noopener">ALIGN_REPORT.md</a></li></ul>
+<hr>
+<h2>📝 Document Conventions</h2>
+<p><strong>Cross-references:</strong> Links use relative paths (<code>docs/PRD.md#section-id</code>) and markdown anchors.</p>
+<p><strong>Code examples:</strong> Formatted with language tags:</p>
+<pre><code class="language-typescript">// TypeScript examples use ```typescript
+const petStats: PetStats = { speed: 50, strength: 60 };</code></pre>
+<p><strong>Diagrams:</strong> PlantUML source in <code>docs/diagrams/puml/</code> with rendered PNG in <code>docs/diagrams/</code>.</p>
+<p><strong>BDD Scenarios:</strong> Gherkin format with:</p>
+<ul><li><strong>Feature:</strong> User story or AC (links to PRD)</li><li><strong>Scenario:</strong> Specific test case</li><li><strong>Given/When/Then:</strong> Executable steps (link to step definitions once implemented)</li></ul>
+<hr>
+<h2>📋 Maintenance</h2>
+<h3>Weekly</h3>
+<ul><li>Check <a href="./docs/ALIGN_REPORT.md" target="_blank" rel="noopener">ALIGN_REPORT.md</a> for new misalignments</li><li>Run: <code>/gendoc-align-check</code> to validate doc consistency</li></ul>
+<h3>Monthly</h3>
+<ul><li>Review RTM.csv coverage metrics</li><li>Validate feature list against BDD scenario count</li></ul>
+<h3>Quarterly</h3>
+<ul><li>Full architectural review (EDD.md, ARCH.md, SCHEMA.md)</li><li>Game balance analysis (stat caps, rarity distribution, training buffs)</li></ul>
+<hr>
+<h2>📜 License</h2>
+<p>[Add license info here — MIT, CC-BY, proprietary, etc.]</p>
+<hr>
+<h2>👥 Team</h2>
+<ul><li><strong>Game Design:</strong> [Name]</li><li><strong>Product Management:</strong> [Name]</li><li><strong>Technical Architecture:</strong> [Name]</li><li><strong>QA / Test Strategy:</strong> [Name]</li></ul>
+<hr>
+<p><strong>Last Updated:</strong> 2026-05-04</p>
+<p><strong>Status:</strong> ⚠️ Specification Phase (30 alignment findings pending fixes)</p>
+<p><strong>Next Phase:</strong> Code Implementation (Backend, Frontend, Admin)</p><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">文件導覽</h2><div class="index-grid"><a class="index-card" href="idea.html"><span class="index-card__icon">💡</span><span class="index-card__title">構想文件 (IDEA)</span></a><a class="index-card" href="brd.html"><span class="index-card__icon">📋</span><span class="index-card__title">商業需求文件 (BRD)</span></a><a class="index-card" href="prd.html"><span class="index-card__icon">📝</span><span class="index-card__title">產品需求文件 (PRD)</span></a><a class="index-card" href="pdd.html"><span class="index-card__icon">🎨</span><span class="index-card__title">產品設計文件 (PDD)</span></a><a class="index-card" href="vdd.html"><span class="index-card__icon">🖼️</span><span class="index-card__title">視覺設計文件 (VDD)</span></a><a class="index-card" href="edd.html"><span class="index-card__icon">🏗️</span><span class="index-card__title">工程設計文件 (EDD)</span></a><a class="index-card" href="arch.html"><span class="index-card__icon">🧩</span><span class="index-card__title">架構設計</span></a><a class="index-card" href="api.html"><span class="index-card__icon">🔌</span><span class="index-card__title">API 文件</span></a><a class="index-card" href="schema.html"><span class="index-card__icon">🗄️</span><span class="index-card__title">Schema 文件</span></a><a class="index-card" href="frontend.html"><span class="index-card__icon">🖥️</span><span class="index-card__title">前端設計文件</span></a><a class="index-card" href="audio.html"><span class="index-card__icon">🔊</span><span class="index-card__title">音效設計文件</span></a><a class="index-card" href="anim.html"><span class="index-card__icon">🎬</span><span class="index-card__title">動畫特效文件</span></a><a class="index-card" href="client_impl.html"><span class="index-card__icon">🖥</span><span class="index-card__title">客戶端實作規格</span></a><a class="index-card" href="constants.html"><span class="index-card__icon">🔢</span><span class="index-card__title">業務常數文件</span></a><a class="index-card" href="test-plan.html"><span class="index-card__icon">✅</span><span class="index-card__title">測試計畫 (Test Plan)</span></a><a class="index-card" href="runbook.html"><span class="index-card__icon">📖</span><span class="index-card__title">Runbook</span></a><a class="index-card" href="local_deploy.html"><span class="index-card__icon">🚀</span><span class="index-card__title">本地部署指南</span></a><a class="index-card" href="rtm.html"><span class="index-card__icon">🗂️</span><span class="index-card__title">需求追蹤矩陣 (RTM)</span></a><a class="index-card" href="align_report.html"><span class="index-card__icon">🔍</span><span class="index-card__title">對齊報告</span></a><a class="index-card" href="admin_impl.html"><span class="index-card__icon">📄</span><span class="index-card__title">Admin Impl</span></a><a class="index-card" href="align-report.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align-Report</span></a><a class="index-card" href="align_fix_complete.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Complete</span></a><a class="index-card" href="align_fix_summary.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Summary</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Client</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Server</span></a><a class="index-card" href="cicd.html"><span class="index-card__icon">📄</span><span class="index-card__title">Cicd</span></a><a class="index-card" href="contracts.html"><span class="index-card__icon">📦</span><span class="index-card__title">機器可讀合約</span></a><a class="index-card" href="developer_guide.html"><span class="index-card__icon">📄</span><span class="index-card__title">Developer Guide</span></a><a class="index-card" href="implementation_readiness.html"><span class="index-card__icon">📄</span><span class="index-card__title">Implementation Readiness</span></a><a class="index-card" href="manifest.html"><span class="index-card__icon">📄</span><span class="index-card__title">Manifest</span></a><a class="index-card" href="resource.html"><span class="index-card__icon">📄</span><span class="index-card__title">Resource</span></a><a class="index-card" href="background-jobs.html"><span class="index-card__icon">📄</span><span class="index-card__title">Background-Jobs</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Server BDD</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Client BDD</span></a><a class="index-card" href="diag-activity-arena-battle.html"><span class="index-card__icon">📐</span><span class="index-card__title">UML 圖表 (24 張)</span><span class="index-card__desc">Server 24 / Frontend 0</span></a></div></section><section style="margin-top:3rem;padding:1.5rem;background:#fff;border:1px solid var(--border);border-radius:8px;"><h2 style="margin-top:0">📊 專案健康狀態</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:1rem"><div style="text-align:center;padding:1rem;background:var(--page-bg);border-radius:6px"><div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">已完成 STEP</div><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">0/20</div></div></div></section></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

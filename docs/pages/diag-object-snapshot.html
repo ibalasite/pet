@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物件圖：快照 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 物件圖：快照</p>
+    <h1 class="banner-title">物件圖：快照</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link active" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Object Diagram — pixel-pet-arena</h1>
+<blockquote><p>來源：EDD §4.1 Pet, §4.2 User, §4.3 ClaimCode, §4.4 ArenaMatch</p></blockquote>
+<h2>Snapshot 1 — Claimed Pet (IDLE state, Level 7)</h2>
+<div class="diagram-container"><pre class="mermaid">classDiagram
+    direction LR
+
+    class pet_claimed_p001 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;a3f8c1d2-4b5e-6f7a-8c9d-0e1f2a3b4c5d&quot;
+        seed = 8872341209
+        rarity = LEGENDARY
+        stat_speed = 72
+        stat_strength = 65
+        stat_stamina = 58
+        level = 7
+        total_training_actions = 73
+        owner_token_hash = &quot;sha256:e8d4f2a1...&quot;
+        is_banned = false
+        last_trained_at = &quot;2026-05-04T18:30:00Z&quot;
+        reserved_until = null
+        created_at = &quot;2026-04-28T09:12:00Z&quot;
+    }
+
+    class identity_maya_001 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;b2c9d1e3-5f6a-7b8c-9d0e-1f2a3b4c5d6e&quot;
+        email_hash = &quot;sha256:3d7f9a2b...&quot;
+        email_encrypted = &quot;AES256GCM:9f8e7d...&quot;
+        deletion_requested_at = null
+        created_at = &quot;2026-04-28T09:15:00Z&quot;
+    }
+
+    class training_log_t001 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;c3d4e5f6-6a7b-8c9d-0e1f-2a3b4c5d6e7f&quot;
+        pet_id = &quot;a3f8c1d2-...&quot;
+        training_type = SPEED
+        stat_delta = 3
+        trained_at = &quot;2026-05-04T18:30:00Z&quot;
+    }
+
+    pet_claimed_p001 --&gt; identity_maya_001 : ownedBy
+    pet_claimed_p001 --&gt; training_log_t001 : latestTraining</pre></div>
+<h2>Snapshot 2 — Arena Match (RESOLVED state, Race mode)</h2>
+<div class="diagram-container"><pre class="mermaid">classDiagram
+    direction LR
+
+    class arena_match_m001 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;d4e5f6a7-7b8c-9d0e-1f2a-3b4c5d6e7f8a&quot;
+        pet_a_id = &quot;a3f8c1d2-...&quot;
+        pet_b_id = &quot;f9e8d7c6-5b4a-3c2d-1e0f-8a7b6c5d4e3f&quot;
+        mode = RACE
+        winner_pet_id = &quot;a3f8c1d2-...&quot;
+        battle_log = &quot;{speed_a:72, speed_b:55, modifier_a:0.08, modifier_b:-0.11, outcome: pet_a_wins}&quot;
+        created_at = &quot;2026-05-04T20:00:00Z&quot;
+        completed_at = &quot;2026-05-04T20:00:12Z&quot;
+        is_flagged = false
+    }
+
+    class pet_winner_p001 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;a3f8c1d2-4b5e-6f7a-8c9d-0e1f2a3b4c5d&quot;
+        stat_speed = 72
+        level = 7
+        rarity = LEGENDARY
+    }
+
+    class pet_loser_p002 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;f9e8d7c6-5b4a-3c2d-1e0f-8a7b6c5d4e3f&quot;
+        stat_speed = 55
+        level = 4
+        rarity = COMMON
+    }
+
+    arena_match_m001 --&gt; pet_winner_p001 : winner
+    arena_match_m001 --&gt; pet_loser_p002 : loser</pre></div>
+<h2>Snapshot 3 — Claim Code (PENDING state, 6-digit OTP)</h2>
+<div class="diagram-container"><pre class="mermaid">classDiagram
+    direction LR
+
+    class claim_code_cc001 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;e5f6a7b8-8c9d-0e1f-2a3b-4c5d6e7f8a9b&quot;
+        pet_id = &quot;a3f8c1d2-4b5e-6f7a-8c9d-0e1f2a3b4c5d&quot;
+        email_hash = &quot;sha256:3d7f9a2b...&quot;
+        code_hash = &quot;sha256:7f3a9c1e...&quot;
+        expires_at = &quot;2026-05-04T09:30:00Z&quot;
+        used_at = null
+        attempts = 0
+        created_at = &quot;2026-05-04T09:15:00Z&quot;
+    }
+
+    class pet_unclaimed_p003 {
+        &lt;&lt;instance&gt;&gt;
+        id = &quot;a3f8c1d2-4b5e-6f7a-8c9d-0e1f2a3b4c5d&quot;
+        rarity = RARE
+        stat_speed = 10
+        stat_strength = 10
+        stat_stamina = 10
+        level = 1
+        owner_token_hash = null
+        reserved_until = &quot;2026-05-05T09:15:00Z&quot;
+    }
+
+    claim_code_cc001 --&gt; pet_unclaimed_p003 : unlocks</pre></div></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

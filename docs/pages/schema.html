@@ -1,103 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — Database Schema — pixel-pet-arena</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schema 文件 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">Database Schema — pixel-pet-arena</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>Database Schema — pixel-pet-arena</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="database-schema--pixel-pet-arena">Database Schema — pixel-pet-arena</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>DOC-ID</strong>: SCHEMA-PIXEL-PET-ARENA-20260503</p>
-<p class="doc-p"><strong>Status</strong>: DRAFT</p>
-<p class="doc-p"><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="1-overview">1. Overview</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Database</strong>: PostgreSQL 15+ managed via Supabase.</p>
-<p class="doc-p"><strong>Primary writer</strong> handles all mutations. <strong>One read replica</strong> handles leaderboard reads, public pet pages, and admin list views.</p>
-<p class="doc-p"><strong>Automated failover</strong> target: 60 seconds (<code>db_autofailover_time_seconds = 60</code>).</p>
-<p class="doc-p"><strong>Connection pool</strong> (managed by the <code>pg</code> Node.js driver):</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Setting</th><th>Value</th><th>Source</th></tr></thead>
-<tbody>
-<tr><td>`min` (pool floor)</td><td>20</td><td>`db_connection_pool_min_connections`</td></tr>
-<tr><td>`max` (pool burst)</td><td>50</td><td>`db_connection_pool_max_connections`</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p">All column names use <code>snake_case</code>. All IDs are <code>UUID</code> (generated via <code>gen_random_uuid()</code>) unless noted. <code>TEXT</code> is used where no meaningful length constraint exists. <code>VARCHAR(n)</code> is used only where a business length limit is meaningful (e.g. reason text capped at 500 chars, usernames capped at 64 chars).</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="2-tables">2. Tables</h2>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>DDL execution order</strong>: The PostgreSQL <code>ENUM</code> types defined in §3 must be created <strong>before</strong> any table in this section. Run all <code>CREATE TYPE</code> statements from §3 first, then execute the <code>CREATE TABLE</code> statements below in the order §2.1 → §2.12. Within the table definitions, §2.1 (<code>claim_identities</code>) must precede §2.2 (<code>pets</code>) because <code>pets.claim_identity_id</code> carries a foreign key to <code>claim_identities</code>; similarly, §2.8 (<code>marketplace_listings</code>) must precede §2.9 (<code>marketplace_transactions</code>), and §2.10 (<code>admin_accounts</code>) must precede §2.11 (<code>admin_audit_log</code>).</blockquote>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="21-codeclaimidentitiescode">2.1 <code>claim_identities</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">One row per unique email address. Implements PII minimization: only the SHA-256 hash is indexed; the raw email is stored only as AES-256-GCM ciphertext. Defined before <code>pets</code> because <code>pets.claim_identity_id</code> carries a foreign key to this table.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE claim_identities (
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Schema 文件</p>
+    <h1 class="banner-title">Schema 文件</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link active" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Database Schema — pixel-pet-arena</h1>
+<p><strong>DOC-ID</strong>: SCHEMA-PIXEL-PET-ARENA-20260503</p>
+<p><strong>Status</strong>: DRAFT</p>
+<p><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503</p>
+<hr>
+<h2>1. Overview</h2>
+<p><strong>Database</strong>: PostgreSQL 15+ managed via Supabase.</p>
+<p><strong>Primary writer</strong> handles all mutations. <strong>One read replica</strong> handles leaderboard reads, public pet pages, and admin list views.</p>
+<p><strong>Automated failover</strong> target: 60 seconds (<code>db_autofailover_time_seconds = 60</code>).</p>
+<p><strong>Connection pool</strong> (managed by the <code>pg</code> Node.js driver):</p>
+<table>
+<tr><th>Setting</th><th>Value</th><th>Source</th></tr>
+<tr><td><code>min</code> (pool floor)</td><td>20</td><td><code>db_connection_pool_min_connections</code></td></tr>
+<tr><td><code>max</code> (pool burst)</td><td>50</td><td><code>db_connection_pool_max_connections</code></td></tr>
+</table>
+<p>All column names use <code>snake_case</code>. All IDs are <code>UUID</code> (generated via <code>gen_random_uuid()</code>) unless noted. <code>TEXT</code> is used where no meaningful length constraint exists. <code>VARCHAR(n)</code> is used only where a business length limit is meaningful (e.g. reason text capped at 500 chars, usernames capped at 64 chars).</p>
+<hr>
+<h2>2. Tables</h2>
+<blockquote><p><strong>DDL execution order</strong>: The PostgreSQL <code>ENUM</code> types defined in §3 must be created <strong>before</strong> any table in this section. Run all <code>CREATE TYPE</code> statements from §3 first, then execute the <code>CREATE TABLE</code> statements below in the order §2.1 → §2.12. Within the table definitions, §2.1 (<code>claim_identities</code>) must precede §2.2 (<code>pets</code>) because <code>pets.claim_identity_id</code> carries a foreign key to <code>claim_identities</code>; similarly, §2.8 (<code>marketplace_listings</code>) must precede §2.9 (<code>marketplace_transactions</code>), and §2.10 (<code>admin_accounts</code>) must precede §2.11 (<code>admin_audit_log</code>).</p></blockquote>
+<h3>2.1 <code>claim_identities</code></h3>
+<p>One row per unique email address. Implements PII minimization: only the SHA-256 hash is indexed; the raw email is stored only as AES-256-GCM ciphertext. Defined before <code>pets</code> because <code>pets.claim_identity_id</code> carries a foreign key to this table.</p>
+<pre><code class="language-sql">CREATE TABLE claim_identities (
     id                    UUID        NOT NULL DEFAULT gen_random_uuid(),
     email_hash            VARCHAR(64) NOT NULL,
     email_encrypted       BYTEA       NULL,
@@ -109,24 +171,19 @@
     CONSTRAINT uq_claim_identities_email_hash UNIQUE (email_hash)
 );
 
-COMMENT ON COLUMN claim_identities.email_hash IS 'SHA-256 of lowercase email. Used for lookups. Never decryptable from this column alone.';
-COMMENT ON COLUMN claim_identities.email_encrypted IS 'AES-256-GCM encrypted raw email. Set to NULL within 24 hours (gdpr_email_hashing_internal_sla_hours = 24) of a GDPR erasure request (internal SLA) and fully NULL within 7 days (gdpr_email_deletion_window_days = 7).';
-COMMENT ON COLUMN claim_identities.deletion_requested_at IS 'Set when a GDPR erasure request is initiated. Triggers background erasure job.';
-COMMENT ON COLUMN claim_identities.updated_at IS 'Updated by the application on every mutation: when deletion_requested_at is set and when email_encrypted is nulled by the GDPR erasure job.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">-- GDPR erasure background job: finds rows pending email encryption removal.
+COMMENT ON COLUMN claim_identities.email_hash IS &#x27;SHA-256 of lowercase email. Used for lookups. Never decryptable from this column alone.&#x27;;
+COMMENT ON COLUMN claim_identities.email_encrypted IS &#x27;AES-256-GCM encrypted raw email. Set to NULL within 24 hours (gdpr_email_hashing_internal_sla_hours = 24) of a GDPR erasure request (internal SLA) and fully NULL within 7 days (gdpr_email_deletion_window_days = 7).&#x27;;
+COMMENT ON COLUMN claim_identities.deletion_requested_at IS &#x27;Set when a GDPR erasure request is initiated. Triggers background erasure job.&#x27;;
+COMMENT ON COLUMN claim_identities.updated_at IS &#x27;Updated by the application on every mutation: when deletion_requested_at is set and when email_encrypted is nulled by the GDPR erasure job.&#x27;;</code></pre>
+<pre><code class="language-sql">-- GDPR erasure background job: finds rows pending email encryption removal.
 -- Query: WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL
 CREATE INDEX idx_claim_identities_deletion
     ON claim_identities (deletion_requested_at)
     WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL;</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="22-codepetscode">2.2 <code>pets</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Stores every generated pet — unclaimed guests, claimed pets, and banned pets.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE pets (
+<hr>
+<h3>2.2 <code>pets</code></h3>
+<p>Stores every generated pet — unclaimed guests, claimed pets, and banned pets.</p>
+<pre><code class="language-sql">CREATE TABLE pets (
     id                   UUID        NOT NULL DEFAULT gen_random_uuid(),
     seed                 BIGINT      NOT NULL,
     rarity               rarity_enum NOT NULL,
@@ -144,7 +201,7 @@ CREATE INDEX idx_claim_identities_deletion
     is_banned            BOOLEAN     NOT NULL DEFAULT FALSE,
     banned_reason        TEXT        NULL,
     banned_at            TIMESTAMPTZ NULL,
-    generation_meta      JSONB       NOT NULL DEFAULT '{}',
+    generation_meta      JSONB       NOT NULL DEFAULT &#x27;{}&#x27;,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -182,40 +239,35 @@ CREATE INDEX idx_claim_identities_deletion
         )
 );
 
-COMMENT ON COLUMN pets.seed IS 'Procedural generation seed — globally unique; drives all sprite generation determinism.';
-COMMENT ON COLUMN pets.rarity IS 'Rarity tier assigned at generation time by weighted random draw: COMMON 60%, RARE 25%, EPIC 12%, LEGENDARY 3% (rarity_common_percent = 60, rarity_rare_percent = 25, rarity_epic_percent = 12, rarity_legendary_percent = 3). Weights are admin-tunable via config but must always sum to 100%.';
-COMMENT ON COLUMN pets.pet_name IS 'Auto-generated from species + color combination at row creation; derived from seed.';
-COMMENT ON COLUMN pets.stat_speed IS 'Speed stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
-COMMENT ON COLUMN pets.stat_strength IS 'Strength stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
-COMMENT ON COLUMN pets.stat_stamina IS 'Stamina stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
-COMMENT ON COLUMN pets.level IS 'Derived: MAX(pet_level_default, FLOOR(total_training_actions / pet_level_formula_divisor)) capped at pet_level_max (pet_level_default = 1, pet_level_formula_divisor = 10, pet_level_max = 100). At 0 training actions the formula yields 0, so the lower bound clamps it to pet_level_default = 1. Updated on every training commit.';
-COMMENT ON COLUMN pets.total_training_actions IS 'Cumulative count of training actions; feeds the level formula.';
-COMMENT ON COLUMN pets.last_trained_at IS 'Timestamp of the most recent training action. NULL if never trained. Used to compute neglect state (threshold: 3 days; training_neglect_threshold_days = 3).';
-COMMENT ON COLUMN pets.claimed_at IS 'UTC timestamp when the email-OTP claim flow completed successfully. NULL = pet is unclaimed (guest preview). Set atomically with owner_token_hash (enforced by chk_pet_claim_consistency). Used for claim conversion analytics.';
-COMMENT ON COLUMN pets.owner_token_hash IS 'SHA-256 hash of the pet access token (minimum pet_access_token_min_bytes = 32 bytes). NULL = unclaimed. Raw token is never stored.';
-COMMENT ON COLUMN pets.claim_identity_id IS 'Set at claim time. Enables GDPR erasure lookup after claim_codes rows are purged.';
-COMMENT ON COLUMN pets.reserved_until IS 'Set to NOW() + pet_reservation_ttl_hours hours (pet_reservation_ttl_hours = 24) when pet is generated for guest preview. NULL for claimed pets. Cleanup job target.';
-COMMENT ON COLUMN pets.generation_meta IS 'JSONB vector: {body, head, color_palette, accessory, rarity_trait, pattern} — 6 dimensions (pet_generation_dimensions = 6).';
-COMMENT ON COLUMN pets.is_banned IS 'TRUE = pet is banned from arena and removed from leaderboard:global via ZREM (reflected within leaderboard_ban_reflection_time_minutes = 5 minutes). Paired with banned_at and banned_reason (enforced by chk_pet_banned_at_consistency and chk_pet_banned_reason_consistency).';
-COMMENT ON COLUMN pets.banned_at IS 'UTC timestamp when the ban was applied. NULL iff is_banned = FALSE (enforced by chk_pet_banned_at_consistency). Immutable after ban — not reset if a ban is reviewed or overridden via a future unban flow.';
-COMMENT ON COLUMN pets.banned_reason IS 'Admin-supplied ban reason. Max 500 characters (admin_moderation_reason_max_chars = 500).';
-COMMENT ON COLUMN pets.updated_at IS 'Updated by the application on every mutation: claim (owner_token_hash + claimed_at set), training (stats + level updated), reservation creation/expiry, and ban action.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE INDEX idx_pets_rarity           ON pets (rarity);
+COMMENT ON COLUMN pets.seed IS &#x27;Procedural generation seed — globally unique; drives all sprite generation determinism.&#x27;;
+COMMENT ON COLUMN pets.rarity IS &#x27;Rarity tier assigned at generation time by weighted random draw: COMMON 60%, RARE 25%, EPIC 12%, LEGENDARY 3% (rarity_common_percent = 60, rarity_rare_percent = 25, rarity_epic_percent = 12, rarity_legendary_percent = 3). Weights are admin-tunable via config but must always sum to 100%.&#x27;;
+COMMENT ON COLUMN pets.pet_name IS &#x27;Auto-generated from species + color combination at row creation; derived from seed.&#x27;;
+COMMENT ON COLUMN pets.stat_speed IS &#x27;Speed stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).&#x27;;
+COMMENT ON COLUMN pets.stat_strength IS &#x27;Strength stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).&#x27;;
+COMMENT ON COLUMN pets.stat_stamina IS &#x27;Stamina stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).&#x27;;
+COMMENT ON COLUMN pets.level IS &#x27;Derived: MAX(pet_level_default, FLOOR(total_training_actions / pet_level_formula_divisor)) capped at pet_level_max (pet_level_default = 1, pet_level_formula_divisor = 10, pet_level_max = 100). At 0 training actions the formula yields 0, so the lower bound clamps it to pet_level_default = 1. Updated on every training commit.&#x27;;
+COMMENT ON COLUMN pets.total_training_actions IS &#x27;Cumulative count of training actions; feeds the level formula.&#x27;;
+COMMENT ON COLUMN pets.last_trained_at IS &#x27;Timestamp of the most recent training action. NULL if never trained. Used to compute neglect state (threshold: 3 days; training_neglect_threshold_days = 3).&#x27;;
+COMMENT ON COLUMN pets.claimed_at IS &#x27;UTC timestamp when the email-OTP claim flow completed successfully. NULL = pet is unclaimed (guest preview). Set atomically with owner_token_hash (enforced by chk_pet_claim_consistency). Used for claim conversion analytics.&#x27;;
+COMMENT ON COLUMN pets.owner_token_hash IS &#x27;SHA-256 hash of the pet access token (minimum pet_access_token_min_bytes = 32 bytes). NULL = unclaimed. Raw token is never stored.&#x27;;
+COMMENT ON COLUMN pets.claim_identity_id IS &#x27;Set at claim time. Enables GDPR erasure lookup after claim_codes rows are purged.&#x27;;
+COMMENT ON COLUMN pets.reserved_until IS &#x27;Set to NOW() + pet_reservation_ttl_hours hours (pet_reservation_ttl_hours = 24) when pet is generated for guest preview. NULL for claimed pets. Cleanup job target.&#x27;;
+COMMENT ON COLUMN pets.generation_meta IS &#x27;JSONB vector: {body, head, color_palette, accessory, rarity_trait, pattern} — 6 dimensions (pet_generation_dimensions = 6).&#x27;;
+COMMENT ON COLUMN pets.is_banned IS &#x27;TRUE = pet is banned from arena and removed from leaderboard:global via ZREM (reflected within leaderboard_ban_reflection_time_minutes = 5 minutes). Paired with banned_at and banned_reason (enforced by chk_pet_banned_at_consistency and chk_pet_banned_reason_consistency).&#x27;;
+COMMENT ON COLUMN pets.banned_at IS &#x27;UTC timestamp when the ban was applied. NULL iff is_banned = FALSE (enforced by chk_pet_banned_at_consistency). Immutable after ban — not reset if a ban is reviewed or overridden via a future unban flow.&#x27;;
+COMMENT ON COLUMN pets.banned_reason IS &#x27;Admin-supplied ban reason. Max 500 characters (admin_moderation_reason_max_chars = 500).&#x27;;
+COMMENT ON COLUMN pets.updated_at IS &#x27;Updated by the application on every mutation: claim (owner_token_hash + claimed_at set), training (stats + level updated), reservation creation/expiry, and ban action.&#x27;;</code></pre>
+<pre><code class="language-sql">CREATE INDEX idx_pets_rarity           ON pets (rarity);
 CREATE INDEX idx_pets_claimed_at       ON pets (claimed_at)        WHERE claimed_at IS NOT NULL;
 CREATE INDEX idx_pets_is_banned        ON pets (is_banned)         WHERE is_banned = TRUE;
 CREATE INDEX idx_pets_owner_token_hash ON pets (owner_token_hash)  WHERE owner_token_hash IS NOT NULL;
 CREATE INDEX idx_pets_last_trained_at  ON pets (last_trained_at)   WHERE last_trained_at IS NOT NULL;
 CREATE INDEX idx_pets_claim_identity   ON pets (claim_identity_id) WHERE claim_identity_id IS NOT NULL;
 CREATE INDEX idx_pets_reserved_until   ON pets (reserved_until)    WHERE reserved_until IS NOT NULL;</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="23-codeclaimcodescode">2.3 <code>claim_codes</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">One-time OTP records for the email claim and recovery flows. Never stores the plaintext code — only its SHA-256 hash.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE claim_codes (
+<hr>
+<h3>2.3 <code>claim_codes</code></h3>
+<p>One-time OTP records for the email claim and recovery flows. Never stores the plaintext code — only its SHA-256 hash.</p>
+<pre><code class="language-sql">CREATE TABLE claim_codes (
     id          UUID        NOT NULL DEFAULT gen_random_uuid(),
     pet_id      UUID        NOT NULL,
     email_hash  VARCHAR(64) NOT NULL,
@@ -236,27 +288,22 @@ CREATE INDEX idx_pets_reserved_until   ON pets (reserved_until)    WHERE reserve
         CHECK (used_at IS NULL OR used_at &gt;= created_at)
 );
 
-COMMENT ON COLUMN claim_codes.email_hash IS 'SHA-256 of lowercase email supplied during the claim flow. Must match claim_identities.email_hash for the OTP to be accepted. Index idx_claim_codes_email_hash supports the OTP lookup query WHERE email_hash = $1.';
-COMMENT ON COLUMN claim_codes.code_hash IS 'SHA-256 of the 6-digit numeric OTP (claim_code_digits = 6). Plaintext OTP is never stored.';
-COMMENT ON COLUMN claim_codes.expires_at IS 'NOW() + 15 minutes at creation (claim_code_expiry_minutes = 15).';
-COMMENT ON COLUMN claim_codes.attempts IS 'Informational counter incremented on each verify call. Enforcement is in Redis (rl:code_entry:{session_id}), not this column.';
-COMMENT ON COLUMN claim_codes.used_at IS 'Set when the OTP is successfully verified. Background job purges rows 72h after creation or first use, whichever is later (claim_token_cleanup_ttl_hours = 72).';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE INDEX idx_claim_codes_pet_id     ON claim_codes (pet_id);
+COMMENT ON COLUMN claim_codes.email_hash IS &#x27;SHA-256 of lowercase email supplied during the claim flow. Must match claim_identities.email_hash for the OTP to be accepted. Index idx_claim_codes_email_hash supports the OTP lookup query WHERE email_hash = $1.&#x27;;
+COMMENT ON COLUMN claim_codes.code_hash IS &#x27;SHA-256 of the 6-digit numeric OTP (claim_code_digits = 6). Plaintext OTP is never stored.&#x27;;
+COMMENT ON COLUMN claim_codes.expires_at IS &#x27;NOW() + 15 minutes at creation (claim_code_expiry_minutes = 15).&#x27;;
+COMMENT ON COLUMN claim_codes.attempts IS &#x27;Informational counter incremented on each verify call. Enforcement is in Redis (rl:code_entry:{session_id}), not this column.&#x27;;
+COMMENT ON COLUMN claim_codes.used_at IS &#x27;Set when the OTP is successfully verified. Background job purges rows 72h after creation or first use, whichever is later (claim_token_cleanup_ttl_hours = 72).&#x27;;</code></pre>
+<pre><code class="language-sql">CREATE INDEX idx_claim_codes_pet_id     ON claim_codes (pet_id);
 CREATE INDEX idx_claim_codes_email_hash ON claim_codes (email_hash);
 CREATE INDEX idx_claim_codes_expires_at ON claim_codes (expires_at);
 -- Background cleanup job: deletes rows 72h after creation or first use, whichever is LATER (claim_token_cleanup_ttl_hours = 72).
--- Query: WHERE created_at &lt; NOW() - INTERVAL '72 hours' AND (used_at IS NULL OR used_at &lt; NOW() - INTERVAL '72 hours')
+-- Query: WHERE created_at &lt; NOW() - INTERVAL &#x27;72 hours&#x27; AND (used_at IS NULL OR used_at &lt; NOW() - INTERVAL &#x27;72 hours&#x27;)
 CREATE INDEX idx_claim_codes_created_at ON claim_codes (created_at);
 CREATE INDEX idx_claim_codes_used_at    ON claim_codes (used_at) WHERE used_at IS NOT NULL;</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="24-codearenamatchescode">2.4 <code>arena_matches</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Append-only record of every completed battle. Battle outcome columns are never mutated after insert; however, <code>is_flagged</code> and <code>flagged_at</code> can be toggled by admin flag/unflag actions. <code>pet_b_id</code> and <code>winner_pet_id</code> use <code>ON DELETE SET NULL</code> so that the match row is retained for audit integrity even if a pet row is later affected.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE arena_matches (
+<hr>
+<h3>2.4 <code>arena_matches</code></h3>
+<p>Append-only record of every completed battle. Battle outcome columns are never mutated after insert; however, <code>is_flagged</code> and <code>flagged_at</code> can be toggled by admin flag/unflag actions. <code>pet_b_id</code> and <code>winner_pet_id</code> use <code>ON DELETE SET NULL</code> so that the match row is retained for audit integrity even if a pet row is later affected.</p>
+<pre><code class="language-sql">CREATE TABLE arena_matches (
     id               UUID           NOT NULL DEFAULT gen_random_uuid(),
     pet_a_id         UUID           NOT NULL,
     pet_b_id         UUID           NULL,
@@ -267,7 +314,7 @@ CREATE INDEX idx_claim_codes_used_at    ON claim_codes (used_at) WHERE used_at I
     stat_delta_a     SMALLINT       NOT NULL DEFAULT 0,
     stat_delta_b     SMALLINT       NOT NULL DEFAULT 0,
     duration_seconds SMALLINT       NOT NULL,
-    battle_log       JSONB          NOT NULL DEFAULT '[]',
+    battle_log       JSONB          NOT NULL DEFAULT &#x27;[]&#x27;,
     is_flagged       BOOLEAN        NOT NULL DEFAULT FALSE,
     flagged_at       TIMESTAMPTZ    NULL,
     completed_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
@@ -308,36 +355,31 @@ CREATE INDEX idx_claim_codes_used_at    ON claim_codes (used_at) WHERE used_at I
         )
 );
 
-COMMENT ON COLUMN arena_matches.mode IS 'Battle mode. RACE = speed-based contest (stat_speed is the primary determining stat); SUMO = strength-based contest (stat_strength is the primary determining stat). Drives the outcome formula applied to the random_seed modifier.';
-COMMENT ON COLUMN arena_matches.pet_a_id IS 'Challenger pet. ON DELETE RESTRICT: pet row is retained for audit integrity.';
-COMMENT ON COLUMN arena_matches.pet_b_id IS 'Opponent pet. NULL if AI opponent (is_ai_opponent = TRUE) or if the pet row has been administratively removed after match completion (ON DELETE SET NULL). Non-null at insert time for human-vs-human matches; enforced by application, not a CHECK constraint (ON DELETE SET NULL would violate a database-level NOT NULL check).';
-COMMENT ON COLUMN arena_matches.is_ai_opponent IS 'TRUE = pet_a fought an AI-controlled opponent; pet_b_id is always NULL for AI matches (enforced by chk_arena_match_ai_opponent_consistency). FALSE = human-vs-human match.';
-COMMENT ON COLUMN arena_matches.winner_pet_id IS 'pet_id of the winning pet. NULL at insert time only when the AI opponent wins (is_ai_opponent = TRUE and the player lost); non-NULL at insert time for all human-vs-human matches. May subsequently become NULL via ON DELETE SET NULL if the winning pet row is later administratively removed. Constrained to be pet_a_id or pet_b_id (chk_arena_match_winner_is_combatant).';
-COMMENT ON COLUMN arena_matches.completed_at IS 'UTC timestamp when the battle result was committed. Doubles as the row creation timestamp (immutable after insert except for is_flagged/flagged_at mutations).';
-COMMENT ON COLUMN arena_matches.random_seed IS 'Seeded random value used for the ±15% outcome modifier (arena_battle_outcome_random_modifier_percent = 15). Enables deterministic replay.';
-COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Food buff bonus (delta) added to pet_a''s base stat for this match. 0 = no active buff. Always &gt;= 0 (chk_arena_match_stat_delta_a_nonneg); food buff magnitude is strictly positive.';
-COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Food buff bonus (delta) added to pet_b''s base stat for this match. 0 = no active buff or AI opponent. Always &gt;= 0 (chk_arena_match_stat_delta_b_nonneg).';
-COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 seconds (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15).';
-COMMENT ON COLUMN arena_matches.battle_log IS 'Structured event sequence array for client-side replay.';
-COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to admin_audit_log.detail, not stored here.';
-COMMENT ON COLUMN arena_matches.flagged_at IS 'Timestamp when the match was most recently flagged. NULL when is_flagged = FALSE.';
-COMMENT ON COLUMN arena_matches.updated_at IS 'Updated by the application on every mutation: when is_flagged is set to TRUE (POST .../flag) or cleared to FALSE (DELETE .../flag). Unchanged on insert-only path.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE INDEX idx_arena_matches_completed_at  ON arena_matches (completed_at);
+COMMENT ON COLUMN arena_matches.mode IS &#x27;Battle mode. RACE = speed-based contest (stat_speed is the primary determining stat); SUMO = strength-based contest (stat_strength is the primary determining stat). Drives the outcome formula applied to the random_seed modifier.&#x27;;
+COMMENT ON COLUMN arena_matches.pet_a_id IS &#x27;Challenger pet. ON DELETE RESTRICT: pet row is retained for audit integrity.&#x27;;
+COMMENT ON COLUMN arena_matches.pet_b_id IS &#x27;Opponent pet. NULL if AI opponent (is_ai_opponent = TRUE) or if the pet row has been administratively removed after match completion (ON DELETE SET NULL). Non-null at insert time for human-vs-human matches; enforced by application, not a CHECK constraint (ON DELETE SET NULL would violate a database-level NOT NULL check).&#x27;;
+COMMENT ON COLUMN arena_matches.is_ai_opponent IS &#x27;TRUE = pet_a fought an AI-controlled opponent; pet_b_id is always NULL for AI matches (enforced by chk_arena_match_ai_opponent_consistency). FALSE = human-vs-human match.&#x27;;
+COMMENT ON COLUMN arena_matches.winner_pet_id IS &#x27;pet_id of the winning pet. NULL at insert time only when the AI opponent wins (is_ai_opponent = TRUE and the player lost); non-NULL at insert time for all human-vs-human matches. May subsequently become NULL via ON DELETE SET NULL if the winning pet row is later administratively removed. Constrained to be pet_a_id or pet_b_id (chk_arena_match_winner_is_combatant).&#x27;;
+COMMENT ON COLUMN arena_matches.completed_at IS &#x27;UTC timestamp when the battle result was committed. Doubles as the row creation timestamp (immutable after insert except for is_flagged/flagged_at mutations).&#x27;;
+COMMENT ON COLUMN arena_matches.random_seed IS &#x27;Seeded random value used for the ±15% outcome modifier (arena_battle_outcome_random_modifier_percent = 15). Enables deterministic replay.&#x27;;
+COMMENT ON COLUMN arena_matches.stat_delta_a IS &#x27;Food buff bonus (delta) added to pet_a&#x27;&#x27;s base stat for this match. 0 = no active buff. Always &gt;= 0 (chk_arena_match_stat_delta_a_nonneg); food buff magnitude is strictly positive.&#x27;;
+COMMENT ON COLUMN arena_matches.stat_delta_b IS &#x27;Food buff bonus (delta) added to pet_b&#x27;&#x27;s base stat for this match. 0 = no active buff or AI opponent. Always &gt;= 0 (chk_arena_match_stat_delta_b_nonneg).&#x27;;
+COMMENT ON COLUMN arena_matches.duration_seconds IS &#x27;Animation window: 5–15 seconds (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15).&#x27;;
+COMMENT ON COLUMN arena_matches.battle_log IS &#x27;Structured event sequence array for client-side replay.&#x27;;
+COMMENT ON COLUMN arena_matches.is_flagged IS &#x27;Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to admin_audit_log.detail, not stored here.&#x27;;
+COMMENT ON COLUMN arena_matches.flagged_at IS &#x27;Timestamp when the match was most recently flagged. NULL when is_flagged = FALSE.&#x27;;
+COMMENT ON COLUMN arena_matches.updated_at IS &#x27;Updated by the application on every mutation: when is_flagged is set to TRUE (POST .../flag) or cleared to FALSE (DELETE .../flag). Unchanged on insert-only path.&#x27;;</code></pre>
+<pre><code class="language-sql">CREATE INDEX idx_arena_matches_completed_at  ON arena_matches (completed_at);
 CREATE INDEX idx_arena_matches_winner        ON arena_matches (winner_pet_id);
 -- Leading pet_a_id / pet_b_id column also serves FK integrity scans (ON DELETE RESTRICT / SET NULL).
 CREATE INDEX idx_arena_matches_pet_a_history ON arena_matches (pet_a_id, completed_at DESC);
 CREATE INDEX idx_arena_matches_pet_b_history ON arena_matches (pet_b_id, completed_at DESC);
 -- Supports GET /admin/api/battles?flagged=true (filters WHERE is_flagged = TRUE). Flag/unflag mutations use the PK, not this index.
 CREATE INDEX idx_arena_matches_is_flagged    ON arena_matches (is_flagged) WHERE is_flagged = TRUE;</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="25-codeleaderboardsnapshotscode">2.5 <code>leaderboard_snapshots</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Periodic snapshots of the leaderboard used for history reporting. The live leaderboard is authoritative from Redis; these rows are the durable PostgreSQL backup.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE leaderboard_snapshots (
+<hr>
+<h3>2.5 <code>leaderboard_snapshots</code></h3>
+<p>Periodic snapshots of the leaderboard used for history reporting. The live leaderboard is authoritative from Redis; these rows are the durable PostgreSQL backup.</p>
+<pre><code class="language-sql">CREATE TABLE leaderboard_snapshots (
     id            UUID        NOT NULL DEFAULT gen_random_uuid(),
     snapshot_time TIMESTAMPTZ NOT NULL,
     entries       JSONB       NOT NULL,
@@ -346,21 +388,16 @@ CREATE INDEX idx_arena_matches_is_flagged    ON arena_matches (is_flagged) WHERE
     CONSTRAINT pk_leaderboard_snapshots PRIMARY KEY (id)
 );
 
-COMMENT ON COLUMN leaderboard_snapshots.entries IS 'Array of top 500 entries: [{rank, pet_id, pet_name, score, win_rate, rarity, level}]. Size: leaderboard_snapshot_retention_top_n = 500.';
-COMMENT ON COLUMN leaderboard_snapshots.snapshot_time IS 'UTC timestamp when this snapshot was taken. Retention: rolling 12 months (leaderboard_snapshot_retention_months = 12).';
-COMMENT ON COLUMN leaderboard_snapshots.created_at IS 'System timestamp when the row was inserted. Distinct from snapshot_time, which is the business timestamp of the leaderboard state captured.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">-- Background retention job: deletes snapshots older than 12 months (leaderboard_snapshot_retention_months = 12).
--- Query: DELETE FROM leaderboard_snapshots WHERE snapshot_time &lt; NOW() - INTERVAL '12 months'
+COMMENT ON COLUMN leaderboard_snapshots.entries IS &#x27;Array of top 500 entries: [{rank, pet_id, pet_name, score, win_rate, rarity, level}]. Size: leaderboard_snapshot_retention_top_n = 500.&#x27;;
+COMMENT ON COLUMN leaderboard_snapshots.snapshot_time IS &#x27;UTC timestamp when this snapshot was taken. Retention: rolling 12 months (leaderboard_snapshot_retention_months = 12).&#x27;;
+COMMENT ON COLUMN leaderboard_snapshots.created_at IS &#x27;System timestamp when the row was inserted. Distinct from snapshot_time, which is the business timestamp of the leaderboard state captured.&#x27;;</code></pre>
+<pre><code class="language-sql">-- Background retention job: deletes snapshots older than 12 months (leaderboard_snapshot_retention_months = 12).
+-- Query: DELETE FROM leaderboard_snapshots WHERE snapshot_time &lt; NOW() - INTERVAL &#x27;12 months&#x27;
 CREATE INDEX idx_leaderboard_snapshots_time ON leaderboard_snapshots (snapshot_time DESC);</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="26-codetraininglogscode">2.6 <code>training_logs</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">One row per completed training action. Enables per-pet daily action counting and the cumulative <code>total_training_actions</code> aggregate that feeds the level formula. Rows are retained indefinitely as a behavioral audit trail (referenced by <code>GET /api/v1/pets/:petId/stats</code>).</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE training_logs (
+<hr>
+<h3>2.6 <code>training_logs</code></h3>
+<p>One row per completed training action. Enables per-pet daily action counting and the cumulative <code>total_training_actions</code> aggregate that feeds the level formula. Rows are retained indefinitely as a behavioral audit trail (referenced by <code>GET /api/v1/pets/:petId/stats</code>).</p>
+<pre><code class="language-sql">CREATE TABLE training_logs (
     id            UUID               NOT NULL DEFAULT gen_random_uuid(),
     pet_id        UUID               NOT NULL,
     training_type training_type_enum NOT NULL,
@@ -377,21 +414,16 @@ CREATE INDEX idx_leaderboard_snapshots_time ON leaderboard_snapshots (snapshot_t
         CHECK (stat_after BETWEEN 1 AND 100)
 );
 
-COMMENT ON COLUMN training_logs.training_type IS 'RUN → speed, STRENGTH → strength, STAMINA → stamina. Enforced by training_type_enum.';
-COMMENT ON COLUMN training_logs.stat_delta IS 'Stat points gained this action: random integer in [1, 3] (training_stat_points_min = 1, training_stat_points_max = 3).';
-COMMENT ON COLUMN training_logs.stat_after IS 'Absolute stat value after this action is applied. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100).';
-COMMENT ON COLUMN training_logs.completed_at IS 'UTC timestamp of the action. Daily action limit (training_actions_per_day = 3) is enforced by counting rows WHERE pet_id = ? AND completed_at &gt;= UTC_DATE.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">-- Leading pet_id column also serves the FK CASCADE scan (ON DELETE CASCADE).
+COMMENT ON COLUMN training_logs.training_type IS &#x27;RUN → speed, STRENGTH → strength, STAMINA → stamina. Enforced by training_type_enum.&#x27;;
+COMMENT ON COLUMN training_logs.stat_delta IS &#x27;Stat points gained this action: random integer in [1, 3] (training_stat_points_min = 1, training_stat_points_max = 3).&#x27;;
+COMMENT ON COLUMN training_logs.stat_after IS &#x27;Absolute stat value after this action is applied. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100).&#x27;;
+COMMENT ON COLUMN training_logs.completed_at IS &#x27;UTC timestamp of the action. Daily action limit (training_actions_per_day = 3) is enforced by counting rows WHERE pet_id = ? AND completed_at &gt;= UTC_DATE.&#x27;;</code></pre>
+<pre><code class="language-sql">-- Leading pet_id column also serves the FK CASCADE scan (ON DELETE CASCADE).
 CREATE INDEX idx_training_logs_completed_at ON training_logs (pet_id, completed_at DESC);</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="27-codefoodbuffscode">2.7 <code>food_buffs</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Active and historical food buff records per pet. Permanent buffs have <code>expires_at = NULL</code>. Record rows are cleaned up 30 days after consumption (<code>food_buff_record_retention_days = 30</code>).</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE food_buffs (
+<hr>
+<h3>2.7 <code>food_buffs</code></h3>
+<p>Active and historical food buff records per pet. Permanent buffs have <code>expires_at = NULL</code>. Record rows are cleaned up 30 days after consumption (<code>food_buff_record_retention_days = 30</code>).</p>
+<pre><code class="language-sql">CREATE TABLE food_buffs (
     id                UUID        NOT NULL DEFAULT gen_random_uuid(),
     pet_id            UUID        NOT NULL,
     food_type         VARCHAR(50) NOT NULL,
@@ -420,29 +452,24 @@ CREATE INDEX idx_training_logs_completed_at ON training_logs (pet_id, completed_
         CHECK (expires_at IS NULL OR expires_at &lt;= record_expires_at)
 );
 
-COMMENT ON COLUMN food_buffs.food_type IS 'Application-defined food item identifier (e.g. ''speed_berry'', ''iron_kibble''). Used by the client to render the correct food icon and label. Not a database enum; valid values are defined by the food catalogue in the application layer and documented in the API spec. Max 50 characters (VARCHAR(50)).';
-COMMENT ON COLUMN food_buffs.is_permanent IS 'TRUE = buff never expires (expires_at IS NULL, enforced by chk_food_buff_expires_at_permanent). FALSE = buff has a finite duration (expires_at IS NOT NULL).';
-COMMENT ON COLUMN food_buffs.consumed_at IS 'UTC timestamp when the food item was applied to the pet. Defaults to NOW() at row insertion. Serves as the reference point for expires_at and record_expires_at calculations.';
-COMMENT ON COLUMN food_buffs.buff_stat IS 'Stat affected: speed, strength, or stamina.';
-COMMENT ON COLUMN food_buffs.magnitude IS 'Stat points granted. Must be &gt; 0. Admin-configurable multiplier range: 0.5×–5.0× (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0).';
-COMMENT ON COLUMN food_buffs.expires_at IS 'NULL for permanent buffs. Set to consumed_at + duration for temporary buffs. chk_food_buff_expires_before_record_cleanup ensures expires_at &lt;= record_expires_at so the buff always expires before its record is deleted by the background cleanup job.';
-COMMENT ON COLUMN food_buffs.record_expires_at IS 'consumed_at + 30 days (food_buff_record_retention_days = 30). Target for background cleanup job. Enforced to be &gt;= expires_at (chk_food_buff_expires_before_record_cleanup) so the record is never deleted while the buff is still logically active.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE INDEX idx_food_buffs_pet_id         ON food_buffs (pet_id);
+COMMENT ON COLUMN food_buffs.food_type IS &#x27;Application-defined food item identifier (e.g. &#x27;&#x27;speed_berry&#x27;&#x27;, &#x27;&#x27;iron_kibble&#x27;&#x27;). Used by the client to render the correct food icon and label. Not a database enum; valid values are defined by the food catalogue in the application layer and documented in the API spec. Max 50 characters (VARCHAR(50)).&#x27;;
+COMMENT ON COLUMN food_buffs.is_permanent IS &#x27;TRUE = buff never expires (expires_at IS NULL, enforced by chk_food_buff_expires_at_permanent). FALSE = buff has a finite duration (expires_at IS NOT NULL).&#x27;;
+COMMENT ON COLUMN food_buffs.consumed_at IS &#x27;UTC timestamp when the food item was applied to the pet. Defaults to NOW() at row insertion. Serves as the reference point for expires_at and record_expires_at calculations.&#x27;;
+COMMENT ON COLUMN food_buffs.buff_stat IS &#x27;Stat affected: speed, strength, or stamina.&#x27;;
+COMMENT ON COLUMN food_buffs.magnitude IS &#x27;Stat points granted. Must be &gt; 0. Admin-configurable multiplier range: 0.5×–5.0× (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0).&#x27;;
+COMMENT ON COLUMN food_buffs.expires_at IS &#x27;NULL for permanent buffs. Set to consumed_at + duration for temporary buffs. chk_food_buff_expires_before_record_cleanup ensures expires_at &lt;= record_expires_at so the buff always expires before its record is deleted by the background cleanup job.&#x27;;
+COMMENT ON COLUMN food_buffs.record_expires_at IS &#x27;consumed_at + 30 days (food_buff_record_retention_days = 30). Target for background cleanup job. Enforced to be &gt;= expires_at (chk_food_buff_expires_before_record_cleanup) so the record is never deleted while the buff is still logically active.&#x27;;</code></pre>
+<pre><code class="language-sql">CREATE INDEX idx_food_buffs_pet_id         ON food_buffs (pet_id);
 CREATE INDEX idx_food_buffs_record_expires ON food_buffs (record_expires_at);</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="28-codemarketplacelistingscode">2.8 <code>marketplace_listings</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Active and historical pet trade listings. Phase 3 feature, gated by <code>FF_MARKETPLACE</code>. A partial unique index prevents duplicate active listings per pet at the database level.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE marketplace_listings (
+<hr>
+<h3>2.8 <code>marketplace_listings</code></h3>
+<p>Active and historical pet trade listings. Phase 3 feature, gated by <code>FF_MARKETPLACE</code>. A partial unique index prevents duplicate active listings per pet at the database level.</p>
+<pre><code class="language-sql">CREATE TABLE marketplace_listings (
     id                UUID         NOT NULL DEFAULT gen_random_uuid(),
     pet_id            UUID         NOT NULL,
     seller_token_hash VARCHAR(64)  NOT NULL,
     price_credits     INTEGER      NOT NULL,
-    status            listing_status_enum NOT NULL DEFAULT 'active',
+    status            listing_status_enum NOT NULL DEFAULT &#x27;active&#x27;,
     listed_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     expires_at        TIMESTAMPTZ  NULL,
     completed_at      TIMESTAMPTZ  NULL,
@@ -455,8 +482,8 @@ CREATE INDEX idx_food_buffs_record_expires ON food_buffs (record_expires_at);</c
         CHECK (price_credits &gt; 0),
     CONSTRAINT chk_marketplace_listing_completed_at_consistency
         CHECK (
-            (status = 'active'   AND completed_at IS NULL) OR
-            (status != 'active'  AND completed_at IS NOT NULL)
+            (status = &#x27;active&#x27;   AND completed_at IS NULL) OR
+            (status != &#x27;active&#x27;  AND completed_at IS NOT NULL)
         ),
     CONSTRAINT chk_marketplace_listing_expires_at_after_listed
         CHECK (expires_at IS NULL OR expires_at &gt; listed_at),
@@ -464,37 +491,32 @@ CREATE INDEX idx_food_buffs_record_expires ON food_buffs (record_expires_at);</c
         CHECK (completed_at IS NULL OR completed_at &gt;= listed_at)
 );
 
-COMMENT ON COLUMN marketplace_listings.pet_id IS 'The pet being listed for trade. ON DELETE RESTRICT: prevents hard-deleting a pet while it has any listing row (active, sold, or cancelled).';
-COMMENT ON COLUMN marketplace_listings.seller_token_hash IS 'SHA-256 hash of the seller pet access token. Used for ownership verification.';
-COMMENT ON COLUMN marketplace_listings.price_credits IS 'Asking price in food credits. Minimum enforced by application: (pet_level × trade_min_price_formula_level_coeff) + (rarity_multiplier × trade_min_price_formula_rarity_coeff) (trade_min_price_formula_level_coeff = 100, trade_min_price_formula_rarity_coeff = 500).';
-COMMENT ON COLUMN marketplace_listings.listed_at IS 'UTC timestamp when the listing was created. Defaults to NOW(). Copied verbatim into marketplace_transactions.listed_at at sale time for financial audit traceability. Sort key for idx_marketplace_listings_listed_at (public/admin browse query ORDER BY listed_at DESC).';
-COMMENT ON COLUMN marketplace_listings.status IS 'active | cancelled | sold.';
-COMMENT ON COLUMN marketplace_listings.expires_at IS 'Optional listing expiry. NULL = no expiry.';
-COMMENT ON COLUMN marketplace_listings.completed_at IS 'Set when status transitions to sold or cancelled.';
-COMMENT ON COLUMN marketplace_listings.updated_at IS 'Updated by the application on every mutation: status transitions (active → sold/cancelled) and background expiry job.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE INDEX idx_marketplace_listings_pet       ON marketplace_listings (pet_id);
-CREATE INDEX idx_marketplace_listings_status    ON marketplace_listings (status) WHERE status = 'active';
+COMMENT ON COLUMN marketplace_listings.pet_id IS &#x27;The pet being listed for trade. ON DELETE RESTRICT: prevents hard-deleting a pet while it has any listing row (active, sold, or cancelled).&#x27;;
+COMMENT ON COLUMN marketplace_listings.seller_token_hash IS &#x27;SHA-256 hash of the seller pet access token. Used for ownership verification.&#x27;;
+COMMENT ON COLUMN marketplace_listings.price_credits IS &#x27;Asking price in food credits. Minimum enforced by application: (pet_level × trade_min_price_formula_level_coeff) + (rarity_multiplier × trade_min_price_formula_rarity_coeff) (trade_min_price_formula_level_coeff = 100, trade_min_price_formula_rarity_coeff = 500).&#x27;;
+COMMENT ON COLUMN marketplace_listings.listed_at IS &#x27;UTC timestamp when the listing was created. Defaults to NOW(). Copied verbatim into marketplace_transactions.listed_at at sale time for financial audit traceability. Sort key for idx_marketplace_listings_listed_at (public/admin browse query ORDER BY listed_at DESC).&#x27;;
+COMMENT ON COLUMN marketplace_listings.status IS &#x27;active | cancelled | sold.&#x27;;
+COMMENT ON COLUMN marketplace_listings.expires_at IS &#x27;Optional listing expiry. NULL = no expiry.&#x27;;
+COMMENT ON COLUMN marketplace_listings.completed_at IS &#x27;Set when status transitions to sold or cancelled.&#x27;;
+COMMENT ON COLUMN marketplace_listings.updated_at IS &#x27;Updated by the application on every mutation: status transitions (active → sold/cancelled) and background expiry job.&#x27;;</code></pre>
+<pre><code class="language-sql">CREATE INDEX idx_marketplace_listings_pet       ON marketplace_listings (pet_id);
+CREATE INDEX idx_marketplace_listings_status    ON marketplace_listings (status) WHERE status = &#x27;active&#x27;;
 CREATE INDEX idx_marketplace_listings_listed_at ON marketplace_listings (listed_at DESC);
 
 -- Prevents a pet from having more than one active listing at a time.
 CREATE UNIQUE INDEX idx_marketplace_listings_active_pet
     ON marketplace_listings (pet_id)
-    WHERE status = 'active';
+    WHERE status = &#x27;active&#x27;;
 
 -- Background job target: transitions active listings whose expires_at has passed to cancelled.
 -- Only rows with a non-NULL expires_at can expire; rows with NULL expires_at never expire.
 CREATE INDEX idx_marketplace_listings_expires_at
     ON marketplace_listings (expires_at)
-    WHERE status = 'active' AND expires_at IS NOT NULL;</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="29-codemarketplacetransactionscode">2.9 <code>marketplace_transactions</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Immutable completed trade records. <code>listing_id</code> uses <code>ON DELETE RESTRICT</code> to ensure the originating listing row is never deleted while a transaction references it.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE marketplace_transactions (
+    WHERE status = &#x27;active&#x27; AND expires_at IS NOT NULL;</code></pre>
+<hr>
+<h3>2.9 <code>marketplace_transactions</code></h3>
+<p>Immutable completed trade records. <code>listing_id</code> uses <code>ON DELETE RESTRICT</code> to ensure the originating listing row is never deleted while a transaction references it.</p>
+<pre><code class="language-sql">CREATE TABLE marketplace_transactions (
     id                UUID        NOT NULL DEFAULT gen_random_uuid(),
     listing_id        UUID        NOT NULL,
     pet_id            UUID        NOT NULL,
@@ -520,40 +542,33 @@ CREATE INDEX idx_marketplace_listings_expires_at
         CHECK (completed_at &gt;= listed_at)
 );
 
-COMMENT ON COLUMN marketplace_transactions.listing_id IS 'FK to marketplace_listings (ON DELETE RESTRICT). uq_marketplace_transactions_listing UNIQUE constraint enforces exactly one completed transaction per listing. The RESTRICT prevents the listing row from being hard-deleted while a transaction references it.';
-COMMENT ON COLUMN marketplace_transactions.price_credits IS 'Sale price in food credits. Denormalized from marketplace_listings.price_credits at transaction time for financial audit immutability — the listing price could be amended before expiry but the transaction records the actual agreed price.';
-COMMENT ON COLUMN marketplace_transactions.pet_id IS 'Denormalized from listing for fast anti-flip queries. Anti-flip window: 7 days (marketplace_trade_antiflip_protection_days = 7).';
-COMMENT ON COLUMN marketplace_transactions.seller_token_hash IS 'SHA-256 hash of the seller pet access token at time of sale.';
-COMMENT ON COLUMN marketplace_transactions.buyer_token_hash IS 'SHA-256 hash of the buyer pet access token at time of purchase.';
-COMMENT ON COLUMN marketplace_transactions.fee_credits IS '5% platform fee: FLOOR(price_credits * 0.05) — trade_transaction_fee_percent = 5. May be 0 for price_credits &lt; 20.';
-COMMENT ON COLUMN marketplace_transactions.listed_at IS 'Copied from the listing row at transaction time for audit traceability.';
-COMMENT ON COLUMN marketplace_transactions.completed_at IS 'UTC timestamp when the trade completed and this immutable record was inserted. Defaults to NOW(). Serves as both the row creation timestamp and the anti-flip reference point.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">-- listing_id: uq_marketplace_transactions_listing UNIQUE constraint creates an implicit index that serves FK scans; no separate index needed.
+COMMENT ON COLUMN marketplace_transactions.listing_id IS &#x27;FK to marketplace_listings (ON DELETE RESTRICT). uq_marketplace_transactions_listing UNIQUE constraint enforces exactly one completed transaction per listing. The RESTRICT prevents the listing row from being hard-deleted while a transaction references it.&#x27;;
+COMMENT ON COLUMN marketplace_transactions.price_credits IS &#x27;Sale price in food credits. Denormalized from marketplace_listings.price_credits at transaction time for financial audit immutability — the listing price could be amended before expiry but the transaction records the actual agreed price.&#x27;;
+COMMENT ON COLUMN marketplace_transactions.pet_id IS &#x27;Denormalized from listing for fast anti-flip queries. Anti-flip window: 7 days (marketplace_trade_antiflip_protection_days = 7).&#x27;;
+COMMENT ON COLUMN marketplace_transactions.seller_token_hash IS &#x27;SHA-256 hash of the seller pet access token at time of sale.&#x27;;
+COMMENT ON COLUMN marketplace_transactions.buyer_token_hash IS &#x27;SHA-256 hash of the buyer pet access token at time of purchase.&#x27;;
+COMMENT ON COLUMN marketplace_transactions.fee_credits IS &#x27;5% platform fee: FLOOR(price_credits * 0.05) — trade_transaction_fee_percent = 5. May be 0 for price_credits &lt; 20.&#x27;;
+COMMENT ON COLUMN marketplace_transactions.listed_at IS &#x27;Copied from the listing row at transaction time for audit traceability.&#x27;;
+COMMENT ON COLUMN marketplace_transactions.completed_at IS &#x27;UTC timestamp when the trade completed and this immutable record was inserted. Defaults to NOW(). Serves as both the row creation timestamp and the anti-flip reference point.&#x27;;</code></pre>
+<pre><code class="language-sql">-- listing_id: uq_marketplace_transactions_listing UNIQUE constraint creates an implicit index that serves FK scans; no separate index needed.
 CREATE INDEX idx_marketplace_transactions_completed ON marketplace_transactions (completed_at DESC);
 -- Anti-flip query: finds the most recent completed trade for a pet via ORDER BY completed_at DESC LIMIT 1.
 -- Leading pet_id column also serves the FK RESTRICT scan (ON DELETE RESTRICT).
 -- Composite covers both the equality filter and the sort without a separate heap sort step.
 CREATE INDEX idx_marketplace_transactions_pet_completed
     ON marketplace_transactions (pet_id, completed_at DESC);</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Feature Flag Gating Note:</strong> <code>marketplace_listings</code> and <code>marketplace_transactions</code> tables exist in the base schema unconditionally. However, all marketplace write endpoints (POST /api/v1/marketplace/list, POST /api/v1/marketplace/buy) and admin/player UIs (marketplace browse, sell form) are gated behind the feature flag <code>FF_MARKETPLACE</code>. Read-only queries on empty tables are safe during Phase 1 and Phase 2 (before FF_MARKETPLACE is enabled). Table presence does not imply feature availability; the feature flag is the source of truth.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="210-codeadminaccountscode">2.10 <code>admin_accounts</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Admin operator credentials. Accounts are never hard-deleted — deactivation is a soft-delete via <code>deactivated_at</code>. The audit log holds a FK to this table, requiring row retention.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE admin_accounts (
+<hr>
+<p><strong>Feature Flag Gating Note:</strong> <code>marketplace_listings</code> and <code>marketplace_transactions</code> tables exist in the base schema unconditionally. However, all marketplace write endpoints (POST /api/v1/marketplace/list, POST /api/v1/marketplace/buy) and admin/player UIs (marketplace browse, sell form) are gated behind the feature flag <code>FF_MARKETPLACE</code>. Read-only queries on empty tables are safe during Phase 1 and Phase 2 (before FF_MARKETPLACE is enabled). Table presence does not imply feature availability; the feature flag is the source of truth.</p>
+<hr>
+<h3>2.10 <code>admin_accounts</code></h3>
+<p>Admin operator credentials. Accounts are never hard-deleted — deactivation is a soft-delete via <code>deactivated_at</code>. The audit log holds a FK to this table, requiring row retention.</p>
+<pre><code class="language-sql">CREATE TABLE admin_accounts (
     id                      UUID        NOT NULL DEFAULT gen_random_uuid(),
     username                VARCHAR(64) NOT NULL,
     password_hash           TEXT        NOT NULL,
     totp_secret_encrypted   TEXT        NULL,
     totp_backup_codes_hash  JSONB       NULL,
-    role                    admin_role_enum NOT NULL DEFAULT 'moderator',
+    role                    admin_role_enum NOT NULL DEFAULT &#x27;moderator&#x27;,
     last_login_at           TIMESTAMPTZ NULL,
     failed_attempts         SMALLINT    NOT NULL DEFAULT 0,
     locked_until            TIMESTAMPTZ NULL,
@@ -567,26 +582,21 @@ CREATE INDEX idx_marketplace_transactions_pet_completed
         CHECK (failed_attempts &gt;= 0)
 );
 
-COMMENT ON COLUMN admin_accounts.username IS 'Login identifier. Unique (uq_admin_accounts_username). Max 64 characters (VARCHAR(64)). Used as the login credential alongside password and TOTP.';
-COMMENT ON COLUMN admin_accounts.password_hash IS 'bcrypt hash. Minimum work factor: 12.';
-COMMENT ON COLUMN admin_accounts.totp_secret_encrypted IS 'AES-256-GCM encrypted TOTP secret. NULL until TOTP enrollment is completed. First login returns TOTP_SETUP_REQUIRED until this is set.';
-COMMENT ON COLUMN admin_accounts.totp_backup_codes_hash IS 'Array of SHA-256 hashes of the 10 single-use backup codes. Consumed entry is removed from array on use. NULL until enrollment.';
-COMMENT ON COLUMN admin_accounts.role IS 'super_admin | moderator | read_only.';
-COMMENT ON COLUMN admin_accounts.last_login_at IS 'UTC timestamp of the most recent successful login (i.e. passed password check + TOTP verification). NULL until the first successful login. Updated on every successful authentication.';
-COMMENT ON COLUMN admin_accounts.failed_attempts IS 'Consecutive failed login counter. Reset to 0 on successful login.';
-COMMENT ON COLUMN admin_accounts.locked_until IS 'Non-NULL and in future = account is locked. Set after 10 consecutive failures (admin_login_lockout_threshold = 10) for 30 minutes (admin_login_lockout_duration_minutes = 30). NOT used for permanent deactivation.';
-COMMENT ON COLUMN admin_accounts.deactivated_at IS 'Non-NULL = account is permanently deactivated. Set by DELETE /admin/api/roles/:adminId (soft-deactivate). Prevents login. Row is never hard-deleted.';
-COMMENT ON COLUMN admin_accounts.updated_at IS 'Updated by the application on every mutation: password change, TOTP enrollment/reset, role change, lockout set/cleared, and deactivation.';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">-- username: uq_admin_accounts_username UNIQUE constraint creates an implicit index for login lookups; no separate index needed.</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="211-codeadminauditlogcode">2.11 <code>admin_audit_log</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Immutable audit trail of all admin actions. Uses <code>BIGSERIAL</code> for sequential ordering. Retention: 2 years (<code>admin_audit_log_retention_years = 2</code>).</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE admin_audit_log (
+COMMENT ON COLUMN admin_accounts.username IS &#x27;Login identifier. Unique (uq_admin_accounts_username). Max 64 characters (VARCHAR(64)). Used as the login credential alongside password and TOTP.&#x27;;
+COMMENT ON COLUMN admin_accounts.password_hash IS &#x27;bcrypt hash. Minimum work factor: 12.&#x27;;
+COMMENT ON COLUMN admin_accounts.totp_secret_encrypted IS &#x27;AES-256-GCM encrypted TOTP secret. NULL until TOTP enrollment is completed. First login returns TOTP_SETUP_REQUIRED until this is set.&#x27;;
+COMMENT ON COLUMN admin_accounts.totp_backup_codes_hash IS &#x27;Array of SHA-256 hashes of the 10 single-use backup codes. Consumed entry is removed from array on use. NULL until enrollment.&#x27;;
+COMMENT ON COLUMN admin_accounts.role IS &#x27;super_admin | moderator | read_only.&#x27;;
+COMMENT ON COLUMN admin_accounts.last_login_at IS &#x27;UTC timestamp of the most recent successful login (i.e. passed password check + TOTP verification). NULL until the first successful login. Updated on every successful authentication.&#x27;;
+COMMENT ON COLUMN admin_accounts.failed_attempts IS &#x27;Consecutive failed login counter. Reset to 0 on successful login.&#x27;;
+COMMENT ON COLUMN admin_accounts.locked_until IS &#x27;Non-NULL and in future = account is locked. Set after 10 consecutive failures (admin_login_lockout_threshold = 10) for 30 minutes (admin_login_lockout_duration_minutes = 30). NOT used for permanent deactivation.&#x27;;
+COMMENT ON COLUMN admin_accounts.deactivated_at IS &#x27;Non-NULL = account is permanently deactivated. Set by DELETE /admin/api/roles/:adminId (soft-deactivate). Prevents login. Row is never hard-deleted.&#x27;;
+COMMENT ON COLUMN admin_accounts.updated_at IS &#x27;Updated by the application on every mutation: password change, TOTP enrollment/reset, role change, lockout set/cleared, and deactivation.&#x27;;</code></pre>
+<pre><code class="language-sql">-- username: uq_admin_accounts_username UNIQUE constraint creates an implicit index for login lookups; no separate index needed.</code></pre>
+<hr>
+<h3>2.11 <code>admin_audit_log</code></h3>
+<p>Immutable audit trail of all admin actions. Uses <code>BIGSERIAL</code> for sequential ordering. Retention: 2 years (<code>admin_audit_log_retention_years = 2</code>).</p>
+<pre><code class="language-sql">CREATE TABLE admin_audit_log (
     id               BIGSERIAL   NOT NULL,
     admin_id         UUID        NULL,
     action           VARCHAR(128) NOT NULL,
@@ -601,37 +611,32 @@ COMMENT ON COLUMN admin_accounts.updated_at IS 'Updated by the application on ev
         FOREIGN KEY (admin_id) REFERENCES admin_accounts(id) ON DELETE RESTRICT
 );
 
-COMMENT ON COLUMN admin_audit_log.id IS 'BIGSERIAL for monotonic log ordering.';
-COMMENT ON COLUMN admin_audit_log.admin_id IS 'Actor admin account. NULL for failed logins with an unrecognized username.';
-COMMENT ON COLUMN admin_audit_log.action IS 'Dot-namespaced action string, e.g. pet.ban, config.arena_rate_limit, admin_user.deactivate.';
-COMMENT ON COLUMN admin_audit_log.target_type IS 'pet | arena_match | leaderboard_entry | config_runtime | config_economy | gdpr_request | admin_user.';
-COMMENT ON COLUMN admin_audit_log.target_id IS 'UUID or key of the affected entity.';
-COMMENT ON COLUMN admin_audit_log.detail IS 'JSONB blob of action-specific context. Shape varies by action: e.g. for pet.ban: {reason, previous_is_banned}; for arena_match.flag: {reason}; for config.*: {previous_value, new_value}. NULL for actions with no additional context.';
-COMMENT ON COLUMN admin_audit_log.ip_address_hash IS 'SHA-256 hash of the raw request IP. Raw IP is never stored. Retained 90 days (ip_address_log_retention_days = 90).';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">-- Background retention job: deletes rows older than 2 years (admin_audit_log_retention_years = 2).
--- Query: DELETE FROM admin_audit_log WHERE created_at &lt; NOW() - INTERVAL '2 years'
+COMMENT ON COLUMN admin_audit_log.id IS &#x27;BIGSERIAL for monotonic log ordering.&#x27;;
+COMMENT ON COLUMN admin_audit_log.admin_id IS &#x27;Actor admin account. NULL for failed logins with an unrecognized username.&#x27;;
+COMMENT ON COLUMN admin_audit_log.action IS &#x27;Dot-namespaced action string, e.g. pet.ban, config.arena_rate_limit, admin_user.deactivate.&#x27;;
+COMMENT ON COLUMN admin_audit_log.target_type IS &#x27;pet | arena_match | leaderboard_entry | config_runtime | config_economy | gdpr_request | admin_user.&#x27;;
+COMMENT ON COLUMN admin_audit_log.target_id IS &#x27;UUID or key of the affected entity.&#x27;;
+COMMENT ON COLUMN admin_audit_log.detail IS &#x27;JSONB blob of action-specific context. Shape varies by action: e.g. for pet.ban: {reason, previous_is_banned}; for arena_match.flag: {reason}; for config.*: {previous_value, new_value}. NULL for actions with no additional context.&#x27;;
+COMMENT ON COLUMN admin_audit_log.ip_address_hash IS &#x27;SHA-256 hash of the raw request IP. Raw IP is never stored. Retained 90 days (ip_address_log_retention_days = 90).&#x27;;</code></pre>
+<pre><code class="language-sql">-- Background retention job: deletes rows older than 2 years (admin_audit_log_retention_years = 2).
+-- Query: DELETE FROM admin_audit_log WHERE created_at &lt; NOW() - INTERVAL &#x27;2 years&#x27;
 CREATE INDEX idx_admin_audit_log_created_at ON admin_audit_log (created_at DESC);
 CREATE INDEX idx_admin_audit_log_admin_id   ON admin_audit_log (admin_id, created_at DESC);
 -- Background job target: nulls ip_address_hash after 90 days (ip_address_log_retention_days = 90).
--- Query: UPDATE ... SET ip_address_hash = NULL WHERE ip_address_hash IS NOT NULL AND created_at &lt; NOW() - INTERVAL '90 days'
+-- Query: UPDATE ... SET ip_address_hash = NULL WHERE ip_address_hash IS NOT NULL AND created_at &lt; NOW() - INTERVAL &#x27;90 days&#x27;
 -- Partial predicate keeps the index tiny — once nulled, rows drop out of the index automatically.
 CREATE INDEX idx_admin_audit_log_ip_hash_cleanup
     ON admin_audit_log (created_at)
     WHERE ip_address_hash IS NOT NULL;</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="212-codegdprrequestscode">2.12 <code>gdpr_requests</code></h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Job queue for all GDPR data subject requests. <code>claim_identity_id</code> uses <code>ON DELETE RESTRICT</code> to prevent an identity row from being removed while open GDPR requests reference it.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE TABLE gdpr_requests (
+<hr>
+<h3>2.12 <code>gdpr_requests</code></h3>
+<p>Job queue for all GDPR data subject requests. <code>claim_identity_id</code> uses <code>ON DELETE RESTRICT</code> to prevent an identity row from being removed while open GDPR requests reference it.</p>
+<pre><code class="language-sql">CREATE TABLE gdpr_requests (
     id                 UUID        NOT NULL DEFAULT gen_random_uuid(),
     claim_identity_id  UUID        NOT NULL,
     initiating_pet_id  UUID        NULL,
     request_type       gdpr_request_type_enum   NOT NULL,
-    status             gdpr_request_status_enum NOT NULL DEFAULT 'pending',
+    status             gdpr_request_status_enum NOT NULL DEFAULT &#x27;pending&#x27;,
     submitted_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     completed_at       TIMESTAMPTZ NULL,
     updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -646,68 +651,63 @@ CREATE INDEX idx_admin_audit_log_ip_hash_cleanup
         CHECK (char_length(admin_notes) &lt;= 500),
     CONSTRAINT chk_gdpr_request_completed_at_consistency
         CHECK (
-            (status IN ('pending', 'processing') AND completed_at IS NULL) OR
-            (status IN ('completed', 'failed')   AND completed_at IS NOT NULL)
+            (status IN (&#x27;pending&#x27;, &#x27;processing&#x27;) AND completed_at IS NULL) OR
+            (status IN (&#x27;completed&#x27;, &#x27;failed&#x27;)   AND completed_at IS NOT NULL)
         ),
     CONSTRAINT chk_gdpr_request_completed_at_after_submitted
         CHECK (completed_at IS NULL OR completed_at &gt;= submitted_at)
 );
 
-COMMENT ON COLUMN gdpr_requests.claim_identity_id IS 'Data subject. A single erasure covers all pets under this identity.';
-COMMENT ON COLUMN gdpr_requests.initiating_pet_id IS 'Pet whose token authenticated the self-service submission. NULL for admin-initiated requests.';
-COMMENT ON COLUMN gdpr_requests.request_type IS 'erasure | data_access | restrict_processing | object_leaderboard | rectification.';
-COMMENT ON COLUMN gdpr_requests.status IS 'pending | processing | completed | failed.';
-COMMENT ON COLUMN gdpr_requests.submitted_at IS 'UTC timestamp when the request was submitted. Doubles as the row creation timestamp (this table has no separate created_at). Defaults to NOW(). FIFO sort key for the admin work queue (idx_gdpr_requests_status ORDER BY submitted_at).';
-COMMENT ON COLUMN gdpr_requests.completed_at IS 'Set when status transitions to completed or failed. NULL while status is pending or processing (enforced by chk_gdpr_request_completed_at_consistency).';
-COMMENT ON COLUMN gdpr_requests.updated_at IS 'Timestamp of the last status transition or admin_notes update. Required to populate the updatedAt field in PATCH /admin/api/gdpr/:requestId response. Updated by application on every status change.';
-COMMENT ON COLUMN gdpr_requests.admin_notes IS 'Filled by admin on completion or status update. Also used for admin-initiated erasure reason (max 500 chars; admin_moderation_reason_max_chars = 500).';</code></pre>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">CREATE INDEX idx_gdpr_requests_identity         ON gdpr_requests (claim_identity_id, submitted_at DESC);
+COMMENT ON COLUMN gdpr_requests.claim_identity_id IS &#x27;Data subject. A single erasure covers all pets under this identity.&#x27;;
+COMMENT ON COLUMN gdpr_requests.initiating_pet_id IS &#x27;Pet whose token authenticated the self-service submission. NULL for admin-initiated requests.&#x27;;
+COMMENT ON COLUMN gdpr_requests.request_type IS &#x27;erasure | data_access | restrict_processing | object_leaderboard | rectification.&#x27;;
+COMMENT ON COLUMN gdpr_requests.status IS &#x27;pending | processing | completed | failed.&#x27;;
+COMMENT ON COLUMN gdpr_requests.submitted_at IS &#x27;UTC timestamp when the request was submitted. Doubles as the row creation timestamp (this table has no separate created_at). Defaults to NOW(). FIFO sort key for the admin work queue (idx_gdpr_requests_status ORDER BY submitted_at).&#x27;;
+COMMENT ON COLUMN gdpr_requests.completed_at IS &#x27;Set when status transitions to completed or failed. NULL while status is pending or processing (enforced by chk_gdpr_request_completed_at_consistency).&#x27;;
+COMMENT ON COLUMN gdpr_requests.updated_at IS &#x27;Timestamp of the last status transition or admin_notes update. Required to populate the updatedAt field in PATCH /admin/api/gdpr/:requestId response. Updated by application on every status change.&#x27;;
+COMMENT ON COLUMN gdpr_requests.admin_notes IS &#x27;Filled by admin on completion or status update. Also used for admin-initiated erasure reason (max 500 chars; admin_moderation_reason_max_chars = 500).&#x27;;</code></pre>
+<pre><code class="language-sql">CREATE INDEX idx_gdpr_requests_identity         ON gdpr_requests (claim_identity_id, submitted_at DESC);
 CREATE INDEX idx_gdpr_requests_status           ON gdpr_requests (status, submitted_at);
 -- FK support: every FK column must have an index (fk_gdpr_requests_initiating_pet).
 CREATE INDEX idx_gdpr_requests_initiating_pet   ON gdpr_requests (initiating_pet_id) WHERE initiating_pet_id IS NOT NULL;</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="3-enums">3. Enums</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">All enums are defined as PostgreSQL <code>ENUM</code> types to enforce domain values at the database level.</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">-- Pet rarity tiers. Drop weights (admin-tunable, must sum to 100%):
+<hr>
+<h2>3. Enums</h2>
+<p>All enums are defined as PostgreSQL <code>ENUM</code> types to enforce domain values at the database level.</p>
+<pre><code class="language-sql">-- Pet rarity tiers. Drop weights (admin-tunable, must sum to 100%):
 --   COMMON = 60%, RARE = 25%, EPIC = 12%, LEGENDARY = 3%
 --   (rarity_common_percent = 60, rarity_rare_percent = 25, rarity_epic_percent = 12, rarity_legendary_percent = 3)
 CREATE TYPE rarity_enum AS ENUM (
-    'COMMON',
-    'RARE',
-    'EPIC',
-    'LEGENDARY'
+    &#x27;COMMON&#x27;,
+    &#x27;RARE&#x27;,
+    &#x27;EPIC&#x27;,
+    &#x27;LEGENDARY&#x27;
 );
 
 -- Arena battle modes.
 CREATE TYPE arena_mode_enum AS ENUM (
-    'RACE',
-    'SUMO'
+    &#x27;RACE&#x27;,
+    &#x27;SUMO&#x27;
 );
 
 -- Training action type. Maps to the stat trained: RUN→speed, STRENGTH→strength, STAMINA→stamina.
 CREATE TYPE training_type_enum AS ENUM (
-    'RUN',
-    'STRENGTH',
-    'STAMINA'
+    &#x27;RUN&#x27;,
+    &#x27;STRENGTH&#x27;,
+    &#x27;STAMINA&#x27;
 );
 
 -- Food buff target stat.
 CREATE TYPE buff_stat_enum AS ENUM (
-    'speed',
-    'strength',
-    'stamina'
+    &#x27;speed&#x27;,
+    &#x27;strength&#x27;,
+    &#x27;stamina&#x27;
 );
 
 -- Marketplace listing lifecycle state.
 CREATE TYPE listing_status_enum AS ENUM (
-    'active',
-    'cancelled',
-    'sold'
+    &#x27;active&#x27;,
+    &#x27;cancelled&#x27;,
+    &#x27;sold&#x27;
 );
 
 -- Admin operator role. Controls endpoint access:
@@ -715,194 +715,127 @@ CREATE TYPE listing_status_enum AS ENUM (
 --   moderator    — pet/leaderboard/battle management; no config or GDPR
 --   read_only    — GET-only access to dashboard, pets, leaderboard, battles, analytics
 CREATE TYPE admin_role_enum AS ENUM (
-    'super_admin',
-    'moderator',
-    'read_only'
+    &#x27;super_admin&#x27;,
+    &#x27;moderator&#x27;,
+    &#x27;read_only&#x27;
 );
 
 -- GDPR request types per GDPR Arts. 15–21.
 CREATE TYPE gdpr_request_type_enum AS ENUM (
-    'erasure',
-    'data_access',
-    'restrict_processing',
-    'object_leaderboard',
-    'rectification'
+    &#x27;erasure&#x27;,
+    &#x27;data_access&#x27;,
+    &#x27;restrict_processing&#x27;,
+    &#x27;object_leaderboard&#x27;,
+    &#x27;rectification&#x27;
 );
 
 -- GDPR request lifecycle state.
 CREATE TYPE gdpr_request_status_enum AS ENUM (
-    'pending',
-    'processing',
-    'completed',
-    'failed'
+    &#x27;pending&#x27;,
+    &#x27;processing&#x27;,
+    &#x27;completed&#x27;,
+    &#x27;failed&#x27;
 );</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="4-redis-key-schema">4. Redis Key Schema</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in seconds where shown.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="41-rate-limit-counters">4.1 Rate Limit Counters</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Key Pattern</th><th>TTL</th><th>Value</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td>`rl:claim:{email_hash}`</td><td>3600 s</td><td>Integer attempt count</td><td>Email claim initiation. Limit: 5/hr per email (`email_claim_attempts_per_hour_per_email = 5`). Window = 1 h = 3600 s (implicit: no separate window-seconds constant; derived from `email_claim_attempts_per_hour_per_email`). Fail-open if Redis unavailable.</td></tr>
-<tr><td>`rl:claim:cooldown:{email_hash}`</td><td>60 s</td><td>`"1"`</td><td>Set when limit is reached. Blocks further attempts during cooldown. TTL = `claim_email_retry_cooldown_seconds = 60`. Returns HTTP 429 with `Retry-After: 60`.</td></tr>
-<tr><td>`rl:arena:{pet_id}`</td><td>3600 s</td><td>Integer battle count</td><td>Arena battles per pet. Default limit: 10/hr (`arena_battles_per_pet_per_hour_default = 10`); admin-tunable 1–50 (`arena_battles_per_pet_per_hour_admin_min = 1`, `arena_battles_per_pet_per_hour_admin_max = 50`). Window = 1 h = 3600 s (`arena_rate_limit_counter_window_hours = 1`). Fail-open.</td></tr>
-<tr><td>`rl:code_entry:{session_id}`</td><td>900 s</td><td>Integer attempt count</td><td>OTP code entry. Limit: 10/session (`claim_code_entry_attempts_per_session = 10`). Window = 15 min = 900 s (`claim_code_expiry_minutes = 15`; the code-entry window matches the OTP validity window). **Fail-closed** — code entry is blocked if Redis is unavailable.</td></tr>
-<tr><td>`rl:code_entry:cooldown:{session_id}`</td><td>60 s</td><td>`"1"`</td><td>Set when code entry limit is reached. TTL matches `claim_email_retry_cooldown_seconds = 60` (no separate constant defined for code-entry cooldown). HTTP 429 with `Retry-After: 60`.</td></tr>
-<tr><td>`rl:admin_login:{ip_hash}`</td><td>900 s</td><td>Integer attempt count</td><td>Pre-auth admin login IP rate limit. Limit: 10 attempts per 15 min (`admin_login_ip_rate_limit_attempts = 10`, `admin_login_ip_rate_limit_window_seconds = 900`).</td></tr>
-<tr><td>`rl:admin:{admin_id}`</td><td>60 s</td><td>Integer request count</td><td>Per-authenticated-admin request rate limit. Limit: 100/min (`admin_portal_requests_per_minute_per_account = 100`).</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="42-arena-matchmaking-queue">4.2 Arena Matchmaking Queue</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Key Pattern</th><th>TTL</th><th>Type</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td>`matchmaking:queue:{mode}`</td><td>None</td><td>Redis Sorted Set</td><td>Score = enqueue epoch (ms). Member format: `"{petId}:{enqueue_epoch_ms}"`. Consumer pops oldest eligible entry via `ZPOPMIN` (atomic read-and-remove; Upstash Redis 7+ supported). Entries older than `arena_matchmaking_timeout_seconds = 30` seconds plus an implementation-defined grace buffer (~15 s; no constant) are considered stale and discarded silently.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="43-session-storage">4.3 Session Storage</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Key Pattern</th><th>TTL</th><th>Value</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td>`session:admin:{session_id}`</td><td>14400 s</td><td>JSON `{ adminId, role, createdAt, absExpiry }`</td><td>Inactivity TTL = 14400 s (4 h; `admin_session_inactivity_expiry_hours = 4`). `absExpiry = createdAt + 28800 s` (8 h; `admin_session_absolute_expiry_hours = 8`) is validated on every request for the absolute cap.</td></tr>
-<tr><td>`token:blacklist:{token_hash}`</td><td>259200 s</td><td>`"1"`</td><td>Invalidates replaced pet access tokens after recovery flow. TTL = 72 h (`claim_token_cleanup_ttl_hours = 72`).</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="44-leaderboard-sorted-set">4.4 Leaderboard Sorted Set</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Key</th><th>TTL</th><th>Type</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td>`leaderboard:global`</td><td>None</td><td>Redis Sorted Set</td><td>Score = arena score (`win_rate × battles_played × level_multiplier`). Member = `pet_id`. Authoritative real-time source; PostgreSQL `leaderboard_snapshots` is the durable backup. Update lag target ≤ 30 s (`leaderboard_update_lag_max_seconds = 30`). Banned pets are removed via `ZREM` immediately on ban (reflected within 5 min; `leaderboard_ban_reflection_time_minutes = 5`). Pet entries are also removed via `ZREM` during GDPR erasure processing.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="45-config-cache">4.5 Config Cache</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Key</th><th>TTL</th><th>Value</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td>`config:runtime`</td><td>300 s</td><td>JSON blob</td><td>Runtime configuration values (arena rate limit, rarity weights, etc.). Refreshed every 5 min (`config_cache_refresh_time_minutes = 5`). Mutations via `PUT /admin/api/config/runtime` or `PUT /admin/api/config/economy` take effect within this window.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="5-data-retention">5. Data Retention</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Table / Key Pattern</th><th>Retention Policy</th><th>Source Constant</th></tr></thead>
-<tbody>
-<tr><td>`pets`</td><td>Indefinite (until GDPR erasure or admin deletion)</td><td>—</td></tr>
-<tr><td>`claim_identities`</td><td>Indefinite; `email_encrypted` nulled within 7 days of erasure request</td><td>`gdpr_email_deletion_window_days = 7`</td></tr>
-<tr><td>`claim_codes`</td><td>Deleted 72 hours after row creation or `used_at`, whichever is later</td><td>`claim_token_cleanup_ttl_hours = 72`</td></tr>
-<tr><td>`arena_matches`</td><td>Indefinite (audit immutability; last 20 per pet shown publicly)</td><td>`arena_battle_records_display_count = 20`</td></tr>
-<tr><td>`training_logs`</td><td>Indefinite (behavioral audit trail; feeds `total_training_actions` aggregate)</td><td>—</td></tr>
-<tr><td>`leaderboard_snapshots`</td><td>Rolling 12 months</td><td>`leaderboard_snapshot_retention_months = 12`</td></tr>
-<tr><td>`food_buffs`</td><td>30 days after `consumed_at` (`record_expires_at` column; cleaned by background job)</td><td>`food_buff_record_retention_days = 30`</td></tr>
-<tr><td>`marketplace_listings`</td><td>Indefinite (referenced by transactions; `ON DELETE RESTRICT`)</td><td>—</td></tr>
-<tr><td>`marketplace_transactions`</td><td>Indefinite (financial audit trail)</td><td>—</td></tr>
-<tr><td>`admin_accounts`</td><td>Indefinite (never hard-deleted; audit log FK)</td><td>—</td></tr>
-<tr><td>`admin_audit_log`</td><td>2 years (GDPR Art. 30 compliance)</td><td>`admin_audit_log_retention_years = 2`</td></tr>
-<tr><td>`gdpr_requests`</td><td>Indefinite (legal compliance record)</td><td>—</td></tr>
-<tr><td>`rl:*` Redis counters</td><td>Per key TTL (60 s – 3600 s)</td><td>Various `rate_limits.*` constants</td></tr>
-<tr><td>`session:admin:*`</td><td>14400 s inactivity / absolute 28800 s</td><td>`admin_session_inactivity_expiry_hours = 4`, `admin_session_absolute_expiry_hours = 8`</td></tr>
-<tr><td>`token:blacklist:*`</td><td>259200 s (72 h)</td><td>`claim_token_cleanup_ttl_hours = 72`</td></tr>
-<tr><td>`leaderboard:global`</td><td>No expiry; entries removed on ban or GDPR erasure</td><td>—</td></tr>
-<tr><td>`matchmaking:queue:*`</td><td>No key-level TTL; stale entries (older than `arena_matchmaking_timeout_seconds = 30` s plus grace) are discarded by the consumer</td><td>`arena_matchmaking_timeout_seconds = 30`</td></tr>
-<tr><td>`config:runtime`</td><td>300 s rolling TTL; re-populated by next admin config write or cache-refresh cycle</td><td>`config_cache_refresh_time_minutes = 5`</td></tr>
-<tr><td>`admin_audit_log.ip_address_hash`</td><td>90 days (column is set to NULL after 90 d by background job)</td><td>`ip_address_log_retention_days = 90`</td></tr>
-<tr><td>Unclaimed `pets` (guest preview)</td><td>Background job deletes `reserved_until < NOW() AND owner_token_hash IS NULL` on an implementation-defined schedule (no constant; run frequency is an operational decision)</td><td>`pet_reservation_ttl_hours = 24`</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="6-indexes--performance-notes">6. Indexes & Performance Notes</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="61-partial-indexes">6.1 Partial Indexes</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Partial indexes on boolean and nullable columns are preferred over full-table indexes where the indexed set is a small fraction of total rows:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><code>idx_pets_claimed_at</code> — <code>WHERE claimed_at IS NOT NULL</code>: only claimed pets have this set; used by analytics and admin list queries that filter for claimed pets.</li>
-<li><code>idx_pets_is_banned</code> — <code>WHERE is_banned = TRUE</code>: nearly all rows are <code>FALSE</code>; this partial index is tiny and fast for ban-check queries.</li>
-<li><code>idx_pets_owner_token_hash</code> — <code>WHERE owner_token_hash IS NOT NULL</code>: unclaimed pets have NULL; only claimed pet rows are indexed, keeping the index compact.</li>
-<li><code>idx_pets_last_trained_at</code> — <code>WHERE last_trained_at IS NOT NULL</code>: never-trained pets are excluded; the index supports neglect detection queries without scanning the full table.</li>
-<li><code>idx_pets_reserved_until</code> — <code>WHERE reserved_until IS NOT NULL</code>: only guest preview pets have this set; background cleanup job scans this index exclusively.</li>
-<li><code>idx_marketplace_listings_status</code> — <code>WHERE status = 'active'</code>: the vast majority of historical listings are <code>cancelled</code> or <code>sold</code>; the active listing index stays small.</li>
-<li><code>idx_marketplace_listings_active_pet</code> — <code>WHERE status = 'active'</code> unique: provides a database-enforced uniqueness constraint for concurrent active listings per pet at near-zero write cost.</li>
-<li><code>idx_arena_matches_is_flagged</code> — <code>WHERE is_flagged = TRUE</code>: nearly all matches are unflagged; partial index stays tiny and serves <code>GET /admin/api/battles?flagged=true</code> efficiently.</li>
-<li><code>idx_gdpr_requests_initiating_pet</code> — <code>WHERE initiating_pet_id IS NOT NULL</code>: supports FK SET NULL integrity scan (<code>fk_gdpr_requests_initiating_pet ON DELETE SET NULL</code>) and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.</li>
-<li><code>idx_claim_codes_used_at</code> — <code>WHERE used_at IS NOT NULL</code>: used by the 72-hour background cleanup job which must find rows whose first-use time has passed.</li>
-<li><code>idx_marketplace_listings_expires_at</code> — <code>WHERE status = 'active' AND expires_at IS NOT NULL</code>: used by the background job that transitions active listings whose <code>expires_at</code> has passed to <code>cancelled</code>. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.</li>
-<li><code>idx_claim_identities_deletion</code> — <code>WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL</code>: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once <code>email_encrypted</code> is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.</li>
-<li><code>idx_admin_audit_log_ip_hash_cleanup</code> — <code>WHERE ip_address_hash IS NOT NULL</code>: used by the background job that nulls <code>ip_address_hash</code> after 90 days (<code>ip_address_log_retention_days = 90</code>). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by <code>idx_claim_identities_deletion</code>.</li>
-<li><code>idx_pets_claim_identity</code> — <code>WHERE claim_identity_id IS NOT NULL</code>: only claimed pets have this FK set; the partial index supports the GDPR erasure lookup query (<code>SELECT id FROM pets WHERE claim_identity_id = $1</code>) efficiently and also serves the FK integrity scan. See §6.5 for the full query pattern.</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="62-composite-indexes">6.2 Composite Indexes</h3>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><code>idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)</code> and <code>idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)</code> — support the <code>ORDER BY completed_at DESC LIMIT 20</code> query pattern used by <code>GET /api/v1/arena/history/:petId</code> (<code>arena_battle_records_display_count = 20</code>). Without a composite index the planner would scan the full <code>pet_a_id</code> partition and sort. The leading column of each index also serves PostgreSQL's FK integrity scan for <code>ON DELETE RESTRICT</code> (pet_a_id) and <code>ON DELETE SET NULL</code> (pet_b_id), eliminating the need for separate single-column indexes.</li>
-<li><code>idx_training_logs_completed_at (pet_id, completed_at DESC)</code> — supports the daily action count query (<code>COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE</code>) and the training history summary in <code>GET /api/v1/pets/:petId/stats</code>. The leading <code>pet_id</code> column also serves the FK CASCADE scan (<code>ON DELETE CASCADE</code>), making a separate <code>idx_training_logs_pet_id</code> unnecessary.</li>
-<li><code>idx_admin_audit_log_admin_id (admin_id, created_at DESC)</code> — supports filtered audit log searches by actor across the full 2-year retention window in ≤ 3 s (<code>admin_audit_log_search_response_time_seconds = 3</code>, <code>admin_audit_log_retention_years = 2</code>).</li>
-<li><code>idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)</code> — supports the anti-flip eligibility check (<code>marketplace_trade_antiflip_protection_days = 7</code>). The query <code>SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1</code> is fully served by the composite index without a separate heap sort. The leading <code>pet_id</code> column also covers the FK RESTRICT scan (<code>ON DELETE RESTRICT</code>), eliminating the need for a separate single-column <code>idx_marketplace_transactions_pet</code> index.</li>
-<li><code>idx_gdpr_requests_identity (claim_identity_id, submitted_at DESC)</code> — supports the query <code>WHERE claim_identity_id = $1 ORDER BY submitted_at DESC</code> for listing all requests by a data subject. The leading column also serves the FK RESTRICT scan (<code>ON DELETE RESTRICT</code>).</li>
-<li><code>idx_gdpr_requests_status (status, submitted_at)</code> — supports the admin work queue query <code>WHERE status IN ('pending', 'processing') ORDER BY submitted_at</code> for processing requests in FIFO order.</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="63-leaderboard-query-pattern">6.3 Leaderboard Query Pattern</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The live leaderboard is served exclusively from the Redis <code>leaderboard:global</code> sorted set (<code>ZRANGE … REV LIMIT</code> for top-N retrieval — O(log N + M) where M is the number of elements returned; <code>ZREVRANK</code> for a pet's rank — O(log N)). (<code>ZREVRANGE</code> is deprecated since Redis 6.2; <code>ZRANGE … REV LIMIT</code> is the idiomatic equivalent on Upstash Redis 7+.) The <code>leaderboard_snapshots</code> table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="64-token-lookup-path">6.4 Token Lookup Path</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Authentication on every write request hashes the incoming bearer token and executes:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">SELECT id, is_banned, claim_identity_id, owner_token_hash
+<hr>
+<h2>4. Redis Key Schema</h2>
+<p>All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in seconds where shown.</p>
+<h3>4.1 Rate Limit Counters</h3>
+<table>
+<tr><th>Key Pattern</th><th>TTL</th><th>Value</th><th>Notes</th></tr>
+<tr><td><code>rl:claim:{email_hash}</code></td><td>3600 s</td><td>Integer attempt count</td><td>Email claim initiation. Limit: 5/hr per email (<code>email_claim_attempts_per_hour_per_email = 5</code>). Window = 1 h = 3600 s (implicit: no separate window-seconds constant; derived from <code>email_claim_attempts_per_hour_per_email</code>). Fail-open if Redis unavailable.</td></tr>
+<tr><td><code>rl:claim:cooldown:{email_hash}</code></td><td>60 s</td><td><code>&quot;1&quot;</code></td><td>Set when limit is reached. Blocks further attempts during cooldown. TTL = <code>claim_email_retry_cooldown_seconds = 60</code>. Returns HTTP 429 with <code>Retry-After: 60</code>.</td></tr>
+<tr><td><code>rl:arena:{pet_id}</code></td><td>3600 s</td><td>Integer battle count</td><td>Arena battles per pet. Default limit: 10/hr (<code>arena_battles_per_pet_per_hour_default = 10</code>); admin-tunable 1–50 (<code>arena_battles_per_pet_per_hour_admin_min = 1</code>, <code>arena_battles_per_pet_per_hour_admin_max = 50</code>). Window = 1 h = 3600 s (<code>arena_rate_limit_counter_window_hours = 1</code>). Fail-open.</td></tr>
+<tr><td><code>rl:code_entry:{session_id}</code></td><td>900 s</td><td>Integer attempt count</td><td>OTP code entry. Limit: 10/session (<code>claim_code_entry_attempts_per_session = 10</code>). Window = 15 min = 900 s (<code>claim_code_expiry_minutes = 15</code>; the code-entry window matches the OTP validity window). <strong>Fail-closed</strong> — code entry is blocked if Redis is unavailable.</td></tr>
+<tr><td><code>rl:code_entry:cooldown:{session_id}</code></td><td>60 s</td><td><code>&quot;1&quot;</code></td><td>Set when code entry limit is reached. TTL matches <code>claim_email_retry_cooldown_seconds = 60</code> (no separate constant defined for code-entry cooldown). HTTP 429 with <code>Retry-After: 60</code>.</td></tr>
+<tr><td><code>rl:admin_login:{ip_hash}</code></td><td>900 s</td><td>Integer attempt count</td><td>Pre-auth admin login IP rate limit. Limit: 10 attempts per 15 min (<code>admin_login_ip_rate_limit_attempts = 10</code>, <code>admin_login_ip_rate_limit_window_seconds = 900</code>).</td></tr>
+<tr><td><code>rl:admin:{admin_id}</code></td><td>60 s</td><td>Integer request count</td><td>Per-authenticated-admin request rate limit. Limit: 100/min (<code>admin_portal_requests_per_minute_per_account = 100</code>).</td></tr>
+</table>
+<h3>4.2 Arena Matchmaking Queue</h3>
+<table>
+<tr><th>Key Pattern</th><th>TTL</th><th>Type</th><th>Notes</th></tr>
+<tr><td><code>matchmaking:queue:{mode}</code></td><td>None</td><td>Redis Sorted Set</td><td>Score = enqueue epoch (ms). Member format: <code>&quot;{petId}:{enqueue_epoch_ms}&quot;</code>. Consumer pops oldest eligible entry via <code>ZPOPMIN</code> (atomic read-and-remove; Upstash Redis 7+ supported). Entries older than <code>arena_matchmaking_timeout_seconds = 30</code> seconds plus an implementation-defined grace buffer (~15 s; no constant) are considered stale and discarded silently.</td></tr>
+</table>
+<h3>4.3 Session Storage</h3>
+<table>
+<tr><th>Key Pattern</th><th>TTL</th><th>Value</th><th>Notes</th></tr>
+<tr><td><code>session:admin:{session_id}</code></td><td>14400 s</td><td>JSON <code>{ adminId, role, createdAt, absExpiry }</code></td><td>Inactivity TTL = 14400 s (4 h; <code>admin_session_inactivity_expiry_hours = 4</code>). <code>absExpiry = createdAt + 28800 s</code> (8 h; <code>admin_session_absolute_expiry_hours = 8</code>) is validated on every request for the absolute cap.</td></tr>
+<tr><td><code>token:blacklist:{token_hash}</code></td><td>259200 s</td><td><code>&quot;1&quot;</code></td><td>Invalidates replaced pet access tokens after recovery flow. TTL = 72 h (<code>claim_token_cleanup_ttl_hours = 72</code>).</td></tr>
+</table>
+<h3>4.4 Leaderboard Sorted Set</h3>
+<table>
+<tr><th>Key</th><th>TTL</th><th>Type</th><th>Notes</th></tr>
+<tr><td><code>leaderboard:global</code></td><td>None</td><td>Redis Sorted Set</td><td>Score = arena score (<code>win_rate × battles_played × level_multiplier</code>). Member = <code>pet_id</code>. Authoritative real-time source; PostgreSQL <code>leaderboard_snapshots</code> is the durable backup. Update lag target ≤ 30 s (<code>leaderboard_update_lag_max_seconds = 30</code>). Banned pets are removed via <code>ZREM</code> immediately on ban (reflected within 5 min; <code>leaderboard_ban_reflection_time_minutes = 5</code>). Pet entries are also removed via <code>ZREM</code> during GDPR erasure processing.</td></tr>
+</table>
+<h3>4.5 Config Cache</h3>
+<table>
+<tr><th>Key</th><th>TTL</th><th>Value</th><th>Notes</th></tr>
+<tr><td><code>config:runtime</code></td><td>300 s</td><td>JSON blob</td><td>Runtime configuration values (arena rate limit, rarity weights, etc.). Refreshed every 5 min (<code>config_cache_refresh_time_minutes = 5</code>). Mutations via <code>PUT /admin/api/config/runtime</code> or <code>PUT /admin/api/config/economy</code> take effect within this window.</td></tr>
+</table>
+<hr>
+<h2>5. Data Retention</h2>
+<table>
+<tr><th>Table / Key Pattern</th><th>Retention Policy</th><th>Source Constant</th></tr>
+<tr><td><code>pets</code></td><td>Indefinite (until GDPR erasure or admin deletion)</td><td>—</td></tr>
+<tr><td><code>claim_identities</code></td><td>Indefinite; <code>email_encrypted</code> nulled within 7 days of erasure request</td><td><code>gdpr_email_deletion_window_days = 7</code></td></tr>
+<tr><td><code>claim_codes</code></td><td>Deleted 72 hours after row creation or <code>used_at</code>, whichever is later</td><td><code>claim_token_cleanup_ttl_hours = 72</code></td></tr>
+<tr><td><code>arena_matches</code></td><td>Indefinite (audit immutability; last 20 per pet shown publicly)</td><td><code>arena_battle_records_display_count = 20</code></td></tr>
+<tr><td><code>training_logs</code></td><td>Indefinite (behavioral audit trail; feeds <code>total_training_actions</code> aggregate)</td><td>—</td></tr>
+<tr><td><code>leaderboard_snapshots</code></td><td>Rolling 12 months</td><td><code>leaderboard_snapshot_retention_months = 12</code></td></tr>
+<tr><td><code>food_buffs</code></td><td>30 days after <code>consumed_at</code> (<code>record_expires_at</code> column; cleaned by background job)</td><td><code>food_buff_record_retention_days = 30</code></td></tr>
+<tr><td><code>marketplace_listings</code></td><td>Indefinite (referenced by transactions; <code>ON DELETE RESTRICT</code>)</td><td>—</td></tr>
+<tr><td><code>marketplace_transactions</code></td><td>Indefinite (financial audit trail)</td><td>—</td></tr>
+<tr><td><code>admin_accounts</code></td><td>Indefinite (never hard-deleted; audit log FK)</td><td>—</td></tr>
+<tr><td><code>admin_audit_log</code></td><td>2 years (GDPR Art. 30 compliance)</td><td><code>admin_audit_log_retention_years = 2</code></td></tr>
+<tr><td><code>gdpr_requests</code></td><td>Indefinite (legal compliance record)</td><td>—</td></tr>
+<tr><td><code>rl:*</code> Redis counters</td><td>Per key TTL (60 s – 3600 s)</td><td>Various <code>rate_limits.*</code> constants</td></tr>
+<tr><td><code>session:admin:*</code></td><td>14400 s inactivity / absolute 28800 s</td><td><code>admin_session_inactivity_expiry_hours = 4</code>, <code>admin_session_absolute_expiry_hours = 8</code></td></tr>
+<tr><td><code>token:blacklist:*</code></td><td>259200 s (72 h)</td><td><code>claim_token_cleanup_ttl_hours = 72</code></td></tr>
+<tr><td><code>leaderboard:global</code></td><td>No expiry; entries removed on ban or GDPR erasure</td><td>—</td></tr>
+<tr><td><code>matchmaking:queue:*</code></td><td>No key-level TTL; stale entries (older than <code>arena_matchmaking_timeout_seconds = 30</code> s plus grace) are discarded by the consumer</td><td><code>arena_matchmaking_timeout_seconds = 30</code></td></tr>
+<tr><td><code>config:runtime</code></td><td>300 s rolling TTL; re-populated by next admin config write or cache-refresh cycle</td><td><code>config_cache_refresh_time_minutes = 5</code></td></tr>
+<tr><td><code>admin_audit_log.ip_address_hash</code></td><td>90 days (column is set to NULL after 90 d by background job)</td><td><code>ip_address_log_retention_days = 90</code></td></tr>
+<tr><td>Unclaimed <code>pets</code> (guest preview)</td><td>Background job deletes <code>reserved_until &lt; NOW() AND owner_token_hash IS NULL</code> on an implementation-defined schedule (no constant; run frequency is an operational decision)</td><td><code>pet_reservation_ttl_hours = 24</code></td></tr>
+</table>
+<hr>
+<h2>6. Indexes &amp; Performance Notes</h2>
+<h3>6.1 Partial Indexes</h3>
+<p>Partial indexes on boolean and nullable columns are preferred over full-table indexes where the indexed set is a small fraction of total rows:</p>
+<ul><li><code>idx_pets_claimed_at</code> — <code>WHERE claimed_at IS NOT NULL</code>: only claimed pets have this set; used by analytics and admin list queries that filter for claimed pets.</li><li><code>idx_pets_is_banned</code> — <code>WHERE is_banned = TRUE</code>: nearly all rows are <code>FALSE</code>; this partial index is tiny and fast for ban-check queries.</li><li><code>idx_pets_owner_token_hash</code> — <code>WHERE owner_token_hash IS NOT NULL</code>: unclaimed pets have NULL; only claimed pet rows are indexed, keeping the index compact.</li><li><code>idx_pets_last_trained_at</code> — <code>WHERE last_trained_at IS NOT NULL</code>: never-trained pets are excluded; the index supports neglect detection queries without scanning the full table.</li><li><code>idx_pets_reserved_until</code> — <code>WHERE reserved_until IS NOT NULL</code>: only guest preview pets have this set; background cleanup job scans this index exclusively.</li><li><code>idx_marketplace_listings_status</code> — <code>WHERE status = &#x27;active&#x27;</code>: the vast majority of historical listings are <code>cancelled</code> or <code>sold</code>; the active listing index stays small.</li><li><code>idx_marketplace_listings_active_pet</code> — <code>WHERE status = &#x27;active&#x27;</code> unique: provides a database-enforced uniqueness constraint for concurrent active listings per pet at near-zero write cost.</li><li><code>idx_arena_matches_is_flagged</code> — <code>WHERE is_flagged = TRUE</code>: nearly all matches are unflagged; partial index stays tiny and serves <code>GET /admin/api/battles?flagged=true</code> efficiently.</li><li><code>idx_gdpr_requests_initiating_pet</code> — <code>WHERE initiating_pet_id IS NOT NULL</code>: supports FK SET NULL integrity scan (<code>fk_gdpr_requests_initiating_pet ON DELETE SET NULL</code>) and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.</li><li><code>idx_claim_codes_used_at</code> — <code>WHERE used_at IS NOT NULL</code>: used by the 72-hour background cleanup job which must find rows whose first-use time has passed.</li><li><code>idx_marketplace_listings_expires_at</code> — <code>WHERE status = &#x27;active&#x27; AND expires_at IS NOT NULL</code>: used by the background job that transitions active listings whose <code>expires_at</code> has passed to <code>cancelled</code>. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.</li><li><code>idx_claim_identities_deletion</code> — <code>WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL</code>: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once <code>email_encrypted</code> is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.</li><li><code>idx_admin_audit_log_ip_hash_cleanup</code> — <code>WHERE ip_address_hash IS NOT NULL</code>: used by the background job that nulls <code>ip_address_hash</code> after 90 days (<code>ip_address_log_retention_days = 90</code>). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by <code>idx_claim_identities_deletion</code>.</li><li><code>idx_pets_claim_identity</code> — <code>WHERE claim_identity_id IS NOT NULL</code>: only claimed pets have this FK set; the partial index supports the GDPR erasure lookup query (<code>SELECT id FROM pets WHERE claim_identity_id = $1</code>) efficiently and also serves the FK integrity scan. See §6.5 for the full query pattern.</li></ul>
+<h3>6.2 Composite Indexes</h3>
+<ul><li><code>idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)</code> and <code>idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)</code> — support the <code>ORDER BY completed_at DESC LIMIT 20</code> query pattern used by <code>GET /api/v1/arena/history/:petId</code> (<code>arena_battle_records_display_count = 20</code>). Without a composite index the planner would scan the full <code>pet_a_id</code> partition and sort. The leading column of each index also serves PostgreSQL&#x27;s FK integrity scan for <code>ON DELETE RESTRICT</code> (pet_a_id) and <code>ON DELETE SET NULL</code> (pet_b_id), eliminating the need for separate single-column indexes.</li><li><code>idx_training_logs_completed_at (pet_id, completed_at DESC)</code> — supports the daily action count query (<code>COUNT(*) WHERE pet_id = ? AND completed_at &gt;= UTC_DATE</code>) and the training history summary in <code>GET /api/v1/pets/:petId/stats</code>. The leading <code>pet_id</code> column also serves the FK CASCADE scan (<code>ON DELETE CASCADE</code>), making a separate <code>idx_training_logs_pet_id</code> unnecessary.</li><li><code>idx_admin_audit_log_admin_id (admin_id, created_at DESC)</code> — supports filtered audit log searches by actor across the full 2-year retention window in ≤ 3 s (<code>admin_audit_log_search_response_time_seconds = 3</code>, <code>admin_audit_log_retention_years = 2</code>).</li><li><code>idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)</code> — supports the anti-flip eligibility check (<code>marketplace_trade_antiflip_protection_days = 7</code>). The query <code>SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1</code> is fully served by the composite index without a separate heap sort. The leading <code>pet_id</code> column also covers the FK RESTRICT scan (<code>ON DELETE RESTRICT</code>), eliminating the need for a separate single-column <code>idx_marketplace_transactions_pet</code> index.</li><li><code>idx_gdpr_requests_identity (claim_identity_id, submitted_at DESC)</code> — supports the query <code>WHERE claim_identity_id = $1 ORDER BY submitted_at DESC</code> for listing all requests by a data subject. The leading column also serves the FK RESTRICT scan (<code>ON DELETE RESTRICT</code>).</li><li><code>idx_gdpr_requests_status (status, submitted_at)</code> — supports the admin work queue query <code>WHERE status IN (&#x27;pending&#x27;, &#x27;processing&#x27;) ORDER BY submitted_at</code> for processing requests in FIFO order.</li></ul>
+<h3>6.3 Leaderboard Query Pattern</h3>
+<p>The live leaderboard is served exclusively from the Redis <code>leaderboard:global</code> sorted set (<code>ZRANGE … REV LIMIT</code> for top-N retrieval — O(log N + M) where M is the number of elements returned; <code>ZREVRANK</code> for a pet&#x27;s rank — O(log N)). (<code>ZREVRANGE</code> is deprecated since Redis 6.2; <code>ZRANGE … REV LIMIT</code> is the idiomatic equivalent on Upstash Redis 7+.) The <code>leaderboard_snapshots</code> table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.</p>
+<h3>6.4 Token Lookup Path</h3>
+<p>Authentication on every write request hashes the incoming bearer token and executes:</p>
+<pre><code class="language-sql">SELECT id, is_banned, claim_identity_id, owner_token_hash
   FROM pets
  WHERE owner_token_hash = $1;</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Before executing the SELECT, the application checks the incoming token hash against the Redis <code>token:blacklist:{token_hash}</code> key; if the key is present the request is rejected immediately without touching PostgreSQL. The partial index <code>idx_pets_owner_token_hash</code> (covering only non-NULL rows) makes the subsequent DB lookup a single index scan.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="65-gdpr-erasure-lookup">6.5 GDPR Erasure Lookup</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The <code>pets.claim_identity_id</code> FK enables the erasure job to find all pets belonging to a data subject in one query:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-sql">SELECT id FROM pets WHERE claim_identity_id = $1;</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">This avoids depending on the ephemeral <code>claim_codes</code> table, which is purged 72 hours after creation or first use, whichever is later (<code>claim_token_cleanup_ttl_hours = 72</code>). The partial index <code>idx_pets_claim_identity</code> supports this scan efficiently.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="66-single-column-support-indexes">6.6 Single-Column Support Indexes</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">These full-table indexes cover FK scans, sort-only queries, and background job targets that are not classified as partial or composite:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><code>idx_pets_rarity (rarity)</code> — supports admin list-view and leaderboard snapshot queries that filter by rarity tier. Not partial because all rows have a non-NULL <code>rarity</code>.</li>
-<li><code>idx_claim_codes_expires_at (expires_at)</code> — supports OTP verification filtering for unexpired codes (<code>WHERE expires_at > NOW()</code>) and the background job that identifies stale unverified codes. Not partial because all rows have a non-NULL <code>expires_at</code>.</li>
-<li><code>idx_claim_codes_created_at (created_at)</code> — supports the 72-hour background cleanup job which finds rows by creation time (<code>WHERE created_at < NOW() - INTERVAL '72 hours'</code>). Not partial because all rows have a non-NULL <code>created_at</code>.</li>
-<li><code>idx_arena_matches_completed_at (completed_at)</code> — supports admin list queries ordered by recency and serves as the sort key for leaderboard-adjacent analytics. Not partial because all rows have a non-NULL <code>completed_at</code>.</li>
-<li><code>idx_arena_matches_winner (winner_pet_id)</code> — supports the FK integrity scan for <code>winner_pet_id ON DELETE SET NULL</code>. PostgreSQL does not require an index on the referencing column, but without one it falls back to a sequential scan of <code>arena_matches</code> whenever a <code>pets</code> row is deleted; the index prevents that O(N) scan at low cost given the low cardinality of <code>winner_pet_id</code> updates.</li>
-<li><code>idx_claim_codes_pet_id (pet_id)</code> — supports the FK CASCADE scan when a <code>pets</code> row is deleted (<code>ON DELETE CASCADE</code>). Also used by the OTP verification query <code>WHERE pet_id = $1 AND expires_at > NOW() AND used_at IS NULL</code>.</li>
-<li><code>idx_claim_codes_email_hash (email_hash)</code> — supports the OTP lookup query <code>WHERE email_hash = $1</code> to retrieve pending codes for a given email.</li>
-<li><code>idx_food_buffs_pet_id (pet_id)</code> — supports the FK CASCADE scan and the active-buff query <code>WHERE pet_id = $1 AND (expires_at IS NULL OR expires_at > NOW())</code>.</li>
-<li><code>idx_food_buffs_record_expires (record_expires_at)</code> — supports the background cleanup job <code>DELETE FROM food_buffs WHERE record_expires_at < NOW()</code> (<code>food_buff_record_retention_days = 30</code>).</li>
-<li><code>idx_marketplace_listings_pet (pet_id)</code> — supports the FK RESTRICT scan and seller-facing queries <code>WHERE pet_id = $1</code>.</li>
-<li><code>idx_marketplace_listings_listed_at (listed_at DESC)</code> — supports the admin and public marketplace browse query <code>ORDER BY listed_at DESC</code>.</li>
-<li><code>idx_marketplace_transactions_completed (completed_at DESC)</code> — supports admin transaction audit queries ordered by recency.</li>
-<li><code>idx_leaderboard_snapshots_time (snapshot_time DESC)</code> — supports both the historical reporting query (<code>SELECT ... ORDER BY snapshot_time DESC LIMIT 1</code>) and the 12-month rolling retention DELETE (<code>WHERE snapshot_time < NOW() - INTERVAL '12 months'</code>; <code>leaderboard_snapshot_retention_months = 12</code>). Not partial because all rows have a non-NULL <code>snapshot_time</code>.</li>
-<li><code>idx_admin_audit_log_created_at (created_at DESC)</code> — supports audit log search queries and the 2-year row retention DELETE (<code>WHERE created_at < NOW() - INTERVAL '2 years'</code>; <code>admin_audit_log_retention_years = 2</code>). The composite <code>idx_admin_audit_log_admin_id</code> additionally covers filtered searches by actor. Not partial because all rows have a non-NULL <code>created_at</code>.</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="67-connection-pool-sizing">6.7 Connection Pool Sizing</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">At <code>db_connection_pool_min_connections = 20</code> and <code>db_connection_pool_max_connections = 50</code>, the pool is sized for the sustained 100 RPS target (<code>normal_operation_rps = 100</code>) with headroom to the 500 RPS peak (<code>peak_operation_rps = 500</code>) before autoscaling adds replicas. Each API server process holds its own pool; with the minimum API server replica count (implementation-defined; no constant), the total connection count at burst is <code>min_replicas × db_connection_pool_max_connections</code>. For example, 2 API server processes × 50 pool max = 100 total connections at burst.</p>
-<div class="doc-gap"></div>
-    </div>
+<p>Before executing the SELECT, the application checks the incoming token hash against the Redis <code>token:blacklist:{token_hash}</code> key; if the key is present the request is rejected immediately without touching PostgreSQL. The partial index <code>idx_pets_owner_token_hash</code> (covering only non-NULL rows) makes the subsequent DB lookup a single index scan.</p>
+<h3>6.5 GDPR Erasure Lookup</h3>
+<p>The <code>pets.claim_identity_id</code> FK enables the erasure job to find all pets belonging to a data subject in one query:</p>
+<pre><code class="language-sql">SELECT id FROM pets WHERE claim_identity_id = $1;</code></pre>
+<p>This avoids depending on the ephemeral <code>claim_codes</code> table, which is purged 72 hours after creation or first use, whichever is later (<code>claim_token_cleanup_ttl_hours = 72</code>). The partial index <code>idx_pets_claim_identity</code> supports this scan efficiently.</p>
+<h3>6.6 Single-Column Support Indexes</h3>
+<p>These full-table indexes cover FK scans, sort-only queries, and background job targets that are not classified as partial or composite:</p>
+<ul><li><code>idx_pets_rarity (rarity)</code> — supports admin list-view and leaderboard snapshot queries that filter by rarity tier. Not partial because all rows have a non-NULL <code>rarity</code>.</li><li><code>idx_claim_codes_expires_at (expires_at)</code> — supports OTP verification filtering for unexpired codes (<code>WHERE expires_at &gt; NOW()</code>) and the background job that identifies stale unverified codes. Not partial because all rows have a non-NULL <code>expires_at</code>.</li><li><code>idx_claim_codes_created_at (created_at)</code> — supports the 72-hour background cleanup job which finds rows by creation time (<code>WHERE created_at &lt; NOW() - INTERVAL &#x27;72 hours&#x27;</code>). Not partial because all rows have a non-NULL <code>created_at</code>.</li><li><code>idx_arena_matches_completed_at (completed_at)</code> — supports admin list queries ordered by recency and serves as the sort key for leaderboard-adjacent analytics. Not partial because all rows have a non-NULL <code>completed_at</code>.</li><li><code>idx_arena_matches_winner (winner_pet_id)</code> — supports the FK integrity scan for <code>winner_pet_id ON DELETE SET NULL</code>. PostgreSQL does not require an index on the referencing column, but without one it falls back to a sequential scan of <code>arena_matches</code> whenever a <code>pets</code> row is deleted; the index prevents that O(N) scan at low cost given the low cardinality of <code>winner_pet_id</code> updates.</li><li><code>idx_claim_codes_pet_id (pet_id)</code> — supports the FK CASCADE scan when a <code>pets</code> row is deleted (<code>ON DELETE CASCADE</code>). Also used by the OTP verification query <code>WHERE pet_id = $1 AND expires_at &gt; NOW() AND used_at IS NULL</code>.</li><li><code>idx_claim_codes_email_hash (email_hash)</code> — supports the OTP lookup query <code>WHERE email_hash = $1</code> to retrieve pending codes for a given email.</li><li><code>idx_food_buffs_pet_id (pet_id)</code> — supports the FK CASCADE scan and the active-buff query <code>WHERE pet_id = $1 AND (expires_at IS NULL OR expires_at &gt; NOW())</code>.</li><li><code>idx_food_buffs_record_expires (record_expires_at)</code> — supports the background cleanup job <code>DELETE FROM food_buffs WHERE record_expires_at &lt; NOW()</code> (<code>food_buff_record_retention_days = 30</code>).</li><li><code>idx_marketplace_listings_pet (pet_id)</code> — supports the FK RESTRICT scan and seller-facing queries <code>WHERE pet_id = $1</code>.</li><li><code>idx_marketplace_listings_listed_at (listed_at DESC)</code> — supports the admin and public marketplace browse query <code>ORDER BY listed_at DESC</code>.</li><li><code>idx_marketplace_transactions_completed (completed_at DESC)</code> — supports admin transaction audit queries ordered by recency.</li><li><code>idx_leaderboard_snapshots_time (snapshot_time DESC)</code> — supports both the historical reporting query (<code>SELECT ... ORDER BY snapshot_time DESC LIMIT 1</code>) and the 12-month rolling retention DELETE (<code>WHERE snapshot_time &lt; NOW() - INTERVAL &#x27;12 months&#x27;</code>; <code>leaderboard_snapshot_retention_months = 12</code>). Not partial because all rows have a non-NULL <code>snapshot_time</code>.</li><li><code>idx_admin_audit_log_created_at (created_at DESC)</code> — supports audit log search queries and the 2-year row retention DELETE (<code>WHERE created_at &lt; NOW() - INTERVAL &#x27;2 years&#x27;</code>; <code>admin_audit_log_retention_years = 2</code>). The composite <code>idx_admin_audit_log_admin_id</code> additionally covers filtered searches by actor. Not partial because all rows have a non-NULL <code>created_at</code>.</li></ul>
+<h3>6.7 Connection Pool Sizing</h3>
+<p>At <code>db_connection_pool_min_connections = 20</code> and <code>db_connection_pool_max_connections = 50</code>, the pool is sized for the sustained 100 RPS target (<code>normal_operation_rps = 100</code>) with headroom to the 500 RPS peak (<code>peak_operation_rps = 500</code>) before autoscaling adds replicas. Each API server process holds its own pool; with the minimum API server replica count (implementation-defined; no constant), the total connection count at burst is <code>min_replicas × db_connection_pool_max_connections</code>. For example, 2 API server processes × 50 pool max = 100 total connections at burst.</p></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

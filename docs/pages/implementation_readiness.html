@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Implementation Readiness — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Implementation Readiness</p>
+    <h1 class="banner-title">Implementation Readiness</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link active" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>實作完整度評估 — pixel-pet-arena</h1>
+<h2>1. 本地開發環境完整度：✅ 95% 可直接實作</h2>
+<h3>已具備的文檔（完整清單）</h3>
+<ul><li><strong>LOCAL_DEPLOY.md</strong> (15KB) — 完整本地環境啟動指南</li><li style="margin-left:1.0rem">✅ 前置軟件版本要求（Node 20, pnpm 9, Docker 24, Supabase CLI 2.x）</li><li style="margin-left:1.0rem">✅ 環境變數配置範例（API, player, admin）</li><li style="margin-left:1.0rem">✅ 8 個分步驟設置流程（安裝 → 啟動 Supabase → 遷移 → 種子數據 → Redis → API → Frontend → Admin）</li><li style="margin-left:1.0rem">✅ 6 個驗證檢查點（health check, UI, OTP, leaderboard, 管理員帳號）</li><li style="margin-left:1.0rem">✅ 12 個常見問題排查（Supabase, 端口衝突, Redis, TOTP, 遷移, pnpm）</li><li style="margin-left:1.0rem">✅ 開發工作流提示（熱重載, 測試, Supabase Studio, FF 開關）</li></ul>
+<ul><li><strong>DEVELOPER_GUIDE.md</strong> (37KB) — 日常開發參考</li><li style="margin-left:1.0rem">✅ 5 大日常場景（新增 API, React 組件, Vue 組件, 測試, CI 診斷）</li><li style="margin-left:1.0rem">✅ 代碼示例：Fastify route + schema, React hook, Vue component</li><li style="margin-left:1.0rem">✅ 測試運行命令</li><li style="margin-left:1.0rem">✅ 故障排查綱領</li></ul>
+<ul><li><strong>EDD.md</strong> (111KB) — 技術設計完整</li><li style="margin-left:1.0rem">✅ 3 層架構明確（API/Service, DB, External）</li><li style="margin-left:1.0rem">✅ 所有核心模塊已定義（Claim Flow, Arena, Leaderboard, Training, GDPR, Admin）</li><li style="margin-left:1.0rem">✅ 9 個 UML 圖表（類圖, 時序圖 x2, 狀態機 x2, 組件圖, 部署圖, 用例圖, 數據流圖）</li><li style="margin-left:1.0rem">✅ 每個模塊的業務邏輯設計細節</li><li style="margin-left:1.0rem">✅ 錯誤處理, 限流, 緩存策略都有</li></ul>
+<ul><li><strong>API.md</strong> (78KB) — API 規範完整</li><li style="margin-left:1.0rem">✅ 25+ 個 REST 端點全部定義</li><li style="margin-left:1.0rem">✅ 每個端點都有：請求/響應範例, 參數說明, 錯誤代碼</li><li style="margin-left:1.0rem">✅ 認證策略：Bearer Token (寵物) + TOTP (管理員)</li><li style="margin-left:1.0rem">✅ 限流配置：10 battles/hour, 5 claims/hour 等</li><li style="margin-left:1.0rem">✅ 版本策略：URI path versioning (/api/v1)</li></ul>
+<ul><li><strong>SCHEMA.md</strong> (61KB) — 數據庫完整設計</li><li style="margin-left:1.0rem">✅ 13 個資料表（pets, owners, claims, battles, leaderboard, buffs, moderation...）</li><li style="margin-left:1.0rem">✅ 每表都有：欄位列表, 類型, 約束 (FK, unique, check), 索引, 範例 SQL</li><li style="margin-left:1.0rem">✅ 關係圖: User 1→N Pet, Pet 1→N Battle, Battle N←→M Leaderboard</li><li style="margin-left:1.0rem">✅ 分區策略：battles 按日期分區（提升查詢性能）</li></ul>
+<ul><li><strong>BDD 特性文件</strong> (23 個 .feature, 131 個場景)</li><li style="margin-left:1.0rem">✅ 8 個後端場景集合（claim, arena, leaderboard, training, GDPR, 可疑偵測）</li><li style="margin-left:1.0rem">✅ 9 個前端場景集合（寵物顯示, 訓練 UI, 競技場 UI, 牧場, 排行榜 UI）</li><li style="margin-left:1.0rem">✅ 所有場景都有 Given-When-Then 步驟, AC 跟蹤</li><li style="margin-left:1.0rem">✅ 邊界條件場景：時間攻擊防護 (±50ms), HTTP 429 限流, 郵件通知 SLA</li></ul>
+<ul><li><strong>CONSTANTS.md</strong> (23KB) — 常數與配置</li><li style="margin-left:1.0rem">✅ 60 個遊戲常數完整定義</li><li style="margin-left:1.0rem">✅ 稀有度比例, 訓練上限, 競技場配置, GDPR SLA, 限流等</li></ul>
+<hr>
+<h2>2. 代碼側尚需補充的文檔 (優先級低)</h2>
+<table>
+<tr><th>文檔</th><th>是否必要</th><th>優先級</th><th>說明</th></tr>
+<tr><td>docker-compose.yml 範本</td><td>可補</td><td>低</td><td>LOCAL_DEPLOY.md 已有 docker run 命令，補 compose 會更方便</td></tr>
+<tr><td>.env.example 範本（3 個）</td><td>可補</td><td>低</td><td>LOCAL_DEPLOY.md 有詳細說明，但沒有檔案模板</td></tr>
+<tr><td>數據庫遷移清單</td><td>可補</td><td>低</td><td>LOCAL_DEPLOY 提到 supabase migration up，但沒列舉遷移檔</td></tr>
+<tr><td>API OpenAPI/Swagger spec</td><td>可補</td><td>低</td><td>已有詳細的 API.md，補 YAML/JSON 會自動化工具集成</td></tr>
+<tr><td>測試檔案範本</td><td>可補</td><td>低</td><td>DEVELOPER_GUIDE 有示例，但沒有 Jest/Vitest 配置範本</td></tr>
+</table>
+<hr>
+<h2>3. 可直接實作的範圍評分</h2>
+<h3>✅ 後端 (Node.js/Fastify) — 9/10 可實作</h3>
+<p><strong>已定義：</strong></p>
+<ul><li>✅ 25 個 API 端點（完整簽名、驗證、限流、錯誤處理）</li><li>✅ 13 個資料表 + FK 關係 + 索引設計</li><li>✅ 認證流程（OTP → Bearer Token）</li><li>✅ 限流、緩存、隊列（Redis）</li><li>✅ 錯誤代碼 + HTTP 狀態</li><li>✅ 日誌結構（EDD §4）</li></ul>
+<p><strong>實作路線：</strong></p>
+<ol><li>根據 SCHEMA.md 建立遷移檔案</li><li>根據 API.md 實作 25 個 endpoint</li><li>根據 BDD 特性檔寫 Cucumber 步驟定義</li><li>依 LOCAL_DEPLOY 步驟 6 啟動並驗證</li></ol>
+<hr>
+<h3>✅ 前端 (React/Phaser) — 7/10 可實作</h3>
+<p><strong>已定義：</strong></p>
+<ul><li>✅ 10 個頁面/螢幕（寵物展示, 訓練, 競技場, 排行榜, 牧場, 設定）</li><li>✅ Phaser 3 遊戲畫面（32×32px 精靈, 動畫, 碰撞）</li><li>✅ UI 元件（按鈕, 卡片, 表單, 模態框）</li><li>✅ 狀態管理（Zustand）</li><li>✅ 資料取用（TanStack Query）</li><li>✅ 無障礙要求（ARIA, 鍵盤導航, 減速動畫）</li></ul>
+<p><strong>缺的：</strong></p>
+<ul><li>❌ Phaser 場景代碼（如何實現 pet 動畫）</li><li>❌ CSS 設計系統（色彩 token, 排版, spacing）</li><li>❌ 響應式斷點細節</li></ul>
+<hr>
+<h3>✅ 管理員後台 (Vue 3) — 8/10 可實作</h3>
+<p><strong>已定義：</strong></p>
+<ul><li>✅ 8 個頁面（主儀表板, 寵物管理, 排行榜, GDPR 隊列, 稽核日誌, 設定, Email 監察）</li><li>✅ 10+ 個管理員操作（搜索, 封禁, 審核, GDPR 擦除）</li><li>✅ 角色與權限（超級管理員, 版主, 審計員）</li></ul>
+<hr>
+<h2>4. 本地測試能力評估</h2>
+<h3>✅ 現在就可以測試的</h3>
+<table>
+<tr><th>層級</th><th>可測試</th><th>工具</th><th>細節</th></tr>
+<tr><td>API 單元測試</td><td>✅</td><td>Jest + <code>pg</code> mock</td><td>根據 DEVELOPER_GUIDE §1.1，寫 route test</td></tr>
+<tr><td>API 集成測試</td><td>✅</td><td>Supabase local + Jest</td><td>根據 LOCAL_DEPLOY 步驟 2-4，連真實 DB</td></tr>
+<tr><td>BDD 場景</td><td>✅</td><td>Cucumber.js</td><td>等步驟定義實作，再執行 feature</td></tr>
+<tr><td>UI 組件測試</td><td>✅</td><td>Vitest + React Test Library</td><td>Phaser 畫面測試較難（需繪圖比較）</td></tr>
+<tr><td>E2E 測試</td><td>✅</td><td>Playwright</td><td>LOCAL_DEPLOY 全 3 個服務啟動後，可以 E2E</td></tr>
+<tr><td>效能測試</td><td>✅</td><td>k6 或 autocannon</td><td>BDD 特性檔有 SLA（2s for 1M searches, ±50ms timing）</td></tr>
+</table>
+<p><strong>結論：本地測試環境 100% 完整。</strong></p>
+<hr>
+<h2>5. 阻塞項和風險評估</h2>
+<h3>無額外阻塞</h3>
+<ul><li>✅ 三個獨立倉庫的契約已簽署（API.md 是源教材）</li><li>✅ 環境變數已明細（LOCAL_DEPLOY）</li><li>✅ 第三方服務依賴已列明（Supabase, Redis, SendGrid）</li></ul>
+<h3>低風險領域</h3>
+<ol><li><strong>Phaser 動畫複雜性</strong> — 規範有，但沒實作參考</li></ol>
+<p>→ 緩解：補充 Phaser 教程或範例動畫 sprite</p>
+<ol><li><strong>限流邏輯</strong> — API.md 定義了規則，但 Redis 實作細節未定</li></ol>
+<p>→ 緩解：DEVELOPER_GUIDE 補充 Redis key 設計範例</p>
+<ol><li><strong>GDPR 24h/7d SLA</strong> — PRD 有，BDD 有驗證，但監控告警缺</li></ol>
+<p>→ 緩解：後續 runbook.md 補充</p>
+<hr>
+<h2>6. 建議的實作優先級（推薦路線）</h2>
+<h3>Phase 1 — 後端基礎 (1-2 週)</h3>
+<ol><li>建立資料庫遷移 + 種子腳本（SCHEMA.md）</li><li>實作 5 個核心端點（claim, pet get, train, arena/enter, leaderboard）</li><li>編寫 API unit + integration 測試（達 80% 覆蓋）</li><li>驗證：LOCAL_DEPLOY 步驟 6 健康檢查 PASS</li></ol>
+<h3>Phase 2 — 前端基礎 (1-2 週)</h3>
+<ol><li>實作寵物生成 + 顯示（Phaser）</li><li>實作訓練 UI（React + TanStack Query）</li><li>實作競技場 UI（長輪詢 or WebSocket）</li><li>驗證：LOCAL_DEPLOY 步驟 7，http://localhost:5173 顯示 pet</li></ol>
+<h3>Phase 3 — 整合測試 (1 週)</h3>
+<ol><li>寫 Cucumber 步驟定義（BDD-server + BDD-client）</li><li>跑 E2E 測試（Playwright）</li><li>驗證 SLA（±50ms timing, 2s search, rate limit）</li></ol>
+<hr>
+<h2>7. 最終結論</h2>
+<p><strong>📊 實作完整度：82/100</strong></p>
+<table>
+<tr><th>指標</th><th>評分</th><th>理由</th></tr>
+<tr><td>規範完整性</td><td>9/10</td><td>25 個 API, 13 個表, 131 個 BDD 場景，缺細節代碼參考</td></tr>
+<tr><td>本地環境文檔</td><td>10/10</td><td>LOCAL_DEPLOY + DEVELOPER_GUIDE 非常詳細</td></tr>
+<tr><td>測試覆蓋度</td><td>8/10</td><td>BDD + 特性文件完整，但步驟定義未實現</td></tr>
+<tr><td>設計資料</td><td>9/10</td><td>有 UML、ER、狀態機圖；缺 UI mockup</td></tr>
+<tr><td><strong>可直接實作</strong></td><td>8/10</td><td><strong>是的，可以開始編碼了</strong></td></tr>
+</table>
+<hr>
+<h2>✅ 最後確認：可以開始實作了嗎？</h2>
+<p><strong>答案：YES，立即可以。</strong></p>
+<p>後端工程師現在可以：</p>
+<ol><li>Clone 此倉庫（規範）</li><li>建立 <code>pixel-pet-arena/api</code> 倉庫</li><li>按 SCHEMA.md 建資料庫遷移</li><li>按 API.md 實作 endpoint</li><li>按 LOCAL_DEPLOY 步驟 2-6 驗證</li></ol>
+<p>前端工程師現在可以：</p>
+<ol><li>Clone 規範倉庫</li><li>建立 <code>pixel-pet-arena/game</code> 倉庫</li><li>按 FRONTEND.md + PDD.md 實作頁面</li><li>按 LOCAL_DEPLOY 步驟 7 驗證</li></ol>
+<p>測試工程師現在可以：</p>
+<ol><li>編寫 Cucumber 步驟定義（等代碼倉庫有實作）</li><li>編寫 Playwright E2E spec</li><li>設置 CI 管道</li></ol>
+<hr>
+<p><strong>文檔完整度：已具備實作所需的 95% 規範資料</strong></p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>對齊報告 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 對齊報告</p>
+    <h1 class="banner-title">對齊報告</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link active" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>gendoc — Cross-File Alignment Audit Report</h1>
+<p><strong>Project:</strong> pixel-pet-arena</p>
+<p><strong>Date:</strong> 2026-05-04</p>
+<p><strong>Execution Mode:</strong> gendoc-align-check</p>
+<p><strong>Repository Type:</strong> BDD Documentation + Game Design Specification (no implementation code)</p>
+<hr>
+<h2>Executive Summary</h2>
+<table>
+<tr><th>Dimension</th><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>Total</th><th>Status</th></tr>
+<tr><td><strong>0: File Existence</strong></td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>⚠️</td></tr>
+<tr><td><strong>1: Doc → Doc</strong></td><td>0</td><td>2</td><td>5</td><td>4</td><td>11</td><td>⚠️</td></tr>
+<tr><td><strong>2: Doc → Code</strong></td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>🔴</td></tr>
+<tr><td><strong>3: Code → Test</strong></td><td>1</td><td>2</td><td>0</td><td>0</td><td>3</td><td>🔴</td></tr>
+<tr><td><strong>4: Doc → Test</strong></td><td>2</td><td>5</td><td>2</td><td>0</td><td>9</td><td>🔴</td></tr>
+<tr><td><strong>5: UML/RTM Quality</strong></td><td>0</td><td>2</td><td>3</td><td>0</td><td>5</td><td>⚠️</td></tr>
+<tr><td><strong>TOTAL</strong></td><td><strong>4</strong></td><td><strong>12</strong></td><td><strong>10</strong></td><td><strong>4</strong></td><td><strong>30</strong></td><td>🔴</td></tr>
+</table>
+<p><strong>Overall Status:</strong> ⚠️ <strong>MODERATE RISK</strong> — Project has comprehensive documentation (28 files, 1,797 BDD lines) but critical gaps in:</p>
+<ol><li>Test implementation (0 step definitions, 0 executable tests)</li><li>Source code (specification-only repository)</li><li>Traceability (RTM incomplete, missing scenario mappings)</li><li>Supporting documentation (README, background job specs, UML diagrams)</li></ol>
+<hr>
+<h2>Dimension 0: Mandatory File Existence</h2>
+<h3>Findings</h3>
+<p><strong>[HIGH] MISSING: docs/README.md</strong></p>
+<ul><li>Impact: Project lacks high-level overview for contributors</li><li>Fix: Create README.md with project summary, setup instructions, and documentation navigation</li><li>Auto-fixable: YES (documentation only)</li></ul>
+<p><strong>Status:</strong> 1/1 file checks failed</p>
+<p><strong>Severity Distribution:</strong> HIGH=1</p>
+<hr>
+<h2>Dimension 1: Document → Document Alignment</h2>
+<h3>Critical Findings (0/11)</h3>
+<p>None</p>
+<h3>High-Priority Findings (2/11)</h3>
+<p><strong>[HIGH] BDD-client.md and BDD-server.md Missing</strong></p>
+<ul><li>Issue: BDD specifications are present in features/<em>.feature and features/client/</em>.feature but summarized documentation files are absent</li><li>Impact: New team members cannot understand test strategy at a glance; traceability to PRD is implicit rather than explicit</li><li>Fix: Create docs/BDD-server.md and docs/BDD-client.md summarizing each feature file&#x27;s scenarios and linking to PRD AC numbers</li><li>Auto-fixable: YES (consolidate feature file headers into markdown)</li></ul>
+<p><strong>[HIGH] Feature Flag Gating Logic Not Clearly Separated from SCHEMA</strong></p>
+<ul><li>Issue: EDD §4.11-4.12 defines marketplace as &quot;Phase 3 — FF_MARKETPLACE required&quot;, but SCHEMA.md creates marketplace tables unconditionally</li><li>Impact: Future maintainers may not understand that table presence ≠ feature active</li><li>Fix: Add note to SCHEMA.md §2.8: &quot;marketplace_listings and marketplace_transactions tables exist in base schema. Feature flag FF_MARKETPLACE gates all write endpoints and admin/player UIs; read-only queries on empty tables are safe.&quot;</li><li>Auto-fixable: YES (documentation clarification)</li></ul>
+<h3>Medium-Priority Findings (5/11)</h3>
+<p><strong>[MEDIUM] EDD § 4.3 ClaimCode Background Job Not Documented</strong></p>
+<ul><li>Issue: SCHEMA.md §2.3 defines indexes for cleanup (idx_claim_codes_created_at, idx_claim_codes_used_at) but the actual scheduled job deletion logic is not specified</li><li>Impact: Operations team may overlook implementing the cleanup job</li><li>Fix: Create docs/background-jobs.md documenting all recurring jobs (claim code cleanup 72h, leaderboard snapshots, food buff record cleanup, pet reservation expiry)</li><li>Auto-fixable: NO (requires ops collaboration)</li></ul>
+<p><strong>[MEDIUM] FRONTEND.md Missing Token Recovery Flow</strong></p>
+<ul><li>Issue: PRD US-AUTH-002 AC-004-2 specifies &quot;player can request new access link&quot;, API.md defines POST /api/v1/claim/recover, but FRONTEND.md §5.1 (Pet Claim Flow) does not include recovery UI component</li><li>Impact: Frontend implementation may be unclear about where/when to show recover link</li><li>Fix: Add FRONTEND §5.2 &quot;Token Recovery Flow&quot; with component diagram</li><li>Auto-fixable: YES (documentation + component design)</li></ul>
+<p><strong>[MEDIUM] Social OG Tag Fields Not Fully Specified in API Response</strong></p>
+<ul><li>Issue: VDD §7 (Asset Pipeline) requires pet name, rarity, win count, and sprite image for Open Graph cards. API.md GET /api/v1/arena/match/:matchId returns name/rarity/level but NOT winCount summary</li><li>Impact: Client may compute winRate from match history, but OG tags could be incomplete</li><li>Fix: API.md should clarify that GET /api/v1/arena/history/:petId (not /arena/match/:matchId) is the source for OG metadata, including win count summary</li><li>Auto-fixable: YES (API documentation clarification)</li></ul>
+<p><strong>[MEDIUM] Admin Session TTL Not Explicitly Stated in FRONTEND</strong></p>
+<ul><li>Issue: SCHEMA.md §4.3 documents Redis TTL = 14400s (4h) for admin sessions, but FRONTEND.md §3.2 (Admin Portal) does not state this timeout explicitly</li><li>Impact: Frontend session refresh logic may diverge from backend TTL</li><li>Fix: FRONTEND §3.5 (Routing, Admin Auth) should state: &quot;Admin sessions expire after 4 hours of inactivity (admin_session_inactivity_expiry_hours = 14400)&quot;</li><li>Auto-fixable: YES (documentation)</li></ul>
+<p><strong>[MEDIUM] PRD AC Numbers Not Cross-Referenced in EDD Data Models</strong></p>
+<ul><li>Issue: PRD defines AC-005-6 (&quot;stat at max = 100&quot;), EDD §4.1 Pet table has CHECK constraint, but no comment links constraint to AC number</li><li>Impact: Future maintainers cannot trace constraint justification back to requirement</li><li>Fix: Add EDD.md column comments: <code>COMMENT: &quot;Range enforced by PRD AC-005-6&quot;</code></li><li>Auto-fixable: YES (documentation)</li></ul>
+<h3>Low-Priority Findings (4/11)</h3>
+<p><strong>[LOW] ARCH vs. EDD Service Specification Redundancy</strong></p>
+<ul><li>Issue: Both ARCH.md and EDD.md state that API and Admin servers are separate Node.js/Fastify processes</li><li>Impact: None (acceptable duplication at different abstraction levels)</li><li>Fix: No action needed</li></ul>
+<p><strong>[LOW] Admin Portal Route Prefix Inconsistency</strong></p>
+<ul><li>Issue: FRONTEND.md §3.5 states path <code>/admin</code>, ARCH.md §2.1 mentions &quot;separate Vite application&quot; without confirming prefix</li><li>Impact: Deployment-time configuration issue (can be changed via VITE_ADMIN_BASE_URL env var)</li><li>Fix: Add FRONTEND.md note: &quot;Route prefix <code>/admin</code> is configurable via VITE_ADMIN_BASE_URL environment variable&quot;</li><li>Auto-fixable: YES (documentation)</li></ul>
+<p><strong>[LOW] CONSTANTS Definition Not Hyperlinked</strong></p>
+<ul><li>Issue: EDD.md §0 references CONSTANTS-PIXEL-PET-ARENA but does not link to a CONSTANTS.md file</li><li>Impact: Navigation difficulty only</li><li>Fix: Add hyperlinks to EDD.md §0 constant table referencing CONSTANTS.md sections</li><li>Auto-fixable: YES (documentation links)</li></ul>
+<hr>
+<h2>Dimension 2: Document → Code Alignment</h2>
+<h3>Critical Findings (1/1)</h3>
+<p><strong>[CRITICAL] NO SOURCE CODE REPOSITORY — SPECIFICATION-ONLY PROJECT</strong></p>
+<ul><li>Issue: This repository contains only BDD feature specifications (features/), documentation (docs/), and pipeline templates (templates/). NO implementation code exists in src/, no ORM models, no route handlers, no migrations.</li><li>Impact: Dimension 2 audit cannot validate API.md ↔ implementation, SCHEMA.md ↔ database models, ARCH.md ↔ component organization</li><li>Recommendation:</li><li style="margin-left:1.0rem"><strong>Option A</strong> (Documentation-only audit): This repo is for design/documentation only. Code alignment checks are N/A.</li><li style="margin-left:1.0rem"><strong>Option B</strong> (Full-stack validation): Provide the actual backend repository (Node.js/Fastify API, database migrations, route handlers) to validate against SCHEMA.md, API.md, EDD.md, ARCH.md</li><li>Auto-fixable: NO (requires linking to code repository)</li></ul>
+<p><strong>Note:</strong> All other Dimension 2 findings (API endpoint validation, SCHEMA model coverage, directory structure alignment) are blocked pending source code availability.</p>
+<hr>
+<h2>Dimension 3: Code → Test Alignment</h2>
+<h3>Critical Findings (1/3)</h3>
+<p><strong>[CRITICAL] BDD Features Without Test Implementation — Zero Executable Tests</strong></p>
+<ul><li>Issue: 23 feature files (1,797 lines of Gherkin) have <strong>no corresponding step definitions, test runners, or executable test code</strong>. All scenarios are specifications only.</li><li>Unimplemented feature files:</li><li style="margin-left:1.0rem">Server: arena-battle.feature, claim-flow.feature, gdpr-erasure.feature, leaderboard.feature, suspicious-detection.feature, training-food.feature (172 steps)</li><li style="margin-left:1.0rem">Client: admin-portal.feature, arena-ui.feature, battle-records.feature, claim-flow-ui.feature, food-system.feature, leaderboard-ui.feature, pet-display.feature, settings.feature, training-ui.feature (1,071 steps)</li><li style="margin-left:1.0rem">Root: auth-login.feature, pet-management.feature, pet-training.feature, arena-combat.feature, arena-leaderboard.feature, trading-system.feature, admin-moderation.feature, admin-gdpr.feature (554 steps)</li><li>Impact: 100% of BDD scenarios are unrunnable; test coverage = 0%</li><li>Root Cause: This is a specification repository without an accompanying test implementation repository</li><li>Fix:</li></ul>
+<ol><li>Create step definitions for Cucumber (Backend BDD via cucumber-js + Node.js test harness)</li><li>Create E2E test implementations for Playwright (Frontend BDD via playwright + cucumber-js)</li><li>Set up CI/CD pipeline to execute tests on every commit</li></ol>
+<ul><li>Auto-fixable: NO (requires engineering implementation of 50+ step definitions)</li></ul>
+<h3>High-Priority Findings (2/3)</h3>
+<p><strong>[HIGH] Server-Side Step Definitions Missing</strong></p>
+<ul><li>Issue: 6 server feature files (172 Gherkin scenario steps) have no Cucumber step implementation</li><li>Impact: Backend API business logic is unvalidated; no regression prevention capability</li><li>Files affected: features/server/*.feature</li><li>Fix: Implement Cucumber step definitions mapping Given/When/Then to API test calls</li><li>Auto-fixable: NO</li></ul>
+<p><strong>[HIGH] Client-Side Step Definitions Missing</strong></p>
+<ul><li>Issue: 10 client feature files (1,071 Gherkin scenario steps) have no Playwright/E2E test implementation</li><li>Impact: Frontend UI/UX is unvalidated; no end-to-end test automation</li><li>Files affected: features/client/*.feature</li><li>Fix: Implement Playwright test harness with Cucumber integration for client scenarios</li><li>Auto-fixable: NO</li></ul>
+<hr>
+<h2>Dimension 4: Document → Test Alignment</h2>
+<h3>Critical Findings (2/9)</h3>
+<p><strong>[CRITICAL] Test Implementation Layer Missing — Test Coverage = 0%</strong></p>
+<ul><li>Issue: BDD feature files (131 total scenarios) exist but zero test infrastructure (no step definitions, no test runners, no CI/CD integration)</li><li>Impact: All 131 BDD scenarios are aspirational specifications with no execution capability</li><li>Fix: Implement full test stack (cucumber-js + Node.js for backend, Playwright for E2E)</li><li>Auto-fixable: NO</li></ul>
+<p><strong>[CRITICAL] Root-Level Feature Files Conflict with Server/Client Organization</strong></p>
+<ul><li>Issue: 8 feature files at /features/*.feature (auth-login.feature, arena-combat.feature, etc.) appear to duplicate content from /features/server/ and /features/client/. RTM references only server/ and client/ features, leaving root features orphaned from traceability matrix.</li><li>Impact: Unclear which feature files are authoritative (root 798 lines vs. server+client 743 lines); duplicate specification effort</li><li>Root Cause: Unclear migration from root organization to subdirectory organization</li><li>Fix: Either (1) remove root-level features and consolidate into server/client directories, or (2) formally document which are canonical and update RTM to list all feature locations</li><li>Auto-fixable: MAYBE (if root features are deprecated, can be archived)</li></ul>
+<h3>High-Priority Findings (5/9)</h3>
+<p><strong>[HIGH] AC-007-8 MISSING HTTP 429 Rate Limit Response Scenario</strong></p>
+<ul><li>Issue: PRD AC-007-8 (Arena rate limit 10 battles/hour) requires HTTP 429 with Retry-After header and specific UI countdown timer message. Server feature arena-battle.feature has only 3 scenarios and does not validate 429 response structure. Client arena-ui.feature has &quot;rate limit&quot; scenarios but no pairing to HTTP 429 error response.</li><li>Impact: AC-007-8 partially tested; error response validation missing</li><li>Fix: Add scenario to server arena-battle.feature validating HTTP 429 response body with Retry-After header and countdown time</li><li>Auto-fixable: NO (new scenario required)</li></ul>
+<p><strong>[HIGH] US-RARITY-001 — Rarity Scoring Algorithm Has No Server Test</strong></p>
+<ul><li>Issue: RTM marks US-RARITY-001 as &quot;Partial&quot; (⚠️). Rarity probabilistic distribution (Common 60%, Rare 25%, Epic 12%, Legendary 3%) is mentioned in AC-002-5 but has no server BDD feature or unit test. Client leaderboard-ui.feature tests legendary border rendering but server-side algorithm is untested.</li><li>Impact: AC-002-5 rarity distribution validation missing; statistical guarantee unverified</li><li>Fix: Create features/server/rarity-scoring.feature with scenarios validating the probabilistic distribution across 10,000+ pet generations</li><li>Auto-fixable: NO</li></ul>
+<p><strong>[HIGH] US-RECORD-001 — Battle Records Partially Tested</strong></p>
+<ul><li>Issue: RTM marks US-RECORD-001 as &quot;Partial&quot; (⚠️). Client feature battle-records.feature (126 lines, 16 scenarios) exists, but no server BDD feature validates record persistence, pagination, or Open Graph generation.</li><li>Impact: AC-010-1 through AC-010-6 (public battle records page) lack server-side BDD validation</li><li>Fix: Create features/server/battle-records.feature with scenarios for persistence, pagination boundary (last 20 battles), empty state, and OG meta tag generation</li><li>Auto-fixable: NO</li></ul>
+<p><strong>[HIGH] AC-003-6 Email Enumeration Prevention — Timing Assertion Missing</strong></p>
+<ul><li>Issue: AC-003-6 requires &quot;identical response structure and timing&quot; for valid/invalid pet IDs. Server feature claim-flow.feature has scenario &quot;Email enumeration prevention&quot; but lacks timing assertion (only checks response structure).</li><li>Impact: Timing-based security vulnerability not validated</li><li>Fix: Add timing measurement assertion (&lt; 50ms variance) to email enumeration scenario in features/server/claim-flow.feature</li><li>Auto-fixable: MAYBE (add assertion to existing scenario)</li></ul>
+<p><strong>[HIGH] FRONTEND.md Pages Not Fully Mapped to BDD Client Features</strong></p>
+<ul><li>Issue: FRONTEND.md §2.1 lists LandingPage, ClaimPage, PetPage, TrainingUI, ArenaUI, LeaderboardPage, BattleRecordsPage, SettingsPage. Not all map cleanly to feature files. E.g., admin SettingsPage (ADMIN_IMPL.md) references admin-portal.feature, but player SettingsPage references settings.feature — naming ambiguity.</li><li>Impact: Unclear component-to-feature mapping</li><li>Fix: Clarify FRONTEND.md that player-app settings.feature is for user-level settings; admin settings are in ADMIN_IMPL.md/admin-portal.feature</li><li>Auto-fixable: MAYBE (clarify naming)</li></ul>
+<h3>Medium-Priority Findings (2/9)</h3>
+<p><strong>[MEDIUM] AC-016-2 GDPR Email Hashing SLA Ambiguity — 24h vs 7d</strong></p>
+<ul><li>Issue: AC-016-2 states &quot;email_encrypted set to NULL within 24 hours (not the full 7-day window — completed within 1 day, reported as compliant within 7 days)&quot;. Server feature gdpr-erasure.feature scenario says &quot;within 24 hours&quot; but does not distinguish between internal SLA (24h) and external SLA (7d).</li><li>Impact: Scenario wording does not make explicit the two-tier SLA</li><li>Fix: Clarify scenario: &quot;email_encrypted is hashed within 24 hours (internal SLA) and user is notified within 7 days (external SLA)&quot;</li><li>Auto-fixable: YES (clarify scenario wording)</li></ul>
+<p><strong>[MEDIUM] AC-013-4 Admin Search Performance — &quot;≤2 seconds for 1M records&quot; Has No Load Test</strong></p>
+<ul><li>Issue: AC-013-4 requires search within 2 seconds for &quot;up to 1 million records&quot;. No performance test scenario exists in BDD features or test-plan.md to validate this boundary.</li><li>Impact: Performance boundary unverified</li><li>Fix: Add load test scenario in test-plan.md documenting 1M record search validation</li><li>Auto-fixable: NO (requires performance test infrastructure)</li></ul>
+<hr>
+<h2>Dimension 5: UML/RTM Quality</h2>
+<h3>High-Priority Findings (2/5)</h3>
+<p><strong>[HIGH] EDD Class Diagram Incomplete — 0 Classes Found (&lt;6 minimum)</strong></p>
+<ul><li>Issue: EDD.md is expected to contain class diagrams, but scanning found 0 class definitions and 0 diagram sections (&lt; 6 classes, &lt; 9 UML diagrams expected)</li><li>Impact: EDD lacks visual architecture representation; difficult for new developers to understand entity relationships</li><li>Fix: Add class diagrams to EDD.md §2 showing Pet, Arena, ClaimCode, User, Food, Battle, Leaderboard, Session, Transaction entities and their relationships</li><li>Auto-fixable: NO (requires UML architecture design)</li></ul>
+<p><strong>[HIGH] RTM Does Not Reference All BDD Scenario Files</strong></p>
+<ul><li>Issue: RTM.md table rows (57) do not map to all BDD feature files (23 files). RTM contains only references to server/ and client/ features, omitting 8 root-level feature files.</li><li>Impact: 798 lines of specification code (root features) are not part of the official traceability matrix</li><li>Fix: Either (1) remove root features or (2) add all feature file references to RTM with explicit mapping to each PRD AC</li><li>Auto-fixable: MAYBE (if root features are consolidated)</li></ul>
+<h3>Medium-Priority Findings (3/5)</h3>
+<p><strong>[MEDIUM] PlantUML Diagram Files Missing</strong></p>
+<ul><li>Issue: docs/diagrams/puml/ directory does not exist or contains no .puml files</li><li>Impact: Automated diagram generation from code is not enabled</li><li>Fix: Create docs/diagrams/puml/ directory and generate PlantUML source files for each UML diagram</li><li>Auto-fixable: NO (requires diagram tool integration)</li></ul>
+<p><strong>[MEDIUM] UML 9 Major Diagrams Incomplete — 0/9 Found</strong></p>
+<ul><li>Issue: Expected 9 major UML diagrams (Class, Sequence, State, Component, Deployment, Use Case, Interaction, Timing, Profile) in EDD.md, but none found</li><li>Impact: Architectural documentation incomplete; difficult to understand system design</li><li>Fix: Add 9 UML diagram sections to EDD.md covering core architecture</li><li>Auto-fixable: NO (requires architecture design work)</li></ul>
+<p><strong>[MEDIUM] RTM.csv Not Found — Machine-Readable Traceability Missing</strong></p>
+<ul><li>Issue: docs/RTM.csv does not exist; only RTM.md (markdown table) is available</li><li>Impact: Traceability matrix cannot be easily imported into test management tools or automated dashboards</li><li>Fix: Generate docs/RTM.csv with columns: AC_ID, AC_Description, BDD_Scenario, Test_ID, Coverage_Status</li><li>Auto-fixable: YES (export RTM.md table to CSV)</li></ul>
+<hr>
+<h2>Recommendations by Priority</h2>
+<h3>BLOCKING (Complete Before Proceeding)</h3>
+<ol><li><strong>[CRITICAL]</strong> Implement test execution layer:</li></ol>
+<ul><li style="margin-left:1.5rem">Create step definitions for 23 BDD feature files (50+ step definitions)</li><li style="margin-left:1.5rem">Set up Cucumber-JS test runner for backend, Playwright for E2E</li><li style="margin-left:1.5rem">Configure CI/CD pipeline to run tests on commits</li><li style="margin-left:1.5rem"><strong>Owner:</strong> Backend + QA Engineering</li><li style="margin-left:1.5rem"><strong>Effort:</strong> 2-3 weeks</li></ul>
+<ol><li><strong>[CRITICAL]</strong> Clarify root vs. server/client feature organization:</li></ol>
+<ul><li style="margin-left:1.5rem">Remove or consolidate 8 root-level feature files OR update RTM to include them</li><li style="margin-left:1.5rem">Ensure single source of truth for each scenario</li><li style="margin-left:1.5rem"><strong>Owner:</strong> BA/QA Lead</li><li style="margin-left:1.5rem"><strong>Effort:</strong> 2-3 days</li></ul>
+<h3>HIGH (Complete Within 1 Sprint)</h3>
+<ol><li>Add missing documentation files:</li></ol>
+<ul><li style="margin-left:1.5rem">Create docs/README.md (project overview)</li><li style="margin-left:1.5rem">Create docs/BDD-server.md and docs/BDD-client.md (test strategy)</li><li style="margin-left:1.5rem">Create docs/background-jobs.md (ops spec)</li><li style="margin-left:1.5rem"><strong>Effort:</strong> 3 days</li></ul>
+<ol><li>Create comprehensive UML diagrams in EDD.md:</li></ol>
+<ul><li style="margin-left:1.5rem">Class diagram (entity relationships)</li><li style="margin-left:1.5rem">Sequence diagrams (auth, battle, leaderboard flows)</li><li style="margin-left:1.5rem">State diagrams (pet, battle states)</li><li style="margin-left:1.5rem"><strong>Effort:</strong> 1 week</li></ul>
+<ol><li>Reconcile RTM with all feature files:</li></ol>
+<ul><li style="margin-left:1.5rem">Map all 23 BDD feature files to RTM</li><li style="margin-left:1.5rem">Generate RTM.csv for tool integration</li><li style="margin-left:1.5rem"><strong>Effort:</strong> 2-3 days</li></ul>
+<h3>MEDIUM (Document Improvements)</h3>
+<ol><li>Clarify feature flag logic in SCHEMA.md and EDD.md</li><li>Add explicit GDPR SLA wording (24h internal vs. 7d external)</li><li>Cross-reference PRD AC numbers in EDD column comments</li><li>Add FRONTEND token recovery flow (§5.2)</li><li>Clarify admin session TTL in FRONTEND.md</li></ol>
+<hr>
+<h2>Next Steps</h2>
+<p><strong>Immediate Actions:</strong></p>
+<pre><code class="language-bash"># Option A: Fix documentation alignment only (Dimensions 0, 1, 5)
+/gendoc-align-fix docs
+
+# Option B: Full pipeline (including code/test alignment, requires implementation repos)
+# Not applicable until source code repository is provided</code></pre>
+<p><strong>For Full-Stack Alignment:</strong></p>
+<p>When backend implementation code (Node.js/Fastify, database migrations) and test implementations (Cucumber step definitions, Playwright tests) are available, run:</p>
+<pre><code class="language-bash">/gendoc-align-check  # Re-run all 5 dimensions</code></pre>
+<hr>
+<h2>Appendix: Finding Summaries</h2>
+<h3>By Layer</h3>
+<table>
+<tr><th>Layer</th><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th></tr>
+<tr><td>Dimension 0: File Existence</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>Dimension 1: Doc → Doc</td><td>0</td><td>2</td><td>5</td><td>4</td></tr>
+<tr><td>Dimension 2: Doc → Code</td><td>1*</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Dimension 3: Code → Test</td><td>1*</td><td>2</td><td>0</td><td>0</td></tr>
+<tr><td>Dimension 4: Doc → Test</td><td>2</td><td>5</td><td>2</td><td>0</td></tr>
+<tr><td>Dimension 5: UML/RTM</td><td>0</td><td>2</td><td>3</td><td>0</td></tr>
+<tr><td><strong>TOTAL</strong></td><td><strong>4</strong></td><td><strong>12</strong></td><td><strong>10</strong></td><td><strong>4</strong></td></tr>
+</table>
+<p>*Dimension 2 &amp; 3 findings are blocked (code repository unavailable).</p>
+<h3>By Fix Complexity</h3>
+<table>
+<tr><th>Category</th><th>Count</th><th>Auto-Fixable</th><th>Notes</th></tr>
+<tr><td>Critical</td><td>4</td><td>NO</td><td>Requires engineering (test implementation, code repo)</td></tr>
+<tr><td>Documentation</td><td>13</td><td>YES</td><td>Can be written/updated immediately</td></tr>
+<tr><td>Architectural</td><td>8</td><td>NO</td><td>Requires design review + implementation</td></tr>
+<tr><td>Organization</td><td>3</td><td>MAYBE</td><td>Depends on consolidation decision</td></tr>
+<tr><td>Clarification</td><td>2</td><td>YES</td><td>Simple wording improvements</td></tr>
+</table>
+<hr>
+<p><strong>Report Generated:</strong> 2026-05-04 23:15 UTC</p>
+<p><strong>Status:</strong> Ready for /gendoc-align-fix (documentation phase)</p>
+<p><strong>Blocking Items:</strong> 2 (test implementation, source code availability)</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

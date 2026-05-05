@@ -1,94 +1,163 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — Machine-Readable Contracts Index</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>機器可讀合約 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">Machine-Readable Contracts Index</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>Machine-Readable Contracts Index</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="machine-readable-contracts-index">Machine-Readable Contracts Index</h1>
-<div class="doc-gap"></div>
-<p class="doc-p">Generated by <code>gendoc-gen-contracts</code> from gendoc documentation pipeline.</p>
-<p class="doc-p">Source documents: docs/EDD.md, docs/API.md, docs/SCHEMA.md, docs/ARCH.md</p>
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="artifact-catalog">Artifact Catalog</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Artifact</th><th>Path</th><th>Purpose</th><th>Source</th></tr></thead>
-<tbody>
-<tr><td>OpenAPI 3.1 YAML</td><td>[docs/blueprint/contracts/openapi.yaml](blueprint/contracts/openapi.yaml)</td><td>API 合約，可匯入 Postman / Swagger UI / code generator（47 paths, 77 schemas）</td><td>docs/API.md</td></tr>
-<tr><td>JSON Schema</td><td>[docs/blueprint/contracts/schemas/](blueprint/contracts/schemas/)</td><td>DTO 型別定義，供 validator / IDE / code generator 使用（7 schemas）</td><td>docs/SCHEMA.md</td></tr>
-<tr><td>Pact Contracts</td><td>[docs/blueprint/contracts/pact/](blueprint/contracts/pact/)</td><td>Consumer-driven 合約測試規格（3 pairs, 39 interactions）</td><td>docs/API.md</td></tr>
-<tr><td>Admin OpenAPI YAML</td><td>[docs/blueprint/contracts/admin/admin-api.yaml](blueprint/contracts/admin/admin-api.yaml)</td><td>Admin API 合約（/admin/api/* 所有 endpoint）</td><td>docs/API.md §6</td></tr>
-<tr><td>RBAC Seed</td><td>[docs/blueprint/contracts/admin/rbac-seed.json](blueprint/contracts/admin/rbac-seed.json)</td><td>Role/Permission 初始資料</td><td>docs/ADMIN_IMPL.md</td></tr>
-<tr><td>Admin Seed</td><td>[docs/blueprint/contracts/admin/admin-seed.json](blueprint/contracts/admin/admin-seed.json)</td><td>本地開發初始 admin 帳號</td><td>internal</td></tr>
-<tr><td>Docker Compose</td><td>[docker-compose.yml](../docker-compose.yml)</td><td>本地開發環境（api + postgres + redis + mailhog）</td><td>docs/EDD.md §4.5.9</td></tr>
-<tr><td>Helm Values</td><td>[docs/blueprint/infra/helm/values.yaml](blueprint/infra/helm/values.yaml)</td><td>Kubernetes 部署配置</td><td>docs/EDD.md §4.5.9</td></tr>
-<tr><td>Network Policy</td><td>[docs/blueprint/infra/k8s/network-policy.yaml](blueprint/infra/k8s/network-policy.yaml)</td><td>網路存取控制規則</td><td>docs/EDD.md §4.5.9</td></tr>
-<tr><td>Seed Code</td><td>[docs/blueprint/scaffold/src/](blueprint/scaffold/src/)</td><td>TypeScript 骨架代碼（12 files）+ 測試骨架</td><td>docs/EDD.md §4.5.2</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="usage-guide">Usage Guide</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="openapi--swagger-ui">OpenAPI / Swagger UI</h3>
-<pre class="doc-code"><code class="lang-bash"># Validate
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › 機器可讀合約</p>
+    <h1 class="banner-title">機器可讀合約</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link active" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Machine-Readable Contracts Index</h1>
+<p>Generated by <code>gendoc-gen-contracts</code> from gendoc documentation pipeline.</p>
+<p>Source documents: docs/EDD.md, docs/API.md, docs/SCHEMA.md, docs/ARCH.md</p>
+<h2>Artifact Catalog</h2>
+<table>
+<tr><th>Artifact</th><th>Path</th><th>Purpose</th><th>Source</th></tr>
+<tr><td>OpenAPI 3.1 YAML</td><td><a href="blueprint/contracts/openapi.yaml" target="_blank" rel="noopener">docs/blueprint/contracts/openapi.yaml</a></td><td>API 合約，可匯入 Postman / Swagger UI / code generator（47 paths, 77 schemas）</td><td>docs/API.md</td></tr>
+<tr><td>JSON Schema</td><td><a href="blueprint/contracts/schemas/" target="_blank" rel="noopener">docs/blueprint/contracts/schemas/</a></td><td>DTO 型別定義，供 validator / IDE / code generator 使用（7 schemas）</td><td>docs/SCHEMA.md</td></tr>
+<tr><td>Pact Contracts</td><td><a href="blueprint/contracts/pact/" target="_blank" rel="noopener">docs/blueprint/contracts/pact/</a></td><td>Consumer-driven 合約測試規格（3 pairs, 39 interactions）</td><td>docs/API.md</td></tr>
+<tr><td>Admin OpenAPI YAML</td><td><a href="blueprint/contracts/admin/admin-api.yaml" target="_blank" rel="noopener">docs/blueprint/contracts/admin/admin-api.yaml</a></td><td>Admin API 合約（/admin/api/* 所有 endpoint）</td><td>docs/API.md §6</td></tr>
+<tr><td>RBAC Seed</td><td><a href="blueprint/contracts/admin/rbac-seed.json" target="_blank" rel="noopener">docs/blueprint/contracts/admin/rbac-seed.json</a></td><td>Role/Permission 初始資料</td><td>docs/ADMIN_IMPL.md</td></tr>
+<tr><td>Admin Seed</td><td><a href="blueprint/contracts/admin/admin-seed.json" target="_blank" rel="noopener">docs/blueprint/contracts/admin/admin-seed.json</a></td><td>本地開發初始 admin 帳號</td><td>internal</td></tr>
+<tr><td>Docker Compose</td><td><a href="../docker-compose.yml" target="_blank" rel="noopener">docker-compose.yml</a></td><td>本地開發環境（api + postgres + redis + mailhog）</td><td>docs/EDD.md §4.5.9</td></tr>
+<tr><td>Helm Values</td><td><a href="blueprint/infra/helm/values.yaml" target="_blank" rel="noopener">docs/blueprint/infra/helm/values.yaml</a></td><td>Kubernetes 部署配置</td><td>docs/EDD.md §4.5.9</td></tr>
+<tr><td>Network Policy</td><td><a href="blueprint/infra/k8s/network-policy.yaml" target="_blank" rel="noopener">docs/blueprint/infra/k8s/network-policy.yaml</a></td><td>網路存取控制規則</td><td>docs/EDD.md §4.5.9</td></tr>
+<tr><td>Seed Code</td><td><a href="blueprint/scaffold/src/" target="_blank" rel="noopener">docs/blueprint/scaffold/src/</a></td><td>TypeScript 骨架代碼（12 files）+ 測試骨架</td><td>docs/EDD.md §4.5.2</td></tr>
+</table>
+<h2>Usage Guide</h2>
+<h3>OpenAPI / Swagger UI</h3>
+<pre><code class="language-bash"># Validate
 npx @redocly/openapi-cli lint docs/blueprint/contracts/openapi.yaml
 
 # Generate client SDK (TypeScript)
@@ -99,39 +168,32 @@ npx openapi-generator-cli generate \
 
 # Start Swagger UI
 npx swagger-ui-serve docs/blueprint/contracts/openapi.yaml</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="json-schema-validation">JSON Schema Validation</h3>
-<pre class="doc-code"><code class="lang-bash"># Validate a payload against schema
+<h3>JSON Schema Validation</h3>
+<pre><code class="language-bash"># Validate a payload against schema
 npx ajv validate \
   -s docs/blueprint/contracts/schemas/Pet.schema.json \
   -d payload.json</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="pact-contract-testing">Pact Contract Testing</h3>
-<pre class="doc-code"><code class="lang-bash"># Provider verification
+<h3>Pact Contract Testing</h3>
+<pre><code class="language-bash"># Provider verification
 npx pact-verifier \
   --pact-urls docs/blueprint/contracts/pact/*.json \
   --provider-base-url http://localhost:3000 \
   --provider-states-setup-url http://localhost:3000/_pact/setup</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="local-development">Local Development</h3>
-<pre class="doc-code"><code class="lang-bash"># Start all services
+<h3>Local Development</h3>
+<pre><code class="language-bash"># Start all services
 cp .env.example .env  # fill in your values
 docker-compose up -d
 
 # API available at http://localhost:3000
 # Swagger UI: http://localhost:3000/docs
 # MailHog UI: http://localhost:8025</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="scaffold">Scaffold</h3>
-<pre class="doc-code"><code class="lang-bash"># Seed code is in docs/blueprint/scaffold/ — copy to begin implementation
+<h3>Scaffold</h3>
+<pre><code class="language-bash"># Seed code is in docs/blueprint/scaffold/ — copy to begin implementation
 cp -r docs/blueprint/scaffold/src/ src/
 cp -r docs/blueprint/scaffold/tests/ tests/</code></pre>
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="coverage-report">Coverage Report</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Step</th><th>Status</th><th>Details</th></tr></thead>
-<tbody>
+<h2>Coverage Report</h2>
+<table>
+<tr><th>Step</th><th>Status</th><th>Details</th></tr>
 <tr><td>OpenAPI 3.1</td><td>✅</td><td>47 paths (player + admin + health), 77 schemas</td></tr>
 <tr><td>JSON Schema</td><td>✅</td><td>7 core DTOs (Pet, ClaimCode, BattleRecord, LeaderboardEntry, FoodItem, ErrorResponse, PaginationMeta)</td></tr>
 <tr><td>Pact Contracts</td><td>✅</td><td>3 consumer-provider pairs, 39 total interactions (happy + error paths)</td></tr>
@@ -139,13 +201,26 @@ cp -r docs/blueprint/scaffold/tests/ tests/</code></pre>
 <tr><td>IaC (Docker)</td><td>✅</td><td>docker-compose.yml + .env.example</td></tr>
 <tr><td>IaC (K8s)</td><td>✅</td><td>helm/values.yaml + k8s/network-policy.yaml</td></tr>
 <tr><td>Seed Code</td><td>✅</td><td>12 TypeScript files (domain + application + infra + routes + tests)</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<p class="doc-p"><em>Generated: 2026-05-05</em></p>
-<p class="doc-p"><em>Project: pixel-pet-arena</em></p>
-<div class="doc-gap"></div>
-    </div>
+</table>
+<hr>
+<p><em>Generated: 2026-05-05</em></p>
+<p><em>Project: pixel-pet-arena</em></p></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>
