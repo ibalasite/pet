@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>test 文件中心 — test</title>
+  <title>pet 文件中心 — pet</title>
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
@@ -26,7 +26,7 @@
 </head>
 <body>
   <header class="top-nav">
-    <a href="index.html" class="nav-brand">test</a>
+    <a href="index.html" class="nav-brand">pet</a>
     <div class="nav-controls">
       <div class="search-wrap">
         <input class="search-input" type="search" placeholder="搜尋文件...">
@@ -37,8 +37,8 @@
     </div>
   </header>
   <div class="doc-page-banner">
-    <p class="banner-breadcrumb"><a href="index.html">test</a> › 文件中心</p>
-    <h1 class="banner-title">test 文件中心</h1>
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 文件中心</p>
+    <h1 class="banner-title">pet 文件中心</h1>
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
@@ -110,6 +110,20 @@
 </details>
 </div>
 <div class="sidebar__section">
+<details>
+<summary>📐 PlantUML</summary>
+<a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-deployment.html">Deployment</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-auth.html">Sequence Auth</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-battle.html">Sequence Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-battle.html">State Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
+<a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
+</details>
+</div>
+<div class="sidebar__section">
 <div class="sidebar__label">Server UML</div>
 <a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
 <a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
@@ -138,141 +152,347 @@
 </div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>pixel-pet-arena 🎮</h1>
-<p><strong>A pixel-art pet breeding, training, and battle arena game</strong> with cross-platform support (Web, iOS, Android) and competitive leaderboards.</p>
+    <main class="doc-content"><p>&lt;!--</p>
+<p>DOC-ID:  README-PIXEL-PET-ARENA-20260505</p>
+<p>Version: v1.0</p>
+<p>Status:  DRAFT</p>
+<p>Author:  AI Generated (gendoc readme)</p>
+<p>Date:    2026-05-05</p>
+<p>Upstream docs:</p>
+<ul><li style="margin-left:2.0rem">BRD: docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">PRD: docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">PDD: docs/PDD.md   (PDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">EDD: docs/EDD.md   (EDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">ARCH: docs/ARCH.md (ARCH-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">API: docs/API.md   (API-PIXEL-PET-ARENA-20260503)</li></ul>
+<p>Change log:</p>
+<p>v1.0  2026-05-05  AI Generated (gendoc readme)  Initial generated draft</p>
+<p>--&gt;</p>
+<h1>pixel-pet-arena</h1>
+<blockquote><p>Zero-account-barrier HTML5 browser game where players claim, train, and battle procedurally-generated pixel pets via email — no registration required.</p></blockquote>
+<p><a href="https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml" target="_blank" rel="noopener"><img src="https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml/badge.svg" alt="CI" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
+<p><a href="LICENSE" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
+<p><a href="https://nodejs.org/" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Node.js-20%20LTS-green.svg" alt="Node.js" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
+<p><a href="https://www.typescriptlang.org/" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/TypeScript-5-blue.svg" alt="TypeScript" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <hr>
-<h2>📋 Project Overview</h2>
-<p>pixel-pet-arena combines pet NFT-like mechanics with real-time multiplayer arena battles. Players claim pets via email, train them daily with food buffs, breed to discover rare variants, and compete in speed (RACE) or strength (SUMO) arena tournaments.</p>
-<p><strong>Tech Stack:</strong></p>
-<ul><li><strong>Backend:</strong> Node.js 20 + Fastify + PostgreSQL + Redis</li><li><strong>Frontend:</strong> Phaser.js 3 (2D pixel canvas) + React + TypeScript + Vite</li><li><strong>Admin:</strong> Vue 3 + ElementPlus</li><li><strong>Audio:</strong> Web Audio API + HTML5 Audio fallback</li><li><strong>DevOps:</strong> Docker Compose (local), Kubernetes (production)</li></ul>
-<p><strong>Core Features:</strong></p>
-<ul><li>🐾 <strong>Pet System:</strong> Claim via email OTP, randomized stats/rarity (Common 60%, Rare 25%, Epic 12%, Legendary 3%)</li><li>📈 <strong>Training:</strong> Daily food buffs (temporary/permanent), stat progression caps</li><li>⚔️ <strong>Arena Battles:</strong> RACE (speed-based), SUMO (strength-based), anti-bot detection, public battle records</li><li>🏆 <strong>Leaderboards:</strong> Real-time ranking, cacheable snapshots, social share (Open Graph)</li><li>💱 <strong>Trading System:</strong> Player marketplace, anti-flip controls, dispute resolution</li><li>🔐 <strong>Admin:</strong> Moderation, GDPR erasure, feature flag config, suspicious activity detection</li></ul>
+<h2>Table of Contents</h2>
+<ul><li><a href="#overview" target="_blank" rel="noopener">Overview</a></li><li><a href="#core-features" target="_blank" rel="noopener">Core Features</a></li><li><a href="#system-architecture" target="_blank" rel="noopener">System Architecture</a></li><li><a href="#tech-stack" target="_blank" rel="noopener">Tech Stack</a></li><li><a href="#quick-start" target="_blank" rel="noopener">Quick Start</a></li><li><a href="#environment-variables" target="_blank" rel="noopener">Environment Variables</a></li><li><a href="#api-quick-reference" target="_blank" rel="noopener">API Quick Reference</a></li><li><a href="#directory-structure" target="_blank" rel="noopener">Directory Structure</a></li><li><a href="#documentation" target="_blank" rel="noopener">Documentation</a></li><li><a href="#testing" target="_blank" rel="noopener">Testing</a></li><li><a href="#known-limitations" target="_blank" rel="noopener">Known Limitations</a></li><li><a href="#changelog" target="_blank" rel="noopener">Changelog</a></li><li><a href="#development-guide" target="_blank" rel="noopener">Development Guide</a></li><li><a href="#license" target="_blank" rel="noopener">License</a></li><li><a href="#security-policy" target="_blank" rel="noopener">Security Policy</a></li><li><a href="#architecture-quick-reference" target="_blank" rel="noopener">Architecture Quick Reference</a></li><li><a href="#code-of-conduct" target="_blank" rel="noopener">Code of Conduct</a></li></ul>
 <hr>
-<h2>📁 Repository Structure</h2>
-<p>This is a <strong>specification and design documentation repository</strong> — contains game design, API contracts, BDD test scenarios, but NOT implementation code.</p>
-<pre><code class="">pixel-pet-arena/
-├── docs/                      # Design &amp; specification documents
-│   ├── IDEA.md               # Initial concept &amp; problem statement
-│   ├── BRD.md                # Business requirements &amp; goals
-│   ├── PRD.md                # Product requirements &amp; user stories (91 ACs)
-│   ├── PDD.md                # Product/UI design specs (Phaser.js canvas, React components)
-│   ├── VDD.md                # Visual design tokens (color, typography, spacing)
-│   ├── EDD.md                # Technical architecture &amp; system design
-│   ├── ARCH.md               # Component &amp; service architecture
-│   ├── API.md                # REST API endpoint specifications (25+ endpoints)
-│   ├── SCHEMA.md             # Database schema &amp; ERD (13 tables)
-│   ├── AUDIO.md              # Audio design (11 SFX, Web Audio API)
-│   ├── ANIM.md               # Animation specs (15+ sprite animations, 32×32px)
-│   ├── FRONTEND.md           # Frontend tech architecture &amp; component design
-│   ├── ADMIN_IMPL.md         # Admin panel UI &amp; backend specs
-│   ├── test-plan.md          # Testing strategy &amp; RTM
-│   ├── BDD-server.md         # Server-side BDD strategy (8 feature files)
-│   ├── BDD-client.md         # Client-side BDD strategy (9 feature files)
-│   ├── RTM.md                # Requirements traceability matrix (131 BDD scenarios)
-│   ├── RTM.csv               # Machine-readable traceability matrix
-│   ├── background-jobs.md    # Recurring task specifications
-│   ├── ALIGN_REPORT.md       # Cross-file alignment audit report
-│   └── diagrams/             # Architecture diagrams (PlantUML, PNG)
-├── features/                  # BDD specifications in Gherkin
-│   ├── server/               # Backend feature files (6 files, 172 steps)
-│   │   ├── arena-battle.feature
-│   │   ├── claim-flow.feature
-│   │   ├── gdpr-erasure.feature
-│   │   ├── leaderboard.feature
-│   │   ├── suspicious-detection.feature
-│   │   └── training-food.feature
-│   ├── client/               # Frontend feature files (9 files, 1,071 steps)
-│   │   ├── admin-portal.feature
-│   │   ├── arena-ui.feature
-│   │   ├── battle-records.feature
-│   │   ├── claim-flow-ui.feature
-│   │   ├── food-system.feature
-│   │   ├── leaderboard-ui.feature
-│   │   ├── pet-display.feature
-│   │   ├── settings.feature
-│   │   └── training-ui.feature
-│   └── root/                 # Legacy root-level feature files (consolidate into server/client)
-│       ├── auth-login.feature
-│       ├── arena-combat.feature
-│       ├── pet-management.feature
-│       ├── pet-training.feature
-│       ├── arena-leaderboard.feature
-│       ├── trading-system.feature
-│       ├── admin-moderation.feature
-│       └── admin-gdpr.feature
-├── templates/                 # Pipeline configuration
-│   ├── pipeline.json         # gendoc step definitions
-│   ├── *.gen.md             # Generation rules for each doc type
-│   └── *.review.md          # Review standards for each doc type
-├── README.md                  # This file
-└── .gendoc-state.json        # Pipeline execution state
-</code></pre>
+<h2>Overview</h2>
+<p><strong>pixel-pet-arena</strong> is a zero-account-barrier HTML5 browser game where players discover and claim procedurally-generated pixel pets using only their email address — no account registration, no password to remember.</p>
+<p>It was built to solve the mutual exclusivity between &quot;no account barrier&quot; and &quot;persistent data&quot; that has prevented casual players from truly owning virtual pets on the web. The core innovation is <strong>email as a lightweight identity layer</strong>: a 6-digit OTP produces a 32-byte cryptographic URL token. Players bookmark their unique URL — that URL is their identity.</p>
+<p>The project is governed by the upstream documents below; every design decision maps to a tracked requirement:</p>
+<table>
+<tr><th>Document</th><th>Purpose</th></tr>
+<tr><td><a href="docs/BRD.md" target="_blank" rel="noopener">BRD</a></td><td>Business goals, success metrics, stakeholder sign-off</td></tr>
+<tr><td><a href="docs/PRD.md" target="_blank" rel="noopener">PRD</a></td><td>User stories, acceptance criteria, priority tiers</td></tr>
+<tr><td><a href="docs/PDD.md" target="_blank" rel="noopener">PDD</a></td><td>UX flows, interaction specs, design tokens</td></tr>
+<tr><td><a href="docs/EDD.md" target="_blank" rel="noopener">EDD</a></td><td>Architecture decisions, technology choices, data models</td></tr>
+</table>
+<p>See <a href="#system-architecture" target="_blank" rel="noopener">System Architecture</a> below for a visual overview, and <a href="#documentation" target="_blank" rel="noopener">Documentation</a> for the full HTML reference site.</p>
 <hr>
-<h2>🚀 Getting Started</h2>
+<h2>Core Features</h2>
+<p><strong>P0 — Must ship for v1.0:</strong></p>
+<ul><li><strong>Random Pixel Pet Generation</strong> — Each pet is procedurally generated across 6 attribute dimensions (body, head, color_palette, accessory, rarity_trait, pattern) guaranteeing ≥ 1 billion unique combinations. 32×32 px sprite rendered on HTML5 Canvas via Phaser.js 3.</li><li><strong>Email Claim Flow</strong> — Guests interact immediately with no login wall. Entering an email sends a 6-digit OTP + permanent unique URL. The pet is accessible from any device via that bookmarked URL forever.</li><li><strong>Pet Training &amp; Feeding System</strong> — 3 training actions per day (reset UTC 00:00). Special food items grant stat buffs to Speed, Strength, or Stamina (max 100 each). Pets visually degrade after 3 days of neglect.</li><li><strong>Arena Combat</strong> — Race mode (Speed-weighted) and Sumo mode (Strength-weighted) with ±15% seeded random modifier. Real-time matchmaking with 30-second AI fallback. Rate-limited to 10 battles/hour per pet.</li><li><strong>Global Leaderboard</strong> — Top 100 pets by win rate, updated within 30 seconds via Redis sorted set. Filterable by rarity tier (Common / Rare / Epic / Legendary).</li><li><strong>Battle Records Page</strong> — Shareable URL displaying the last 20 battles per pet with outcomes, stat snapshots, and opponent info.</li></ul>
+<p><strong>P1 — Roadmap:</strong></p>
+<ul><li>Rarity scoring system (Common 60% / Rare 25% / Epic 12% / Legendary 3%) with visual badges.</li><li>Sumo arena mode (Strength-weighted) as additional arena variant.</li></ul>
+<p><strong>P2 — Future:</strong></p>
+<ul><li>Pet trading marketplace (5% platform fee), tournament system, seasonal competitions.</li></ul>
+<hr>
+<h2>System Architecture</h2>
+<div class="diagram-container"><pre class="mermaid">flowchart TB
+    subgraph Browser[&quot;Browser — Vercel CDN&quot;]
+        PA[&quot;Player App\nReact 18 + Phaser.js 3\nVite 5 / TypeScript 5&quot;]
+        AP[&quot;Admin Portal\nVue 3 + Element Plus\nVite 5 / TypeScript 5&quot;]
+    end
+
+    subgraph API[&quot;API Layer — Railway (autoscale HPA 70% CPU)&quot;]
+        GA[&quot;Game API\nFastify 4 / Node.js 20 LTS\n≥ 2 replicas&quot;]
+        AA[&quot;Admin API\nFastify 4 / Node.js 20 LTS\n1 replica&quot;]
+    end
+
+    subgraph Data[&quot;Data Tier&quot;]
+        PG[(&quot;PostgreSQL 15+\nSupabase managed\nDaily S3 backup&quot;)]
+        RD[(&quot;Redis 7+\nUpstash serverless\nLeaderboard · Rate-limits · Sessions&quot;)]
+    end
+
+    subgraph Email[&quot;Email Services&quot;]
+        SG[&quot;SendGrid v3\nprimary&quot;]
+        NM[&quot;Nodemailer SMTP\nfallback — activates after\n3 consecutive SendGrid failures&quot;]
+    end
+
+    PA --&gt;|&quot;REST /api/v1/*&quot;| GA
+    AP --&gt;|&quot;REST /admin/api/*&quot;| AA
+    GA --&gt; PG
+    GA --&gt; RD
+    AA --&gt; PG
+    AA --&gt; RD
+    GA --&gt;|&quot;transactional email&quot;| SG
+    SG -.-&gt;|&quot;failover&quot;| NM</pre></div>
+<blockquote><p>For component-level detail, data flow diagrams, and ADR records see:</p></blockquote>
+<blockquote><p>- <a href="docs/EDD.md" target="_blank" rel="noopener">EDD — Engineering Design Document</a> (architecture + implementation)</p></blockquote>
+<blockquote><p>- <a href="docs/ARCH.md" target="_blank" rel="noopener">ARCH — System Architecture</a> (C4 diagrams + ADRs)</p></blockquote>
+<hr>
+<h2>Tech Stack</h2>
+<table>
+<tr><th>Layer</th><th>Technology</th><th>Notes</th></tr>
+<tr><td><strong>Frontend (Player)</strong></td><td>React 18 + Phaser.js 3 + Vite 5 + TypeScript 5</td><td>Canvas rendering for pixel pets; TanStack Query v5, Zustand, React Hook Form + Zod</td></tr>
+<tr><td><strong>Frontend (Admin)</strong></td><td>Vue 3 + Element Plus + Vite 5 + TypeScript 5</td><td>Data-dense admin portal; separate Vite build deployed independently</td></tr>
+<tr><td><strong>Backend</strong></td><td>Node.js 20 LTS + Fastify 4</td><td>Game API + Admin API as two Fastify plugins in one monorepo</td></tr>
+<tr><td><strong>Database</strong></td><td>PostgreSQL 15+ (Supabase managed)</td><td>Primary writer + 1 read replica; auto-failover 60s; daily S3 backup</td></tr>
+<tr><td><strong>Cache / Queue</strong></td><td>Redis 7+ (Upstash serverless)</td><td>Leaderboard sorted set, rate-limit counters, admin sessions, matchmaking queue</td></tr>
+<tr><td><strong>Infrastructure</strong></td><td>Vercel (frontend CDN) + Railway (API, autoscale)</td><td>HPA triggers at 70% CPU; ≥ 2 API replicas for game server</td></tr>
+<tr><td><strong>CI / CD</strong></td><td>GitHub Actions</td><td>Lint → Test → Build → Deploy pipeline; coverage gate ≥ 80%</td></tr>
+<tr><td><strong>Email</strong></td><td>SendGrid v3 (primary) + Nodemailer SMTP (fallback)</td><td>Failover after 3 consecutive SendGrid failures; SPF + DKIM configured</td></tr>
+<tr><td><strong>Testing</strong></td><td>Vitest (unit) + Supertest (integration) + Playwright (E2E) + Cucumber (BDD)</td><td>80% coverage enforced as CI gate</td></tr>
+</table>
+<hr>
+<h2>Quick Start</h2>
 <h3>Prerequisites</h3>
-<ul><li>Node.js 20+</li><li>Docker &amp; Docker Compose (for local database)</li><li>Git</li></ul>
-<h3>For Documentation Review</h3>
-<pre><code class="language-bash"># Clone repository
-git clone https://github.com/pixel-pet-arena/docs.git
+<ul><li><a href="https://git-scm.com/" target="_blank" rel="noopener">Git</a> 2.40+</li><li>An <code>.env</code> file — copy from <code>.env.example</code> (see <a href="#environment-variables" target="_blank" rel="noopener">Environment Variables</a>)</li></ul>
+<hr>
+<h3>Docker (Recommended)</h3>
+<p>The fastest path: Docker Compose starts the app, PostgreSQL, Redis, and MailHog (local email catcher) with a single command.</p>
+<p><strong>Prerequisites:</strong> <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">Docker Desktop</a> 24+ (includes Compose v2)</p>
+<pre><code class="language-bash">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
 cd pixel-pet-arena
 
-# Read the design docs in order
-1. docs/IDEA.md              # Understand the vision
-2. docs/BRD.md               # Business context
-3. docs/PRD.md               # Feature requirements
-4. docs/PDD.md + docs/VDD.md # UI/visual design
-5. docs/EDD.md               # Technical architecture
-6. docs/API.md               # API contracts
-7. docs/test-plan.md + RTM.md # Test strategy
-8. features/                 # BDD scenarios</code></pre>
-<h3>For Game Implementation</h3>
-<p>This repository is <strong>documentation-only</strong>. For actual game code (backend API, frontend game, admin panel), see:</p>
-<ul><li><strong>Backend Repository:</strong> <a href="https://github.com/pixel-pet-arena/api" target="_blank" rel="noopener">pixel-pet-arena/api</a> (Node.js + Fastify)</li><li><strong>Frontend Repository:</strong> <a href="https://github.com/pixel-pet-arena/game" target="_blank" rel="noopener">pixel-pet-arena/game</a> (Phaser.js + React)</li><li><strong>Admin Repository:</strong> <a href="https://github.com/pixel-pet-arena/admin" target="_blank" rel="noopener">pixel-pet-arena/admin</a> (Vue 3)</li></ul>
+# Configure environment
+cp .env.example .env
+# Edit .env — at minimum confirm POSTGRES_PASSWORD and generate EMAIL_ENCRYPTION_KEY:
+# openssl rand -hex 32
+
+# Start all services (app + postgres + redis + mailhog)
+docker compose up -d
+
+# Confirm everything is healthy
+docker compose ps
+# Expected: all services show &quot;running (healthy)&quot;</code></pre>
+<p>Verify the app is responding:</p>
+<pre><code class="language-bash">curl http://localhost:3000/health
+# {&quot;status&quot;:&quot;ok&quot;,&quot;version&quot;:&quot;1.0.0&quot;,&quot;uptime&quot;:3}</code></pre>
+<p>Open the player app at <strong>http://localhost:5173</strong> and the admin portal at <strong>http://localhost:5174</strong>.</p>
+<p>MailHog web UI (captured claim emails): <strong>http://localhost:8025</strong></p>
 <hr>
-<h2>📊 Documentation Quality</h2>
-<h3>Coverage (131 BDD Scenarios)</h3>
-<ul><li><strong>Server-side:</strong> 8 feature files, 172 Gherkin steps covering auth, arena, leaderboard, trading, moderation, GDPR</li><li><strong>Client-side:</strong> 9 feature files, 1,071 Gherkin steps covering UI, animations, forms, accessibility</li><li><strong>Requirements Traceability:</strong> 91 Product Requirements → 131 BDD Scenarios (RTM.csv)</li></ul>
-<h3>Known Issues / Pending Fixes</h3>
-<p>See <strong>docs/ALIGN_REPORT.md</strong> for:</p>
-<ul><li>30 cross-file alignment findings (4 CRITICAL, 12 HIGH, 10 MEDIUM, 4 LOW)</li><li>Auto-fixable documentation improvements</li><li>Blocking items (requires engineering decisions)</li></ul>
-<h3>Alignment Audit</h3>
-<p>Last run: 2026-05-04</p>
-<ul><li><strong>Dimension 0</strong> (File Existence): 1 HIGH — README.md created ✅</li><li><strong>Dimension 1</strong> (Doc ↔ Doc): 11 findings — In progress</li><li><strong>Dimension 2</strong> (Doc ↔ Code): Blocked (no src/ in this repo)</li><li><strong>Dimension 3</strong> (Code ↔ Test): Blocked (no tests in this repo)</li><li><strong>Dimension 4</strong> (Doc ↔ Test): 9 findings — In progress</li><li><strong>Dimension 5</strong> (UML/RTM): 5 findings — In progress</li></ul>
+<h3>macOS / Linux (Native)</h3>
+<p><strong>Prerequisites:</strong></p>
+<ul><li>Node.js 20 LTS (<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">install guide</a>)</li><li>PostgreSQL 15+ (local) or a remote Supabase connection string</li><li>Redis 7+ (local) or a remote Upstash connection string</li></ul>
+<pre><code class="language-bash">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
+cd pixel-pet-arena
+
+# Install all workspace dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your local database, Redis, and email credentials
+
+# Run database migrations
+npm run db:migrate
+
+# Start the development servers (API + player app + admin portal concurrently)
+npm run dev</code></pre>
+<p>Expected output:</p>
+<pre><code class="">[game-api]  Listening on http://localhost:3000
+[game-api]  Database: connected (postgres://localhost:5432/pixel_pet_arena)
+[game-api]  Redis: connected (redis://localhost:6379)
+[player-app] VITE v5.x.x  ready in 800 ms  →  http://localhost:5173/
+[admin-app]  VITE v5.x.x  ready in 900 ms  →  http://localhost:5174/</code></pre>
 <hr>
-<h2>🔄 Contributing</h2>
-<h3>Documentation Updates</h3>
-<ol><li>Read the relevant upstream documents first</li><li>Follow <a href="./docs/IDEA.md#gendoc-pipeline" target="_blank" rel="noopener">gendoc workflow</a></li><li>Run alignment audit: <code>/gendoc-align-check</code></li><li>Fix alignment issues: <code>/gendoc-align-fix docs</code></li><li>Commit with: <code>docs(gendoc)[&lt;step&gt;]: &lt;description&gt;</code></li></ol>
-<h3>Implementation</h3>
-<ul><li>Backend, frontend, and admin implementations live in separate repositories</li><li>All code must pass BDD scenarios in <code>features/</code></li><li>RTM.csv tracks requirement coverage</li></ul>
-<h3>Feedback</h3>
-<ul><li><strong>Design questions:</strong> Open issue in <a href="https://github.com/pixel-pet-arena/docs/discussions" target="_blank" rel="noopener">Discussions</a></li><li><strong>Bug reports:</strong> <a href="https://github.com/pixel-pet-arena/docs/issues" target="_blank" rel="noopener">Issues</a></li><li><strong>Alignment gaps:</strong> See <a href="./docs/ALIGN_REPORT.md" target="_blank" rel="noopener">ALIGN_REPORT.md</a></li></ul>
+<h3>Windows (PowerShell)</h3>
+<blockquote><p><strong>Recommendation:</strong> Use <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">WSL 2</a> + Docker Desktop for the smoothest experience. The commands below work in PowerShell 7+ natively.</p></blockquote>
+<p><strong>Prerequisites:</strong> Node.js 20 LTS, PostgreSQL 15+, Redis 7+ (all installable via <a href="https://learn.microsoft.com/windows/package-manager/" target="_blank" rel="noopener">winget</a>).</p>
+<pre><code class="language-powershell">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
+Set-Location pixel-pet-arena
+
+# Install all workspace dependencies
+npm install
+
+# Configure environment
+Copy-Item .env.example .env
+# Open .env in your editor and fill in database / Redis / email credentials
+
+# Run database migrations
+npm run db:migrate
+
+# Start the development servers
+npm run dev</code></pre>
+<p>Verify the server started:</p>
+<pre><code class="language-powershell">Invoke-RestMethod http://localhost:3000/health</code></pre>
 <hr>
-<h2>📝 Document Conventions</h2>
-<p><strong>Cross-references:</strong> Links use relative paths (<code>docs/PRD.md#section-id</code>) and markdown anchors.</p>
-<p><strong>Code examples:</strong> Formatted with language tags:</p>
-<pre><code class="language-typescript">// TypeScript examples use ```typescript
-const petStats: PetStats = { speed: 50, strength: 60 };</code></pre>
-<p><strong>Diagrams:</strong> PlantUML source in <code>docs/diagrams/puml/</code> with rendered PNG in <code>docs/diagrams/</code>.</p>
-<p><strong>BDD Scenarios:</strong> Gherkin format with:</p>
-<ul><li><strong>Feature:</strong> User story or AC (links to PRD)</li><li><strong>Scenario:</strong> Specific test case</li><li><strong>Given/When/Then:</strong> Executable steps (link to step definitions once implemented)</li></ul>
+<h2>Environment Variables</h2>
+<p>Copy <code>.env.example</code> to <code>.env</code> before starting. The app validates all required variables at startup and exits with a clear error if any are missing.</p>
+<table>
+<tr><th>Variable</th><th>Description</th><th>Required</th><th>Default</th><th>Example</th></tr>
+<tr><td><code>POSTGRES_DB</code></td><td>PostgreSQL database name</td><td>Yes</td><td>—</td><td><code>pixel_pet_arena</code></td></tr>
+<tr><td><code>POSTGRES_USER</code></td><td>PostgreSQL username</td><td>Yes</td><td>—</td><td><code>postgres</code></td></tr>
+<tr><td><code>POSTGRES_PASSWORD</code></td><td>PostgreSQL password</td><td>Yes</td><td>—</td><td><code>changeme_local</code></td></tr>
+<tr><td><code>SENDGRID_API_KEY</code></td><td>SendGrid v3 API key for transactional email</td><td>Yes (prod)</td><td>—</td><td><code>SG.xxxxx</code></td></tr>
+<tr><td><code>EMAIL_ENCRYPTION_KEY</code></td><td>AES-256-GCM key for GDPR email storage (hex 32 bytes)</td><td>Yes</td><td>—</td><td><code>openssl rand -hex 32</code></td></tr>
+<tr><td><code>REDIS_URL</code></td><td>Redis connection string (Upstash or local)</td><td>No</td><td><code>redis://localhost:6379</code></td><td><code>rediss://user:pass@host:6380</code></td></tr>
+<tr><td><code>DATABASE_URL</code></td><td>Full PostgreSQL connection string (overrides POSTGRES_* vars)</td><td>No</td><td>built from POSTGRES_*</td><td><code>postgresql://user:pass@localhost:5432/pixel_pet_arena</code></td></tr>
+<tr><td><code>APP_PORT</code></td><td>HTTP port the Game API listens on</td><td>No</td><td><code>3000</code></td><td><code>8080</code></td></tr>
+<tr><td><code>LOG_LEVEL</code></td><td>Minimum log level (<code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code>)</td><td>No</td><td><code>info</code></td><td><code>debug</code></td></tr>
+<tr><td><code>ADMIN_TOTP_SECRET</code></td><td>TOTP secret for admin 2FA (base32)</td><td>Yes (prod)</td><td>—</td><td><code>JBSWY3DPEHPK3PXP</code></td></tr>
+</table>
+<p>See <code>.env.example</code> for the full annotated list and optional tuning parameters.</p>
 <hr>
-<h2>📋 Maintenance</h2>
-<h3>Weekly</h3>
-<ul><li>Check <a href="./docs/ALIGN_REPORT.md" target="_blank" rel="noopener">ALIGN_REPORT.md</a> for new misalignments</li><li>Run: <code>/gendoc-align-check</code> to validate doc consistency</li></ul>
-<h3>Monthly</h3>
-<ul><li>Review RTM.csv coverage metrics</li><li>Validate feature list against BDD scenario count</li></ul>
-<h3>Quarterly</h3>
-<ul><li>Full architectural review (EDD.md, ARCH.md, SCHEMA.md)</li><li>Game balance analysis (stat caps, rarity distribution, training buffs)</li></ul>
+<h2>API Quick Reference</h2>
+<p>All player-facing endpoints use <code>/api/v1/</code> prefix. All admin endpoints use <code>/admin/api/</code> prefix. Authentication: pet endpoints use <code>Authorization: Bearer &lt;pet_access_token&gt;</code>; admin endpoints use httpOnly session cookie + TOTP.</p>
+<table>
+<tr><th>Method + Path</th><th>Auth</th><th>Description</th></tr>
+<tr><td><code>POST /api/v1/claim/initiate</code></td><td>None</td><td>Send 6-digit OTP to email address to begin claim</td></tr>
+<tr><td><code>POST /api/v1/claim/verify</code></td><td>None</td><td>Verify OTP code → receive permanent pet access token + URL</td></tr>
+<tr><td><code>GET /api/v1/pets/:petId</code></td><td>None</td><td>Retrieve public pet profile (stats, appearance, rarity)</td></tr>
+<tr><td><code>POST /api/v1/pets/:petId/train</code></td><td>Pet token</td><td>Perform 1 training action (max 3/day, reset UTC 00:00)</td></tr>
+<tr><td><code>GET /api/v1/leaderboard</code></td><td>None</td><td>Top 100 pets by win rate; filterable by rarity</td></tr>
+<tr><td><code>GET /api/v1/arena/battles/:petId</code></td><td>None</td><td>Last 20 battle records for a pet (shareable URL)</td></tr>
+<tr><td><code>POST /api/v1/arena/enter</code></td><td>Pet token</td><td>Enter arena queue (race or sumo mode); rate-limited 10/hr</td></tr>
+<tr><td><code>GET /health</code></td><td>None</td><td>Service health check with version and uptime</td></tr>
+</table>
+<p>For full request/response schemas, error codes, rate limits, and admin endpoints see:</p>
+<ul><li>Markdown source: <a href="docs/API.md" target="_blank" rel="noopener">docs/API.md</a></li><li>HTML online: <a href="docs/pages/api.html" target="_blank" rel="noopener">docs/pages/api.html</a></li></ul>
 <hr>
-<h2>📜 License</h2>
-<p>[Add license info here — MIT, CC-BY, proprietary, etc.]</p>
+<h2>Directory Structure</h2>
+<pre><code class="">pixel-pet-arena/
+├── .github/                    # GitHub Actions CI/CD workflows
+│   └── workflows/
+│       ├── ci.yml              # Lint, test, build on every PR
+│       └── deploy.yml          # Deploy to Railway + Vercel
+├── apps/
+│   ├── game-api/               # Fastify 4 Game API (Node.js 20 LTS)
+│   │   ├── src/
+│   │   │   ├── claim/          # OTP generation, email dispatch, token issuance
+│   │   │   ├── pets/           # Pet CRUD, training, feeding
+│   │   │   ├── arena/          # Matchmaking, battle engine, result recording
+│   │   │   ├── leaderboard/    # Redis sorted set reads + PostgreSQL fallback
+│   │   │   └── shared/         # Config, logger, Zod schemas, DB client
+│   │   └── package.json
+│   ├── admin-api/              # Fastify 4 Admin API (Node.js 20 LTS)
+│   │   └── src/
+│   │       ├── auth/           # TOTP login, session management
+│   │       ├── pets/           # Admin pet management, ban, override
+│   │       ├── gdpr/           # GDPR queue processing
+│   │       └── config/         # Runtime parameter tuning
+│   ├── player-app/             # React 18 + Phaser.js 3 player SPA
+│   │   └── src/
+│   │       ├── game/           # Phaser.js canvas engine, sprite generator
+│   │       ├── claim/          # Claim flow (3-step compound component)
+│   │       ├── arena/          # Arena lobby, match UI
+│   │       └── leaderboard/    # Leaderboard page
+│   └── admin-portal/           # Vue 3 + Element Plus admin SPA
+├── packages/
+│   ├── shared-types/           # Shared TypeScript types across all apps
+│   └── constants/              # Shared game constants from constants.json
+├── docs/                       # Markdown source for all design documents
+│   ├── BRD.md                  # Business Requirements Document
+│   ├── PRD.md                  # Product Requirements Document
+│   ├── PDD.md                  # Product Design Document (UX)
+│   ├── EDD.md                  # Engineering Design Document
+│   ├── ARCH.md                 # System Architecture + ADRs
+│   ├── API.md                  # REST API reference
+│   ├── SCHEMA.md               # Database schema reference
+│   ├── test-plan.md            # Test Plan + RTM
+│   └── pages/                  # Generated HTML documentation site
+├── features/                   # Cucumber/Gherkin BDD feature files (server)
+│   ├── claim-flow.feature
+│   ├── arena-battle.feature
+│   ├── leaderboard.feature
+│   └── client/                 # Playwright E2E feature files
+├── docs/pages/prototype/       # Interactive HTML/CSS/JS prototype
+├── .env.example                # Annotated environment variable template
+├── docker-compose.yml          # Local multi-service development stack
+└── package.json                # Monorepo root (npm workspaces)</code></pre>
 <hr>
-<h2>👥 Team</h2>
-<ul><li><strong>Game Design:</strong> [Name]</li><li><strong>Product Management:</strong> [Name]</li><li><strong>Technical Architecture:</strong> [Name]</li><li><strong>QA / Test Strategy:</strong> [Name]</li></ul>
+<h2>Documentation</h2>
+<p>The full documentation suite is generated into a static HTML site in <code>docs/pages/</code>.</p>
+<table>
+<tr><th>Document</th><th>Markdown Source</th><th>HTML</th><th>Description</th></tr>
+<tr><td>BRD</td><td><a href="docs/BRD.md" target="_blank" rel="noopener">docs/BRD.md</a></td><td><a href="docs/pages/brd.html" target="_blank" rel="noopener">brd.html</a></td><td>Business goals, ROI analysis, stakeholder sign-off</td></tr>
+<tr><td>PRD</td><td><a href="docs/PRD.md" target="_blank" rel="noopener">docs/PRD.md</a></td><td><a href="docs/pages/prd.html" target="_blank" rel="noopener">prd.html</a></td><td>User stories, acceptance criteria, priority tiers</td></tr>
+<tr><td>PDD</td><td><a href="docs/PDD.md" target="_blank" rel="noopener">docs/PDD.md</a></td><td><a href="docs/pages/pdd.html" target="_blank" rel="noopener">pdd.html</a></td><td>UX flows, wireframes, component specs</td></tr>
+<tr><td>EDD</td><td><a href="docs/EDD.md" target="_blank" rel="noopener">docs/EDD.md</a></td><td><a href="docs/pages/edd.html" target="_blank" rel="noopener">edd.html</a></td><td>Architecture, technology choices, data models</td></tr>
+<tr><td>ARCH</td><td><a href="docs/ARCH.md" target="_blank" rel="noopener">docs/ARCH.md</a></td><td><a href="docs/pages/arch.html" target="_blank" rel="noopener">arch.html</a></td><td>C4 diagrams, component architecture, ADRs</td></tr>
+<tr><td>API</td><td><a href="docs/API.md" target="_blank" rel="noopener">docs/API.md</a></td><td><a href="docs/pages/api.html" target="_blank" rel="noopener">api.html</a></td><td>REST API endpoints, schemas, error codes</td></tr>
+<tr><td>SCHEMA</td><td><a href="docs/SCHEMA.md" target="_blank" rel="noopener">docs/SCHEMA.md</a></td><td><a href="docs/pages/schema.html" target="_blank" rel="noopener">schema.html</a></td><td>Database table definitions and ERD</td></tr>
+<tr><td>BDD</td><td><a href="features/" target="_blank" rel="noopener">features/</a></td><td><a href="docs/pages/bdd-server.html" target="_blank" rel="noopener">bdd-server.html</a></td><td>Gherkin server feature files</td></tr>
+<tr><td>E2E BDD</td><td><a href="features/client/" target="_blank" rel="noopener">features/client/</a></td><td><a href="docs/pages/bdd-client.html" target="_blank" rel="noopener">bdd-client.html</a></td><td>Playwright E2E feature files</td></tr>
+<tr><td>Test Plan</td><td><a href="docs/test-plan.md" target="_blank" rel="noopener">docs/test-plan.md</a></td><td><a href="docs/pages/test-plan.html" target="_blank" rel="noopener">test-plan.html</a></td><td>Test strategy, coverage matrix, RTM</td></tr>
+</table>
+<p>Regenerate the HTML site:</p>
+<pre><code class="language-bash">python3 ~/.claude/skills/gendoc/tools/bin/gen_html.py
+# Output: docs/pages/*.html</code></pre>
 <hr>
-<p><strong>Last Updated:</strong> 2026-05-04</p>
-<p><strong>Status:</strong> ⚠️ Specification Phase (30 alignment findings pending fixes)</p>
-<p><strong>Next Phase:</strong> Code Implementation (Backend, Frontend, Admin)</p><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">文件導覽</h2><div class="index-grid"><a class="index-card" href="idea.html"><span class="index-card__icon">💡</span><span class="index-card__title">構想文件 (IDEA)</span></a><a class="index-card" href="brd.html"><span class="index-card__icon">📋</span><span class="index-card__title">商業需求文件 (BRD)</span></a><a class="index-card" href="prd.html"><span class="index-card__icon">📝</span><span class="index-card__title">產品需求文件 (PRD)</span></a><a class="index-card" href="pdd.html"><span class="index-card__icon">🎨</span><span class="index-card__title">產品設計文件 (PDD)</span></a><a class="index-card" href="vdd.html"><span class="index-card__icon">🖼️</span><span class="index-card__title">視覺設計文件 (VDD)</span></a><a class="index-card" href="edd.html"><span class="index-card__icon">🏗️</span><span class="index-card__title">工程設計文件 (EDD)</span></a><a class="index-card" href="arch.html"><span class="index-card__icon">🧩</span><span class="index-card__title">架構設計</span></a><a class="index-card" href="api.html"><span class="index-card__icon">🔌</span><span class="index-card__title">API 文件</span></a><a class="index-card" href="schema.html"><span class="index-card__icon">🗄️</span><span class="index-card__title">Schema 文件</span></a><a class="index-card" href="frontend.html"><span class="index-card__icon">🖥️</span><span class="index-card__title">前端設計文件</span></a><a class="index-card" href="audio.html"><span class="index-card__icon">🔊</span><span class="index-card__title">音效設計文件</span></a><a class="index-card" href="anim.html"><span class="index-card__icon">🎬</span><span class="index-card__title">動畫特效文件</span></a><a class="index-card" href="client_impl.html"><span class="index-card__icon">🖥</span><span class="index-card__title">客戶端實作規格</span></a><a class="index-card" href="constants.html"><span class="index-card__icon">🔢</span><span class="index-card__title">業務常數文件</span></a><a class="index-card" href="test-plan.html"><span class="index-card__icon">✅</span><span class="index-card__title">測試計畫 (Test Plan)</span></a><a class="index-card" href="runbook.html"><span class="index-card__icon">📖</span><span class="index-card__title">Runbook</span></a><a class="index-card" href="local_deploy.html"><span class="index-card__icon">🚀</span><span class="index-card__title">本地部署指南</span></a><a class="index-card" href="rtm.html"><span class="index-card__icon">🗂️</span><span class="index-card__title">需求追蹤矩陣 (RTM)</span></a><a class="index-card" href="align_report.html"><span class="index-card__icon">🔍</span><span class="index-card__title">對齊報告</span></a><a class="index-card" href="admin_impl.html"><span class="index-card__icon">📄</span><span class="index-card__title">Admin Impl</span></a><a class="index-card" href="align-report.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align-Report</span></a><a class="index-card" href="align_fix_complete.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Complete</span></a><a class="index-card" href="align_fix_summary.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Summary</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Client</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Server</span></a><a class="index-card" href="cicd.html"><span class="index-card__icon">📄</span><span class="index-card__title">Cicd</span></a><a class="index-card" href="contracts.html"><span class="index-card__icon">📦</span><span class="index-card__title">機器可讀合約</span></a><a class="index-card" href="developer_guide.html"><span class="index-card__icon">📄</span><span class="index-card__title">Developer Guide</span></a><a class="index-card" href="implementation_readiness.html"><span class="index-card__icon">📄</span><span class="index-card__title">Implementation Readiness</span></a><a class="index-card" href="manifest.html"><span class="index-card__icon">📄</span><span class="index-card__title">Manifest</span></a><a class="index-card" href="resource.html"><span class="index-card__icon">📄</span><span class="index-card__title">Resource</span></a><a class="index-card" href="background-jobs.html"><span class="index-card__icon">📄</span><span class="index-card__title">Background-Jobs</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Server BDD</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Client BDD</span></a><a class="index-card" href="diag-activity-arena-battle.html"><span class="index-card__icon">📐</span><span class="index-card__title">UML 圖表 (24 張)</span><span class="index-card__desc">Server 24 / Frontend 0</span></a></div></section><section style="margin-top:3rem;padding:1.5rem;background:#fff;border:1px solid var(--border);border-radius:8px;"><h2 style="margin-top:0">📊 專案健康狀態</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:1rem"><div style="text-align:center;padding:1rem;background:var(--page-bg);border-radius:6px"><div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">已完成 STEP</div><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">0/20</div></div></div></section></main>
+<h2>Testing</h2>
+<h3>Run All Tests</h3>
+<pre><code class="language-bash">npm test</code></pre>
+<h3>Generate Coverage Report</h3>
+<pre><code class="language-bash">npm run test:coverage
+# Report written to coverage/lcov-report/index.html</code></pre>
+<p>Coverage target: <strong>80% lines, branches, functions.</strong> The CI pipeline fails if coverage drops below this threshold.</p>
+<h3>Individual Test Types</h3>
+<pre><code class="language-bash"># Unit tests only (Vitest)
+npm run test:unit
+
+# Integration tests (requires DATABASE_URL and REDIS_URL)
+npm run test:integration
+
+# BDD / Cucumber feature tests (server)
+npm run test:bdd
+
+# End-to-end tests (Playwright, requires a running app instance)
+npm run test:e2e</code></pre>
+<h3>Performance Targets</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>P99 read latency</td><td>&lt; 200 ms at 100 RPS</td></tr>
+<tr><td>P99 write latency</td><td>&lt; 500 ms at 100 RPS</td></tr>
+<tr><td>LCP (player app)</td><td>&lt; 2.5 s</td></tr>
+<tr><td>FCP (player app)</td><td>&lt; 1.5 s</td></tr>
+<tr><td>CLS</td><td>&lt; 0.1</td></tr>
+</table>
+<hr>
+<h2>Known Limitations</h2>
+<ol><li><strong>Email pre-scan (Gmail/Outlook)</strong>: Email clients may auto-click URLs in emails. Mitigated by using a 6-digit numeric code + separate URL (not a magic-link), requiring manual code entry.</li><li><strong>Token enumeration surface</strong>: Pet access tokens are 32-byte cryptographically random — brute-force infeasible — but long-lived. Pets with no owner interaction for <code>PET_RESERVATION_TTL_HOURS</code> (24h) are cleaned up.</li><li><strong>Arena matchmaking at low CCU</strong>: With &lt; ~50 online players, AI-controlled opponents fill matchmaking after the 30-second timeout. AI fallback stats are seeded from the global average.</li><li><strong>Leaderboard eventual consistency</strong>: Redis sorted set may lag up to 30 seconds behind the authoritative PostgreSQL <code>battle_records</code> table during peak load. Displayed with a &quot;last updated&quot; timestamp.</li><li><strong>Marketplace (P2) not yet implemented</strong>: Pet trading feature (<code>FF_MARKETPLACE</code>) is behind a feature flag and not available in v1.0.</li></ol>
+<hr>
+<h2>Changelog</h2>
+<p>See <a href="https://github.com/pixel-pet-arena/pixel-pet-arena/releases" target="_blank" rel="noopener">GitHub Releases</a> for versioned release notes.</p>
+<hr>
+<h2>Development Guide</h2>
+<blockquote><p>This README is auto-generated from <code>docs/BRD.md</code>, <code>docs/PRD.md</code>, <code>docs/EDD.md</code>, <code>docs/ARCH.md</code>, and related upstream documents via the <code>gendoc</code> pipeline. To regenerate: <code>/gendoc readme</code>.</p></blockquote>
+<p>See <a href="docs/DEVELOPER_GUIDE.md" target="_blank" rel="noopener">docs/DEVELOPER_GUIDE.md</a> for the full onboarding guide including branch strategy, commit message format, PR checklist, local environment tips, and release process.</p>
+<hr>
+<h2>License</h2>
+<p>MIT License</p>
+<p>Copyright (c) 2026 pixel-pet-arena contributors</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</p>
+<p>See <a href="LICENSE" target="_blank" rel="noopener">LICENSE</a> for the full text.</p>
+<hr>
+<h2>Security Policy</h2>
+<h3>Responsible Disclosure</h3>
+<p>If you discover a security vulnerability, <strong>do not open a public GitHub Issue</strong>. Instead, email <strong>security@pixel-pet-arena.com</strong> with:</p>
+<ol><li>A description of the vulnerability and its potential impact</li><li>Steps to reproduce</li><li>Any suggested mitigations</li></ol>
+<p><strong>Response SLA:</strong></p>
+<table>
+<tr><th>Severity</th><th>Acknowledgement</th><th>Initial Assessment</th><th>Patch Target</th></tr>
+<tr><td>Critical</td><td>72 hours</td><td>72 hours</td><td>7 days</td></tr>
+<tr><td>High</td><td>72 hours</td><td>7 days</td><td>30 days</td></tr>
+<tr><td>Medium</td><td>72 hours</td><td>14 days</td><td>90 days</td></tr>
+</table>
+<p>We credit responsible disclosures in release notes. See <a href="SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a> for the full policy.</p>
+<hr>
+<h2>Architecture Quick Reference</h2>
+<table>
+<tr><th>Key Decision</th><th>Choice</th><th>Document</th></tr>
+<tr><td>API paradigm</td><td>REST (<code>/api/v1/</code>, <code>/admin/api/</code>)</td><td><a href="docs/ARCH.md#adr" target="_blank" rel="noopener">docs/ARCH.md §ADR</a></td></tr>
+<tr><td>Database</td><td>PostgreSQL 15+ (Supabase managed) + Redis 7+ (Upstash)</td><td><a href="docs/SCHEMA.md" target="_blank" rel="noopener">docs/SCHEMA.md</a></td></tr>
+<tr><td>Authentication</td><td>Email OTP → 32-byte cryptographic URL token (no sessions for players); TOTP for admin</td><td><a href="docs/ARCH.md#5-security-architecture" target="_blank" rel="noopener">docs/ARCH.md §5 Security</a></td></tr>
+<tr><td>Frontend separation</td><td>Player app (React + Phaser.js) and Admin portal (Vue 3) as separate Vite builds</td><td><a href="docs/EDD.md" target="_blank" rel="noopener">docs/EDD.md §1</a></td></tr>
+<tr><td>Deployment platform</td><td>Vercel (frontend CDN) + Railway (API, autoscale HPA 70% CPU)</td><td><a href="docs/LOCAL_DEPLOY.md" target="_blank" rel="noopener">docs/LOCAL_DEPLOY.md</a></td></tr>
+</table>
+<p>Main ADRs: <a href="docs/ARCH.md#14-architecture-decision-records" target="_blank" rel="noopener">docs/ARCH.md — Architecture Decision Records</a></p>
+<hr>
+<h2>Code of Conduct</h2>
+<p>This project adopts the <a href="https://www.contributor-covenant.org/" target="_blank" rel="noopener">Contributor Covenant</a> v2.1 as its Code of Conduct.</p>
+<p>See <a href="CODE_OF_CONDUCT.md" target="_blank" rel="noopener">CODE_OF_CONDUCT.md</a> for the full text.</p>
+<p>For violations, contact the maintainers at <strong>conduct@pixel-pet-arena.com</strong>.</p><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">文件導覽</h2><div class="index-grid"><a class="index-card" href="idea.html"><span class="index-card__icon">💡</span><span class="index-card__title">構想文件 (IDEA)</span></a><a class="index-card" href="brd.html"><span class="index-card__icon">📋</span><span class="index-card__title">商業需求文件 (BRD)</span></a><a class="index-card" href="prd.html"><span class="index-card__icon">📝</span><span class="index-card__title">產品需求文件 (PRD)</span></a><a class="index-card" href="pdd.html"><span class="index-card__icon">🎨</span><span class="index-card__title">產品設計文件 (PDD)</span></a><a class="index-card" href="vdd.html"><span class="index-card__icon">🖼️</span><span class="index-card__title">視覺設計文件 (VDD)</span></a><a class="index-card" href="edd.html"><span class="index-card__icon">🏗️</span><span class="index-card__title">工程設計文件 (EDD)</span></a><a class="index-card" href="arch.html"><span class="index-card__icon">🧩</span><span class="index-card__title">架構設計</span></a><a class="index-card" href="api.html"><span class="index-card__icon">🔌</span><span class="index-card__title">API 文件</span></a><a class="index-card" href="schema.html"><span class="index-card__icon">🗄️</span><span class="index-card__title">Schema 文件</span></a><a class="index-card" href="frontend.html"><span class="index-card__icon">🖥️</span><span class="index-card__title">前端設計文件</span></a><a class="index-card" href="audio.html"><span class="index-card__icon">🔊</span><span class="index-card__title">音效設計文件</span></a><a class="index-card" href="anim.html"><span class="index-card__icon">🎬</span><span class="index-card__title">動畫特效文件</span></a><a class="index-card" href="client_impl.html"><span class="index-card__icon">🖥</span><span class="index-card__title">客戶端實作規格</span></a><a class="index-card" href="constants.html"><span class="index-card__icon">🔢</span><span class="index-card__title">業務常數文件</span></a><a class="index-card" href="test-plan.html"><span class="index-card__icon">✅</span><span class="index-card__title">測試計畫 (Test Plan)</span></a><a class="index-card" href="runbook.html"><span class="index-card__icon">📖</span><span class="index-card__title">Runbook</span></a><a class="index-card" href="local_deploy.html"><span class="index-card__icon">🚀</span><span class="index-card__title">本地部署指南</span></a><a class="index-card" href="rtm.html"><span class="index-card__icon">🗂️</span><span class="index-card__title">需求追蹤矩陣 (RTM)</span></a><a class="index-card" href="align_report.html"><span class="index-card__icon">🔍</span><span class="index-card__title">對齊報告</span></a><a class="index-card" href="admin_impl.html"><span class="index-card__icon">📄</span><span class="index-card__title">Admin Impl</span></a><a class="index-card" href="align-report.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align-Report</span></a><a class="index-card" href="align_fix_complete.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Complete</span></a><a class="index-card" href="align_fix_summary.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Summary</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Client</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Server</span></a><a class="index-card" href="cicd.html"><span class="index-card__icon">📄</span><span class="index-card__title">Cicd</span></a><a class="index-card" href="contracts.html"><span class="index-card__icon">📦</span><span class="index-card__title">機器可讀合約</span></a><a class="index-card" href="developer_guide.html"><span class="index-card__icon">📄</span><span class="index-card__title">Developer Guide</span></a><a class="index-card" href="implementation_readiness.html"><span class="index-card__icon">📄</span><span class="index-card__title">Implementation Readiness</span></a><a class="index-card" href="manifest.html"><span class="index-card__icon">📄</span><span class="index-card__title">Manifest</span></a><a class="index-card" href="resource.html"><span class="index-card__icon">📄</span><span class="index-card__title">Resource</span></a><a class="index-card" href="background-jobs.html"><span class="index-card__icon">📄</span><span class="index-card__title">Background-Jobs</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Server BDD</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Client BDD</span></a><a class="index-card" href="diag-activity-arena-battle.html"><span class="index-card__icon">📐</span><span class="index-card__title">UML 圖表 (24 張)</span><span class="index-card__desc">Server 24 / Frontend 0</span></a></div></section><section style="margin-top:3rem;padding:1.5rem;background:#fff;border:1px solid var(--border);border-radius:8px;"><h2 style="margin-top:0">📊 專案健康狀態</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:1rem"><div style="text-align:center;padding:1rem;background:var(--page-bg);border-radius:6px"><div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">已完成 STEP</div><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">0/20</div></div></div></section></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

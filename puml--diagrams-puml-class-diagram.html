@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cicd Pr Gate — pet</title>
+  <title>Class Diagram — pet</title>
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
@@ -37,8 +37,8 @@
     </div>
   </header>
   <div class="doc-page-banner">
-    <p class="banner-breadcrumb"><a href="index.html">pet</a> › Cicd Pr Gate</p>
-    <h1 class="banner-title">Cicd Pr Gate</h1>
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › PlantUML › Class Diagram</p>
+    <h1 class="banner-title">PlantUML › Class Diagram</h1>
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
@@ -110,9 +110,9 @@
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📐 PlantUML</summary>
-<a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
+<a class="sidebar__link active" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-deployment.html">Deployment</a>
@@ -131,7 +131,7 @@
 <a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
 <a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
 <a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
-<a class="sidebar__link active" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
 <a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
 <a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
 <a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
@@ -152,100 +152,171 @@
 </div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>PR Gate Workflow (ci.yml)</h1>
-<p>This document details the PR gate workflow defined in <code>.github/workflows/ci.yml</code> for the pixel-pet-arena monorepo. Every pull request targeting <code>main</code> must pass all checks before it is eligible for merge. The gate runs lint, TypeScript type-checking, unit tests, integration tests, Docker builds for all three services, an end-to-end smoke test against the built containers, and a <code>detect-secrets</code> security scan to prevent credential leakage into the repository history.</p>
-<h2>Workflow Trigger and Runner Context</h2>
-<p>The <code>ci.yml</code> workflow triggers on <code>pull_request</code> events targeting <code>main</code> and on direct pushes to <code>main</code>. Jobs run on <code>ubuntu-latest</code> GitHub-hosted runners. The pnpm workspace is bootstrapped with Node.js 20 and the lockfile is used for deterministic installs. A PostgreSQL service container and a Redis service container are started as job services for the integration test job.</p>
-<div class="diagram-container"><pre class="mermaid">flowchart TD
-    PUSH([PR Opened / Pushed\ngithub.event pull_request])
+    <main class="doc-content"><h1>Class Diagram</h1><pre><code class="language-plantuml">@startuml pixel-pet-arena-class-diagram
 
-    subgraph LINT_TC [Lint &amp; Type-Check — parallel]
-        LINT[pnpm lint\nESLint across api · player-app · admin-app]
-        TC[pnpm typecheck\ntsc --noEmit all packages]
-    end
+!define ENTITY #F5F5F5
+!define PROCESS #E8F4F8
+!define EXTERNAL #FFF5E6
 
-    subgraph UNIT [Unit Tests — parallel per package]
-        UNIT_API[api unit tests\nVitest · coverage ≥ 80%]
-        UNIT_PLAYER[player-app unit tests\nVitest · coverage ≥ 80%]
-        UNIT_ADMIN[admin-app unit tests\nVitest · coverage ≥ 80%]
-    end
+skinparam linetype ortho
+skinparam classBackgroundColor ENTITY
+skinparam classBorderColor #333333
 
-    subgraph INTEGRATION [Integration Tests]
-        PG_SVC[PostgreSQL 15 service\nlocalhost:5432]
-        REDIS_SVC[Redis 7 service\nlocalhost:6379]
-        SUPABASE_MIG[supabase migration up\napply schema to test DB]
-        INT_API[api integration tests\nFastify inject · DB + Redis]
-    end
+class User {
+  id: UUID
+  email_hash: VARCHAR(64)
+  email_encrypted: BYTEA
+  deletion_requested_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  updated_at: TIMESTAMPTZ
+  --
+  +getClaimedPets()
+  +requestGDPRDeletion()
+}
 
-    subgraph BUILD [Docker Builds — parallel]
-        BUILD_API[docker build api\nmulti-stage TypeScript compile]
-        BUILD_PLAYER[docker build player-app\nnginx:alpine · port 80]
-        BUILD_ADMIN[docker build admin-app\nnginx:alpine · port 80]
-    end
+class Pet {
+  id: UUID
+  seed: BIGINT
+  rarity: ENUM
+  pet_name: VARCHAR(64)
+  stat_speed: SMALLINT [1..100]
+  stat_strength: SMALLINT [1..100]
+  stat_stamina: SMALLINT [1..100]
+  level: SMALLINT [1..100]
+  total_training_actions: INTEGER
+  is_banned: BOOLEAN
+  owner_token_hash: VARCHAR(64)
+  claimed_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  --
+  +train(type): void
+  +compete(opponent): BattleResult
+  +getStats(): Stats
+}
 
-    E2E[E2E Smoke Tests\nPlaywright against docker-compose stack]
+class ClaimCode {
+  id: UUID
+  pet_id: UUID
+  email_hash: VARCHAR(64)
+  code_hash: VARCHAR(64)
+  expires_at: TIMESTAMPTZ
+  used_at: TIMESTAMPTZ
+  attempts: SMALLINT
+  created_at: TIMESTAMPTZ
+  --
+  +verify(code): boolean
+  +isExpired(): boolean
+}
 
-    SEC_SCAN[detect-secrets scan\n--baseline .secrets.baseline\nfail on new secrets]
+class ArenaMatch {
+  id: UUID
+  pet_a_id: UUID
+  pet_b_id: UUID
+  is_ai_opponent: BOOLEAN
+  mode: ENUM {RACE, SUMO}
+  winner_pet_id: UUID
+  random_seed: BIGINT
+  stat_delta_a: SMALLINT
+  stat_delta_b: SMALLINT
+  duration_seconds: SMALLINT [5..15]
+  battle_log: JSONB
+  completed_at: TIMESTAMPTZ
+  --
+  +calculateOutcome(): UUID
+  +getReplay(): BattleLog
+}
 
-    RESULT{All checks\npassed?}
-    BLOCK([PR Blocked\nCheck annotations on diff])
-    PASS([PR Gate Passed\nReady for merge])
+class TrainingLog {
+  id: UUID
+  pet_id: UUID
+  training_type: ENUM {RUN, STRENGTH, STAMINA}
+  stat_delta: SMALLINT [1..3]
+  stat_after: SMALLINT
+  completed_at: TIMESTAMPTZ
+  --
+  +getDailyCount(): INTEGER
+}
 
-    PUSH --&gt; LINT_TC
-    LINT_TC --&gt; UNIT
-    UNIT --&gt; INTEGRATION
-    PG_SVC --&gt; SUPABASE_MIG
-    SUPABASE_MIG --&gt; INT_API
-    REDIS_SVC --&gt; INT_API
-    INTEGRATION --&gt; BUILD
-    BUILD --&gt; E2E
-    E2E --&gt; SEC_SCAN
-    SEC_SCAN --&gt; RESULT
-    RESULT -- No --&gt; BLOCK
-    RESULT -- Yes --&gt; PASS
+class FoodBuff {
+  id: UUID
+  pet_id: UUID
+  buff_type: ENUM {SPEED_BOOST, STRENGTH_BOOST, STAMINA_BOOST}
+  stat_multiplier: DECIMAL
+  expires_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  --
+  +isActive(): boolean
+  +getStatBonus(stat): INTEGER
+}
 
-    style BLOCK fill:#e63946,color:#fff
-    style PASS fill:#2a9d8f,color:#fff
-    style RESULT fill:#f0a500,color:#000
-    style SEC_SCAN fill:#457b9d,color:#fff</pre></div>
-<h2>Job Dependency Graph</h2>
-<p>The jobs are structured to maximise parallelism while preserving correctness. Lint and type-check run concurrently in the first wave. Unit tests fan out across the three workspace packages in parallel once the lint/type-check wave succeeds. Integration tests require a clean schema applied via <code>supabase migration up</code> against the PostgreSQL service container. Docker builds fan out after integration tests pass. The E2E smoke test runs after all three images are built and a temporary <code>docker-compose</code> stack is started. The security scan runs last but is non-blocking for unrelated job failures — it only fails the gate if <code>detect-secrets</code> reports new findings not present in <code>.secrets.baseline</code>.</p>
-<div class="diagram-container"><pre class="mermaid">sequenceDiagram
-    participant GH as GitHub Actions Runner
-    participant LINT as ESLint / tsc
-    participant TEST as Vitest (unit + integration)
-    participant DB as PostgreSQL 15 (service)
-    participant REDIS as Redis 7 (service)
-    participant DOCKER as Docker Build
-    participant PW as Playwright Smoke
-    participant DS as detect-secrets
+class Leaderboard {
+  id: UUID
+  snapshot_time: TIMESTAMPTZ
+  entries: JSONB
+  --
+  +getTopPets(limit): Pet[]
+  +getRank(pet_id): INTEGER
+  +updateScores(): void
+}
 
-    GH-&gt;&gt;LINT: Run ESLint (all packages)
-    GH-&gt;&gt;LINT: Run tsc --noEmit (all packages)
-    LINT--&gt;&gt;GH: lint OK / fail annotations
-    GH-&gt;&gt;TEST: Run unit tests (api, player-app, admin-app)
-    TEST--&gt;&gt;GH: unit coverage reports
-    GH-&gt;&gt;DB: Start PostgreSQL service container
-    GH-&gt;&gt;REDIS: Start Redis service container
-    DB--&gt;&gt;GH: ready
-    REDIS--&gt;&gt;GH: ready
-    GH-&gt;&gt;DB: supabase migration up
-    DB--&gt;&gt;GH: schema applied
-    GH-&gt;&gt;TEST: Run integration tests (api)
-    TEST--&gt;&gt;GH: integration results
-    GH-&gt;&gt;DOCKER: Build api image (multi-stage)
-    GH-&gt;&gt;DOCKER: Build player-app image (nginx)
-    GH-&gt;&gt;DOCKER: Build admin-app image (nginx)
-    DOCKER--&gt;&gt;GH: images built
-    GH-&gt;&gt;PW: docker-compose up + playwright test
-    PW--&gt;&gt;GH: smoke test results
-    GH-&gt;&gt;DS: detect-secrets scan
-    DS--&gt;&gt;GH: baseline diff result
-    GH--&gt;&gt;GH: Aggregate job results → pass/fail</pre></div>
-<h2>Security Scan Details</h2>
-<p>The <code>detect-secrets</code> scanner runs with <code>--baseline .secrets.baseline</code> so that pre-approved findings are suppressed. Any newly detected high-entropy string, AWS key pattern, GitHub token, or database DSN that does not appear in the baseline causes the job to exit with a non-zero status, blocking the merge. The baseline file is committed to the repository and updated deliberately via <code>detect-secrets scan --baseline .secrets.baseline</code> in a dedicated housekeeping PR. This ensures the PR gate enforces a zero-tolerance policy on newly introduced secrets without penalising developers for existing managed entries.</p>
-<h2>Test Coverage Requirements</h2>
-<p>All three workspace packages are required to meet an 80% line coverage threshold enforced by Vitest&#x27;s built-in coverage reporter. Coverage reports are uploaded as GitHub Actions artifacts and are also reported as PR check annotations. A coverage drop below threshold fails the unit test job and blocks the PR gate.</p></main>
+class AdminAccount {
+  id: UUID
+  username: VARCHAR(64)
+  password_hash: VARCHAR(256)
+  role: ENUM {MODERATOR, ADMIN}
+  is_locked: BOOLEAN
+  created_at: TIMESTAMPTZ
+  --
+  +banPet(pet_id, reason): void
+  +setRateLimits(config): void
+}
+
+class AdminAuditLog {
+  id: UUID
+  admin_id: UUID
+  action: VARCHAR(255)
+  target_type: VARCHAR(50)
+  target_id: UUID
+  details: JSONB
+  created_at: TIMESTAMPTZ
+  --
+  +log(action, target): void
+}
+
+class Session {
+  id: UUID
+  admin_id: UUID
+  token_hash: VARCHAR(64)
+  expires_at: TIMESTAMPTZ
+  inactivity_expires_at: TIMESTAMPTZ
+  created_at: TIMESTAMPTZ
+  --
+  +isValid(): boolean
+  +refresh(): void
+}
+
+class BattleResult {
+  winner_id: UUID
+  loser_id: UUID
+  mode: ENUM
+  duration: INTEGER
+  log: BattleLog
+  timestamp: TIMESTAMPTZ
+}
+
+User &quot;1&quot; -- &quot;*&quot; Pet : &quot;claims &gt;&quot;
+Pet &quot;1&quot; -- &quot;*&quot; ArenaMatch : &quot;participates in &gt;&quot;
+Pet &quot;1&quot; -- &quot;*&quot; TrainingLog : &quot;records &gt;&quot;
+Pet &quot;1&quot; -- &quot;*&quot; FoodBuff : &quot;uses &gt;&quot;
+ArenaMatch &quot;1&quot; -- &quot;1&quot; BattleResult : &quot;produces &gt;&quot;
+ClaimCode &quot;1&quot; -- &quot;1&quot; Pet : &quot;unlocks &gt;&quot;
+Leaderboard &quot;1&quot; -- &quot;*&quot; Pet : &quot;ranks &gt;&quot;
+AdminAccount &quot;1&quot; -- &quot;*&quot; AdminAuditLog : &quot;logs &gt;&quot;
+AdminAccount &quot;1&quot; -- &quot;*&quot; Session : &quot;creates &gt;&quot;
+Session &quot;1&quot; -- &quot;1&quot; AdminAccount : &quot;belongs to &gt;&quot;
+
+@enduml
+</code></pre><p style="color:var(--text-muted)">⚠️ PlantUML 圖表無法生成（請確認本機已安裝 plantuml 或網路可連至 plantuml.com）</p></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
