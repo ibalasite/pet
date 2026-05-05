@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — Background Jobs Specification</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">Background Jobs Specification</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>Background Jobs Specification</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="background-jobs-specification">Background Jobs Specification</h1>
+<div class="doc-gap"></div>
+<p class="doc-p"><!-- Recurring and async job definitions for pixel-pet-arena backend --></p>
+<p class="doc-p"><!-- Upstream: EDD.md (§4), SCHEMA.md (§2) --></p>
+<p class="doc-p"><!-- Date: 2026-05-04 --></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="overview">Overview</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">This document specifies all background jobs and async cleanup processes that run on the pixel-pet-arena backend. These jobs maintain data consistency, enforce retention windows, and clean up expired records.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1-claim-code-cleanup">1. Claim Code Cleanup</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Schedule:</strong> Every 6 hours</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.3 (Email Claim Flow)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.3 (<code>claim_codes</code> table), indexes <code>idx_claim_codes_created_at</code>, <code>idx_claim_codes_used_at</code></p>
+<p class="doc-p"><strong>Related Constant:</strong> <code>CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">Deletes claim code records that are older than 72 hours, calculated as the maximum of:</p>
+<ul class="doc-list">
+<li>Creation time (<code>created_at</code>) + 72 hours, or</li>
+<li>First use time (<code>used_at</code>) + 72 hours</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p">After deletion, the associated <code>claim_identities</code> row may remain (if no other claims link to it), but the specific code is removed.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Query Target:</strong></p>
+<pre class="doc-code"><code class="lang-sql">DELETE FROM claim_codes
+WHERE (created_at + INTERVAL '72 hours' &lt; NOW())
+   OR (used_at IS NOT NULL AND used_at + INTERVAL '72 hours' &lt; NOW());</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Impact:</strong> Prevents unbounded growth of historical claim records; maintains GDPR right to be forgotten.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2-unclaimed-pet-cleanup">2. Unclaimed Pet Cleanup</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Schedule:</strong> Every 6 hours</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.2 (Pet Data Model)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.2 (<code>pets</code> table), index <code>idx_pets_reserved_until</code></p>
+<p class="doc-p"><strong>Related Constant:</strong> <code>PET_RESERVATION_TTL_HOURS = 24</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">Deletes pets that have been in guest preview mode (unclaimed) for longer than 24 hours. A pet is considered unclaimed if:</p>
+<ul class="doc-list">
+<li><code>owner_token_hash IS NULL</code> (never claimed), and</li>
+<li><code>reserved_until < NOW()</code> (reservation window expired)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Query Target:</strong></p>
+<pre class="doc-code"><code class="lang-sql">DELETE FROM pets
+WHERE owner_token_hash IS NULL
+  AND reserved_until IS NOT NULL
+  AND reserved_until &lt; NOW();</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Impact:</strong> Frees database storage; prevents accumulation of abandoned guest pets; ensures claimed pets (with <code>reserved_until = NULL</code>) are never deleted.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-leaderboard-snapshot-sync">3. Leaderboard Snapshot Sync</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Schedule:</strong> Every 30 seconds</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.9 (Leaderboard System)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.5 (<code>leaderboard_snapshots</code> table)</p>
+<p class="doc-p"><strong>Related Constant:</strong> <code>LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">Syncs the in-memory Redis leaderboard (<code>leaderboard:global</code> sorted set) to PostgreSQL for durability and fallback. This job:</p>
+<p class="doc-p">1. Reads all entries from Redis <code>leaderboard:global</code> via <code>ZRANGE ... WITHSCORES</code></p>
+<p class="doc-p">2. Upserts top 1,000 entries into <code>leaderboard_snapshots</code> table</p>
+<p class="doc-p">3. Deletes rows representing banned pets (status = 'BANNED' in pets table)</p>
+<p class="doc-p">4. Updates <code>snapshot_updated_at</code> timestamp</p>
+<div class="doc-gap"></div>
+<p class="doc-p">On Redis unavailability, the API falls back to querying the PostgreSQL snapshot and returns <code>"degraded": true</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Impact:</strong> Ensures leaderboard persistence; enables fallback during Redis outages.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-food-buff-record-cleanup">4. Food Buff Record Cleanup</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Schedule:</strong> Every 12 hours</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.7 (Food System)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.6 (<code>food_buffs</code> table), index <code>idx_food_buffs_record_expires</code></p>
+<p class="doc-p"><strong>Related Constant:</strong> <code>FOOD_BUFF_EXAMPLE_TEMP_DURATION_HOURS = 24</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">Deletes historical food buff records that have expired. Buffs are marked with <code>record_expires_at</code> at application time; this job removes rows where:</p>
+<ul class="doc-list">
+<li><code>record_expires_at < NOW()</code></li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p">Active buffs (not yet expired) are NOT deleted; <code>record_expires_at</code> is nullable for permanent buffs.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Query Target:</strong></p>
+<pre class="doc-code"><code class="lang-sql">DELETE FROM food_buffs
+WHERE record_expires_at IS NOT NULL
+  AND record_expires_at &lt; NOW();</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Impact:</strong> Prevents unbounded growth of historical buff records; does not affect active buff application (checked at read time, not deletion time).</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-gdpr-email-hashing-async">5. GDPR Email Hashing (Async)</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Trigger:</strong> User initiates via POST /api/v1/gdpr/request</p>
+<p class="doc-p"><strong>Schedule:</strong> Background processing, internal SLA 24 hours</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.4 (GDPR & Privacy)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.1 (<code>claim_identities</code> table), index <code>idx_claim_identities_deletion</code></p>
+<p class="doc-p"><strong>Related Constants:</strong> <code>GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24</code>, <code>GDPR_EMAIL_DELETION_WINDOW_DAYS = 7</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">On GDPR erasure request, an async job is enqueued. The job:</p>
+<p class="doc-p">1. Finds the <code>claim_identities</code> row where <code>deletion_requested_at IS NOT NULL</code></p>
+<p class="doc-p">2. Verifies <code>email_encrypted IS NOT NULL</code> (not already hashed)</p>
+<p class="doc-p">3. Sets <code>email_encrypted = NULL</code>, leaving only the SHA-256 hash (<code>email_hash</code>)</p>
+<p class="doc-p">4. Updates <code>updated_at</code> timestamp</p>
+<p class="doc-p">5. Optionally removes the associated pet(s) from Redis leaderboard via <code>ZREM leaderboard:global <pet_id></code> for each claimed pet</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>SLA:</strong> Complete within 24 hours (internal commitment). User notified within 7 days (external GDPR window).</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Impact:</strong> Ensures compliance with GDPR Article 17 (right to erasure); SHA-256 hash retained for anti-re-registration verification.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="6-pet-reservation-expiry-part-of-cleanup">6. Pet Reservation Expiry (Part of Cleanup)</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Schedule:</strong> Every 6 hours (combined with claim code cleanup)</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.2 (Pet Data Model)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.2 (<code>pets</code> table)</p>
+<p class="doc-p"><strong>Related Constant:</strong> <code>PET_RESERVATION_TTL_HOURS = 24</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">When a guest claims a pet, <code>reserved_until</code> is set to NULL. This prevents the pet from being cleaned up by the unclaimed pet cleanup job. If a pet remains unclaimed after 24 hours, the cleanup job (see §2 above) removes it entirely.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">No separate job needed; handled as part of Unclaimed Pet Cleanup.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="7-suspicious-pet-detection">7. Suspicious Pet Detection</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Schedule:</strong> Every 5 minutes</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.11 (Admin Moderation System)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.4 (<code>battles</code> table), §2.11 (<code>admin_audit_log</code>)</p>
+<p class="doc-p"><strong>Related Constants:</strong> <code>BOT_DETECTION_BATTLES_THRESHOLD = 50</code>, <code>BOT_DETECTION_WINDOW_MINUTES = 60</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">Scans for pets that have completed more than 50 battles in the last 60 minutes. Flags them as SUSPICIOUS for manual review:</p>
+<p class="doc-p">1. Query: Find pets where <code>SELECT COUNT(*) FROM battles WHERE pet_id = X AND created_at > NOW() - INTERVAL '60 minutes' > 50</code></p>
+<p class="doc-p">2. For each qualifying pet, update pets.status = 'SUSPICIOUS'</p>
+<p class="doc-p">3. Create a moderation alert in the admin review queue</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Moderators then manually review and ban if warranted.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Impact:</strong> Early detection of bot/spam behavior; flag for manual review, not automatic ban.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="8-marketplace-listing-expiry">8. Marketplace Listing Expiry</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Schedule:</strong> Every 30 minutes</p>
+<p class="doc-p"><strong>EDD Reference:</strong> §4.12 (Marketplace)</p>
+<p class="doc-p"><strong>SCHEMA Reference:</strong> §2.8 (<code>marketplace_listings</code> table), index <code>idx_marketplace_listings_expires_at</code></p>
+<p class="doc-p"><strong>Related Constant:</strong> None (configurable per listing via <code>expires_at</code>)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Description:</strong></p>
+<p class="doc-p">Transitions marketplace listings to 'cancelled' status if their <code>expires_at</code> timestamp has passed:</p>
+<p class="doc-p">1. Query: <code>SELECT * FROM marketplace_listings WHERE status = 'active' AND expires_at IS NOT NULL AND expires_at < NOW()</code></p>
+<p class="doc-p">2. Update <code>status = 'cancelled'</code>, set <code>completed_at = NOW()</code></p>
+<p class="doc-p">3. Return the pet to the seller's inventory (no explicit API call needed; listing presence determines availability)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Impact:</strong> Enforces listing duration limits; auto-expires unsold listings.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="job-execution-strategy">Job Execution Strategy</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Orchestration:</strong> Node.js task queue (Bull/Bee-Queue) or simple cron jobs with PostgreSQL LISTEN/NOTIFY for robustness.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Monitoring:</strong></p>
+<ul class="doc-list">
+<li>Track job completion time and error rate</li>
+<li>Alert if any job fails more than 3 times consecutively</li>
+<li>Log job start/end with duration</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Concurrency:</strong></p>
+<ul class="doc-list">
+<li>All cleanup jobs are idempotent (DELETE WHERE ... is safe to retry)</li>
+<li>GDPR erasure job is idempotent (SET email_encrypted = NULL is safe if already NULL)</li>
+<li>Leaderboard sync is idempotent (UPSERT logic)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="testing">Testing</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">All background jobs should have:</p>
+<p class="doc-p">1. Unit test verifying the query logic</p>
+<p class="doc-p">2. Integration test with test PostgreSQL + test Redis (where applicable)</p>
+<p class="doc-p">3. Concurrency test to ensure idempotency under parallel execution</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Example (Vitest):</p>
+<pre class="doc-code"><code class="lang-typescript">test('Unclaimed pet cleanup deletes only expired, unclaimed pets', async () =&gt; {
+  // Create claimed pet (should NOT delete)
+  // Create unclaimed pet with reserved_until &lt; NOW() (should delete)
+  // Create unclaimed pet with reserved_until &gt; NOW() (should NOT delete)
+  // Run cleanup job
+  // Assert: only expired, unclaimed pet is deleted
+})</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Document Version:</strong> 1.0</p>
+<p class="doc-p"><strong>Last Updated:</strong> 2026-05-04</p>
+<p class="doc-p"><strong>Maintainer:</strong> Platform Engineering Team</p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

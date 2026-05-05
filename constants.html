@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — CONSTANTS — Global Quantitative Truth Source</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">CONSTANTS — Global Quantitative Truth Source</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>CONSTANTS — Global Quantitative Truth Source</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="constants--global-quantitative-truth-source">CONSTANTS — Global Quantitative Truth Source</h1>
+<div class="doc-gap"></div>
+<p class="doc-p"><!-- 跨文件數值一致性的唯一真相來源（由 EDD Pass-0 生成） --></p>
+<p class="doc-p"><!-- 所有下游文件（EDD/BDD/test-plan/runbook）必須讀取此文件並引用，不得自行填寫未驗證數字 --></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="document-control">Document Control</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>欄位</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td>**DOC-ID**</td><td>CONSTANTS-PIXEL-PET-ARENA-20260503</td></tr>
+<tr><td>**產品名稱**</td><td>Pixel Pet Arena</td></tr>
+<tr><td>**文件版本**</td><td>v1.0</td></tr>
+<tr><td>**狀態**</td><td>DRAFT</td></tr>
+<tr><td>**日期**</td><td>2026-05-03</td></tr>
+<tr><td>**上游 PRD**</td><td>[PRD.md](PRD.md)</td></tr>
+<tr><td>**上游 BRD**</td><td>[BRD.md](BRD.md)</td></tr>
+<tr><td>**同步輸出**</td><td>[constants.json](constants.json)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="change-log">Change Log</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>版本</th><th>日期</th><th>作者</th><th>變更摘要</th></tr></thead>
+<tbody>
+<tr><td>v1.0</td><td>2026-05-03</td><td>gendoc</td><td>初稿（從 PRD-PIXEL-PET-ARENA-20260503 及 BRD-PIXEL-PET-ARENA-20260503 提取所有量化常數）</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="">使用指引</h2>
+<div class="doc-gap"></div>
+<blockquote class="doc-quote">⚠️ <strong>唯一真相來源</strong>：本文件中所有數值均來源於 PRD 及 BRD，</blockquote>
+<blockquote class="doc-quote">下游文件（EDD/BDD/test-plan/runbook/ARCH）必須引用此文件中的數值，</blockquote>
+<blockquote class="doc-quote"><strong>不得在下游文件中自行定義任何量化數值</strong>。</blockquote>
+<blockquote class="doc-quote">若發現 PRD 與本文件有衝突，以 PRD 為準並更新本文件。</blockquote>
+<blockquote class="doc-quote"></blockquote>
+<blockquote class="doc-quote">- <strong>§1</strong>：產品核心數值（pet 生成、訓練、戰鬥、排行榜、認證等核心常數）</blockquote>
+<blockquote class="doc-quote">- <strong>§2</strong>：倍率與乘算器（稀有度倍率、交易價格公式、食物 buff 示例值）</blockquote>
+<blockquote class="doc-quote">- <strong>§3</strong>：閾值與觸發條件（bot 偵測、快取刷新、A11y、資料庫 failover 等觸發點）</blockquote>
+<blockquote class="doc-quote">- <strong>§4</strong>：SLO/SLI 目標（可用性、延遲、錯誤率、Core Web Vitals）</blockquote>
+<blockquote class="doc-quote">- <strong>§5</strong>：RTP / 機率設計（稀有度機率分布，四檔必須加總 100%）</blockquote>
+<blockquote class="doc-quote">- <strong>§6</strong>：Rate Limit 設定（戰鬥、認證、管理員各端點）</blockquote>
+<blockquote class="doc-quote">- <strong>§7</strong>：業務規則數值（GDPR 時限、交易費率、成長目標、A/B 測試參數）</blockquote>
+<blockquote class="doc-quote">- <strong>§8</strong>：系統容量規劃（RPS、DAU、連線池、基礎設施成本）</blockquote>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1-product-core-constants">§1 Product Core Constants</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>PET_GENERATION_COMBINATIONS_MIN</td><td>1,000,000,000</td><td>combinations</td><td>PRD §5 US-PET-002 AC-002-1</td><td>Must exceed 1 billion distinct combinations across (body × head × color × accessory × rarity_trait × pattern)</td></tr>
+<tr><td>PET_GENERATION_DIMENSIONS</td><td>6</td><td>dimensions</td><td>PRD §5 US-PET-001 AC-001-3</td><td>body, head, color palette, accessory, rarity trait, pattern</td></tr>
+<tr><td>PET_STAT_DEFAULT</td><td>10</td><td>points</td><td>PRD §11.2 data dictionary</td><td>DEFAULT 10 for stat_speed, stat_strength, stat_stamina</td></tr>
+<tr><td>PET_STAT_MIN</td><td>1</td><td>points</td><td>PRD §11.2 data dictionary</td><td>CHECK (1-100) constraint</td></tr>
+<tr><td>PET_STAT_MAX</td><td>100</td><td>points</td><td>PRD §5 US-TRAIN-001 AC-005-6</td><td>HTTP 400 with stat_at_maximum error when reached</td></tr>
+<tr><td>PET_LEVEL_DEFAULT</td><td>1</td><td>level</td><td>PRD §11.2 data dictionary</td><td>DEFAULT 1</td></tr>
+<tr><td>PET_LEVEL_MAX</td><td>100</td><td>level</td><td>PRD §11.2 data dictionary</td><td>CHECK (1-100); derived from FLOOR(total_training_actions / 10)</td></tr>
+<tr><td>PET_LEVEL_FORMULA_DIVISOR</td><td>10</td><td>training actions</td><td>PRD §11.2 data dictionary</td><td>level = FLOOR(total_training_actions / 10) capped at 100</td></tr>
+<tr><td>TRAINING_ACTIONS_PER_DAY</td><td>3</td><td>actions/day</td><td>PRD §5 US-TRAIN-001 AC-005-1</td><td>run, strength, stamina training; reset UTC 00:00</td></tr>
+<tr><td>TRAINING_STAT_POINTS_MIN</td><td>1</td><td>points/action</td><td>PRD §5 US-TRAIN-001 AC-005-1</td><td>Lower bound of per-action stat increment</td></tr>
+<tr><td>TRAINING_STAT_POINTS_MAX</td><td>3</td><td>points/action</td><td>PRD §5 US-TRAIN-001 AC-005-1</td><td>Based on current pet level</td></tr>
+<tr><td>TRAINING_STAT_DISPLAY_DURATION</td><td>2</td><td>seconds</td><td>PRD §5 US-TRAIN-001 AC-005-3</td><td>"+X Speed" indicator display time</td></tr>
+<tr><td>TRAINING_NEGLECT_THRESHOLD</td><td>3</td><td>consecutive days</td><td>PRD §5 US-TRAIN-001 AC-005-5</td><td>Triggers "hungry/neglected" visual state</td></tr>
+<tr><td>ARENA_RATE_LIMIT_BATTLES_PER_HOUR</td><td>10</td><td>battles/hour</td><td>PRD §5 US-ARENA-001 AC-007-6; PRD §15 RTM</td><td>Default; admin-tunable</td></tr>
+<tr><td>ARENA_RATE_LIMIT_ADMIN_MIN</td><td>1</td><td>battles/hour</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Admin-tunable lower bound</td></tr>
+<tr><td>ARENA_RATE_LIMIT_ADMIN_MAX</td><td>50</td><td>battles/hour</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Admin-tunable upper bound</td></tr>
+<tr><td>ARENA_MATCH_DURATION_MIN</td><td>5</td><td>seconds</td><td>PRD §5 US-ARENA-001 AC-007-3; PRD §6.3</td><td>Battle animation minimum</td></tr>
+<tr><td>ARENA_MATCH_DURATION_MAX</td><td>15</td><td>seconds</td><td>PRD §5 US-ARENA-001 AC-007-3; PRD §6.3</td><td>Battle animation maximum</td></tr>
+<tr><td>ARENA_MATCHMAKING_TIMEOUT</td><td>30</td><td>seconds</td><td>PRD §5 US-ARENA-001 AC-007-1</td><td>Offer AI opponent if no match found</td></tr>
+<tr><td>ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER</td><td>15</td><td>percent (±)</td><td>PRD §5 US-ARENA-001 AC-007-2; US-ARENA-002 AC-008-2; PRD §6.3</td><td>Seeded random modifier ±15% applied to Speed stat (race) or Strength stat (sumo); single canonical value covering both battle types</td></tr>
+<tr><td>ARENA_BATTLE_RECORDS_DISPLAY</td><td>20</td><td>battles</td><td>PRD §5 US-RECORD-001 AC-010-1</td><td>Last 20 battles shown on public page</td></tr>
+<tr><td>LEADERBOARD_TOP_DISPLAY</td><td>100</td><td>pets</td><td>PRD §5 US-BOARD-001 AC-009-1</td><td>Top 100 displayed by default</td></tr>
+<tr><td>LEADERBOARD_ADMIN_VIEW</td><td>500</td><td>pets</td><td>PRD §5 US-ADMIN-002 AC-014-1; PRD §19.3</td><td>Admin sees top 500</td></tr>
+<tr><td>LEADERBOARD_SNAPSHOT_TOP_N</td><td>500</td><td>pets</td><td>PRD §11.1 data dictionary</td><td>LeaderboardSnapshot stores top 500 pets per snapshot</td></tr>
+<tr><td>CLAIM_CODE_DIGITS</td><td>6</td><td>digits</td><td>PRD §5 US-AUTH-001 AC-003-2; PRD §13 glossary</td><td>Numeric 6-digit one-time password</td></tr>
+<tr><td>CLAIM_CODE_EXPIRY</td><td>15</td><td>minutes</td><td>PRD §5 US-AUTH-001 AC-003-4; PRD §6.5 state machine</td><td>Expires T+15min from generation</td></tr>
+<tr><td>CLAIM_TOKEN_CLEANUP_TTL</td><td>72</td><td>hours</td><td>PRD §11.1 data dictionary; PRD §6.5 state machine</td><td>Deleted 72 hours after creation or first use</td></tr>
+<tr><td>PET_ACCESS_TOKEN_MIN_BYTES</td><td>32</td><td>bytes</td><td>PRD §7.2 NFR-SEC-05; PRD §13 glossary</td><td>URL-safe base64 random bytes</td></tr>
+<tr><td>CLAIM_TOKEN_MIN_ENTROPY</td><td>32</td><td>bytes</td><td>PRD §7.2 NFR-SEC-01</td><td>Cryptographically random ≥ 32 bytes entropy</td></tr>
+<tr><td>FOOD_BUFF_RECORD_RETENTION</td><td>30</td><td>days</td><td>PRD §11.1 data dictionary; PRD §6.6 state machine</td><td>Buff record retained 30 days after expiry/consumption</td></tr>
+<tr><td>FOOD_BUFF_MULTIPLIER_ADMIN_MIN</td><td>0.5</td><td>x (multiplier)</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable lower bound for food buff multipliers</td></tr>
+<tr><td>FOOD_BUFF_MULTIPLIER_ADMIN_MAX</td><td>5.0</td><td>x (multiplier)</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable upper bound for food buff multipliers</td></tr>
+<tr><td>ARENA_ENTRY_COOLDOWN_ADMIN_MIN</td><td>0</td><td>minutes</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable lower bound</td></tr>
+<tr><td>ARENA_ENTRY_COOLDOWN_ADMIN_MAX</td><td>60</td><td>minutes</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable upper bound</td></tr>
+<tr><td>ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT</td><td>0</td><td>credits</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Default arena entry cost</td></tr>
+<tr><td>ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX</td><td>10</td><td>credits</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable upper bound</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2-multipliers--modifiers">§2 Multipliers & Modifiers</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>RARITY_MULTIPLIER_COMMON</td><td>1</td><td>multiplier</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>Used in minimum price formula</td></tr>
+<tr><td>RARITY_MULTIPLIER_RARE</td><td>2</td><td>multiplier</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>Used in minimum price formula</td></tr>
+<tr><td>RARITY_MULTIPLIER_EPIC</td><td>4</td><td>multiplier</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>Used in minimum price formula</td></tr>
+<tr><td>RARITY_MULTIPLIER_LEGENDARY</td><td>8</td><td>multiplier</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>Used in minimum price formula</td></tr>
+<tr><td>TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF</td><td>100</td><td>credits/level</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>min_price = (pet_level × 100) + (rarity_multiplier × 500)</td></tr>
+<tr><td>TRADE_MIN_PRICE_FORMULA_RARITY_COEFF</td><td>500</td><td>credits</td><td>PRD §5 US-TRADE-001 AC-012-5</td><td>min_price = (pet_level × 100) + (rarity_multiplier × 500)</td></tr>
+<tr><td>ARENA_SCORE_FORMULA</td><td>win_rate × battles_played × level_multiplier</td><td>formula</td><td>PRD §5 US-BOARD-001 AC-009-1</td><td>Composite leaderboard score</td></tr>
+<tr><td>FOOD_BUFF_EXAMPLE_TEMP_AMOUNT</td><td>5</td><td>stat points</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example: "Speed Berry +5 Speed for 24h"</td></tr>
+<tr><td>FOOD_BUFF_EXAMPLE_TEMP_DURATION</td><td>24</td><td>hours</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example temporary food buff duration</td></tr>
+<tr><td>FOOD_BUFF_EXAMPLE_PERM_AMOUNT</td><td>3</td><td>stat points</td><td>PRD §5 US-FOOD-001 AC-006-1</td><td>Example: "Power Mushroom +3 Strength permanently"</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-thresholds--triggers">§3 Thresholds & Triggers</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Constant Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>BOT_DETECTION_BATTLES_THRESHOLD</td><td>50</td><td>battles</td><td>PRD §5 US-ADMIN-005 AC-017-1; PRD §7.9 analytics; PRD §19.3</td><td>Auto-flag as SUSPICIOUS if >50 battles within any 60-min window</td></tr>
+<tr><td>BOT_DETECTION_WINDOW</td><td>60</td><td>minutes</td><td>PRD §5 US-ADMIN-005 AC-017-1; PRD §7.9 analytics</td><td>Rolling window for bot detection</td></tr>
+<tr><td>LEADERBOARD_ADMIN_SUSPICIOUS_FLAG</td><td>50</td><td>battles/hour</td><td>PRD §5 US-ADMIN-002 AC-014-1</td><td>Admin leaderboard view flags >50 battles/hour</td></tr>
+<tr><td>LEADERBOARD_BAN_REFLECTION_TIME</td><td>5</td><td>minutes</td><td>PRD §5 US-BOARD-001 AC-009-6; PRD §5 US-ADMIN-002 AC-014-3</td><td>Banned pet removed from leaderboard within 5 minutes</td></tr>
+<tr><td>LEADERBOARD_UPDATE_LAG_MAX</td><td>30</td><td>seconds</td><td>PRD §5 US-BOARD-001 AC-009-2; PRD §7.1 NFR-PERF-09</td><td>Maximum eventual consistency lag</td></tr>
+<tr><td>CONFIG_CACHE_REFRESH_TIME</td><td>5</td><td>minutes</td><td>PRD §5 US-ADMIN-003 AC-015-2; US-ADMIN-006 AC-018-3</td><td>Config changes take effect within 5 minutes</td></tr>
+<tr><td>PET_SEED_COLLISION_MAX_RETRIES</td><td>3</td><td>retries</td><td>PRD §11.3 data quality</td><td>Application-level retry on seed collision</td></tr>
+<tr><td>AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR</td><td>5</td><td>attempts/hour</td><td>PRD §7.2 NFR-SEC-04</td><td>Per email, authentication endpoint</td></tr>
+<tr><td>AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS</td><td>10</td><td>attempts/session</td><td>PRD §7.2 NFR-SEC-04</td><td>Per session, code-entry endpoint</td></tr>
+<tr><td>ADMIN_SESSION_INACTIVITY_EXPIRY</td><td>4</td><td>hours</td><td>PRD §7.2 NFR-SEC-11; PRD §19.6 NFR-ADMIN-02</td><td>Admin session token expires after 4 hours inactivity</td></tr>
+<tr><td>ADMIN_SESSION_ABSOLUTE_EXPIRY</td><td>8</td><td>hours</td><td>PRD §19.6 NFR-ADMIN-02</td><td>Absolute session expiry regardless of activity</td></tr>
+<tr><td>ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE</td><td>100</td><td>requests/min</td><td>PRD §19.6 NFR-ADMIN-04</td><td>Per admin account</td></tr>
+<tr><td>ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME</td><td>3</td><td>seconds</td><td>PRD §19.5 admin audit requirements</td><td>Max search response time for any 12-month window</td></tr>
+<tr><td>ADMIN_SEARCH_RESPONSE_TIME</td><td>2</td><td>seconds</td><td>PRD §5 US-ADMIN-001 AC-013-4</td><td>Search by pet ID or email, up to 1 million records</td></tr>
+<tr><td>ADMIN_MODERATION_REASON_MAX_CHARS</td><td>500</td><td>characters</td><td>PRD §5 US-ADMIN-005 AC-017-4</td><td>Required reason text field for moderation actions</td></tr>
+<tr><td>ADMIN_DAILY_MODERATION_ACTIONS</td><td>100</td><td>actions/day</td><td>PRD §19.6 NFR-ADMIN-06</td><td>Single moderator capacity without degradation</td></tr>
+<tr><td>ADMIN_PAGE_LOAD_TIME</td><td>3</td><td>seconds</td><td>PRD §19.6 NFR-ADMIN-06</td><td>With up to 1 million pet records</td></tr>
+<tr><td>ARENA_RATE_LIMIT_COUNTER_WINDOW</td><td>1</td><td>hour</td><td>PRD §7.2 NFR-SEC-10</td><td>Redis-backed counter TTL</td></tr>
+<tr><td>OBSERVABILITY_ERROR_RATE_ALERT_WINDOW</td><td>5</td><td>minutes</td><td>PRD §7.8 NFR-OBS-03</td><td>Alert trigger window for >1% error rate</td></tr>
+<tr><td>OBSERVABILITY_LATENCY_ALERT_THRESHOLD</td><td>1000</td><td>ms</td><td>PRD §7.8 NFR-OBS-04</td><td>Alert if any endpoint exceeds P99 1000ms</td></tr>
+<tr><td>OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW</td><td>30</td><td>minutes</td><td>PRD §7.8 NFR-OBS-05</td><td>Alert window for >2% SendGrid failure rate</td></tr>
+<tr><td>OBSERVABILITY_LEADERBOARD_LAG_ALERT</td><td>60</td><td>seconds</td><td>PRD §7.8 metrics table</td><td>Alert threshold for leaderboard_update_lag_seconds</td></tr>
+<tr><td>OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD</td><td>5</td><td>claims/hour</td><td>PRD §7.8 metrics table</td><td>Alert if <5/hour for 2h (engagement drop)</td></tr>
+<tr><td>OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD</td><td>10</td><td>battles/hour</td><td>PRD §7.8 metrics table</td><td>Alert if <10/hour for 2h</td></tr>
+<tr><td>INFRA_REDIS_ALERT_THRESHOLD</td><td>80</td><td>percent</td><td>PRD §7.8 metrics table</td><td>redis_memory_usage_percent alert</td></tr>
+<tr><td>INFRA_DB_POOL_ALERT_THRESHOLD</td><td>80</td><td>percent</td><td>PRD §7.8 metrics table</td><td>db_connection_pool_utilization alert</td></tr>
+<tr><td>A11Y_FOCUS_CONTRAST_RATIO</td><td>3</td><td>:1</td><td>PRD §7.7 NFR-A11Y-01; PRD §18 A11y-01</td><td>Minimum focus indicator contrast ratio</td></tr>
+<tr><td>A11Y_TEXT_CONTRAST_NORMAL</td><td>4.5</td><td>:1</td><td>PRD §18 A11y-06</td><td>Normal text minimum contrast</td></tr>
+<tr><td>A11Y_TEXT_CONTRAST_LARGE</td><td>3</td><td>:1</td><td>PRD §18 A11y-06</td><td>Large text minimum contrast</td></tr>
+<tr><td>A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY</td><td>2</td><td>minutes</td><td>PRD §18 A11y-09</td><td>Warn user 2 min before claim code expiry</td></tr>
+<tr><td>MARKETPLACE_TRADE_ANTIFLIP_PROTECTION</td><td>7</td><td>days</td><td>PRD §5 US-TRADE-001 AC-012-4</td><td>Cooldown after trade before relisting same pet</td></tr>
+<tr><td>DB_AUTOFAILOVER_TIME</td><td>60</td><td>seconds</td><td>PRD §7.3 NFR-AVAIL-03</td><td>PostgreSQL automated failover target</td></tr>
+<tr><td>DB_MAINTENANCE_WINDOW_MAX</td><td>2</td><td>hours/month</td><td>PRD §7.3 NFR-AVAIL-02</td><td>Maximum planned maintenance per month</td></tr>
+<tr><td>DB_MAINTENANCE_NOTICE</td><td>48</td><td>hours</td><td>PRD §7.3 NFR-AVAIL-02</td><td>Advance notice required for maintenance window</td></tr>
+<tr><td>SENDGRID_FAILOVER_CONSECUTIVE_FAILURES</td><td>3</td><td>failures</td><td>PRD §7.3 NFR-AVAIL-04</td><td>Trigger Nodemailer SMTP fallback</td></tr>
+<tr><td>HEALTH_CHECK_RESPONSE_TIME</td><td>500</td><td>ms</td><td>PRD §7.3 NFR-AVAIL-06</td><td>/health endpoint response time</td></tr>
+<tr><td>HORIZONTAL_SCALE_CPU_THRESHOLD</td><td>70</td><td>percent</td><td>PRD §7.4 NFR-SCALE-02</td><td>HPA scale-out trigger</td></tr>
+<tr><td>ARENA_MATCHMAKING_CONCURRENT_ENTRIES</td><td>100</td><td>entries</td><td>PRD §7.4 NFR-SCALE-04</td><td>Redis queue concurrent capacity</td></tr>
+<tr><td>PET_GENERATION_CONCURRENT_BATCH</td><td>1000</td><td>pets</td><td>PRD §7.4 NFR-SCALE-05</td><td>Concurrent generation within 10 seconds</td></tr>
+<tr><td>PET_GENERATION_CONCURRENT_BATCH_TIME</td><td>10</td><td>seconds</td><td>PRD §7.4 NFR-SCALE-05</td><td>Completion time for 1000 concurrent pet generations</td></tr>
+<tr><td>CODE_MODULE_MAX_LINES</td><td>800</td><td>lines</td><td>PRD §7.5 NFR-MAINT-03</td><td>No module exceeds 800 lines</td></tr>
+<tr><td>CODE_FUNCTION_MAX_LINES</td><td>50</td><td>lines</td><td>PRD §7.5 NFR-MAINT-03</td><td>Functions do not exceed 50 lines</td></tr>
+<tr><td>API_BACKWARD_COMPAT_VERSIONS</td><td>1</td><td>major version</td><td>PRD §7.5 NFR-MAINT-06; PRD §8.5</td><td>Backward compatibility maintained for at least 1 major version</td></tr>
+<tr><td>API_DEPRECATION_NOTICE_DAYS</td><td>90</td><td>days</td><td>PRD §8.5</td><td>Notice required before breaking changes</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-slosli-targets">§4 SLO/SLI Targets</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Metric</th><th>Target</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Availability</td><td>99.9%</td><td>monthly</td><td>PRD §7.3 NFR-AVAIL-01</td><td>Maximum 43.8 minutes downtime per month</td></tr>
+<tr><td>P99 API Latency (read endpoints)</td><td>< 200</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-01</td><td>All read endpoints</td></tr>
+<tr><td>P99 API Latency (write endpoints)</td><td>< 500</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-02</td><td>Training, arena entry write endpoints</td></tr>
+<tr><td>First Contentful Paint (FCP)</td><td>< 1.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-03</td><td>Lighthouse / Core Web Vitals</td></tr>
+<tr><td>Largest Contentful Paint (LCP)</td><td>< 2.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-04</td><td>Core Web Vitals</td></tr>
+<tr><td>Cumulative Layout Shift (CLS)</td><td>< 0.1</td><td>score</td><td>PRD §7.1 NFR-PERF-05</td><td>Core Web Vitals</td></tr>
+<tr><td>Interaction to Next Paint (INP)</td><td>< 200</td><td>ms</td><td>PRD §7.1 NFR-PERF-06</td><td>Core Web Vitals</td></tr>
+<tr><td>Pet Animation Frame Rate</td><td>≥ 30</td><td>FPS sustained</td><td>PRD §7.1 NFR-PERF-07</td><td>Mid-range devices</td></tr>
+<tr><td>Arena Battle Result E2E</td><td>< 2</td><td>seconds</td><td>PRD §7.1 NFR-PERF-08</td><td>Calculation + storage</td></tr>
+<tr><td>Leaderboard Update Lag</td><td>≤ 30</td><td>seconds</td><td>PRD §7.1 NFR-PERF-09</td><td>From battle completion</td></tr>
+<tr><td>Email Delivery (P90)</td><td>≤ 60</td><td>seconds</td><td>PRD §7.1 NFR-PERF-10</td><td>Claim password email</td></tr>
+<tr><td>Error Rate</td><td>< 1%</td><td>of requests / 5 min</td><td>PRD §7.8 NFR-OBS-03</td><td>Alert trigger threshold</td></tr>
+<tr><td>Observability P99 Alert</td><td>> 1000</td><td>ms / 5 min</td><td>PRD §7.8 NFR-OBS-04</td><td>Alert threshold</td></tr>
+<tr><td>Email Delivery Failure Rate</td><td>< 2%</td><td>/ 30 min</td><td>PRD §7.8 NFR-OBS-05; PRD §9.2 guardrails</td><td>SendGrid failure rate alert</td></tr>
+<tr><td>Spam Complaint Rate</td><td>< 0.1%</td><td>SendGrid</td><td>PRD §9.2 guardrail metrics</td><td>Prevents SendGrid IP throttling</td></tr>
+<tr><td>Test Unit Coverage</td><td>≥ 80%</td><td>percent</td><td>PRD §7.5 NFR-MAINT-01</td><td>All business logic modules</td></tr>
+<tr><td>Pet Interaction Response</td><td>< 200</td><td>ms</td><td>PRD §5 US-PET-001 AC-001-2</td><td>Click/tap animation response</td></tr>
+<tr><td>Pet Render on Load</td><td>< 2</td><td>seconds</td><td>PRD §5 US-PET-001 AC-001-1</td><td>Canvas render on page load</td></tr>
+<tr><td>Total JS Bundle (gzipped)</td><td>< 300</td><td>KB</td><td>PRD §7.1 bundle size limits</td><td>App page type</td></tr>
+<tr><td>Total CSS Bundle (gzipped)</td><td>< 50</td><td>KB</td><td>PRD §7.1 bundle size limits</td><td>App page type</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-rtp--probability-design">§5 RTP / Probability Design</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Rarity</th><th>Probability</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Common</td><td>60%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
+<tr><td>Rare</td><td>25%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
+<tr><td>Epic</td><td>12%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
+<tr><td>Legendary</td><td>3%</td><td>PRD §5 US-PET-002 AC-002-5; PRD §13 glossary</td><td>Assigned probabilistically at generation time</td></tr>
+<tr><td>Total</td><td>100%</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Four values must always sum to 100%; admin-tunable</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="6-rate-limits">§6 Rate Limits</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Endpoint/Feature</th><th>Limit</th><th>Window</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Arena battles per pet</td><td>10 (default)</td><td>1 hour</td><td>PRD §5 US-ARENA-001 AC-007-6; PRD §7.2 NFR-SEC-10</td><td>Redis-backed counter with TTL; HTTP 429 + Retry-After on breach</td></tr>
+<tr><td>Arena battles per pet (admin-tunable range)</td><td>1–50</td><td>1 hour</td><td>PRD §5 US-ADMIN-003 AC-015-1</td><td>Integer; default 10</td></tr>
+<tr><td>Email claim attempts</td><td>5</td><td>1 hour per email</td><td>PRD §7.2 NFR-SEC-04</td><td>Per email address</td></tr>
+<tr><td>Claim code-entry attempts</td><td>10</td><td>per session</td><td>PRD §7.2 NFR-SEC-04</td><td>Per session</td></tr>
+<tr><td>Claim email retry cooldown</td><td>60</td><td>seconds</td><td>PRD §6.2 error flow; PRD §6.5 state machine</td><td>Minimum wait before retry after failure</td></tr>
+<tr><td>Email re-send on delivery failure</td><td>3</td><td>retries</td><td>PRD §6.2 error flow</td><td>Retry queue over 15 minutes</td></tr>
+<tr><td>Email re-send retry duration</td><td>15</td><td>minutes</td><td>PRD §6.2 error flow</td><td>Total retry window for failed delivery</td></tr>
+<tr><td>Admin portal requests per admin</td><td>100</td><td>per minute</td><td>PRD §19.6 NFR-ADMIN-04</td><td>Separately rate-limited from player API</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="7-business-rules">§7 Business Rules</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Rule Name</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>GDPR_EMAIL_DELETION_WINDOW</td><td>7</td><td>days</td><td>PRD §7.2 NFR-SEC-07; PRD §17.3; PRD §17.2 PII inventory</td><td>Email replaced with SHA-256 hash within 7 days of deletion request</td></tr>
+<tr><td>GDPR_EMAIL_HASHING_INTERNAL_SLA</td><td>24</td><td>hours</td><td>PRD §19.4 US-ADMIN-004 AC-016-2</td><td>Actual system completes within 24 hours; reported compliant within 7 days</td></tr>
+<tr><td>GDPR_DATA_ACCESS_RESPONSE</td><td>30</td><td>days</td><td>PRD §17.3 GDPR rights matrix</td><td>Right of Access (Art. 15)</td></tr>
+<tr><td>GDPR_DATA_PORTABILITY_RESPONSE</td><td>30</td><td>days</td><td>PRD §17.3 GDPR rights matrix</td><td>Right to Portability (Art. 20)</td></tr>
+<tr><td>GDPR_RESTRICT_PROCESSING_RESPONSE</td><td>24</td><td>hours</td><td>PRD §17.3 GDPR rights matrix</td><td>Right to Restrict Processing (Art. 18)</td></tr>
+<tr><td>GDPR_OBJECT_LEADERBOARD_RESPONSE</td><td>5</td><td>business days</td><td>PRD §17.3 GDPR rights matrix</td><td>Right to Object (Art. 21)</td></tr>
+<tr><td>GDPR_EMAIL_RECTIFICATION_RESPONSE</td><td>24</td><td>hours</td><td>PRD §17.3 GDPR rights matrix</td><td>Right to Rectification (Art. 16)</td></tr>
+<tr><td>LEADERBOARD_SNAPSHOT_RETENTION</td><td>12</td><td>months</td><td>PRD §11.1 data dictionary</td><td>Rolling retention; older snapshots purged</td></tr>
+<tr><td>ANALYTICS_EVENT_HOT_RETENTION</td><td>90</td><td>days</td><td>PRD §11.1 data dictionary</td><td>Hot storage for analytics events</td></tr>
+<tr><td>ANALYTICS_EVENT_COLD_ARCHIVE</td><td>2</td><td>years</td><td>PRD §11.1 data dictionary</td><td>Cold archive for analytics events</td></tr>
+<tr><td>ADMIN_AUDIT_LOG_RETENTION</td><td>2</td><td>years</td><td>PRD §11.1 data dictionary; PRD §19.5</td><td>Compliance requirement; GDPR Art. 30 accountability</td></tr>
+<tr><td>IP_ADDRESS_LOG_RETENTION</td><td>90</td><td>days</td><td>PRD §11.4 PII inventory; PRD §17.2</td><td>Hashed IP only; raw IP never stored</td></tr>
+<tr><td>TRADE_TRANSACTION_FEE</td><td>5</td><td>percent</td><td>PRD §5 US-TRADE-001 AC-012-5; BRD §11.1</td><td>Platform fee deducted from agreed trade price</td></tr>
+<tr><td>TRADE_FEE_RANGE_BRD</td><td>5–10</td><td>percent</td><td>BRD §11.1 商業模式; BRD §2.3</td><td>BRD revenue assumption range; PRD locks at 5%</td></tr>
+<tr><td>COPPA_MINIMUM_AGE</td><td>13</td><td>years</td><td>PRD §5 US-AUTH-001 AC-003-8; PRD §8.1 constraints</td><td>Age confirmation checkbox required on claim form</td></tr>
+<tr><td>EMAIL_CLAIM_FLOW_STEPS_MAX</td><td>3</td><td>steps</td><td>BRD §7.2 Input metrics</td><td>email → email sent → enter code</td></tr>
+<tr><td>MAAPO_TARGET_MONTH_1</td><td>50</td><td>owners</td><td>PRD §9.1</td><td>Monthly Active Arena Pet Owners target</td></tr>
+<tr><td>MAAPO_TARGET_MONTH_3</td><td>200</td><td>owners</td><td>PRD §9.1</td><td>Monthly Active Arena Pet Owners target</td></tr>
+<tr><td>MAAPO_TARGET_MONTH_6</td><td>500</td><td>owners</td><td>PRD §9.1</td><td>Monthly Active Arena Pet Owners target</td></tr>
+<tr><td>MAAPO_TARGET_MONTH_12</td><td>1000</td><td>owners</td><td>PRD §9.1</td><td>Monthly Active Arena Pet Owners target</td></tr>
+<tr><td>DAP_TARGET_WEEK_4</td><td>100</td><td>pets/day</td><td>PRD §9.1</td><td>Daily Active Pets leading indicator</td></tr>
+<tr><td>DAP_TARGET_MONTH_3</td><td>500</td><td>pets/day</td><td>PRD §9.1</td><td>Daily Active Pets leading indicator</td></tr>
+<tr><td>DAP_TARGET_MONTH_6</td><td>1000</td><td>pets/day</td><td>PRD §9.1</td><td>Daily Active Pets leading indicator</td></tr>
+<tr><td>DAP_TARGET_MONTH_12</td><td>2000</td><td>pets/day</td><td>PRD §9.1</td><td>Daily Active Pets leading indicator</td></tr>
+<tr><td>CLAIM_CONVERSION_TARGET</td><td>10</td><td>percent</td><td>PRD §9.2; BRD §7.2; BRD §3.1 O1</td><td>Visitor to email-claim conversion rate</td></tr>
+<tr><td>DAY_7_RETENTION_TARGET</td><td>25</td><td>percent</td><td>PRD §9.2; BRD §7.2; BRD §3.1 O1</td><td>7-day retention target</td></tr>
+<tr><td>DAY_30_RETENTION_TARGET</td><td>15</td><td>percent</td><td>BRD §7.2</td><td>30-day retention target</td></tr>
+<tr><td>DAY_1_RETURN_RATE_TARGET</td><td>50</td><td>percent</td><td>BRD §7.2</td><td>Day-1 return rate after claim</td></tr>
+<tr><td>CLAIM_CONVERSION_ALPHA_GO</td><td>7</td><td>percent</td><td>PRD §9.3 go/no-go</td><td>Alpha → Beta go threshold</td></tr>
+<tr><td>CLAIM_CONVERSION_PIVOT_THRESHOLD</td><td>3</td><td>percent</td><td>PRD §9.3 go/no-go; BRD §10.2 K1</td><td>Below this triggers Pivot/Kill evaluation</td></tr>
+<tr><td>DAY_3_RETENTION_ALPHA_GO</td><td>30</td><td>percent</td><td>PRD §9.3 go/no-go</td><td>Alpha → Beta go threshold</td></tr>
+<tr><td>DAY_3_RETENTION_NOGO</td><td>10</td><td>percent</td><td>PRD §9.3 go/no-go</td><td>Alpha → Beta no-go threshold</td></tr>
+<tr><td>DAY_7_RETENTION_BETA_NOGO</td><td>10</td><td>percent</td><td>PRD §9.3 go/no-go; BRD §10.2 K2</td><td>Beta → GA no-go / Kill trigger</td></tr>
+<tr><td>ARENA_BATTLES_BETA_GA_MIN</td><td>50</td><td>battles/day</td><td>PRD §9.3 go/no-go</td><td>Minimum Beta exit threshold (week 8 post-launch)</td></tr>
+<tr><td>ARENA_BATTLES_BETA_GA_NOGO</td><td>20</td><td>battles/day</td><td>PRD §9.3 go/no-go</td><td>Beta → GA no-go threshold</td></tr>
+<tr><td>ARENA_BATTLES_GA_SUCCESS</td><td>100</td><td>battles/day</td><td>PRD §9.3; BRD §3.1 O2</td><td>3-month sustained success target post-GA</td></tr>
+<tr><td>DAU_MARKETPLACE_TRIGGER</td><td>1000</td><td>users</td><td>PRD §9.3; PRD §10.2 FF_MARKETPLACE; BRD §5.3</td><td>Sustain 2 weeks before enabling marketplace</td></tr>
+<tr><td>ARENA_SOCIAL_SHARE_RATE_TARGET</td><td>5</td><td>percent</td><td>PRD §9.2 guardrails; BRD §3.1 O4; BRD §7.2</td><td>Arena battle social share rate</td></tr>
+<tr><td>LEADERBOARD_UV_DAU_RATIO_TARGET</td><td>20</td><td>percent</td><td>PRD §9.2 guardrails; BRD §3.1 O2; BRD §7.2</td><td>Leaderboard page UV / DAU</td></tr>
+<tr><td>ORGANIC_TRAFFIC_TARGET</td><td>30</td><td>percent</td><td>BRD §3.1 O4</td><td>Natural traffic as percent of total visits at 6 months</td></tr>
+<tr><td>ARENA_FAIR_PLAY_RATE_TARGET</td><td>95</td><td>percent</td><td>PRD §9.2 guardrail metrics</td><td>Non-bot battles minimum</td></tr>
+<tr><td>CLAIM_EMAIL_DELIVERY_RATE_TARGET</td><td>98</td><td>percent</td><td>PRD §9.2 guardrail metrics; BRD §8.3 vendor SLA</td><td>Operational guardrail — alerts and remediation trigger if below 98%; see also SENDGRID_DELIVERY_RATE_ASSUMPTION (same value, planning assumption)</td></tr>
+<tr><td>CLAIM_FORM_ERROR_RATE_MAX</td><td>2</td><td>percent</td><td>PRD §9.2 guardrail metrics</td><td>Upper bound for claim form errors</td></tr>
+<tr><td>SENDGRID_DELIVERY_RATE_ASSUMPTION</td><td>98</td><td>percent</td><td>PRD §8.4 assumption A5</td><td>BRD cost/revenue planning assumption with proper SPF/DKIM setup; see also CLAIM_EMAIL_DELIVERY_RATE_TARGET (same value, operational guardrail)</td></tr>
+<tr><td>MVP_BUDGET</td><td>40000</td><td>USD</td><td>PRD §8.1; BRD §8.1; BRD §3.3 base scenario</td><td>Hard budget constraint</td></tr>
+<tr><td>AB_TEST_SAMPLE_SIZE_001_002</td><td>1000</td><td>visitors/arm</td><td>PRD §9.4</td><td>AB-001, AB-002 sample size</td></tr>
+<tr><td>AB_TEST_SAMPLE_SIZE_003_004</td><td>500</td><td>sessions or battles/arm</td><td>PRD §9.4</td><td>AB-003, AB-004 sample size</td></tr>
+<tr><td>AB_TEST_DURATION</td><td>2</td><td>weeks</td><td>PRD §9.4</td><td>Duration for all A/B tests</td></tr>
+<tr><td>ALPHA_BETA_TESTERS</td><td>20</td><td>people</td><td>PRD §10.1</td><td>Invited testers for Alpha phase</td></tr>
+<tr><td>BETA_AUDIENCE</td><td>500</td><td>users</td><td>PRD §10.1</td><td>itch.io + Discord beta rollout</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="8-capacity-planning">§8 Capacity Planning</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Parameter</th><th>Value</th><th>Unit</th><th>PRD Source</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>NORMAL_OPERATION_RPS</td><td>100</td><td>RPS</td><td>PRD §7.1 capacity targets</td><td>Sustained normal operation</td></tr>
+<tr><td>NORMAL_OPERATION_DAU_MIN</td><td>2000</td><td>DAU</td><td>PRD §7.1 capacity targets; BRD §3.1 O3</td><td>Normal DAU range lower bound; intentionally equal to DAU_12_MONTH_TARGET — infrastructure sized to meet 12-month business objective</td></tr>
+<tr><td>NORMAL_OPERATION_DAU_MAX</td><td>5000</td><td>DAU</td><td>PRD §7.1 capacity targets; BRD §3.1 O3</td><td>Normal DAU range upper bound</td></tr>
+<tr><td>PEAK_OPERATION_RPS</td><td>500</td><td>RPS</td><td>PRD §7.1 capacity targets</td><td>Viral event peak</td></tr>
+<tr><td>PEAK_CONCURRENT_USERS</td><td>2000</td><td>PCU</td><td>PRD §7.1 capacity targets; PRD §13 glossary</td><td>Peak Concurrent Users during arena events</td></tr>
+<tr><td>DB_CONNECTION_POOL_MIN_CONNECTIONS</td><td>20</td><td>connections</td><td>PRD §7.1 capacity targets</td><td>PostgreSQL connection pool minimum</td></tr>
+<tr><td>DAU_12_MONTH_TARGET</td><td>2000</td><td>DAU</td><td>BRD §3.1 O3; PRD §9.1 DAP targets</td><td>12-month DAU success objective; intentionally equal to NORMAL_OPERATION_DAU_MIN — represents the infrastructure sizing target</td></tr>
+<tr><td>CLAIMED_PETS_6_WEEK_TARGET</td><td>500</td><td>pets</td><td>BRD §7.2; BRD §3.5</td><td>6-week total claimed pets target</td></tr>
+<tr><td>MONTHLY_GMV_TARGET</td><td>10000</td><td>USD</td><td>BRD §3.1 O5</td><td>Marketplace monthly GMV target at 12 months</td></tr>
+<tr><td>MONTHLY_FEE_REVENUE_TARGET</td><td>500</td><td>USD</td><td>BRD §3.1 O5; BRD §7.2 Outcome</td><td>Monthly transaction fee revenue at 12 months</td></tr>
+<tr><td>PII_EMAIL_RETENTION_POST_DELETE</td><td>7</td><td>days</td><td>PRD §11.4 PII inventory</td><td>Account lifetime + 7 days post-deletion; then hashed</td></tr>
+<tr><td>SERVER_COST_DAU5K_MONTHLY_MIN</td><td>50</td><td>USD/month</td><td>BRD §11.1 cost structure</td><td>Vercel + Supabase + Railway at DAU ≤ 5k</td></tr>
+<tr><td>SERVER_COST_DAU5K_MONTHLY_MAX</td><td>200</td><td>USD/month</td><td>BRD §11.1 cost structure</td><td>Vercel + Supabase + Railway at DAU ≤ 5k</td></tr>
+<tr><td>EMAIL_SENDGRID_MONTHLY_LIMIT</td><td>10000</td><td>emails</td><td>BRD §11.1 cost structure</td><td>~$20/month</td></tr>
+<tr><td>INFRA_COST_ANNUAL_BASE</td><td>8000</td><td>USD/year</td><td>BRD §3.3 base scenario</td><td>Server + maintenance labor</td></tr>
+<tr><td>VENDOR_MIGRATION_PLAN_DAYS</td><td>14</td><td>days</td><td>PRD §8.3; BRD §13.1</td><td>SendGrid and PostgreSQL vendor migration plan window</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<blockquote class="doc-quote"><strong>Data retention constants</strong> (ANALYTICS_EVENT_HOT_RETENTION, ANALYTICS_EVENT_COLD_ARCHIVE, ADMIN_AUDIT_LOG_RETENTION) are defined in §7 Business Rules.</blockquote>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="appendix-aconstantsjson-">Appendix A：constants.json 同步格式</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">本文件生成後，必須同步輸出 <code>docs/constants.json</code>，格式如下（節選關鍵欄位）：</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-json">{
+  "version": "1.0",
+  "generated_from": "docs/PRD.md",
+  "last_updated": "2026-05-03",
+  "core": {
+    "PET_GENERATION_COMBINATIONS_MIN": 1000000000,
+    "PET_STAT_MAX": 100,
+    "PET_LEVEL_MAX": 100,
+    "TRAINING_ACTIONS_PER_DAY": 3,
+    "ARENA_RATE_LIMIT_BATTLES_PER_HOUR": 10,
+    "CLAIM_CODE_DIGITS": 6,
+    "CLAIM_CODE_EXPIRY": 15
+  },
+  "slo": {
+    "availability_pct": 99.9,
+    "p99_latency_read_ms": 200,
+    "p99_latency_write_ms": 500,
+    "error_rate_pct": 1.0,
+    "leaderboard_update_lag_s": 30
+  },
+  "rtp": {
+    "COMMON_PCT": 60,
+    "RARE_PCT": 25,
+    "EPIC_PCT": 12,
+    "LEGENDARY_PCT": 3
+  },
+  "rate_limits": {
+    "arena_battles_per_pet": {"limit": 10, "window": "1h"},
+    "email_claim_attempts": {"limit": 5, "window": "1h"},
+    "admin_requests_per_account": {"limit": 100, "window": "1m"}
+  },
+  "capacity": {
+    "NORMAL_OPERATION_RPS": 100,
+    "PEAK_OPERATION_RPS": 500,
+    "DAU_12_MONTH_TARGET": 2000
+  }
+}</code></pre>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

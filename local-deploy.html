@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — Local Development Setup — pixel-pet-arena</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">Local Development Setup — pixel-pet-arena</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>Local Development Setup — pixel-pet-arena</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="local-development-setup--pixel-pet-arena">Local Development Setup — pixel-pet-arena</h1>
+<div class="doc-gap"></div>
+<p class="doc-p">This guide walks a developer joining the project for the first time through every step required to run all three services locally: the Fastify API, the React/Phaser player frontend, and the Vue 3 admin portal.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="prerequisites">Prerequisites</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Before you begin, make sure the following software is installed and available on your <code>PATH</code>.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="required-versions">Required versions</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Tool</th><th>Minimum version</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Node.js</td><td>20.x</td><td>Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to manage versions</td></tr>
+<tr><td>pnpm</td><td>9.x</td><td>Install with `npm install -g pnpm@latest`</td></tr>
+<tr><td>Docker Desktop</td><td>24.x or higher</td><td>Required to run the Supabase local stack; must be running before `supabase start`</td></tr>
+<tr><td>Git</td><td>2.x</td><td>Any modern version works</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p">Check your versions before continuing:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">node --version   # should print v20.x.x or higher
+pnpm --version   # should print 9.x.x or higher
+docker --version # should print Docker version 24.x or higher</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="supabase-cli-required-for-local-setup">Supabase CLI (required for local setup)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The Supabase CLI is required for Steps 2 and 3 (<code>supabase start</code>, <code>supabase migration up</code>). Install it before proceeding:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># macOS — Homebrew
+brew install supabase/tap/supabase
+
+# Linux — Homebrew (recommended)
+brew install supabase/tap/supabase</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Verify installation:</p>
+<pre class="doc-code"><code class="lang-bash">supabase --version   # should print 2.x.x or higher</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="optional-tools">Optional tools</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Redis CLI</strong> — useful for inspecting cache state. Install via Homebrew (<code>brew install redis</code>) on macOS; on Linux, install the <code>redis-tools</code> package. You do not need a locally installed Redis server — the Docker container is sufficient.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="platform-notes">Platform notes</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>macOS</strong> is the primary development environment assumed throughout this guide. All commands are written for zsh/bash on macOS.</li>
+<li><strong>Linux</strong> users: all commands work without modification. Ensure Docker Engine (not just Docker CLI) is running. You may need to prefix Docker commands with <code>sudo</code> depending on your group membership.</li>
+<li><strong>Windows (WSL2)</strong>: run all commands inside a WSL2 terminal (Ubuntu 22.04 recommended). Docker Desktop for Windows with the WSL2 backend must be enabled. Paths and line endings should be handled automatically inside WSL2.</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="environment-setup">Environment Setup</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Each application in the monorepo has its own environment file. You must copy and populate all three before starting any service.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="clone-the-repository">Clone the repository</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">git clone https://github.com/&lt;your-org&gt;/pixel-pet-arena.git
+cd pixel-pet-arena</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="copy-environment-files">Copy environment files</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">cp apps/api/.env.example     apps/api/.env.local
+cp apps/player/.env.example  apps/player/.env.local
+cp apps/admin/.env.example   apps/admin/.env.local</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="key-environment-variables">Key environment variables</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Open each <code>.env.local</code> file and set the values listed below. Variables marked <strong>required</strong> will cause the service to fail on startup if missing or empty.</p>
+<div class="doc-gap"></div>
+<h4 class="doc-h4" id="codeappsapienvlocalcode"><code>apps/api/.env.local</code></h4>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`DATABASE_URL`</td><td>Yes</td><td>Leave blank for now — the value is printed by `supabase start` in Setup Steps step 2 (looks like `postgresql://postgres:postgres@localhost:54322/postgres`)</td></tr>
+<tr><td>`REDIS_URL`</td><td>Yes</td><td>Redis connection string; use `redis://localhost:6379` for the local Docker container</td></tr>
+<tr><td>`JWT_SECRET`</td><td>Yes</td><td>Used to sign the short-lived TOTP setup token returned during first-time admin account enrollment; not used for player authentication (players use raw bearer tokens)</td></tr>
+<tr><td>`EMAIL_ENCRYPTION_KEY`</td><td>Yes</td><td>A 32-byte AES-256-GCM key used to encrypt and decrypt stored email addresses; generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`</td></tr>
+<tr><td>`SENDGRID_API_KEY`</td><td>No</td><td>Can be any non-empty dummy string locally; emails are captured by the Supabase Inbucket testing inbox and viewable at `http://localhost:54324`</td></tr>
+<tr><td>`ADMIN_TOTP_ISSUER`</td><td>Yes</td><td>The issuer name shown in your authenticator app, e.g. `pixel-pet-arena-local`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h4 class="doc-h4" id="codeappsplayerenvlocalcode"><code>apps/player/.env.local</code></h4>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`VITE_API_BASE_URL`</td><td>Yes</td><td>Set to `http://localhost:3000`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h4 class="doc-h4" id="codeappsadminenvlocalcode"><code>apps/admin/.env.local</code></h4>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`VITE_API_BASE_URL`</td><td>Yes</td><td>Set to `http://localhost:3000`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="generating-a-jwtsecret">Generating a JWT_SECRET</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Use Node.js to generate a cryptographically random secret. Run this command and paste the output into <code>apps/api/.env.local</code>:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))"</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">The output will be a base64url-encoded string of 64 random bytes. Keep this value private and never commit it to source control.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="feature-flags">Feature flags</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The following feature flags have recommended local defaults. Set them in <code>apps/api/.env.local</code> to override behaviour without changing application code:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">FF_MARKETPLACE=false
+FF_ARENA_SUMO=true</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="setup-steps">Setup Steps</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Follow these steps in order. Each step depends on the previous one completing successfully.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">1. <strong>Install all workspace dependencies.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">Run this from the repository root. pnpm will link workspace packages via symlinks and resolve shared dependencies through its virtual store.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   pnpm install</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">2. <strong>Start the Supabase local stack.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">This starts a PostgreSQL database, the Supabase Studio web UI, a local email testing inbox, and several supporting services inside Docker containers. Docker Desktop must be running before executing this command.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   supabase start</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">The command prints connection details when it finishes, including a <code>DB URL</code> value. Copy the <code>DB URL</code> (it will look like <code>postgresql://postgres:postgres@localhost:54322/postgres</code>) and set it as <code>DATABASE_URL</code> in <code>apps/api/.env.local</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Supabase Studio is accessible at <code>http://localhost:54323</code> once the stack is running.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">3. <strong>Run database migrations.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">Apply all pending schema migrations to the local PostgreSQL database. The canonical command is:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   supabase migration up</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">If the repository defines a <code>pnpm db:migrate</code> script in the root <code>package.json</code>, use that instead of running <code>supabase migration up</code> directly — do <strong>not</strong> run both, as this will double-apply migrations. The <code>db:migrate</code> script may use a different migration driver (such as <code>node-pg-migrate</code>) rather than the Supabase CLI directly. Check <code>package.json</code> to see which is available:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   grep -A2 '"db:' package.json</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">4. <strong>Seed the database.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">This command inserts initial data including a default admin account, starter pets, and arena configuration. The seed script prints the username, initial password, and TOTP secret for the local admin account — <strong>save this entire output now</strong>. You will need all three values in the Verification section to log into the admin portal. If you lose them, run <code>pnpm db:seed --reset-admin</code> to regenerate a new TOTP secret (see <em>TOTP setup for the local admin account</em> in Troubleshooting).</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   pnpm db:seed</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">5. <strong>Start the local Redis container.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">The API uses Redis for caching and the job queue. Pull and run the official <code>redis:7-alpine</code> image on the default port:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   docker run -d --name pixel-pet-redis -p 6379:6379 redis:7-alpine</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">If you already have a Redis container from a previous session, start it again with:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   docker start pixel-pet-redis</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Confirm Redis is reachable:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   docker exec -it pixel-pet-redis redis-cli ping
+   # Expected output: PONG</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">6. <strong>Start the backend API.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">The API runs on port 3000 with hot reload enabled via <code>ts-node-dev</code> or the equivalent configured in the <code>api</code> package.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   pnpm --filter api dev</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Wait until the console prints something like <code>Server listening at http://0.0.0.0:3000</code> before proceeding.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">7. <strong>Start the player frontend.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">The React + Phaser frontend runs on Vite's dev server at port 5173 with hot module replacement enabled.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   pnpm --filter player-app dev</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">8. <strong>Start the admin portal.</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">The Vue 3 admin portal runs on its own Vite dev server at port 5174.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   pnpm --filter admin-app dev</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Each of the three services in steps 6–8 should be run in separate terminal tabs or panes so you can observe their output simultaneously.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="verification">Verification</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Once all three services are running, use the following checks to confirm a healthy local environment.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="api-health-check">API health check</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">curl http://localhost:3000/health</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Expected response:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-json">{"status":"healthy","checks":{"database":"ok","redis":"ok"},"timestamp":"2026-05-03T12:00:00Z"}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Any non-200 response or a connection refusal indicates the API is not running or one or more upstream dependencies (database or Redis) are unhealthy.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="player-frontend">Player frontend</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Open <code>http://localhost:5173</code> in your browser. You should see either a pet displayed on a pixel-art background, or a prompt asking you to generate your first pet. If the page is blank or shows a network error, check that the API is running and that <code>VITE_API_BASE_URL</code> is set correctly in <code>apps/player/.env.local</code>.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="admin-portal-login-page">Admin portal login page</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Open <code>http://localhost:5174/admin/login</code> in your browser. A TOTP login form should appear with fields for username and one-time password. If the page does not load, check that the admin dev server started without errors on port 5174.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="leaderboard-endpoint">Leaderboard endpoint</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">curl http://localhost:3000/api/v1/leaderboard</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Expected response: a JSON array (empty <code>[]</code> is fine on a freshly seeded database). A 500 error here usually indicates a database connectivity problem.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="test-admin-account">Test admin account</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The <code>pnpm db:seed</code> command creates a default admin user. The seed script prints the username, initial password, and TOTP secret to the console. To log in to the admin portal:</p>
+<div class="doc-gap"></div>
+<p class="doc-p">1. Open <code>http://localhost:5174/admin/login</code>.</p>
+<p class="doc-p">2. Enter the seeded credentials (username and password printed by <code>db:seed</code>).</p>
+<p class="doc-p">3. Open your authenticator app (Google Authenticator, Authy, 1Password, etc.) and manually enter the TOTP secret printed by <code>db:seed</code>. The issuer name will match the <code>ADMIN_TOTP_ISSUER</code> value you set in the environment file.</p>
+<p class="doc-p">4. Enter the six-digit TOTP code from your authenticator app to complete login.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="common-issues-and-troubleshooting">Common Issues and Troubleshooting</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="supabase-will-not-start">Supabase will not start</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Symptom:</strong> <code>supabase start</code> hangs or prints a Docker-related error.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Verify Docker Desktop is running. On macOS, the Docker icon should be visible in the menu bar. On Linux, run <code>systemctl status docker</code> (or <code>sudo service docker status</code>) to confirm the daemon is active.</li>
+<li>Run <code>docker info</code> to confirm the Docker daemon is responsive.</li>
+<li>If a previous Supabase session left containers running in a broken state, stop and reset everything:</li>
+</ul>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">  supabase stop --no-backup
+  supabase start</code></pre>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Check for port conflicts. Supabase uses ports <code>54321</code> (API), <code>54322</code> (PostgreSQL), <code>54323</code> (Studio), and <code>54324</code> (email). Run <code>lsof -i :54322</code> to see if anything else is using that port and stop it before retrying.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="port-already-in-use-3000-5173-5174">Port already in use (3000, 5173, 5174)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Symptom:</strong> A service fails to start with <code>EADDRINUSE</code> or a similar error.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Find and kill the conflicting process:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">lsof -ti :3000 | xargs kill -9
+lsof -ti :5173 | xargs kill -9
+lsof -ti :5174 | xargs kill -9</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">On Linux, substitute <code>fuser</code> if <code>lsof</code> is not installed: <code>fuser -k 3000/tcp</code>, <code>fuser -k 5173/tcp</code>, <code>fuser -k 5174/tcp</code>.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="redis-connection-refused-or-port-6379-already-in-use">Redis connection refused or port 6379 already in use</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Symptom A — <code>docker run</code> fails with <code>port is already allocated</code>:</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">Port 6379 is already bound by a native Redis installation (e.g. installed via Homebrew or <code>apt</code>). Stop it before starting the Docker container:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># macOS (Homebrew)
+brew services stop redis
+
+# Linux (systemd)
+sudo systemctl stop redis</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Then re-run <code>docker run -d --name pixel-pet-redis -p 6379:6379 redis:7-alpine</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Symptom B — The API logs <code>Error: connect ECONNREFUSED 127.0.0.1:6379</code>:</strong></p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Check that the Redis Docker container is running:</li>
+</ul>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">  docker ps --filter name=pixel-pet-redis</code></pre>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>If the container is not listed, start it again (see Setup Steps, step 5).</li>
+<li>If the container is listed but the API still cannot connect, verify that <code>REDIS_URL=redis://localhost:6379</code> is set in <code>apps/api/.env.local</code>.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="totp-setup-for-the-local-admin-account">TOTP setup for the local admin account</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">If you lose the seed output or need to reset the admin TOTP:</p>
+<div class="doc-gap"></div>
+<p class="doc-p">1. Reset the admin account's TOTP secret by running the seed command again:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">   pnpm db:seed --reset-admin</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">2. The new TOTP secret will be printed to the console. Remove the old entry from your authenticator app and add the new secret.</p>
+<p class="doc-p">3. Alternatively, query the <code>admin_users</code> table directly in Supabase Studio (<code>http://localhost:54323</code>) to retrieve the raw TOTP secret for manual entry.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="database-migration-errors">Database migration errors</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Symptom:</strong> <code>supabase migration up</code> fails with schema conflicts or missing tables.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">The safest fix for a local database is a full reset. This wipes all local data and re-applies every migration from scratch:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">supabase db reset
+pnpm db:seed</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Do not run <code>db reset</code> against any shared or staging environment — it is destructive.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="pnpm-workspace-dependency-issues">pnpm workspace dependency issues</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Symptom:</strong> Imports from workspace packages fail, or you see <code>Cannot find module</code> errors after adding a new package.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Re-run <code>pnpm install</code> from the repository root. This rebuilds the workspace symlinks.</li>
+<li>If a specific package was added to a sub-app, ensure the version specifier in that app's <code>package.json</code> uses the <code>workspace:*</code> protocol:</li>
+</ul>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-json">  "dependencies": {
+    "@pixel-pet-arena/shared": "workspace:*"
+  }</code></pre>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Clear the pnpm cache and reinstall if problems persist:</li>
+</ul>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">  pnpm store prune
+  pnpm install --force</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="development-workflow-tips">Development Workflow Tips</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="hot-reload">Hot reload</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Player frontend</strong> (<code>apps/player</code>): Vite HMR is enabled by default. Changes to <code>.tsx</code>, <code>.ts</code>, <code>.css</code>, and Phaser scene files are reflected in the browser within milliseconds without a full page reload.</li>
+<li><strong>Admin portal</strong> (<code>apps/admin</code>): Vite HMR is also enabled. Vue single-file components update in place.</li>
+<li><strong>Backend API</strong> (<code>apps/api</code>): The API process is managed by <code>ts-node-dev</code> (or an equivalent nodemon configuration). The process restarts automatically when any <code>.ts</code> source file changes. Allow one to two seconds for the TypeScript compiler to pick up changes.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="running-tests">Running tests</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Run the full test suite from the repository root:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">pnpm test</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Run end-to-end tests (requires all three services to be running):</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">pnpm test:e2e</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Run tests for a specific workspace package:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">pnpm --filter api test
+pnpm --filter player-app test
+pnpm --filter admin-app test</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="supabase-studio">Supabase Studio</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The Supabase Studio web interface is available at <code>http://localhost:54323</code> while <code>supabase start</code> is running. Use it to:</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Browse and edit table data directly.</li>
+<li>Inspect the <code>admin_users</code> table for TOTP secrets.</li>
+<li>Monitor SQL query activity in the Logs section.</li>
+<li>Manage Row Level Security policies during development.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="feature-flag-overrides">Feature flag overrides</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Feature flags are read from environment variables at API startup. Override them in <code>apps/api/.env.local</code> without touching any application code:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Enable the marketplace feature locally
+FF_MARKETPLACE=true
+
+# Disable the arena sumo mode locally
+FF_ARENA_SUMO=false</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Restart the API process after changing flag values for them to take effect.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="useful-one-liners">Useful one-liners</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Tail API logs
+pnpm --filter api dev 2&gt;&amp;1 | tee /tmp/api.log
+
+# Check Supabase service status
+supabase status
+
+# Inspect Redis keys
+docker exec -it pixel-pet-redis redis-cli KEYS "*"
+
+# Reset everything and start fresh
+supabase db reset &amp;&amp; pnpm db:seed</code></pre>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

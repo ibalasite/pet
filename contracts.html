@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — Machine-Readable Contracts Index</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">Machine-Readable Contracts Index</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>Machine-Readable Contracts Index</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="machine-readable-contracts-index">Machine-Readable Contracts Index</h1>
+<div class="doc-gap"></div>
+<p class="doc-p">Generated by <code>gendoc-gen-contracts</code> from gendoc documentation pipeline.</p>
+<p class="doc-p">Source documents: docs/EDD.md, docs/API.md, docs/SCHEMA.md, docs/ARCH.md</p>
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="artifact-catalog">Artifact Catalog</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Artifact</th><th>Path</th><th>Purpose</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>OpenAPI 3.1 YAML</td><td>[docs/blueprint/contracts/openapi.yaml](blueprint/contracts/openapi.yaml)</td><td>API 合約，可匯入 Postman / Swagger UI / code generator（47 paths, 77 schemas）</td><td>docs/API.md</td></tr>
+<tr><td>JSON Schema</td><td>[docs/blueprint/contracts/schemas/](blueprint/contracts/schemas/)</td><td>DTO 型別定義，供 validator / IDE / code generator 使用（7 schemas）</td><td>docs/SCHEMA.md</td></tr>
+<tr><td>Pact Contracts</td><td>[docs/blueprint/contracts/pact/](blueprint/contracts/pact/)</td><td>Consumer-driven 合約測試規格（3 pairs, 39 interactions）</td><td>docs/API.md</td></tr>
+<tr><td>Admin OpenAPI YAML</td><td>[docs/blueprint/contracts/admin/admin-api.yaml](blueprint/contracts/admin/admin-api.yaml)</td><td>Admin API 合約（/admin/api/* 所有 endpoint）</td><td>docs/API.md §6</td></tr>
+<tr><td>RBAC Seed</td><td>[docs/blueprint/contracts/admin/rbac-seed.json](blueprint/contracts/admin/rbac-seed.json)</td><td>Role/Permission 初始資料</td><td>docs/ADMIN_IMPL.md</td></tr>
+<tr><td>Admin Seed</td><td>[docs/blueprint/contracts/admin/admin-seed.json](blueprint/contracts/admin/admin-seed.json)</td><td>本地開發初始 admin 帳號</td><td>internal</td></tr>
+<tr><td>Docker Compose</td><td>[docker-compose.yml](../docker-compose.yml)</td><td>本地開發環境（api + postgres + redis + mailhog）</td><td>docs/EDD.md §4.5.9</td></tr>
+<tr><td>Helm Values</td><td>[docs/blueprint/infra/helm/values.yaml](blueprint/infra/helm/values.yaml)</td><td>Kubernetes 部署配置</td><td>docs/EDD.md §4.5.9</td></tr>
+<tr><td>Network Policy</td><td>[docs/blueprint/infra/k8s/network-policy.yaml](blueprint/infra/k8s/network-policy.yaml)</td><td>網路存取控制規則</td><td>docs/EDD.md §4.5.9</td></tr>
+<tr><td>Seed Code</td><td>[docs/blueprint/scaffold/src/](blueprint/scaffold/src/)</td><td>TypeScript 骨架代碼（12 files）+ 測試骨架</td><td>docs/EDD.md §4.5.2</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="usage-guide">Usage Guide</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="openapi--swagger-ui">OpenAPI / Swagger UI</h3>
+<pre class="doc-code"><code class="lang-bash"># Validate
+npx @redocly/openapi-cli lint docs/blueprint/contracts/openapi.yaml
+
+# Generate client SDK (TypeScript)
+npx openapi-generator-cli generate \
+  -i docs/blueprint/contracts/openapi.yaml \
+  -g typescript-axios \
+  -o src/generated/client
+
+# Start Swagger UI
+npx swagger-ui-serve docs/blueprint/contracts/openapi.yaml</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="json-schema-validation">JSON Schema Validation</h3>
+<pre class="doc-code"><code class="lang-bash"># Validate a payload against schema
+npx ajv validate \
+  -s docs/blueprint/contracts/schemas/Pet.schema.json \
+  -d payload.json</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="pact-contract-testing">Pact Contract Testing</h3>
+<pre class="doc-code"><code class="lang-bash"># Provider verification
+npx pact-verifier \
+  --pact-urls docs/blueprint/contracts/pact/*.json \
+  --provider-base-url http://localhost:3000 \
+  --provider-states-setup-url http://localhost:3000/_pact/setup</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="local-development">Local Development</h3>
+<pre class="doc-code"><code class="lang-bash"># Start all services
+cp .env.example .env  # fill in your values
+docker-compose up -d
+
+# API available at http://localhost:3000
+# Swagger UI: http://localhost:3000/docs
+# MailHog UI: http://localhost:8025</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="scaffold">Scaffold</h3>
+<pre class="doc-code"><code class="lang-bash"># Seed code is in docs/blueprint/scaffold/ — copy to begin implementation
+cp -r docs/blueprint/scaffold/src/ src/
+cp -r docs/blueprint/scaffold/tests/ tests/</code></pre>
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="coverage-report">Coverage Report</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Step</th><th>Status</th><th>Details</th></tr></thead>
+<tbody>
+<tr><td>OpenAPI 3.1</td><td>✅</td><td>47 paths (player + admin + health), 77 schemas</td></tr>
+<tr><td>JSON Schema</td><td>✅</td><td>7 core DTOs (Pet, ClaimCode, BattleRecord, LeaderboardEntry, FoodItem, ErrorResponse, PaginationMeta)</td></tr>
+<tr><td>Pact Contracts</td><td>✅</td><td>3 consumer-provider pairs, 39 total interactions (happy + error paths)</td></tr>
+<tr><td>Admin Contracts</td><td>✅</td><td>admin-api.yaml + rbac-seed.json + admin-seed.json</td></tr>
+<tr><td>IaC (Docker)</td><td>✅</td><td>docker-compose.yml + .env.example</td></tr>
+<tr><td>IaC (K8s)</td><td>✅</td><td>helm/values.yaml + k8s/network-policy.yaml</td></tr>
+<tr><td>Seed Code</td><td>✅</td><td>12 TypeScript files (domain + application + infra + routes + tests)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<p class="doc-p"><em>Generated: 2026-05-05</em></p>
+<p class="doc-p"><em>Project: pixel-pet-arena</em></p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

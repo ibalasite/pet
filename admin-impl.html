@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — ADMIN_IMPL — Admin Portal Implementation Specification</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">ADMIN_IMPL — Admin Portal Implementation Specification</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>ADMIN_IMPL — Admin Portal Implementation Specification</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="adminimpl--admin-portal-implementation-specification">ADMIN_IMPL — Admin Portal Implementation Specification</h1>
+<p class="doc-p"><!-- SDLC Layer 4: Implementation Engineering --></p>
+<p class="doc-p"><!-- Upstream: EDD.md (tech stack §3.7) + FRONTEND.md §3 (admin portal design) + API.md §6 (/admin/api/* endpoints) + SCHEMA.md (admin_accounts + admin_audit_log tables) + constants.json --></p>
+<p class="doc-p"><!-- Scope: Admin Portal (Vue 3 + Element Plus + TypeScript + Vite). Player App (React 18 + Phaser 3) is excluded — see CLIENT_IMPL.md. --></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="document-control">Document Control</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Field</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td>**DOC-ID**</td><td>ADMIN_IMPL-PIXEL-PET-ARENA-20260503</td></tr>
+<tr><td>**Project Name**</td><td>pixel-pet-arena</td></tr>
+<tr><td>**Admin Tech Stack**</td><td>Vue 3 (Composition API) + Element Plus + Vite 5 + TypeScript 5 (FRONTEND.md §3)</td></tr>
+<tr><td>**Document Version**</td><td>v1.0</td></tr>
+<tr><td>**Status**</td><td>DRAFT</td></tr>
+<tr><td>**Author**</td><td>AI Generated (gendoc ADMIN_IMPL)</td></tr>
+<tr><td>**Date**</td><td>2026-05-03</td></tr>
+<tr><td>**Upstream EDD**</td><td>[EDD.md](EDD.md) §3.3 + §5.5-A</td></tr>
+<tr><td>**Upstream API**</td><td>[API.md](API.md) §6 — `/admin/api/*` endpoints</td></tr>
+<tr><td>**Upstream SCHEMA**</td><td>[SCHEMA.md](SCHEMA.md) — `admin_accounts` + `admin_audit_log` tables</td></tr>
+<tr><td>**Upstream ARCH**</td><td>[ARCH.md](ARCH.md) — Admin Portal container (deployment + tech stack)</td></tr>
+<tr><td>**Upstream CONSTANTS**</td><td>[constants.json](constants.json) — session TTLs, page sizes, rate limits</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="change-log">Change Log</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Version</th><th>Date</th><th>Author</th><th>Change Summary</th></tr></thead>
+<tbody>
+<tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (gendoc ADMIN_IMPL)</td><td>Initial draft</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1-admin-portal-overview">§1 Admin Portal Overview</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="11-system-purpose">§1.1 System Purpose</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The pixel-pet-arena Admin Portal is an internal operations platform used exclusively by platform staff. Primary user groups:</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Super Admin</strong>: Full access — account management, GDPR compliance, system configuration, audit log review</li>
+<li><strong>Moderator</strong>: Pet management (ban/unban), suspicious activity review, battle record inspection, leaderboard view</li>
+<li><strong>Read Only</strong>: Monitoring dashboard, leaderboard and analytics read access, no write permissions</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p">Core operations problems the portal solves:</p>
+<div class="doc-gap"></div>
+<p class="doc-p">1. <strong>Pet ban/unban</strong> — Processes automated bot detection results (threshold: > 50 battles/hr rolling window; <code>bot_detection_battles_threshold = 50</code>)</p>
+<p class="doc-p">2. <strong>Leaderboard management</strong> — Admins view Top 500; public shows only Top 100 (<code>leaderboard_admin_view = 500</code>, <code>leaderboard_top_display = 100</code>)</p>
+<p class="doc-p">3. <strong>GDPR compliance queue</strong> — Handles erasure / data_access / restrict_processing / object_leaderboard / rectification requests across 5 request types</p>
+<p class="doc-p">4. <strong>System configuration</strong> — Runtime parameters (arena rate limit, rarity weights) and economy parameters (food buff multiplier) cached in Redis (TTL: <code>config_cache_refresh_time_minutes = 5</code>)</p>
+<p class="doc-p">5. <strong>Audit log</strong> — All CUD operations recorded, retained 2 years (<code>admin_audit_log_retention_years = 2</code>)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="12-design-principles">§1.2 Design Principles</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Security-first</strong>: RBAC minimum privilege; httpOnly + SameSite=Strict session cookie; every operation produces an audit log entry</li>
+<li><strong>Operational efficiency</strong>: Bulk operations + smart search (pet ID / email hash)</li>
+<li><strong>Data consistency</strong>: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s)</li>
+<li><strong>Auditability</strong>: All CUD operations write to <code>admin_audit_log</code>, retained 2 years (<code>admin_audit_log_retention_years = 2</code>)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="13-user-roles-from-edd-37--arch-51">§1.3 User Roles (from EDD §3.7 + ARCH §5.1)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Role</th><th>Display Name</th><th>Accessible Features</th></tr></thead>
+<tbody>
+<tr><td>`super_admin`</td><td>Super Admin</td><td>All: GDPR, config, roles, audit log + all moderator features</td></tr>
+<tr><td>`moderator`</td><td>Moderator</td><td>Pet management (ban/unban), battle management (flag/unflag), leaderboard view, suspicious activity, email monitor, analytics, dashboard</td></tr>
+<tr><td>`read_only`</td><td>Read Only</td><td>GET-only: dashboard, pet list, leaderboard, battle records, email monitor, analytics</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2-technology-stack-decisions">§2 Technology Stack Decisions</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="21-framework-selection">§2.1 Framework Selection</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Technology</th><th>Choice</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td>Frontend Framework</td><td>Vue 3.4+ (Composition API)</td><td>`<script setup>` syntax + Composition API fully compatible with Element Plus 2.x; Vue 3 reactivity system well-suited for form-heavy admin CRUD interfaces</td></tr>
+<tr><td>UI Component Library</td><td>Element Plus 2.7+</td><td>Enterprise-grade component library; `ElTable` with built-in sorting/filtering/pagination handles admin data-intensive requirements out of the box</td></tr>
+<tr><td>Build Tool</td><td>Vite 5.x</td><td>Fast HMR + optimized production bundle; seamless integration with monorepo pnpm workspaces</td></tr>
+<tr><td>State Management</td><td>Pinia 2.x</td><td>Modular stores; Vue 3 native TypeScript-friendly; official replacement for Vuex</td></tr>
+<tr><td>Routing</td><td>Vue Router 4.x</td><td>History mode + dynamic routing + `beforeEach` route guards (RBAC validation)</td></tr>
+<tr><td>HTTP Client</td><td>Axios 1.x</td><td>Request/response interceptors for session expiry handling; `withCredentials: true` for session cookie</td></tr>
+<tr><td>Charts</td><td>ECharts 5.x (via vue-echarts 6.x)</td><td>Analytics dashboard line chart requirements; tree-shakeable on-demand imports control bundle size</td></tr>
+<tr><td>i18n</td><td>None (single-language — English only)</td><td>Admin is an internal tool; English-only interface is sufficient</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="22-dependency-version-manifest">§2.2 Dependency Version Manifest</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-json">{
+  "dependencies": {
+    "vue": "^3.4.0",
+    "element-plus": "^2.7.0",
+    "vue-router": "^4.3.0",
+    "pinia": "^2.1.0",
+    "axios": "^1.6.0",
+    "echarts": "^5.5.0",
+    "vue-echarts": "^6.7.0",
+    "@element-plus/icons-vue": "^2.3.0"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "^5.4.0",
+    "vue-tsc": "^2.0.0",
+    "@types/node": "^20.0.0",
+    "vitest": "^1.4.0",
+    "@vue/test-utils": "^2.4.0",
+    "unplugin-auto-import": "^0.17.0",
+    "unplugin-vue-components": "^0.26.0"
+  }
+}</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-directory-structure">§3 Directory Structure</h2>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">packages/admin-app/                   ← Admin Portal root (pnpm workspace)
+├── src/
+│   ├── api/                          ← API call wrappers (maps to API.md /admin/api/* routes)
+│   │   ├── http.ts                   ← Axios instance + interceptors (session handling)
+│   │   ├── auth.ts                   ← login / logout / totp/setup / totp/verify
+│   │   ├── pets.ts                   ← GET /pets, GET /pets/:id, ban, unban
+│   │   ├── battles.ts                ← GET /battles, GET /suspicious, flag, unflag
+│   │   ├── leaderboard.ts            ← GET /leaderboard, DELETE /leaderboard/:petId
+│   │   ├── config.ts                 ← GET/PUT /config/runtime, /economy, /flags
+│   │   ├── gdpr.ts                   ← GET /gdpr, POST /gdpr/delete, PATCH /gdpr/:id
+│   │   ├── audit.ts                  ← GET /admin/api/audit
+│   │   ├── roles.ts                  ← GET/POST /roles, DELETE /roles/:id, TOTP reset
+│   │   ├── analytics.ts              ← GET /analytics, GET /dashboard, GET /email/monitor
+│   │   └── types.ts                  ← API response types (synchronized with packages/shared)
+│   ├── components/
+│   │   ├── common/                   ← Shared components
+│   │   │   ├── SearchableTable.vue   ← Table + Pagination + Search bar composite component
+│   │   │   ├── ConfirmDialog.vue     ← ElMessageBox wrapper (dangerous action confirmation)
+│   │   │   ├── AuditLogDetail.vue    ← Audit log detail Drawer
+│   │   │   └── StatusBadge.vue       ← Status badge (banned / active / pending)
+│   │   └── business/                 ← Domain-specific components
+│   │       ├── PetBanForm.vue        ← Ban/unban Dialog (reason field, max 500 chars)
+│   │       ├── BattleFlagForm.vue    ← Flag battle Dialog
+│   │       └── GdprStatusForm.vue    ← GDPR status update Dialog
+│   ├── composables/                  ← Reusable logic (Vue Composition API)
+│   │   ├── usePermission.ts          ← hasPermission() + v-permission directive
+│   │   ├── usePagination.ts          ← Pagination state management
+│   │   ├── useTable.ts               ← Table loading / error / data three-state pattern
+│   │   └── useSessionTimer.ts        ← 4h inactivity + 8h absolute expiry monitoring
+│   ├── layouts/
+│   │   └── AdminLayout.vue           ← HeaderBar + SidebarMenu + Content main layout
+│   ├── router/
+│   │   ├── index.ts                  ← Route definitions + createRouter
+│   │   ├── guards.ts                 ← beforeEach route guards (session + role validation)
+│   │   └── routes.ts                 ← Route list (includes meta.permission)
+│   ├── stores/                       ← Pinia stores
+│   │   ├── auth.ts                   ← session + adminUser + login/logout
+│   │   ├── permission.ts             ← role + hasPermission() + menuTree
+│   │   └── config.ts                 ← runtime config + economy config frontend cache
+│   ├── types/                        ← TypeScript type definitions
+│   │   ├── admin.ts                  ← AdminUser, AuditLogEntry, GdprRequest
+│   │   ├── pet.ts                    ← Pet, BanStatus, ModerationReason
+│   │   ├── config.ts                 ← RuntimeConfig, EconomyConfig, FeatureFlag
+│   │   └── api.ts                    ← ApiEnvelope, PagedResponse, Meta
+│   ├── utils/                        ← Utility functions
+│   │   ├── format.ts                 ← Date format, email mask, reason truncate
+│   │   └── session.ts                ← Session expiry calculation utilities
+│   ├── styles/                       ← Styles
+│   │   ├── variables.css             ← CSS Custom Properties (color / spacing tokens)
+│   │   └── global.css                ← Reset + Element Plus theme overrides
+│   └── views/
+│       ├── auth/
+│       │   ├── LoginView.vue         ← Login form (username + password + TOTP)
+│       │   └── TotpSetupView.vue     ← First-login TOTP setup page
+│       ├── dashboard/
+│       │   └── DashboardView.vue     ← KPI cards + system status
+│       ├── pets/
+│       │   ├── PetListView.vue       ← Pet list (search / filter / ban actions)
+│       │   └── PetDetailView.vue     ← Pet detail (ban history + stats + battles)
+│       ├── battles/
+│       │   ├── BattleListView.vue    ← Battle records list (flag/unflag)
+│       │   └── SuspiciousView.vue    ← Suspicious activity list
+│       ├── leaderboard/
+│       │   └── LeaderboardView.vue   ← Top 500 admin view (suspicious flags)
+│       ├── analytics/
+│       │   ├── AnalyticsView.vue     ← Time-series charts (DAU / claims / battles)
+│       │   └── EmailMonitorView.vue  ← Email delivery rate monitoring
+│       ├── config/
+│       │   ├── RuntimeConfigView.vue ← Arena rate limit / rarity weights
+│       │   ├── EconomyConfigView.vue ← Food buff multiplier / arena entry cost
+│       │   └── FeatureFlagsView.vue  ← Feature flag management (FF_MARKETPLACE, etc.)
+│       ├── gdpr/
+│       │   └── GdprQueueView.vue     ← GDPR request queue (status filter / update)
+│       ├── roles/
+│       │   └── RoleManagementView.vue ← Admin account list (create / deactivate / TOTP reset)
+│       ├── audit/
+│       │   └── AuditLogView.vue      ← Audit log (actor / action / time range filter)
+│       └── errors/
+│           ├── 403View.vue           ← Forbidden page
+│           └── 404View.vue           ← Not found page
+├── public/
+│   └── favicon.ico
+├── .env.development
+├── .env.production
+├── vite.config.ts
+├── tsconfig.json
+└── package.json</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-routing-design">§4 Routing Design</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="41-route-table">§4.1 Route Table</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Path</th><th>Component</th><th>Required Permission</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`/admin/login`</td><td>`LoginView`</td><td>Public</td><td>Admin login page (username + password + TOTP)</td></tr>
+<tr><td>`/admin/totp-setup`</td><td>`TotpSetupView`</td><td>Public (requires setupToken)</td><td>First-login TOTP enrollment</td></tr>
+<tr><td>`/admin/dashboard`</td><td>`DashboardView`</td><td>All authenticated roles</td><td>KPI Dashboard</td></tr>
+<tr><td>`/admin/pets`</td><td>`PetListView`</td><td>`read_only+`</td><td>Pet list + search + filter</td></tr>
+<tr><td>`/admin/pets/:petId`</td><td>`PetDetailView`</td><td>`read_only+`</td><td>Pet detail + ban history</td></tr>
+<tr><td>`/admin/battles`</td><td>`BattleListView`</td><td>`read_only+`</td><td>Battle records list</td></tr>
+<tr><td>`/admin/suspicious`</td><td>`SuspiciousView`</td><td>`moderator+`</td><td>Bot-detected suspicious pets list</td></tr>
+<tr><td>`/admin/leaderboard`</td><td>`LeaderboardView`</td><td>`read_only+`</td><td>Top 500 leaderboard admin view</td></tr>
+<tr><td>`/admin/analytics`</td><td>`AnalyticsView`</td><td>`read_only+`</td><td>Product analytics charts (DAU / claims / battles)</td></tr>
+<tr><td>`/admin/email`</td><td>`EmailMonitorView`</td><td>`read_only+`</td><td>Email delivery rate monitoring</td></tr>
+<tr><td>`/admin/config/runtime`</td><td>`RuntimeConfigView`</td><td>`super_admin`</td><td>Arena rate limit / rarity weights</td></tr>
+<tr><td>`/admin/config/economy`</td><td>`EconomyConfigView`</td><td>`super_admin`</td><td>Food buff multiplier / arena entry cost</td></tr>
+<tr><td>`/admin/config/flags`</td><td>`FeatureFlagsView`</td><td>`super_admin`</td><td>Feature flag management</td></tr>
+<tr><td>`/admin/gdpr`</td><td>`GdprQueueView`</td><td>`super_admin`</td><td>GDPR request queue</td></tr>
+<tr><td>`/admin/roles`</td><td>`RoleManagementView`</td><td>`super_admin`</td><td>Admin account and role management</td></tr>
+<tr><td>`/admin/audit`</td><td>`AuditLogView`</td><td>`super_admin`</td><td>Audit log review</td></tr>
+<tr><td>`/admin/403`</td><td>`403View`</td><td>Public</td><td>Forbidden error page</td></tr>
+<tr><td>`/admin/:pathMatch(.*)`</td><td>`404View`</td><td>Public</td><td>404 error page</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="42-route-guards">§4.2 Route Guards</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// router/guards.ts
+import { useAuthStore } from '@/stores/auth'
+import { usePermissionStore } from '@/stores/permission'
+import type { Router } from 'vue-router'
+
+export function setupRouterGuards(router: Router) {
+  router.beforeEach(async (to, _from, next) =&gt; {
+    const authStore = useAuthStore()
+    const permStore = usePermissionStore()
+
+    // Public pages (login / totp-setup / error pages) — pass through
+    if (to.meta.public) return next()
+
+    // Not authenticated → redirect to login, preserve destination path
+    if (!authStore.isAuthenticated) {
+      return next({ path: '/login', query: { redirect: to.fullPath } })
+    }
+
+    // Permission check (meta.permission = required role level)
+    const required = to.meta.permission as string | undefined
+    if (required &amp;&amp; !permStore.hasPermission(required)) {
+      return next('/403')
+    }
+
+    next()
+  })
+}</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="43-dynamic-sidebar-generation-strategy">§4.3 Dynamic Sidebar Generation Strategy</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The portal uses a <strong>client-filtered</strong> strategy: roles are fixed at deploy time (<code>super_admin</code> / <code>moderator</code> / <code>read_only</code>); the frontend filters a static menu config based on the current user's role. Menu items without permission are removed entirely (not just disabled) to prevent information leakage.</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Rationale: EDD §3.7 and ARCH §5.1 define three admin roles that are fixed for EDD Phase 1 — no need for server-side dynamic menu delivery.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-rbac-implementation">§5 RBAC Implementation</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="51-role-definitions-from-edd-37--arch-51--schema-adminroleenum">§5.1 Role Definitions (from EDD §3.7 + ARCH §5.1 + SCHEMA admin_role_enum)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Role Key</th><th>Display Name</th><th>System Role</th><th>Permission Level</th></tr></thead>
+<tbody>
+<tr><td>`super_admin`</td><td>Super Admin</td><td>Yes</td><td>All (config / GDPR / roles / audit log)</td></tr>
+<tr><td>`moderator`</td><td>Moderator</td><td>Yes</td><td>pet ban/unban, battle flag/unflag, leaderboard, suspicious, analytics, dashboard, email monitor</td></tr>
+<tr><td>`read_only`</td><td>Read Only</td><td>Yes</td><td>GET-only: dashboard, pets, leaderboard, battles, analytics, email monitor</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p">Permission mapping to API.md §6 endpoint Role Access:</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Resource</th><th>Action</th><th>Required Role</th></tr></thead>
+<tbody>
+<tr><td>dashboard</td><td>view</td><td>read_only+</td></tr>
+<tr><td>pets</td><td>list / view</td><td>read_only+</td></tr>
+<tr><td>pets</td><td>ban / unban</td><td>moderator+</td></tr>
+<tr><td>pets</td><td>edit (PUT)</td><td>super_admin</td></tr>
+<tr><td>battles</td><td>list / view</td><td>read_only+</td></tr>
+<tr><td>battles</td><td>flag / unflag</td><td>moderator+</td></tr>
+<tr><td>suspicious</td><td>view</td><td>moderator+</td></tr>
+<tr><td>leaderboard</td><td>view</td><td>read_only+</td></tr>
+<tr><td>leaderboard</td><td>remove entry</td><td>moderator+</td></tr>
+<tr><td>analytics</td><td>view</td><td>read_only+</td></tr>
+<tr><td>email</td><td>monitor</td><td>read_only+</td></tr>
+<tr><td>config</td><td>read</td><td>super_admin</td></tr>
+<tr><td>config</td><td>write</td><td>super_admin</td></tr>
+<tr><td>gdpr</td><td>view / process</td><td>super_admin</td></tr>
+<tr><td>roles</td><td>view / manage</td><td>super_admin</td></tr>
+<tr><td>audit</td><td>view</td><td>super_admin</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="52-permission-guard-implementation">§5.2 Permission Guard Implementation</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// composables/usePermission.ts
+import { usePermissionStore } from '@/stores/permission'
+import type { DirectiveBinding } from 'vue'
+
+export function usePermission() {
+  const permStore = usePermissionStore()
+
+  const hasPermission = (requiredRole: 'read_only' | 'moderator' | 'super_admin'): boolean =&gt; {
+    const roleHierarchy = { read_only: 0, moderator: 1, super_admin: 2 }
+    const userLevel = roleHierarchy[permStore.role] ?? -1
+    const requiredLevel = roleHierarchy[requiredRole] ?? 99
+    return userLevel &gt;= requiredLevel
+  }
+
+  return { hasPermission }
+}
+
+// v-permission directive — registered in main.ts
+export const permissionDirective = {
+  mounted(el: HTMLElement, binding: DirectiveBinding&lt;string&gt;) {
+    const { hasPermission } = usePermission()
+    if (!hasPermission(binding.value as 'read_only' | 'moderator' | 'super_admin')) {
+      el.parentNode?.removeChild(el)
+    }
+  }
+}</code></pre>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-vue">&lt;!-- Button-level permission control example --&gt;
+&lt;template&gt;
+  &lt;el-button
+    v-permission="'moderator'"
+    type="danger"
+    @click="handleBan(pet.id)"
+  &gt;
+    Ban Pet
+  &lt;/el-button&gt;
+&lt;/template&gt;</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="53-dynamic-menu-strategy">§5.3 Dynamic Menu Strategy</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Choice: <strong>client-filtered</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">Implementation: Each route in <code>router/routes.ts</code> carries <code>meta.permission</code>. <code>SidebarMenu</code> in <code>AdminLayout.vue</code> iterates the route config and applies <code>usePermission().hasPermission(route.meta.permission)</code> to filter out inaccessible menu items. Items without access are removed from the DOM entirely — not just visually hidden.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="54-session-management">§5.4 Session Management</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Item</th><th>Specification</th></tr></thead>
+<tbody>
+<tr><td>Session storage location</td><td>HttpOnly Cookie (`session=<session_id>; HttpOnly; SameSite=Strict; Secure; Path=/admin`)</td></tr>
+<tr><td>Inactivity timeout</td><td>4 hours (admin_session_inactivity_expiry_hours = 4)</td></tr>
+<tr><td>Absolute expiry</td><td>8 hours (admin_session_absolute_expiry_hours = 8)</td></tr>
+<tr><td>Session identity</td><td>Frontend stores no token string; `isAuthenticated` is inferred from 401 / 200 responses on any authenticated API call</td></tr>
+<tr><td>Refresh strategy</td><td>Axios Response Interceptor intercepts 401 → clears auth state → redirects to login page</td></tr>
+<tr><td>CSRF protection</td><td>SameSite=Strict cookie policy prevents cross-site request forgery; no additional token required (FRONTEND.md §3.6)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="6-layout-system">§6 Layout System</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="61-main-layout-structure">§6.1 Main Layout Structure</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">┌───────────────────────────────────────────────────────────┐
+│  HeaderBar (Logo + Admin Username + Role Badge + Logout)   │
+├──────────────┬────────────────────────────────────────────┤
+│  SidebarMenu │  Content Area                              │
+│  (260px)     │  ┌──────────────────────────────────────┐  │
+│  Dashboard   │  │  BreadCrumb (auto-generated by route) │  │
+│  Pet Mgmt    │  ├──────────────────────────────────────┤  │
+│  Battles     │  │  Page Content                        │  │
+│  Leaderboard │  │  (max-width: 1400px; padding: 24px)  │  │
+│  Analytics   │  │                                      │  │
+│  Config ▾    │  └──────────────────────────────────────┘  │
+│  GDPR        │                                            │
+│  Roles       │                                            │
+│  Audit Log   │                                            │
+└──────────────┴────────────────────────────────────────────┘</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Layout sub-components:</strong></p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>HeaderBar</strong>: Left side shows pixel-pet-arena logo (text) + "Admin Portal" label; right side shows the logged-in admin's username + role badge (<code>el-tag</code>) + session inactivity countdown + logout button. Logout calls <code>POST /admin/api/auth/logout</code> and clears auth state.</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>SidebarMenu</strong>: Uses Element Plus <code>el-menu</code>. Expanded width: 260px / collapsed width: 64px (icon-only + tooltip). Menu items are dynamically filtered by current user role (client-filtered; items without access are never rendered). Active route is highlighted with a left-border accent color (<code>--el-color-primary</code>) + light background. Config is a nested group (Runtime / Economy / Feature Flags).</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>BreadCrumb</strong>: Placed at the top of the Content Area using <code>el-breadcrumb</code>, auto-generated from <code>route.matched</code> hierarchy (e.g. "Pet Management > Pet Detail").</li>
+</ul>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Content Area</strong>: <code>max-width: 1400px</code>; <code>padding: 24px</code>; renders page content via <code><RouterView /></code>. Scroll occurs only in the Content Area — Sidebar and Header are fixed.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="62-sidebar-specification">§6.2 Sidebar Specification</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Expanded width</td><td>260px</td></tr>
+<tr><td>Collapsed width</td><td>64px (icon only)</td></tr>
+<tr><td>Collapsed behavior</td><td>Icons only; `:collapse-transition="false"` prevents animation stutter; tooltip shows menu name</td></tr>
+<tr><td>Active item style</td><td>3px solid left border `var(--el-color-primary)` + background `var(--el-color-primary-light-9)`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="7-page-specifications">§7 Page Specifications</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="71-login-page-codeadminlogincode">§7.1 Login Page (<code>/admin/login</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Admin authentication (username + password + 6-digit TOTP code)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Form fields</strong>:</p>
+<ul class="doc-list">
+<li><code>username</code>: string, required (not email — avoids exposing user existence)</li>
+<li><code>password</code>: string, required, type="password"</li>
+<li><code>totpCode</code>: string, optional on first login (server returns <code>TOTP_SETUP_REQUIRED</code> and redirects to setup page)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Interaction rules</strong>:</p>
+<ul class="doc-list">
+<li>Pre-submit <code>formRef.validate()</code> call</li>
+<li>Success → store adminId + role in <code>authStore</code>, redirect to <code>redirect</code> query param or default <code>/admin/dashboard</code></li>
+<li>10 consecutive failures → account locked (admin_login_lockout_threshold = 10; admin_login_lockout_duration_minutes = 30), display <code>unlockedAt</code> remaining time</li>
+<li>IP-level pre-auth rate limit: 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10; admin_login_ip_rate_limit_window_seconds = 900)</li>
+<li><code>TOTP_SETUP_REQUIRED</code> response → extract <code>error.details.setupToken</code>, navigate to <code>/admin/totp-setup</code></li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>APIs required</strong>: <code>POST /admin/api/auth/login</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="72-dashboard-codeadmindashboardcode">§7.2 Dashboard (<code>/admin/dashboard</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Platform health at a glance; page load target ≤ 3 seconds (admin_page_load_time_seconds = 3)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>KPI Cards</strong>:</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Card</th><th>Data Source</th><th>Update Strategy</th></tr></thead>
+<tbody>
+<tr><td>Claimed Pets Today</td><td>`GET /admin/api/dashboard → claimedPetsToday`</td><td>On page load + manual refresh</td></tr>
+<tr><td>Active Battles Today</td><td>`GET /admin/api/dashboard → activeBattlesToday`</td><td>On page load + manual refresh</td></tr>
+<tr><td>Pending GDPR Requests</td><td>`GET /admin/api/dashboard → pendingGdprRequests`</td><td>On page load (super_admin only; hidden for others)</td></tr>
+<tr><td>Daily Active Users</td><td>`GET /admin/api/dashboard → dailyActiveUsers`</td><td>On page load</td></tr>
+<tr><td>Error Rate (5 min)</td><td>`GET /admin/api/dashboard → errorRateLast5Min`</td><td>On page load + 30 s polling</td></tr>
+<tr><td>Email Delivery Rate</td><td>`GET /admin/api/dashboard → emailDeliveryRate`</td><td>On page load</td></tr>
+<tr><td>System Status</td><td>`GET /admin/api/dashboard → systemStatus`</td><td>On page load + 30 s polling</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>System Status display</strong>: <code>healthy</code> → green <code>el-tag</code>; <code>degraded</code> → orange; <code>down</code> → red + <code>ElNotification</code> alert</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Charts</strong>: Dashboard KPI data comes from the <code>GET /admin/api/dashboard</code> aggregated endpoint. Time-series charts are on <code>/admin/analytics</code> only — no ECharts instances on the Dashboard page.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required API</strong>: <code>GET /admin/api/dashboard</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: All authenticated roles (<code>read_only+</code>)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="73-pet-management--list-codeadminpetscode">§7.3 Pet Management — List (<code>/admin/pets</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Search, filter, and manage all platform pets; supports ≤ 2 s search across 1 million records (admin_search_response_time_seconds = 2)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Pet ID (truncated), Owner Email (masked: <code>p<em>*</em>@example.com</code>), Rarity, Level, Win Rate, Battles Played, Ban Status, Created At</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Search / filter</strong>:</p>
+<ul class="doc-list">
+<li>Search: Exact pet UUID or SHA-256 email hash (64-char hex)</li>
+<li>Filter: Rarity (<code>COMMON/RARE/EPIC/LEGENDARY</code>) / Ban Status (All / Banned / Active)</li>
+<li>Pagination: 20 rows per page default</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Action buttons</strong> (conditionally shown):</p>
+<ul class="doc-list">
+<li>Ban (<code>v-permission="'moderator'"</code>) → opens <code>PetBanForm.vue</code> dialog</li>
+<li>Unban (<code>v-permission="'moderator'"</code>, shown only for banned pets) → opens <code>PetBanForm.vue</code> dialog (reason required)</li>
+<li>View Detail → navigates to <code>/admin/pets/:petId</code></li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/pets</code>, <code>POST /admin/api/pets/:petId/ban</code>, <code>POST /admin/api/pets/:petId/unban</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>read_only+</code> (GET) / <code>moderator+</code> (ban/unban)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="74-pet-management--detail-codeadminpetspetidcode">§7.4 Pet Management — Detail (<code>/admin/pets/:petId</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: View a single pet's full information including ban history and battle records</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Displayed information</strong>:</p>
+<ul class="doc-list">
+<li>Basic info: ID, Pet Name, Seed, Rarity, Level, Generation Meta (6 dimensions)</li>
+<li>Stats: speed / strength / stamina, Total Training Actions, Last Trained At, isNeglected</li>
+<li>Owner: Owner Email (masked), Claimed At</li>
+<li>Ban status: isBanned, Banned Reason (max 500 chars), Banned At</li>
+<li>Last 20 arena battle records (arena_battle_records_display_count = 20)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Actions</strong>: Ban / Unban (<code>moderator+</code>), Edit Pet Name (<code>super_admin</code>, <code>PUT /admin/api/pets/:petId</code>)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required API</strong>: <code>GET /admin/api/pets/:petId</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="75-battle-records-codeadminbattlescode">§7.5 Battle Records (<code>/admin/battles</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Review all arena battle records; supports flag/unflag operations</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Match ID, Pet A, Pet B (null if AI), Winner (<code>winnerId</code>), Duration, Flagged (<code>isFlagged</code>), Completed At</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Filters</strong>: Date range (from/to) / Pet ID / Flagged (All / Flagged Only)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Actions</strong>:</p>
+<ul class="doc-list">
+<li>Flag Battle (<code>moderator+</code>) → <code>POST /admin/api/battles/:matchId/flag</code> (reason required, max 500 chars)</li>
+<li>Unflag Battle (<code>moderator+</code>) → <code>DELETE /admin/api/battles/:matchId/flag</code> (reason required)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/battles</code>, <code>POST /admin/api/battles/:matchId/flag</code>, <code>DELETE /admin/api/battles/:matchId/flag</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>read_only+</code> (GET) / <code>moderator+</code> (flag/unflag)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="76-suspicious-activity-codeadminsuspiciouscode">§7.6 Suspicious Activity (<code>/admin/suspicious</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: List pets automatically flagged by the bot detection system (> 50 battles/hr rolling window)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Pet ID, Battles Last Hour, Win Rate, Flag Count, Last Flagged At</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Actions</strong>: Navigate to Pet Detail (ban actions performed on the detail page)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Threshold</strong>: bot_detection_battles_threshold = 50 / bot_detection_window_minutes = 60</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required API</strong>: <code>GET /admin/api/suspicious</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>moderator+</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="77-leaderboard-management-codeadminleaderboardcode">§7.7 Leaderboard Management (<code>/admin/leaderboard</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: View Top 500 leaderboard (public version shows only Top 100); suspicious pets display a warning badge</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Rank, Pet Name, Rarity, Level, Score, Win Rate, Battles Last Hour, Suspicious (warning icon when <code>isSuspicious</code>), Banned</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Hard cap</strong>: 500 entries (leaderboard_admin_view = 500), single response, no pagination</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Actions</strong>:</p>
+<ul class="doc-list">
+<li>Remove from Leaderboard (<code>moderator+</code>) → <code>DELETE /admin/api/leaderboard/:petId</code></li>
+<li>View Pet Detail → navigate to <code>/admin/pets/:petId</code></li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/leaderboard</code>, <code>DELETE /admin/api/leaderboard/:petId</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>read_only+</code> (GET) / <code>moderator+</code> (DELETE)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="78-analytics-codeadminanalyticscode">§7.8 Analytics (<code>/admin/analytics</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Platform time-series analysis charts</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Charts</strong>:</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Chart</th><th>Type</th><th>Data Source</th></tr></thead>
+<tbody>
+<tr><td>Daily Active Users</td><td>ECharts Line</td><td>`GET /admin/api/analytics?metric=dau`</td></tr>
+<tr><td>New Claims Per Day</td><td>ECharts Line</td><td>`GET /admin/api/analytics?metric=claims`</td></tr>
+<tr><td>Arena Battles Per Day</td><td>ECharts Bar</td><td>`GET /admin/api/analytics?metric=arena_battles`</td></tr>
+<tr><td>Leaderboard UVs</td><td>ECharts Line</td><td>`GET /admin/api/analytics?metric=leaderboard_uvs`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Controls</strong>: Date range picker (from / to, required), manual refresh button</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required API</strong>: <code>GET /admin/api/analytics</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>read_only+</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="79-email-monitor-codeadminemailcode">§7.9 Email Monitor (<code>/admin/email</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Monitor SendGrid delivery health</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Displayed info</strong>: Emails Sent (24h), Delivery Success Rate (target ≥ 98%; claim_email_delivery_rate_target_percent = 98), Bounce Rate, Spam Complaint Rate (target < 0.1%; spam_complaint_rate_max_percent = 0.1), Failover Active (boolean)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required API</strong>: <code>GET /admin/api/email/monitor</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>read_only+</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="710-runtime-config-codeadminconfigruntimecode">§7.10 Runtime Config (<code>/admin/config/runtime</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Runtime parameter adjustment; config changes take effect within 5 minutes (config_cache_refresh_time_minutes = 5)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Form fields</strong>:</p>
+<ul class="doc-list">
+<li><code>arenaRateLimitBattlesPerHour</code>: integer, range <code>[1, 50]</code> (arena_rate_limit_admin_min = 1, arena_rate_limit_admin_max = 50)</li>
+<li><code>arenaMatchmakingTimeoutSeconds</code>: integer, recommended range 5–120</li>
+<li><code>rarityWeights.common</code>: integer</li>
+<li><code>rarityWeights.rare</code>: integer</li>
+<li><code>rarityWeights.epic</code>: integer</li>
+<li><code>rarityWeights.legendary</code>: integer (all four must sum to 100%)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/config/runtime</code>, <code>PUT /admin/api/config/runtime</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>super_admin</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="711-economy-config-codeadminconfigeconomycode">§7.11 Economy Config (<code>/admin/config/economy</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Food buff multiplier and arena entry cost configuration</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Form fields</strong>:</p>
+<ul class="doc-list">
+<li><code>foodBuffMultiplierMin</code>: 0.5–5.0 (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0)</li>
+<li><code>foodBuffMultiplierMax</code>: 0.5–5.0</li>
+<li><code>arenaEntryCostFoodCreditsDefault</code>: 0–10 (arena_entry_cost_food_credits_default = 0, arena_entry_cost_food_credits_admin_max = 10)</li>
+<li><code>arenaEntryCooldownMaxMinutes</code>: 0–60 (arena_entry_cooldown_admin_min_minutes = 0, arena_entry_cooldown_admin_max_minutes = 60)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/config/economy</code>, <code>PUT /admin/api/config/economy</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>super_admin</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="712-feature-flags-codeadminconfigflagscode">§7.12 Feature Flags (<code>/admin/config/flags</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Control feature switches such as <code>FF_MARKETPLACE</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Flag Name, Enabled (<code>el-switch</code>), Description</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Actions</strong>: Toggle → <code>PUT /admin/api/config/flags/:flag</code> (secondary confirmation required for high-impact flags such as <code>FF_MARKETPLACE</code>)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/config/flags</code>, <code>PUT /admin/api/config/flags/:flag</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>super_admin</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="713-gdpr-queue-codeadmingdprcode">§7.13 GDPR Queue (<code>/admin/gdpr</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Process 5 types of GDPR requests (erasure / data_access / restrict_processing / object_leaderboard / rectification)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Request ID, Request Type, Status, Submitted At, Completed At, Admin Notes</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Filters</strong>: Status / Type</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Actions</strong>:</p>
+<ul class="doc-list">
+<li>Update Status (non-erasure requests) → <code>PATCH /admin/api/gdpr/:requestId</code> (status + adminNotes, max 500 chars)</li>
+<li>Initiate Admin Erasure → <code>POST /admin/api/gdpr/delete</code> (emailHash + reason, max 500 chars)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>SLA display</strong>: Each row shows remaining time before SLA deadline:</p>
+<ul class="doc-list">
+<li>erasure: 7 days (gdpr_email_deletion_window_days = 7)</li>
+<li>data_access: 30 days (gdpr_data_access_response_days = 30)</li>
+<li>restrict_processing: 24 h (gdpr_restrict_processing_response_hours = 24)</li>
+<li>object_leaderboard: 5 business days (gdpr_object_leaderboard_response_business_days = 5)</li>
+<li>rectification: 24 h (gdpr_email_rectification_response_hours = 24)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/gdpr</code>, <code>PATCH /admin/api/gdpr/:requestId</code>, <code>POST /admin/api/gdpr/delete</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>super_admin</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="714-role-management-codeadminrolescode">§7.14 Role Management (<code>/admin/roles</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Manage admin accounts (create / deactivate / reset TOTP)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Admin ID, Username, Role, Last Login At, Status (Active / Deactivated)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Actions</strong>:</p>
+<ul class="doc-list">
+<li>Create Admin → <code>POST /admin/api/roles</code> (username + role + temporaryPassword)</li>
+<li>Deactivate Admin → <code>DELETE /admin/api/roles/:adminId</code> (secondary confirmation required)</li>
+<li>Reset TOTP → <code>POST /admin/api/roles/:adminId/totp/reset</code> (secondary confirmation required)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Constraint</strong>: Admin accounts are soft-deleted only (<code>deactivated_at</code> set); hard deletion is not permitted</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required APIs</strong>: <code>GET /admin/api/roles</code>, <code>POST /admin/api/roles</code>, <code>DELETE /admin/api/roles/:adminId</code>, <code>POST /admin/api/roles/:adminId/totp/reset</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>super_admin</code></p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="715-audit-log-codeadminauditcode">§7.15 Audit Log (<code>/admin/audit</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Purpose</strong>: Review all admin CUD operation records; any 12-month window search ≤ 3 s (admin_audit_log_search_response_time_seconds = 3)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Table columns</strong>: Log ID, Admin Username, Action, Target Type, Target ID, Detail (JSONB summary), Created At</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Filters</strong>: Actor (actorId UUID) / Action Type (e.g. <code>pet.ban</code>) / Date Range (from / to)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Read-only</strong>: No deletion or modification; Detail column is expandable to show full JSONB (<code>AuditLogDetail.vue</code>)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>IP note</strong>: IP addresses are stored as SHA-256 hash; raw IPs are never displayed; nulled after 90 days (ip_address_log_retention_days = 90)</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required API</strong>: <code>GET /admin/api/audit</code></p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Required permission</strong>: <code>super_admin</code></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="8-api-integration">§8 API Integration</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="81-axios-configuration">§8.1 Axios Configuration</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// api/http.ts
+import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
+import router from '@/router'
+
+// API timeout — page load target 3 s (admin_page_load_time_seconds = 3); use 10 s as API call timeout
+const ADMIN_API_TIMEOUT_MS = 10_000
+
+const http = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: ADMIN_API_TIMEOUT_MS,
+  withCredentials: true, // carry httpOnly session cookie
+})
+
+// No CSRF token injection required — SameSite=Strict cookie policy prevents cross-site forgery (FRONTEND.md §3.6)
+
+// Response interceptor: session expiry handling
+http.interceptors.response.use(
+  res =&gt; res,
+  async error =&gt; {
+    const status = error.response?.status
+    if (status === 401) {
+      // Session expired → clear auth state → redirect to login
+      const authStore = useAuthStore()
+      authStore.clearSession()
+      await router.push('/login')
+    } else if (status === 403) {
+      await router.push('/403')
+    }
+    return Promise.reject(error)
+  }
+)
+
+export default http</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="82-csrf-protection">§8.2 CSRF Protection</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Admin API CSRF protection relies on the <code>SameSite=Strict</code> attribute on the session cookie (API.md §2.2). Because the cookie is <code>SameSite=Strict</code>, browsers will not attach it to cross-origin requests, making cross-site request forgery impossible without additional token mechanisms. No <code>X-CSRF-Token</code> header is required (FRONTEND.md §3.6). If the deployment is ever extended to cross-origin scenarios, an <code>X-CSRF-Token</code> double-submit pattern must be added at that time.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="83-admin-session-handling">§8.3 Admin Session Handling</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Admin sessions use server-side Redis sessions (<code>session:admin:{session_id}</code>):</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Inactivity TTL</strong>: 14400 s (admin_session_inactivity_expiry_hours = 4) — automatically renewed by the server on each request</li>
+<li><strong>Absolute expiry</strong>: 28800 s (admin_session_absolute_expiry_hours = 8) — server enforces via <code>absExpiry</code> field in the session JSON</li>
+<li><strong>Frontend monitoring</strong>: <code>useSessionTimer.ts</code> composable starts a timer at login; shows a toast 5 minutes before inactivity expiry; forces redirect to login at absolute expiry</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="84-api-endpoint-mapping-all-codeadminapicode-routes-from-apimd-6">§8.4 API Endpoint Mapping (all <code>/admin/api/*</code> routes from API.md §6)</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Feature</th><th>Method</th><th>Path</th><th>Required Permission</th><th>Page</th></tr></thead>
+<tbody>
+<tr><td>Admin login</td><td>POST</td><td>`/admin/api/auth/login`</td><td>Public</td><td>`/admin/login`</td></tr>
+<tr><td>TOTP setup</td><td>POST</td><td>`/admin/api/auth/totp/setup`</td><td>setupToken</td><td>`/admin/totp-setup`</td></tr>
+<tr><td>Logout</td><td>POST</td><td>`/admin/api/auth/logout`</td><td>Authenticated</td><td>—</td></tr>
+<tr><td>TOTP verify (step-up)</td><td>POST</td><td>`/admin/api/auth/totp/verify`</td><td>Authenticated</td><td>—</td></tr>
+<tr><td>List admin accounts</td><td>GET</td><td>`/admin/api/roles`</td><td>super_admin</td><td>`/admin/roles`</td></tr>
+<tr><td>Create admin account</td><td>POST</td><td>`/admin/api/roles`</td><td>super_admin</td><td>`/admin/roles`</td></tr>
+<tr><td>Deactivate admin account</td><td>DELETE</td><td>`/admin/api/roles/:adminId`</td><td>super_admin</td><td>`/admin/roles`</td></tr>
+<tr><td>Reset TOTP</td><td>POST</td><td>`/admin/api/roles/:adminId/totp/reset`</td><td>super_admin</td><td>`/admin/roles`</td></tr>
+<tr><td>Pet list</td><td>GET</td><td>`/admin/api/pets`</td><td>read_only+</td><td>`/admin/pets`</td></tr>
+<tr><td>Pet detail</td><td>GET</td><td>`/admin/api/pets/:petId`</td><td>read_only+</td><td>`/admin/pets/:petId`</td></tr>
+<tr><td>Update pet (petName)</td><td>PUT</td><td>`/admin/api/pets/:petId`</td><td>super_admin</td><td>`/admin/pets/:petId`</td></tr>
+<tr><td>Ban pet</td><td>POST</td><td>`/admin/api/pets/:petId/ban`</td><td>moderator+</td><td>`/admin/pets`</td></tr>
+<tr><td>Unban pet</td><td>POST</td><td>`/admin/api/pets/:petId/unban`</td><td>moderator+</td><td>`/admin/pets`</td></tr>
+<tr><td>Battle records list</td><td>GET</td><td>`/admin/api/battles`</td><td>read_only+</td><td>`/admin/battles`</td></tr>
+<tr><td>Suspicious activity list</td><td>GET</td><td>`/admin/api/suspicious`</td><td>moderator+</td><td>`/admin/suspicious`</td></tr>
+<tr><td>Flag battle</td><td>POST</td><td>`/admin/api/battles/:matchId/flag`</td><td>moderator+</td><td>`/admin/battles`</td></tr>
+<tr><td>Unflag battle</td><td>DELETE</td><td>`/admin/api/battles/:matchId/flag`</td><td>moderator+</td><td>`/admin/battles`</td></tr>
+<tr><td>Leaderboard (Top 500)</td><td>GET</td><td>`/admin/api/leaderboard`</td><td>read_only+</td><td>`/admin/leaderboard`</td></tr>
+<tr><td>Remove leaderboard entry</td><td>DELETE</td><td>`/admin/api/leaderboard/:petId`</td><td>moderator+</td><td>`/admin/leaderboard`</td></tr>
+<tr><td>Read runtime config</td><td>GET</td><td>`/admin/api/config/runtime`</td><td>super_admin</td><td>`/admin/config/runtime`</td></tr>
+<tr><td>Update runtime config</td><td>PUT</td><td>`/admin/api/config/runtime`</td><td>super_admin</td><td>`/admin/config/runtime`</td></tr>
+<tr><td>Read economy config</td><td>GET</td><td>`/admin/api/config/economy`</td><td>super_admin</td><td>`/admin/config/economy`</td></tr>
+<tr><td>Update economy config</td><td>PUT</td><td>`/admin/api/config/economy`</td><td>super_admin</td><td>`/admin/config/economy`</td></tr>
+<tr><td>Read feature flags</td><td>GET</td><td>`/admin/api/config/flags`</td><td>super_admin</td><td>`/admin/config/flags`</td></tr>
+<tr><td>Update feature flag</td><td>PUT</td><td>`/admin/api/config/flags/:flag`</td><td>super_admin</td><td>`/admin/config/flags`</td></tr>
+<tr><td>GDPR queue list</td><td>GET</td><td>`/admin/api/gdpr`</td><td>super_admin</td><td>`/admin/gdpr`</td></tr>
+<tr><td>Admin-initiated erasure</td><td>POST</td><td>`/admin/api/gdpr/delete`</td><td>super_admin</td><td>`/admin/gdpr`</td></tr>
+<tr><td>Update GDPR status</td><td>PATCH</td><td>`/admin/api/gdpr/:requestId`</td><td>super_admin</td><td>`/admin/gdpr`</td></tr>
+<tr><td>Audit log</td><td>GET</td><td>`/admin/api/audit`</td><td>super_admin</td><td>`/admin/audit`</td></tr>
+<tr><td>Dashboard</td><td>GET</td><td>`/admin/api/dashboard`</td><td>read_only+</td><td>`/admin/dashboard`</td></tr>
+<tr><td>Analytics</td><td>GET</td><td>`/admin/api/analytics`</td><td>read_only+</td><td>`/admin/analytics`</td></tr>
+<tr><td>Email monitor</td><td>GET</td><td>`/admin/api/email/monitor`</td><td>read_only+</td><td>`/admin/email`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="9-pinia-store-architecture">§9 Pinia Store Architecture</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="91-store-summary">§9.1 Store Summary</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Store</th><th>Responsibility</th><th>Primary State</th></tr></thead>
+<tbody>
+<tr><td>`authStore`</td><td>Authentication state / session management</td><td>`adminId`, `role`, `username`, `sessionExpiresAt`, `isAuthenticated`</td></tr>
+<tr><td>`permissionStore`</td><td>Current user role + permission queries</td><td>`role`, `hasPermission()`</td></tr>
+<tr><td>`configStore`</td><td>Frontend cache for runtime config, economy config, and feature flags</td><td>`runtimeConfig`, `economyConfig`, `featureFlags`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="92-authstore--key-logic">§9.2 authStore — Key Logic</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">This project uses an <strong>HttpOnly Cookie</strong> session mechanism. <code>authStore</code> stores no token string. <code>isAuthenticated</code> is derived from whether <code>adminUser</code> is non-null. After page refresh, if the session is still valid, Axios automatically carries the cookie — the first authenticated API call returning 200 maintains the logged-in state; a 401 redirects to login.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// stores/auth.ts
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { usePermissionStore } from './permission'
+import { authApi } from '@/api/auth'
+import router from '@/router'
+
+interface AdminUser {
+  adminId: string
+  username: string
+  role: 'super_admin' | 'moderator' | 'read_only'
+  sessionExpiresAt: string
+}
+
+export const useAuthStore = defineStore('auth', () =&gt; {
+  const adminUser = ref&lt;AdminUser | null&gt;(null)
+  const loginAt = ref&lt;number | null&gt;(null)
+
+  // HttpOnly Cookie session: isAuthenticated derived from adminUser presence
+  const isAuthenticated = computed(() =&gt; adminUser.value !== null)
+
+  async function login(credentials: { username: string; password: string; totpCode?: string }) {
+    const res = await authApi.login(credentials)
+    adminUser.value = {
+      adminId: res.data.data.adminId,
+      username: credentials.username,
+      role: res.data.data.role,
+      sessionExpiresAt: res.data.data.sessionExpiresAt,
+    }
+    loginAt.value = Date.now()
+    const permStore = usePermissionStore()
+    permStore.setRole(res.data.data.role)
+  }
+
+  async function logout() {
+    try {
+      await authApi.logout()
+    } finally {
+      clearSession()
+      await router.push('/login')
+    }
+  }
+
+  function clearSession() {
+    adminUser.value = null
+    loginAt.value = null
+    const permStore = usePermissionStore()
+    permStore.clearRole()
+  }
+
+  return { adminUser, isAuthenticated, loginAt, login, logout, clearSession }
+})</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="93-permissionstore--key-logic">§9.3 permissionStore — Key Logic</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// stores/permission.ts
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+
+type AdminRole = 'super_admin' | 'moderator' | 'read_only'
+
+const ROLE_HIERARCHY: Record&lt;AdminRole, number&gt; = {
+  read_only: 0,
+  moderator: 1,
+  super_admin: 2,
+}
+
+export const usePermissionStore = defineStore('permission', () =&gt; {
+  const role = ref&lt;AdminRole | null&gt;(null)
+
+  function setRole(r: AdminRole) {
+    role.value = r
+  }
+
+  function clearRole() {
+    role.value = null
+  }
+
+  function hasPermission(requiredRole: AdminRole): boolean {
+    if (!role.value) return false
+    return (ROLE_HIERARCHY[role.value] ?? -1) &gt;= (ROLE_HIERARCHY[requiredRole] ?? 99)
+  }
+
+  // Generate accessible sidebar menu keys by role
+  const accessibleMenuKeys = () =&gt; {
+    if (!role.value) return []
+    const all = ['dashboard', 'pets', 'battles', 'suspicious', 'leaderboard', 'analytics', 'email']
+    const superOnly = ['config', 'gdpr', 'roles', 'audit']
+    if (role.value === 'super_admin') return [...all, ...superOnly]
+    if (role.value === 'moderator') return all
+    return all.filter(k =&gt; !['suspicious'].includes(k))
+  }
+
+  return { role, setRole, clearRole, hasPermission, accessibleMenuKeys }
+})</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="94-configstore--key-logic">§9.4 configStore — Key Logic</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// stores/config.ts
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { configApi } from '@/api/config'
+
+interface RuntimeConfig {
+  arenaRateLimitBattlesPerHour: number        // range [1, 50] (arena_rate_limit_admin_min/max)
+  arenaMatchmakingTimeoutSeconds: number
+  rarityWeights: { common: number; rare: number; epic: number; legendary: number }
+}
+
+interface EconomyConfig {
+  foodBuffMultiplierMin: number               // (food_buff_multiplier_admin_min = 0.5)
+  foodBuffMultiplierMax: number               // (food_buff_multiplier_admin_max = 5.0)
+  arenaEntryCostFoodCreditsDefault: number    // (arena_entry_cost_food_credits_default = 0)
+  arenaEntryCostFoodCreditsMax: number        // (arena_entry_cost_food_credits_admin_max = 10)
+  arenaEntryCooldownMinMinutes: number        // (arena_entry_cooldown_admin_min_minutes = 0)
+  arenaEntryCooldownMaxMinutes: number        // (arena_entry_cooldown_admin_max_minutes = 60)
+}
+
+interface FeatureFlag {
+  flag: string
+  enabled: boolean
+  description: string
+}
+
+export const useConfigStore = defineStore('config', () =&gt; {
+  const runtimeConfig = ref&lt;RuntimeConfig | null&gt;(null)
+  const economyConfig = ref&lt;EconomyConfig | null&gt;(null)
+  const featureFlags = ref&lt;FeatureFlag[]&gt;([])
+  const loading = ref(false)
+
+  async function fetchRuntimeConfig() {
+    loading.value = true
+    try {
+      const res = await configApi.getRuntimeConfig()
+      runtimeConfig.value = res.data.data
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateRuntimeConfig(patch: Partial&lt;RuntimeConfig&gt;) {
+    await configApi.putRuntimeConfig(patch)
+    await fetchRuntimeConfig() // refresh cache
+  }
+
+  async function fetchEconomyConfig() {
+    loading.value = true
+    try {
+      const res = await configApi.getEconomyConfig()
+      economyConfig.value = res.data.data
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateEconomyConfig(patch: Partial&lt;EconomyConfig&gt;) {
+    await configApi.putEconomyConfig(patch)
+    await fetchEconomyConfig() // refresh cache
+  }
+
+  async function fetchFeatureFlags() {
+    const res = await configApi.getFeatureFlags()
+    featureFlags.value = res.data.data.flags
+  }
+
+  async function updateFeatureFlag(flag: string, enabled: boolean) {
+    await configApi.putFeatureFlag(flag, enabled)
+    await fetchFeatureFlags()
+  }
+
+  return {
+    runtimeConfig, economyConfig, featureFlags, loading,
+    fetchRuntimeConfig, updateRuntimeConfig,
+    fetchEconomyConfig, updateEconomyConfig,
+    fetchFeatureFlags, updateFeatureFlag,
+  }
+})</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="10-element-plus-component-standards">§10 Element Plus Component Standards</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="101-table-component-standard-universal">§10.1 Table Component Standard (Universal)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">All admin tables must implement three states:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-vue">&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- Loading state --&gt;
+    &lt;el-table v-loading="loading" :data="tableData"&gt;
+      &lt;el-table-column prop="id" label="ID" /&gt;
+      &lt;!-- ... --&gt;
+
+      &lt;!-- Empty state (el-table built-in empty slot) --&gt;
+      &lt;template #empty&gt;
+        &lt;el-empty description="No records found" /&gt;
+      &lt;/template&gt;
+    &lt;/el-table&gt;
+
+    &lt;!-- Error state --&gt;
+    &lt;el-alert
+      v-if="error"
+      :title="error"
+      type="error"
+      show-icon
+    &gt;
+      &lt;template #default&gt;
+        &lt;el-button size="small" @click="fetchData"&gt;Retry&lt;/el-button&gt;
+      &lt;/template&gt;
+    &lt;/el-alert&gt;
+
+    &lt;!-- Pagination --&gt;
+    &lt;el-pagination
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :total="total"
+      :page-sizes="[20, 50, 100]"
+      layout="total, sizes, prev, pager, next"
+      @change="fetchData"
+    /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="102-form-component-standard">§10.2 Form Component Standard</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-vue">&lt;template&gt;
+  &lt;el-form ref="formRef" :model="form" :rules="rules" label-width="160px"&gt;
+    &lt;el-form-item label="Reason" prop="reason"&gt;
+      &lt;el-input
+        v-model="form.reason"
+        type="textarea"
+        :maxlength="ADMIN_MODERATION_REASON_MAX_CHARS"
+        show-word-limit
+        :rows="4"
+        placeholder="Enter moderation reason (max 500 characters)"
+      /&gt;
+    &lt;/el-form-item&gt;
+    &lt;el-form-item&gt;
+      &lt;el-button type="primary" :loading="submitting" @click="handleSubmit"&gt;
+        Confirm
+      &lt;/el-button&gt;
+      &lt;el-button @click="handleCancel"&gt;Cancel&lt;/el-button&gt;
+    &lt;/el-form-item&gt;
+  &lt;/el-form&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts"&gt;
+import { ref } from 'vue'
+import type { FormInstance } from 'element-plus'
+import { ElMessage } from 'element-plus'
+
+// admin_moderation_reason_max_chars = 500
+const ADMIN_MODERATION_REASON_MAX_CHARS = 500
+
+const formRef = ref&lt;FormInstance&gt;()
+const form = ref({ reason: '' })
+const submitting = ref(false)
+
+const rules = {
+  reason: [
+    { required: true, message: 'Reason is required', trigger: 'blur' },
+    { max: ADMIN_MODERATION_REASON_MAX_CHARS, message: `Max ${ADMIN_MODERATION_REASON_MAX_CHARS} characters`, trigger: 'change' },
+  ],
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate()
+  submitting.value = true
+  try {
+    // ... API call
+    ElMessage.success('Action completed successfully')
+  } finally {
+    submitting.value = false
+  }
+}
+&lt;/script&gt;</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="103-dangerous-action-confirmation-elmessagebox">§10.3 Dangerous Action Confirmation (ElMessageBox)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">All ban / deactivate / delete / feature flag toggle operations must confirm before executing:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">import { ElMessageBox, ElMessage } from 'element-plus'
+
+async function handleBanPet(petId: string) {
+  await ElMessageBox.confirm(
+    'Are you sure you want to ban this pet? It will be removed from the leaderboard within 5 minutes.',
+    'Confirm Ban',
+    {
+      type: 'warning',
+      confirmButtonText: 'Ban Pet',
+      cancelButtonText: 'Cancel',
+      confirmButtonClass: 'el-button--danger',
+    }
+  )
+  // Proceed after confirmation
+  await petsApi.ban(petId, { reason: moderationReason.value })
+  ElMessage.success('Pet banned successfully. Leaderboard removal in progress.')
+}</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="104-global-message-notification-standards">§10.4 Global Message Notification Standards</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// Operation success
+ElMessage({ type: 'success', message: 'Changes saved', duration: 3000 })
+
+// Operation failure (API error)
+ElMessage({ type: 'error', message: `Error: ${err.response?.data?.error?.message ?? 'Unknown error'}`, duration: 5000 })
+
+// Warning (e.g. GDPR SLA approaching deadline)
+ElNotification({ type: 'warning', title: 'GDPR SLA Alert', message: 'Request #xxx expires in 2 hours', duration: 0 })</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="11-shared-component-specifications">§11 Shared Component Specifications</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="111-searchabletable-component">§11.1 SearchableTable Component</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// Type definitions
+interface TableColumn {
+  prop: string
+  label: string
+  width?: number | string
+  minWidth?: number | string
+  sortable?: boolean
+  formatter?: (row: unknown, column: unknown, value: unknown) =&gt; string
+  slot?: string // custom render slot name
+}
+
+interface SearchField {
+  prop: string
+  label: string
+  type: 'input' | 'select' | 'date-range'
+  placeholder?: string
+  options?: { label: string; value: string | number | boolean }[]
+}
+
+interface PagedResponse&lt;T&gt; {
+  data: { [key: string]: T[] }
+  meta: { total: number; page: number; limit: number }
+}
+
+interface SearchableTableProps {
+  columns: TableColumn[]
+  fetchFn: (params: Record&lt;string, unknown&gt;) =&gt; Promise&lt;PagedResponse&lt;unknown&gt;&gt;
+  searchFields?: SearchField[]
+  defaultPageSize?: number  // default: 20
+  selectable?: boolean
+  rowKey?: string           // default: 'id'
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Usage example</strong>:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-vue">&lt;SearchableTable
+  :columns="petColumns"
+  :fetch-fn="fetchPets"
+  :search-fields="petSearchFields"
+  :default-page-size="20"
+&gt;
+  &lt;template #actions="{ row }"&gt;
+    &lt;el-button v-permission="'moderator'" size="small" type="danger" @click="banPet(row)"&gt;
+      Ban
+    &lt;/el-button&gt;
+  &lt;/template&gt;
+&lt;/SearchableTable&gt;</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="112-auditlogdetail-component">§11.2 AuditLogDetail Component</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Renders the <code>admin_audit_log.detail</code> JSONB column with formatted key-value display; highlights <code>reason</code>, <code>previous_value</code>, <code>new_value</code>, and similar fields.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">interface AuditLogDetailProps {
+  id: string | number           // audit_log id (BIGSERIAL) — matches API.md §6.8 response field `id`
+  adminUsername: string
+  action: string                // e.g. 'pet.ban', 'config.arena_rate_limit'
+  targetType: string            // 'pet' | 'arena_match' | 'config_runtime' | ...
+  targetId: string
+  detail: Record&lt;string, unknown&gt; | null
+  createdAt: string             // ISO 8601
+  visible: boolean              // controls Drawer open/close
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Usage example</strong>:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-vue">&lt;AuditLogDetail
+  v-bind="selectedLog"
+  :visible="drawerVisible"
+  @close="drawerVisible = false"
+/&gt;</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="12-chart-integration">§12 Chart Integration</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">The admin analytics page uses ECharts 5.x (via vue-echarts 6.x) for time-series data visualization.</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Chart</th><th>Type</th><th>Update Strategy</th></tr></thead>
+<tbody>
+<tr><td>Daily Active Users</td><td>ECharts LineChart</td><td>Manual refresh (Date Range change)</td></tr>
+<tr><td>New Claims Per Day</td><td>ECharts LineChart</td><td>Manual refresh</td></tr>
+<tr><td>Arena Battles Per Day</td><td>ECharts BarChart</td><td>Manual refresh</td></tr>
+<tr><td>Leaderboard UVs</td><td>ECharts LineChart</td><td>Manual refresh</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>On-demand ECharts import example</strong>:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// views/analytics/AnalyticsView.vue
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { LineChart, BarChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent, LegendComponent, TitleComponent } from 'echarts/components'
+import VChart from 'vue-echarts'
+
+use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent])</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Responsive sizing</strong>: Use the <code>autoresize</code> prop on <code>v-chart</code> to automatically adapt to container width:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-vue">&lt;v-chart :option="chartOption" autoresize style="height: 320px" /&gt;</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="13-internationalization-i18n">§13 Internationalization (i18n)</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">The Admin Portal is single-language (English). No multi-locale configuration is required. Element Plus locale uses the default <code>en</code> locale.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="14-performance">§14 Performance</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="141-route-level-lazy-loading">§14.1 Route-Level Lazy Loading</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// router/routes.ts
+// Note: createRouter uses createWebHistory('/admin') base — all paths below are
+// relative to that base (FRONTEND.md §3.5). The browser URL for path '/login' is
+// /admin/login; for child path 'dashboard' under '/' it is /admin/dashboard.
+const routes = [
+  {
+    path: '/login',
+    component: () =&gt; import('@/views/auth/LoginView.vue'),
+    meta: { public: true },
+  },
+  {
+    path: '/totp-setup',
+    component: () =&gt; import('@/views/auth/TotpSetupView.vue'),
+    meta: { public: true },
+  },
+  {
+    path: '/',
+    component: () =&gt; import('@/layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'dashboard',
+        component: () =&gt; import('@/views/dashboard/DashboardView.vue'),
+      },
+      {
+        path: 'pets',
+        component: () =&gt; import('@/views/pets/PetListView.vue'),
+      },
+      {
+        path: 'pets/:petId',
+        component: () =&gt; import('@/views/pets/PetDetailView.vue'),
+      },
+      {
+        path: 'battles',
+        component: () =&gt; import('@/views/battles/BattleListView.vue'),
+      },
+      {
+        path: 'suspicious',
+        component: () =&gt; import('@/views/battles/SuspiciousView.vue'),
+        meta: { permission: 'moderator' },
+      },
+      {
+        path: 'leaderboard',
+        component: () =&gt; import('@/views/leaderboard/LeaderboardView.vue'),
+      },
+      {
+        path: 'analytics',
+        component: () =&gt; import('@/views/analytics/AnalyticsView.vue'),
+      },
+      {
+        path: 'email',
+        component: () =&gt; import('@/views/analytics/EmailMonitorView.vue'),
+      },
+      {
+        path: 'config/runtime',
+        component: () =&gt; import('@/views/config/RuntimeConfigView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'config/economy',
+        component: () =&gt; import('@/views/config/EconomyConfigView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'config/flags',
+        component: () =&gt; import('@/views/config/FeatureFlagsView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'gdpr',
+        component: () =&gt; import('@/views/gdpr/GdprQueueView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'roles',
+        component: () =&gt; import('@/views/roles/RoleManagementView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+      {
+        path: 'audit',
+        component: () =&gt; import('@/views/audit/AuditLogView.vue'),
+        meta: { permission: 'super_admin' },
+      },
+    ],
+  },
+  // Error pages — public, outside AdminLayout
+  {
+    path: '/403',
+    component: () =&gt; import('@/views/errors/403View.vue'),
+    meta: { public: true },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: () =&gt; import('@/views/errors/404View.vue'),
+    meta: { public: true },
+  },
+]</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="142-bundle-analysis">§14.2 Bundle Analysis</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Run bundle analysis
+npx vite-bundle-visualizer</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Target: Element Plus uses automatic on-demand import (unplugin-auto-import + unplugin-vue-components). Main bundle target: <strong>< 150 KB gzipped</strong> (total_js_bundle_gzipped_kb = 300 for full stack reference).</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="143-performance-targets">§14.3 Performance Targets</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Metric</th><th>Target</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Admin page load (including data)</td><td>< 3000 ms</td><td>admin_page_load_time_seconds = 3</td></tr>
+<tr><td>Pet search response time</td><td>< 2000 ms</td><td>admin_search_response_time_seconds = 2</td></tr>
+<tr><td>Audit log search (any 12-month window)</td><td>< 3000 ms</td><td>admin_audit_log_search_response_time_seconds = 3</td></tr>
+<tr><td>FCP (First Contentful Paint)</td><td>< 2000 ms</td><td>Derived from admin page load target</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="144-element-plus-on-demand-import-configuration">§14.4 Element Plus On-Demand Import Configuration</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// vite.config.ts (unplugin configuration)
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+
+plugins: [
+  AutoImport({ resolvers: [ElementPlusResolver()] }),
+  Components({ resolvers: [ElementPlusResolver()] }),
+]</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="15-deployment-configuration">§15 Deployment Configuration</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="151-vite-configuration-build--dev-proxy">§15.1 Vite Configuration (Build + Dev Proxy)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import path from 'path'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+
+export default defineConfig({
+  base: '/admin/',
+  plugins: [
+    vue(),
+    AutoImport({ resolvers: [ElementPlusResolver()] }),
+    Components({ resolvers: [ElementPlusResolver()] }),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    proxy: {
+      '/admin/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    outDir: 'dist/admin',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-vue':     ['vue', 'vue-router', 'pinia'],
+          'vendor-element': ['element-plus', '@element-plus/icons-vue'],
+          'vendor-charts':  ['echarts', 'vue-echarts'],
+          'vendor-axios':   ['axios'],
+        },
+      },
+    },
+  },
+})</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="152-environment-variables">§15.2 Environment Variables</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Variable</th><th>Development</th><th>Production</th></tr></thead>
+<tbody>
+<tr><td>`VITE_API_BASE_URL`</td><td>`http://localhost:3000`</td><td>`https://api.pixel-pet-arena.com` (via Nginx proxy)</td></tr>
+<tr><td>`VITE_ADMIN_PATH`</td><td>`/admin`</td><td>`/admin`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><code>.env.development</code>:</p>
+<pre class="doc-code"><code class="lang-text">VITE_API_BASE_URL=http://localhost:3000
+VITE_ADMIN_PATH=/admin</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><code>.env.production</code>:</p>
+<pre class="doc-code"><code class="lang-text">VITE_API_BASE_URL=https://api.pixel-pet-arena.com
+VITE_ADMIN_PATH=/admin</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="153-nginx-routing-configuration">§15.3 Nginx Routing Configuration</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-nginx"># Admin Portal SPA routing
+location /admin/ {
+    root /usr/share/nginx/html;
+    try_files $uri $uri/ /admin/index.html;
+}
+
+# Admin API proxy (ARCH §1.2: Admin Portal → Admin API Server)
+location /admin/api/ {
+    proxy_pass http://backend:3000/admin/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # Pass session cookie through
+    proxy_pass_header Set-Cookie;
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Vercel deployment</strong> (alternative to Nginx):</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><code>packages/admin-app/vercel.json</code>:</p>
+<pre class="doc-code"><code class="lang-json">{
+  "rewrites": [
+    { "source": "/admin/api/(.*)", "destination": "https://api.pixel-pet-arena.com/admin/api/$1" },
+    { "source": "/admin/(.*)", "destination": "/admin/index.html" }
+  ]
+}</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="16-security-hardening">§16 Security Hardening</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="161-authentication-security">§16.1 Authentication Security</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Control</th><th>Implementation</th></tr></thead>
+<tbody>
+<tr><td>TOTP enforcement</td><td>Every admin login requires TOTP after enrollment; `TOTP_SETUP_REQUIRED` returned on first login</td></tr>
+<tr><td>Account lockout</td><td>10 consecutive failures trigger 30-minute lockout (admin_login_lockout_threshold = 10, admin_login_lockout_duration_minutes = 30)</td></tr>
+<tr><td>IP rate limiting</td><td>10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10, admin_login_ip_rate_limit_window_seconds = 900)</td></tr>
+<tr><td>Password hashing</td><td>bcrypt, minimum work factor 12 (SCHEMA.md §2.10 comment)</td></tr>
+<tr><td>TOTP secret storage</td><td>AES-256-GCM encrypted in `admin_accounts.totp_secret_encrypted`</td></tr>
+<tr><td>Backup codes</td><td>10 single-use codes; SHA-256 hashes stored in `totp_backup_codes_hash` array</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="162-session-security">§16.2 Session Security</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Control</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Cookie flags</td><td>`HttpOnly; SameSite=Strict; Secure; Path=/admin`</td></tr>
+<tr><td>Inactivity timeout</td><td>4 hours (admin_session_inactivity_expiry_hours = 4)</td></tr>
+<tr><td>Absolute timeout</td><td>8 hours (admin_session_absolute_expiry_hours = 8)</td></tr>
+<tr><td>CSRF protection</td><td>`SameSite=Strict` cookie attribute — cross-site submissions are blocked by the browser; no additional token required</td></tr>
+<tr><td>Session store</td><td>Redis server-side (`session:admin:{session_id}`)</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="163-rbac-security">§16.3 RBAC Security</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Every route in Vue Router carries a <code>meta.permission</code> value</li>
+<li>The <code>beforeEach</code> guard validates session and role on every navigation</li>
+<li>The <code>v-permission</code> directive removes unauthorized DOM elements entirely</li>
+<li>Sidebar menu items for unauthorized routes are never rendered</li>
+<li>Server-side authorization is always authoritative; frontend guards are defense-in-depth only</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="164-audit-trail">§16.4 Audit Trail</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">All CUD operations write to <code>admin_audit_log</code>:</p>
+<ul class="doc-list">
+<li>Actor (<code>admin_id</code>), action, target type, target ID, detail (JSONB), IP hash, created at</li>
+<li>Retained 2 years (admin_audit_log_retention_years = 2)</li>
+<li>IP addresses nulled after 90 days (ip_address_log_retention_days = 90)</li>
+<li>Immutable — no delete or update operations are permitted</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="17-pre-delivery-checklist">§17 Pre-Delivery Checklist</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>#</th><th>Check Item</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>§3 directory structure complete — views / stores / router / api / composables / components all present</td><td>✅</td></tr>
+<tr><td>2</td><td>§4 route table covers all admin feature pages with `meta.permission` fields</td><td>✅</td></tr>
+<tr><td>3</td><td>§5 RBAC: three roles fully defined + PermissionGuard composable + `v-permission` directive</td><td>✅</td></tr>
+<tr><td>4</td><td>§5.2 Permission Guard: `hasPermission()` (role hierarchy) + route guard + button-level permission examples</td><td>✅</td></tr>
+<tr><td>5</td><td>§7 Page specs: Login / Dashboard / Pet / Battle / Suspicious / Leaderboard / Analytics / Email / Config (Runtime/Economy/Flags) / GDPR / Roles / Audit — all have column and action descriptions</td><td>✅</td></tr>
+<tr><td>6</td><td>§8.1 Axios config: baseURL + `withCredentials: true` (session cookie) + response interceptor (401/403 handling); CSRF handled by SameSite=Strict (no token injection needed)</td><td>✅</td></tr>
+<tr><td>7</td><td>§8.4 `/admin/api/*` endpoint mapping complete (32 endpoints, covering API.md §6.1–§6.9)</td><td>✅</td></tr>
+<tr><td>8</td><td>§9 Three Pinia stores (authStore / permissionStore / configStore) with full state + actions</td><td>✅</td></tr>
+<tr><td>9a</td><td>§15.1 Vite build: `base='/admin/'`, `outDir='dist/admin'`, `manualChunks` vendor splitting, `server.proxy` for `/admin/api`</td><td>✅</td></tr>
+<tr><td>9b</td><td>§15.2/§15.3 Env vars: `VITE_API_BASE_URL` filled; Nginx `/admin/` `try_files` configured</td><td>✅</td></tr>
+<tr><td>10</td><td>No placeholder text or empty TODO fields anywhere in document</td><td>✅</td></tr>
+<tr><td>11</td><td>§1 Admin Portal overview: system purpose filled; §1.3 role table complete per EDD §3.7 + ARCH §5.1</td><td>✅</td></tr>
+<tr><td>12</td><td>§6.1 main layout: ASCII diagram maintains three-zone structure (Header / Sidebar / Content); §6.1 narrative covers HeaderBar / SidebarMenu / BreadCrumb / Content</td><td>✅</td></tr>
+<tr><td>13</td><td>§5.1 permission table one-to-one maps to API.md §6 `/admin/api/*` endpoint Role Access</td><td>✅</td></tr>
+<tr><td>14</td><td>All constants cited in `(constant_name = value)` format consistent with CLIENT_IMPL.md style</td><td>✅</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

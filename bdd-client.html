@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — BDD — Client Feature Specifications</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">BDD — Client Feature Specifications</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>BDD — Client Feature Specifications</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="bdd--client-feature-specifications">BDD — Client Feature Specifications</h1>
+<div class="doc-gap"></div>
+<p class="doc-p"><!-- Client-side Gherkin test specifications for pixel-pet-arena frontend (Player App + Admin Portal) --></p>
+<p class="doc-p"><!-- Authored by: gendoc-align-fix --></p>
+<p class="doc-p"><!-- Date: 2026-05-04 --></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="overview">Overview</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">This document summarizes the 9 client-side BDD feature files that specify the frontend UI/UX, user flows, and component behavior for pixel-pet-arena. These specifications ensure the player app and admin portal conform to PRD acceptance criteria and design requirements.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Total Coverage:</strong> 9 client features, 50+ scenarios, 10 PRD user stories linked</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="player-app-features">Player App Features</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="1-arena-ui-codefeaturesclientarena-uifeaturecode">1. Arena UI (<code>features/client/arena-ui.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-ARENA-001, US-ARENA-002</p>
+<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates arena entry, matchmaking UI, battle animation, and rate limit feedback.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Mode Selection</strong>: Player selects RACE or SUMO mode and enters arena via button</li>
+<li><strong>Matchmaking Status</strong>: "Finding opponent..." display with aria-live="polite" and aria-busy="true"</li>
+<li><strong>Opponent Found</strong>: Battle animation plays for 5–15 seconds; navigates to <code>/arena/result/:matchId</code></li>
+<li><strong>Matchmaking Timeout</strong>: No opponent within 30 seconds triggers AIOfferModal</li>
+<li><strong>Rate Limit Display</strong>: HTTP 429 response shows countdown timer for next available battle</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> ModeSelector, PreBattlePanel, MatchmakingStatus, ArenaScene (Phaser), ResultModal</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="2-email-claim-flow-ui-codefeaturesclientclaim-flow-uifeaturecode">2. Email Claim Flow UI (<code>features/client/claim-flow-ui.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-AUTH-001, US-AUTH-002</p>
+<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates two-step email OTP claim flow: email entry → OTP verification → success state.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Email Entry</strong>: Guest enters email and confirms age (13+); advances to OTP step</li>
+<li><strong>Age Verification</strong>: Claim blocked without age confirmation checkbox</li>
+<li><strong>Already Claimed</strong>: Inline error if pet already has owner</li>
+<li><strong>OTP Verification</strong>: 6-digit code entry field with countdown timer</li>
+<li><strong>Code Expiry</strong>: After 15 minutes, error message "Code expired, request new code"</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> ClaimFlow (compound), ClaimEmailForm, ClaimCodeForm, SuccessMessage</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>email_claim_flow_steps_max = 3</code>, <code>claim_code_digits = 6</code>, <code>claim_code_expiry_minutes = 15</code></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="3-battle-records-page-codefeaturesclientbattle-recordsfeaturecode">3. Battle Records Page (<code>features/client/battle-records.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-RECORD-001</p>
+<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates battle history display, stat differential, public access, and share URL.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Records Display</strong>: Last 20 battles ordered by date descending (AC-010-2)</li>
+<li><strong>Stat Differential</strong>: Shows advantage/disadvantage vs. opponent for each battle (e.g., "Speed: +7")</li>
+<li><strong>Public Access</strong>: No authentication required; page accessible via <code>/pet/:petId/records</code> (AC-010-1)</li>
+<li><strong>Share Button</strong>: Generates shareable URL with Open Graph metadata (pet name, rarity, win count)</li>
+<li><strong>Empty State</strong>: "No battles yet" message when pet has no records</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> BattleRecordsPage, BattleHistoryTable, BattleHistoryRow, PetSummaryCard, ShareModal</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>arena_battle_records_display_count = 20</code></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="4-food-system-ui-codefeaturesclientfood-systemfeaturecode">4. Food System UI (<code>features/client/food-system.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-FOOD-001</p>
+<p class="doc-p"><strong>Scenarios:</strong> 4+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates food inventory, buff application, and buff duration indicator.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Inventory Display</strong>: Grid/list of FoodItem cards with stat icons and buff magnitude</li>
+<li><strong>Apply Buff</strong>: "Use" button triggers buff application; optimistic update + server confirmation</li>
+<li><strong>Buff Active Indicator</strong>: Badge or timer showing buff expiry time (e.g., "12h remaining")</li>
+<li><strong>Permanent vs. Temporary</strong>: Different styling for permanent bonuses vs. 24h temporary buffs</li>
+<li><strong>Empty Inventory</strong>: Message when player has no food items</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> FoodInventory, FoodItem, BuffIndicator, BuffActiveModal</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="5-leaderboard-ui-codefeaturesclientleaderboard-uifeaturecode">5. Leaderboard UI (<code>features/client/leaderboard-ui.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-BOARD-001, US-RARITY-001</p>
+<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates global leaderboard ranking display, rarity badges, and owner rank banner.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Public Access</strong>: No authentication required for leaderboard view (AC-009-3)</li>
+<li><strong>Top 100 Display</strong>: Leaderboard table with up to 100 rows (AC-009-4)</li>
+<li><strong>Auto-Refresh</strong>: TanStack Query refetches every 30 seconds (AC-009-2)</li>
+<li><strong>Rarity Filter</strong>: Tabs to filter by Common, Rare, Epic, Legendary (AC-002-5)</li>
+<li><strong>Owner Rank</strong>: Banner highlighting player's own pet position on board</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> LeaderboardPage, LeaderboardTable, LeaderboardRow, RarityFilter, OwnerRankBanner</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>leaderboard_update_lag_max_seconds = 30</code>, <code>leaderboard_top_display = 100</code></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="6-pet-display-codefeaturesclientpet-displayfeaturecode">6. Pet Display (<code>features/client/pet-display.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-PET-001, US-PET-002</p>
+<p class="doc-p"><strong>Scenarios:</strong> 3+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates landing page pet generation, stat display, and food buff visual indicator.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Token Generation</strong>: Visiting "/" generates new pet_token via GET /api/v1/pets/random</li>
+<li><strong>Pet Canvas</strong>: Pixel art rendered with Phaser, role="img", aria-label with pet name</li>
+<li><strong>Stat Bars</strong>: Visual bars for Speed, Strength, Stamina with current/max values</li>
+<li><strong>Buff Indicator</strong>: Icon/badge showing active food buff on stat bar</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> PetCanvas, StatBars, BuffIndicator, LandingPage</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>pet_access_token_min_bytes = 32</code></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="7-settings-page-codefeaturesclientsettingsfeaturecode">7. Settings Page (<code>features/client/settings.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> User-level preferences (no specific PRD story)</p>
+<p class="doc-p"><strong>Scenarios:</strong> 3+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates settings modal/page for theme, audio, and notification preferences.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Settings Menu</strong>: Accessible from navbar; dismissible via close button or Escape</li>
+<li><strong>Theme Toggle</strong>: Switch between light and dark mode (persists to localStorage)</li>
+<li><strong>Audio Toggle</strong>: Enable/disable background music and SFX</li>
+<li><strong>Notification Toggle</strong>: Enable/disable browser notifications for arena results</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> SettingsModal, ThemeToggle, AudioToggle, NotificationToggle</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="8-training-ui-codefeaturesclienttraining-uifeaturecode">8. Training UI (<code>features/client/training-ui.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-TRAIN-001</p>
+<p class="doc-p"><strong>Scenarios:</strong> 4+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates training action selection, daily cap enforcement, and stat change feedback.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Action Cards</strong>: Three TrainingActionCard options (RUN, STRENGTH, STAMINA)</li>
+<li><strong>Daily Cap</strong>: Display "3 actions remaining today" counter; block 4th attempt (AC-006-5)</li>
+<li><strong>Stat Change</strong>: StatChangeIndicator shows +1/+2/+3 point delta and updated total</li>
+<li><strong>Error Feedback</strong>: HTTP 400 "TRAINING_LIMIT_REACHED" shows inline error</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> TrainingPage, TrainingActionCard, StatChangeIndicator, TrainingInputForm</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>training_actions_per_day = 3</code></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="admin-portal-features">Admin Portal Features</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="9-admin-portal-codefeaturesclientadmin-portalfeaturecode">9. Admin Portal (<code>features/client/admin-portal.feature</code>)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006</p>
+<p class="doc-p"><strong>Scenarios:</strong> 15+</p>
+<div class="doc-gap"></div>
+<p class="doc-p">Validates admin authentication, pet moderation, GDPR erasure, leaderboard management, and system configuration.</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Admin Login</strong>: Email-based login with httpOnly SameSite=Strict session cookie (AC-011-1)</li>
+<li><strong>Session Timeout</strong>: Session expires after 4 hours of inactivity (AC-011-2)</li>
+<li><strong>Moderation Queue</strong>: View SUSPICIOUS pets and bans; submit reason ≤500 chars (AC-013-2)</li>
+<li><strong>GDPR Erasure</strong>: Approve/deny erasure requests; view SLA status (AC-016-1, AC-016-2)</li>
+<li><strong>Leaderboard Reset</strong>: Admin action to reset leaderboard; reflects within 5 minutes (AC-009-5)</li>
+<li><strong>Runtime Parameters</strong>: Tune arena_rate_limit_battles_per_hour, rarity weights, etc. (US-ADMIN-003)</li>
+<li><strong>Game Economy</strong>: Configure food buff multipliers, arena entry cost, battle cooldown (US-ADMIN-006)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key UI Components:</strong> AdminPortal, Moderation Queue, PetDetailModal, GDPRRequestList, ConfigPanel, ParameterInputForm</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>admin_moderation_reason_max_chars = 500</code>, <code>admin_session_inactivity_expiry_hours = 4</code></p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="cross-reference-prd-acceptance-criteria">Cross-Reference: PRD Acceptance Criteria</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>AC ID</th><th>Story</th><th>Covered By</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>AC-002-5</td><td>US-RARITY-001</td><td>Leaderboard UI</td><td>✓</td></tr>
+<tr><td>AC-006-5</td><td>US-TRAIN-001</td><td>Training UI</td><td>✓</td></tr>
+<tr><td>AC-009-1</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
+<tr><td>AC-009-2</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
+<tr><td>AC-009-3</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
+<tr><td>AC-009-4</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
+<tr><td>AC-009-5</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
+<tr><td>AC-010-1</td><td>US-RECORD-001</td><td>Battle Records</td><td>✓</td></tr>
+<tr><td>AC-010-2</td><td>US-RECORD-001</td><td>Battle Records</td><td>✓</td></tr>
+<tr><td>AC-011-1</td><td>US-ADMIN-001</td><td>Admin Portal</td><td>✓</td></tr>
+<tr><td>AC-011-2</td><td>US-ADMIN-001</td><td>Admin Portal</td><td>✓</td></tr>
+<tr><td>AC-013-2</td><td>US-ADMIN-005</td><td>Admin Portal</td><td>✓</td></tr>
+<tr><td>AC-016-1</td><td>US-AUTH-002</td><td>Admin Portal</td><td>✓</td></tr>
+<tr><td>AC-016-2</td><td>US-AUTH-002</td><td>Admin Portal</td><td>✓</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="how-to-use-this-document">How to Use This Document</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">1. <strong>For Frontend Developers</strong>: Quick reference for UI/UX specifications and component interactions.</p>
+<p class="doc-p">2. <strong>For QA/E2E Testers</strong>: Cross-reference scenario steps against <code>features/client/</code> feature files to create Playwright test implementations.</p>
+<p class="doc-p">3. <strong>For Product/Design</strong>: Verify all frontend flows match PRD acceptance criteria and design system.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Generated:</strong> 2026-05-04</p>
+<p class="doc-p"><strong>Last Updated:</strong> 2026-05-04</p>
+<p class="doc-p"><strong>Maintainer:</strong> Product Engineering Team</p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

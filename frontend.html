@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — FRONTEND.md — pixel-pet-arena</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">FRONTEND.md — pixel-pet-arena</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>FRONTEND.md — pixel-pet-arena</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="frontendmd--pixel-pet-arena">FRONTEND.md — pixel-pet-arena</h1>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>DOC-ID</strong>: FRONTEND-PIXEL-PET-ARENA-20260503</p>
+<p class="doc-p"><strong>Status</strong>: DRAFT</p>
+<p class="doc-p"><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="1-overview">1. Overview</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="11-two-app-architecture">1.1 Two-App Architecture</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">pixel-pet-arena ships two independently-deployed frontend applications that share the same backend API infrastructure but are built on separate stacks by design.</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>App</th><th>Stack</th><th>Audience</th><th>Auth model</th><th>Deployment</th></tr></thead>
+<tbody>
+<tr><td>**Player App**</td><td>React 18 + Phaser.js + TypeScript</td><td>Casual players, competitive gamers, collectors</td><td>`pet_access_token` (32-byte URL-safe base64, stored in `localStorage`)</td><td>Vercel CDN — SPA, no SSR</td></tr>
+<tr><td>**Admin Portal**</td><td>Vue 3 + Element Plus + TypeScript</td><td>Operators, moderators, super admins</td><td>httpOnly session cookie (server-side Redis session)</td><td>Vercel CDN — separate route/subdomain</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p">The stack separation is intentional: the pixel-art CSS design system used in the player app must not bleed into the data-dense admin interface. Element Plus provides production-grade data tables, forms, and pagination for admin CRUD workflows that would require significant custom code in React.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="12-tech-stack-summary">1.2 Tech Stack Summary</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Player App</strong></p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+<tbody>
+<tr><td>UI framework</td><td>React</td><td>18.x</td></tr>
+<tr><td>Game canvas</td><td>Phaser.js</td><td>3.x (dynamically imported)</td></tr>
+<tr><td>Language</td><td>TypeScript</td><td>5.x</td></tr>
+<tr><td>Build tool</td><td>Vite</td><td>5.x</td></tr>
+<tr><td>Server state</td><td>TanStack Query</td><td>5.x</td></tr>
+<tr><td>Client state</td><td>Zustand</td><td>4.x</td></tr>
+<tr><td>Form state</td><td>React Hook Form</td><td>7.x</td></tr>
+<tr><td>Schema validation</td><td>Zod</td><td>3.x</td></tr>
+<tr><td>Routing</td><td>React Router</td><td>6.x</td></tr>
+<tr><td>Testing — unit</td><td>Vitest</td><td>1.x</td></tr>
+<tr><td>Testing — E2E</td><td>Playwright</td><td>1.x</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Admin Portal</strong></p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+<tbody>
+<tr><td>UI framework</td><td>Vue 3 (Composition API)</td><td>3.x</td></tr>
+<tr><td>Component library</td><td>Element Plus</td><td>latest</td></tr>
+<tr><td>Language</td><td>TypeScript</td><td>5.x</td></tr>
+<tr><td>Build tool</td><td>Vite</td><td>5.x</td></tr>
+<tr><td>State management</td><td>Pinia</td><td>2.x</td></tr>
+<tr><td>HTTP client</td><td>Axios</td><td>1.x</td></tr>
+<tr><td>Charts</td><td>ECharts (via vue-echarts)</td><td>latest</td></tr>
+<tr><td>Routing</td><td>Vue Router</td><td>4.x</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="13-build-tooling">1.3 Build Tooling</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Both apps use <strong>Vite 5</strong> for development and production builds. Key configuration:</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>HMR in development with instant TypeScript feedback</li>
+<li>Code splitting per route (dynamic <code>import()</code>)</li>
+<li>Phaser.js loaded via <code>import()</code> — never included in the initial bundle</li>
+<li>Tree-shaking via ES module imports</li>
+<li><code>pnpm</code> as the package manager across both workspaces</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="2-player-app-architecture">2. Player App Architecture</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="21-directory-structure">2.1 Directory Structure</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">apps/player/
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+├── src/
+│   ├── main.tsx                    # Entry point; React root
+│   ├── App.tsx                     # Router + Layout wrapper
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── NavBar.tsx
+│   │   │   └── Layout.tsx
+│   │   ├── landing/
+│   │   │   ├── LandingPage.tsx
+│   │   │   ├── ClaimCTA.tsx
+│   │   │   ├── RarityHint.tsx
+│   │   │   └── SocialProofCounter.tsx
+│   │   ├── claim/
+│   │   │   ├── ClaimPage.tsx
+│   │   │   ├── ClaimFlow.tsx
+│   │   │   ├── ClaimEmailForm.tsx
+│   │   │   ├── ClaimCodeForm.tsx
+│   │   │   ├── ExpiryWarning.tsx
+│   │   │   └── URLReveal.tsx
+│   │   ├── pet/
+│   │   │   ├── PetPage.tsx
+│   │   │   ├── RarityBadge.tsx
+│   │   │   ├── StatsPanel.tsx
+│   │   │   ├── StatBar.tsx
+│   │   │   ├── TrainingEntry.tsx
+│   │   │   ├── FoodInventory.tsx
+│   │   │   ├── FoodItem.tsx
+│   │   │   ├── ArenaEntry.tsx
+│   │   │   └── NeglectedState.tsx
+│   │   ├── training/
+│   │   │   ├── TrainingPage.tsx
+│   │   │   ├── TrainingActions.tsx
+│   │   │   ├── TrainingActionCard.tsx
+│   │   │   ├── StatChangeIndicator.tsx
+│   │   │   ├── DailyResetTimer.tsx
+│   │   │   └── TrainingStreak.tsx
+│   │   ├── arena/
+│   │   │   ├── ArenaPage.tsx
+│   │   │   ├── ArenaScene.tsx          # Phaser.js battle animation scene
+│   │   │   ├── ModeSelector.tsx
+│   │   │   ├── PreBattlePanel.tsx
+│   │   │   ├── MatchmakingStatus.tsx
+│   │   │   ├── AIOfferModal.tsx
+│   │   │   ├── RateLimitBanner.tsx
+│   │   │   ├── BattleResultPage.tsx
+│   │   │   ├── BattleResultCard.tsx
+│   │   │   ├── StatComparison.tsx
+│   │   │   └── ShareBattleButton.tsx
+│   │   ├── leaderboard/
+│   │   │   ├── LeaderboardPage.tsx
+│   │   │   ├── LeaderboardTable.tsx
+│   │   │   ├── LeaderboardRow.tsx
+│   │   │   ├── RarityFilter.tsx
+│   │   │   └── OwnerRankBanner.tsx
+│   │   ├── records/
+│   │   │   ├── BattleRecordsPage.tsx
+│   │   │   ├── PetSummaryCard.tsx
+│   │   │   └── BattleHistoryTable.tsx
+│   │   ├── gdpr/
+│   │   │   ├── GdprPage.tsx
+│   │   │   ├── GdprRequestForm.tsx
+│   │   │   └── GdprStatusBanner.tsx
+│   │   ├── marketplace/               # FF_MARKETPLACE only
+│   │   │   └── MarketplacePage.tsx
+│   │   └── canvas/
+│   │       ├── PetCanvas.tsx          # React host for Phaser instance
+│   │       └── PetCanvasEngine.ts     # Phaser.js lifecycle manager
+│   ├── hooks/
+│   │   ├── usePet.ts
+│   │   ├── useLeaderboard.ts
+│   │   ├── useArenaHistory.ts
+│   │   ├── useTraining.ts
+│   │   ├── useFeed.ts
+│   │   ├── useClaim.ts
+│   │   ├── useReducedMotion.ts
+│   │   └── usePetToken.ts
+│   ├── store/
+│   │   └── useAppStore.ts             # Zustand store (slices: arena, claim, toast)
+│   ├── lib/
+│   │   ├── apiClient.ts               # Axios/fetch wrapper with token attachment
+│   │   ├── tokenStorage.ts            # localStorage read/write for pet_access_token
+│   │   ├── petGeneration.ts           # Seed → attribute vector (deterministic)
+│   │   └── spriteLoader.ts            # Phaser preload helpers
+│   ├── schemas/
+│   │   ├── pet.ts                     # Zod schemas for pet API responses
+│   │   ├── claim.ts
+│   │   ├── arena.ts
+│   │   └── leaderboard.ts
+│   ├── styles/
+│   │   ├── tokens.css                 # CSS custom properties (design tokens)
+│   │   ├── typography.css
+│   │   ├── rarity.css                 # Rarity tier animations and borders
+│   │   └── global.css
+│   └── constants.ts                   # Re-exports of constants.json values as typed TS consts</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="22-react-component-tree-top-level">2.2 React Component Tree (Top Level)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">App
+├── Layout
+│   ├── NavBar                          (hasPetToken prop drives "My Pet" visibility)
+│   └── Router (React Router v6)
+│       ├── LandingPage             /
+│       │   ├── PetCanvas           (Phaser.js instance via PetCanvasEngine)
+│       │   ├── RarityHint
+│       │   ├── ClaimCTA
+│       │   └── SocialProofCounter
+│       ├── ClaimPage               /claim
+│       │   └── ClaimFlow           (compound, max 3 steps — email_claim_flow_steps_max = 3)
+│       │       ├── ClaimEmailForm
+│       │       ├── ClaimCodeForm
+│       │       └── URLReveal
+│       ├── PetPage                 /pet/:petId
+│       │   ├── PetCanvas
+│       │   ├── RarityBadge
+│       │   ├── StatsPanel → StatBar × 3
+│       │   ├── TrainingEntry
+│       │   ├── FoodInventory → FoodItem × N
+│       │   ├── ArenaEntry
+│       │   └── NeglectedState      (conditional — training_neglect_threshold_days = 3)
+│       ├── TrainingPage            /pet/:petId/train
+│       │   ├── TrainingActions → TrainingActionCard × 3
+│       │   ├── StatChangeIndicator (visible 2s — training_stat_display_duration_seconds = 2)
+│       │   ├── DailyResetTimer
+│       │   └── TrainingStreak
+│       ├── BattleRecordsPage       /pet/:petId/records
+│       │   ├── PetSummaryCard
+│       │   └── BattleHistoryTable  (last 20 — arena_battle_records_display_count = 20)
+│       ├── ArenaPage               /arena
+│       │   ├── ModeSelector        (RACE / SUMO)
+│       │   ├── PreBattlePanel
+│       │   ├── MatchmakingStatus
+│       │   ├── AIOfferModal        (offered after arena_matchmaking_timeout_seconds = 30)
+│       │   └── RateLimitBanner
+│       ├── BattleResultPage        /arena/result/:matchId
+│       │   ├── BattleResultCard    (WIN / LOSS variants)
+│       │   ├── StatComparison
+│       │   ├── ShareBattleButton
+│       │   └── ActionButtons
+│       ├── LeaderboardPage         /leaderboard
+│       │   ├── RarityFilter
+│       │   ├── LeaderboardTable → LeaderboardRow × 100  (leaderboard_top_display = 100)
+│       │   └── OwnerRankBanner     (if pet token present)
+│       ├── GdprPage                /gdpr        (owner auth required)
+│       │   ├── GdprRequestForm     (type selector: erasure / data_access / restrict_processing / object_leaderboard / rectification)
+│       │   └── GdprStatusBanner    (polls GET /api/v1/gdpr/request/status by jobId)
+│       └── MarketplacePage         /marketplace  (FF_MARKETPLACE only)</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="23-phaserjs-integration-pattern">2.3 Phaser.js Integration Pattern</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Phaser.js is integrated as a side-effectful singleton managed inside a dedicated <code>PetCanvasEngine</code> class. No component other than <code>src/components/canvas/PetCanvas.tsx</code> may import Phaser directly.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Pattern: React host + Phaser canvas</strong></p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-tsx">// src/components/canvas/PetCanvas.tsx
+import { useEffect, useRef } from 'react';
+import type { PetCanvasEngine } from './PetCanvasEngine';
+
+interface PetCanvasProps {
+  seed: bigint;  // API returns seed as a JSON number; callers must convert: BigInt(apiResponse.seed)
+  rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
+  interactive?: boolean;
+}
+
+export function PetCanvas({ seed, rarity, interactive = false }: PetCanvasProps) {
+  const containerRef = useRef&lt;HTMLDivElement&gt;(null);
+  const engineRef = useRef&lt;PetCanvasEngine | null&gt;(null);
+
+  useEffect(() =&gt; {
+    if (!containerRef.current) return;
+    let cancelled = false;
+    // Phaser is dynamically imported — excluded from initial JS bundle
+    import('./PetCanvasEngine').then(({ PetCanvasEngine }) =&gt; {
+      if (cancelled) return; // guard against unmount before import resolves
+      engineRef.current = new PetCanvasEngine(containerRef.current!, {
+        seed,
+        rarity,
+        interactive,
+        spriteResolutionPx: 32, // (sprite_resolution_px = 32)
+      });
+    });
+    return () =&gt; {
+      cancelled = true;
+      engineRef.current?.destroy();
+      engineRef.current = null;
+    };
+  }, [seed, rarity, interactive]);
+
+  // Note: image-rendering: crisp-edges (Firefox fallback for pixelated) must be
+  // declared in a CSS class (e.g. .pixel-canvas) — inline styles cannot stack the same property.
+  return (
+    &lt;div
+      ref={containerRef}
+      aria-label="Pixel pet canvas"
+      role="img"
+      style={{ imageRendering: 'pixelated' }}
+    /&gt;
+  );
+}</code></pre>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/components/canvas/PetCanvasEngine.ts
+// All Phaser imports live here — nowhere else
+import Phaser from 'phaser';
+import { buildAttributeVector } from '../../lib/petGeneration';
+
+export class PetCanvasEngine {
+  private game: Phaser.Game;
+
+  constructor(container: HTMLElement, config: EngineConfig) {
+    const { seed, rarity, spriteResolutionPx } = config;
+    const attributes = buildAttributeVector(seed); // deterministic from seed
+
+    this.game = new Phaser.Game({
+      type: Phaser.AUTO,            // WebGL with Canvas 2D fallback
+      parent: container,
+      width: spriteResolutionPx * 2,   // 32 × 2 = 64 CSS px @1×; retina handled via image-rendering: pixelated
+      height: spriteResolutionPx * 2,
+      transparent: true,
+      scene: [new PetIdleScene(seed, attributes, rarity)],
+    });
+  }
+
+  destroy(): void {
+    this.game.destroy(true);
+  }
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key isolation rules</strong>:</p>
+<ul class="doc-list">
+<li><code>PetCanvasEngine.ts</code> is the only file that imports <code>phaser</code>.</li>
+<li>Phaser is loaded via dynamic <code>import()</code> so it is excluded from the main bundle.</li>
+<li><code>ArenaScene.tsx</code> for battle animations follows the same pattern — a separate Phaser scene dynamically loaded when the arena route is entered.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="24-state-management">2.4 State Management</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Four tiers of state, each with a distinct tool (EDD §8.2):</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Tier</th><th>Library</th><th>Scope</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td>Server state</td><td>TanStack Query v5</td><td>Remote API data with cache</td><td>Pet stats, leaderboard entries, battle history</td></tr>
+<tr><td>Client state</td><td>Zustand</td><td>Ephemeral UI — not persisted</td><td>Arena mode selection, claim flow step, toast queue</td></tr>
+<tr><td>URL state</td><td>URLSearchParams / route params</td><td>Shareable, bookmarkable</td><td>Leaderboard rarity filter (`?rarity=EPIC`), page number</td></tr>
+<tr><td>Form state</td><td>React Hook Form + Zod</td><td>Controlled inputs with validation</td><td>`ClaimEmailForm`, `ClaimCodeForm`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Zustand store slices</strong> (<code>src/store/useAppStore.ts</code>):</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">interface AppStore {
+  // Arena slice
+  selectedMode: 'RACE' | 'SUMO' | null;
+  setSelectedMode: (mode: 'RACE' | 'SUMO' | null) =&gt; void;
+
+  // Claim flow slice
+  claimStep: 'email' | 'code' | 'reveal';
+  claimId: string | null;
+  setClaimStep: (step: 'email' | 'code' | 'reveal') =&gt; void;
+  setClaimId: (id: string | null) =&gt; void;
+
+  // Toast slice
+  toasts: Toast[];
+  pushToast: (toast: Toast) =&gt; void;
+  dismissToast: (id: string) =&gt; void;
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>TanStack Query cache rules</strong>:</p>
+<ul class="doc-list">
+<li>Global <code>staleTime: 30_000</code> (30 seconds)</li>
+<li><code>useLeaderboard</code> sets <code>refetchInterval: 30_000</code> (leaderboard_update_lag_max_seconds = 30 from constants.json)</li>
+<li><code>usePet</code> is invalidated on successful <code>submitTraining</code> or <code>useFeed</code> mutation</li>
+<li>No cache is shared between the player app and the admin portal</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="25-routing">2.5 Routing</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">React Router v6 with <code>createBrowserRouter</code>. All routes are lazy-loaded via React Router v6.4's built-in <code>lazy</code> route property (not <code>React.lazy()</code> + <code><Suspense></code> — these are distinct APIs; React Router's <code>lazy</code> handles the loading boundary internally).</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/App.tsx (router configuration)
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: &lt;Layout /&gt;,
+    children: [
+      { index: true, lazy: () =&gt; import('./components/landing/LandingPage') },
+      { path: 'claim', lazy: () =&gt; import('./components/claim/ClaimPage') },
+      { path: 'pet/:petId', lazy: () =&gt; import('./components/pet/PetPage') },
+      { path: 'pet/:petId/train', lazy: () =&gt; import('./components/training/TrainingPage') },
+      { path: 'pet/:petId/records', lazy: () =&gt; import('./components/records/BattleRecordsPage') },
+      { path: 'arena', lazy: () =&gt; import('./components/arena/ArenaPage') },
+      { path: 'arena/result/:matchId', lazy: () =&gt; import('./components/arena/BattleResultPage') },
+      { path: 'leaderboard', lazy: () =&gt; import('./components/leaderboard/LeaderboardPage') },
+      // GDPR self-service: owner token required; accessible at /gdpr
+      // Route-level guard: loader redirects to / when no pet_access_token present in localStorage
+      {
+        path: 'gdpr',
+        lazy: () =&gt; import('./components/gdpr/GdprPage'),
+        loader: () =&gt; {
+          if (!localStorage.getItem('pet_access_token')) {
+            throw redirect('/');
+          }
+          return null;
+        },
+      },
+      // Marketplace: only rendered when FF_MARKETPLACE feature flag is active
+      { path: 'marketplace', lazy: () =&gt; import('./components/marketplace/MarketplacePage') },
+    ],
+  },
+]);</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>URL state conventions</strong>:</p>
+<ul class="doc-list">
+<li><code>/leaderboard?rarity=EPIC&page=2</code> — rarity filter and pagination are URL state</li>
+<li><code>/pet/:petId?token=<petToken></code> — initial token hydration from deep link; token copied to <code>localStorage</code> on mount</li>
+<li><code>/arena/result/:matchId</code> — shareable battle record URL</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="26-api-client-layer">2.6 API Client Layer</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/lib/apiClient.ts
+import axios from 'axios';
+import { getPetToken } from './tokenStorage';
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+
+export const apiClient = axios.create({
+  baseURL: `${BASE_URL}/api/v1`,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Token attachment — reads pet_access_token from localStorage on every request
+apiClient.interceptors.request.use((config) =&gt; {
+  const token = getPetToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Error normalization
+apiClient.interceptors.response.use(
+  (response) =&gt; response,
+  (error) =&gt; {
+    // Translate API error envelope to a typed AppError
+    const code = error.response?.data?.error?.code ?? 'UNKNOWN_ERROR';
+    const message = error.response?.data?.error?.message ?? 'An unexpected error occurred.';
+    return Promise.reject(new AppError(code, message, error.response?.status));
+  }
+);</code></pre>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/lib/tokenStorage.ts
+const TOKEN_KEY = 'pet_access_token';
+
+export function getPetToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setPetToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearPetToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Token attachment rules</strong>:</p>
+<ul class="doc-list">
+<li>Token is read from <code>localStorage</code> via <code>getPetToken()</code> on every outgoing request.</li>
+<li>On <code>/claim/verify</code> success response, <code>setPetToken(petToken)</code> persists the token.</li>
+<li>On URL deep-link with <code>?token=<value></code>, the token is extracted and saved via <code>setPetToken</code> during route hydration in <code>PetPage</code>.</li>
+<li>HTTP 401 responses trigger <code>clearPetToken()</code> and redirect to <code>/</code>.</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="3-admin-portal-architecture">3. Admin Portal Architecture</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="31-directory-structure">3.1 Directory Structure</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">apps/admin/
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+├── src/
+│   ├── main.ts                     # Vue app entry
+│   ├── App.vue                     # Root component + router-view
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AdminLayout.vue
+│   │   │   ├── AdminSidebar.vue
+│   │   │   └── AdminNavbar.vue
+│   │   ├── dashboard/
+│   │   │   └── DashboardPage.vue
+│   │   ├── pets/
+│   │   │   ├── PetListPage.vue
+│   │   │   ├── PetSearchBar.vue
+│   │   │   └── PetBanModal.vue
+│   │   ├── leaderboard/
+│   │   │   ├── AdminLeaderboardPage.vue
+│   │   │   └── SuspiciousFlagBadge.vue
+│   │   ├── battles/
+│   │   │   ├── BattleListPage.vue
+│   │   │   └── BattleFlagModal.vue
+│   │   ├── suspicious/
+│   │   │   └── SuspiciousActivityPage.vue
+│   │   ├── gdpr/
+│   │   │   ├── GdprQueuePage.vue
+│   │   │   └── GdprRequestRow.vue
+│   │   ├── config/
+│   │   │   ├── RuntimeConfigPage.vue
+│   │   │   ├── EconomyConfigPage.vue
+│   │   │   └── FlagsConfigPage.vue
+│   │   ├── email/
+│   │   │   └── EmailMonitorPage.vue
+│   │   ├── analytics/
+│   │   │   ├── AnalyticsPage.vue
+│   │   │   └── MetricChart.vue
+│   │   ├── audit/
+│   │   │   └── AuditLogPage.vue
+│   │   ├── roles/
+│   │   │   ├── RolesPage.vue
+│   │   │   └── CreateAdminModal.vue
+│   │   └── auth/
+│   │       ├── LoginPage.vue
+│   │       └── TotpSetupPage.vue
+│   ├── stores/
+│   │   ├── useAdminAuthStore.ts    # Pinia: session state, role
+│   │   ├── usePetStore.ts          # Pinia: admin pet list cache
+│   │   └── useConfigStore.ts       # Pinia: runtime + economy + feature flags config cache
+│   ├── lib/
+│   │   ├── adminApiClient.ts       # Axios with session cookie; CSRF handling
+│   │   └── formatters.ts           # Date, number, rarity formatting
+│   └── router/
+│       └── index.ts                # Vue Router route definitions</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="32-vue-3-component-tree">3.2 Vue 3 Component Tree</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">App.vue
+├── LoginPage.vue               /admin/login
+│   └── TotpSetupPage.vue       /admin/totp-setup   (first-login flow)
+└── AdminLayout.vue             /admin/**
+    ├── AdminSidebar.vue
+    ├── AdminNavbar.vue
+    └── &lt;router-view&gt;
+        ├── DashboardPage.vue       /admin/dashboard
+        ├── PetListPage.vue         /admin/pets
+        ├── AdminLeaderboardPage.vue /admin/leaderboard
+        ├── BattleListPage.vue      /admin/battles
+        ├── SuspiciousActivityPage.vue /admin/suspicious
+        ├── GdprQueuePage.vue       /admin/gdpr
+        ├── RuntimeConfigPage.vue   /admin/config/runtime
+        ├── EconomyConfigPage.vue   /admin/config/economy
+        ├── FlagsConfigPage.vue     /admin/config/flags
+        ├── EmailMonitorPage.vue    /admin/email
+        ├── AnalyticsPage.vue       /admin/analytics
+        ├── AuditLogPage.vue        /admin/audit
+        └── RolesPage.vue           /admin/roles</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="33-element-plus-usage">3.3 Element Plus Usage</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Element Plus is registered globally in <code>main.ts</code>. Key components used per module:</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Module</th><th>Element Plus components</th></tr></thead>
+<tbody>
+<tr><td>Pet Management</td><td>`ElTable`, `ElTableColumn`, `ElPagination`, `ElInput`, `ElSelect`, `ElButton`, `ElDialog`</td></tr>
+<tr><td>Leaderboard</td><td>`ElTable`, `ElTag`, `ElBadge` — hard-capped list of up to `leaderboard_admin_view = 500` entries (no pagination; `SuspiciousFlagBadge` annotates high-activity pets)</td></tr>
+<tr><td>Battle Records</td><td>`ElTable`, `ElDatePicker`, `ElSwitch`</td></tr>
+<tr><td>GDPR Queue</td><td>`ElTable`, `ElSelect` (status filter), `ElForm`, `ElFormItem`</td></tr>
+<tr><td>Config pages (runtime, economy)</td><td>`ElForm`, `ElFormItem`, `ElInputNumber`, `ElSlider`, `ElAlert`</td></tr>
+<tr><td>Feature Flags</td><td>`ElTable`, `ElSwitch`, `ElTag`</td></tr>
+<tr><td>Analytics</td><td>`ElDatePicker` (range), integrated with vue-echarts for `MetricChart`</td></tr>
+<tr><td>Audit Log</td><td>`ElTable`, `ElDatePicker` (range), `ElPagination`</td></tr>
+<tr><td>Login</td><td>`ElForm`, `ElInput` (password + TOTP), `ElButton`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p">All tables use server-side pagination via the <code>ElPagination</code> component bound to Pinia store page state, except the admin leaderboard which is a hard-capped single-response list (<code>leaderboard_admin_view = 500</code>).</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="34-state-management-pinia">3.4 State Management (Pinia)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/stores/useAdminAuthStore.ts
+export const useAdminAuthStore = defineStore('adminAuth', () =&gt; {
+  const role = ref&lt;'super_admin' | 'moderator' | 'read_only' | null&gt;(null);
+  const username = ref&lt;string | null&gt;(null);
+  const isAuthenticated = computed(() =&gt; role.value !== null);
+
+  async function login(credentials: LoginPayload) { /* ... */ }
+  async function logout() { /* ... */ }
+
+  return { role, username, isAuthenticated, login, logout };
+});</code></pre>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/stores/useConfigStore.ts
+export const useConfigStore = defineStore('config', () =&gt; {
+  const runtimeConfig = ref&lt;RuntimeConfig | null&gt;(null);
+  const economyConfig = ref&lt;EconomyConfig | null&gt;(null);
+  const featureFlags = ref&lt;FeatureFlag[] | null&gt;(null);
+
+  // config_cache_refresh_time_minutes = 5; local cache mirrors backend TTL
+  async function fetchRuntimeConfig() { /* GET /admin/api/config/runtime */ }
+  async function fetchEconomyConfig() { /* GET /admin/api/config/economy */ }
+  async function fetchFeatureFlags() { /* GET /admin/api/config/flags */ }
+  async function updateFeatureFlag(flag: string, enabled: boolean) { /* PUT /admin/api/config/flags/:flag */ }
+
+  return { runtimeConfig, economyConfig, featureFlags, fetchRuntimeConfig, fetchEconomyConfig, fetchFeatureFlags, updateFeatureFlag };
+});</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="35-routing-vue-router">3.5 Routing (Vue Router)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/router/index.ts
+const router = createRouter({
+  history: createWebHistory('/admin'),
+  routes: [
+    { path: '/login', component: () =&gt; import('../components/auth/LoginPage.vue') },
+    { path: '/totp-setup', component: () =&gt; import('../components/auth/TotpSetupPage.vue') },
+    {
+      path: '/',
+      component: AdminLayout,
+      meta: { requiresAuth: true },
+      children: [
+        { path: 'dashboard', component: () =&gt; import('../components/dashboard/DashboardPage.vue') },
+        { path: 'pets', component: () =&gt; import('../components/pets/PetListPage.vue') },
+        { path: 'leaderboard', component: () =&gt; import('../components/leaderboard/AdminLeaderboardPage.vue') },
+        { path: 'battles', component: () =&gt; import('../components/battles/BattleListPage.vue') },
+        { path: 'suspicious', component: () =&gt; import('../components/suspicious/SuspiciousActivityPage.vue') },
+        { path: 'gdpr', component: () =&gt; import('../components/gdpr/GdprQueuePage.vue') },
+        { path: 'config/runtime', component: () =&gt; import('../components/config/RuntimeConfigPage.vue') },
+        { path: 'config/economy', component: () =&gt; import('../components/config/EconomyConfigPage.vue') },
+        { path: 'config/flags', component: () =&gt; import('../components/config/FlagsConfigPage.vue') },
+        { path: 'email', component: () =&gt; import('../components/email/EmailMonitorPage.vue') },
+        { path: 'analytics', component: () =&gt; import('../components/analytics/AnalyticsPage.vue') },
+        { path: 'audit', component: () =&gt; import('../components/audit/AuditLogPage.vue') },
+        { path: 'roles', component: () =&gt; import('../components/roles/RolesPage.vue') },
+      ],
+    },
+  ],
+});
+
+// Navigation guard: redirect unauthenticated users to /login
+router.beforeEach((to) =&gt; {
+  const auth = useAdminAuthStore();
+  if (to.meta.requiresAuth &amp;&amp; !auth.isAuthenticated) {
+    return '/login';
+  }
+});</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Admin Session Timeout:</strong></p>
+<p class="doc-p">Admin sessions expire after 4 hours of inactivity (<code>admin_session_inactivity_expiry_hours = 4</code>). The session TTL is refreshed with each request to the admin API. After 8 hours absolute time (<code>admin_session_absolute_expiry_hours = 8</code>), the session is forcibly invalidated regardless of activity. On expiry, the server responds with HTTP 401; the client clears the session and redirects to <code>/admin/login</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Admin Route Prefix Configuration:</strong></p>
+<p class="doc-p">The admin portal route prefix <code>/admin</code> is configurable via the <code>VITE_ADMIN_BASE_URL</code> environment variable. This allows deployment-time configuration of the admin portal subdomain or path without rebuilding the application.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="36-api-client-admin">3.6 API Client (Admin)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Admin requests use session cookies — no Authorization header. Axios is configured with <code>withCredentials: true</code> so the browser sends the httpOnly session cookie on every request.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/lib/adminApiClient.ts
+import axios from 'axios';
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+
+export const adminApiClient = axios.create({
+  baseURL: `${BASE_URL}/admin/api`,
+  withCredentials: true,           // send httpOnly session cookie
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Session expiry handling
+adminApiClient.interceptors.response.use(
+  (response) =&gt; response,
+  (error) =&gt; {
+    if (error.response?.status === 401) {
+      // Session expired or invalidated
+      useAdminAuthStore().logout();
+      router.push('/login');
+    }
+    return Promise.reject(error);
+  }
+);</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>CSRF handling</strong>: The admin API is served under <code>/admin/api</code> with <code>SameSite=Strict</code> cookie policy. All state-mutating requests are POST/PUT/DELETE. Because the cookie is <code>SameSite=Strict</code>, cross-site form submissions cannot forge admin actions. No additional CSRF token is required given this configuration; if the deployment adds cross-origin scenarios, an <code>X-CSRF-Token</code> header must be implemented.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="4-pixel-art-rendering">4. Pixel Art Rendering</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="41-phaserjs-sprite-loading">4.1 Phaser.js Sprite Loading</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Sprite sheets are loaded in the Phaser scene's <code>preload()</code> method. Frame size is governed by <code>sprite_resolution_px = 32</code> from <code>constants.json</code> — this value is passed as a typed constant and never hardcoded.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/components/canvas/PetCanvasEngine.ts
+import { SPRITE_RESOLUTION_PX } from '../../constants';
+// SPRITE_RESOLUTION_PX = 32  (sprite_resolution_px from constants.json)
+
+class PetIdleScene extends Phaser.Scene {
+  private seed: bigint;
+  private attributes: AttributeVector;
+  private rarity: string;
+
+  constructor(seed: bigint, attributes: AttributeVector, rarity: string) {
+    super({ key: 'PetIdleScene' });
+    this.seed = seed;
+    this.attributes = attributes;
+    this.rarity = rarity;
+  }
+
+  preload(): void {
+    // Sprite sheet: frameWidth = frameHeight = SPRITE_RESOLUTION_PX
+    this.load.spritesheet('pet', `/sprites/pet-${this.seed.toString()}-sheet.png`, {
+      frameWidth: SPRITE_RESOLUTION_PX,   // 32
+      frameHeight: SPRITE_RESOLUTION_PX,  // 32
+    });
+  }
+
+  create(): void {
+    this.anims.create({
+      key: 'idle',
+      frames: this.anims.generateFrameNumbers('pet', { start: 0, end: 3 }),
+      frameRate: 30,   // pet_animation_fps_min = 30 (constants.json slo section)
+      repeat: -1,      // loop indefinitely
+    });
+
+    const sprite = this.add.sprite(
+      this.cameras.main.width / 2,
+      this.cameras.main.height / 2,
+      'pet'
+    );
+    sprite.setScale(2); // scale 32px frame to fill 64px canvas (sprite_resolution_px × 2)
+    sprite.play('idle');
+  }
+}</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="42-sprite-resolution">4.2 Sprite Resolution</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Frame size</strong>: <code>sprite_resolution_px = 32</code> px per frame (from <code>constants.json</code> core section). All sprite sheets are authored at this resolution.</li>
+<li><strong>Display scaling</strong>: Sprites are rendered at 2× scale in the hero canvas (64×64 CSS px visible at @1×; 128×128 px at @2× retina), using CSS <code>image-rendering: pixelated</code> and <code>image-rendering: crisp-edges</code> to preserve hard pixel boundaries at all zoom levels.</li>
+<li><strong>Sprite sizes by context</strong> (from VDD §4.2):</li>
+</ul>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Context</th><th>Sprite size</th><th>Display size</th></tr></thead>
+<tbody>
+<tr><td>Hero canvas (Landing, My Pet, Battle Result)</td><td>64×64 px @ 1×</td><td>128×128 px @ 2× (retina)</td></tr>
+<tr><td>Leaderboard thumbnail</td><td>32×32 px</td><td>32×32 px @ 1×, 64×64 px @ 2×</td></tr>
+<tr><td>Trade card (Marketplace)</td><td>48×48 px @ 1×</td><td>96×96 px @ 2×</td></tr>
+<tr><td>OG social share card</td><td>128×128 px</td><td>128×128 px rendered on 1200×630 card</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="43-animation">4.3 Animation</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong>Minimum frame rate</strong>: <code>pet_animation_fps_min = 30</code> FPS sustained (from <code>constants.json</code> slo section). This is the <code>frameRate</code> value passed to <code>this.anims.create()</code> inside a Phaser Scene.</li>
+<li><strong>Idle animation</strong>: 4-frame minimum, 8-frame recommended loop.</li>
+<li><strong>Interaction response</strong>: 2-frame "bounce" sequence — scale 1.15× frame 1, return to 1× frame 2; 200ms total (<code>pet_interaction_response_ms = 200</code> from constants.json).</li>
+<li><strong>Training animation</strong>: 3-frame "effort" sequence, 400ms.</li>
+<li><strong>Neglected state</strong>: CSS <code>filter: grayscale(60%) brightness(0.8)</code> applied when <code>training_neglect_threshold_days = 3</code> days without training.</li>
+<li><strong>Reduced motion</strong>: <code>useReducedMotion()</code> hook detects <code>prefers-reduced-motion: reduce</code>. When true, Phaser's animation loop is paused and a static sprite frame is shown. No particle effects are created.</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="44-sprite-generation-from-seed">4.4 Sprite Generation from Seed</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Pet appearance is deterministic from the integer seed stored in <code>pets.seed</code>. The generation algorithm maps seed → 6-dimension attribute vector:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/lib/petGeneration.ts
+// pet_generation_dimensions = 6
+export interface AttributeVector {
+  bodyType: number;       // dimension 1
+  headType: number;       // dimension 2
+  colorPalette: number;   // dimension 3
+  accessory: number;      // dimension 4
+  rarityTrait: number;    // dimension 5
+  pattern: number;        // dimension 6
+}
+
+export function buildAttributeVector(seed: bigint): AttributeVector {
+  // Deterministic decomposition of seed into 6 independent dimensions
+  // Combination space &gt;= pet_generation_combinations_min = 1,000,000,000
+  return {
+    bodyType:    Number(seed % 100n),
+    headType:    Number((seed / 100n) % 100n),
+    colorPalette: Number((seed / 10_000n) % 100n),
+    accessory:   Number((seed / 1_000_000n) % 10n),
+    rarityTrait: Number((seed / 10_000_000n) % 10n),
+    pattern:     Number((seed / 100_000_000n) % 10n),
+  };
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">The same seed always produces the same <code>AttributeVector</code> (<code>AC-002-2</code>). The attribute vector selects sprite sheet frames for each dimension layer, composited by Phaser.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="45-canvas-vs-dom-rendering-decisions">4.5 Canvas vs DOM Rendering Decisions</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Element</th><th>Rendering</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td>Pet sprite and idle animation</td><td>Phaser.js canvas (WebGL → Canvas 2D fallback)</td><td>Requires per-frame animation loop, sprite composition, interaction physics</td></tr>
+<tr><td>Battle animation sequence</td><td>Phaser.js canvas (separate `ArenaScene`)</td><td>8-frame run cycle, particle burst, positional animation</td></tr>
+<tr><td>Stat bars, rarity badges, leaderboard</td><td>DOM + CSS</td><td>Data-driven, accessible, no animation requiring frame-by-frame control</td></tr>
+<tr><td>Rarity shimmer / glow effects</td><td>CSS animations (`legendary-shimmer`, `epic-shimmer`)</td><td>Compositor-friendly; avoids canvas overhead for purely decorative effects</td></tr>
+<tr><td>Training stat indicator (`+X Speed`)</td><td>DOM + CSS keyframes (`translateY` + `opacity`)</td><td>Compositor-friendly transform; no Phaser scene needed</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="5-key-ui-flows">5. Key UI Flows</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="51-pet-claim-flow-email--otp--token-storage">5.1 Pet Claim Flow (Email → OTP → Token Storage)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The claim flow is a 3-step compound component (<code>email_claim_flow_steps_max = 3</code>).</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">Guest on LandingPage
+  ↓ clicks ClaimCTA
+ClaimPage renders ClaimFlow
+  │
+  ├─ Step 1: ClaimEmailForm
+  │    User enters email + checks COPPA age confirmation
+  │    → POST /api/v1/claim  { email, petId, ageConfirmed: true }
+  │    ← { claimId, expiresAt }
+  │    Rate limit: auth_rate_limit_claim_attempts_per_hour = 5
+  │
+  ├─ Step 2: ClaimCodeForm
+  │    User enters 6-digit OTP (claim_code_digits = 6)
+  │    ExpiryWarning shown when ≤ a11y_claim_code_warning_before_expiry_minutes = 2 min remain
+  │    → POST /api/v1/claim/verify  { claimId, code }
+  │    ← { petToken, petId, petUrl }
+  │    Code expires after claim_code_expiry_minutes = 15 min
+  │    Rate limit: auth_rate_limit_code_entry_attempts_per_session = 10
+  │
+  └─ Step 3: URLReveal
+       petToken → setPetToken(petToken)  [localStorage]
+       petUrl displayed with copy button
+       → navigate to /pet/:petId</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Error states handled in UI</strong>:</p>
+<ul class="doc-list">
+<li><code>ALREADY_CLAIMED</code> (HTTP 400): "This pet is already owned."</li>
+<li><code>CODE_EXPIRED</code> (HTTP 400): "Claim code has expired. Please request a new one." + re-request button</li>
+<li><code>INVALID_CODE</code> (HTTP 400): Red shake animation on digit boxes + error message</li>
+<li><code>VALIDATION_ERROR</code> (HTTP 400): Inline field error shown (malformed email, invalid UUID for <code>petId</code>)</li>
+<li><code>AGE_CONFIRMATION_REQUIRED</code> (HTTP 400): Checkbox re-highlighted with error message "Age confirmation required"</li>
+<li><code>PET_NOT_FOUND</code> (HTTP 404): "Pet not found. Please reload and try again."</li>
+<li><code>MAX_ATTEMPTS_REACHED</code> (HTTP 429): All inputs disabled after reaching the 10-attempt session limit (<code>auth_rate_limit_code_entry_attempts_per_session = 10</code>); <code>Retry-After</code> countdown shown</li>
+<li><code>RATE_LIMIT_EXCEEDED</code> (HTTP 429): Email claim rate limit reached; <code>claim_email_retry_cooldown_seconds = 60</code> second cooldown countdown shown</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="52-token-recovery-flow-lost-url-recovery">5.2 Token Recovery Flow (Lost URL Recovery)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Players who have lost their bookmarked pet URL may recover access via the recovery flow. Recovery is triggered from the LandingPage via a "Forgot Your Pet?" link or from the ClaimPage.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">Guest on LandingPage or ClaimPage
+  ↓ clicks "Forgot Your Pet?" or recovery link
+TokenRecoveryPage /claim/recover
+  │
+  ├─ Step 1: RecoveryEmailForm
+  │    User enters email + petId (pet ID displayed on the original pet page if still available)
+  │    → POST /api/v1/claim/recover  { email, petId }
+  │    ← { claimId, expiresAt }
+  │    Note: Returns HTTP 200 regardless of email/petId match to prevent account enumeration (AC-004-2)
+  │    Rate limit: same auth_rate_limit_claim_attempts_per_hour = 5 as initial claim
+  │
+  ├─ Step 2: RecoveryCodeForm
+  │    User enters 6-digit OTP sent to registered email
+  │    → POST /api/v1/claim/verify  { claimId, code }
+  │    ← { petToken, petId, petUrl }
+  │    Code expires after claim_code_expiry_minutes = 15 min
+  │
+  └─ Step 3: URLReveal
+       petToken → setPetToken(petToken)  [localStorage]
+       Old token immediately invalidated via Redis blacklist (token:blacklist:{old_hash}, TTL 72h)
+       petUrl displayed with copy button
+       → navigate to /pet/:petId</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>State Management:</strong></p>
+<ul class="doc-list">
+<li>Zustand store (<code>recoverySlice</code>): tracks <code>claimId</code>, <code>email</code>, <code>petId</code>, <code>recoveryStep</code>, <code>recoveryAttempts</code></li>
+<li>On success, Zustand <code>petSlice.setPetToken()</code> is called to update localStorage</li>
+<li>Old token automatically blacklisted on server; no client-side token invalidation needed</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Error states handled in UI:</strong></p>
+<ul class="doc-list">
+<li><code>CODE_EXPIRED</code> (HTTP 400): "Recovery code has expired. Please request a new one." + re-request button</li>
+<li><code>INVALID_CODE</code> (HTTP 400): Red shake animation on digit boxes + error message</li>
+<li><code>MAX_ATTEMPTS_REACHED</code> (HTTP 429): All inputs disabled after reaching the 10-attempt limit</li>
+<li><code>RATE_LIMIT_EXCEEDED</code> (HTTP 429): Email recovery rate limit reached; countdown shown</li>
+<li><code>EMAIL_NOT_FOUND</code> (HTTP 400): No pet found for this email/petId combination (returned as HTTP 200 with claimId but OTP code delivery fails silently to prevent enumeration)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Component diagram:</strong></p>
+<pre class="doc-code"><code class="lang-text">TokenRecoveryPage
+├── RecoveryEmailForm
+│   ├── EmailInput
+│   ├── PetIdInput (optional if pet ID is known)
+│   └── RecoverButton
+├── RecoveryCodeForm (shown after email submission)
+│   ├── CodeDigitInput × 6
+│   ├── ExpiryWarning (when ≤ 2 min remain)
+│   └── ResendCodeButton
+└── TokenRevealModal (shown on success)
+    ├── PetUrlDisplay
+    ├── CopyButton
+    └── NavigateToPetButton</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Related AC:</strong> AC-004-2 (player can request new access link), AC-004-3 (link sent within 60s)</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="53-training-interaction">5.3 Training Interaction</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">PetPage (owner authenticated via Bearer token)
+  ↓ clicks TrainingEntry
+TrainingPage /pet/:petId/train
+  │
+  ├─ TrainingActions shows 3 action cards (RUN / STRENGTH / STAMINA)
+  │    Each card shows current stat value and trains-remaining count
+  │    training_actions_per_day = 3 actions per UTC day
+  │
+  ├─ User clicks "Train" on a card
+  │    → POST /api/v1/pets/:petId/train  { trainingType: 'RUN' | 'STRENGTH' | 'STAMINA' }
+  │    ← { updatedStats, statDelta, actionsRemainingToday }
+  │
+  ├─ On success:
+  │    StatChangeIndicator appears: "+X Speed" floats up, visible for
+  │    training_stat_display_duration_seconds = 2 seconds
+  │    Stat bars animate to new values
+  │    usePet cache is invalidated → PetPage re-fetches
+  │
+  ├─ Error states:
+  │    HTTP 400 VALIDATION_ERROR → toast: "Invalid training type. Please try again."
+  │    HTTP 400 TRAINING_LIMIT_REACHED → all action cards disabled; DailyResetTimer shown
+  │    HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (pet_stat_max = 100)"; card remains
+  │                                enabled for other stats not yet at max
+  │    HTTP 401 → handled globally: clearPetToken() + redirect to /
+  │    HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
+  │    HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)
+  │
+  └─ Exhausted (actionsRemainingToday = 0):
+       DailyResetTimer shows countdown to UTC 00:00 reset
+       All action cards disabled
+
+  Neglect check: if last_trained_at &gt; training_neglect_threshold_days = 3 days ago
+    → NeglectedState overlay renders on PetCanvas</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="54-feed-interaction">5.4 Feed Interaction</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">PetPage (owner authenticated via Bearer token)
+  ↓ selects FoodItem in FoodInventory
+  │
+  ├─ User taps/clicks food item in FoodInventory
+  │    FoodItem shows stat targeted, magnitude, and buff duration
+  │    → POST /api/v1/pets/:petId/feed
+  │       { buffType, stat, magnitude, isPermanent }
+  │    ← { updatedStats, buffApplied }
+  │       updatedStats: { speed, strength, stamina }  (level excluded — level is training-derived)
+  │       buffApplied: { stat, magnitude, isPermanent, expiresAt }
+  │           expiresAt is null when isPermanent is true
+  │
+  ├─ On success:
+  │    Stat bar for the targeted stat animates to new value
+  │    If temporary buff: buff badge appears on stat bar with remaining duration
+  │    usePet cache is invalidated → PetPage re-fetches
+  │
+  └─ Error states:
+       HTTP 400 STAT_AT_MAXIMUM → toast: "Stat is already at maximum (pet_stat_max = 100)"
+       HTTP 400 VALIDATION_ERROR → inline error (magnitude or buffType out of configured range)
+       HTTP 401 → handled globally: clearPetToken() + redirect to /
+       HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
+       HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="55-arena-battle-flow">5.5 Arena Battle Flow</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">PetPage
+  ↓ clicks ArenaEntry (battles remaining &gt; 0)
+ArenaPage /arena
+  │
+  ├─ A1: Rate limit check (client-side from Zustand store — state set on prior HTTP 429 response)
+  │    If arena rate limit reached: RateLimitBanner shown; flow blocked
+  │    arena_rate_limit_battles_per_hour_default = 10
+  │
+  ├─ A2: ModeSelector — user picks RACE or SUMO
+  │
+  ├─ A3: User clicks "Enter Arena"
+  │    → POST /api/v1/arena/enter  { petId, mode, acceptAI?: boolean }
+  │    Long-poll: server waits up to arena_matchmaking_timeout_seconds = 30s
+  │    MatchmakingStatus shows "Finding opponent..." with animated dots
+  │    HTTP 400 VALIDATION_ERROR → toast: "Invalid arena mode." (should not occur in normal flow)
+  │    HTTP 401 → handled globally: clearPetToken() + redirect to /
+  │    HTTP 403 NOT_OWNER → toast: "You do not own this pet." (should not occur in normal flow)
+  │    HTTP 403 PET_BANNED → show ban notice; arena entry blocked
+  │    HTTP 404 PET_NOT_FOUND → toast: "Pet not found. Please reload and try again." (should not occur in normal flow)
+  │    HTTP 429 RATE_LIMIT_EXCEEDED → RateLimitBanner shown; Retry-After countdown displayed
+  │
+  ├─ A4a: Opponent found (&lt; 30s)
+  │    3-2-1 pixel countdown animation
+  │    ArenaScene (Phaser.js) renders battle animation
+  │    Duration: arena_match_duration_min_seconds = 5s to
+  │              arena_match_duration_max_seconds = 15s
+  │    ← { matchId, result, opponentPetId, isAiOpponent, statDelta, newLeaderboardScore }
+  │
+  ├─ A4b: No opponent (30s timeout), acceptAI omitted or false
+  │    HTTP 408 MATCHMAKING_TIMEOUT
+  │    Battle rate-limit counter NOT incremented on timeout
+  │    "No opponent found" message with retry option
+  │
+  ├─ A4c: No opponent, user accepts AIOfferModal
+  │    → POST /api/v1/arena/enter  { ..., acceptAI: true }
+  │    ← AI opponent result
+  │
+  └─ A5: navigate to /arena/result/:matchId
+       BattleResultPage shows WIN/LOSS card
+       ShareBattleButton copies public URL
+       Leaderboard score updated within leaderboard_update_lag_max_seconds = 30s
+
+  Error states:
+       HTTP 400 VALIDATION_ERROR → toast: "Invalid request. Please try again."
+       HTTP 401 UNAUTHORIZED → clearPetToken() + redirect to /
+       HTTP 403 NOT_OWNER → toast: "You do not own this pet."
+       HTTP 429 RATE_LIMIT_EXCEEDED → show cooldown timer (arena_rate_limit_battles_per_hour_default = 10 battles/hour)</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="56-marketplace-browse--list--buy-ffmarketplace">5.6 Marketplace Browse / List / Buy (FF_MARKETPLACE)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">This flow is only active when the <code>FF_MARKETPLACE</code> feature flag is <code>true</code>.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">MarketplacePage /marketplace
+  │
+  ├─ Browse: GET /api/v1/marketplace/listings?sortBy=price|rarity|level&amp;order=asc|desc&amp;page=1
+  │    Public — no auth required
+  │    ElTable (admin portal) / custom table (player app) with rarity filtering
+  │
+  ├─ List pet for sale (owner only):
+  │    → POST /api/v1/marketplace/listings
+  │       { petId, priceCredits }
+  │    Min price enforced: (pet_level × 100) + (rarity_multiplier × 500)
+  │       (trade_min_price_formula_level_coeff = 100; trade_min_price_formula_rarity_coeff = 500)
+  │    Anti-flip: marketplace_trade_antiflip_protection_days = 7 days
+  │       since last purchase before re-listing is allowed
+  │    Platform fee: trade_transaction_fee_percent = 5%
+  │
+  ├─ Cancel listing (owner only):
+  │    → DELETE /api/v1/marketplace/listings/:listingId
+  │
+  ├─ Buy:
+  │    → POST /api/v1/marketplace/listings/:listingId/buy
+  │    ← ownership transferred; buyer's token now controls the pet
+  │    Trade history: GET /api/v1/marketplace/history/:petId (authenticated, private)
+  │
+  └─ Error states (all marketplace endpoints):
+       HTTP 400 VALIDATION_ERROR → toast: "Invalid request. Please check your input."
+       HTTP 401 UNAUTHORIZED → clearPetToken() + redirect to /
+       HTTP 403 FEATURE_DISABLED → show "Marketplace is not yet available" banner
+       HTTP 403 NOT_OWNER → toast: "You do not own this pet."
+       HTTP 404 NOT_FOUND → toast: "Listing not found. It may have been removed."</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="57-leaderboard-view">5.7 Leaderboard View</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">LeaderboardPage /leaderboard
+  │
+  ├─ GET /api/v1/leaderboard?rarity=&lt;filter&gt;&amp;page=1&amp;limit=100
+  │    Public — no auth required
+  │    Top leaderboard_top_display = 100 pets shown publicly
+  │    Lag ≤ leaderboard_update_lag_max_seconds = 30s (sourced from Redis sorted set)
+  │    TanStack Query refetchInterval = 30,000ms mirrors this SLO
+  │
+  ├─ RarityFilter tabs (All / Common / Rare / Epic / Legendary)
+  │    Filter state in URL: ?rarity=EPIC
+  │
+  ├─ OwnerRankBanner (if pet token in localStorage):
+  │    GET /api/v1/leaderboard/rank/:petId
+  │    Shows "Your pet [Name] is ranked #X"
+  │
+  └─ LeaderboardRow click → /pet/:petId/records
+       BattleHistoryTable shows last arena_battle_records_display_count = 20 battles</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="58-gdpr-self-service-flow-player">5.8 GDPR Self-Service Flow (Player)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">PetPage (owner authenticated via Bearer token)
+  ↓ clicks "Data Rights" / GDPR link
+GdprPage /gdpr
+  │
+  ├─ GdprRequestForm
+  │    Type selector (radio / dropdown):
+  │      erasure | data_access | restrict_processing | object_leaderboard | rectification
+  │    → POST /api/v1/gdpr/request  { type: "erasure" | ... }   (auth: Bearer token)
+  │    ← { jobId, message }  HTTP 202 Accepted
+  │    jobId stored in component state; GdprStatusBanner activates
+  │
+  ├─ GdprStatusBanner (after submission)
+  │    Polls GET /api/v1/gdpr/request/status?jobId=&lt;jobId&gt;  (auth: Bearer token)
+  │    Displays current status: pending | processing | completed | failed
+  │    SLA copy displayed per request type:
+  │      erasure → "Processed within 7 days (gdpr_email_deletion_window_days = 7)"
+  │      data_access / portability → "Processed within 30 days (gdpr_data_access_response_days = 30; gdpr_data_portability_response_days = 30)"
+  │      restrict_processing → "Processed within 24 hours (gdpr_restrict_processing_response_hours = 24)"
+  │      object_leaderboard → "Processed within 5 business days (gdpr_object_leaderboard_response_business_days = 5)"
+  │      rectification → "Processed within 24 hours (gdpr_email_rectification_response_hours = 24)"
+  │
+  └─ Error states:
+       HTTP 400 VALIDATION_ERROR → inline form error: "Please select a valid request type."
+       HTTP 401 → redirect to / (token cleared)
+       HTTP 403 FORBIDDEN → "Your account is not authorized to view this request."
+       HTTP 404 NOT_FOUND → "Request not found."</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="59-admin-login-totp">5.9 Admin Login (TOTP)</h3>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">AdminLoginPage /admin/login
+  │
+  ├─ Step 1: Credentials entry
+  │    → POST /admin/api/auth/login  { username, password, totpCode? }
+  │    IP rate limit: admin_login_ip_rate_limit_attempts = 10 per
+  │                   admin_login_ip_rate_limit_window_seconds = 900s (15 min)
+  │
+  ├─ Path A: TOTP not yet enrolled (first login)
+  │    ← HTTP 403  { error: { code: "TOTP_SETUP_REQUIRED", details: { setupToken } } }
+  │    Redirect → /admin/totp-setup
+  │    TotpSetupPage calls POST /admin/api/auth/totp/setup  { setupToken, password }
+  │    ← { otpAuthUrl, backupCodes }
+  │    Admin scans QR code in authenticator app
+  │    → Return to /admin/login for standard login
+  │
+  ├─ Path B: Successful login with TOTP code
+  │    ← HTTP 200; Set-Cookie: session=&lt;id&gt;; HttpOnly; SameSite=Strict; Secure; Path=/admin
+  │    Session: inactivity admin_session_inactivity_expiry_hours = 4h
+  │             absolute admin_session_absolute_expiry_hours = 8h
+  │    → navigate to /admin/dashboard
+  │
+  ├─ Path C: Account locked
+  │    After admin_login_lockout_threshold = 10 consecutive failures
+  │    ← HTTP 403  { error: { code: "ACCOUNT_LOCKED", details: { unlockedAt } } }
+  │    Lockout duration: admin_login_lockout_duration_minutes = 30 min
+  │
+  ├─ Error states:
+  │    HTTP 400 VALIDATION_ERROR → inline form error: "Please enter a valid username and password."
+  │    HTTP 401 UNAUTHORIZED → inline form error: "Invalid credentials."
+  │    HTTP 429 RATE_LIMIT_EXCEEDED → show rate-limit message with (admin_login_ip_rate_limit_window_seconds = 900 → 15 min) countdown
+  │
+  └─ All auth events written to audit log (admin_audit_log_retention_years = 2 years)</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="6-performance-budget">6. Performance Budget</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">All targets derived from <code>constants.json</code> slo section.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="61-core-web-vitals-targets">6.1 Core Web Vitals Targets</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Metric</th><th>Target</th><th>Constant key</th></tr></thead>
+<tbody>
+<tr><td>FCP</td><td>≤ 1.5s</td><td>`fcp_seconds`</td></tr>
+<tr><td>LCP</td><td>≤ 2.5s</td><td>`lcp_seconds`</td></tr>
+<tr><td>CLS</td><td>≤ 0.1</td><td>`cls_score`</td></tr>
+<tr><td>INP</td><td>≤ 200ms</td><td>`inp_ms`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="62-rendering-slos">6.2 Rendering SLOs</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Metric</th><th>Target</th><th>Constant key</th></tr></thead>
+<tbody>
+<tr><td>Pet canvas render on load</td><td>≤ 2s</td><td>`pet_render_on_load_seconds`</td></tr>
+<tr><td>Pet interaction response (click/tap)</td><td>≤ 200ms</td><td>`pet_interaction_response_ms`</td></tr>
+<tr><td>Pet animation frame rate</td><td>≥ 30 FPS sustained</td><td>`pet_animation_fps_min`</td></tr>
+<tr><td>Arena battle E2E</td><td>≤ 2s</td><td>`arena_battle_e2e_seconds`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="63-bundle-budgets">6.3 Bundle Budgets</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Asset</th><th>Budget (gzipped)</th><th>Constant key</th></tr></thead>
+<tbody>
+<tr><td>Total JS bundle</td><td>≤ 300 KB</td><td>`total_js_bundle_gzipped_kb`</td></tr>
+<tr><td>Total CSS bundle</td><td>≤ 50 KB</td><td>`total_css_bundle_gzipped_kb`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="64-code-splitting-strategy">6.4 Code Splitting Strategy</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Phaser.js is the dominant bundle contributor (~1 MB minified). It is excluded from the initial bundle by being loaded only inside <code>PetCanvasEngine.ts</code> via dynamic <code>import()</code>. The initial page load delivers only React + Router + TanStack Query + Zustand.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">Initial bundle (eager):       React + Router + TanStack Query + Zustand + Zod
+                               Target: &lt; 150 KB gzipped
+
+Phaser.js (lazy):             Loaded only when PetCanvas mounts
+                               Served from CDN edge; cached after first load
+
+Route chunks (lazy):          One chunk per route via React Router v6 lazy route property
+                               LandingPage chunk downloads Phaser.js as a side-effect
+
+Admin portal:                 Entirely separate Vite build; no shared bundle with player app</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Vite code splitting config</strong> (<code>apps/player/vite.config.ts</code>):</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'form-vendor': ['react-hook-form', 'zod'],
+          // Phaser is NOT listed here — it is excluded from all eager chunks
+          // and loaded only via dynamic import() inside PetCanvasEngine.ts
+        },
+      },
+    },
+  },
+});</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="65-additional-performance-rules">6.5 Additional Performance Rules</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><code>font-display: swap</code> for both <code>Press Start 2P</code> and <code>Inter</code></li>
+<li>Preload only <code>Press Start 2P</code> (above-fold critical); <code>Inter</code> loads asynchronously</li>
+<li>All images have explicit <code>width</code> and <code>height</code> attributes to prevent CLS</li>
+<li>Hero sprite: <code>loading="eager"</code> + <code>fetchpriority="high"</code>; all other sprites: <code>loading="lazy"</code></li>
+<li><code>image-rendering: pixelated</code> prevents browser smoothing that would increase LCP cost of canvas</li>
+<li>TanStack Query <code>staleTime: 30_000</code> avoids refetch-on-mount CLS from stale → fresh state transitions</li>
+<li>Admin portal page load SLO: ≤ 3s with up to 1 million pet records (<code>admin_page_load_time_seconds = 3</code> from constants.json thresholds section)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="7-accessibility">7. Accessibility</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="71-standard">7.1 Standard</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>WCAG 2.1 AA</strong> compliance is required across all player app screens (PRD §7.7 NFR-A11Y-01).</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="72-contrast-ratios">7.2 Contrast Ratios</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Context</th><th>Minimum ratio</th><th>Constant key</th></tr></thead>
+<tbody>
+<tr><td>Normal body text (< 18pt or non-bold < 14pt)</td><td>4.5:1</td><td>`a11y_text_contrast_normal`</td></tr>
+<tr><td>Large text (≥ 18pt or bold ≥ 14pt)</td><td>3:1</td><td>`a11y_text_contrast_large`</td></tr>
+<tr><td>Focus indicator</td><td>3:1</td><td>`a11y_focus_contrast_ratio`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p">Verified token values from VDD §3.1:</p>
+<ul class="doc-list">
+<li><code>--color-neutral-50</code> (<code>#e8e8f0</code>) on <code>--color-surface-base</code> (<code>#1a1a2e</code>): 12.4:1 (AAA) — primary text</li>
+<li><code>--color-focus</code> (<code>#ffd700</code>) on dark surfaces: 3.1:1 (AA non-text) — focus rings</li>
+<li>All rarity colors verified against dark base in VDD §3.3 (minimum 5.9:1 for Epic)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="73-claim-code-expiry-warning">7.3 Claim Code Expiry Warning</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The <code>ExpiryWarning</code> component activates when OTP time remaining ≤ <code>a11y_claim_code_warning_before_expiry_minutes = 2</code> minutes. It uses <code>role="alert"</code> and <code>aria-live="assertive"</code> to announce the countdown to screen readers. The warning must meet the 4.5:1 contrast ratio against its background.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-tsx">// src/components/claim/ExpiryWarning.tsx
+export function ExpiryWarning({ minutesRemaining }: { minutesRemaining: number }) {
+  const WARNING_THRESHOLD = 2; // a11y_claim_code_warning_before_expiry_minutes = 2
+
+  if (minutesRemaining &gt; WARNING_THRESHOLD) return null;
+
+  return (
+    &lt;div role="alert" aria-live="assertive" className="expiry-warning"&gt;
+      Your claim code expires in {minutesRemaining} minute{minutesRemaining !== 1 ? 's' : ''}.
+      &lt;button onClick={/* requestNewCode */}&gt;Request a new code&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="74-keyboard-navigation">7.4 Keyboard Navigation</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>All interactive elements are reachable via <code>Tab</code> and activatable via <code>Enter</code> or <code>Space</code></li>
+<li><code>AIOfferModal</code> implements a focus trap (focus cycles within the modal while open; <code>Escape</code> closes)</li>
+<li><code>LeaderboardRow</code> entries are individually focusable; <code>Enter</code> navigates to battle records</li>
+<li><code>RarityFilter</code> tabs support arrow-key navigation between tabs</li>
+<li><code>TrainingActions</code> tab order: card 1 → Train button 1 → card 2 → Train button 2 → card 3 → Train button 3</li>
+<li><code>StatBar</code> and <code>StatsPanel</code> values are readable by screen reader via <code>aria-label</code></li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="75-motion-and-reduced-motion">7.5 Motion and Reduced Motion</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The <code>useReducedMotion()</code> hook wraps <code>window.matchMedia('(prefers-reduced-motion: reduce)')</code>:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-typescript">// src/hooks/useReducedMotion.ts
+import { useState, useEffect } from 'react';
+
+export function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(
+    () =&gt; window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+
+  useEffect(() =&gt; {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent) =&gt; setReduced(e.matches);
+    mq.addEventListener('change', handler);
+    return () =&gt; mq.removeEventListener('change', handler);
+  }, []);
+
+  return reduced;
+}</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">When <code>useReducedMotion()</code> returns <code>true</code>:</p>
+<ul class="doc-list">
+<li><code>PetCanvasEngine</code> pauses the Phaser animation loop and renders a static sprite frame</li>
+<li>CSS rarity shimmer animations are suppressed (<code>animation: none</code> via <code>@media (prefers-reduced-motion: reduce)</code>)</li>
+<li>Particle burst effects are not created</li>
+<li>Stat change indicator uses <code>opacity</code> only (no <code>translateY</code> motion)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="76-semantic-html">7.6 Semantic HTML</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><code><header></code> wraps <code>NavBar</code></li>
+<li><code><main></code> wraps all page content</li>
+<li><code><nav aria-label="Main navigation"></code> in <code>NavBar</code></li>
+<li><code><section aria-labelledby="..."></code> for each major page section</li>
+<li><code><h1></code> present on every route</li>
+<li><code><table></code> with <code><th scope="col"></code> for <code>LeaderboardTable</code>, <code>BattleHistoryTable</code>, <code>StatComparison</code></li>
+<li><code><button></code> for all interactive actions (not <code><div onClick></code>)</li>
+<li>Minimum touch target: 44×44px on all interactive elements (WCAG 2.5.5 AAA; also meets Apple HIG and Material Design recommendations)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="77-aria-roles-in-dynamic-regions">7.7 ARIA Roles in Dynamic Regions</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Component</th><th>ARIA usage</th></tr></thead>
+<tbody>
+<tr><td>`ExpiryWarning`</td><td>`role="alert"`, `aria-live="assertive"`</td></tr>
+<tr><td>`OwnerRankBanner`</td><td>`role="status"`</td></tr>
+<tr><td>`MatchmakingStatus`</td><td>`aria-live="polite"`, `aria-busy="true"` during queue wait</td></tr>
+<tr><td>`DailyResetTimer`</td><td>`aria-live="polite"` with throttled announcements (every 60 seconds and at ≤ 5 minutes remaining); the visible counter may update every second but the live-region text is only changed at those thresholds to avoid flooding screen readers</td></tr>
+<tr><td>`RateLimitBanner`</td><td>`role="alert"`, `aria-live="assertive"`</td></tr>
+<tr><td>`AIOfferModal`</td><td>`role="dialog"`, `aria-modal="true"`, focus trap</td></tr>
+<tr><td>`PetCanvas`</td><td>`role="img"`, `aria-label="Pixel pet canvas"`</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="8-security">8. Security</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="81-token-storage">8.1 Token Storage</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The <code>pet_access_token</code> is stored in <code>localStorage</code> under the key <code>pet_access_token</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Trade-offs considered</strong>:</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Storage</th><th>XSS risk</th><th>CSRF risk</th><th>Persistence across tabs</th><th>Decision</th></tr></thead>
+<tbody>
+<tr><td>`localStorage`</td><td>Yes — accessible via JavaScript (`window.localStorage`)</td><td>None — not sent automatically</td><td>Yes</td><td>**Selected**</td></tr>
+<tr><td>`sessionStorage`</td><td>Yes</td><td>None</td><td>No (tab-scoped)</td><td>Rejected: breaks multi-device / multi-tab use case</td></tr>
+<tr><td>httpOnly cookie</td><td>None</td><td>Yes (mitigated by `SameSite`)</td><td>Yes</td><td>Rejected for player token: requires server-side session, contradicts token URL model</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><code>localStorage</code> is chosen for the player token because the product's identity model requires the token to be embeddable in a URL and transferable between devices by bookmarking the URL. The XSS risk is mitigated by the CSP policy (see §8.3) which blocks inline scripts and untrusted origins.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Admin sessions</strong> use httpOnly cookies exclusively — no JS access to session identifiers.</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="82-admin-session-security">8.2 Admin Session Security</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Session cookie properties: <code>HttpOnly; SameSite=Strict; Secure; Path=/admin</code></li>
+<li>Session is stored server-side in Redis — the cookie contains only a session ID</li>
+<li>Inactivity timeout: <code>admin_session_inactivity_expiry_hours = 4</code> hours</li>
+<li>Absolute timeout: <code>admin_session_absolute_expiry_hours = 8</code> hours (regardless of activity)</li>
+<li>No JWT tokens used for admin auth — server-side sessions reduce token exposure risk</li>
+<li>Axios <code>withCredentials: true</code> in <code>adminApiClient.ts</code> ensures the cookie is sent on every request</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="83-content-security-policy">8.3 Content Security Policy</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Phase 1/2 CSP</strong> (current): The following CSP is applied as a response header on all player app and admin portal responses. Adjust trusted origins before production deployment. A nonce-based <code>script-src</code> policy (replacing the CDN allowlist) is scheduled as a Phase 3 security hardening item per EDD §13.3.</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-text">Content-Security-Policy:
+  default-src 'self';
+  script-src 'self' https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: https:;
+  font-src 'self' https://fonts.gstatic.com;
+  connect-src 'self' https://api.pixel-pet-arena.com;
+  frame-src 'none';
+  object-src 'none';
+  base-uri 'self';</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p">Key constraints:</p>
+<ul class="doc-list">
+<li><code>script-src</code> excludes <code>'unsafe-inline'</code> — all scripts must be from <code>'self'</code> or trusted CDN</li>
+<li><code>frame-src 'none'</code> prevents clickjacking</li>
+<li><code>object-src 'none'</code> blocks Flash/plugin vectors</li>
+<li><code>connect-src</code> restricts XHR/fetch to the API origin only</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="84-xss-prevention">8.4 XSS Prevention</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>All user-supplied data is displayed via React's default JSX escaping (no <code>dangerouslySetInnerHTML</code>)</li>
+<li>Pet names (<code>pets.pet_name</code>) are rendered as text nodes, never injected as HTML</li>
+<li>Error messages from the API are rendered as text content only</li>
+<li><code>adminApiClient.ts</code> serializes request bodies via <code>JSON.stringify</code>; no string concatenation in query parameters</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="85-token-validation">8.5 Token Validation</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The <code>pet_access_token</code> read from <code>localStorage</code> is sent in the <code>Authorization: Bearer</code> header. The API server hashes the received token (SHA-256) and compares it to <code>pets.owner_token_hash</code>. The raw token is never stored server-side.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Token revocation handling</strong>:</p>
+<ul class="doc-list">
+<li>HTTP 401 from any authenticated endpoint clears <code>localStorage</code> token and redirects to <code>/</code></li>
+<li>Replaced tokens (via recovery flow) are added to a Redis blacklist with TTL <code>claim_token_cleanup_ttl_hours = 72</code> hours</li>
+<li>Admin-revoked tokens (owner_token_hash set to NULL) immediately return 401</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="86-admin-specific-security-frontend">8.6 Admin-Specific Security (Frontend)</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>No admin API calls are made from the player app — the two apps use entirely separate API client instances</li>
+<li>The admin portal is served from a separate subdomain or route prefix (<code>admin.pixel-pet-arena.com</code>) and is not part of the player app bundle</li>
+<li>TOTP code (<code>totpCode</code>) is submitted as a string in the JSON body and cleared from Vue component state immediately after submission</li>
+<li>Backup codes are displayed once after TOTP setup and are never stored in frontend state</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="9-testing">9. Testing</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="91-player-app">9.1 Player App</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Framework</strong>: Vitest (unit/integration), Playwright (E2E)</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Test type</th><th>Location</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>Unit</td><td>`apps/player/src/**/__tests__/*.test.ts`</td><td>Hooks, utilities, Zod schemas, `petGeneration.ts`, `tokenStorage.ts`</td></tr>
+<tr><td>Component</td><td>`apps/player/src/**/__tests__/*.test.tsx`</td><td>Form components (`ClaimEmailForm`, `ClaimCodeForm`), `ExpiryWarning`, `StatBar`, `DailyResetTimer`</td></tr>
+<tr><td>E2E</td><td>`apps/player/e2e/*.spec.ts`</td><td>Claim flow, training flow, arena entry, leaderboard navigation, GDPR submission</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Minimum coverage target</strong>: 80% (<code>unit_test_coverage_min_percent = 80</code> from <code>constants.json</code> slo section), enforced by Vitest <code>coverage.thresholds</code>.</p>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key E2E scenarios</strong> (Playwright):</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-ts">// apps/player/e2e/claim.spec.ts
+test('claim flow completes and token is stored', async ({ page }) =&gt; {
+  await page.goto('/');
+  await expect(page.locator('h1')).toBeVisible();
+  // ...step through email, OTP, reveal
+});</code></pre>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Screenshot breakpoints: 320, 768, 1024, 1440 (both dark mode — primary — and light mode)</li>
+<li>Verify <code>useReducedMotion</code> path: Phaser animation paused, shimmer CSS suppressed</li>
+<li>Verify <code>HTTP 429</code> → <code>RateLimitBanner</code> renders and inputs are disabled</li>
+<li>Verify <code>HTTP 401</code> → token cleared, redirect to <code>/</code></li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="92-admin-portal">9.2 Admin Portal</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Framework</strong>: Vitest (unit), Playwright (E2E)</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Test type</th><th>Location</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>Unit</td><td>`apps/admin/src/**/__tests__/*.test.ts`</td><td>Pinia store actions (`useAdminAuthStore`, `useConfigStore`), `formatters.ts`</td></tr>
+<tr><td>E2E</td><td>`apps/admin/e2e/*.spec.ts`</td><td>Login with TOTP, pet ban/unban, GDPR queue, runtime config update</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Key E2E scenarios</strong>:</p>
+<ul class="doc-list">
+<li>Login → TOTP enrollment path → standard login with <code>totpCode</code></li>
+<li><code>moderator</code> role cannot access <code>/admin/config/runtime</code> (403 → visible error)</li>
+<li><code>read_only</code> role cannot perform mutations (ban, flag)</li>
+<li>Session expiry → redirect to <code>/admin/login</code></li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="93-visual-regression">9.3 Visual Regression</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">Playwright screenshots are taken at 320, 768, 1024, and 1440px breakpoints for:</p>
+<ul class="doc-list">
+<li><code>LandingPage</code> (with and without pet token in localStorage)</li>
+<li><code>PetPage</code> (Common, Rare, Epic, Legendary rarity)</li>
+<li><code>BattleResultPage</code> (WIN and LOSS variants)</li>
+<li><code>LeaderboardPage</code> (with <code>OwnerRankBanner</code> visible)</li>
+<li><code>ArenaPage</code> (matchmaking state, rate-limited state)</li>
+<li><code>GdprPage</code> (form and status banner states)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="10-player-app-features--bdd-scenario-mapping">10. Player App Features → BDD Scenario Mapping</h2>
+<div class="doc-gap"></div>
+<p class="doc-p">Each page and component in the player app is covered by BDD scenarios in the <code>features/</code> directory. The mapping below tracks traceability between UI components and test coverage.</p>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Page/Component</th><th>Route</th><th>BDD Feature File</th><th>Scenarios</th><th>Coverage</th></tr></thead>
+<tbody>
+<tr><td>Landing Page</td><td>`/`</td><td>`claim-flow-ui.feature`</td><td>Landing display, pet canvas, claim CTA</td><td>Initial claim flow</td></tr>
+<tr><td>Claim Page</td><td>`/claim`</td><td>`claim-flow-ui.feature`</td><td>Email input, OTP verification, rate limiting, error states</td><td>Email claim, OTP entry, expiry, enumeration prevention</td></tr>
+<tr><td>Pet Dashboard</td><td>`/pet/:petId`</td><td>`pet-display.feature`</td><td>Sprite rendering, stat display, rarity badges, action buttons, training cards</td><td>Pet generation, stat bars, rarity distribution, neglected state</td></tr>
+<tr><td>Training UI</td><td>`/pet/:petId/train`</td><td>`training-ui.feature`</td><td>Daily cap, buff selection, confirm dialog, buff application, stat change indicators</td><td>Training actions, daily limits, skill-ups, level progression</td></tr>
+<tr><td>Arena Mode Selection</td><td>`/arena`</td><td>`arena-ui.feature`</td><td>Mode selection (RACE/SUMO), opponent loading, error handling, rate limit banner</td><td>Battle mode choice, matchmaking status, AI fallback</td></tr>
+<tr><td>Battle View</td><td>`/arena/battle/:matchId`</td><td>`arena-ui.feature`</td><td>Live battle animation, result display, reward notification, share button</td><td>Battle resolution, WIN/LOSS variants, stat changes</td></tr>
+<tr><td>Leaderboard</td><td>`/leaderboard`</td><td>`leaderboard-ui.feature`</td><td>Ranking display, pagination, player search, filter by rarity</td><td>Top 100 display, rarity filters, score calculation</td></tr>
+<tr><td>Battle Records</td><td>`/pet/:petId/records`</td><td>`battle-records.feature`</td><td>Record list, pagination, social share preview, public access</td><td>History display, OG meta tags, pagination cursor, AI opponent marking</td></tr>
+<tr><td>Settings</td><td>`/settings`</td><td>`settings.feature`</td><td>Theme toggle, audio mute, notification prefs, session management</td><td>User preferences, local state, logout</td></tr>
+<tr><td>Admin Portal</td><td>`/admin`</td><td>`admin-portal.feature`</td><td>Login, TOTP, dashboard, moderation, config management</td><td>Authentication, authorization, role-based access</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="101-feature-file-organization">10.1 Feature File Organization</h3>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li><strong><code>features/client/</code></strong>: Player app UI scenarios (component behavior, routing, state management)</li>
+<li><strong><code>features/server/</code></strong>: API scenarios (backend validation, business logic, rate limiting, GDPR compliance)</li>
+<li><strong><code>features/server/</code></strong>: Supporting scenarios (rarity distribution, battle records API, admin operations)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="102-uncovered-areas">10.2 Uncovered Areas</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">The following areas are covered in unit tests rather than BDD scenarios:</p>
+<div class="doc-gap"></div>
+<ul class="doc-list">
+<li>Phaser.js pixel art rendering logic (<code>apps/player/src/components/canvas/PetCanvasEngine.test.ts</code>)</li>
+<li>TanStack Query cache invalidation patterns (<code>apps/player/src/hooks/__tests__/usePet.test.ts</code>)</li>
+<li>Zod schema validation edge cases (<code>apps/player/src/schemas/__tests__/*.test.ts</code>)</li>
+<li>Vue Element Plus admin data table interactions (covered in admin-portal.feature E2E scenarios)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<p class="doc-p">STEP_COMPLETE: FRONTEND</p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

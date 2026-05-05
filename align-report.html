@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — gendoc — Cross-File Alignment Audit Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
+    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
+    nav a:hover { color: var(--accent-yellow); }
+    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
+    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
+    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
+    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
+    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
+    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
+    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
+    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
+    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
+    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
+    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
+    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
+    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
+    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
+    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
+    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .doc-gap { height: 0.5rem; }
+    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { color: var(--accent-yellow); text-decoration: underline; }
+    strong { color: var(--accent-yellow); }
+    em { color: #aa88ff; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">⌂ Index</a>
+    <span class="breadcrumb">›</span>
+    <span class="breadcrumb">gendoc — Cross-File Alignment Audit Report</span>
+  </nav>
+  <div class="main">
+    <div class="doc-header">
+      <h1>gendoc — Cross-File Alignment Audit Report</h1>
+      <div class="meta">pixel-pet-arena · Documentation</div>
+    </div>
+    <div class="doc-content">
+<h1 class="doc-h1" id="gendoc--cross-file-alignment-audit-report">gendoc — Cross-File Alignment Audit Report</h1>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Project:</strong> pixel-pet-arena</p>
+<p class="doc-p"><strong>Date:</strong> 2026-05-04</p>
+<p class="doc-p"><strong>Execution Mode:</strong> gendoc-align-check</p>
+<p class="doc-p"><strong>Repository Type:</strong> BDD Documentation + Game Design Specification (no implementation code)</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="executive-summary">Executive Summary</h2>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Dimension</th><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>Total</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>**0: File Existence**</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>⚠️</td></tr>
+<tr><td>**1: Doc → Doc**</td><td>0</td><td>2</td><td>5</td><td>4</td><td>11</td><td>⚠️</td></tr>
+<tr><td>**2: Doc → Code**</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>🔴</td></tr>
+<tr><td>**3: Code → Test**</td><td>1</td><td>2</td><td>0</td><td>0</td><td>3</td><td>🔴</td></tr>
+<tr><td>**4: Doc → Test**</td><td>2</td><td>5</td><td>2</td><td>0</td><td>9</td><td>🔴</td></tr>
+<tr><td>**5: UML/RTM Quality**</td><td>0</td><td>2</td><td>3</td><td>0</td><td>5</td><td>⚠️</td></tr>
+<tr><td>**TOTAL**</td><td>**4**</td><td>**12**</td><td>**10**</td><td>**4**</td><td>**30**</td><td>🔴</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Overall Status:</strong> ⚠️ <strong>MODERATE RISK</strong> — Project has comprehensive documentation (28 files, 1,797 BDD lines) but critical gaps in:</p>
+<p class="doc-p">1. Test implementation (0 step definitions, 0 executable tests)</p>
+<p class="doc-p">2. Source code (specification-only repository)</p>
+<p class="doc-p">3. Traceability (RTM incomplete, missing scenario mappings)</p>
+<p class="doc-p">4. Supporting documentation (README, background job specs, UML diagrams)</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="dimension-0-mandatory-file-existence">Dimension 0: Mandatory File Existence</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="findings">Findings</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] MISSING: docs/README.md</strong></p>
+<ul class="doc-list">
+<li>Impact: Project lacks high-level overview for contributors</li>
+<li>Fix: Create README.md with project summary, setup instructions, and documentation navigation</li>
+<li>Auto-fixable: YES (documentation only)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Status:</strong> 1/1 file checks failed</p>
+<p class="doc-p"><strong>Severity Distribution:</strong> HIGH=1</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="dimension-1-document--document-alignment">Dimension 1: Document → Document Alignment</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="critical-findings-011">Critical Findings (0/11)</h3>
+<p class="doc-p">None</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="high-priority-findings-211">High-Priority Findings (2/11)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] BDD-client.md and BDD-server.md Missing</strong></p>
+<ul class="doc-list">
+<li>Issue: BDD specifications are present in features/<em>.feature and features/client/</em>.feature but summarized documentation files are absent</li>
+<li>Impact: New team members cannot understand test strategy at a glance; traceability to PRD is implicit rather than explicit</li>
+<li>Fix: Create docs/BDD-server.md and docs/BDD-client.md summarizing each feature file's scenarios and linking to PRD AC numbers</li>
+<li>Auto-fixable: YES (consolidate feature file headers into markdown)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] Feature Flag Gating Logic Not Clearly Separated from SCHEMA</strong></p>
+<ul class="doc-list">
+<li>Issue: EDD §4.11-4.12 defines marketplace as "Phase 3 — FF_MARKETPLACE required", but SCHEMA.md creates marketplace tables unconditionally</li>
+<li>Impact: Future maintainers may not understand that table presence ≠ feature active</li>
+<li>Fix: Add note to SCHEMA.md §2.8: "marketplace_listings and marketplace_transactions tables exist in base schema. Feature flag FF_MARKETPLACE gates all write endpoints and admin/player UIs; read-only queries on empty tables are safe."</li>
+<li>Auto-fixable: YES (documentation clarification)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="medium-priority-findings-511">Medium-Priority Findings (5/11)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] EDD § 4.3 ClaimCode Background Job Not Documented</strong></p>
+<ul class="doc-list">
+<li>Issue: SCHEMA.md §2.3 defines indexes for cleanup (idx_claim_codes_created_at, idx_claim_codes_used_at) but the actual scheduled job deletion logic is not specified</li>
+<li>Impact: Operations team may overlook implementing the cleanup job</li>
+<li>Fix: Create docs/background-jobs.md documenting all recurring jobs (claim code cleanup 72h, leaderboard snapshots, food buff record cleanup, pet reservation expiry)</li>
+<li>Auto-fixable: NO (requires ops collaboration)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] FRONTEND.md Missing Token Recovery Flow</strong></p>
+<ul class="doc-list">
+<li>Issue: PRD US-AUTH-002 AC-004-2 specifies "player can request new access link", API.md defines POST /api/v1/claim/recover, but FRONTEND.md §5.1 (Pet Claim Flow) does not include recovery UI component</li>
+<li>Impact: Frontend implementation may be unclear about where/when to show recover link</li>
+<li>Fix: Add FRONTEND §5.2 "Token Recovery Flow" with component diagram</li>
+<li>Auto-fixable: YES (documentation + component design)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] Social OG Tag Fields Not Fully Specified in API Response</strong></p>
+<ul class="doc-list">
+<li>Issue: VDD §7 (Asset Pipeline) requires pet name, rarity, win count, and sprite image for Open Graph cards. API.md GET /api/v1/arena/match/:matchId returns name/rarity/level but NOT winCount summary</li>
+<li>Impact: Client may compute winRate from match history, but OG tags could be incomplete</li>
+<li>Fix: API.md should clarify that GET /api/v1/arena/history/:petId (not /arena/match/:matchId) is the source for OG metadata, including win count summary</li>
+<li>Auto-fixable: YES (API documentation clarification)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] Admin Session TTL Not Explicitly Stated in FRONTEND</strong></p>
+<ul class="doc-list">
+<li>Issue: SCHEMA.md §4.3 documents Redis TTL = 14400s (4h) for admin sessions, but FRONTEND.md §3.2 (Admin Portal) does not state this timeout explicitly</li>
+<li>Impact: Frontend session refresh logic may diverge from backend TTL</li>
+<li>Fix: FRONTEND §3.5 (Routing, Admin Auth) should state: "Admin sessions expire after 4 hours of inactivity (admin_session_inactivity_expiry_hours = 14400)"</li>
+<li>Auto-fixable: YES (documentation)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] PRD AC Numbers Not Cross-Referenced in EDD Data Models</strong></p>
+<ul class="doc-list">
+<li>Issue: PRD defines AC-005-6 ("stat at max = 100"), EDD §4.1 Pet table has CHECK constraint, but no comment links constraint to AC number</li>
+<li>Impact: Future maintainers cannot trace constraint justification back to requirement</li>
+<li>Fix: Add EDD.md column comments: <code>COMMENT: "Range enforced by PRD AC-005-6"</code></li>
+<li>Auto-fixable: YES (documentation)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="low-priority-findings-411">Low-Priority Findings (4/11)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[LOW] ARCH vs. EDD Service Specification Redundancy</strong></p>
+<ul class="doc-list">
+<li>Issue: Both ARCH.md and EDD.md state that API and Admin servers are separate Node.js/Fastify processes</li>
+<li>Impact: None (acceptable duplication at different abstraction levels)</li>
+<li>Fix: No action needed</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[LOW] Admin Portal Route Prefix Inconsistency</strong></p>
+<ul class="doc-list">
+<li>Issue: FRONTEND.md §3.5 states path <code>/admin</code>, ARCH.md §2.1 mentions "separate Vite application" without confirming prefix</li>
+<li>Impact: Deployment-time configuration issue (can be changed via VITE_ADMIN_BASE_URL env var)</li>
+<li>Fix: Add FRONTEND.md note: "Route prefix <code>/admin</code> is configurable via VITE_ADMIN_BASE_URL environment variable"</li>
+<li>Auto-fixable: YES (documentation)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[LOW] CONSTANTS Definition Not Hyperlinked</strong></p>
+<ul class="doc-list">
+<li>Issue: EDD.md §0 references CONSTANTS-PIXEL-PET-ARENA but does not link to a CONSTANTS.md file</li>
+<li>Impact: Navigation difficulty only</li>
+<li>Fix: Add hyperlinks to EDD.md §0 constant table referencing CONSTANTS.md sections</li>
+<li>Auto-fixable: YES (documentation links)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="dimension-2-document--code-alignment">Dimension 2: Document → Code Alignment</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="critical-findings-11">Critical Findings (1/1)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[CRITICAL] NO SOURCE CODE REPOSITORY — SPECIFICATION-ONLY PROJECT</strong></p>
+<ul class="doc-list">
+<li>Issue: This repository contains only BDD feature specifications (features/), documentation (docs/), and pipeline templates (templates/). NO implementation code exists in src/, no ORM models, no route handlers, no migrations.</li>
+<li>Impact: Dimension 2 audit cannot validate API.md ↔ implementation, SCHEMA.md ↔ database models, ARCH.md ↔ component organization</li>
+<li>Recommendation:</li>
+<li><strong>Option A</strong> (Documentation-only audit): This repo is for design/documentation only. Code alignment checks are N/A.</li>
+<li><strong>Option B</strong> (Full-stack validation): Provide the actual backend repository (Node.js/Fastify API, database migrations, route handlers) to validate against SCHEMA.md, API.md, EDD.md, ARCH.md</li>
+<li>Auto-fixable: NO (requires linking to code repository)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Note:</strong> All other Dimension 2 findings (API endpoint validation, SCHEMA model coverage, directory structure alignment) are blocked pending source code availability.</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="dimension-3-code--test-alignment">Dimension 3: Code → Test Alignment</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="critical-findings-13">Critical Findings (1/3)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[CRITICAL] BDD Features Without Test Implementation — Zero Executable Tests</strong></p>
+<ul class="doc-list">
+<li>Issue: 23 feature files (1,797 lines of Gherkin) have <strong>no corresponding step definitions, test runners, or executable test code</strong>. All scenarios are specifications only.</li>
+<li>Unimplemented feature files:</li>
+<li>Server: arena-battle.feature, claim-flow.feature, gdpr-erasure.feature, leaderboard.feature, suspicious-detection.feature, training-food.feature (172 steps)</li>
+<li>Client: admin-portal.feature, arena-ui.feature, battle-records.feature, claim-flow-ui.feature, food-system.feature, leaderboard-ui.feature, pet-display.feature, settings.feature, training-ui.feature (1,071 steps)</li>
+<li>Root: auth-login.feature, pet-management.feature, pet-training.feature, arena-combat.feature, arena-leaderboard.feature, trading-system.feature, admin-moderation.feature, admin-gdpr.feature (554 steps)</li>
+<li>Impact: 100% of BDD scenarios are unrunnable; test coverage = 0%</li>
+<li>Root Cause: This is a specification repository without an accompanying test implementation repository</li>
+<li>Fix:</li>
+</ul>
+<p class="doc-p">1. Create step definitions for Cucumber (Backend BDD via cucumber-js + Node.js test harness)</p>
+<p class="doc-p">2. Create E2E test implementations for Playwright (Frontend BDD via playwright + cucumber-js)</p>
+<p class="doc-p">3. Set up CI/CD pipeline to execute tests on every commit</p>
+<ul class="doc-list">
+<li>Auto-fixable: NO (requires engineering implementation of 50+ step definitions)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="high-priority-findings-23">High-Priority Findings (2/3)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] Server-Side Step Definitions Missing</strong></p>
+<ul class="doc-list">
+<li>Issue: 6 server feature files (172 Gherkin scenario steps) have no Cucumber step implementation</li>
+<li>Impact: Backend API business logic is unvalidated; no regression prevention capability</li>
+<li>Files affected: features/server/*.feature</li>
+<li>Fix: Implement Cucumber step definitions mapping Given/When/Then to API test calls</li>
+<li>Auto-fixable: NO</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] Client-Side Step Definitions Missing</strong></p>
+<ul class="doc-list">
+<li>Issue: 10 client feature files (1,071 Gherkin scenario steps) have no Playwright/E2E test implementation</li>
+<li>Impact: Frontend UI/UX is unvalidated; no end-to-end test automation</li>
+<li>Files affected: features/client/*.feature</li>
+<li>Fix: Implement Playwright test harness with Cucumber integration for client scenarios</li>
+<li>Auto-fixable: NO</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="dimension-4-document--test-alignment">Dimension 4: Document → Test Alignment</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="critical-findings-29">Critical Findings (2/9)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[CRITICAL] Test Implementation Layer Missing — Test Coverage = 0%</strong></p>
+<ul class="doc-list">
+<li>Issue: BDD feature files (131 total scenarios) exist but zero test infrastructure (no step definitions, no test runners, no CI/CD integration)</li>
+<li>Impact: All 131 BDD scenarios are aspirational specifications with no execution capability</li>
+<li>Fix: Implement full test stack (cucumber-js + Node.js for backend, Playwright for E2E)</li>
+<li>Auto-fixable: NO</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[CRITICAL] Root-Level Feature Files Conflict with Server/Client Organization</strong></p>
+<ul class="doc-list">
+<li>Issue: 8 feature files at /features/*.feature (auth-login.feature, arena-combat.feature, etc.) appear to duplicate content from /features/server/ and /features/client/. RTM references only server/ and client/ features, leaving root features orphaned from traceability matrix.</li>
+<li>Impact: Unclear which feature files are authoritative (root 798 lines vs. server+client 743 lines); duplicate specification effort</li>
+<li>Root Cause: Unclear migration from root organization to subdirectory organization</li>
+<li>Fix: Either (1) remove root-level features and consolidate into server/client directories, or (2) formally document which are canonical and update RTM to list all feature locations</li>
+<li>Auto-fixable: MAYBE (if root features are deprecated, can be archived)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="high-priority-findings-59">High-Priority Findings (5/9)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] AC-007-8 MISSING HTTP 429 Rate Limit Response Scenario</strong></p>
+<ul class="doc-list">
+<li>Issue: PRD AC-007-8 (Arena rate limit 10 battles/hour) requires HTTP 429 with Retry-After header and specific UI countdown timer message. Server feature arena-battle.feature has only 3 scenarios and does not validate 429 response structure. Client arena-ui.feature has "rate limit" scenarios but no pairing to HTTP 429 error response.</li>
+<li>Impact: AC-007-8 partially tested; error response validation missing</li>
+<li>Fix: Add scenario to server arena-battle.feature validating HTTP 429 response body with Retry-After header and countdown time</li>
+<li>Auto-fixable: NO (new scenario required)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] US-RARITY-001 — Rarity Scoring Algorithm Has No Server Test</strong></p>
+<ul class="doc-list">
+<li>Issue: RTM marks US-RARITY-001 as "Partial" (⚠️). Rarity probabilistic distribution (Common 60%, Rare 25%, Epic 12%, Legendary 3%) is mentioned in AC-002-5 but has no server BDD feature or unit test. Client leaderboard-ui.feature tests legendary border rendering but server-side algorithm is untested.</li>
+<li>Impact: AC-002-5 rarity distribution validation missing; statistical guarantee unverified</li>
+<li>Fix: Create features/server/rarity-scoring.feature with scenarios validating the probabilistic distribution across 10,000+ pet generations</li>
+<li>Auto-fixable: NO</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] US-RECORD-001 — Battle Records Partially Tested</strong></p>
+<ul class="doc-list">
+<li>Issue: RTM marks US-RECORD-001 as "Partial" (⚠️). Client feature battle-records.feature (126 lines, 16 scenarios) exists, but no server BDD feature validates record persistence, pagination, or Open Graph generation.</li>
+<li>Impact: AC-010-1 through AC-010-6 (public battle records page) lack server-side BDD validation</li>
+<li>Fix: Create features/server/battle-records.feature with scenarios for persistence, pagination boundary (last 20 battles), empty state, and OG meta tag generation</li>
+<li>Auto-fixable: NO</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] AC-003-6 Email Enumeration Prevention — Timing Assertion Missing</strong></p>
+<ul class="doc-list">
+<li>Issue: AC-003-6 requires "identical response structure and timing" for valid/invalid pet IDs. Server feature claim-flow.feature has scenario "Email enumeration prevention" but lacks timing assertion (only checks response structure).</li>
+<li>Impact: Timing-based security vulnerability not validated</li>
+<li>Fix: Add timing measurement assertion (< 50ms variance) to email enumeration scenario in features/server/claim-flow.feature</li>
+<li>Auto-fixable: MAYBE (add assertion to existing scenario)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] FRONTEND.md Pages Not Fully Mapped to BDD Client Features</strong></p>
+<ul class="doc-list">
+<li>Issue: FRONTEND.md §2.1 lists LandingPage, ClaimPage, PetPage, TrainingUI, ArenaUI, LeaderboardPage, BattleRecordsPage, SettingsPage. Not all map cleanly to feature files. E.g., admin SettingsPage (ADMIN_IMPL.md) references admin-portal.feature, but player SettingsPage references settings.feature — naming ambiguity.</li>
+<li>Impact: Unclear component-to-feature mapping</li>
+<li>Fix: Clarify FRONTEND.md that player-app settings.feature is for user-level settings; admin settings are in ADMIN_IMPL.md/admin-portal.feature</li>
+<li>Auto-fixable: MAYBE (clarify naming)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="medium-priority-findings-29">Medium-Priority Findings (2/9)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] AC-016-2 GDPR Email Hashing SLA Ambiguity — 24h vs 7d</strong></p>
+<ul class="doc-list">
+<li>Issue: AC-016-2 states "email_encrypted set to NULL within 24 hours (not the full 7-day window — completed within 1 day, reported as compliant within 7 days)". Server feature gdpr-erasure.feature scenario says "within 24 hours" but does not distinguish between internal SLA (24h) and external SLA (7d).</li>
+<li>Impact: Scenario wording does not make explicit the two-tier SLA</li>
+<li>Fix: Clarify scenario: "email_encrypted is hashed within 24 hours (internal SLA) and user is notified within 7 days (external SLA)"</li>
+<li>Auto-fixable: YES (clarify scenario wording)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] AC-013-4 Admin Search Performance — "≤2 seconds for 1M records" Has No Load Test</strong></p>
+<ul class="doc-list">
+<li>Issue: AC-013-4 requires search within 2 seconds for "up to 1 million records". No performance test scenario exists in BDD features or test-plan.md to validate this boundary.</li>
+<li>Impact: Performance boundary unverified</li>
+<li>Fix: Add load test scenario in test-plan.md documenting 1M record search validation</li>
+<li>Auto-fixable: NO (requires performance test infrastructure)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="dimension-5-umlrtm-quality">Dimension 5: UML/RTM Quality</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="high-priority-findings-25">High-Priority Findings (2/5)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] EDD Class Diagram Incomplete — 0 Classes Found (<6 minimum)</strong></p>
+<ul class="doc-list">
+<li>Issue: EDD.md is expected to contain class diagrams, but scanning found 0 class definitions and 0 diagram sections (< 6 classes, < 9 UML diagrams expected)</li>
+<li>Impact: EDD lacks visual architecture representation; difficult for new developers to understand entity relationships</li>
+<li>Fix: Add class diagrams to EDD.md §2 showing Pet, Arena, ClaimCode, User, Food, Battle, Leaderboard, Session, Transaction entities and their relationships</li>
+<li>Auto-fixable: NO (requires UML architecture design)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[HIGH] RTM Does Not Reference All BDD Scenario Files</strong></p>
+<ul class="doc-list">
+<li>Issue: RTM.md table rows (57) do not map to all BDD feature files (23 files). RTM contains only references to server/ and client/ features, omitting 8 root-level feature files.</li>
+<li>Impact: 798 lines of specification code (root features) are not part of the official traceability matrix</li>
+<li>Fix: Either (1) remove root features or (2) add all feature file references to RTM with explicit mapping to each PRD AC</li>
+<li>Auto-fixable: MAYBE (if root features are consolidated)</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="medium-priority-findings-35">Medium-Priority Findings (3/5)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] PlantUML Diagram Files Missing</strong></p>
+<ul class="doc-list">
+<li>Issue: docs/diagrams/puml/ directory does not exist or contains no .puml files</li>
+<li>Impact: Automated diagram generation from code is not enabled</li>
+<li>Fix: Create docs/diagrams/puml/ directory and generate PlantUML source files for each UML diagram</li>
+<li>Auto-fixable: NO (requires diagram tool integration)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] UML 9 Major Diagrams Incomplete — 0/9 Found</strong></p>
+<ul class="doc-list">
+<li>Issue: Expected 9 major UML diagrams (Class, Sequence, State, Component, Deployment, Use Case, Interaction, Timing, Profile) in EDD.md, but none found</li>
+<li>Impact: Architectural documentation incomplete; difficult to understand system design</li>
+<li>Fix: Add 9 UML diagram sections to EDD.md covering core architecture</li>
+<li>Auto-fixable: NO (requires architecture design work)</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>[MEDIUM] RTM.csv Not Found — Machine-Readable Traceability Missing</strong></p>
+<ul class="doc-list">
+<li>Issue: docs/RTM.csv does not exist; only RTM.md (markdown table) is available</li>
+<li>Impact: Traceability matrix cannot be easily imported into test management tools or automated dashboards</li>
+<li>Fix: Generate docs/RTM.csv with columns: AC_ID, AC_Description, BDD_Scenario, Test_ID, Coverage_Status</li>
+<li>Auto-fixable: YES (export RTM.md table to CSV)</li>
+</ul>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="recommendations-by-priority">Recommendations by Priority</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="blocking-complete-before-proceeding">BLOCKING (Complete Before Proceeding)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">1. <strong>[CRITICAL]</strong> Implement test execution layer:</p>
+<ul class="doc-list">
+<li>Create step definitions for 23 BDD feature files (50+ step definitions)</li>
+<li>Set up Cucumber-JS test runner for backend, Playwright for E2E</li>
+<li>Configure CI/CD pipeline to run tests on commits</li>
+<li><strong>Owner:</strong> Backend + QA Engineering</li>
+<li><strong>Effort:</strong> 2-3 weeks</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p">2. <strong>[CRITICAL]</strong> Clarify root vs. server/client feature organization:</p>
+<ul class="doc-list">
+<li>Remove or consolidate 8 root-level feature files OR update RTM to include them</li>
+<li>Ensure single source of truth for each scenario</li>
+<li><strong>Owner:</strong> BA/QA Lead</li>
+<li><strong>Effort:</strong> 2-3 days</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="high-complete-within-1-sprint">HIGH (Complete Within 1 Sprint)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">3. Add missing documentation files:</p>
+<ul class="doc-list">
+<li>Create docs/README.md (project overview)</li>
+<li>Create docs/BDD-server.md and docs/BDD-client.md (test strategy)</li>
+<li>Create docs/background-jobs.md (ops spec)</li>
+<li><strong>Effort:</strong> 3 days</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p">4. Create comprehensive UML diagrams in EDD.md:</p>
+<ul class="doc-list">
+<li>Class diagram (entity relationships)</li>
+<li>Sequence diagrams (auth, battle, leaderboard flows)</li>
+<li>State diagrams (pet, battle states)</li>
+<li><strong>Effort:</strong> 1 week</li>
+</ul>
+<div class="doc-gap"></div>
+<p class="doc-p">5. Reconcile RTM with all feature files:</p>
+<ul class="doc-list">
+<li>Map all 23 BDD feature files to RTM</li>
+<li>Generate RTM.csv for tool integration</li>
+<li><strong>Effort:</strong> 2-3 days</li>
+</ul>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="medium-document-improvements">MEDIUM (Document Improvements)</h3>
+<div class="doc-gap"></div>
+<p class="doc-p">6. Clarify feature flag logic in SCHEMA.md and EDD.md</p>
+<p class="doc-p">7. Add explicit GDPR SLA wording (24h internal vs. 7d external)</p>
+<p class="doc-p">8. Cross-reference PRD AC numbers in EDD column comments</p>
+<p class="doc-p">9. Add FRONTEND token recovery flow (§5.2)</p>
+<p class="doc-p">10. Clarify admin session TTL in FRONTEND.md</p>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="next-steps">Next Steps</h2>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Immediate Actions:</strong></p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash"># Option A: Fix documentation alignment only (Dimensions 0, 1, 5)
+/gendoc-align-fix docs
+
+# Option B: Full pipeline (including code/test alignment, requires implementation repos)
+# Not applicable until source code repository is provided</code></pre>
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>For Full-Stack Alignment:</strong></p>
+<div class="doc-gap"></div>
+<p class="doc-p">When backend implementation code (Node.js/Fastify, database migrations) and test implementations (Cucumber step definitions, Playwright tests) are available, run:</p>
+<div class="doc-gap"></div>
+<pre class="doc-code"><code class="lang-bash">/gendoc-align-check  # Re-run all 5 dimensions</code></pre>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<h2 class="doc-h2" id="appendix-finding-summaries">Appendix: Finding Summaries</h2>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="by-layer">By Layer</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Layer</th><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th></tr></thead>
+<tbody>
+<tr><td>Dimension 0: File Existence</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>Dimension 1: Doc → Doc</td><td>0</td><td>2</td><td>5</td><td>4</td></tr>
+<tr><td>Dimension 2: Doc → Code</td><td>1*</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Dimension 3: Code → Test</td><td>1*</td><td>2</td><td>0</td><td>0</td></tr>
+<tr><td>Dimension 4: Doc → Test</td><td>2</td><td>5</td><td>2</td><td>0</td></tr>
+<tr><td>Dimension 5: UML/RTM</td><td>0</td><td>2</td><td>3</td><td>0</td></tr>
+<tr><td>**TOTAL**</td><td>**4**</td><td>**12**</td><td>**10**</td><td>**4**</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<p class="doc-p">*Dimension 2 & 3 findings are blocked (code repository unavailable).</p>
+<div class="doc-gap"></div>
+<h3 class="doc-h3" id="by-fix-complexity">By Fix Complexity</h3>
+<div class="doc-gap"></div>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead><tr><th>Category</th><th>Count</th><th>Auto-Fixable</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Critical</td><td>4</td><td>NO</td><td>Requires engineering (test implementation, code repo)</td></tr>
+<tr><td>Documentation</td><td>13</td><td>YES</td><td>Can be written/updated immediately</td></tr>
+<tr><td>Architectural</td><td>8</td><td>NO</td><td>Requires design review + implementation</td></tr>
+<tr><td>Organization</td><td>3</td><td>MAYBE</td><td>Depends on consolidation decision</td></tr>
+<tr><td>Clarification</td><td>2</td><td>YES</td><td>Simple wording improvements</td></tr>
+</tbody></table></div>
+<div class="doc-gap"></div>
+<hr class="doc-hr">
+<div class="doc-gap"></div>
+<p class="doc-p"><strong>Report Generated:</strong> 2026-05-04 23:15 UTC</p>
+<p class="doc-p"><strong>Status:</strong> Ready for /gendoc-align-fix (documentation phase)</p>
+<p class="doc-p"><strong>Blocking Items:</strong> 2 (test implementation, source code availability)</p>
+<div class="doc-gap"></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pixel-pet-arena — Documentation Index</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+    :root {
+      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
+      --border: #252545; --border-bright: #3838aa;
+      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
+      --accent-yellow: #ffd740; --accent-green: #69ff47;
+      --pixel-font: 'Press Start 2P', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; }
+    header { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 2rem; text-align: center; position: relative; z-index: 1; }
+    header h1 { font-family: var(--pixel-font); font-size: 16px; color: var(--accent-cyan); line-height: 2; }
+    header p { color: #8888aa; font-size: 18px; margin-top: 0.5rem; }
+    .main { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
+    .category { margin-bottom: 2rem; }
+    .cat-title { font-family: var(--pixel-font); font-size: 10px; color: var(--accent-purple); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); }
+    .cat-files { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+    .doc-card { display: flex; align-items: center; gap: 0.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem; text-decoration: none; color: #c8c8e8; transition: border-color 0.2s, background 0.2s; }
+    .doc-card:hover { border-color: var(--accent-cyan); background: #1a1a3e; color: var(--accent-cyan); }
+    .doc-icon { font-size: 20px; }
+    .doc-name { font-family: var(--pixel-font); font-size: 7px; line-height: 1.5; }
+    .prototype-link { margin: 2rem 0; text-align: center; }
+    .prototype-link a { display: inline-block; background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%); color: #000; font-family: var(--pixel-font); font-size: 9px; padding: 1rem 2rem; border-radius: 4px; text-decoration: none; }
+    .prototype-link a:hover { opacity: 0.85; }
+    footer { text-align: center; padding: 2rem; color: #444466; font-size: 14px; border-top: 1px solid var(--border); margin-top: 2rem; position: relative; z-index: 1; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PIXEL PET ARENA</h1>
+    <p>Engineering Documentation Index</p>
+  </header>
+  <div class="main">
+    <div class="prototype-link">
+      <a href="prototype/index.html">▶ Launch Interactive Prototype</a>
+    </div>
+    <div class="category"><h2 class="cat-title">Core Business</h2><div class="cat-files">
+  <a href="brd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BRD</span></a>
+  <a href="idea.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">IDEA</span></a>
+  <a href="prd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PRD</span></a>
+</div></div>
+<div class="category"><h2 class="cat-title">Design & UX</h2><div class="cat-files">
+  <a href="pdd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PDD</span></a>
+  <a href="vdd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">VDD</span></a>
+  <a href="frontend.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">FRONTEND</span></a>
+  <a href="anim.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ANIM</span></a>
+  <a href="audio.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">AUDIO</span></a>
+</div></div>
+<div class="category"><h2 class="cat-title">Engineering</h2><div class="cat-files">
+  <a href="edd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">EDD</span></a>
+  <a href="arch.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ARCH</span></a>
+  <a href="api.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">API</span></a>
+  <a href="schema.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">SCHEMA</span></a>
+  <a href="constants.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CONSTANTS</span></a>
+</div></div>
+<div class="category"><h2 class="cat-title">Implementation</h2><div class="cat-files">
+  <a href="client-impl.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CLIENT IMPL</span></a>
+  <a href="admin-impl.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ADMIN IMPL</span></a>
+  <a href="contracts.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CONTRACTS</span></a>
+  <a href="cicd.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">CICD</span></a>
+</div></div>
+<div class="category"><h2 class="cat-title">Quality & Testing</h2><div class="cat-files">
+  <a href="bdd-client.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BDD CLIENT</span></a>
+  <a href="bdd-server.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BDD SERVER</span></a>
+  <a href="rtm.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">RTM</span></a>
+  <a href="test-plan.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">TEST PLAN</span></a>
+</div></div>
+<div class="category"><h2 class="cat-title">Operations</h2><div class="cat-files">
+  <a href="developer-guide.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">DEVELOPER GUIDE</span></a>
+  <a href="local-deploy.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">LOCAL DEPLOY</span></a>
+  <a href="runbook.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">RUNBOOK</span></a>
+  <a href="background-jobs.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">BACKGROUND JOBS</span></a>
+  <a href="resource.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">RESOURCE</span></a>
+</div></div>
+<div class="category"><h2 class="cat-title">Reports</h2><div class="cat-files">
+  <a href="manifest.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">MANIFEST</span></a>
+  <a href="align-report.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ALIGN REPORT</span></a>
+  <a href="align-fix-complete.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ALIGN FIX COMPLETE</span></a>
+  <a href="align-fix-summary.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ALIGN FIX SUMMARY</span></a>
+  <a href="implementation-readiness.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">IMPLEMENTATION READINESS</span></a>
+</div></div>
+<div class="category"><h2 class="cat-title">Game Screens</h2><div class="cat-files">
+  <a href="player-arena.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PLAYER ARENA</span></a>
+  <a href="player-pet-display.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">PLAYER PET DISPLAY</span></a>
+  <a href="admin-dashboard.html" class="doc-card"><span class="doc-icon">📄</span><span class="doc-name">ADMIN DASHBOARD</span></a>
+</div></div>
+
+  </div>
+  <footer>pixel-pet-arena · gendoc generated documentation</footer>
+</body>
+</html>
