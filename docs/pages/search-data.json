@@ -2,7 +2,7 @@
   "index.html": {
     "url": "index.html",
     "title": "pet 文件中心",
-    "excerpt": "&lt;!--\nDOC-ID:  README-PIXEL-PET-ARENA-20260505\nVersion: v1.0\nStatus:  DRAFT\nAuthor:  AI Generated (gendoc readme)\nDate:    2026-05-05\nUpstream docs:"
+    "excerpt": "&lt;!--\nDOC-ID:  README-PIXEL-PET-ARENA-20260505\nVersion: v1.1\nStatus:  DRAFT\nAuthor:  AI Generated (gendoc readme)\nDate:    2026-05-05\nUpstream docs:"
   },
   "idea.html": {
     "url": "idea.html",
@@ -352,7 +352,7 @@
   "puml--diagrams-puml-sequence-auth.html": {
     "url": "puml--diagrams-puml-sequence-auth.html",
     "title": "Sequence Auth",
-    "excerpt": "Sequence Auth@startuml pixel-pet-arena-sequence-auth\n\n!define PLAYER #E8F4F8\n!define SERVER #F5F5F5\n!define EMAIL #FFF5E6\n!define DB #E8F5E9\n\nparticip"
+    "excerpt": "Sequence AuthAPI ServerAPI ServerSendGridPostgreSQLPostgreSQLPostgreSQLPostgreSQLRedisRedisPlayer AppAPI ServerSendGridPostgreSQLRedisPlayer AppPlayer"
   },
   "puml--diagrams-puml-sequence-battle.html": {
     "url": "puml--diagrams-puml-sequence-battle.html",
@@ -362,16 +362,16 @@
   "puml--diagrams-puml-state-battle.html": {
     "url": "puml--diagrams-puml-state-battle.html",
     "title": "State Battle",
-    "excerpt": "State Battle@startuml pixel-pet-arena-state-battle\n\ntitle Arena Match State Machine\n\n[*] --&gt; CREATED: arena_match record inserted\n\nstate CREATED {\n"
+    "excerpt": "State BattleArena Match State MachineCREATEDRESOLVEDARCHIVEDFINDING_OPPONENTTime: 0-30sMatchmaking queue polledOne of:- Opponent found- Timeout (AI fa"
   },
   "puml--diagrams-puml-state-pet.html": {
     "url": "puml--diagrams-puml-state-pet.html",
     "title": "State Pet",
-    "excerpt": "State Pet@startuml pixel-pet-arena-state-pet\n\ntitle Pet State Machine\n\n[*] --&gt; GENERATED\n\nstate GENERATED {\n  [*] --&gt; UNCLAIMED\n  UNCLAIMED --&g"
+    "excerpt": "State PetPet State MachineGENERATEDBANNEDUNCLAIMEDReserved for 24h (guest preview)owner_token_hash: NULLclaimed_at: NULLBANNED_STATEis_banned = TRUEba"
   },
   "puml--diagrams-puml-usecase-diagram.html": {
     "url": "puml--diagrams-puml-usecase-diagram.html",
     "title": "Usecase Diagram",
-    "excerpt": "Usecase Diagram@startuml pixel-pet-arena-usecase\n\n!define PLAYER #E8F4F8\n!define ADMIN #FFF5E6\n!define SYSTEM #F5F5F5\n\nskinparam linetype ortho\n\nleft "
+    "excerpt": "Usecase Diagrampixel-pet-arenaView Random Pet(Guest)Claim Pet(Email + OTP)Train Pet(Daily Actions)Apply Food Buff(Stat Boost)Enter Arena(Race or Sumo)"
   }
 }
