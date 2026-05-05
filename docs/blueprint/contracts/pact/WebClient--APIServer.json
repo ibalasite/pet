@@ -1,0 +1,504 @@
+{
+  "consumer": {
+    "name": "WebClient"
+  },
+  "provider": {
+    "name": "APIServer"
+  },
+  "interactions": [
+    {
+      "description": "initiate claim with valid email and unclaimed pet",
+      "providerState": "pet with id 550e8400-e29b-41d4-a716-446655440000 exists and is unclaimed",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/claim",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "player@example.com",
+          "petId": "550e8400-e29b-41d4-a716-446655440000",
+          "ageConfirmed": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "claimId": "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f",
+            "expiresAt": "2026-05-03T12:15:00Z"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "initiate claim fails when pet is already claimed",
+      "providerState": "pet with id 550e8400-e29b-41d4-a716-446655440000 is already claimed",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/claim",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "player@example.com",
+          "petId": "550e8400-e29b-41d4-a716-446655440000",
+          "ageConfirmed": true
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "ALREADY_CLAIMED",
+            "message": "The pet is already owned by another player.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "verify OTP code and receive pet access token",
+      "providerState": "claim session 7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f exists and OTP is valid",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/claim/verify",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "claimId": "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f",
+          "code": "482917"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "petToken": "dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t",
+            "petId": "550e8400-e29b-41d4-a716-446655440000",
+            "petUrl": "https://pixel-pet-arena.com/pet/550e8400-e29b-41d4-a716-446655440000?token=dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "verify OTP code fails with invalid code",
+      "providerState": "claim session 7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f exists and OTP is invalid",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/claim/verify",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "claimId": "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f",
+          "code": "000000"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "INVALID_CODE",
+            "message": "The submitted OTP code does not match.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "train pet speed with valid owner token",
+      "providerState": "pet 550e8400-e29b-41d4-a716-446655440000 is owned by token dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t and has training actions remaining",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/pets/550e8400-e29b-41d4-a716-446655440000/train",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        },
+        "body": {
+          "trainingType": "RUN"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "updatedStats": {
+              "speed": 36,
+              "strength": 28,
+              "stamina": 41,
+              "level": 7
+            },
+            "statDelta": 2,
+            "actionsRemainingToday": 1
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "train pet fails when daily limit reached",
+      "providerState": "pet 550e8400-e29b-41d4-a716-446655440000 has used all 3 training actions today",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/pets/550e8400-e29b-41d4-a716-446655440000/train",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        },
+        "body": {
+          "trainingType": "STRENGTH"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "TRAINING_LIMIT_REACHED",
+            "message": "All 3 daily training actions have been used.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "enter arena battle with valid owner token and human opponent found",
+      "providerState": "pet 550e8400-e29b-41d4-a716-446655440000 is authenticated and has not exceeded hourly battle limit, opponent available",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/arena/enter",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        },
+        "body": {
+          "petId": "550e8400-e29b-41d4-a716-446655440000",
+          "mode": "RACE",
+          "acceptAI": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "matchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "result": "WIN",
+            "opponentPetId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+            "isAiOpponent": false,
+            "statDelta": 3,
+            "newLeaderboardScore": 142.7
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "enter arena fails with matchmaking timeout and acceptAI false",
+      "providerState": "pet 550e8400-e29b-41d4-a716-446655440000 is authenticated and no opponent available in 30 seconds",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/arena/enter",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        },
+        "body": {
+          "petId": "550e8400-e29b-41d4-a716-446655440000",
+          "mode": "SUMO",
+          "acceptAI": false
+        }
+      },
+      "response": {
+        "status": 408,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "MATCHMAKING_TIMEOUT",
+            "message": "No opponent found within 30 seconds. Try again or enable AI opponent.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "enter arena fails when pet is banned",
+      "providerState": "pet 550e8400-e29b-41d4-a716-446655440000 is banned",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/arena/enter",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        },
+        "body": {
+          "petId": "550e8400-e29b-41d4-a716-446655440000",
+          "mode": "RACE",
+          "acceptAI": true
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "PET_BANNED",
+            "message": "This pet has been banned and cannot enter the arena.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "fetch global leaderboard top 100",
+      "providerState": "leaderboard has entries",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/leaderboard",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "entries": [
+              {
+                "rank": 1,
+                "petId": "550e8400-e29b-41d4-a716-446655440000",
+                "petName": "Crimson Vexor",
+                "rarity": "RARE",
+                "level": 7,
+                "score": 142.7,
+                "winRate": 0.706
+              }
+            ],
+            "lastUpdated": "2026-05-03T11:41:30Z"
+          },
+          "error": null,
+          "meta": {
+            "total": 100,
+            "page": 1,
+            "limit": 100
+          }
+        }
+      }
+    },
+    {
+      "description": "fetch arena battle history for a pet",
+      "providerState": "pet 550e8400-e29b-41d4-a716-446655440000 has battle history",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/arena/history/550e8400-e29b-41d4-a716-446655440000",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "petId": "550e8400-e29b-41d4-a716-446655440000",
+            "battles": [
+              {
+                "matchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "mode": "RACE",
+                "opponentPetId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+                "isAiOpponent": false,
+                "result": "WIN",
+                "completedAt": "2026-05-03T11:42:00Z"
+              }
+            ],
+            "summary": {
+              "wins": 12,
+              "losses": 5,
+              "winRate": 0.706
+            }
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "fetch arena battle history fails for nonexistent pet",
+      "providerState": "no pet exists with id 00000000-0000-0000-0000-000000000000",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/arena/history/00000000-0000-0000-0000-000000000000",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "PET_NOT_FOUND",
+            "message": "No pet found with the given ID.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "fetch full arena match record",
+      "providerState": "arena match a1b2c3d4-e5f6-7890-abcd-ef1234567890 exists",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/arena/match/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "matchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "mode": "RACE",
+            "petA": {
+              "petId": "550e8400-e29b-41d4-a716-446655440000",
+              "petName": "Crimson Vexor",
+              "rarity": "RARE",
+              "level": 7
+            },
+            "petB": {
+              "petId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+              "petName": "Azure Stomper",
+              "rarity": "COMMON",
+              "level": 4
+            },
+            "winnerId": "550e8400-e29b-41d4-a716-446655440000",
+            "battleLog": [
+              { "event": "start", "tick": 0 },
+              { "event": "speed_check", "petA": 36, "petB": 28, "tick": 1 },
+              { "event": "finish", "winnerId": "550e8400-e29b-41d4-a716-446655440000", "tick": 12 }
+            ],
+            "completedAt": "2026-05-03T11:42:00Z"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "submit GDPR erasure request with valid pet token",
+      "providerState": "pet token dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t is valid and pet is claimed",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/gdpr/request",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        },
+        "body": {
+          "type": "erasure"
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "jobId": "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8",
+            "message": "Your GDPR request has been received and will be processed within the applicable SLA."
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "arena rate limit exceeded returns 429",
+      "providerState": "pet 550e8400-e29b-41d4-a716-446655440000 has reached the hourly battle rate limit",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/arena/enter",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        },
+        "body": {
+          "petId": "550e8400-e29b-41d4-a716-446655440000",
+          "mode": "RACE",
+          "acceptAI": true
+        }
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "360"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "RATE_LIMIT_EXCEEDED",
+            "message": "Hourly battle limit exceeded. Please wait before entering the arena again.",
+            "details": {}
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "2.0.0"
+    },
+    "x-generated-by": "gendoc-gen-contracts"
+  }
+}

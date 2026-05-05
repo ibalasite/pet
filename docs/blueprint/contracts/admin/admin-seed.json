@@ -1,0 +1,10 @@
+{
+  "admin_users": [
+    {
+      "username": "admin@local.dev",
+      "role": "super_admin",
+      "note": "Local development super admin — TOTP setup required on first login",
+      "password_note": "Set via env: ADMIN_SEED_PASSWORD (bcrypt hash stored in DB)"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/Pet",
+  "title": "Pet",
+  "type": "object",
+  "required": [
+    "id",
+    "seed",
+    "rarity",
+    "petName",
+    "statSpeed",
+    "statStrength",
+    "statStamina",
+    "level",
+    "totalTrainingActions",
+    "isBanned",
+    "generationMeta",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique pet identifier (UUID v4).",
+      "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "seed": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Procedural generation seed — globally unique; drives all sprite generation determinism.",
+      "example": 8472930174
+    },
+    "rarity": {
+      "type": "string",
+      "enum": ["COMMON", "RARE", "EPIC", "LEGENDARY"],
+      "description": "Rarity tier assigned at generation time by weighted random draw: COMMON 60%, RARE 25%, EPIC 12%, LEGENDARY 3%.",
+      "example": "RARE"
+    },
+    "petName": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Auto-generated from species + color combination at row creation; derived from seed.",
+      "example": "Crimson Thornback"
+    },
+    "statSpeed": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Speed stat. Range: 1–100. Default: 10.",
+      "example": 42
+    },
+    "statStrength": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Strength stat. Range: 1–100. Default: 10.",
+      "example": 35
+    },
+    "statStamina": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Stamina stat. Range: 1–100. Default: 10.",
+      "example": 28
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Derived level: MAX(1, FLOOR(totalTrainingActions / 10)), capped at 100. Updated on every training commit.",
+      "example": 5
+    },
+    "totalTrainingActions": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cumulative count of training actions; feeds the level formula.",
+      "example": 47
+    },
+    "lastTrainedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Timestamp of the most recent training action. NULL if never trained.",
+      "example": "2026-05-04T10:30:00Z"
+    },
+    "ownerTokenHash": {
+      "type": ["string", "null"],
+      "maxLength": 64,
+      "description": "SHA-256 hash of the pet access token. NULL = unclaimed. Raw token is never stored.",
+      "example": null
+    },
+    "claimedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "UTC timestamp when the email-OTP claim flow completed. NULL = pet is unclaimed (guest preview).",
+      "example": "2026-04-01T08:00:00Z"
+    },
+    "claimIdentityId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Set at claim time. Enables GDPR erasure lookup.",
+      "example": "1a2b3c4d-5e6f-7890-abcd-ef1234567890"
+    },
+    "reservedUntil": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Set to NOW() + 24h when pet is generated for guest preview. NULL for claimed pets.",
+      "example": null
+    },
+    "isBanned": {
+      "type": "boolean",
+      "description": "TRUE = pet is banned from arena and removed from leaderboard.",
+      "example": false
+    },
+    "bannedReason": {
+      "type": ["string", "null"],
+      "maxLength": 500,
+      "description": "Admin-supplied ban reason. Non-null only when isBanned = true.",
+      "example": null
+    },
+    "bannedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "UTC timestamp when the ban was applied. NULL iff isBanned = false.",
+      "example": null
+    },
+    "generationMeta": {
+      "type": "object",
+      "description": "JSONB vector with 6 generation dimensions: {body, head, colorPalette, accessory, rarityTrait, pattern}.",
+      "properties": {
+        "body": { "type": "string", "example": "serpentine" },
+        "head": { "type": "string", "example": "horned" },
+        "colorPalette": { "type": "string", "example": "crimson" },
+        "accessory": { "type": "string", "example": "spiked_collar" },
+        "rarityTrait": { "type": "string", "example": "glowing_eyes" },
+        "pattern": { "type": "string", "example": "striped" }
+      },
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the pet row was created.",
+      "example": "2026-03-15T12:00:00Z"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of the last mutation (claim, training, reservation, ban).",
+      "example": "2026-05-04T10:30:00Z"
+    }
+  },
+  "additionalProperties": false
+}

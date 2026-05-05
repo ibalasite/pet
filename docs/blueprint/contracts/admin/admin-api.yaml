@@ -1,0 +1,1983 @@
+openapi: 3.1.0
+info:
+  title: pixel-pet-arena Admin API
+  version: v1.0
+  description: |
+    Internal admin API for pixel-pet-arena. All endpoints are under the
+    `/admin/api/` prefix. Authentication uses an httpOnly session cookie
+    established via `POST /admin/api/auth/login`.
+
+    Rate limit: 100 requests/minute per admin account (Redis key `rl:admin:{admin_id}`, TTL 60 s).
+
+servers:
+  - url: https://api.pixel-pet-arena.com/admin/api
+    description: Production
+  - url: http://localhost:3000/admin/api
+    description: Local development
+
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: |
+        httpOnly session cookie set by `POST /admin/api/auth/login`.
+        SameSite=Strict; Secure; Path=/admin.
+        Inactivity timeout: 4 h. Absolute max: 8 h.
+
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required: [success, data, error]
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+        error:
+          type: "null"
+
+    ErrorEnvelope:
+      type: object
+      required: [success, data, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: "null"
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+
+    PaginationMeta:
+      type: object
+      required: [total, page, limit]
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AdminRole:
+      type: string
+      enum: [super_admin, moderator, read_only]
+
+    # --- Auth ---
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: moderator_alice
+        password:
+          type: string
+          format: password
+          example: correct-horse-battery-staple
+        totpCode:
+          type: string
+          pattern: '^\d{6}$'
+          example: "482917"
+          description: Required on all logins except first-time enrollment flow.
+
+    LoginData:
+      type: object
+      properties:
+        adminId:
+          type: string
+          format: uuid
+        role:
+          $ref: '#/components/schemas/AdminRole'
+        sessionExpiresAt:
+          type: string
+          format: date-time
+
+    TotpSetupRequest:
+      type: object
+      required: [setupToken, password]
+      properties:
+        setupToken:
+          type: string
+          description: Short-lived signed JWT from the login 403 TOTP_SETUP_REQUIRED response.
+        password:
+          type: string
+          format: password
+
+    TotpSetupData:
+      type: object
+      properties:
+        otpAuthUrl:
+          type: string
+          example: "otpauth://totp/pixel-pet-arena:moderator_alice?secret=BASE32SECRET&issuer=pixel-pet-arena"
+        backupCodes:
+          type: array
+          items:
+            type: string
+          minItems: 10
+          maxItems: 10
+
+    TotpVerifyRequest:
+      type: object
+      required: [totpCode]
+      properties:
+        totpCode:
+          type: string
+          pattern: '^\d{6}$'
+          example: "482917"
+
+    TotpVerifyData:
+      type: object
+      properties:
+        verified:
+          type: boolean
+
+    # --- Role / user management ---
+    AdminUserSummary:
+      type: object
+      properties:
+        adminId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/AdminRole'
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+        deactivatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreateAdminRequest:
+      type: object
+      required: [username, role, temporaryPassword]
+      properties:
+        username:
+          type: string
+          example: new_moderator
+        role:
+          $ref: '#/components/schemas/AdminRole'
+        temporaryPassword:
+          type: string
+          format: password
+
+    AuditLogIdData:
+      type: object
+      properties:
+        auditLogId:
+          type: string
+
+    # --- Pets ---
+    AdminPetSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerEmailMasked:
+          type: string
+          example: "p***@example.com"
+        rarity:
+          type: string
+          enum: [COMMON, RARE, EPIC, LEGENDARY]
+        level:
+          type: integer
+        battlesPlayed:
+          type: integer
+        winRate:
+          type: number
+          format: float
+        isBanned:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    ModerationReasonRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          maxLength: 500
+
+    # --- Battles ---
+    BattleSummary:
+      type: object
+      properties:
+        matchId:
+          type: string
+          format: uuid
+        petAId:
+          type: string
+          format: uuid
+        petBId:
+          type: string
+          format: uuid
+        winnerId:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+          enum: [WIN, LOSS, DRAW]
+        duration:
+          type: integer
+          description: Battle duration in seconds.
+        completedAt:
+          type: string
+          format: date-time
+        isFlagged:
+          type: boolean
+
+    # --- Leaderboard ---
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        petId:
+          type: string
+          format: uuid
+        petName:
+          type: string
+        rarity:
+          type: string
+          enum: [COMMON, RARE, EPIC, LEGENDARY]
+        level:
+          type: integer
+        score:
+          type: number
+          format: float
+        winRate:
+          type: number
+          format: float
+        battlesLastHour:
+          type: integer
+        isSuspicious:
+          type: boolean
+        isBanned:
+          type: boolean
+
+    # --- Config ---
+    RuntimeConfig:
+      type: object
+      properties:
+        arenaRateLimitBattlesPerHour:
+          type: integer
+          minimum: 1
+          maximum: 50
+        arenaMatchmakingTimeoutSeconds:
+          type: integer
+        rarityWeights:
+          type: object
+          properties:
+            common:
+              type: integer
+            rare:
+              type: integer
+            epic:
+              type: integer
+            legendary:
+              type: integer
+
+    FeatureFlag:
+      type: object
+      properties:
+        flag:
+          type: string
+        enabled:
+          type: boolean
+        description:
+          type: string
+
+    # --- GDPR ---
+    GdprRequestSummary:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        requestType:
+          type: string
+          enum: [erasure, data_access, restrict_processing, object_leaderboard, rectification]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        submittedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        adminNotes:
+          type: string
+          nullable: true
+
+    GdprDeleteRequest:
+      type: object
+      required: [emailHash, reason]
+      properties:
+        emailHash:
+          type: string
+          description: SHA-256 hex hash of the email address.
+        reason:
+          type: string
+          maxLength: 500
+
+    GdprPatchRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [processing, completed, failed]
+        adminNotes:
+          type: string
+          maxLength: 500
+          nullable: true
+
+    # --- Audit ---
+    AuditEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        adminId:
+          type: string
+          format: uuid
+        adminUsername:
+          type: string
+        action:
+          type: string
+          example: "pet.ban"
+        targetType:
+          type: string
+        targetId:
+          type: string
+        detail:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    # --- Dashboard ---
+    DashboardData:
+      type: object
+      properties:
+        claimedPetsToday:
+          type: integer
+        activeBattlesToday:
+          type: integer
+        pendingGdprRequests:
+          type: integer
+        dailyActiveUsers:
+          type: integer
+        errorRateLast5Min:
+          type: number
+          format: float
+        emailDeliveryRate:
+          type: number
+          format: float
+        systemStatus:
+          type: string
+          enum: [healthy, degraded, down]
+
+    AnalyticsData:
+      type: object
+      properties:
+        metric:
+          type: string
+          enum: [dau, claims, arena_battles, leaderboard_uvs]
+        dataPoints:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              value:
+                type: integer
+        summary:
+          type: object
+          properties:
+            total:
+              type: integer
+            average:
+              type: number
+            peak:
+              type: integer
+
+    EmailMonitorData:
+      type: object
+      properties:
+        emailsSentLast24h:
+          type: integer
+        deliverySuccessRate:
+          type: number
+          format: float
+        bounceRate:
+          type: number
+          format: float
+        spamComplaintRate:
+          type: number
+          format: float
+        failoverActive:
+          type: boolean
+
+security:
+  - SessionCookie: []
+
+paths:
+  # =========================================================================
+  # 6.1 Admin Authentication
+  # =========================================================================
+  /auth/login:
+    post:
+      tags: [Admin Auth]
+      summary: Admin login
+      description: |
+        Authenticates an admin with username, password, and TOTP code.
+        On success sets `session` cookie (httpOnly; SameSite=Strict; Secure; Path=/admin).
+        If TOTP is not yet enrolled returns HTTP 403 with `TOTP_SETUP_REQUIRED` and
+        a short-lived `setupToken` JWT in `error.details.setupToken`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful. Session cookie set.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "session=<session_id>; HttpOnly; SameSite=Strict; Secure; Path=/admin"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LoginData'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                success: false
+                data: null
+                error: {code: VALIDATION_ERROR, message: "Missing or malformed fields"}
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Account locked or TOTP setup required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                accountLocked:
+                  value:
+                    success: false
+                    data: null
+                    error: {code: ACCOUNT_LOCKED, message: "Account locked", details: {unlockedAt: "2026-05-03T12:30:00Z"}}
+                totpSetupRequired:
+                  value:
+                    success: false
+                    data: null
+                    error: {code: TOTP_SETUP_REQUIRED, message: "TOTP enrollment required", details: {setupToken: "<signed JWT>"}}
+        '429':
+          description: IP pre-auth rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /auth/logout:
+    post:
+      tags: [Admin Auth]
+      summary: Admin logout
+      description: Invalidates the current admin session. Writes a logout event to the audit log.
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /auth/totp/setup:
+    post:
+      tags: [Admin Auth]
+      summary: Complete TOTP enrollment
+      description: |
+        Completes TOTP enrollment for a first-time admin login.
+        Requires the short-lived `setupToken` JWT returned in the login 403 response.
+        After setup the admin must perform a standard login with `totpCode`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TotpSetupRequest'
+      responses:
+        '200':
+          description: TOTP enrolled. Returns OTP auth URL and backup codes.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TotpSetupData'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: setupToken missing, invalid, or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /auth/totp/verify:
+    post:
+      tags: [Admin Auth]
+      summary: TOTP step-up verification
+      description: |
+        Verifies a TOTP code against the current admin's secret. Used for step-up
+        authentication before sensitive Super Admin write operations.
+      responses:
+        '200':
+          description: TOTP code verified
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TotpVerifyData'
+        '400':
+          description: Missing or invalid totpCode
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session invalid or TOTP code does not match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.2 Admin Role Management  (endpoints use /users path per task spec;
+  #      the underlying doc uses /roles — both are noted in comments)
+  # =========================================================================
+  /users:
+    get:
+      tags: [Role Management]
+      summary: List admin accounts
+      description: Lists all admin users and their roles. Super Admin only.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Admin user list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          admins:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AdminUserSummary'
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    post:
+      tags: [Role Management]
+      summary: Create admin account
+      description: Creates a new admin account. Super Admin only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminRequest'
+      responses:
+        '201':
+          description: Admin account created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          adminId:
+                            type: string
+                            format: uuid
+                          username:
+                            type: string
+                          role:
+                            $ref: '#/components/schemas/AdminRole'
+                          auditLogId:
+                            type: string
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /users/{id}:
+    get:
+      tags: [Role Management]
+      summary: Get admin account
+      description: Returns details for a single admin account. Super Admin only.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Admin account details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminUserSummary'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Admin not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    put:
+      tags: [Role Management]
+      summary: Update admin account
+      description: Updates role or other fields on an admin account. Super Admin only.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  $ref: '#/components/schemas/AdminRole'
+      responses:
+        '200':
+          description: Admin account updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuditLogIdData'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Admin not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    delete:
+      tags: [Role Management]
+      summary: Deactivate admin account
+      description: |
+        Soft-deactivates an admin account (sets `deactivated_at = NOW()`).
+        Login is immediately blocked. Account row is never hard-deleted.
+        Super Admin only.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Admin account deactivated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuditLogIdData'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Admin not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.3 Admin Pet Management
+  # =========================================================================
+  /pets:
+    get:
+      tags: [Pet Management]
+      summary: List pets
+      description: |
+        Lists pets with optional search and filtering. Supports up to 1 million
+        records with a response time target of ≤ 2 s. Moderator+ or Read Only.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Exact pet UUID or exact SHA-256 email hash.
+        - name: rarity
+          in: query
+          schema:
+            type: string
+            enum: [COMMON, RARE, EPIC, LEGENDARY]
+        - name: isBanned
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Pet list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          pets:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AdminPetSummary'
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /pets/{id}:
+    get:
+      tags: [Pet Management]
+      summary: Get pet details
+      description: Full pet record including ban history and last 20 battle records. Moderator+ or Read Only.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pet details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Pet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    put:
+      tags: [Pet Management]
+      summary: Update pet admin fields
+      description: |
+        Updates administrative fields on a pet (e.g. correcting `petName` after
+        content moderation review). Super Admin only. Audit-logged.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                petName:
+                  type: string
+      responses:
+        '200':
+          description: Pet updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuditLogIdData'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Pet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /pets/{id}/ban:
+    post:
+      tags: [Pet Management]
+      summary: Ban a pet
+      description: |
+        Bans a pet. Removed from public leaderboard within 5 minutes.
+        Banned pets receive `PET_BANNED` on arena entry. Moderator+.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationReasonRequest'
+      responses:
+        '200':
+          description: Pet banned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuditLogIdData'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Role below moderator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Pet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    get:
+      tags: [Pet Management]
+      summary: Get pet ban status
+      description: Returns current ban status and ban history for a pet. Moderator+ or Read Only.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ban status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          isBanned:
+                            type: boolean
+                          bannedReason:
+                            type: string
+                            nullable: true
+                          bannedAt:
+                            type: string
+                            format: date-time
+                            nullable: true
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Pet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /pets/{id}/token:
+    delete:
+      tags: [Pet Management]
+      summary: Revoke pet access token
+      description: |
+        Revokes the pet access token (clears `owner_token_hash` in DB).
+        The pet owner will need to re-claim their pet. Super Admin only. Audit-logged.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Token revoked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuditLogIdData'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Pet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.4 Admin Arena & Battle Management
+  # =========================================================================
+  /battles:
+    get:
+      tags: [Arena & Battles]
+      summary: List battles
+      description: Lists arena battles with optional filters. Moderator+ or Read Only.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start of date range (ISO 8601)
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End of date range (ISO 8601)
+        - name: petId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter battles involving a specific pet
+        - name: flagged
+          in: query
+          schema:
+            type: boolean
+          description: Filter to flagged battles only
+      responses:
+        '200':
+          description: Battle list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          battles:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/BattleSummary'
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+        '400':
+          description: Malformed date, invalid UUID, or invalid flagged value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /battles/{id}/flag:
+    post:
+      tags: [Arena & Battles]
+      summary: Flag a battle
+      description: Flags a battle record as suspicious. Moderator+.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: matchId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationReasonRequest'
+      responses:
+        '200':
+          description: Battle flagged
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuditLogIdData'
+        '400':
+          description: Missing or invalid reason
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Role below moderator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    delete:
+      tags: [Arena & Battles]
+      summary: Remove battle flag
+      description: Removes a flag from a battle record. Moderator+.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: matchId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationReasonRequest'
+      responses:
+        '200':
+          description: Flag removed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuditLogIdData'
+        '400':
+          description: Missing or invalid reason
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Role below moderator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.5 Admin Leaderboard
+  # =========================================================================
+  /leaderboard:
+    get:
+      tags: [Leaderboard]
+      summary: Admin leaderboard (top 500)
+      description: |
+        Returns the top 500 pets with suspicious-flag annotations for pets
+        exceeding 50 battles/hour. Hard-capped list — no pagination parameters.
+        Moderator+ or Read Only.
+      responses:
+        '200':
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          entries:
+                            type: array
+                            maxItems: 500
+                            items:
+                              $ref: '#/components/schemas/LeaderboardEntry'
+                          lastUpdated:
+                            type: string
+                            format: date-time
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /leaderboard/recalculate:
+    post:
+      tags: [Leaderboard]
+      summary: Trigger leaderboard recalculation
+      description: |
+        Triggers an immediate recalculation of the leaderboard sorted set in Redis.
+        Moderator+.
+      responses:
+        '200':
+          description: Recalculation triggered
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          scheduledAt:
+                            type: string
+                            format: date-time
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Role below moderator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.6 Admin Configuration
+  # =========================================================================
+  /config/runtime:
+    get:
+      tags: [Configuration]
+      summary: Get runtime config
+      description: Returns current runtime configuration values. Super Admin only.
+      responses:
+        '200':
+          description: Runtime config
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RuntimeConfig'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    put:
+      tags: [Configuration]
+      summary: Update runtime config
+      description: |
+        Updates runtime configuration values. Changes take effect within 5 minutes.
+        Tunable ranges:
+        - `arenaRateLimitBattlesPerHour`: [1, 50]
+        - `arenaMatchmakingTimeoutSeconds`: [5, 120] recommended
+        - `rarityWeights`: four values must sum to 100.
+        Super Admin only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuntimeConfig'
+      responses:
+        '200':
+          description: Config updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+        '400':
+          description: Out of range or rarity weights do not sum to 100
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /config/feature-flags:
+    get:
+      tags: [Configuration]
+      summary: List feature flags
+      description: Returns current feature flag states. Super Admin only.
+      responses:
+        '200':
+          description: Feature flags
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          flags:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/FeatureFlag'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    put:
+      tags: [Configuration]
+      summary: Enable or disable a feature flag
+      description: |
+        Enables or disables a named feature flag. Audit-logged. Super Admin only.
+        Pass the flag name in the request body alongside the desired `enabled` value.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [flag, enabled]
+              properties:
+                flag:
+                  type: string
+                  example: FF_MARKETPLACE
+                enabled:
+                  type: boolean
+      responses:
+        '200':
+          description: Feature flag updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          flag:
+                            type: string
+                          enabled:
+                            type: boolean
+                          auditLogId:
+                            type: string
+        '400':
+          description: Missing or invalid enabled field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Feature flag not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.7 Admin GDPR Queue
+  # =========================================================================
+  /gdpr/queue:
+    get:
+      tags: [GDPR]
+      summary: List GDPR requests
+      description: Lists GDPR requests with optional status/type filtering. Super Admin only.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [erasure, data_access, restrict_processing, object_leaderboard, rectification]
+      responses:
+        '200':
+          description: GDPR request list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          requests:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/GdprRequestSummary'
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    post:
+      tags: [GDPR]
+      summary: Initiate admin-triggered erasure
+      description: |
+        Initiates an admin-triggered GDPR erasure request. Email hash hashed
+        within 24 h SLA; compliant within 7 days. Super Admin only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GdprDeleteRequest'
+      responses:
+        '202':
+          description: Erasure request accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          requestId:
+                            type: string
+                            format: uuid
+                          estimatedCompletion:
+                            type: string
+                            format: date-time
+        '400':
+          description: Missing or invalid emailHash or reason
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+    put:
+      tags: [GDPR]
+      summary: Update GDPR request status
+      description: |
+        Updates status of a non-erasure GDPR request
+        (data_access, restrict_processing, object_leaderboard, rectification).
+        Erasure requests are managed exclusively via POST /gdpr/queue.
+        Requires requestId in request body. Super Admin only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  required: [requestId]
+                  properties:
+                    requestId:
+                      type: string
+                      format: uuid
+                - $ref: '#/components/schemas/GdprPatchRequest'
+      responses:
+        '200':
+          description: GDPR request updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          requestId:
+                            type: string
+                            format: uuid
+                          status:
+                            type: string
+                          updatedAt:
+                            type: string
+                            format: date-time
+        '400':
+          description: Validation error or wrong request type (erasure)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: GDPR request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.8 Admin Audit Log
+  # =========================================================================
+  /audit:
+    get:
+      tags: [Audit]
+      summary: Query audit log
+      description: |
+        Returns audit log entries. Supports any 12-month window in ≤ 3 s.
+        Logs retained for 2 years. IP addresses stored as SHA-256 hashes only.
+        Super Admin only.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: actorId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by admin account ID
+        - name: action
+          in: query
+          schema:
+            type: string
+          description: "Filter by action type (e.g. pet.ban, config.arena_rate_limit)"
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          entries:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AuditEntry'
+                      meta:
+                        $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: Not super_admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  # =========================================================================
+  # 6.9 Admin Dashboard, Analytics & Email Monitor
+  # =========================================================================
+  /dashboard:
+    get:
+      tags: [Dashboard & Analytics]
+      summary: Platform health dashboard
+      description: |
+        Returns a real-time summary of platform health. Metrics sourced from
+        Redis counters and PostgreSQL aggregates. Page load target ≤ 3 s.
+        Moderator+ or Read Only.
+      responses:
+        '200':
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DashboardData'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /analytics:
+    get:
+      tags: [Dashboard & Analytics]
+      summary: Product analytics time-series
+      description: Returns product analytics time-series data. Moderator+ or Read Only.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: metric
+          in: query
+          schema:
+            type: string
+            enum: [dau, claims, arena_battles, leaderboard_uvs]
+      responses:
+        '200':
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AnalyticsData'
+        '400':
+          description: Missing from/to or unrecognised metric
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /email-monitor:
+    get:
+      tags: [Dashboard & Analytics]
+      summary: Email delivery health monitor
+      description: |
+        Returns email delivery health metrics from SendGrid webhook logs.
+        Targets: delivery rate ≥ 98%, spam complaint rate < 0.1%.
+        Moderator+ or Read Only.
+      responses:
+        '200':
+          description: Email health metrics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EmailMonitorData'
+        '401':
+          description: Session missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+tags:
+  - name: Admin Auth
+    description: Admin authentication and TOTP management
+  - name: Role Management
+    description: Admin user and role management (Super Admin only)
+  - name: Pet Management
+    description: Pet moderation — ban, unban, token revocation
+  - name: Arena & Battles
+    description: Battle record inspection and flagging
+  - name: Leaderboard
+    description: Admin leaderboard view and recalculation
+  - name: Configuration
+    description: Runtime config and feature flag management (Super Admin only)
+  - name: GDPR
+    description: GDPR request queue management (Super Admin only)
+  - name: Audit
+    description: Audit log query (Super Admin only)
+  - name: Dashboard & Analytics
+    description: Platform health dashboard, analytics, and email monitor

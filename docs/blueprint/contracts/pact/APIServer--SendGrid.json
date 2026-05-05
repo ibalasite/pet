@@ -1,0 +1,332 @@
+{
+  "consumer": {
+    "name": "APIServer"
+  },
+  "provider": {
+    "name": "SendGrid"
+  },
+  "interactions": [
+    {
+      "description": "send OTP claim email for pet claim initiation",
+      "providerState": "SendGrid API is available and API key is valid",
+      "request": {
+        "method": "POST",
+        "path": "/v3/mail/send",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer SG.example_api_key"
+        },
+        "body": {
+          "personalizations": [
+            {
+              "to": [{ "email": "player@example.com" }],
+              "subject": "Your Pixel Pet Arena claim code"
+            }
+          ],
+          "from": {
+            "email": "noreply@pixel-pet-arena.com",
+            "name": "Pixel Pet Arena"
+          },
+          "content": [
+            {
+              "type": "text/plain",
+              "value": "Your claim code is: 482917\n\nThis code expires in 15 minutes. Do not share it with anyone."
+            },
+            {
+              "type": "text/html",
+              "value": "<p>Your claim code is: <strong>482917</strong></p><p>This code expires in 15 minutes. Do not share it with anyone.</p>"
+            }
+          ],
+          "mail_settings": {
+            "bypass_list_management": { "enable": true }
+          },
+          "tracking_settings": {
+            "click_tracking": { "enable": false },
+            "open_tracking": { "enable": false }
+          }
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "X-Message-Id": "msg_claim_abc123def456"
+        },
+        "body": null
+      }
+    },
+    {
+      "description": "send OTP claim email fails when SendGrid rejects the request with invalid API key",
+      "providerState": "SendGrid API key is invalid or revoked",
+      "request": {
+        "method": "POST",
+        "path": "/v3/mail/send",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer SG.invalid_api_key"
+        },
+        "body": {
+          "personalizations": [
+            {
+              "to": [{ "email": "player@example.com" }],
+              "subject": "Your Pixel Pet Arena claim code"
+            }
+          ],
+          "from": {
+            "email": "noreply@pixel-pet-arena.com",
+            "name": "Pixel Pet Arena"
+          },
+          "content": [
+            {
+              "type": "text/plain",
+              "value": "Your claim code is: 482917"
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "errors": [
+            {
+              "message": "The provided authorization grant is invalid, expired, or revoked",
+              "field": null,
+              "help": "https://sendgrid.com/docs/API_Reference/Web_API_v3/Mail/errors.html"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "send OTP recovery email for lost pet access token",
+      "providerState": "SendGrid API is available and API key is valid",
+      "request": {
+        "method": "POST",
+        "path": "/v3/mail/send",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer SG.example_api_key"
+        },
+        "body": {
+          "personalizations": [
+            {
+              "to": [{ "email": "player@example.com" }],
+              "subject": "Pixel Pet Arena — Recover your pet access"
+            }
+          ],
+          "from": {
+            "email": "noreply@pixel-pet-arena.com",
+            "name": "Pixel Pet Arena"
+          },
+          "content": [
+            {
+              "type": "text/plain",
+              "value": "Your recovery code is: 739201\n\nThis code expires in 15 minutes. Use it to recover access to your pet."
+            },
+            {
+              "type": "text/html",
+              "value": "<p>Your recovery code is: <strong>739201</strong></p><p>This code expires in 15 minutes. Use it to recover access to your pet.</p>"
+            }
+          ],
+          "mail_settings": {
+            "bypass_list_management": { "enable": true }
+          },
+          "tracking_settings": {
+            "click_tracking": { "enable": false },
+            "open_tracking": { "enable": false }
+          }
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "X-Message-Id": "msg_recovery_xyz789abc"
+        },
+        "body": null
+      }
+    },
+    {
+      "description": "send OTP email fails when recipient address is invalid",
+      "providerState": "SendGrid API is available but recipient email address is malformed",
+      "request": {
+        "method": "POST",
+        "path": "/v3/mail/send",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer SG.example_api_key"
+        },
+        "body": {
+          "personalizations": [
+            {
+              "to": [{ "email": "not-a-valid-email" }],
+              "subject": "Your Pixel Pet Arena claim code"
+            }
+          ],
+          "from": {
+            "email": "noreply@pixel-pet-arena.com",
+            "name": "Pixel Pet Arena"
+          },
+          "content": [
+            {
+              "type": "text/plain",
+              "value": "Your claim code is: 482917"
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "errors": [
+            {
+              "message": "The to address is not valid.",
+              "field": "personalizations.0.to.0.email",
+              "help": "https://sendgrid.com/docs/API_Reference/Web_API_v3/Mail/errors.html"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "SendGrid event webhook delivers successful email delivery event",
+      "providerState": "SendGrid webhook endpoint is configured and active",
+      "request": {
+        "method": "POST",
+        "path": "/internal/sendgrid/events",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Twilio-Email-Event-Webhook-Signature": "sha256=validsignaturehex"
+        },
+        "body": [
+          {
+            "email": "player@example.com",
+            "event": "delivered",
+            "sg_message_id": "msg_claim_abc123def456",
+            "timestamp": 1746274200,
+            "smtp-id": "<14c5d75ce9347.6c2b327a3fedc3c4@example.sendgrid.net>",
+            "category": ["claim_otp"]
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "received": true
+        }
+      }
+    },
+    {
+      "description": "SendGrid event webhook delivers bounce event triggering failover monitoring",
+      "providerState": "SendGrid webhook endpoint is configured and delivery failure tracking is active",
+      "request": {
+        "method": "POST",
+        "path": "/internal/sendgrid/events",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Twilio-Email-Event-Webhook-Signature": "sha256=validsignaturehex"
+        },
+        "body": [
+          {
+            "email": "player@example.com",
+            "event": "bounce",
+            "sg_message_id": "msg_claim_abc123def456",
+            "timestamp": 1746274260,
+            "smtp-id": "<14c5d75ce9347.6c2b327a3fedc3c4@example.sendgrid.net>",
+            "reason": "550 5.1.1 The email account that you tried to reach does not exist.",
+            "status": "5.1.1",
+            "type": "bounce",
+            "category": ["claim_otp"]
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "received": true
+        }
+      }
+    },
+    {
+      "description": "SendGrid event webhook delivers spam complaint event",
+      "providerState": "SendGrid webhook endpoint is configured and spam complaint tracking is active",
+      "request": {
+        "method": "POST",
+        "path": "/internal/sendgrid/events",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Twilio-Email-Event-Webhook-Signature": "sha256=validsignaturehex"
+        },
+        "body": [
+          {
+            "email": "player@example.com",
+            "event": "spamreport",
+            "sg_message_id": "msg_claim_abc123def456",
+            "timestamp": 1746274320,
+            "category": ["claim_otp"]
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "received": true
+        }
+      }
+    },
+    {
+      "description": "SendGrid event webhook rejects request with invalid signature",
+      "providerState": "SendGrid webhook endpoint has signature verification enabled",
+      "request": {
+        "method": "POST",
+        "path": "/internal/sendgrid/events",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Twilio-Email-Event-Webhook-Signature": "sha256=invalidsignaturehex"
+        },
+        "body": [
+          {
+            "email": "player@example.com",
+            "event": "delivered",
+            "sg_message_id": "msg_claim_abc123def456",
+            "timestamp": 1746274200
+          }
+        ]
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "Invalid webhook signature.",
+            "details": {}
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "2.0.0"
+    },
+    "x-generated-by": "gendoc-gen-contracts"
+  }
+}

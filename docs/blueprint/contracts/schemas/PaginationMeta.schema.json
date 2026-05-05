@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/PaginationMeta",
+  "title": "PaginationMeta",
+  "description": "Pagination metadata included in list endpoint responses.",
+  "type": "object",
+  "required": ["total", "page", "limit"],
+  "properties": {
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of records matching the query (across all pages).",
+      "example": 243
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Current page number (1-indexed).",
+      "example": 1
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of records returned per page.",
+      "example": 20
+    },
+    "totalPages": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of pages, derived from CEIL(total / limit).",
+      "example": 13
+    },
+    "hasNextPage": {
+      "type": "boolean",
+      "description": "True if there is a subsequent page available.",
+      "example": true
+    },
+    "hasPreviousPage": {
+      "type": "boolean",
+      "description": "True if there is a preceding page available.",
+      "example": false
+    }
+  },
+  "additionalProperties": false
+}

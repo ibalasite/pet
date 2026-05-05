@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/ErrorResponse",
+  "title": "ErrorResponse",
+  "description": "Standard API error envelope. All errors use this format. Successful responses use this envelope with success=true and error=null.",
+  "type": "object",
+  "required": ["success", "data", "error"],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Always false for error responses.",
+      "example": false,
+      "enum": [false]
+    },
+    "data": {
+      "type": "null",
+      "description": "Always null for error responses.",
+      "example": null
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "description": "Error detail object.",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "SNAKE_CASE error code identifying the error type.",
+          "example": "UNAUTHORIZED",
+          "examples": [
+            "UNAUTHORIZED",
+            "NOT_OWNER",
+            "PET_BANNED",
+            "FORBIDDEN",
+            "ACCOUNT_LOCKED",
+            "TOTP_SETUP_REQUIRED",
+            "NOT_FOUND",
+            "VALIDATION_ERROR",
+            "RATE_LIMITED",
+            "INTERNAL_SERVER_ERROR"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable description of the error.",
+          "example": "Missing or invalid Authorization: Bearer token."
+        },
+        "details": {
+          "type": ["object", "null"],
+          "description": "Optional additional context specific to the error code. Shape varies by error code.",
+          "additionalProperties": true,
+          "example": {}
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

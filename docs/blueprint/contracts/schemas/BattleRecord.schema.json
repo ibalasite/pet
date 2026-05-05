@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/BattleRecord",
+  "title": "BattleRecord",
+  "type": "object",
+  "required": [
+    "id",
+    "petAId",
+    "isAiOpponent",
+    "mode",
+    "randomSeed",
+    "statDeltaA",
+    "statDeltaB",
+    "durationSeconds",
+    "battleLog",
+    "isFlagged",
+    "completedAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique arena match identifier (UUID v4).",
+      "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    },
+    "petAId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Challenger pet ID. ON DELETE RESTRICT — pet row is retained for audit integrity.",
+      "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "petBId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Opponent pet ID. NULL if isAiOpponent = true or if the pet row has been administratively removed.",
+      "example": "9b8a7c6d-5e4f-3210-abcd-ef9876543210"
+    },
+    "isAiOpponent": {
+      "type": "boolean",
+      "description": "TRUE = petA fought an AI-controlled opponent; petBId is always NULL for AI matches.",
+      "example": false
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["RACE", "SUMO"],
+      "description": "Battle mode. RACE = speed-based; SUMO = strength-based.",
+      "example": "RACE"
+    },
+    "winnerPetId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Pet ID of the winning pet. NULL when the AI opponent wins. Must be petAId or petBId.",
+      "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "randomSeed": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Seeded random value used for the ±15% outcome modifier. Enables deterministic replay.",
+      "example": 7392847261
+    },
+    "statDeltaA": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Food buff bonus (delta) added to petA's base stat for this match. 0 = no active buff.",
+      "example": 5
+    },
+    "statDeltaB": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Food buff bonus (delta) added to petB's base stat for this match. 0 = no active buff or AI opponent.",
+      "example": 0
+    },
+    "durationSeconds": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 15,
+      "description": "Animation window duration in seconds (5–15 s).",
+      "example": 10
+    },
+    "battleLog": {
+      "type": "array",
+      "description": "Structured event sequence array for client-side replay.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "example": []
+    },
+    "isFlagged": {
+      "type": "boolean",
+      "description": "TRUE = match has been flagged by a moderator for review.",
+      "example": false
+    },
+    "flaggedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Timestamp when the match was most recently flagged. NULL when isFlagged = false.",
+      "example": null
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the battle result was committed.",
+      "example": "2026-05-04T14:20:00Z"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of the last mutation (flag/unflag).",
+      "example": "2026-05-04T14:20:00Z"
+    }
+  },
+  "additionalProperties": false
+}

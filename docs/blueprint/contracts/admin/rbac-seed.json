@@ -1,0 +1,26 @@
+{
+  "roles": [
+    {"name": "super_admin", "description": "Full platform access including user management and config"},
+    {"name": "moderator", "description": "Pet and arena moderation; no config or user management"},
+    {"name": "read_only", "description": "Read-only access to dashboard and analytics"}
+  ],
+  "permissions": [
+    {"name": "admin:users:read"},
+    {"name": "admin:users:write"},
+    {"name": "admin:pets:read"},
+    {"name": "admin:pets:write"},
+    {"name": "admin:battles:read"},
+    {"name": "admin:battles:write"},
+    {"name": "admin:config:read"},
+    {"name": "admin:config:write"},
+    {"name": "admin:gdpr:read"},
+    {"name": "admin:gdpr:write"},
+    {"name": "admin:audit:read"},
+    {"name": "admin:dashboard:read"}
+  ],
+  "role_permissions": {
+    "super_admin": ["admin:users:read","admin:users:write","admin:pets:read","admin:pets:write","admin:battles:read","admin:battles:write","admin:config:read","admin:config:write","admin:gdpr:read","admin:gdpr:write","admin:audit:read","admin:dashboard:read"],
+    "moderator": ["admin:pets:read","admin:pets:write","admin:battles:read","admin:battles:write","admin:dashboard:read"],
+    "read_only": ["admin:dashboard:read","admin:audit:read"]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/FoodItem",
+  "title": "FoodItem",
+  "type": "object",
+  "required": [
+    "id",
+    "petId",
+    "foodType",
+    "buffStat",
+    "magnitude",
+    "isPermanent",
+    "consumedAt",
+    "recordExpiresAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique food buff record identifier (UUID v4).",
+      "example": "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
+    },
+    "petId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Pet this food buff is applied to.",
+      "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "foodType": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Application-defined food item identifier (e.g. 'speed_berry', 'iron_kibble'). Used by the client to render the correct food icon and label.",
+      "example": "speed_berry"
+    },
+    "buffStat": {
+      "type": "string",
+      "enum": ["speed", "strength", "stamina"],
+      "description": "Stat affected by this food buff.",
+      "example": "speed"
+    },
+    "magnitude": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Stat points granted. Must be > 0. Admin-configurable multiplier range: 0.5×–5.0×.",
+      "example": 8
+    },
+    "isPermanent": {
+      "type": "boolean",
+      "description": "TRUE = buff never expires (expiresAt is null). FALSE = buff has a finite duration (expiresAt is non-null).",
+      "example": false
+    },
+    "effectType": {
+      "type": "string",
+      "enum": ["permanent", "temporary"],
+      "description": "Derived from isPermanent: 'permanent' when isPermanent = true, 'temporary' when isPermanent = false.",
+      "example": "temporary"
+    },
+    "expiresAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "NULL for permanent buffs. Set to consumedAt + duration for temporary buffs.",
+      "example": "2026-05-05T10:30:00Z"
+    },
+    "consumedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the food item was applied to the pet.",
+      "example": "2026-05-04T10:30:00Z"
+    },
+    "recordExpiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "consumedAt + 30 days. Target for background cleanup job. Always >= expiresAt.",
+      "example": "2026-06-03T10:30:00Z"
+    }
+  },
+  "additionalProperties": false
+}

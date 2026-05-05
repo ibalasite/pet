@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/ClaimCode",
+  "title": "ClaimCode",
+  "type": "object",
+  "required": [
+    "id",
+    "petId",
+    "emailHash",
+    "codeHash",
+    "expiresAt",
+    "attempts",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique claim code record identifier (UUID v4).",
+      "example": "c1a2b3c4-d5e6-7890-abcd-ef1234567890"
+    },
+    "petId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Foreign key to the pet this claim code is issued for.",
+      "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "emailHash": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "SHA-256 of lowercase email supplied during the claim flow. Must match claim_identities.email_hash for the OTP to be accepted.",
+      "example": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "codeHash": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "SHA-256 of the 6-digit numeric OTP. Plaintext OTP is never stored.",
+      "example": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "OTP expiry timestamp. Set to NOW() + 15 minutes at creation.",
+      "example": "2026-05-04T10:45:00Z"
+    },
+    "usedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Set when the OTP is successfully verified. NULL if unused.",
+      "example": null
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Informational counter incremented on each verify call. Enforcement is in Redis.",
+      "example": 0
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the claim code row was created.",
+      "example": "2026-05-04T10:30:00Z"
+    }
+  },
+  "additionalProperties": false
+}

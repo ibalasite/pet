@@ -1,0 +1,526 @@
+{
+  "consumer": {
+    "name": "AdminPortal"
+  },
+  "provider": {
+    "name": "APIServer"
+  },
+  "interactions": [
+    {
+      "description": "admin login with valid credentials and TOTP code",
+      "providerState": "admin account moderator_alice exists with valid TOTP enrolled and is not locked",
+      "request": {
+        "method": "POST",
+        "path": "/admin/api/auth/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "moderator_alice",
+          "password": "correct-horse-battery-staple",
+          "totpCode": "482917"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Set-Cookie": "session=abc123sessionid; HttpOnly; SameSite=Strict; Secure; Path=/admin"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "adminId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "role": "moderator",
+            "sessionExpiresAt": "2026-05-03T16:00:00Z"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "admin login fails when account is locked after too many failures",
+      "providerState": "admin account moderator_alice is locked until 2026-05-03T12:30:00Z",
+      "request": {
+        "method": "POST",
+        "path": "/admin/api/auth/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "moderator_alice",
+          "password": "wrong-password",
+          "totpCode": "000000"
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "ACCOUNT_LOCKED",
+            "message": "Admin account is temporarily locked after repeated failed login attempts.",
+            "details": {
+              "unlockedAt": "2026-05-03T12:30:00Z"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "admin login triggers TOTP setup required on first login",
+      "providerState": "admin account new_admin exists without TOTP enrolled",
+      "request": {
+        "method": "POST",
+        "path": "/admin/api/auth/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "new_admin",
+          "password": "initial-password-xyz"
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "TOTP_SETUP_REQUIRED",
+            "message": "TOTP enrollment is required before a session can be granted.",
+            "details": {
+              "setupToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoibmV3X2FkbWluIiwiZXhwIjoxNzQ2MjcwMDAwfQ.example"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "list pets with pagination as moderator",
+      "providerState": "admin session cookie is valid with moderator role and pets exist in database",
+      "request": {
+        "method": "GET",
+        "path": "/admin/api/pets",
+        "query": "page=1&limit=20",
+        "headers": {
+          "Cookie": "session=abc123sessionid"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "pets": [
+              {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "ownerEmailMasked": "p***@example.com",
+                "rarity": "RARE",
+                "level": 7,
+                "battlesPlayed": 17,
+                "winRate": 0.706,
+                "isBanned": false,
+                "createdAt": "2026-04-15T09:32:00Z"
+              }
+            ]
+          },
+          "error": null,
+          "meta": {
+            "total": 1500,
+            "page": 1,
+            "limit": 20
+          }
+        }
+      }
+    },
+    {
+      "description": "ban a pet as moderator with reason",
+      "providerState": "admin session cookie is valid with moderator role and pet 550e8400-e29b-41d4-a716-446655440000 exists and is not banned",
+      "request": {
+        "method": "POST",
+        "path": "/admin/api/pets/550e8400-e29b-41d4-a716-446655440000/ban",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=abc123sessionid"
+        },
+        "body": {
+          "reason": "Automated bot behavior detected: 52 battles in 60-minute window"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "auditLogId": "12348"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "ban a pet fails when pet does not exist",
+      "providerState": "admin session cookie is valid with moderator role and no pet exists with id 00000000-0000-0000-0000-000000000000",
+      "request": {
+        "method": "POST",
+        "path": "/admin/api/pets/00000000-0000-0000-0000-000000000000/ban",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=abc123sessionid"
+        },
+        "body": {
+          "reason": "Suspicious activity"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "PET_NOT_FOUND",
+            "message": "No pet found with the given ID.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "unban a pet as moderator",
+      "providerState": "admin session cookie is valid with moderator role and pet 550e8400-e29b-41d4-a716-446655440000 is banned",
+      "request": {
+        "method": "POST",
+        "path": "/admin/api/pets/550e8400-e29b-41d4-a716-446655440000/unban",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=abc123sessionid"
+        },
+        "body": {
+          "reason": "Manual review confirmed legitimate play"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "auditLogId": "12349"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "list arena battles with date range filter",
+      "providerState": "admin session cookie is valid with moderator role and arena battles exist",
+      "request": {
+        "method": "GET",
+        "path": "/admin/api/battles",
+        "query": "page=1&limit=20&from=2026-05-01T00:00:00Z&to=2026-05-03T23:59:59Z",
+        "headers": {
+          "Cookie": "session=abc123sessionid"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "battles": [
+              {
+                "matchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "petAId": "550e8400-e29b-41d4-a716-446655440000",
+                "petBId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+                "winnerId": "550e8400-e29b-41d4-a716-446655440000",
+                "outcome": "WIN",
+                "duration": 9,
+                "completedAt": "2026-05-03T11:42:00Z",
+                "isFlagged": false
+              }
+            ]
+          },
+          "error": null,
+          "meta": {
+            "total": 8420,
+            "page": 1,
+            "limit": 20
+          }
+        }
+      }
+    },
+    {
+      "description": "flag an arena battle as suspicious",
+      "providerState": "admin session cookie is valid with moderator role and battle a1b2c3d4-e5f6-7890-abcd-ef1234567890 exists",
+      "request": {
+        "method": "POST",
+        "path": "/admin/api/battles/a1b2c3d4-e5f6-7890-abcd-ef1234567890/flag",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=abc123sessionid"
+        },
+        "body": {
+          "reason": "Abnormally fast victory; possible stat manipulation"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "auditLogId": "12350"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "get runtime configuration as super admin",
+      "providerState": "admin session cookie is valid with super_admin role",
+      "request": {
+        "method": "GET",
+        "path": "/admin/api/config/runtime",
+        "headers": {
+          "Cookie": "session=superadminsessionid"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "arenaRateLimitBattlesPerHour": 10,
+            "arenaMatchmakingTimeoutSeconds": 30,
+            "rarityWeights": {
+              "common": 60,
+              "rare": 25,
+              "epic": 12,
+              "legendary": 3
+            }
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "update runtime configuration as super admin",
+      "providerState": "admin session cookie is valid with super_admin role",
+      "request": {
+        "method": "PUT",
+        "path": "/admin/api/config/runtime",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=superadminsessionid"
+        },
+        "body": {
+          "arenaRateLimitBattlesPerHour": 15,
+          "rarityWeights": {
+            "common": 55,
+            "rare": 28,
+            "epic": 13,
+            "legendary": 4
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {},
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "update runtime configuration fails when value is out of allowed range",
+      "providerState": "admin session cookie is valid with super_admin role",
+      "request": {
+        "method": "PUT",
+        "path": "/admin/api/config/runtime",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=superadminsessionid"
+        },
+        "body": {
+          "arenaRateLimitBattlesPerHour": 99
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "OUT_OF_RANGE",
+            "message": "arenaRateLimitBattlesPerHour exceeds the allowed range [1, 50].",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "update runtime configuration forbidden for non-super-admin",
+      "providerState": "admin session cookie is valid with moderator role",
+      "request": {
+        "method": "PUT",
+        "path": "/admin/api/config/runtime",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=abc123sessionid"
+        },
+        "body": {
+          "arenaRateLimitBattlesPerHour": 15
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Insufficient role permissions for this operation.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "toggle feature flag as super admin",
+      "providerState": "admin session cookie is valid with super_admin role and feature flag FF_MARKETPLACE exists",
+      "request": {
+        "method": "PUT",
+        "path": "/admin/api/config/flags/FF_MARKETPLACE",
+        "headers": {
+          "Content-Type": "application/json",
+          "Cookie": "session=superadminsessionid"
+        },
+        "body": {
+          "enabled": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "flag": "FF_MARKETPLACE",
+            "enabled": true,
+            "auditLogId": "12353"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "get admin leaderboard top 500 with suspicious annotations",
+      "providerState": "admin session cookie is valid with moderator role and leaderboard has entries",
+      "request": {
+        "method": "GET",
+        "path": "/admin/api/leaderboard",
+        "headers": {
+          "Cookie": "session=abc123sessionid"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "entries": [
+              {
+                "rank": 1,
+                "petId": "550e8400-e29b-41d4-a716-446655440000",
+                "petName": "Crimson Vexor",
+                "rarity": "RARE",
+                "level": 7,
+                "score": 142.7,
+                "winRate": 0.706,
+                "battlesLastHour": 12,
+                "isSuspicious": false,
+                "isBanned": false
+              }
+            ],
+            "lastUpdated": "2026-05-03T11:41:30Z"
+          },
+          "error": null
+        }
+      }
+    },
+    {
+      "description": "any admin request fails when session is expired",
+      "providerState": "admin session cookie abc123expired has expired",
+      "request": {
+        "method": "GET",
+        "path": "/admin/api/pets",
+        "headers": {
+          "Cookie": "session=abc123expired"
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "Admin session is missing or has expired.",
+            "details": {}
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "2.0.0"
+    },
+    "x-generated-by": "gendoc-gen-contracts"
+  }
+}

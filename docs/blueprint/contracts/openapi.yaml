@@ -1,0 +1,3597 @@
+openapi: 3.1.0
+info:
+  title: pixel-pet-arena API
+  version: "1.0"
+  description: |
+    REST API for the Pixel Pet Arena platform. Covers the public Player API
+    (/api/v1/) and the internal Admin API (/admin/api/).
+
+    Authentication:
+    - Player endpoints use a 32-byte URL-safe Base64 Bearer token obtained
+      via the claim flow.
+    - Admin endpoints use a server-side session cookie set on successful login.
+
+    All responses use the standard JSON envelope:
+      { "success": bool, "data": any|null, "error": ErrorResponse|null }
+    List responses also include a "meta" field with pagination info.
+
+servers:
+  - url: https://api.pixel-pet-arena.com
+    description: Production
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Claim
+    description: Pet ownership claim and recovery flow
+  - name: Pets
+    description: Pet data and training
+  - name: Arena
+    description: Battle arena matchmaking and history
+  - name: Leaderboard
+    description: Global leaderboard
+  - name: GDPR
+    description: Player GDPR self-service
+  - name: Marketplace
+    description: Phase 3 pet trading marketplace (FF_MARKETPLACE)
+  - name: Admin Auth
+    description: Admin authentication and TOTP
+  - name: Admin Roles
+    description: Admin user management
+  - name: Admin Pets
+    description: Admin pet management
+  - name: Admin Arena
+    description: Admin battle and suspicious-activity management
+  - name: Admin Leaderboard
+    description: Admin leaderboard view
+  - name: Admin Config
+    description: Runtime configuration, economy, and feature flags
+  - name: Admin GDPR
+    description: Admin GDPR queue management
+  - name: Admin Audit
+    description: Audit log
+  - name: Admin Dashboard
+    description: Dashboard, analytics, and email health
+  - name: Health
+    description: Health check
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Pet access token (32-byte URL-safe Base64 string)
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Admin session cookie
+
+  schemas:
+    # ---------------------------------------------------------------
+    # Common envelope schemas
+    # ---------------------------------------------------------------
+    ErrorDetail:
+      type: object
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: Human-readable description of the error.
+        details:
+          type: object
+          nullable: true
+      required:
+        - code
+        - message
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          nullable: true
+          example: null
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - success
+        - error
+
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 250
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+      required:
+        - total
+        - page
+        - limit
+
+    # ---------------------------------------------------------------
+    # Enums
+    # ---------------------------------------------------------------
+    RarityEnum:
+      type: string
+      enum:
+        - COMMON
+        - RARE
+        - EPIC
+        - LEGENDARY
+
+    TrainingTypeEnum:
+      type: string
+      enum:
+        - RUN
+        - STRENGTH
+        - STAMINA
+
+    ArenaModeEnum:
+      type: string
+      enum:
+        - RACE
+        - SUMO
+
+    BattleResultEnum:
+      type: string
+      enum:
+        - WIN
+        - LOSS
+
+    GdprRequestTypeEnum:
+      type: string
+      enum:
+        - erasure
+        - data_access
+        - restrict_processing
+        - object_leaderboard
+        - rectification
+
+    GdprStatusEnum:
+      type: string
+      enum:
+        - pending
+        - processing
+        - completed
+        - failed
+
+    AdminRoleEnum:
+      type: string
+      enum:
+        - super_admin
+        - moderator
+        - read_only
+
+    SystemStatusEnum:
+      type: string
+      enum:
+        - healthy
+        - degraded
+        - down
+
+    AnalyticsMetricEnum:
+      type: string
+      enum:
+        - dau
+        - claims
+        - arena_battles
+        - leaderboard_uvs
+
+    # ---------------------------------------------------------------
+    # Pet schemas
+    # ---------------------------------------------------------------
+    PetStats:
+      type: object
+      properties:
+        speed:
+          type: integer
+          minimum: 1
+          maximum: 100
+        strength:
+          type: integer
+          minimum: 1
+          maximum: 100
+        stamina:
+          type: integer
+          minimum: 1
+          maximum: 100
+        level:
+          type: integer
+          minimum: 1
+          maximum: 100
+      required:
+        - speed
+        - strength
+        - stamina
+        - level
+
+    PetStatsNoLevel:
+      type: object
+      properties:
+        speed:
+          type: integer
+          minimum: 1
+          maximum: 100
+        strength:
+          type: integer
+          minimum: 1
+          maximum: 100
+        stamina:
+          type: integer
+          minimum: 1
+          maximum: 100
+      required:
+        - speed
+        - strength
+        - stamina
+
+    GenerationMeta:
+      type: object
+      properties:
+        body:
+          type: string
+          example: lizard
+        head:
+          type: string
+          example: horned
+        colorPalette:
+          type: string
+          example: crimson_gold
+        accessory:
+          type: string
+          example: cape
+        rarityTrait:
+          type: string
+          example: shimmering_scales
+        pattern:
+          type: string
+          example: diagonal_stripe
+      required:
+        - body
+        - head
+        - colorPalette
+        - accessory
+        - rarityTrait
+        - pattern
+
+    FoodBuff:
+      type: object
+      properties:
+        stat:
+          type: string
+          enum:
+            - speed
+            - strength
+            - stamina
+        magnitude:
+          type: integer
+        isPermanent:
+          type: boolean
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - stat
+        - magnitude
+        - isPermanent
+
+    Pet:
+      type: object
+      description: Public pet data
+      properties:
+        id:
+          type: string
+          format: uuid
+        seed:
+          type: integer
+          format: int64
+        rarity:
+          $ref: '#/components/schemas/RarityEnum'
+        petName:
+          type: string
+        stats:
+          $ref: '#/components/schemas/PetStats'
+        isOwner:
+          type: boolean
+          description: true if the authenticated token owns this pet
+        claimedAt:
+          type: string
+          format: date-time
+          nullable: true
+        isNeglected:
+          type: boolean
+      required:
+        - id
+        - seed
+        - rarity
+        - petName
+        - stats
+
+    RandomPet:
+      type: object
+      description: A newly generated unclaimed pet
+      properties:
+        id:
+          type: string
+          format: uuid
+        seed:
+          type: integer
+          format: int64
+        rarity:
+          $ref: '#/components/schemas/RarityEnum'
+        petName:
+          type: string
+        stats:
+          $ref: '#/components/schemas/PetStats'
+        generationMeta:
+          $ref: '#/components/schemas/GenerationMeta'
+        reservedUntil:
+          type: string
+          format: date-time
+      required:
+        - id
+        - seed
+        - rarity
+        - petName
+        - stats
+        - generationMeta
+        - reservedUntil
+
+    PetStatsDetail:
+      type: object
+      properties:
+        petId:
+          type: string
+          format: uuid
+        stats:
+          $ref: '#/components/schemas/PetStats'
+        totalTrainingActions:
+          type: integer
+        trainingActionsToday:
+          type: integer
+        actionsRemainingToday:
+          type: integer
+        lastTrainedAt:
+          type: string
+          format: date-time
+          nullable: true
+        isNeglected:
+          type: boolean
+        activeFoodBuffs:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodBuff'
+      required:
+        - petId
+        - stats
+        - totalTrainingActions
+        - trainingActionsToday
+        - actionsRemainingToday
+        - isNeglected
+        - activeFoodBuffs
+
+    # ---------------------------------------------------------------
+    # Claim schemas
+    # ---------------------------------------------------------------
+    ClaimInitiateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        petId:
+          type: string
+          format: uuid
+        ageConfirmed:
+          type: boolean
+          description: COPPA — must be true (player confirms age ≥ 13)
+      required:
+        - email
+        - petId
+        - ageConfirmed
+
+    ClaimInitiateResponse:
+      type: object
+      properties:
+        claimId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+        - claimId
+        - expiresAt
+
+    ClaimVerifyRequest:
+      type: object
+      properties:
+        claimId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          description: 6-digit numeric OTP
+          pattern: '^\d{6}$'
+      required:
+        - claimId
+        - code
+
+    ClaimVerifyResponse:
+      type: object
+      properties:
+        petToken:
+          type: string
+          description: 32-byte URL-safe Base64 pet access token (transmitted only once)
+        petId:
+          type: string
+          format: uuid
+        petUrl:
+          type: string
+          format: uri
+      required:
+        - petToken
+        - petId
+        - petUrl
+
+    ClaimRecoverRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        petId:
+          type: string
+          format: uuid
+      required:
+        - email
+        - petId
+
+    # ---------------------------------------------------------------
+    # Training / Feed schemas
+    # ---------------------------------------------------------------
+    TrainRequest:
+      type: object
+      properties:
+        trainingType:
+          $ref: '#/components/schemas/TrainingTypeEnum'
+      required:
+        - trainingType
+
+    TrainResponse:
+      type: object
+      properties:
+        updatedStats:
+          $ref: '#/components/schemas/PetStats'
+        statDelta:
+          type: integer
+          minimum: 1
+          maximum: 3
+        actionsRemainingToday:
+          type: integer
+      required:
+        - updatedStats
+        - statDelta
+        - actionsRemainingToday
+
+    FeedRequest:
+      type: object
+      properties:
+        buffType:
+          type: string
+        stat:
+          type: string
+          enum:
+            - speed
+            - strength
+            - stamina
+        magnitude:
+          type: integer
+        isPermanent:
+          type: boolean
+          default: false
+      required:
+        - buffType
+        - stat
+        - magnitude
+
+    FeedResponse:
+      type: object
+      properties:
+        updatedStats:
+          $ref: '#/components/schemas/PetStatsNoLevel'
+        buffApplied:
+          $ref: '#/components/schemas/FoodBuff'
+      required:
+        - updatedStats
+        - buffApplied
+
+    # ---------------------------------------------------------------
+    # Arena schemas
+    # ---------------------------------------------------------------
+    ArenaEnterRequest:
+      type: object
+      properties:
+        petId:
+          type: string
+          format: uuid
+        mode:
+          $ref: '#/components/schemas/ArenaModeEnum'
+        acceptAI:
+          type: boolean
+          default: false
+      required:
+        - petId
+        - mode
+
+    ArenaEnterResponse:
+      type: object
+      properties:
+        matchId:
+          type: string
+          format: uuid
+        result:
+          $ref: '#/components/schemas/BattleResultEnum'
+        opponentPetId:
+          type: string
+          format: uuid
+          nullable: true
+        isAiOpponent:
+          type: boolean
+        statDelta:
+          type: integer
+        newLeaderboardScore:
+          type: number
+          format: float
+      required:
+        - matchId
+        - result
+        - isAiOpponent
+        - statDelta
+        - newLeaderboardScore
+
+    BattleParticipant:
+      type: object
+      properties:
+        petId:
+          type: string
+          format: uuid
+        petName:
+          type: string
+        rarity:
+          $ref: '#/components/schemas/RarityEnum'
+        level:
+          type: integer
+      required:
+        - petId
+        - petName
+        - rarity
+        - level
+
+    BattleLogEvent:
+      type: object
+      description: A single event in the deterministic battle log
+      additionalProperties: true
+      properties:
+        event:
+          type: string
+        tick:
+          type: integer
+
+    BattleRecord:
+      type: object
+      properties:
+        matchId:
+          type: string
+          format: uuid
+        mode:
+          $ref: '#/components/schemas/ArenaModeEnum'
+        petA:
+          $ref: '#/components/schemas/BattleParticipant'
+        petB:
+          $ref: '#/components/schemas/BattleParticipant'
+        winnerId:
+          type: string
+          format: uuid
+        battleLog:
+          type: array
+          items:
+            $ref: '#/components/schemas/BattleLogEvent'
+        completedAt:
+          type: string
+          format: date-time
+      required:
+        - matchId
+        - mode
+        - petA
+        - petB
+        - winnerId
+        - battleLog
+        - completedAt
+
+    BattleSummaryEntry:
+      type: object
+      properties:
+        matchId:
+          type: string
+          format: uuid
+        mode:
+          $ref: '#/components/schemas/ArenaModeEnum'
+        opponentPetId:
+          type: string
+          format: uuid
+          nullable: true
+        isAiOpponent:
+          type: boolean
+        result:
+          $ref: '#/components/schemas/BattleResultEnum'
+        completedAt:
+          type: string
+          format: date-time
+      required:
+        - matchId
+        - mode
+        - isAiOpponent
+        - result
+        - completedAt
+
+    ArenaHistoryResponse:
+      type: object
+      properties:
+        petId:
+          type: string
+          format: uuid
+        battles:
+          type: array
+          items:
+            $ref: '#/components/schemas/BattleSummaryEntry'
+        summary:
+          type: object
+          properties:
+            wins:
+              type: integer
+            losses:
+              type: integer
+            winRate:
+              type: number
+              format: float
+          required:
+            - wins
+            - losses
+            - winRate
+      required:
+        - petId
+        - battles
+        - summary
+
+    # ---------------------------------------------------------------
+    # Leaderboard schemas
+    # ---------------------------------------------------------------
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        petId:
+          type: string
+          format: uuid
+        petName:
+          type: string
+        rarity:
+          $ref: '#/components/schemas/RarityEnum'
+        level:
+          type: integer
+        score:
+          type: number
+          format: float
+        winRate:
+          type: number
+          format: float
+      required:
+        - rank
+        - petId
+        - petName
+        - rarity
+        - level
+        - score
+        - winRate
+
+    LeaderboardResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderboardEntry'
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - entries
+        - lastUpdated
+
+    PetRankResponse:
+      type: object
+      properties:
+        petId:
+          type: string
+          format: uuid
+        rank:
+          type: integer
+          nullable: true
+        score:
+          type: number
+          format: float
+      required:
+        - petId
+        - rank
+        - score
+
+    # ---------------------------------------------------------------
+    # GDPR schemas
+    # ---------------------------------------------------------------
+    GdprRequestBody:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/GdprRequestTypeEnum'
+      required:
+        - type
+
+    GdprJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        message:
+          type: string
+      required:
+        - jobId
+        - message
+
+    GdprStatusResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        requestType:
+          $ref: '#/components/schemas/GdprRequestTypeEnum'
+        status:
+          $ref: '#/components/schemas/GdprStatusEnum'
+        submittedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - jobId
+        - requestType
+        - status
+        - submittedAt
+
+    # ---------------------------------------------------------------
+    # Marketplace schemas
+    # ---------------------------------------------------------------
+    MarketplaceListing:
+      type: object
+      description: Active marketplace listing with pet summary and price
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        petId:
+          type: string
+          format: uuid
+        petName:
+          type: string
+        rarity:
+          $ref: '#/components/schemas/RarityEnum'
+        level:
+          type: integer
+        price:
+          type: integer
+        listedAt:
+          type: string
+          format: date-time
+      required:
+        - listingId
+        - petId
+        - petName
+        - rarity
+        - level
+        - price
+        - listedAt
+
+    CreateListingRequest:
+      type: object
+      properties:
+        petId:
+          type: string
+          format: uuid
+        price:
+          type: integer
+          description: Min price = (pet_level * 100) + (rarity_multiplier * 500)
+      required:
+        - petId
+        - price
+
+    CreateListingResponse:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+      required:
+        - listingId
+
+    TradeHistoryEntry:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+        price:
+          type: integer
+        transactedAt:
+          type: string
+          format: date-time
+        buyerPetId:
+          type: string
+          format: uuid
+        sellerPetId:
+          type: string
+          format: uuid
+      required:
+        - transactionId
+        - price
+        - transactedAt
+
+    # ---------------------------------------------------------------
+    # Admin schemas
+    # ---------------------------------------------------------------
+    AdminLoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        totpCode:
+          type: string
+          description: 6-digit TOTP code (required except on first-time enrollment)
+      required:
+        - username
+        - password
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        adminId:
+          type: string
+          format: uuid
+        role:
+          $ref: '#/components/schemas/AdminRoleEnum'
+        sessionExpiresAt:
+          type: string
+          format: date-time
+      required:
+        - adminId
+        - role
+        - sessionExpiresAt
+
+    TotpSetupRequest:
+      type: object
+      properties:
+        setupToken:
+          type: string
+          description: Short-lived signed JWT from login 403 TOTP_SETUP_REQUIRED response
+        password:
+          type: string
+      required:
+        - setupToken
+        - password
+
+    TotpSetupResponse:
+      type: object
+      properties:
+        otpAuthUrl:
+          type: string
+          description: otpauth://totp/... URI for QR code generation
+        backupCodes:
+          type: array
+          items:
+            type: string
+          minItems: 10
+          maxItems: 10
+      required:
+        - otpAuthUrl
+        - backupCodes
+
+    TotpVerifyRequest:
+      type: object
+      properties:
+        totpCode:
+          type: string
+          pattern: '^\d{6}$'
+      required:
+        - totpCode
+
+    AdminUser:
+      type: object
+      properties:
+        adminId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/AdminRoleEnum'
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+        deactivatedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - adminId
+        - username
+        - role
+
+    CreateAdminRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/AdminRoleEnum'
+        temporaryPassword:
+          type: string
+      required:
+        - username
+        - role
+        - temporaryPassword
+
+    CreateAdminResponse:
+      type: object
+      properties:
+        adminId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/AdminRoleEnum'
+        auditLogId:
+          type: string
+      required:
+        - adminId
+        - username
+        - role
+        - auditLogId
+
+    AuditLogIdResponse:
+      type: object
+      properties:
+        auditLogId:
+          type: string
+      required:
+        - auditLogId
+
+    AdminPetSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerEmailMasked:
+          type: string
+          example: p***@example.com
+          nullable: true
+        rarity:
+          $ref: '#/components/schemas/RarityEnum'
+        level:
+          type: integer
+        battlesPlayed:
+          type: integer
+        winRate:
+          type: number
+          format: float
+        isBanned:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - rarity
+        - level
+        - battlesPlayed
+        - winRate
+        - isBanned
+        - createdAt
+
+    UpdatePetRequest:
+      type: object
+      description: Partial pet fields that are admin-editable (e.g. petName)
+      properties:
+        petName:
+          type: string
+          maxLength: 64
+
+    ModerateRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 500
+      required:
+        - reason
+
+    AdminBattleSummary:
+      type: object
+      properties:
+        matchId:
+          type: string
+          format: uuid
+        petAId:
+          type: string
+          format: uuid
+        petBId:
+          type: string
+          format: uuid
+        winnerId:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+          enum:
+            - WIN
+            - LOSS
+        duration:
+          type: integer
+          description: Battle duration in seconds
+        completedAt:
+          type: string
+          format: date-time
+        isFlagged:
+          type: boolean
+      required:
+        - matchId
+        - petAId
+        - petBId
+        - winnerId
+        - outcome
+        - duration
+        - completedAt
+        - isFlagged
+
+    SuspiciousPet:
+      type: object
+      properties:
+        petId:
+          type: string
+          format: uuid
+        battlesLastHour:
+          type: integer
+        winRate:
+          type: number
+          format: float
+        flagCount:
+          type: integer
+        lastFlaggedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - petId
+        - battlesLastHour
+        - winRate
+        - flagCount
+
+    RarityWeights:
+      type: object
+      properties:
+        common:
+          type: integer
+        rare:
+          type: integer
+        epic:
+          type: integer
+        legendary:
+          type: integer
+      required:
+        - common
+        - rare
+        - epic
+        - legendary
+
+    RuntimeConfig:
+      type: object
+      properties:
+        arenaRateLimitBattlesPerHour:
+          type: integer
+          minimum: 1
+          maximum: 50
+        arenaMatchmakingTimeoutSeconds:
+          type: integer
+        rarityWeights:
+          $ref: '#/components/schemas/RarityWeights'
+      required:
+        - arenaRateLimitBattlesPerHour
+        - arenaMatchmakingTimeoutSeconds
+        - rarityWeights
+
+    EconomyConfig:
+      type: object
+      properties:
+        foodBuffMultiplierMin:
+          type: number
+          format: float
+          minimum: 0.5
+          maximum: 5.0
+        foodBuffMultiplierMax:
+          type: number
+          format: float
+          minimum: 0.5
+          maximum: 5.0
+        arenaEntryCostFoodCreditsDefault:
+          type: integer
+          minimum: 0
+          maximum: 10
+        arenaEntryCostFoodCreditsMax:
+          type: integer
+        arenaEntryCooldownMinMinutes:
+          type: integer
+        arenaEntryCooldownMaxMinutes:
+          type: integer
+          minimum: 0
+          maximum: 60
+      required:
+        - foodBuffMultiplierMin
+        - foodBuffMultiplierMax
+        - arenaEntryCostFoodCreditsDefault
+        - arenaEntryCostFoodCreditsMax
+        - arenaEntryCooldownMinMinutes
+        - arenaEntryCooldownMaxMinutes
+
+    FeatureFlag:
+      type: object
+      properties:
+        flag:
+          type: string
+        enabled:
+          type: boolean
+        description:
+          type: string
+      required:
+        - flag
+        - enabled
+
+    SetFeatureFlagRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+      required:
+        - enabled
+
+    SetFeatureFlagResponse:
+      type: object
+      properties:
+        flag:
+          type: string
+        enabled:
+          type: boolean
+        auditLogId:
+          type: string
+      required:
+        - flag
+        - enabled
+        - auditLogId
+
+    AdminLeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        petId:
+          type: string
+          format: uuid
+        petName:
+          type: string
+        rarity:
+          $ref: '#/components/schemas/RarityEnum'
+        level:
+          type: integer
+        score:
+          type: number
+          format: float
+        winRate:
+          type: number
+          format: float
+        battlesLastHour:
+          type: integer
+        isSuspicious:
+          type: boolean
+        isBanned:
+          type: boolean
+      required:
+        - rank
+        - petId
+        - petName
+        - rarity
+        - level
+        - score
+        - winRate
+        - battlesLastHour
+        - isSuspicious
+        - isBanned
+
+    AdminGdprRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        requestType:
+          $ref: '#/components/schemas/GdprRequestTypeEnum'
+        status:
+          $ref: '#/components/schemas/GdprStatusEnum'
+        submittedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        adminNotes:
+          type: string
+          nullable: true
+      required:
+        - requestId
+        - requestType
+        - status
+        - submittedAt
+
+    AdminGdprDeleteRequest:
+      type: object
+      properties:
+        emailHash:
+          type: string
+          description: SHA-256 hex hash of the email address
+        reason:
+          type: string
+          maxLength: 500
+      required:
+        - emailHash
+        - reason
+
+    AdminGdprDeleteResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        estimatedCompletion:
+          type: string
+          format: date-time
+      required:
+        - requestId
+        - estimatedCompletion
+
+    PatchGdprRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - processing
+            - completed
+            - failed
+        adminNotes:
+          type: string
+          maxLength: 500
+      required:
+        - status
+
+    PatchGdprResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/GdprStatusEnum'
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - requestId
+        - status
+        - updatedAt
+
+    AuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        adminId:
+          type: string
+          format: uuid
+        adminUsername:
+          type: string
+        action:
+          type: string
+          example: pet.ban
+        targetType:
+          type: string
+          example: pet
+        targetId:
+          type: string
+          format: uuid
+          nullable: true
+        detail:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - adminId
+        - adminUsername
+        - action
+        - createdAt
+
+    DashboardData:
+      type: object
+      properties:
+        claimedPetsToday:
+          type: integer
+        activeBattlesToday:
+          type: integer
+        pendingGdprRequests:
+          type: integer
+        dailyActiveUsers:
+          type: integer
+        errorRateLast5Min:
+          type: number
+          format: float
+        emailDeliveryRate:
+          type: number
+          format: float
+        systemStatus:
+          $ref: '#/components/schemas/SystemStatusEnum'
+      required:
+        - claimedPetsToday
+        - activeBattlesToday
+        - pendingGdprRequests
+        - dailyActiveUsers
+        - errorRateLast5Min
+        - emailDeliveryRate
+        - systemStatus
+
+    AnalyticsDataPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        value:
+          type: integer
+      required:
+        - date
+        - value
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        metric:
+          $ref: '#/components/schemas/AnalyticsMetricEnum'
+        dataPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsDataPoint'
+        summary:
+          type: object
+          properties:
+            total:
+              type: integer
+            average:
+              type: number
+            peak:
+              type: integer
+          required:
+            - total
+            - average
+            - peak
+      required:
+        - metric
+        - dataPoints
+        - summary
+
+    EmailMonitorResponse:
+      type: object
+      properties:
+        emailsSentLast24h:
+          type: integer
+        deliverySuccessRate:
+          type: number
+          format: float
+        bounceRate:
+          type: number
+          format: float
+        spamComplaintRate:
+          type: number
+          format: float
+        failoverActive:
+          type: boolean
+      required:
+        - emailsSentLast24h
+        - deliverySuccessRate
+        - bounceRate
+        - spamComplaintRate
+        - failoverActive
+
+    HealthResponse:
+      type: object
+      description: Platform health status (minimal envelope, not standard API envelope)
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - down
+        checks:
+          type: object
+          properties:
+            database:
+              type: string
+            redis:
+              type: string
+          additionalProperties:
+            type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - status
+        - checks
+        - timestamp
+
+  # ---------------------------------------------------------------
+  # Reusable responses
+  # ---------------------------------------------------------------
+  responses:
+    401Unauthorized:
+      description: Unauthenticated — token or session missing/invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    403Forbidden:
+      description: Forbidden — insufficient permissions, banned pet, or locked account
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    404NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    400BadRequest:
+      description: Bad request — validation error or business rule violation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    429TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    409Conflict:
+      description: Conflict — duplicate resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+# =================================================================
+# Paths
+# =================================================================
+paths:
+
+  # ---------------------------------------------------------------
+  # Health
+  # ---------------------------------------------------------------
+  /health:
+    get:
+      operationId: getHealth
+      summary: Platform health check
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: All checks healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: One or more dependency checks failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # ---------------------------------------------------------------
+  # Claim Flow
+  # ---------------------------------------------------------------
+  /api/v1/claim:
+    post:
+      operationId: inititateClaim
+      summary: Initiate pet claim — send OTP
+      tags:
+        - Claim
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimInitiateRequest'
+      responses:
+        '200':
+          description: OTP sent; returns claimId and expiry
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ClaimInitiateResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+  /api/v1/claim/verify:
+    post:
+      operationId: verifyClaim
+      summary: Verify OTP and issue pet access token
+      tags:
+        - Claim
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimVerifyRequest'
+      responses:
+        '200':
+          description: OTP verified; pet access token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ClaimVerifyResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+  /api/v1/claim/recover:
+    post:
+      operationId: recoverClaim
+      summary: Send recovery OTP for lost bookmarked URL
+      description: |
+        Always returns HTTP 200 regardless of whether the email/petId combination
+        matches (anti-enumeration design). The claimId is only functional if the
+        combination matches a claimed pet.
+      tags:
+        - Claim
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimRecoverRequest'
+      responses:
+        '200':
+          description: Recovery OTP initiated (always, regardless of match)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ClaimInitiateResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+
+  # ---------------------------------------------------------------
+  # Pet Endpoints
+  # ---------------------------------------------------------------
+  /api/v1/pets/random:
+    get:
+      operationId: getRandomPet
+      summary: Generate a new unclaimed random pet for guest display
+      tags:
+        - Pets
+      security: []
+      responses:
+        '200':
+          description: Randomly generated pet reserved for 24 hours
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RandomPet'
+                  error:
+                    nullable: true
+
+  /api/v1/pets/{petId}:
+    get:
+      operationId: getPet
+      summary: Fetch public pet data
+      tags:
+        - Pets
+      security:
+        - {}
+        - BearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pet data; isOwner populated when authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Pet'
+                  error:
+                    nullable: true
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /api/v1/pets/{petId}/stats:
+    get:
+      operationId: getPetStats
+      summary: Get full stats panel including training history
+      tags:
+        - Pets
+      security:
+        - {}
+        - BearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full stats panel with training summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/PetStatsDetail'
+                  error:
+                    nullable: true
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /api/v1/pets/{petId}/train:
+    post:
+      operationId: trainPet
+      summary: Perform one training action on the authenticated player's pet
+      tags:
+        - Pets
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainRequest'
+      responses:
+        '200':
+          description: Training applied; updated stats and remaining actions returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/TrainResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /api/v1/pets/{petId}/feed:
+    post:
+      operationId: feedPet
+      summary: Apply a food buff to the authenticated player's pet
+      tags:
+        - Pets
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedRequest'
+      responses:
+        '200':
+          description: Food buff applied; updated stats returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/FeedResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Arena
+  # ---------------------------------------------------------------
+  /api/v1/arena/enter:
+    post:
+      operationId: enterArena
+      summary: Enter matchmaking queue for an arena battle (long-poll, up to 30s)
+      tags:
+        - Arena
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArenaEnterRequest'
+      responses:
+        '200':
+          description: Battle resolved; result returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ArenaEnterResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '408':
+          description: Matchmaking timeout — no opponent found within 30 seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+  /api/v1/arena/match/{matchId}:
+    get:
+      operationId: getArenaMatch
+      summary: Fetch full record of a completed arena match
+      tags:
+        - Arena
+      security: []
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full battle record
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/BattleRecord'
+                  error:
+                    nullable: true
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /api/v1/arena/history/{petId}:
+    get:
+      operationId: getArenaHistory
+      summary: Return last 20 arena battles for a pet (public)
+      tags:
+        - Arena
+      security: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Arena battle history and win/loss summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ArenaHistoryResponse'
+                  error:
+                    nullable: true
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Leaderboard
+  # ---------------------------------------------------------------
+  /api/v1/leaderboard:
+    get:
+      operationId: getLeaderboard
+      summary: Get global leaderboard (top 100 public entries)
+      tags:
+        - Leaderboard
+      security: []
+      parameters:
+        - name: rarity
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RarityEnum'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+      responses:
+        '200':
+          description: Leaderboard entries with pagination meta
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/LeaderboardResponse'
+                  error:
+                    nullable: true
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+
+  /api/v1/leaderboard/rank/{petId}:
+    get:
+      operationId: getPetLeaderboardRank
+      summary: Get the leaderboard rank of a specific pet
+      tags:
+        - Leaderboard
+      security: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pet rank and score (rank is null if not on leaderboard)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/PetRankResponse'
+                  error:
+                    nullable: true
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # GDPR Self-Service
+  # ---------------------------------------------------------------
+  /api/v1/gdpr/request:
+    post:
+      operationId: submitGdprRequest
+      summary: Submit a GDPR request
+      tags:
+        - GDPR
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GdprRequestBody'
+      responses:
+        '202':
+          description: GDPR request accepted and queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GdprJobResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /api/v1/gdpr/request/status:
+    get:
+      operationId: getGdprRequestStatus
+      summary: Check status of a GDPR request
+      tags:
+        - GDPR
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: jobId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: GDPR request status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GdprStatusResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Marketplace (Phase 3 — FF_MARKETPLACE)
+  # ---------------------------------------------------------------
+  /api/v1/marketplace/listings:
+    get:
+      operationId: listMarketplaceListings
+      summary: Browse active marketplace listings (requires FF_MARKETPLACE)
+      tags:
+        - Marketplace
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum:
+              - price
+              - rarity
+              - level
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        '200':
+          description: Paginated list of active marketplace listings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MarketplaceListing'
+                  error:
+                    nullable: true
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '403':
+          description: Feature flag FF_MARKETPLACE is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      operationId: createMarketplaceListing
+      summary: Create a new marketplace listing (requires FF_MARKETPLACE)
+      tags:
+        - Marketplace
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateListingRequest'
+      responses:
+        '201':
+          description: Listing created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/CreateListingResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /api/v1/marketplace/listings/{listingId}:
+    delete:
+      operationId: cancelMarketplaceListing
+      summary: Cancel an active marketplace listing (requires FF_MARKETPLACE)
+      tags:
+        - Marketplace
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Listing cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /api/v1/marketplace/listings/{listingId}/buy:
+    post:
+      operationId: buyMarketplaceListing
+      summary: Purchase a marketplace listing (requires FF_MARKETPLACE)
+      tags:
+        - Marketplace
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Purchase completed; 5% platform fee applied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /api/v1/marketplace/history/{petId}:
+    get:
+      operationId: getMarketplaceHistory
+      summary: Get trade history for a pet (owner-only; requires FF_MARKETPLACE)
+      tags:
+        - Marketplace
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Trade history for the pet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TradeHistoryEntry'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Admin Authentication
+  # ---------------------------------------------------------------
+  /admin/api/auth/login:
+    post:
+      operationId: adminLogin
+      summary: Admin login with username, password, and TOTP
+      description: |
+        On success, sets a session cookie (HttpOnly; SameSite=Strict; Secure; Path=/admin).
+        First-login without TOTP configured returns 403 TOTP_SETUP_REQUIRED with a
+        short-lived setupToken in error.details.
+      tags:
+        - Admin Auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+      responses:
+        '200':
+          description: Authenticated; session cookie set
+          headers:
+            Set-Cookie:
+              description: session=<id>; HttpOnly; SameSite=Strict; Secure; Path=/admin
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AdminLoginResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+  /admin/api/auth/totp/setup:
+    post:
+      operationId: adminTotpSetup
+      summary: Complete TOTP enrollment for first-time admin login
+      tags:
+        - Admin Auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TotpSetupRequest'
+      responses:
+        '200':
+          description: TOTP enrolled; otpAuthUrl and backup codes returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/TotpSetupResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /admin/api/auth/logout:
+    post:
+      operationId: adminLogout
+      summary: Invalidate the current admin session
+      tags:
+        - Admin Auth
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Session invalidated; logout audit entry written
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /admin/api/auth/totp/verify:
+    post:
+      operationId: adminTotpVerify
+      summary: Verify TOTP for step-up authentication before sensitive operations
+      tags:
+        - Admin Auth
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TotpVerifyRequest'
+      responses:
+        '200':
+          description: TOTP code verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      verified:
+                        type: boolean
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  # ---------------------------------------------------------------
+  # Admin Role Management
+  # ---------------------------------------------------------------
+  /admin/api/roles:
+    get:
+      operationId: listAdminRoles
+      summary: List all admin users and roles (Super Admin only)
+      tags:
+        - Admin Roles
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of admin users with pagination meta
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      admins:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AdminUser'
+                  error:
+                    nullable: true
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+    post:
+      operationId: createAdminRole
+      summary: Create a new admin account (Super Admin only)
+      tags:
+        - Admin Roles
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminRequest'
+      responses:
+        '201':
+          description: Admin account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/CreateAdminResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+
+  /admin/api/roles/{adminId}:
+    delete:
+      operationId: deactivateAdminRole
+      summary: Soft-deactivate an admin account (Super Admin only)
+      tags:
+        - Admin Roles
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: adminId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Admin account deactivated; auditLogId returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /admin/api/roles/{adminId}/totp/reset:
+    post:
+      operationId: resetAdminTotp
+      summary: Reset TOTP for an admin account (Super Admin only)
+      tags:
+        - Admin Roles
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: adminId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: TOTP cleared; admin must re-enroll on next login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Admin Pet Management
+  # ---------------------------------------------------------------
+  /admin/api/pets:
+    get:
+      operationId: adminListPets
+      summary: List pets with optional search and filtering (Moderator+ or Read Only)
+      tags:
+        - Admin Pets
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          description: Search by exact pet UUID or SHA-256 email hash
+          schema:
+            type: string
+        - name: rarity
+          in: query
+          schema:
+            $ref: '#/components/schemas/RarityEnum'
+        - name: isBanned
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Paginated list of pets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      pets:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AdminPetSummary'
+                  error:
+                    nullable: true
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /admin/api/pets/{petId}:
+    get:
+      operationId: adminGetPet
+      summary: Get full pet details including owner info and ban history (Moderator+ or Read Only)
+      tags:
+        - Admin Pets
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full pet record with ban history and last 20 battle records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AdminPetSummary'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+    put:
+      operationId: adminUpdatePet
+      summary: Update administrative fields on a pet (Super Admin only)
+      tags:
+        - Admin Pets
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePetRequest'
+      responses:
+        '200':
+          description: Pet updated; auditLogId returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /admin/api/pets/{petId}/ban:
+    post:
+      operationId: adminBanPet
+      summary: Ban a pet (Moderator+)
+      tags:
+        - Admin Pets
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateRequest'
+      responses:
+        '200':
+          description: Pet banned; removed from leaderboard within 5 minutes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /admin/api/pets/{petId}/unban:
+    post:
+      operationId: adminUnbanPet
+      summary: Lift ban from a pet (Moderator+)
+      tags:
+        - Admin Pets
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateRequest'
+      responses:
+        '200':
+          description: Pet unbanned; restored to leaderboard if eligible
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Admin Arena & Battle Management
+  # ---------------------------------------------------------------
+  /admin/api/battles:
+    get:
+      operationId: adminListBattles
+      summary: List arena battles with optional filters (Moderator+ or Read Only)
+      tags:
+        - Admin Arena
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: from
+          in: query
+          description: Start of date range (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: End of date range (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: petId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: flagged
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Paginated list of battle records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      battles:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AdminBattleSummary'
+                  error:
+                    nullable: true
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /admin/api/suspicious:
+    get:
+      operationId: adminListSuspiciousPets
+      summary: List pets flagged by bot detection (Moderator+)
+      description: Returns pets with more than 50 battles in a 60-minute rolling window
+      tags:
+        - Admin Arena
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: List of suspicious pets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      suspiciousPets:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SuspiciousPet'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+
+  /admin/api/battles/{matchId}/flag:
+    post:
+      operationId: adminFlagBattle
+      summary: Flag a battle record as suspicious (Moderator+)
+      tags:
+        - Admin Arena
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateRequest'
+      responses:
+        '200':
+          description: Battle flagged; auditLogId returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+    delete:
+      operationId: adminUnflagBattle
+      summary: Remove a flag from a battle record (Moderator+)
+      tags:
+        - Admin Arena
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateRequest'
+      responses:
+        '200':
+          description: Battle flag removed; auditLogId returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Admin Leaderboard
+  # ---------------------------------------------------------------
+  /admin/api/leaderboard:
+    get:
+      operationId: adminGetLeaderboard
+      summary: Get top 500 leaderboard entries with suspicious annotations (Moderator+ or Read Only)
+      tags:
+        - Admin Leaderboard
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Up to 500 leaderboard entries (hard-capped, not paginated)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      entries:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AdminLeaderboardEntry'
+                      lastUpdated:
+                        type: string
+                        format: date-time
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /admin/api/leaderboard/{petId}:
+    delete:
+      operationId: adminRemovePetFromLeaderboard
+      summary: Remove a pet from the leaderboard (Moderator+)
+      tags:
+        - Admin Leaderboard
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pet removed from leaderboard Redis sorted set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuditLogIdResponse'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Admin Configuration
+  # ---------------------------------------------------------------
+  /admin/api/config/runtime:
+    get:
+      operationId: adminGetRuntimeConfig
+      summary: Get current runtime configuration (Super Admin only)
+      tags:
+        - Admin Config
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Current runtime configuration values
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuntimeConfig'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+    put:
+      operationId: adminUpdateRuntimeConfig
+      summary: Update runtime configuration (Super Admin only)
+      tags:
+        - Admin Config
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuntimeConfig'
+      responses:
+        '200':
+          description: Configuration updated; takes effect within 5 minutes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+
+  /admin/api/config/economy:
+    get:
+      operationId: adminGetEconomyConfig
+      summary: Get current economy configuration (Super Admin only)
+      tags:
+        - Admin Config
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Current economy configuration values
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/EconomyConfig'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+    put:
+      operationId: adminUpdateEconomyConfig
+      summary: Update economy configuration (Super Admin only)
+      tags:
+        - Admin Config
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EconomyConfig'
+      responses:
+        '200':
+          description: Economy configuration updated; takes effect within 5 minutes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+
+  /admin/api/config/flags:
+    get:
+      operationId: adminListFeatureFlags
+      summary: Get current feature flag states (Super Admin only)
+      tags:
+        - Admin Config
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: List of all feature flags with their enabled state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      flags:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FeatureFlag'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+
+  /admin/api/config/flags/{flag}:
+    put:
+      operationId: adminSetFeatureFlag
+      summary: Enable or disable a feature flag (Super Admin only)
+      tags:
+        - Admin Config
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: flag
+          in: path
+          required: true
+          schema:
+            type: string
+          example: FF_MARKETPLACE
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetFeatureFlagRequest'
+      responses:
+        '200':
+          description: Feature flag updated; auditLogId returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/SetFeatureFlagResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Admin GDPR Queue
+  # ---------------------------------------------------------------
+  /admin/api/gdpr:
+    get:
+      operationId: adminListGdprRequests
+      summary: List all GDPR requests with optional filtering (Super Admin only)
+      tags:
+        - Admin GDPR
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/GdprStatusEnum'
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/GdprRequestTypeEnum'
+      responses:
+        '200':
+          description: Paginated list of GDPR requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      requests:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AdminGdprRequest'
+                  error:
+                    nullable: true
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+
+  /admin/api/gdpr/delete:
+    post:
+      operationId: adminTriggerGdprDelete
+      summary: Initiate admin-triggered GDPR erasure by email hash (Super Admin only)
+      tags:
+        - Admin GDPR
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminGdprDeleteRequest'
+      responses:
+        '202':
+          description: Erasure request queued; requestId and estimated completion returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AdminGdprDeleteResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+
+  /admin/api/gdpr/{requestId}:
+    patch:
+      operationId: adminPatchGdprRequest
+      summary: Update status of a non-erasure GDPR request (Super Admin only)
+      description: Only handles data_access, restrict_processing, object_leaderboard, and rectification. Erasure requests must use POST /admin/api/gdpr/delete.
+      tags:
+        - Admin GDPR
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchGdprRequest'
+      responses:
+        '200':
+          description: GDPR request status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/PatchGdprResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  # ---------------------------------------------------------------
+  # Admin Audit Log
+  # ---------------------------------------------------------------
+  /admin/api/audit:
+    get:
+      operationId: adminGetAuditLog
+      summary: Get audit log entries (Super Admin only)
+      tags:
+        - Admin Audit
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: from
+          in: query
+          description: Start of date range (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: End of date range (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: actorId
+          in: query
+          description: Filter by admin account ID
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          description: Filter by action type (e.g. pet.ban)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      entries:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AuditLogEntry'
+                  error:
+                    nullable: true
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+
+  # ---------------------------------------------------------------
+  # Admin Dashboard, Analytics & Email Monitor
+  # ---------------------------------------------------------------
+  /admin/api/dashboard:
+    get:
+      operationId: adminGetDashboard
+      summary: Get real-time platform health summary (Moderator+ or Read Only)
+      tags:
+        - Admin Dashboard
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Real-time dashboard metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/DashboardData'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /admin/api/analytics:
+    get:
+      operationId: adminGetAnalytics
+      summary: Get product analytics time-series data (Moderator+ or Read Only)
+      tags:
+        - Admin Dashboard
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Start date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          description: End date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: metric
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/AnalyticsMetricEnum'
+      responses:
+        '200':
+          description: Analytics time-series data with summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AnalyticsResponse'
+                  error:
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+
+  /admin/api/email/monitor:
+    get:
+      operationId: adminGetEmailMonitor
+      summary: Get email delivery health metrics (Moderator+ or Read Only)
+      tags:
+        - Admin Dashboard
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Email delivery health metrics from SendGrid webhook logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/EmailMonitorResponse'
+                  error:
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
