@@ -1,8 +1,48 @@
 # CONSTANTS — Global Quantitative Truth Source
 
-DOC-ID: CONSTANTS-PIXEL-PET-ARENA-20260503
-Status: DRAFT
-Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-20260503
+<!-- 跨文件數值一致性的唯一真相來源（由 EDD Pass-0 生成） -->
+<!-- 所有下游文件（EDD/BDD/test-plan/runbook）必須讀取此文件並引用，不得自行填寫未驗證數字 -->
+
+---
+
+## Document Control
+
+| 欄位 | 內容 |
+|------|------|
+| **DOC-ID** | CONSTANTS-PIXEL-PET-ARENA-20260503 |
+| **產品名稱** | Pixel Pet Arena |
+| **文件版本** | v1.0 |
+| **狀態** | DRAFT |
+| **日期** | 2026-05-03 |
+| **上游 PRD** | [PRD.md](PRD.md) |
+| **上游 BRD** | [BRD.md](BRD.md) |
+| **同步輸出** | [constants.json](constants.json) |
+
+---
+
+## Change Log
+
+| 版本 | 日期 | 作者 | 變更摘要 |
+|------|------|------|---------|
+| v1.0 | 2026-05-03 | gendoc | 初稿（從 PRD-PIXEL-PET-ARENA-20260503 及 BRD-PIXEL-PET-ARENA-20260503 提取所有量化常數） |
+
+---
+
+## 使用指引
+
+> ⚠️ **唯一真相來源**：本文件中所有數值均來源於 PRD 及 BRD，
+> 下游文件（EDD/BDD/test-plan/runbook/ARCH）必須引用此文件中的數值，
+> **不得在下游文件中自行定義任何量化數值**。
+> 若發現 PRD 與本文件有衝突，以 PRD 為準並更新本文件。
+>
+> - **§1**：產品核心數值（pet 生成、訓練、戰鬥、排行榜、認證等核心常數）
+> - **§2**：倍率與乘算器（稀有度倍率、交易價格公式、食物 buff 示例值）
+> - **§3**：閾值與觸發條件（bot 偵測、快取刷新、A11y、資料庫 failover 等觸發點）
+> - **§4**：SLO/SLI 目標（可用性、延遲、錯誤率、Core Web Vitals）
+> - **§5**：RTP / 機率設計（稀有度機率分布，四檔必須加總 100%）
+> - **§6**：Rate Limit 設定（戰鬥、認證、管理員各端點）
+> - **§7**：業務規則數值（GDPR 時限、交易費率、成長目標、A/B 測試參數）
+> - **§8**：系統容量規劃（RPS、DAU、連線池、基礎設施成本）
 
 ---
 
@@ -250,3 +290,49 @@ Source: Extracted from PRD-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-2026050
 | VENDOR_MIGRATION_PLAN_DAYS | 14 | days | PRD §8.3; BRD §13.1 | SendGrid and PostgreSQL vendor migration plan window |
 
 > **Data retention constants** (ANALYTICS_EVENT_HOT_RETENTION, ANALYTICS_EVENT_COLD_ARCHIVE, ADMIN_AUDIT_LOG_RETENTION) are defined in §7 Business Rules.
+
+---
+
+## Appendix A：constants.json 同步格式
+
+本文件生成後，必須同步輸出 `docs/constants.json`，格式如下（節選關鍵欄位）：
+
+```json
+{
+  "version": "1.0",
+  "generated_from": "docs/PRD.md",
+  "last_updated": "2026-05-03",
+  "core": {
+    "PET_GENERATION_COMBINATIONS_MIN": 1000000000,
+    "PET_STAT_MAX": 100,
+    "PET_LEVEL_MAX": 100,
+    "TRAINING_ACTIONS_PER_DAY": 3,
+    "ARENA_RATE_LIMIT_BATTLES_PER_HOUR": 10,
+    "CLAIM_CODE_DIGITS": 6,
+    "CLAIM_CODE_EXPIRY": 15
+  },
+  "slo": {
+    "availability_pct": 99.9,
+    "p99_latency_read_ms": 200,
+    "p99_latency_write_ms": 500,
+    "error_rate_pct": 1.0,
+    "leaderboard_update_lag_s": 30
+  },
+  "rtp": {
+    "COMMON_PCT": 60,
+    "RARE_PCT": 25,
+    "EPIC_PCT": 12,
+    "LEGENDARY_PCT": 3
+  },
+  "rate_limits": {
+    "arena_battles_per_pet": {"limit": 10, "window": "1h"},
+    "email_claim_attempts": {"limit": 5, "window": "1h"},
+    "admin_requests_per_account": {"limit": 100, "window": "1m"}
+  },
+  "capacity": {
+    "NORMAL_OPERATION_RPS": 100,
+    "PEAK_OPERATION_RPS": 500,
+    "DAU_12_MONTH_TARGET": 2000
+  }
+}
+```
