@@ -1,6 +1,6 @@
 <!--
   DOC-ID:  README-PIXEL-PET-ARENA-20260505
-  Version: v1.0
+  Version: v1.1
   Status:  DRAFT
   Author:  AI Generated (gendoc readme)
   Date:    2026-05-05
@@ -13,13 +13,14 @@
     - API: docs/API.md   (API-PIXEL-PET-ARENA-20260503)
   Change log:
     v1.0  2026-05-05  AI Generated (gendoc readme)  Initial generated draft
+    v1.1  2026-05-05  AI Generated (gendoc readme)  Fix GitHub repo URLs to ibalasite/pet
 -->
 
 # pixel-pet-arena
 
 > Zero-account-barrier HTML5 browser game where players claim, train, and battle procedurally-generated pixel pets via email — no registration required.
 
-[![CI](https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml/badge.svg)](https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml)
+[![CI](https://github.com/ibalasite/pet/actions/workflows/ci.yml/badge.svg)](https://github.com/ibalasite/pet/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20%20LTS-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
@@ -161,8 +162,8 @@ The fastest path: Docker Compose starts the app, PostgreSQL, Redis, and MailHog 
 **Prerequisites:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) 24+ (includes Compose v2)
 
 ```bash
-git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
-cd pixel-pet-arena
+git clone https://github.com/ibalasite/pet.git
+cd pet
 
 # Configure environment
 cp .env.example .env
@@ -199,8 +200,8 @@ MailHog web UI (captured claim emails): **http://localhost:8025**
 - Redis 7+ (local) or a remote Upstash connection string
 
 ```bash
-git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
-cd pixel-pet-arena
+git clone https://github.com/ibalasite/pet.git
+cd pet
 
 # Install all workspace dependencies
 npm install
@@ -235,8 +236,8 @@ Expected output:
 **Prerequisites:** Node.js 20 LTS, PostgreSQL 15+, Redis 7+ (all installable via [winget](https://learn.microsoft.com/windows/package-manager/)).
 
 ```powershell
-git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
-Set-Location pixel-pet-arena
+git clone https://github.com/ibalasite/pet.git
+Set-Location pet
 
 # Install all workspace dependencies
 npm install
@@ -442,7 +443,7 @@ npm run test:e2e
 
 ## Changelog
 
-See [GitHub Releases](https://github.com/pixel-pet-arena/pixel-pet-arena/releases) for versioned release notes.
+See [GitHub Releases](https://github.com/ibalasite/pet/releases) for versioned release notes.
 
 ---
 
