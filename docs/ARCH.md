@@ -1,12 +1,50 @@
 # ARCH — System Architecture
 
-**DOC-ID**: ARCH-PIXEL-PET-ARENA-20260503
-**Project**: pixel-pet-arena
-**Version**: v1.0
-**Status**: DRAFT
-**Author**: AI Generated (gendoc arch)
-**Date**: 2026-05-03
-**Upstream**: EDD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503
+---
+
+## Document Control
+
+| 欄位 | 內容 |
+|------|------|
+| **DOC-ID** | ARCH-PIXEL-PET-ARENA-20260503 |
+| **產品名稱** | Pixel Pet Arena |
+| **文件版本** | v1.0 |
+| **狀態** | DRAFT |
+| **作者** | AI Generated (gendoc arch) |
+| **建立日期** | 2026-05-03 |
+| **上游文件** | EDD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503 |
+
+---
+
+## Change Log
+
+| 版本 | 日期 | 作者 | 變更摘要 |
+|------|------|------|---------|
+| v1.0 | 2026-05-03 | AI Generated (gendoc arch) | 初稿：完整系統架構設計文件 |
+
+---
+
+## 目錄
+
+1. [§1. Architecture Overview](#§1-architecture-overview)
+2. [§2. Component Architecture](#§2-component-architecture)
+3. [§3. Key Architectural Decisions](#§3-key-architectural-decisions)
+4. [§4. Data Flow Diagrams](#§4-data-flow-diagrams)
+5. [§5. Security Architecture](#§5-security-architecture)
+6. [§6. Scalability and Reliability](#§6-scalability-and-reliability)
+7. [§7. Deployment Architecture](#§7-deployment-architecture)
+8. [§8. Cross-Cutting Concerns](#§8-cross-cutting-concerns)
+9. [§9. 高可用設計](#§9-高可用設計)
+10. [§10. 災難恢復（DR）](#§10-災難恢復dr)
+11. [§11. 技術棧全覽](#§11-技術棧全覽)
+12. [§12. Observability 架構](#§12-observability-架構)
+13. [§13. 外部依賴地圖](#§13-外部依賴地圖)
+14. [§14. Architecture Decision Records](#§14-architecture-decision-records)
+15. [§15. 架構審查檢查清單](#§15-架構審查檢查清單)
+16. [§16. Cost Optimization & FinOps](#§16-cost-optimization--finops)
+17. [§17. Marketplace Feature 成本影響評估](#§17-marketplace-feature-成本影響評估)
+18. [§18. API Gateway & Service Mesh Architecture](#§18-api-gateway--service-mesh-architecture)
+19. [§19. Admin Portal 架構](#§19-admin-portal-架構)
 
 ---
 
@@ -1230,3 +1268,221 @@ Secrets (database URLs, Redis URLs, SendGrid API keys, SMTP credentials, JWT sig
 ---
 
 *This ARCH document is the authoritative system architecture specification for pixel-pet-arena. All implementation must reference and comply with this document. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 (constants.json). Conflicts between this ARCH and upstream EDD/PRD/PDD shall be resolved by filing an Engineering Change Request (ECR) against the relevant upstream document.*
+
+---
+
+## §9. 高可用設計
+
+Pixel Pet Arena targets 99.9% monthly availability (CONSTANTS: Availability). The following design decisions support this target:
+
+| Component | HA Strategy | RTO | RPO |
+|-----------|-------------|-----|-----|
+| Next.js frontend | Vercel edge network (global CDN) | < 30s | N/A (stateless) |
+| NestJS backend | Railway auto-restart + health check `/health` (500ms SLA) | < 60s | N/A |
+| PostgreSQL | Supabase managed with automated failover (CONSTANTS: DB_AUTOFAILOVER_TIME = 60s) | 60s | < 1min |
+| Redis | Upstash serverless with durability enabled | < 30s | < 5s |
+| Email | SendGrid primary + Nodemailer SMTP fallback (after 3 failures) | Automatic | N/A |
+
+**Maintenance windows**: Max 2 hours/month (CONSTANTS: DB_MAINTENANCE_WINDOW_MAX), 48h advance notice required.
+
+---
+
+## §10. 災難恢復（DR）
+
+### §10.1 Backup Strategy
+
+| Data | Backup Frequency | Retention | Location |
+|------|-----------------|-----------|----------|
+| PostgreSQL (all tables) | Daily automated snapshot (Supabase) | 7 days | Supabase managed |
+| Redis leaderboard | Upstash built-in durability (AOF) | Real-time | Upstash |
+| Pet sprites / static assets | Versioned via git + Vercel deployment | Indefinite | Vercel CDN |
+
+### §10.2 Recovery Procedures
+
+- **Database restore**: Supabase point-in-time recovery; rebuild Redis from `leaderboard_snapshots` table if needed
+- **Redis rebuild SLA**: Full leaderboard rebuild from PostgreSQL within 60 seconds at normal load
+- **Full disaster recovery test**: Quarterly; simulate DB restore + Redis rebuild; document results in runbook
+
+---
+
+## §11. 技術棧全覽
+
+| Layer | Technology | Version | Rationale |
+|-------|-----------|---------|-----------|
+| Frontend | Next.js + Phaser 3 | Next 14 / Phaser 3.60 | SSR for SEO; Canvas 2D for pet animation ≥ 30 FPS |
+| Backend | Node.js / NestJS | Node 20 LTS | TypeScript-first; modular; Railway deploy |
+| Database | PostgreSQL (Supabase) | PostgreSQL 15 | Managed hosting; Row-level security; real-time subscriptions |
+| Cache / Queue | Redis (Upstash) | Serverless | Leaderboard; arena matchmaking queue; rate limit counters |
+| Email | SendGrid + Nodemailer | SendGrid v3 API | 98% delivery SLA; SMTP fallback |
+| Deployment | Vercel (frontend) + Railway (backend) | — | Serverless + container-based; $50–200/month at DAU ≤ 5k |
+| Monitoring | Sentry + Datadog | — | Error tracking + metrics; alert on P99 > 1000ms |
+| CDN | Vercel Edge | — | Static assets + sprite sheets; global edge caching |
+
+---
+
+## §12. Observability 架構
+
+### §12.1 Metrics (RED Method)
+
+| Metric | Tool | Alert Threshold | CONSTANTS Reference |
+|--------|------|-----------------|---------------------|
+| Request Rate | Datadog | — | — |
+| Error Rate | Datadog / Sentry | > 1% over 5 min | OBSERVABILITY_ERROR_RATE_ALERT_WINDOW |
+| Duration (P99) | Datadog | > 1000ms | OBSERVABILITY_LATENCY_ALERT_THRESHOLD |
+| Leaderboard lag | Custom metric | > 60s | OBSERVABILITY_LEADERBOARD_LAG_ALERT |
+| Redis memory | Upstash + Datadog | > 80% | INFRA_REDIS_ALERT_THRESHOLD |
+| DB connection pool | Supabase + Datadog | > 80% | INFRA_DB_POOL_ALERT_THRESHOLD |
+
+### §12.2 Logs
+
+Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`, `trace_id`, `event`, `duration_ms`. PII (email, IP) never logged raw — hashed only.
+
+### §12.3 Traces
+
+`X-Trace-ID` header propagated across all boundaries. Used for debugging arena battle E2E latency (SLA: < 2s per CONSTANTS: `Arena Battle Result E2E`).
+
+---
+
+## §13. 外部依賴地圖
+
+| Service | Provider | Criticality | Failover | SLA |
+|---------|----------|-------------|---------|-----|
+| Database | Supabase | CRITICAL | Read replica (manual) | 99.9% |
+| Cache | Upstash Redis | HIGH | Rebuild from DB | 99.99% |
+| Email | SendGrid | HIGH | Nodemailer SMTP fallback | 99.9% |
+| Frontend CDN | Vercel | CRITICAL | — (managed) | 99.99% |
+| Backend hosting | Railway | HIGH | Redeploy from image | 99.5% |
+| Error tracking | Sentry | LOW | Alert suppressed | — |
+| Metrics | Datadog | LOW | Alert suppressed | — |
+
+**Vendor migration plan**: 14 days (CONSTANTS: VENDOR_MIGRATION_PLAN_DAYS) for SendGrid → alternative SMTP or PostgreSQL → alternative managed DB.
+
+---
+
+## §14. Architecture Decision Records
+
+| ADR # | Title | Status | Decision |
+|-------|-------|--------|---------|
+| ADR-001 | Use Supabase (managed PostgreSQL) over self-hosted | Accepted | Reduces ops burden for MVP; acceptable vendor lock-in at DAU ≤ 5k |
+| ADR-002 | Phaser 3 over Unity WebGL for browser game | Accepted | Smaller bundle; no plugin; native HTML5 Canvas |
+| ADR-003 | NestJS over plain Express for backend | Accepted | Dependency injection; modular architecture; TypeScript-native |
+| ADR-004 | Upstash Redis over ElastiCache | Accepted | Serverless billing; no idle cost; Vercel edge compatible |
+| ADR-005 | ENV-variable feature flags over LaunchDarkly | Accepted | MVP scope; LaunchDarkly re-evaluated at beta if runtime toggles needed |
+| ADR-006 | Admin portal on `/admin` route (same deployment) | Accepted | MVP simplicity; revisit for subdomain isolation post-GA security audit |
+| ADR-007 | Email-based passwordless auth over OAuth | Accepted | PRD requirement; reduces friction; no third-party OAuth vendor risk |
+
+---
+
+## §15. 架構審查檢查清單
+
+### §15.1 安全性
+
+- [x] 所有 API 端點有 authentication guard（admin routes + user routes）
+- [x] Rate limiting 實作在 NestJS middleware（Redis 計數器）
+- [x] SQL injection 防護：使用 Prisma ORM（parameterized queries）
+- [x] CSRF 保護：stateless JWT + SameSite cookie
+- [x] Secrets 在 ENV vars；不在 code 或 image 中
+- [ ] Security audit（pre-launch）
+
+### §15.2 可靠性
+
+- [x] Health check endpoint `/health`（500ms SLA）
+- [x] Email fallback（SendGrid → SMTP after 3 failures）
+- [x] Database connection pool 設定（min 20 connections）
+- [ ] DR test（quarterly）
+- [ ] Load test at PEAK_OPERATION_RPS = 500
+
+### §15.3 可觀察性
+
+- [x] Structured JSON logging
+- [x] Trace ID propagation
+- [x] Error rate alerting（Sentry + Datadog）
+- [ ] Custom dashboard for MAAPO / DAP metrics（post-launch）
+
+---
+
+## §16. Cost Optimization & FinOps
+
+### §16.1 MVP Cost Structure (DAU ≤ 5k)
+
+| Service | Monthly Cost | Tier | Scale Trigger |
+|---------|-------------|------|---------------|
+| Vercel | $0–20 | Hobby / Pro | Edge function invocations > 1M/month |
+| Supabase | $0–25 | Free / Pro | DB size > 500MB or connections > 60 |
+| Railway | $5–20 | Starter | CPU > 70% sustained (CONSTANTS: HORIZONTAL_SCALE_CPU_THRESHOLD) |
+| Upstash Redis | $0–10 | Pay-per-request | Commands > 10k/day |
+| SendGrid | $0–20 | Free / Essentials | Emails > 10k/month (CONSTANTS: EMAIL_SENDGRID_MONTHLY_LIMIT) |
+| Sentry | $0 | Developer | — |
+| Datadog | $15–30 | Free | Metrics > 500/month |
+| **Total** | **$20–125** | — | Per CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MIN/MAX ($50–200) |
+
+### §16.2 Cost Guardrails
+
+- Monthly cost alert at $150 (75% of CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX)
+- Auto-scaling limited to Railway horizontal pod expansion (max 3 replicas for MVP)
+
+---
+
+## §17. Marketplace Feature 成本影響評估
+
+> This section evaluates the cost impact of enabling `FF_MARKETPLACE` (pet trading feature).
+> Activation trigger: DAU ≥ 1000 sustained 2 weeks (CONSTANTS: DAU_MARKETPLACE_TRIGGER).
+
+| Impact Area | Current (no marketplace) | With Marketplace Enabled | Delta |
+|-------------|--------------------------|--------------------------|-------|
+| DB writes | ~500/day | +300/day (trade records) | +60% |
+| Redis operations | ~2k/day | +500/day (trade price cache) | +25% |
+| API calls | ~5k/day | +2k/day (listing, bid, accept) | +40% |
+| Monthly infra cost | $50–125 | $80–175 | +$30–50 |
+| SendGrid emails | ~200/month | +50/month (trade notifications) | +25% |
+
+**Decision**: Enable FF_MARKETPLACE when DAU ≥ 1000 sustained. Monitor Supabase connection pool utilization; upgrade to Pro tier if > 60%.
+
+---
+
+## §18. API Gateway & Service Mesh Architecture
+
+Pixel Pet Arena uses a **direct-call architecture** for MVP (no API gateway or service mesh). All routing is handled by NestJS Router + Vercel Edge.
+
+### §18.1 Request Flow
+
+```
+User Browser
+  → Vercel Edge (CDN / Next.js SSR)
+    → NestJS API (/api/v1/*)        [Railway]
+      → Supabase PostgreSQL         [Supabase]
+      → Upstash Redis               [Upstash]
+      → SendGrid                    [External]
+
+Admin Browser
+  → Vercel Edge (/admin/*)
+    → NestJS API (/api/admin/*)     [Railway, same deployment]
+      → Supabase PostgreSQL
+```
+
+### §18.2 Future API Gateway (Post-GA)
+
+If traffic exceeds PEAK_OPERATION_RPS = 500 or multi-region deployment is required, evaluate:
+- **Cloudflare Workers** for edge-side rate limiting and geo-routing
+- **Kong Gateway** for service mesh if microservices are introduced
+
+---
+
+## §19. Admin Portal 架構
+
+The admin portal is deployed as part of the same Next.js application (route: `/admin/*`). Separation from player routes is enforced at the NestJS authentication layer.
+
+### §19.1 Admin Authentication
+
+- Dedicated admin JWT (separate secret from player JWT)
+- Session inactivity expiry: 4 hours (CONSTANTS: ADMIN_SESSION_INACTIVITY_EXPIRY)
+- Absolute session expiry: 8 hours (CONSTANTS: ADMIN_SESSION_ABSOLUTE_EXPIRY)
+- Rate limit: 100 requests/minute per admin (CONSTANTS: ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE)
+
+### §19.2 Admin API Routes
+
+All admin endpoints are prefixed `/api/admin/` and guarded by `AdminAuthGuard`. Response time SLA: 2 seconds for search (up to 1M pet records). See `docs/API.md §Admin` for full endpoint list.
+
+### §19.3 Admin Data Access
+
+Admin queries hit read replicas where available to reduce load on primary. Audit logs written for all admin moderation actions (retention: 2 years per CONSTANTS: ADMIN_AUDIT_LOG_RETENTION).
