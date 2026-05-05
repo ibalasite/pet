@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">⚙</span>
+      <div class="sidebar-logo-text">ADMIN<br>PORTAL</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="index.html"       class="nav-link active"><span class="nav-icon">▦</span> Dashboard</a>
+      <a href="pets.html"        class="nav-link"><span class="nav-icon">🐾</span> Pets</a>
+      <a href="leaderboard.html" class="nav-link"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <div class="nav-section-label">System</div>
+      <a href="config.html"      class="nav-link"><span class="nav-icon">⚙</span> Config</a>
+      <a href="analytics.html"   class="nav-link"><span class="nav-icon">📊</span> Analytics</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">SA</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">superadmin</div>
+          <div class="sidebar-user-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ────────────────────────────────────────────── -->
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <span class="topbar-title">PIXEL PET ARENA ADMIN</span>
+        <span class="topbar-sep">/</span>
+        <span class="topbar-breadcrumb">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <span class="text-muted text-sm">Mon, Jun 04 2026 · 14:22 UTC</span>
+        <button class="btn-logout">⏻ LOGOUT</button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">System overview and quick actions</p>
+      </div>
+
+      <!-- Metric Cards -->
+      <div class="metric-grid">
+        <div class="admin-metric-card accent-primary">
+          <div class="metric-label">Total Pets</div>
+          <div class="metric-value">847</div>
+          <div class="metric-sub">↑ 12 since yesterday</div>
+        </div>
+        <div class="admin-metric-card accent-success">
+          <div class="metric-label">Active Today (DAU)</div>
+          <div class="metric-value">234</div>
+          <div class="metric-sub">↑ 6 vs last Monday</div>
+        </div>
+        <div class="admin-metric-card accent-accent">
+          <div class="metric-label">Battles Today</div>
+          <div class="metric-value">1,204</div>
+          <div class="metric-sub">5.1 battles / active pet</div>
+        </div>
+        <div class="admin-metric-card accent-warning">
+          <div class="metric-label">Flagged Pets</div>
+          <div class="metric-value" style="color:var(--admin-red)">3</div>
+          <div class="metric-sub text-danger">Requires review</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions + Charts row -->
+      <div class="two-col" style="margin-bottom:20px;">
+
+        <!-- Quick Actions -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <span class="admin-card-title">Quick Actions</span>
+          </div>
+          <div class="admin-card-body">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <a href="pets.html?status=flagged">
+                <button class="btn btn-danger" style="width:100%;justify-content:flex-start;">
+                  ⚑ View Flagged Pets
+                </button>
+              </a>
+              <button class="btn btn-warning" onclick="showToast('Cache reset queued...')" style="width:100%;justify-content:flex-start;">
+                ↺ Reset Leaderboard Cache
+              </button>
+              <button class="btn btn-ghost" onclick="showToast('Test email sent to superadmin@example.com')" style="width:100%;justify-content:flex-start;">
+                ✉ Send Test Email
+              </button>
+              <hr class="divider">
+              <a href="config.html">
+                <button class="btn btn-primary" style="width:100%;justify-content:flex-start;">
+                  ⚙ Runtime Config
+                </button>
+              </a>
+              <a href="analytics.html">
+                <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;">
+                  📊 View Analytics
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- DAU Chart -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <span class="admin-card-title">DAU — Last 7 Days</span>
+            <span class="text-muted text-sm">May 29 – Jun 4</span>
+          </div>
+          <div class="admin-card-body" style="padding:12px 16px;">
+            <div class="admin-chart">
+              <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+                <!-- Grid lines -->
+                <line x1="48" y1="10"  x2="390" y2="10"  class="chart-grid"/>
+                <line x1="48" y1="42"  x2="390" y2="42"  class="chart-grid"/>
+                <line x1="48" y1="74"  x2="390" y2="74"  class="chart-grid"/>
+                <line x1="48" y1="106" x2="390" y2="106" class="chart-grid"/>
+                <line x1="48" y1="138" x2="390" y2="138" class="chart-axis"/>
+                <!-- Y axis -->
+                <line x1="48" y1="10" x2="48" y2="138" class="chart-axis"/>
+                <!-- Y labels -->
+                <text x="40" y="14"  class="chart-label" text-anchor="end">250</text>
+                <text x="40" y="46"  class="chart-label" text-anchor="end">200</text>
+                <text x="40" y="78"  class="chart-label" text-anchor="end">150</text>
+                <text x="40" y="110" class="chart-label" text-anchor="end">100</text>
+                <text x="40" y="142" class="chart-label" text-anchor="end">50</text>
+
+                <!-- Data: [180,195,201,220,234,228,234] mapped to y
+                     y = 138 - ((val-50)/200 * 128)
+                     50→138, 250→10
+                     scale = 128/200 = 0.64
+                     180 → 138-(130*0.64)=138-83.2=54.8
+                     195 → 138-145*0.64=138-92.8=45.2
+                     201 → 138-151*0.64=138-96.64=41.4
+                     220 → 138-170*0.64=138-108.8=29.2
+                     234 → 138-184*0.64=138-117.8=20.2
+                     228 → 138-178*0.64=138-113.9=24.1
+                     234 → 20.2
+                     X positions: 48 + i*(342/6) = 48,105,162,219,276,333,390
+                -->
+                <!-- Area fill -->
+                <polygon
+                  points="48,54.8 105,45.2 162,41.4 219,29.2 276,20.2 333,24.1 390,20.2 390,138 48,138"
+                  fill="#6c5ce7" class="chart-area"/>
+                <!-- Line -->
+                <polyline
+                  points="48,54.8 105,45.2 162,41.4 219,29.2 276,20.2 333,24.1 390,20.2"
+                  class="chart-line" stroke="#6c5ce7"/>
+                <!-- Dots -->
+                <rect x="44"  y="50.8"  width="8" height="8" fill="#6c5ce7" class="chart-dot"/>
+                <rect x="101" y="41.2"  width="8" height="8" fill="#6c5ce7" class="chart-dot"/>
+                <rect x="158" y="37.4"  width="8" height="8" fill="#6c5ce7" class="chart-dot"/>
+                <rect x="215" y="25.2"  width="8" height="8" fill="#6c5ce7" class="chart-dot"/>
+                <rect x="272" y="16.2"  width="8" height="8" fill="#fdcb6e" class="chart-dot"/>
+                <rect x="329" y="20.1"  width="8" height="8" fill="#6c5ce7" class="chart-dot"/>
+                <rect x="386" y="16.2"  width="8" height="8" fill="#fdcb6e" class="chart-dot"/>
+                <!-- X labels -->
+                <text x="48"  y="153" class="chart-label" text-anchor="middle">5/29</text>
+                <text x="105" y="153" class="chart-label" text-anchor="middle">5/30</text>
+                <text x="162" y="153" class="chart-label" text-anchor="middle">5/31</text>
+                <text x="219" y="153" class="chart-label" text-anchor="middle">6/1</text>
+                <text x="276" y="153" class="chart-label" text-anchor="middle">6/2</text>
+                <text x="333" y="153" class="chart-label" text-anchor="middle">6/3</text>
+                <text x="390" y="153" class="chart-label" text-anchor="middle">6/4</text>
+                <!-- Value labels -->
+                <text x="48"  y="46"  class="chart-value" text-anchor="middle">180</text>
+                <text x="276" y="12"  class="chart-value" text-anchor="middle" fill="#fdcb6e">234</text>
+                <text x="390" y="12"  class="chart-value" text-anchor="middle" fill="#fdcb6e">234</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Battles per Hour Chart + Activity Log row -->
+      <div class="two-col">
+        <!-- Battles per Hour -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <span class="admin-card-title">Battles / Hour — Today</span>
+            <span class="text-muted text-sm">00:00 – 14:00 UTC</span>
+          </div>
+          <div class="admin-card-body" style="padding:12px 16px;">
+            <div class="admin-chart">
+              <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+                <!-- Grid -->
+                <line x1="48" y1="10"  x2="390" y2="10"  class="chart-grid"/>
+                <line x1="48" y1="42"  x2="390" y2="42"  class="chart-grid"/>
+                <line x1="48" y1="74"  x2="390" y2="74"  class="chart-grid"/>
+                <line x1="48" y1="106" x2="390" y2="106" class="chart-grid"/>
+                <line x1="48" y1="138" x2="390" y2="138" class="chart-axis"/>
+                <line x1="48" y1="10"  x2="48" y2="138"  class="chart-axis"/>
+                <!-- Y labels: 0–120 -->
+                <text x="40" y="14"  class="chart-label" text-anchor="end">120</text>
+                <text x="40" y="46"  class="chart-label" text-anchor="end">90</text>
+                <text x="40" y="78"  class="chart-label" text-anchor="end">60</text>
+                <text x="40" y="110" class="chart-label" text-anchor="end">30</text>
+                <text x="40" y="142" class="chart-label" text-anchor="end">0</text>
+                <!-- Bar data (14 bars): hours 0–13
+                     values: 12,18,8,5,14,32,55,78,95,110,104,112,96,86
+                     bar width ~23, gap ~3, start x=52
+                     y = 138 - (val/120 * 128)
+                     scale = 128/120 = 1.0667
+                -->
+                <rect x="52"  y="125" width="20" height="13"  fill="#6c5ce7" opacity="0.8"/>
+                <rect x="78"  y="119" width="20" height="19"  fill="#6c5ce7" opacity="0.8"/>
+                <rect x="104" y="129" width="20" height="9"   fill="#6c5ce7" opacity="0.8"/>
+                <rect x="130" y="132" width="20" height="6"   fill="#6c5ce7" opacity="0.8"/>
+                <rect x="156" y="123" width="20" height="15"  fill="#6c5ce7" opacity="0.8"/>
+                <rect x="182" y="104" width="20" height="34"  fill="#6c5ce7" opacity="0.8"/>
+                <rect x="208" y="79"  width="20" height="59"  fill="#6c5ce7" opacity="0.8"/>
+                <rect x="234" y="55"  width="20" height="83"  fill="#6c5ce7" opacity="0.85"/>
+                <rect x="260" y="37"  width="20" height="101" fill="#6c5ce7" opacity="0.9"/>
+                <rect x="286" y="21"  width="20" height="117" fill="#fdcb6e" opacity="0.9"/>
+                <rect x="312" y="27"  width="20" height="111" fill="#fdcb6e" opacity="0.9"/>
+                <rect x="338" y="19"  width="20" height="119" fill="#fdcb6e" opacity="0.9"/>
+                <rect x="364" y="35"  width="20" height="103" fill="#fdcb6e"/>
+                <!-- X labels -->
+                <text x="62"  y="153" class="chart-label" text-anchor="middle">0</text>
+                <text x="140" y="153" class="chart-label" text-anchor="middle">3</text>
+                <text x="218" y="153" class="chart-label" text-anchor="middle">6</text>
+                <text x="296" y="153" class="chart-label" text-anchor="middle">9</text>
+                <text x="374" y="153" class="chart-label" text-anchor="middle">13h</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity Log -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <span class="admin-card-title">Recent Activity</span>
+            <a href="#" class="text-muted text-sm" style="font-family:var(--font-pixel);font-size:7px;">View All →</a>
+          </div>
+          <div class="admin-card-body" style="padding:0;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Admin</th>
+                  <th>Action</th>
+                  <th>Target</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-muted text-sm">14:18</td>
+                  <td>superadmin</td>
+                  <td><span class="activity-type type-ban">BAN</span></td>
+                  <td class="mono">pet-006</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">13:55</td>
+                  <td>superadmin</td>
+                  <td><span class="activity-type type-config">CONFIG</span></td>
+                  <td class="mono" style="font-size:10px;">ARENA_DAILY_LIMIT</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">13:40</td>
+                  <td>moderator1</td>
+                  <td><span class="activity-type type-flag">FLAG</span></td>
+                  <td class="mono">pet-009</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">12:31</td>
+                  <td>superadmin</td>
+                  <td><span class="activity-type type-cache">CACHE</span></td>
+                  <td class="text-sm">Leaderboard reset</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">11:59</td>
+                  <td>moderator1</td>
+                  <td><span class="activity-type type-unban">UNBAN</span></td>
+                  <td class="mono">pet-004</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">10:44</td>
+                  <td>superadmin</td>
+                  <td><span class="activity-type type-email">EMAIL</span></td>
+                  <td class="text-sm">Test email sent</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">09:22</td>
+                  <td>superadmin</td>
+                  <td><span class="activity-type type-config">CONFIG</span></td>
+                  <td class="mono" style="font-size:10px;">FF_GDPR_SELF_SERVICE</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">08:05</td>
+                  <td>moderator2</td>
+                  <td><span class="activity-type type-flag">FLAG</span></td>
+                  <td class="mono">pet-012</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">07:18</td>
+                  <td>superadmin</td>
+                  <td><span class="activity-type type-ban">BAN</span></td>
+                  <td class="mono">pet-017</td>
+                </tr>
+                <tr>
+                  <td class="text-muted text-sm">Jun 3</td>
+                  <td>superadmin</td>
+                  <td><span class="activity-type type-cache">CACHE</span></td>
+                  <td class="text-sm">Full LB recalc</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--surface);border:2px solid #0d0d1a;box-shadow:4px 4px 0 #0d0d1a;padding:12px 20px;font-family:var(--font-pixel);font-size:8px;color:var(--success);z-index:300;"></div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+</script>
+</body>
+</html>

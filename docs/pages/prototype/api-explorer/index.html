@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Explorer — Pixel Pet Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1a1a2e;
+  --surface: #242444;
+  --surface-hover: #2d2d5a;
+  --primary: #6c5ce7;
+  --accent: #fdcb6e;
+  --text: #e8e8f0;
+  --muted: #6c6c9a;
+  --success: #00b894;
+  --error: #e87c7c;
+  --warning: #e8a87c;
+  --shadow: 4px 4px 0 #0d0d1a;
+  --border: 1px solid #3a3a5c;
+  --sidebar-w: 260px;
+  --navbar-h: 56px;
+
+  --group-claim: #0ea5e9;
+  --group-pets: #6c5ce7;
+  --group-arena: #e87c7c;
+  --group-leaderboard: #00b894;
+  --group-marketplace: #fdcb6e;
+  --group-health: #b2bec3;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* ─── NAVBAR ─── */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--navbar-h);
+  background: var(--surface);
+  border-bottom: 2px solid #3a3a5c;
+  box-shadow: 0 4px 0 #0d0d1a;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  z-index: 100;
+}
+
+.navbar-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  text-shadow: 2px 2px 0 #0d0d1a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.navbar-title span { color: var(--primary); }
+
+.navbar-spacer { flex: 1; }
+
+.auth-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.auth-group label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.token-input {
+  background: var(--bg);
+  border: 2px solid #3a3a5c;
+  color: var(--text);
+  font-family: 'Inter', monospace;
+  font-size: 12px;
+  padding: 6px 10px;
+  width: 260px;
+  outline: none;
+}
+.token-input:focus { border-color: var(--primary); }
+.token-input::placeholder { color: var(--muted); }
+
+.auto-attach {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.auto-attach input[type=checkbox] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.auto-attach span {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--muted);
+}
+
+.nav-link {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 10px;
+  border: 2px solid #3a3a5c;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.nav-link:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+/* ─── LAYOUT ─── */
+.app-body {
+  display: flex;
+  height: 100vh;
+  padding-top: var(--navbar-h);
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 2px solid #3a3a5c;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: var(--bg); }
+.sidebar::-webkit-scrollbar-thumb { background: #3a3a5c; }
+
+.search-wrap {
+  padding: 12px;
+  border-bottom: 2px solid #3a3a5c;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid #3a3a5c;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  padding: 8px 10px 8px 28px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%236c6c9a' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.44 1.406a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 8px center;
+}
+.search-input:focus { border-color: var(--primary); }
+.search-input::placeholder { color: var(--muted); }
+
+.group-section { border-bottom: 1px solid #3a3a5c; }
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+.group-header:hover { background: var(--surface-hover); }
+
+.group-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+
+.group-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  flex: 1;
+}
+
+.group-count {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 2px 5px;
+  border: 1px solid #3a3a5c;
+}
+
+.group-chevron {
+  font-size: 8px;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+.group-section.collapsed .group-chevron { transform: rotate(-90deg); }
+.group-section.collapsed .group-endpoints { display: none; }
+
+.endpoint-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 20px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-left: 3px solid transparent;
+}
+.endpoint-item:hover { background: var(--surface-hover); }
+.endpoint-item.active {
+  background: var(--surface-hover);
+  border-left-color: var(--primary);
+}
+.endpoint-item.hidden { display: none; }
+
+.method-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  padding: 3px 5px;
+  flex-shrink: 0;
+  min-width: 44px;
+  text-align: center;
+}
+.badge-GET { background: var(--success); color: #0d0d1a; }
+.badge-POST { background: var(--primary); color: #fff; }
+.badge-PUT { background: var(--warning); color: #0d0d1a; }
+.badge-PATCH { background: var(--accent); color: #0d0d1a; }
+.badge-DELETE { background: var(--error); color: #fff; }
+
+.endpoint-path {
+  font-family: 'Inter', monospace;
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── MAIN PANEL ─── */
+.main-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.main-panel::-webkit-scrollbar { width: 6px; }
+.main-panel::-webkit-scrollbar-track { background: var(--bg); }
+.main-panel::-webkit-scrollbar-thumb { background: #3a3a5c; }
+
+/* ─── WELCOME ─── */
+.welcome-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.welcome-logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 32px;
+  text-shadow: 4px 4px 0 #0d0d1a;
+}
+
+.welcome-msg {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 2;
+}
+
+.welcome-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-chip {
+  background: var(--surface);
+  border: 2px solid #3a3a5c;
+  box-shadow: var(--shadow);
+  padding: 8px 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--accent);
+}
+
+/* ─── ENDPOINT DETAIL ─── */
+.endpoint-detail { display: none; flex-direction: column; gap: 20px; }
+.endpoint-detail.visible { display: flex; }
+
+.endpoint-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.endpoint-header .method-badge {
+  font-size: 8px;
+  padding: 5px 8px;
+}
+
+.endpoint-title-path {
+  font-family: 'Inter', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.endpoint-summary {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.endpoint-desc {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 12px;
+  background: var(--surface);
+  border-left: 3px solid var(--primary);
+}
+
+/* ─── SECTION CARD ─── */
+.section-card {
+  background: var(--surface);
+  border: 1px solid #3a3a5c;
+  box-shadow: var(--shadow);
+}
+
+.section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--accent);
+  padding: 12px 16px;
+  border-bottom: 1px solid #3a3a5c;
+  background: #1e1e3a;
+}
+
+.section-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.param-row {
+  display: grid;
+  grid-template-columns: 120px 80px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.param-name {
+  font-family: 'Inter', monospace;
+  font-size: 13px;
+  color: var(--text);
+}
+.param-name .req { color: var(--error); margin-left: 2px; }
+.param-type {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 3px 6px;
+  border: 1px solid #3a3a5c;
+  text-align: center;
+}
+
+.param-input {
+  background: var(--bg);
+  border: 2px solid #3a3a5c;
+  color: var(--text);
+  font-family: 'Inter', monospace;
+  font-size: 12px;
+  padding: 7px 10px;
+  outline: none;
+  width: 100%;
+}
+.param-input:focus { border-color: var(--primary); }
+.param-input::placeholder { color: var(--muted); }
+
+.body-textarea {
+  background: var(--bg);
+  border: 2px solid #3a3a5c;
+  color: var(--accent);
+  font-family: 'Inter', monospace;
+  font-size: 12px;
+  padding: 12px;
+  outline: none;
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.6;
+}
+.body-textarea:focus { border-color: var(--primary); }
+
+/* ─── TRY IT BUTTON ─── */
+.try-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.1s, box-shadow 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+}
+.try-btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #0d0d1a; }
+.try-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #0d0d1a; }
+.try-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading .spinner { display: block; }
+.loading .btn-label { display: none; }
+
+/* ─── RESPONSE ─── */
+.response-section {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.response-section.visible { display: flex; }
+
+.response-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 6px 12px;
+  box-shadow: var(--shadow);
+}
+.status-2xx { background: var(--success); color: #0d0d1a; }
+.status-4xx { background: var(--error); color: #fff; }
+.status-5xx { background: var(--warning); color: #0d0d1a; }
+
+.response-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--muted);
+}
+
+.response-body {
+  background: #0f0f1e;
+  border: 2px solid #3a3a5c;
+  padding: 16px;
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.response-body pre {
+  font-family: 'Inter', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* JSON Syntax Highlighting */
+.json-key { color: #74b9ff; }
+.json-string { color: #55efc4; }
+.json-number { color: var(--accent); }
+.json-bool { color: var(--primary); }
+.json-null { color: var(--muted); }
+
+/* ─── AUTH BADGE ─── */
+.auth-required-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 4px 8px;
+  background: #3a2a00;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+/* ─── SCROLLBAR GLOBAL ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #3a3a5c; }
+</style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="navbar">
+  <div class="navbar-title">PIXEL PET ARENA — <span>API Explorer</span></div>
+  <div class="navbar-spacer"></div>
+  <div class="auth-group">
+    <label>TOKEN</label>
+    <input type="text" class="token-input" id="tokenInput" placeholder="Bearer &lt;your_petToken&gt;">
+    <label class="auto-attach">
+      <input type="checkbox" id="autoAttach" checked>
+      <span>Auto-attach</span>
+    </label>
+  </div>
+  <a href="../index.html" class="nav-link">← Prototype</a>
+  <a href="../../../index.html" class="nav-link">← Docs Site</a>
+</nav>
+
+<!-- ─── APP BODY ─── -->
+<div class="app-body">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+    <div class="search-wrap">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search endpoints… (/)">
+    </div>
+    <div id="sidebarGroups"></div>
+  </aside>
+
+  <!-- ─── MAIN PANEL ─── -->
+  <main class="main-panel" id="mainPanel">
+
+    <!-- Welcome State -->
+    <div class="welcome-state" id="welcomeState">
+      <div class="welcome-logo">🐾</div>
+      <div class="welcome-msg">← Select an endpoint to explore</div>
+      <div class="welcome-stats">
+        <div class="stat-chip">26 endpoints</div>
+        <div class="stat-chip">6 groups</div>
+        <div class="stat-chip">Mock mode</div>
+      </div>
+    </div>
+
+    <!-- Endpoint Detail -->
+    <div class="endpoint-detail" id="endpointDetail">
+      <div class="endpoint-header" id="detailHeader"></div>
+      <div class="endpoint-desc" id="detailDesc"></div>
+      <div id="detailParams"></div>
+      <div id="detailBody"></div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <button class="try-btn" id="tryBtn" onclick="executeRequest()">
+          <div class="spinner" id="spinner"></div>
+          <span class="btn-label">▶ Try It</span>
+        </button>
+        <div id="authBadgeWrap"></div>
+      </div>
+      <div class="response-section" id="responseSection">
+        <div class="response-meta">
+          <div class="status-badge" id="statusBadge"></div>
+          <div class="response-time" id="responseTime"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-title">RESPONSE BODY</div>
+          <div class="response-body">
+            <pre id="responseBody"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── API DEFINITION ───────────────────────────────────────────────────────────
+
+const API_GROUPS = [
+  {
+    id: 'claim',
+    name: 'Claim Flow',
+    color: '#0ea5e9',
+    endpoints: [
+      {
+        id: 'claim-initiate',
+        method: 'POST',
+        path: '/api/v1/claim',
+        summary: 'Initiate email claim',
+        description: 'Start the claim flow for a pet. Sends an OTP code to the provided email address.',
+        auth: false,
+        pathParams: [],
+        queryParams: [],
+        body: JSON.stringify({ email: 'trainer@example.com', petId: 'pet-001', ageConfirmed: true }, null, 2),
+        responses: {
+          200: { success: true, data: { claimId: 'claim-abc123', expiresAt: '2026-05-05T23:59:59Z' } },
+          400: { success: false, error: { code: 'ALREADY_CLAIMED', message: 'This pet has already been claimed.' } }
+        }
+      },
+      {
+        id: 'claim-verify',
+        method: 'POST',
+        path: '/api/v1/claim/verify',
+        summary: 'Verify OTP code',
+        description: 'Submit the 6-digit OTP sent by email to complete the claim and receive a petToken.',
+        auth: false,
+        pathParams: [],
+        queryParams: [],
+        body: JSON.stringify({ claimId: 'claim-abc123', otpCode: '483921' }, null, 2),
+        responses: {
+          200: { success: true, data: { petToken: 'eyJhbGciOiJIUzI1NiJ9.demo-token', petId: 'pet-001', petUrl: 'https://pixelpetarena.com/pet/pet-001', expiresAt: null } },
+          400: { success: false, error: { code: 'INVALID_OTP_CODE', message: 'The OTP code is incorrect or has expired.' } },
+          429: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many attempts. Try again in 60 seconds.' } }
+        }
+      },
+      {
+        id: 'claim-status',
+        method: 'GET',
+        path: '/api/v1/claim/:claimId/status',
+        summary: 'Get claim session status',
+        description: 'Poll the status of an active claim session. Useful for UI polling during OTP entry.',
+        auth: false,
+        pathParams: [{ name: 'claimId', type: 'string', placeholder: 'claim-abc123', required: true }],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { success: true, data: { claimId: 'claim-abc123', status: 'pending', attemptsLeft: 4 } }
+        }
+      }
+    ]
+  },
+  {
+    id: 'pets',
+    name: 'Pets',
+    color: '#6c5ce7',
+    endpoints: [
+      {
+        id: 'pet-get',
+        method: 'GET',
+        path: '/api/v1/pets/:petId',
+        summary: 'Get pet by ID',
+        description: 'Retrieve full pet metadata including stats, level, training history, and generation traits.',
+        auth: false,
+        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { success: true, data: { id: 'pet-001', seed: 'A9F2B3', rarity: 'RARE', pet_name: 'Teal Spark', stat_speed: 42, stat_strength: 31, stat_stamina: 55, level: 7, total_training_actions: 72, last_trained_at: '2026-05-04T18:22:00Z', claimed_at: '2026-04-01T10:00:00Z', is_banned: false, generation_meta: { body: 'round', head: 'pointed', color_palette: 'blue-yellow', accessory: 'hat', rarity_trait: 'glow_rare' } } },
+          403: { success: false, error: { code: 'PET_BANNED', message: 'This pet has been banned from the arena.' } },
+          404: { success: false, error: { code: 'PET_NOT_FOUND', message: 'No pet found with that ID.' } }
+        }
+      },
+      {
+        id: 'pet-food',
+        method: 'GET',
+        path: '/api/v1/pets/:petId/food',
+        summary: 'Get food inventory',
+        description: 'Returns the current food inventory for a pet. Requires authentication as the pet owner.',
+        auth: true,
+        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { success: true, data: [{ id: 'food-001', food_type: 'speed_berry', buff_stat: 'speed', magnitude: 5, is_permanent: false, expires_at: '2026-05-06T00:00:00Z' }, { id: 'food-002', food_type: 'strength_nut', buff_stat: 'strength', magnitude: 3, is_permanent: true, expires_at: null }] },
+          401: { success: false, error: { code: 'UNAUTHORIZED', message: 'A valid pet token is required.' } }
+        }
+      },
+      {
+        id: 'pet-feed',
+        method: 'POST',
+        path: '/api/v1/pets/:petId/feed',
+        summary: 'Apply food buff',
+        description: 'Apply a food item from the pet\'s inventory. Returns updated stats after consumption.',
+        auth: true,
+        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
+        queryParams: [],
+        body: JSON.stringify({ foodId: 'food-001' }, null, 2),
+        responses: {
+          200: { success: true, data: { stat_speed: 47, food_applied: 'speed_berry' } },
+          400: { success: false, error: { code: 'FOOD_ALREADY_CONSUMED', message: 'This food item has already been used.' } },
+          404: { success: false, error: { code: 'FOOD_NOT_FOUND', message: 'Food item not found in inventory.' } }
+        }
+      },
+      {
+        id: 'pet-train',
+        method: 'POST',
+        path: '/api/v1/pets/:petId/train',
+        summary: 'Train pet',
+        description: 'Submit a training action. Each action costs one training slot (max 3/day). Resets at midnight UTC.',
+        auth: true,
+        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
+        queryParams: [],
+        body: JSON.stringify({ action: 'sprint' }, null, 2),
+        responses: {
+          200: { success: true, data: { stat_speed: 45, actions_remaining: 2, next_reset: '2026-05-06T00:00:00Z' } },
+          400: { success: false, error: { code: 'TRAINING_LIMIT_REACHED', message: 'No training actions remaining today.' } },
+          403: { success: false, error: { code: 'UNAUTHORIZED', message: 'You do not own this pet.' } }
+        }
+      }
+    ]
+  },
+  {
+    id: 'arena',
+    name: 'Arena',
+    color: '#e87c7c',
+    endpoints: [
+      {
+        id: 'arena-battle',
+        method: 'POST',
+        path: '/api/v1/arena/battle',
+        summary: 'Start battle',
+        description: 'Queue a pet for a battle. Optionally challenge a specific pet by ID. Matchmaking may take up to 30 seconds.',
+        auth: true,
+        pathParams: [],
+        queryParams: [],
+        body: JSON.stringify({ mode: 'RACE', challengePetId: 'pet-002' }, null, 2),
+        responses: {
+          200: { success: true, data: { battleId: 'match-001', status: 'queued' } },
+          400: { success: false, error: { code: 'ARENA_RATE_LIMIT', message: 'You can only queue one battle at a time.' } },
+          503: { success: false, error: { code: 'MATCHMAKING_UNAVAILABLE', message: 'Arena matchmaking is temporarily offline.' } }
+        }
+      },
+      {
+        id: 'arena-result',
+        method: 'GET',
+        path: '/api/v1/arena/battles/:battleId',
+        summary: 'Get battle result',
+        description: 'Retrieve the full result and stat deltas for a completed battle.',
+        auth: false,
+        pathParams: [{ name: 'battleId', type: 'string', placeholder: 'match-001', required: true }],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { success: true, data: { id: 'match-001', pet_a_id: 'pet-001', pet_b_id: 'pet-002', is_ai_opponent: false, mode: 'RACE', winner_pet_id: 'pet-001', stat_delta_a: 5, stat_delta_b: 0, duration_seconds: 9, completed_at: '2026-05-05T14:22:00Z', is_flagged: false } },
+          404: { success: false, error: { code: 'BATTLE_NOT_FOUND', message: 'No battle found with that ID.' } }
+        }
+      },
+      {
+        id: 'arena-history',
+        method: 'GET',
+        path: '/api/v1/arena/history/:petId',
+        summary: 'Get battle history',
+        description: 'Returns a paginated list of all battles for a given pet.',
+        auth: false,
+        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { success: true, data: [{ match_id: 'match-001', date: '2026-05-05T14:22:00Z', mode: 'RACE', opponent_name: 'Ember Claw', opponent_rarity: 'COMMON', outcome: 'WIN', stat_delta: 5 }, { match_id: 'match-000', date: '2026-05-04T09:10:00Z', mode: 'SUMO', opponent_name: 'Bolt Runner', opponent_rarity: 'UNCOMMON', outcome: 'LOSS', stat_delta: -2 }], total: 20 }
+        }
+      }
+    ]
+  },
+  {
+    id: 'leaderboard',
+    name: 'Leaderboard',
+    color: '#00b894',
+    endpoints: [
+      {
+        id: 'lb-top',
+        method: 'GET',
+        path: '/api/v1/leaderboard',
+        summary: 'Get top 100',
+        description: 'Returns the current top 100 pets ranked by arena score. Results are cached for 5 minutes.',
+        auth: false,
+        pathParams: [],
+        queryParams: [
+          { name: 'rarity', type: 'string', placeholder: 'RARE (filter)', required: false },
+          { name: 'limit', type: 'number', placeholder: '100 (default)', required: false },
+          { name: 'offset', type: 'number', placeholder: '0', required: false }
+        ],
+        body: null,
+        responses: {
+          200: { success: true, data: [{ rank: 1, pet_id: 'pet-001', pet_name: 'Teal Spark', rarity: 'RARE', level: 7, arena_score: 2470, win_rate: 0.74 }, { rank: 2, pet_id: 'pet-099', pet_name: 'Nova Fang', rarity: 'LEGENDARY', level: 12, arena_score: 2398, win_rate: 0.71 }], total: 847, cached_at: '2026-05-05T14:55:00Z' }
+        }
+      },
+      {
+        id: 'lb-pet',
+        method: 'GET',
+        path: '/api/v1/leaderboard/pet/:petId',
+        summary: 'Get pet rank',
+        description: 'Look up the current rank and percentile for a specific pet.',
+        auth: false,
+        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { success: true, data: { rank: 4, percentile: 0.9952, pet_name: 'Teal Spark', arena_score: 2470 } },
+          404: { success: false, error: { code: 'PET_NOT_RANKED', message: 'This pet does not appear on the leaderboard yet.' } }
+        }
+      }
+    ]
+  },
+  {
+    id: 'marketplace',
+    name: 'Marketplace',
+    color: '#fdcb6e',
+    endpoints: [
+      {
+        id: 'market-listings',
+        method: 'GET',
+        path: '/api/v1/marketplace/listings',
+        summary: 'Get listings',
+        description: 'Browse active marketplace listings. Feature requires DAU > 1000 to be enabled.',
+        auth: false,
+        pathParams: [],
+        queryParams: [
+          { name: 'rarity', type: 'string', placeholder: 'RARE', required: false },
+          { name: 'sort', type: 'string', placeholder: 'price|recent', required: false },
+          { name: 'limit', type: 'number', placeholder: '20', required: false },
+          { name: 'offset', type: 'number', placeholder: '0', required: false }
+        ],
+        body: null,
+        responses: {
+          200: { success: true, data: [{ id: 'listing-001', pet_id: 'pet-042', pet_name: 'Storm Wisp', rarity: 'RARE', level: 7, price_credits: 1700, status: 'active', listed_at: '2026-05-04T12:00:00Z' }], total: 23 },
+          503: { success: false, error: { code: 'FEATURE_DISABLED', message: 'Marketplace requires DAU > 1000.' } }
+        }
+      },
+      {
+        id: 'market-create',
+        method: 'POST',
+        path: '/api/v1/marketplace/listings',
+        summary: 'Create listing',
+        description: 'List your pet for trade or sale on the marketplace. Feature flag must be enabled.',
+        auth: true,
+        pathParams: [],
+        queryParams: [],
+        body: JSON.stringify({ petId: 'pet-001', price_credits: 1700, looking_for: 'LEGENDARY' }, null, 2),
+        responses: {
+          201: { success: true, data: { id: 'listing-099', status: 'active' } },
+          503: { success: false, error: { code: 'FEATURE_DISABLED', message: 'Marketplace requires DAU > 1000.' } }
+        }
+      }
+    ]
+  },
+  {
+    id: 'health',
+    name: 'Health',
+    color: '#b2bec3',
+    endpoints: [
+      {
+        id: 'health-check',
+        method: 'GET',
+        path: '/health',
+        summary: 'Health check',
+        description: 'Verify that the API and its dependencies (database, Redis) are healthy.',
+        auth: false,
+        pathParams: [],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { status: 'ok', version: '1.0.0', uptime: 86400, db: 'connected', redis: 'connected' }
+        }
+      },
+      {
+        id: 'auth-me',
+        method: 'GET',
+        path: '/api/v1/auth/me',
+        summary: 'Verify token / get user',
+        description: 'Validate the current Bearer token and return the associated pet identity.',
+        auth: true,
+        pathParams: [],
+        queryParams: [],
+        body: null,
+        responses: {
+          200: { success: true, data: { pet_id: 'pet-001', email: 'p***@example.com', role: 'player' } },
+          401: { success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid or expired token.' } }
+        }
+      }
+    ]
+  }
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+
+let activeEndpointId = null;
+let activeEndpoint = null;
+
+// ─── MOCK ENGINE ─────────────────────────────────────────────────────────────
+
+function intercept(endpoint, pathVars, queryVars, body, token) {
+  const errorMode = queryVars['error'] === 'true';
+  if (errorMode) {
+    return { status: 500, body: { success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Simulated server error (error=true).' } } };
+  }
+  const needsAuth = endpoint.auth;
+  const autoAttach = document.getElementById('autoAttach').checked;
+  if (needsAuth && autoAttach && !token) {
+    return { status: 401, body: { success: false, error: { code: 'UNAUTHORIZED', message: 'A valid Bearer token is required. Paste your petToken in the top bar.' } } };
+  }
+
+  const responses = endpoint.responses;
+  const codes = Object.keys(responses).map(Number);
+  const successCode = codes.find(c => c >= 200 && c < 300) || codes[0];
+  return { status: successCode, body: responses[successCode] };
+}
+
+function simulateDelay() {
+  return new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
+}
+
+// ─── SIDEBAR RENDER ───────────────────────────────────────────────────────────
+
+function renderSidebar() {
+  const container = document.getElementById('sidebarGroups');
+  container.innerHTML = '';
+
+  API_GROUPS.forEach(group => {
+    const section = document.createElement('div');
+    section.className = 'group-section';
+    section.dataset.groupId = group.id;
+
+    const header = document.createElement('div');
+    header.className = 'group-header';
+    header.innerHTML = `
+      <div class="group-dot" style="background:${group.color};box-shadow:0 0 6px ${group.color}44;"></div>
+      <span class="group-name" style="color:${group.color};">${group.name}</span>
+      <span class="group-count">${group.endpoints.length}</span>
+      <span class="group-chevron">▼</span>
+    `;
+    header.addEventListener('click', () => section.classList.toggle('collapsed'));
+
+    const endpointList = document.createElement('div');
+    endpointList.className = 'group-endpoints';
+
+    group.endpoints.forEach(ep => {
+      const item = document.createElement('div');
+      item.className = 'endpoint-item';
+      item.dataset.endpointId = ep.id;
+      item.dataset.searchText = (ep.method + ' ' + ep.path + ' ' + ep.summary).toLowerCase();
+      item.innerHTML = `
+        <span class="method-badge badge-${ep.method}">${ep.method}</span>
+        <span class="endpoint-path">${ep.path}</span>
+      `;
+      item.addEventListener('click', () => selectEndpoint(ep.id));
+      endpointList.appendChild(item);
+    });
+
+    section.appendChild(header);
+    section.appendChild(endpointList);
+    container.appendChild(section);
+  });
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.endpoint-item').forEach(item => {
+    const match = !q || item.dataset.searchText.includes(q);
+    item.classList.toggle('hidden', !match);
+  });
+  // auto-expand groups with matches
+  document.querySelectorAll('.group-section').forEach(section => {
+    const hasVisible = [...section.querySelectorAll('.endpoint-item')].some(i => !i.classList.contains('hidden'));
+    if (q) {
+      section.classList.toggle('collapsed', !hasVisible);
+    }
+  });
+});
+
+// ─── ENDPOINT SELECTION ───────────────────────────────────────────────────────
+
+function findEndpoint(id) {
+  for (const g of API_GROUPS) {
+    const ep = g.endpoints.find(e => e.id === id);
+    if (ep) return ep;
+  }
+  return null;
+}
+
+function selectEndpoint(id) {
+  activeEndpointId = id;
+  activeEndpoint = findEndpoint(id);
+
+  document.querySelectorAll('.endpoint-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.endpointId === id);
+  });
+
+  document.getElementById('welcomeState').style.display = 'none';
+  const detail = document.getElementById('endpointDetail');
+  detail.classList.add('visible');
+
+  renderEndpointDetail(activeEndpoint);
+
+  // hide response
+  document.getElementById('responseSection').classList.remove('visible');
+}
+
+function renderEndpointDetail(ep) {
+  // Find group color
+  const group = API_GROUPS.find(g => g.endpoints.some(e => e.id === ep.id));
+  const color = group ? group.color : '#6c5ce7';
+
+  // Header
+  document.getElementById('detailHeader').innerHTML = `
+    <span class="method-badge badge-${ep.method}" style="font-size:10px;padding:6px 10px;">${ep.method}</span>
+    <span class="endpoint-title-path">${ep.path}</span>
+    <span class="endpoint-summary">${ep.summary}</span>
+  `;
+
+  // Desc
+  document.getElementById('detailDesc').textContent = ep.description;
+
+  // Params
+  const paramsEl = document.getElementById('detailParams');
+  paramsEl.innerHTML = '';
+
+  if (ep.pathParams.length > 0 || ep.queryParams.length > 0) {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+
+    let title = '';
+    if (ep.pathParams.length > 0 && ep.queryParams.length > 0) title = 'PARAMETERS';
+    else if (ep.pathParams.length > 0) title = 'PATH PARAMETERS';
+    else title = 'QUERY PARAMETERS';
+
+    card.innerHTML = `<div class="section-title" style="color:${color};">${title}</div>`;
+    const body = document.createElement('div');
+    body.className = 'section-body';
+
+    [...ep.pathParams.map(p => ({...p, kind: 'path'})), ...ep.queryParams.map(p => ({...p, kind: 'query'}))].forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'param-row';
+      row.innerHTML = `
+        <div class="param-name">${p.name}${p.required ? '<span class="req">*</span>' : ''}</div>
+        <div class="param-type">${p.kind}</div>
+        <input type="text" class="param-input" data-param="${p.name}" data-kind="${p.kind}" placeholder="${p.placeholder}">
+      `;
+      body.appendChild(row);
+    });
+
+    card.appendChild(body);
+    paramsEl.appendChild(card);
+  }
+
+  // Body
+  const bodyEl = document.getElementById('detailBody');
+  bodyEl.innerHTML = '';
+
+  if (ep.body !== null) {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.innerHTML = `<div class="section-title" style="color:${color};">REQUEST BODY</div>
+    <div class="section-body">
+      <textarea class="body-textarea" id="reqBody">${ep.body}</textarea>
+    </div>`;
+    bodyEl.appendChild(card);
+  }
+
+  // Auth badge
+  const authWrap = document.getElementById('authBadgeWrap');
+  authWrap.innerHTML = ep.auth ? '<span class="auth-required-badge">🔑 Auth Required</span>' : '';
+}
+
+// ─── EXECUTE REQUEST ──────────────────────────────────────────────────────────
+
+async function executeRequest() {
+  if (!activeEndpoint) return;
+
+  const btn = document.getElementById('tryBtn');
+  const spinner = document.getElementById('spinner');
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  const token = document.getElementById('tokenInput').value.trim();
+
+  // Gather path vars
+  const pathVars = {};
+  document.querySelectorAll('.param-input[data-kind="path"]').forEach(inp => {
+    pathVars[inp.dataset.param] = inp.value.trim();
+  });
+
+  // Gather query vars
+  const queryVars = {};
+  document.querySelectorAll('.param-input[data-kind="query"]').forEach(inp => {
+    if (inp.value.trim()) queryVars[inp.dataset.param] = inp.value.trim();
+  });
+
+  // Body
+  let bodyVal = null;
+  const bodyTA = document.getElementById('reqBody');
+  if (bodyTA) bodyVal = bodyTA.value;
+
+  const startTime = Date.now();
+  await simulateDelay();
+  const elapsed = Date.now() - startTime;
+
+  const result = intercept(activeEndpoint, pathVars, queryVars, bodyVal, token);
+
+  // Render response
+  const section = document.getElementById('responseSection');
+  section.classList.add('visible');
+
+  const statusBadge = document.getElementById('statusBadge');
+  statusBadge.textContent = result.status;
+  statusBadge.className = 'status-badge';
+  if (result.status >= 200 && result.status < 300) statusBadge.classList.add('status-2xx');
+  else if (result.status >= 400 && result.status < 500) statusBadge.classList.add('status-4xx');
+  else statusBadge.classList.add('status-5xx');
+
+  document.getElementById('responseTime').textContent = elapsed + 'ms (mock)';
+  document.getElementById('responseBody').innerHTML = syntaxHighlight(JSON.stringify(result.body, null, 2));
+
+  btn.disabled = false;
+  btn.classList.remove('loading');
+}
+
+// ─── JSON SYNTAX HIGHLIGHT ────────────────────────────────────────────────────
+
+function syntaxHighlight(json) {
+  return json
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+      let cls = 'json-number';
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? 'json-key' : 'json-string';
+      } else if (/true|false/.test(match)) {
+        cls = 'json-bool';
+      } else if (/null/.test(match)) {
+        cls = 'json-null';
+      }
+      return `<span class="${cls}">${match}</span>`;
+    });
+}
+
+// ─── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('searchInput').blur();
+    if (document.getElementById('endpointDetail').classList.contains('visible')) {
+      // optionally deselect
+    }
+  }
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
+renderSidebar();
+</script>
+</body>
+</html>
