@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Config — Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">⚙</span>
+      <div class="sidebar-logo-text">ADMIN<br>PORTAL</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="index.html"       class="nav-link"><span class="nav-icon">▦</span> Dashboard</a>
+      <a href="pets.html"        class="nav-link"><span class="nav-icon">🐾</span> Pets</a>
+      <a href="leaderboard.html" class="nav-link"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <div class="nav-section-label">System</div>
+      <a href="config.html"      class="nav-link active"><span class="nav-icon">⚙</span> Config</a>
+      <a href="analytics.html"   class="nav-link"><span class="nav-icon">📊</span> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">SA</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">superadmin</div>
+          <div class="sidebar-user-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ────────────────────────────────────────────── -->
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <span class="topbar-title">PIXEL PET ARENA ADMIN</span>
+        <span class="topbar-sep">/</span>
+        <span class="topbar-breadcrumb">Runtime Config</span>
+      </div>
+      <div class="topbar-right">
+        <span class="text-muted text-sm">Mon, Jun 04 2026 · 14:22 UTC</span>
+        <button class="btn-logout">⏻ LOGOUT</button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <div class="page-header">
+        <h1 class="page-title">Runtime Config & Feature Flags</h1>
+        <p class="page-subtitle">Live configuration — changes take effect within 30 seconds</p>
+      </div>
+
+      <div class="alert alert-warning">
+        <span class="alert-icon">⚠</span>
+        <span>All config changes are logged in the Audit Log. Changes to <strong>ARENA_DAILY_LIMIT_PER_PET</strong> apply from the next UTC midnight reset.</span>
+      </div>
+
+      <!-- Runtime Config + Feature Flags side by side -->
+      <div class="two-col" style="margin-bottom:20px;">
+
+        <!-- Runtime Config -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <span class="admin-card-title">Runtime Config</span>
+            <button class="btn btn-primary btn-sm" id="saveRuntimeBtn" disabled onclick="saveRuntime()">
+              💾 Save Changes
+            </button>
+          </div>
+          <div class="admin-card-body" style="padding:0;">
+            <table class="config-table">
+              <tbody>
+                <tr>
+                  <td class="config-key">ARENA_MATCHMAKING_TIMEOUT_SEC</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_arena_timeout" value="30" min="5" max="300" oninput="markDirty('saveRuntimeBtn','cfg_arena_timeout')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_arena_timeout', 30, 'saveRuntimeBtn')">Reset</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="config-key">ARENA_DAILY_LIMIT_PER_PET</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_arena_daily" value="10" min="1" max="50" oninput="markDirty('saveRuntimeBtn','cfg_arena_daily')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_arena_daily', 10, 'saveRuntimeBtn')">Reset</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="config-key">TRAINING_ACTIONS_PER_DAY</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_training_actions" value="3" min="1" max="10" oninput="markDirty('saveRuntimeBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_training_actions', 3, 'saveRuntimeBtn')">Reset</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="config-key">TRAINING_RESET_UTC_HOUR</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_training_reset" value="0" min="0" max="23" oninput="markDirty('saveRuntimeBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_training_reset', 0, 'saveRuntimeBtn')">Reset</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="config-key">FOOD_BUFF_MAX_PER_DAY</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_food_buff" value="3" min="0" max="10" oninput="markDirty('saveRuntimeBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_food_buff', 3, 'saveRuntimeBtn')">Reset</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="config-key">CLAIM_OTP_EXPIRY_MIN</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_otp_expiry" value="15" min="1" max="60" oninput="markDirty('saveRuntimeBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_otp_expiry', 15, 'saveRuntimeBtn')">Reset</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Feature Flags -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <span class="admin-card-title">Feature Flags</span>
+            <span class="text-muted text-sm">Toggle — effective immediately</span>
+          </div>
+          <div class="admin-card-body">
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">FF_ARENA_SUMO</div>
+                <div class="toggle-note">Sumo battle mode (experimental)</div>
+              </div>
+              <div class="flex" style="align-items:center;">
+                <label class="admin-toggle" for="ff_sumo">
+                  <input type="checkbox" id="ff_sumo" onchange="toggleFF('FF_ARENA_SUMO', this.checked)">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label text-muted" id="lbl_ff_sumo">OFF</span>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">FF_MARKETPLACE</div>
+                <div class="toggle-note" style="color:var(--warning);">Requires DAU &gt; 1,000</div>
+              </div>
+              <div class="flex" style="align-items:center;">
+                <label class="admin-toggle" for="ff_marketplace">
+                  <input type="checkbox" id="ff_marketplace" onchange="toggleFF('FF_MARKETPLACE', this.checked)">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label text-muted" id="lbl_ff_marketplace">OFF</span>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">FF_GDPR_SELF_SERVICE</div>
+                <div class="toggle-note">Allow players to request data export / deletion</div>
+              </div>
+              <div class="flex" style="align-items:center;">
+                <label class="admin-toggle" for="ff_gdpr">
+                  <input type="checkbox" id="ff_gdpr" checked onchange="toggleFF('FF_GDPR_SELF_SERVICE', this.checked)">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label text-success" id="lbl_ff_gdpr">ON</span>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name" style="color:var(--admin-red);">FF_MAINTENANCE_MODE</div>
+                <div class="toggle-note text-danger">Blocks all player actions immediately</div>
+              </div>
+              <div class="flex" style="align-items:center;">
+                <label class="admin-toggle toggle-danger" for="ff_maintenance">
+                  <input type="checkbox" id="ff_maintenance" onchange="toggleMaintenanceConfirm(this)">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label text-muted" id="lbl_ff_maintenance">OFF</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Economy Config -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <span class="admin-card-title">Economy Config</span>
+          <button class="btn btn-primary btn-sm" id="saveEconBtn" disabled onclick="saveEcon()">
+            💾 Save Economy Config
+          </button>
+        </div>
+        <div class="admin-card-body" style="padding:0;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+            <table class="config-table" style="border-right:1px solid #0d0d1a;">
+              <thead>
+                <tr>
+                  <th style="font-family:var(--font-pixel);font-size:7px;color:var(--muted);padding:10px 12px;background:var(--bg);border-bottom:2px solid #0d0d1a;" colspan="3">
+                    Base Stats
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="config-key">BASE_STAT_MIN</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_stat_min" value="10" min="1" max="50" oninput="markDirty('saveEconBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_stat_min', 10, 'saveEconBtn')">Reset</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="config-key">BASE_STAT_MAX</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_stat_max" value="50" min="10" max="100" oninput="markDirty('saveEconBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_stat_max', 50, 'saveEconBtn')">Reset</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table class="config-table">
+              <thead>
+                <tr>
+                  <th style="font-family:var(--font-pixel);font-size:7px;color:var(--muted);padding:10px 12px;background:var(--bg);border-bottom:2px solid #0d0d1a;" colspan="3">
+                    Training Deltas
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="config-key">TRAINING_STAT_DELTA_MIN</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_delta_min" value="1" min="0" max="20" oninput="markDirty('saveEconBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_delta_min', 1, 'saveEconBtn')">Reset</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="config-key">TRAINING_STAT_DELTA_MAX</td>
+                  <td class="config-value-cell">
+                    <input type="number" class="config-value-input" id="cfg_delta_max" value="8" min="1" max="30" oninput="markDirty('saveEconBtn')">
+                  </td>
+                  <td class="config-actions-cell">
+                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_delta_max', 8, 'saveEconBtn')">Reset</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ── MAINTENANCE CONFIRM MODAL ───────────────────────── -->
+<div class="modal-overlay" id="maintenanceModal">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <span class="modal-title" style="color:var(--admin-red);">⚠ Enable Maintenance Mode?</span>
+      <button class="modal-close" onclick="cancelMaintenance()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-danger" style="margin-bottom:16px;">
+        <span class="alert-icon">🚨</span>
+        <span>This will <strong>immediately block all player actions</strong> across the entire platform.</span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;">
+        All API requests will return 503. Active battles will be interrupted. Only disable for critical maintenance windows.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cancelMaintenance()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmMaintenance()">Enable Maintenance</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--surface);border:2px solid #0d0d1a;box-shadow:4px 4px 0 #0d0d1a;padding:12px 20px;font-family:var(--font-pixel);font-size:8px;color:var(--success);z-index:300;max-width:320px;"></div>
+
+<script>
+// Static map: flag key → {labelId, displayName}
+// All label element IDs and display strings are hardcoded — never derived from
+// runtime/user input — eliminating the XSS vector from dynamic ID construction.
+const FF_META = {
+  FF_ARENA_SUMO:       { labelId: 'lbl_ff_sumo',        display: 'FF_ARENA_SUMO' },
+  FF_MARKETPLACE:      { labelId: 'lbl_ff_marketplace', display: 'FF_MARKETPLACE' },
+  FF_GDPR_SELF_SERVICE:{ labelId: 'lbl_ff_gdpr',        display: 'FF_GDPR_SELF_SERVICE' },
+  FF_MAINTENANCE_MODE: { labelId: 'lbl_ff_maintenance', display: 'FF_MAINTENANCE_MODE' }
+};
+
+// Per-section dirty-field tracking: maps btnId → Set of dirty input element IDs.
+const dirtyFields = {};
+
+function markDirty(btnId, inputId) {
+  if (!dirtyFields[btnId]) dirtyFields[btnId] = new Set();
+  dirtyFields[btnId].add(inputId);
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = false;
+}
+
+function resetField(inputId, defaultVal, btnId) {
+  const input = document.getElementById(inputId);
+  if (input) input.value = defaultVal;
+  // Remove this field from the dirty set.
+  if (dirtyFields[btnId]) dirtyFields[btnId].delete(inputId);
+  // Only disable the button when no fields remain dirty for this section.
+  if (!dirtyFields[btnId] || dirtyFields[btnId].size === 0) {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.disabled = true;
+  }
+}
+
+function saveRuntime() {
+  const btnId = 'saveRuntimeBtn';
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled = true; btn.textContent = '✓ Saved'; }
+  // Clear dirty set after save.
+  dirtyFields[btnId] = new Set();
+  showToast('Runtime config saved. Propagating to workers…');
+  // Re-query the element inside the callback to avoid a stale closure reference.
+  setTimeout(() => {
+    const b = document.getElementById(btnId);
+    if (b) b.textContent = '💾 Save Changes';
+  }, 2000);
+}
+
+function saveEcon() {
+  const btnId = 'saveEconBtn';
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled = true; btn.textContent = '✓ Saved'; }
+  dirtyFields[btnId] = new Set();
+  showToast('Economy config saved.');
+  setTimeout(() => {
+    const b = document.getElementById(btnId);
+    if (b) b.textContent = '💾 Save Economy Config';
+  }, 2000);
+}
+
+function toggleFF(key, enabled) {
+  // Look up metadata from the static whitelist — never interpolate key into DOM IDs.
+  const meta = FF_META[key];
+  if (!meta) return; // unknown flag — silently ignore
+  const labelEl = document.getElementById(meta.labelId);
+  if (labelEl) {
+    labelEl.textContent = enabled ? 'ON' : 'OFF';
+    labelEl.className = 'toggle-label ' + (enabled ? 'text-success' : 'text-muted');
+  }
+  // Use the hardcoded display name from the whitelist, not the raw key parameter.
+  showToast(meta.display + ' ' + (enabled ? 'enabled' : 'disabled'));
+}
+
+let pendingMaintenanceCheckbox = null;
+
+function toggleMaintenanceConfirm(checkbox) {
+  if (checkbox.checked) {
+    // Revert immediately; only actually enable after modal confirm
+    checkbox.checked = false;
+    pendingMaintenanceCheckbox = checkbox;
+    const modal = document.getElementById('maintenanceModal');
+    if (modal) modal.classList.add('open');
+  } else {
+    const lbl = document.getElementById('lbl_ff_maintenance');
+    if (lbl) { lbl.textContent = 'OFF'; lbl.className = 'toggle-label text-muted'; }
+    showToast('FF_MAINTENANCE_MODE disabled');
+  }
+}
+
+function confirmMaintenance() {
+  if (pendingMaintenanceCheckbox) {
+    pendingMaintenanceCheckbox.checked = true;
+    pendingMaintenanceCheckbox = null;
+  }
+  const lbl = document.getElementById('lbl_ff_maintenance');
+  if (lbl) { lbl.textContent = 'ON'; lbl.className = 'toggle-label text-danger'; }
+  closeModal('maintenanceModal');
+  showToast('⚠ MAINTENANCE MODE ENABLED — players blocked');
+}
+
+function cancelMaintenance() {
+  pendingMaintenanceCheckbox = null;
+  closeModal('maintenanceModal');
+}
+
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+</script>
+</body>
+</html>
