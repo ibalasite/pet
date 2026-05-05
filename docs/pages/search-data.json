@@ -1,8 +1,8 @@
 {
   "index.html": {
     "url": "index.html",
-    "title": "test 文件中心",
-    "excerpt": "pixel-pet-arena 🎮\nA pixel-art pet breeding, training, and battle arena game with cross-platform support (Web, iOS, Android) and competitive leaderboar"
+    "title": "pet 文件中心",
+    "excerpt": "&lt;!--\nDOC-ID:  README-PIXEL-PET-ARENA-20260505\nVersion: v1.0\nStatus:  DRAFT\nAuthor:  AI Generated (gendoc readme)\nDate:    2026-05-05\nUpstream docs:"
   },
   "idea.html": {
     "url": "idea.html",
@@ -328,5 +328,50 @@
     "url": "req__idea-input.html",
     "title": "Idea Input",
     "excerpt": "原始需求輸入\n一個HTML5的寵物網站，使用者不用登入，可以隨機跟一個寵物互動，覺得想養要給email，會寄一封密碼信給你，以及畫面有領取的URL，下次可依此URL回來跟寵物互動，養大的寵物可以跟其他寵物競賽，可以去競技場比賽跑，可以比相撲擂台等，若要讓寵物好，要訓練，給特殊食物，也可以把寵物交易，"
+  },
+  "puml--diagrams-puml-class-diagram.html": {
+    "url": "puml--diagrams-puml-class-diagram.html",
+    "title": "Class Diagram",
+    "excerpt": "Class Diagram@startuml pixel-pet-arena-class-diagram\n\n!define ENTITY #F5F5F5\n!define PROCESS #E8F4F8\n!define EXTERNAL #FFF5E6\n\nskinparam linetype orth"
+  },
+  "puml--diagrams-puml-component-diagram.html": {
+    "url": "puml--diagrams-puml-component-diagram.html",
+    "title": "Component Diagram",
+    "excerpt": "Component Diagram@startuml pixel-pet-arena-components\n\n!define FRONTEND #E8F4F8\n!define BACKEND #F5F5F5\n!define DATA #E8F5E9\n!define EXTERNAL #FFF5E6\n"
+  },
+  "puml--diagrams-puml-dataflow-diagram.html": {
+    "url": "puml--diagrams-puml-dataflow-diagram.html",
+    "title": "Dataflow Diagram",
+    "excerpt": "Dataflow Diagram@startuml pixel-pet-arena-dataflow\n\n!define PROCESS #F5F5F5\n!define DATASTORE #E8F5E9\n!define EXTERNAL #FFF5E6\n!define ACTOR #E8F4F8\n\n"
+  },
+  "puml--diagrams-puml-deployment.html": {
+    "url": "puml--diagrams-puml-deployment.html",
+    "title": "Deployment",
+    "excerpt": "Deployment@startuml pixel-pet-arena-deployment\n\n!define EDGE #E3F2FD\n!define COMPUTE #F5F5F5\n!define STORAGE #E8F5E9\n!define EXTERNAL #FFF5E6\n\nskinpar"
+  },
+  "puml--diagrams-puml-sequence-auth.html": {
+    "url": "puml--diagrams-puml-sequence-auth.html",
+    "title": "Sequence Auth",
+    "excerpt": "Sequence Auth@startuml pixel-pet-arena-sequence-auth\n\n!define PLAYER #E8F4F8\n!define SERVER #F5F5F5\n!define EMAIL #FFF5E6\n!define DB #E8F5E9\n\nparticip"
+  },
+  "puml--diagrams-puml-sequence-battle.html": {
+    "url": "puml--diagrams-puml-sequence-battle.html",
+    "title": "Sequence Battle",
+    "excerpt": "Sequence Battle@startuml pixel-pet-arena-sequence-battle\n\n!define PLAYER #E8F4F8\n!define SERVER #F5F5F5\n!define CACHE #FCE4EC\n!define DB #E8F5E9\n\npart"
+  },
+  "puml--diagrams-puml-state-battle.html": {
+    "url": "puml--diagrams-puml-state-battle.html",
+    "title": "State Battle",
+    "excerpt": "State Battle@startuml pixel-pet-arena-state-battle\n\ntitle Arena Match State Machine\n\n[*] --&gt; CREATED: arena_match record inserted\n\nstate CREATED {\n"
+  },
+  "puml--diagrams-puml-state-pet.html": {
+    "url": "puml--diagrams-puml-state-pet.html",
+    "title": "State Pet",
+    "excerpt": "State Pet@startuml pixel-pet-arena-state-pet\n\ntitle Pet State Machine\n\n[*] --&gt; GENERATED\n\nstate GENERATED {\n  [*] --&gt; UNCLAIMED\n  UNCLAIMED --&g"
+  },
+  "puml--diagrams-puml-usecase-diagram.html": {
+    "url": "puml--diagrams-puml-usecase-diagram.html",
+    "title": "Usecase Diagram",
+    "excerpt": "Usecase Diagram@startuml pixel-pet-arena-usecase\n\n!define PLAYER #E8F4F8\n!define ADMIN #FFF5E6\n!define SYSTEM #F5F5F5\n\nskinparam linetype ortho\n\nleft "
   }
 }

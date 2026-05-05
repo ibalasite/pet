@@ -733,7 +733,7 @@ graph TD
 
 ```mermaid
 flowchart TD
-    A([User opens pixel-pet-arena.com]) --> B[Canvas loads; random pixel pet generated and animated]
+    A((User opens pixel-pet-arena.com)) --> B[Canvas loads; random pixel pet generated and animated]
     B --> C{User interacts with pet?}
     C -->|Click/tap on pet| D[Pet plays interaction animation; stats briefly flash]
     C -->|Just watches| D

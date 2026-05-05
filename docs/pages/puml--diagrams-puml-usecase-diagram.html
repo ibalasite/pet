@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cicd Pr Gate — pet</title>
+  <title>Usecase Diagram — pet</title>
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
@@ -37,8 +37,8 @@
     </div>
   </header>
   <div class="doc-page-banner">
-    <p class="banner-breadcrumb"><a href="index.html">pet</a> › Cicd Pr Gate</p>
-    <h1 class="banner-title">Cicd Pr Gate</h1>
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › PlantUML › Usecase Diagram</p>
+    <h1 class="banner-title">PlantUML › Usecase Diagram</h1>
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
@@ -110,7 +110,7 @@
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📐 PlantUML</summary>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
@@ -120,7 +120,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-sequence-battle.html">Sequence Battle</a>
 <a class="sidebar__link" href="puml--diagrams-puml-state-battle.html">State Battle</a>
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
-<a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
+<a class="sidebar__link active" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -131,7 +131,7 @@
 <a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
 <a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
 <a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
-<a class="sidebar__link active" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
 <a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
 <a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
 <a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
@@ -152,100 +152,101 @@
 </div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>PR Gate Workflow (ci.yml)</h1>
-<p>This document details the PR gate workflow defined in <code>.github/workflows/ci.yml</code> for the pixel-pet-arena monorepo. Every pull request targeting <code>main</code> must pass all checks before it is eligible for merge. The gate runs lint, TypeScript type-checking, unit tests, integration tests, Docker builds for all three services, an end-to-end smoke test against the built containers, and a <code>detect-secrets</code> security scan to prevent credential leakage into the repository history.</p>
-<h2>Workflow Trigger and Runner Context</h2>
-<p>The <code>ci.yml</code> workflow triggers on <code>pull_request</code> events targeting <code>main</code> and on direct pushes to <code>main</code>. Jobs run on <code>ubuntu-latest</code> GitHub-hosted runners. The pnpm workspace is bootstrapped with Node.js 20 and the lockfile is used for deterministic installs. A PostgreSQL service container and a Redis service container are started as job services for the integration test job.</p>
-<div class="diagram-container"><pre class="mermaid">flowchart TD
-    PUSH([PR Opened / Pushed\ngithub.event pull_request])
+    <main class="doc-content"><h1>Usecase Diagram</h1><pre><code class="language-plantuml">@startuml pixel-pet-arena-usecase
 
-    subgraph LINT_TC [Lint &amp; Type-Check — parallel]
-        LINT[pnpm lint\nESLint across api · player-app · admin-app]
-        TC[pnpm typecheck\ntsc --noEmit all packages]
-    end
+!define PLAYER #E8F4F8
+!define ADMIN #FFF5E6
+!define SYSTEM #F5F5F5
 
-    subgraph UNIT [Unit Tests — parallel per package]
-        UNIT_API[api unit tests\nVitest · coverage ≥ 80%]
-        UNIT_PLAYER[player-app unit tests\nVitest · coverage ≥ 80%]
-        UNIT_ADMIN[admin-app unit tests\nVitest · coverage ≥ 80%]
-    end
+skinparam linetype ortho
 
-    subgraph INTEGRATION [Integration Tests]
-        PG_SVC[PostgreSQL 15 service\nlocalhost:5432]
-        REDIS_SVC[Redis 7 service\nlocalhost:6379]
-        SUPABASE_MIG[supabase migration up\napply schema to test DB]
-        INT_API[api integration tests\nFastify inject · DB + Redis]
-    end
+left to right direction
 
-    subgraph BUILD [Docker Builds — parallel]
-        BUILD_API[docker build api\nmulti-stage TypeScript compile]
-        BUILD_PLAYER[docker build player-app\nnginx:alpine · port 80]
-        BUILD_ADMIN[docker build admin-app\nnginx:alpine · port 80]
-    end
+actor &quot;Guest Player&quot; as guest #E8F4F8
+actor &quot;Pet Owner&quot; as owner #E8F4F8
+actor &quot;Collector&quot; as collector #E8F4F8
+actor &quot;Competitive\nPlayer&quot; as competitor #E8F4F8
+actor &quot;Admin\nOperator&quot; as admin #FFF5E6
+actor &quot;System\nBackground Job&quot; as system #F5F5F5
 
-    E2E[E2E Smoke Tests\nPlaywright against docker-compose stack]
+rectangle &quot;pixel-pet-arena&quot; {
+  usecase UC1 as &quot;View Random Pet\n(Guest)&quot;
+  usecase UC2 as &quot;Claim Pet\n(Email + OTP)&quot;
+  usecase UC3 as &quot;Train Pet\n(Daily Actions)&quot;
+  usecase UC4 as &quot;Apply Food Buff\n(Stat Boost)&quot;
+  usecase UC5 as &quot;Enter Arena\n(Race or Sumo)&quot;
+  usecase UC6 as &quot;View Global\nLeaderboard&quot;
+  usecase UC7 as &quot;View Battle\nRecords (Public)&quot;
+  usecase UC8 as &quot;Request GDPR\nErasure&quot;
+  usecase UC9 as &quot;Ban Pet\n(Moderation)&quot;
+  usecase UC10 as &quot;Tune Rate\nLimits&quot;
+  usecase UC11 as &quot;Configure Game\nEconomy&quot;
+  usecase UC12 as &quot;Cleanup Expired\nClaims&quot;
+  usecase UC13 as &quot;Update Leaderboard\nSnapshots&quot;
+}
 
-    SEC_SCAN[detect-secrets scan\n--baseline .secrets.baseline\nfail on new secrets]
+guest --&gt; UC1: discovers
+owner --&gt; UC2: claims pet
+owner --&gt; UC3: daily training
+owner --&gt; UC4: food system
+competitor --&gt; UC5: arena battles
+competitor --&gt; UC6: check rankings
+collector --&gt; UC7: pet achievements
+owner --&gt; UC8: data deletion
+owner --&gt; UC7: share battles
+owner --&gt; UC6: track progress
 
-    RESULT{All checks\npassed?}
-    BLOCK([PR Blocked\nCheck annotations on diff])
-    PASS([PR Gate Passed\nReady for merge])
+admin --&gt; UC9: moderation
+admin --&gt; UC10: platform tuning
+admin --&gt; UC11: economy balance
 
-    PUSH --&gt; LINT_TC
-    LINT_TC --&gt; UNIT
-    UNIT --&gt; INTEGRATION
-    PG_SVC --&gt; SUPABASE_MIG
-    SUPABASE_MIG --&gt; INT_API
-    REDIS_SVC --&gt; INT_API
-    INTEGRATION --&gt; BUILD
-    BUILD --&gt; E2E
-    E2E --&gt; SEC_SCAN
-    SEC_SCAN --&gt; RESULT
-    RESULT -- No --&gt; BLOCK
-    RESULT -- Yes --&gt; PASS
+system --&gt; UC12: scheduled cleanup
+system --&gt; UC13: hourly leaderboard
 
-    style BLOCK fill:#e63946,color:#fff
-    style PASS fill:#2a9d8f,color:#fff
-    style RESULT fill:#f0a500,color:#000
-    style SEC_SCAN fill:#457b9d,color:#fff</pre></div>
-<h2>Job Dependency Graph</h2>
-<p>The jobs are structured to maximise parallelism while preserving correctness. Lint and type-check run concurrently in the first wave. Unit tests fan out across the three workspace packages in parallel once the lint/type-check wave succeeds. Integration tests require a clean schema applied via <code>supabase migration up</code> against the PostgreSQL service container. Docker builds fan out after integration tests pass. The E2E smoke test runs after all three images are built and a temporary <code>docker-compose</code> stack is started. The security scan runs last but is non-blocking for unrelated job failures — it only fails the gate if <code>detect-secrets</code> reports new findings not present in <code>.secrets.baseline</code>.</p>
-<div class="diagram-container"><pre class="mermaid">sequenceDiagram
-    participant GH as GitHub Actions Runner
-    participant LINT as ESLint / tsc
-    participant TEST as Vitest (unit + integration)
-    participant DB as PostgreSQL 15 (service)
-    participant REDIS as Redis 7 (service)
-    participant DOCKER as Docker Build
-    participant PW as Playwright Smoke
-    participant DS as detect-secrets
+UC2 .&gt; UC3: after claim
+UC3 .&gt; UC5: prerequisite
+UC5 .&gt; UC6: feeds data
+UC5 .&gt; UC7: generates record
+UC7 .&gt; UC8: GDPR scope
+UC3 .&gt; UC4: food buff applied
 
-    GH-&gt;&gt;LINT: Run ESLint (all packages)
-    GH-&gt;&gt;LINT: Run tsc --noEmit (all packages)
-    LINT--&gt;&gt;GH: lint OK / fail annotations
-    GH-&gt;&gt;TEST: Run unit tests (api, player-app, admin-app)
-    TEST--&gt;&gt;GH: unit coverage reports
-    GH-&gt;&gt;DB: Start PostgreSQL service container
-    GH-&gt;&gt;REDIS: Start Redis service container
-    DB--&gt;&gt;GH: ready
-    REDIS--&gt;&gt;GH: ready
-    GH-&gt;&gt;DB: supabase migration up
-    DB--&gt;&gt;GH: schema applied
-    GH-&gt;&gt;TEST: Run integration tests (api)
-    TEST--&gt;&gt;GH: integration results
-    GH-&gt;&gt;DOCKER: Build api image (multi-stage)
-    GH-&gt;&gt;DOCKER: Build player-app image (nginx)
-    GH-&gt;&gt;DOCKER: Build admin-app image (nginx)
-    DOCKER--&gt;&gt;GH: images built
-    GH-&gt;&gt;PW: docker-compose up + playwright test
-    PW--&gt;&gt;GH: smoke test results
-    GH-&gt;&gt;DS: detect-secrets scan
-    DS--&gt;&gt;GH: baseline diff result
-    GH--&gt;&gt;GH: Aggregate job results → pass/fail</pre></div>
-<h2>Security Scan Details</h2>
-<p>The <code>detect-secrets</code> scanner runs with <code>--baseline .secrets.baseline</code> so that pre-approved findings are suppressed. Any newly detected high-entropy string, AWS key pattern, GitHub token, or database DSN that does not appear in the baseline causes the job to exit with a non-zero status, blocking the merge. The baseline file is committed to the repository and updated deliberately via <code>detect-secrets scan --baseline .secrets.baseline</code> in a dedicated housekeeping PR. This ensures the PR gate enforces a zero-tolerance policy on newly introduced secrets without penalising developers for existing managed entries.</p>
-<h2>Test Coverage Requirements</h2>
-<p>All three workspace packages are required to meet an 80% line coverage threshold enforced by Vitest&#x27;s built-in coverage reporter. Coverage reports are uploaded as GitHub Actions artifacts and are also reported as PR check annotations. A coverage drop below threshold fails the unit test job and blocks the PR gate.</p></main>
+UC6 .&gt; UC11: influenced by
+UC5 .&gt; UC10: rate limit check
+UC12 .&gt; UC2: removes tokens
+
+note right of guest
+  Guest mode: any visitor
+  Can view/interact with random pet
+  No persistence
+end note
+
+note right of owner
+  Claimed pet owner
+  Persistent access via URL token
+  Full gameplay features
+end note
+
+note right of collector
+  Motivated by rarity
+  Seeks unique pets
+  Follows leaderboard for legendary
+end note
+
+note right of competitor
+  Arena-focused player
+  Cares about rank
+  Shares battle records
+end note
+
+note right of admin
+  Internal operators
+  Moderation &amp; tuning
+  Config changes
+  Audit visibility
+end note
+
+@enduml
+</code></pre><p style="color:var(--text-muted)">⚠️ PlantUML 圖表無法生成（請確認本機已安裝 plantuml 或網路可連至 plantuml.com）</p></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
