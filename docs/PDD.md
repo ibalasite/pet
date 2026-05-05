@@ -1,11 +1,15 @@
 # PDD — Product Design Document
 
-<!-- ⚠️ Platform Scope — 本文件適用範圍 -->
+---
+
+## Platform Scope Declaration（平台範圍宣告）
+
 - [x] Web（Browser）
 - [ ] iOS Native
 - [ ] Android Native
-- [ ] Desktop App
-- [ ] Game UI
+- [ ] Desktop App（Electron / macOS / Windows）
+- [ ] Game UI（Phaser 3 / HTML5 Canvas）
+- [ ] Embedded / Kiosk
 
 ---
 
@@ -1158,6 +1162,50 @@ AdminDataTable (shared admin component)
 ├── children: AdminTableRow[]
 └── features: bulk select, CSV export, search
 ```
+
+---
+
+## §9.5 Client 類別圖（Class Diagram）
+
+> 本節定義 **Client 端（前端 Web）** 的程式結構，依照 Clean Architecture 原則分層。
+> 每一層只依賴它下方的層，絕對不跨層溝通。
+
+### §9.5.1 Web 前端 Class Diagram（概覽）
+
+```
+Presentation Layer
+  ├── PageRouter（路由管理）
+  ├── PetCanvasView（Canvas 渲染）
+  ├── ArenaView（戰鬥畫面）
+  ├── LeaderboardView（排行榜）
+  └── AdminPortalView（管理後台）
+
+Application Layer
+  ├── PetUseCase（生成、訓練、食物 buff）
+  ├── ArenaUseCase（配對、戰鬥結果）
+  ├── AuthUseCase（Claim Code 流程）
+  └── TradeUseCase（交易，FF_MARKETPLACE）
+
+Domain Layer
+  ├── Pet（entity: id, rarity, stats, level）
+  ├── Battle（entity: outcome, timestamp, random_modifier）
+  ├── ClaimToken（entity: code, expiry）
+  └── LeaderboardEntry（entity: rank, score）
+
+Infrastructure Layer
+  ├── ApiClient（REST calls to backend）
+  ├── CanvasRenderer（Phaser 3 / HTML5 Canvas）
+  └── LocalStorageAdapter（token cache）
+```
+
+| Class | Layer | 主要職責 | 對應 PRD |
+|-------|-------|---------|---------|
+| PageRouter | Presentation | URL routing, SPA navigation | US-PET-001 |
+| PetCanvasView | Presentation | Canvas pet rendering ≥ 30 FPS | US-PET-001 AC-001-1 |
+| ArenaView | Presentation | Battle animation 5–15s | US-ARENA-001 AC-007-3 |
+| PetUseCase | Application | Training, food buff logic | US-TRAIN-001, US-FOOD-001 |
+| ArenaUseCase | Application | Matchmaking, outcome calculation | US-ARENA-001, US-ARENA-002 |
+| ApiClient | Infrastructure | All REST calls, error handling | API.md |
 
 ---
 
