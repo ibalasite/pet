@@ -6,30 +6,30 @@
   "review_strategy": "exhaustive",
   "review_strategy_custom": "",
   "max_rounds": 99,
-  "stop_condition": "finding=0\uff08\u7121\u4e0a\u9650\uff09",
+  "stop_condition": "finding=0（無上限）",
   "client_type": "game",
   "client_type_source": "confirmed",
-  "last_updated": "2026-05-04T14:39:48Z",
+  "last_updated": "2026-05-05T10:24:38Z",
   "has_admin_backend": true,
   "skill_source": "gendoc-auto",
   "spawned_session": false,
   "input_type": "text_idea",
   "input_source": "",
-  "input_summary": "\u4e00\u500bHTML5\u7684\u5bf5\u7269\u7db2\u7ad9\uff0c\u4f7f\u7528\u8005\u4e0d\u7528\u767b\u5165\uff0c\u53ef\u4ee5\u96a8\u6a5f\u8ddf\u4e00\u500b\u5bf5\u7269\u4e92\u52d5\uff0c\u89ba\u5f97\u60f3\u990a\u8981\u7d66email\uff0c\u6703\u5bc4\u4e00\u5c01\u5bc6\u78bc\u4fe1\u7d66\u4f60\uff0c\u4ee5\u53ca\u756b\u9762\u6709\u9818\u53d6\u7684URL\uff0c\u4e0b\u6b21\u53ef\u4f9d\u6b64URL\u56de\u4f86\u8ddf\u5bf5\u7269\u4e92\u52d5\uff0c\u990a\u5927\u7684\u5bf5\u7269\u53ef\u4ee5\u8ddf\u5176\u4ed6\u5bf5\u7269\u7af6\u8cfd\uff0c\u53ef\u4ee5\u53bb\u7af6\u6280\u5834\u6bd4\u8cfd\u8dd1\uff0c\u53ef\u4ee5\u6bd4\u76f8\u64b2\u64c2\u53f0\u7b49\uff0c\u82e5\u8981\u8b93\u5bf5\u7269\u597d\uff0c\u8981\u8a13\u7df4\uff0c\u7d66\u7279\u6b8a\u98df\u7269\uff0c\u4e5f\u53ef\u4ee5\u628a\u5bf5\u7269\u4ea4\u6613\uff0c\u6240\u4ee5\u6bcf\u652f\u5bf5\u7269\u6709\u81ea\u5df1\u7684\u6230\u7e3e\uff0c\u4e5f\u6709\u5bf5\u7269\u6392\u884c\u699c\uff0c\u6bcf\u652f\u5bf5\u7269\u90fd\u662f\u7368\u4e00\u7121\u4e8c\u7684\uff0c\u7528\u8c61\u7d20\u98a8\u683c\u4f86\u505a\u96a8\u6a5f\u7522\u751f\u7279\u6b8a\u5bf5\u7269\uff0c\u96a8\u6a5f\u5230\u6bcf\u6b21\u9818\u7684\u90fd\u4e0d\u4e00\u6a23",
+  "input_summary": "一個HTML5的寵物網站，使用者不用登入，可以隨機跟一個寵物互動，覺得想養要給email，會寄一封密碼信給你，以及畫面有領取的URL，下次可依此URL回來跟寵物互動，養大的寵物可以跟其他寵物競賽，可以去競技場比賽跑，可以比相撲擂台等，若要讓寵物好，要訓練，給特殊食物，也可以把寵物交易，所以每支寵物有自己的戰績，也有寵物排行榜，每支寵物都是獨一無二的，用象素風格來做隨機產生特殊寵物，隨機到每次領的都不一樣",
   "req_dir": "docs/req",
   "project_name": "pixel-pet-arena",
   "project_type": "web-app",
-  "key_features": "1. \u96a8\u6a5f\u50cf\u7d20\u5bf5\u7269\u751f\u6210\uff08\u6bcf\u96bb\u7368\u4e00\u7121\u4e8c\uff09\uff1b2. \u7121\u9700\u767b\u5165\u5373\u53ef\u4e92\u52d5\uff0cemail \u8a8d\u9818\u5236\uff08\u5bc6\u78bc\u4fe1 + \u5c08\u5c6c URL\uff09\uff1b3. \u5bf5\u7269\u8a13\u7df4 / \u7279\u6b8a\u98df\u7269\u5f37\u5316\u7cfb\u7d71\uff1b4. \u7af6\u6280\u5834\uff08\u8dd1\u6b65\u8cfd / \u76f8\u64b2\u64c2\u53f0\u7b49\u591a\u7a2e\u5c0d\u6230\u6a21\u5f0f\uff09\uff1b5. \u5bf5\u7269\u4ea4\u6613\u5e02\u5834\uff1b6. \u5bf5\u7269\u6230\u7e3e + \u5168\u670d\u6392\u884c\u699c",
-  "target_users": "\u4f11\u9592\u73a9\u5bb6\uff08\u7121\u5e33\u865f\u9580\u6abb\uff09\u3001\u50cf\u7d20\u85dd\u8853\u611b\u597d\u8005\u3001\u8f15\u5ea6\u7af6\u6280\u904a\u6232\u73a9\u5bb6",
-  "tech_stack_hints": "HTML5 Canvas / Phaser.js \u6216\u7d14 HTML5\uff1b\u5f8c\u7aef Node.js / Go\uff1b\u8cc7\u6599\u5eab PostgreSQL\uff1bEmail \u5bc4\u9001 SendGrid / SMTP",
-  "q1_users": "\u4f11\u9592\u73a9\u5bb6\uff08\u7121\u9700\u5e33\u865f\uff09\u3001\u50cf\u7d20\u85dd\u8853\u611b\u597d\u8005\u3001\u8f15\u5ea6\u7af6\u6280\u904a\u6232\u73a9\u5bb6\u3001\u5bf5\u7269\u6536\u85cf\u611b\u597d\u8005",
-  "q2_painpoint": "\u7121\u9700\u5e33\u865f\u9580\u6abb\uff0cemail \u8a8d\u9818\u5236\uff08\u5bc6\u78bc + \u5c08\u5c6c URL\uff09\uff1b\u96a8\u6a5f\u751f\u6210\u50cf\u7d20\u5bf5\u7269\uff1b\u7af6\u6280\u5834\u591a\u6a21\u5f0f\u5c0d\u6230\uff1b\u5bf5\u7269\u8a13\u7df4/\u5f37\u5316/\u4ea4\u6613\u751f\u614b\u7cfb\u7d71",
-  "q3_constraints": "HTML5\uff08\u652f\u63f4\u4e3b\u6d41\u700f\u89bd\u5668\uff09\uff1b\u50cf\u7d20\u98a8\u683c Canvas \u6e32\u67d3\uff1b\u5f8c\u7aef\u9700\u652f\u63f4 email \u767c\u9001\uff1b\u6bcf\u96bb\u5bf5\u7269\u6578\u64da\u6c38\u4e45\u5b58\u5132",
-  "q5_additional": "\u5bf5\u7269\u5b8c\u5168\u96a8\u6a5f\u751f\u6210\uff0c\u6bcf\u6b21\u9818\u990a\u90fd\u4e0d\u540c\uff1b\u50cf\u7d20\u85dd\u8853\u98a8\u683c\uff1b\u6709\u6392\u884c\u699c\u8207\u4ea4\u6613\u5e02\u5834",
-  "research_summary": "## \u7af6\u54c1/\u53c3\u8003\u8cc7\u6e90\n- GitHub topics/virtual-pet\uff1a\u591a\u500b Tamagotchi \u98a8\u683c\u865b\u64ec\u5bf5\u7269\u958b\u6e90\u9805\u76ee\uff08\u700f\u89bd\u5668 + \u72c0\u614b\u6a5f + WebSocket\uff09\n- KilledByAPixel/LittleJS\uff1a\u8f15\u91cf HTML5 \u904a\u6232\u5f15\u64ce\uff08\u7121\u4f9d\u8cf4\uff0c\u2b50 3k+\uff09\uff0c\u9069\u5408\u50cf\u7d20\u5c0f\u904a\u6232\n- Phaser.js\uff1a\u6210\u719f HTML5 \u904a\u6232\u6846\u67b6\uff0c\u6709\u8c50\u5bcc pixel art + arcade \u7bc4\u4f8b\n- itch.io HTML5 Pixel Art + Procedural Generation \u5de5\u5177\u96c6\uff1a\u591a\u6b3e\u985e\u4f3c\u98a8\u683c\u53c3\u8003\n\n## \u6280\u8853\u5efa\u8b70\n- \u6e32\u67d3\u6846\u67b6\uff1aPhaser 3 \u6216 LittleJS\uff08\u8f15\u91cf\uff09\uff0cCanvas \u642d\u914d image-rendering: pixelated\n- \u50cf\u7d20\u751f\u6210\uff1a\u7a0b\u5e8f\u5316\u751f\u6210\uff08Sprite \u7d44\u4ef6\u62fc\u88dd\uff09\uff0c\u652f\u63f4\u8abf\u8272\u76e4\u96a8\u6a5f\u5316\u78ba\u4fdd\u552f\u4e00\u6027\n- \u5f8c\u7aef\uff1aNode.js (Express/Fastify) + PostgreSQL\uff08\u5bf5\u7269\u6578\u64da\u6301\u4e45\u5316\uff09\n- Auth\uff1aEmail Magic Link\uff08JWT token\uff0c\u6709\u6548\u671f 15 \u5206\u9418\uff09+ \u5c08\u5c6c URL\uff08\u9577\u6548 token\uff09\n- Email\uff1aSendGrid / Nodemailer\uff08SMTP fallback\uff09\n\n## \u5df2\u77e5\u98a8\u96aa\n- Email Client \u9810\u6383\u63cf\u554f\u984c\uff1a\u6536\u4fe1\u5f8c client \u53ef\u80fd\u63d0\u524d\u9ede\u64ca magic link \u5c0e\u81f4\u5931\u6548 \u2192 \u6539\u7528 Password email \u914d\u5408\u624b\u52d5\u8f38\u5165\uff0c\u6216\u4f7f\u7528 TOTP fallback\n- Token \u904e\u671f\u7ba1\u7406\uff1a\u5fc5\u9808\u8a2d\u7f6e TTL + already-used tracking\uff0c\u9632\u6b62 token \u91cd\u7528\u653b\u64ca\n- \u5e33\u865f\u679a\u8209\u653b\u64ca\uff1aemail \u4e0d\u8ad6\u662f\u5426\u5b58\u5728\u90fd\u56de\u50b3\u76f8\u540c\u8a0a\u606f\uff08\u4e0d\u900f\u9732\u662f\u5426\u5df2\u5b58\u5728\uff09\n- \u50cf\u7d20\u5bf5\u7269\u552f\u4e00\u6027\u4fdd\u8b49\uff1a\u9700\u8a2d\u8a08\u8db3\u5920\u5927\u7684\u96a8\u6a5f\u7d44\u5408\u7a7a\u9593\uff08\u7a2e\u5b50 + \u591a\u5c6c\u6027\u7d44\u5408\uff09\uff0c\u4e26\u8a18\u9304\u5df2\u7528 seed\n- \u7af6\u6280\u5834\u516c\u5e73\u6027\uff1a\u9632\u6b62\u5237\u6230\u7e3e\uff08Rate limiting + \u5c0d\u6230\u51b7\u537b\u671f\uff09",
-  "q4_dau": "2,000\u20135,000/day\uff08launch\uff09\u2192 peak 20,000/day\uff08viral event\uff09",
-  "q4_peak_ccu": "200\u2013500 \u4eba\uff08\u5e38\u614b\uff09\uff0c\u5cf0\u503c\u7d04 2,000 \u4eba\uff08\u7af6\u6280\u5834\u6d3b\u52d5\u671f\uff09",
-  "q4_estimate_basis": "\u53c3\u8003\u7af6\u54c1\uff1a\u985e Tamagotchi \u700f\u89bd\u5668\u904a\u6232\u6708\u6d3b\u7d04 3-10 \u842c\uff08DAU/MAU \u2248 5-10%\uff09\uff0c\u555f\u52d5\u671f\u4fdd\u5b88\u4f30 DAU 2k-5k\uff1b\u7af6\u6280\u5834\u6d3b\u52d5\u671f\u5cf0\u503c PCU \u7d04 DAU 10%",
+  "key_features": "1. 隨機像素寵物生成（每隻獨一無二）；2. 無需登入即可互動，email 認領制（密碼信 + 專屬 URL）；3. 寵物訓練 / 特殊食物強化系統；4. 競技場（跑步賽 / 相撲擂台等多種對戰模式）；5. 寵物交易市場；6. 寵物戰績 + 全服排行榜",
+  "target_users": "休閒玩家（無帳號門檻）、像素藝術愛好者、輕度競技遊戲玩家",
+  "tech_stack_hints": "HTML5 Canvas / Phaser.js 或純 HTML5；後端 Node.js / Go；資料庫 PostgreSQL；Email 寄送 SendGrid / SMTP",
+  "q1_users": "休閒玩家（無需帳號）、像素藝術愛好者、輕度競技遊戲玩家、寵物收藏愛好者",
+  "q2_painpoint": "無需帳號門檻，email 認領制（密碼 + 專屬 URL）；隨機生成像素寵物；競技場多模式對戰；寵物訓練/強化/交易生態系統",
+  "q3_constraints": "HTML5（支援主流瀏覽器）；像素風格 Canvas 渲染；後端需支援 email 發送；每隻寵物數據永久存儲",
+  "q5_additional": "寵物完全隨機生成，每次領養都不同；像素藝術風格；有排行榜與交易市場",
+  "research_summary": "## 競品/參考資源\n- GitHub topics/virtual-pet：多個 Tamagotchi 風格虛擬寵物開源項目（瀏覽器 + 狀態機 + WebSocket）\n- KilledByAPixel/LittleJS：輕量 HTML5 遊戲引擎（無依賴，⭐ 3k+），適合像素小遊戲\n- Phaser.js：成熟 HTML5 遊戲框架，有豐富 pixel art + arcade 範例\n- itch.io HTML5 Pixel Art + Procedural Generation 工具集：多款類似風格參考\n\n## 技術建議\n- 渲染框架：Phaser 3 或 LittleJS（輕量），Canvas 搭配 image-rendering: pixelated\n- 像素生成：程序化生成（Sprite 組件拼裝），支援調色盤隨機化確保唯一性\n- 後端：Node.js (Express/Fastify) + PostgreSQL（寵物數據持久化）\n- Auth：Email Magic Link（JWT token，有效期 15 分鐘）+ 專屬 URL（長效 token）\n- Email：SendGrid / Nodemailer（SMTP fallback）\n\n## 已知風險\n- Email Client 預掃描問題：收信後 client 可能提前點擊 magic link 導致失效 → 改用 Password email 配合手動輸入，或使用 TOTP fallback\n- Token 過期管理：必須設置 TTL + already-used tracking，防止 token 重用攻擊\n- 帳號枚舉攻擊：email 不論是否存在都回傳相同訊息（不透露是否已存在）\n- 像素寵物唯一性保證：需設計足夠大的隨機組合空間（種子 + 多屬性組合），並記錄已用 seed\n- 競技場公平性：防止刷戰績（Rate limiting + 對戰冷卻期）",
+  "q4_dau": "2,000–5,000/day（launch）→ peak 20,000/day（viral event）",
+  "q4_peak_ccu": "200–500 人（常態），峰值約 2,000 人（競技場活動期）",
+  "q4_estimate_basis": "參考競品：類 Tamagotchi 瀏覽器遊戲月活約 3-10 萬（DAU/MAU ≈ 5-10%），啟動期保守估 DAU 2k-5k；競技場活動期峰值 PCU 約 DAU 10%",
   "idea_generated": true,
   "idea_path": "docs/IDEA.md",
   "completed_steps": [
@@ -65,7 +65,9 @@
     "CONTRACTS",
     "MOCK",
     "PROTOTYPE",
-    "HTML"
+    "HTML",
+    "AUDIO",
+    "ANIM"
   ],
   "idea_review_passed": true,
   "brd_generated": true,
@@ -76,5 +78,153 @@
   "pipeline_hash": "d2e551157c0da496",
   "lang_stack": "Node.js 20 LTS + Fastify 4",
   "lang_stack_locked": true,
-  "current_step": "BDD-client"
+  "current_step": "BDD-client",
+  "review_progress": {
+    "AUDIO": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "ANIM": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "BDD-server": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "BDD-client": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "PRD": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "CONSTANTS": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "PDD": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "VDD": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "EDD": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "ARCH": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    }
+  },
+  "last_completed": "PRD",
+  "special_completed": {
+    "CONTRACTS": true,
+    "MOCK": true,
+    "PROTOTYPE": true
+  }
 }
