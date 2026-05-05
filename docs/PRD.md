@@ -1129,7 +1129,7 @@ Metrics that must not degrade while improving the North Star:
 - K3: Legal blocks email claim mechanism in target markets with no workaround → Kill and redesign identity layer
 - K4: Technical PoC shows infrastructure cost > $500/month at MVP scale → redesign technical approach
 
-### 9.4 A/B Test Plan
+## §9.4 Experiment & A/B Test Plan（實驗與 A/B 測試計畫）
 
 | Test ID | Hypothesis | Variant A (Control) | Variant B (Test) | Primary Metric | Sample Size | Duration |
 |---------|-----------|---------------------|-----------------|---------------|:---:|---------|
@@ -1138,7 +1138,7 @@ Metrics that must not degrade while improving the North Star:
 | AB-003 | Showing opponent's pet stats before battle increases arena entries | Enter arena → battle directly | Enter arena → preview opponent stats → confirm | Arena entry rate | 500 sessions/arm | 2 weeks |
 | AB-004 | Post-battle share prompt increases virality | Share button on result screen (passive) | Share prompt modal 2 seconds after result | Share click rate | 500 battles/arm | 2 weeks |
 
-### 9.5 Definition of Done
+## §9.5 Definition of Done（完成定義）
 
 **Product DoD**:
 - [ ] All P0 User Stories have ≥ 3 passing acceptance criteria tests

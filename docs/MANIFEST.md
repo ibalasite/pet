@@ -132,7 +132,7 @@ Each step must pass the following gate checks before being marked COMPLETE.
 
 All generated documents must pass:
 
-1. **No bare placeholders**: No `{{PLACEHOLDER}}` strings in output
+1. **No bare placeholders**: No unfilled template placeholder strings in output
 2. **No duplicate paragraphs**: Paragraphs ≥150 chars must not repeat verbatim
 3. **Minimum section words**: Each section must contain ≥30 words
 4. **No trivial entity names**: No generic names like "Entity1", "Component2"
