@@ -32,12 +32,12 @@
         <input class="search-input" type="search" placeholder="搜尋文件...">
         <div class="search-results"></div>
       </div>
-      
+      <a class="nav-gh-link" href="https://github.com/ibalasite/pet" target="_blank" rel="noopener">⌥ GitHub</a>
       <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
   </header>
   <div class="doc-page-banner">
-    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 文件中心</p>
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 文件中心 <span style="margin-left:1rem"><a href="https://github.com/ibalasite/pet" target="_blank" rel="noopener" style="color:var(--banner-link)">⌥ GitHub ↗</a></span></p>
     <h1 class="banner-title">pet 文件中心</h1>
   </div>
   <div class="page-wrapper">
@@ -154,7 +154,7 @@
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><p>&lt;!--</p>
 <p>DOC-ID:  README-PIXEL-PET-ARENA-20260505</p>
-<p>Version: v1.0</p>
+<p>Version: v1.1</p>
 <p>Status:  DRAFT</p>
 <p>Author:  AI Generated (gendoc readme)</p>
 <p>Date:    2026-05-05</p>
@@ -162,10 +162,11 @@
 <ul><li style="margin-left:2.0rem">BRD: docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">PRD: docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">PDD: docs/PDD.md   (PDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">EDD: docs/EDD.md   (EDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">ARCH: docs/ARCH.md (ARCH-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">API: docs/API.md   (API-PIXEL-PET-ARENA-20260503)</li></ul>
 <p>Change log:</p>
 <p>v1.0  2026-05-05  AI Generated (gendoc readme)  Initial generated draft</p>
+<p>v1.1  2026-05-05  AI Generated (gendoc readme)  Fix GitHub repo URLs to ibalasite/pet</p>
 <p>--&gt;</p>
 <h1>pixel-pet-arena</h1>
 <blockquote><p>Zero-account-barrier HTML5 browser game where players claim, train, and battle procedurally-generated pixel pets via email — no registration required.</p></blockquote>
-<p><a href="https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml" target="_blank" rel="noopener"><img src="https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml/badge.svg" alt="CI" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
+<p><a href="https://github.com/ibalasite/pet/actions/workflows/ci.yml" target="_blank" rel="noopener"><img src="https://github.com/ibalasite/pet/actions/workflows/ci.yml/badge.svg" alt="CI" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <p><a href="LICENSE" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <p><a href="https://nodejs.org/" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Node.js-20%20LTS-green.svg" alt="Node.js" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <p><a href="https://www.typescriptlang.org/" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/TypeScript-5-blue.svg" alt="TypeScript" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
@@ -249,8 +250,8 @@
 <h3>Docker (Recommended)</h3>
 <p>The fastest path: Docker Compose starts the app, PostgreSQL, Redis, and MailHog (local email catcher) with a single command.</p>
 <p><strong>Prerequisites:</strong> <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">Docker Desktop</a> 24+ (includes Compose v2)</p>
-<pre><code class="language-bash">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
-cd pixel-pet-arena
+<pre><code class="language-bash">git clone https://github.com/ibalasite/pet.git
+cd pet
 
 # Configure environment
 cp .env.example .env
@@ -272,8 +273,8 @@ docker compose ps
 <h3>macOS / Linux (Native)</h3>
 <p><strong>Prerequisites:</strong></p>
 <ul><li>Node.js 20 LTS (<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">install guide</a>)</li><li>PostgreSQL 15+ (local) or a remote Supabase connection string</li><li>Redis 7+ (local) or a remote Upstash connection string</li></ul>
-<pre><code class="language-bash">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
-cd pixel-pet-arena
+<pre><code class="language-bash">git clone https://github.com/ibalasite/pet.git
+cd pet
 
 # Install all workspace dependencies
 npm install
@@ -297,8 +298,8 @@ npm run dev</code></pre>
 <h3>Windows (PowerShell)</h3>
 <blockquote><p><strong>Recommendation:</strong> Use <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">WSL 2</a> + Docker Desktop for the smoothest experience. The commands below work in PowerShell 7+ natively.</p></blockquote>
 <p><strong>Prerequisites:</strong> Node.js 20 LTS, PostgreSQL 15+, Redis 7+ (all installable via <a href="https://learn.microsoft.com/windows/package-manager/" target="_blank" rel="noopener">winget</a>).</p>
-<pre><code class="language-powershell">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
-Set-Location pixel-pet-arena
+<pre><code class="language-powershell">git clone https://github.com/ibalasite/pet.git
+Set-Location pet
 
 # Install all workspace dependencies
 npm install
@@ -451,7 +452,7 @@ npm run test:e2e</code></pre>
 <ol><li><strong>Email pre-scan (Gmail/Outlook)</strong>: Email clients may auto-click URLs in emails. Mitigated by using a 6-digit numeric code + separate URL (not a magic-link), requiring manual code entry.</li><li><strong>Token enumeration surface</strong>: Pet access tokens are 32-byte cryptographically random — brute-force infeasible — but long-lived. Pets with no owner interaction for <code>PET_RESERVATION_TTL_HOURS</code> (24h) are cleaned up.</li><li><strong>Arena matchmaking at low CCU</strong>: With &lt; ~50 online players, AI-controlled opponents fill matchmaking after the 30-second timeout. AI fallback stats are seeded from the global average.</li><li><strong>Leaderboard eventual consistency</strong>: Redis sorted set may lag up to 30 seconds behind the authoritative PostgreSQL <code>battle_records</code> table during peak load. Displayed with a &quot;last updated&quot; timestamp.</li><li><strong>Marketplace (P2) not yet implemented</strong>: Pet trading feature (<code>FF_MARKETPLACE</code>) is behind a feature flag and not available in v1.0.</li></ol>
 <hr>
 <h2>Changelog</h2>
-<p>See <a href="https://github.com/pixel-pet-arena/pixel-pet-arena/releases" target="_blank" rel="noopener">GitHub Releases</a> for versioned release notes.</p>
+<p>See <a href="https://github.com/ibalasite/pet/releases" target="_blank" rel="noopener">GitHub Releases</a> for versioned release notes.</p>
 <hr>
 <h2>Development Guide</h2>
 <blockquote><p>This README is auto-generated from <code>docs/BRD.md</code>, <code>docs/PRD.md</code>, <code>docs/EDD.md</code>, <code>docs/ARCH.md</code>, and related upstream documents via the <code>gendoc</code> pipeline. To regenerate: <code>/gendoc readme</code>.</p></blockquote>
