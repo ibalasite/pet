@@ -1,11 +1,26 @@
 # EDD — Engineering Design Document
-## pixel-pet-arena
 
-DOC-ID: EDD-PIXEL-PET-ARENA-20260503
-Status: DRAFT
-Author: AI Generated (gendoc edd)
-Created: 2026-05-03
-Upstream: PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503
+---
+
+## Document Control
+
+| 欄位 | 內容 |
+|------|------|
+| **DOC-ID** | EDD-PIXEL-PET-ARENA-20260503 |
+| **產品名稱** | Pixel Pet Arena |
+| **文件版本** | v1.0 |
+| **狀態** | DRAFT |
+| **作者** | AI Generated (gendoc edd) |
+| **建立日期** | 2026-05-03 |
+| **上游文件** | PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503 |
+
+---
+
+## Change Log
+
+| 版本 | 日期 | 作者 | 變更摘要 |
+|------|------|------|---------|
+| v1.0 | 2026-05-03 | AI Generated (gendoc edd) | 初稿：從 PRD / PDD / VDD / CONSTANTS 生成完整工程設計文件 |
 
 ---
 
@@ -1713,3 +1728,100 @@ For claim flow optimization (tests 001–002) and arena engagement tests (003–
 ---
 
 *This EDD is the authoritative engineering specification for pixel-pet-arena. All implementation decisions, schema designs, and API contracts must reference and comply with this document. Numeric values are sourced exclusively from CONSTANTS-PIXEL-PET-ARENA-20260503. Conflicts between this EDD and upstream PDD/VDD/PRD shall be resolved by filing an ECR (Engineering Change Request) against the relevant upstream document.*
+
+---
+
+## §15. Risk Assessment
+
+| # | Risk | Probability | Impact | Mitigation |
+|---|------|-------------|--------|------------|
+| R-01 | Supabase free tier limits hit before DAU target (5k DAU) | Medium | High | Monitor connection pool utilization; upgrade to Pro at 60% threshold |
+| R-02 | Phaser 3 Canvas performance on low-end mobile devices (< 30 FPS) | Medium | Medium | Progressive enhancement: fall back to CSS sprite animation; test on Galaxy A13 |
+| R-03 | SendGrid deliverability below 98% SLA (CONSTANTS: CLAIM_EMAIL_DELIVERY_RATE_TARGET) | Low | High | SPF/DKIM configured; Nodemailer SMTP fallback after 3 consecutive failures |
+| R-04 | Redis eviction during leaderboard peak causes stale data > 30s (CONSTANTS: LEADERBOARD_UPDATE_LAG_MAX) | Low | Medium | Upstash durability + explicit TTL; fallback to PostgreSQL read on cache miss |
+| R-05 | GDPR erasure timeline (7 days) missed due to async queue backlog | Low | High | Dead letter queue + alerting; manual override by admin within 24h |
+| R-06 | MVP budget overrun (CONSTANTS: MVP_BUDGET = $40k) from infrastructure scaling events | Low | High | Infrastructure cost ceiling alerts at $200/month (CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX) |
+
+---
+
+## §16. Technical Debt & Known Compromises
+
+| # | Item | Compromise | Accepted Reason | Target Resolution |
+|---|------|------------|-----------------|------------------|
+| TD-01 | Pet ownership transfer not implemented | Pets become unclaimed on GDPR erasure (OQ-E04) | MVP scope reduction | Post-v1 if user demand confirmed |
+| TD-02 | Feature flags are ENV-variable based (no runtime toggle) | Cannot toggle FF_MARKETPLACE without redeploy | LaunchDarkly integration deferred to beta+ | Post-beta if A/B toggle required |
+| TD-03 | Admin portal on same Vercel project (`/admin` route) | Shared CSP; slightly weaker isolation | Simpler deployment for MVP | Post-GA if security audit requires subdomain isolation |
+| TD-04 | Server-side OG image generation deferred (Puppeteer) | Static HTML fallback for battle share cards | Puppeteer infra complexity too high for MVP | Post-beta: Cloudflare Browser Rendering |
+| TD-05 | Sumo arena mode battle logic shares same random modifier formula as Race mode | Stat selection (Speed vs Strength) confirmed, but edge cases when stats equal are not fully spec'd (OQ-E08) | CONSTANTS lock at ±15% covers both modes | Resolve before arena public launch |
+
+---
+
+## §18. References
+
+| 文件 | 路徑 | 說明 |
+|------|------|------|
+| PRD | `docs/PRD.md` | 功能需求、NFR、驗收條件 |
+| PDD | `docs/PDD.md` | UI/UX 設計規格 |
+| VDD | `docs/VDD.md` | 視覺設計與 Design Token |
+| CONSTANTS | `docs/CONSTANTS.md` | 所有量化常數唯一真相來源 |
+| SCHEMA | `docs/SCHEMA.md` | 資料庫 schema 詳細定義 |
+| API | `docs/API.md` | REST API 端點規格 |
+| ARCH | `docs/ARCH.md` | 系統架構概覽 |
+| Supabase Docs | https://supabase.com/docs | PostgreSQL + Auth 平台文件 |
+| Phaser 3 | https://phaser.io/phaser3 | 遊戲框架 |
+| Railway | https://railway.app/docs | Node.js backend 部署 |
+| Upstash | https://upstash.com/docs/redis | Serverless Redis |
+
+---
+
+## §19. Approval Sign-off
+
+| 角色 | 負責人 | 審核日期 | 簽核狀態 |
+|------|--------|---------|---------|
+| Engineering Lead | TBD | — | Pending |
+| Product Manager | TBD | — | Pending |
+| Security Reviewer | TBD | — | Pending |
+| Architecture Reviewer | TBD | — | Pending |
+
+> APPROVED 版本的任何架構變更需走 ECR（Engineering Change Request）流程。
+
+---
+
+## §20. Feature Flag Engineering
+
+Pixel Pet Arena uses environment-variable-based feature flags for MVP (no runtime toggle service). All flags are defined in `.env` / Vercel project environment variables.
+
+| Flag | Default | Description | Activation Trigger (from CONSTANTS) |
+|------|---------|-------------|-------------------------------------|
+| `FF_MARKETPLACE` | `false` | Enable pet trading marketplace | DAU ≥ 1000 sustained 2 weeks (CONSTANTS: DAU_MARKETPLACE_TRIGGER) |
+| `FF_ARENA_SUMO` | `false` | Enable sumo battle mode | Post-alpha, after Race mode stability confirmed |
+| `FF_ADMIN_PORTAL` | `true` | Enable `/admin` routes | Always-on (has_admin_backend=true) |
+
+### Flag 生命週期檢查清單
+
+- [ ] Flag 在 `.env.example` 中宣告並附說明
+- [ ] Flag 預設值為 `false`（除 FF_ADMIN_PORTAL）
+- [ ] Flag 啟用條件已在 CONSTANTS.md 或 PRD 中量化定義
+- [ ] Flag 移除計畫：功能 GA 後 30 天內清理舊 flag 分支
+- [ ] 後端 guard：`if (!FF_MARKETPLACE) return 404`（不暴露未完成功能）
+- [ ] 前端 guard：路由層 redirect + UI 元素隱藏
+
+---
+
+## §21. Cross-Cutting Concerns
+
+### §21.1 Logging 標準
+
+All services emit structured JSON logs with fields: `timestamp`, `level`, `service`, `trace_id`, `user_id` (hashed), `event`, `duration_ms`. Raw IP and email never logged.
+
+### §21.2 Distributed Tracing
+
+`trace_id` propagated via `X-Trace-ID` header across all service boundaries (Next.js → Railway backend → Supabase → Upstash). Used for debugging arena battle latency > 2s (CONSTANTS: `Arena Battle Result E2E`).
+
+### §21.3 Configuration Management
+
+All environment-specific config (DB URLs, API keys, feature flags) via Vercel/Railway project env vars. No config hardcoded. Required vars validated at startup; missing required var causes immediate `process.exit(1)` with clear error message.
+
+### §21.4 Secrets Rotation
+
+SendGrid API key, Supabase service role key, and admin JWT secret rotated every 90 days or immediately on exposure. Rotation procedure documented in `docs/runbook.md §5 Secret Rotation`.
