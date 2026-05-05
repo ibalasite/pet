@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Display Prototype — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › prototype/ › Pet Display Prototype</p>
+    <h1 class="banner-title">prototype/ › Pet Display Prototype</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details open>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link active" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Pet Display Prototype Specification</h1>
+<h2>Overview</h2>
+<p>The Pet Display page is the primary screen players see after login. It centers the player&#x27;s active pixel-art pet, exposes live stat bars, and offers the three core actions: Train, Challenge, and View Records. The page is built in React 18 and embeds a Phaser 3 canvas for animated sprite rendering. It communicates with the Fastify 4 API on port 3000 and is served from the player-app on port 5173.</p>
+<hr>
+<h2>Screen Layout</h2>
+<pre><code class="">┌──────────────────────────────────────────────┐
+│  pixel-pet-arena          [Player: dragonfly] │
+├──────────────────────────────────────────────┤
+│                                              │
+│           ┌──────────────────┐               │
+│           │                  │               │
+│           │  Phaser 3 Canvas │               │
+│           │   (pet sprite)   │               │
+│           │   160 × 160 px   │               │
+│           └──────────────────┘               │
+│             Pet Name: Blazekin               │
+│             Level 12  ·  Type: Fire          │
+│                                              │
+│  HP   [████████████░░░░░░]  84 / 100         │
+│  ATK  [█████████░░░░░░░░░]  62 / 100         │
+│  DEF  [██████░░░░░░░░░░░░]  41 / 100         │
+│  SPD  [███████████░░░░░░░]  74 / 100         │
+│                                              │
+│  ┌──────────┐ ┌──────────┐ ┌─────────────┐  │
+│  │  Train   │ │Challenge │ │ View Records│  │
+│  └──────────┘ └──────────┘ └─────────────┘  │
+│                                              │
+│  Last fed: 2 hours ago                       │
+└──────────────────────────────────────────────┘</code></pre>
+<p>The layout uses a single-column flex container on mobile (&lt; 768 px) and centers within a max-width 480 px card on wider viewports. The Phaser canvas maintains a fixed 160 × 160 pixel intrinsic size but is scaled via CSS <code>transform: scale()</code> at larger breakpoints to preserve crisp pixel art rendering without browser interpolation artifacts.</p>
+<hr>
+<h2>Component Tree</h2>
+<pre><code class="">PetDisplay                         # page-level container, owns all state
+├── PetSprite                      # wraps the Phaser 3 Game instance
+│   └── &lt;canvas id=&quot;pet-canvas&quot;&gt;  # injected by Phaser on mount
+├── StatPanel                      # renders HP/ATK/DEF/SPD progress bars
+│   ├── StatBar (HP)
+│   ├── StatBar (ATK)
+│   ├── StatBar (DEF)
+│   └── StatBar (SPD)
+└── ActionButtons                  # Train / Challenge / View Records row
+    ├── TrainButton
+    ├── ChallengeButton
+    └── RecordsButton</code></pre>
+<p><strong>PetDisplay</strong> is the sole owner of shared state. It passes immutable prop slices down to each child. <code>PetSprite</code> receives a <code>spritesheet</code> URL and an <code>animationKey</code> string; it boots a Phaser 3 scene on mount and destroys it on unmount to avoid memory leaks. <code>StatPanel</code> receives a <code>stats</code> object (<code>{ hp, atk, def, spd, maxHp, maxAtk, maxDef, maxSpd }</code>). <code>ActionButtons</code> receives callback props (<code>onTrain</code>, <code>onChallenge</code>, <code>onViewRecords</code>) and a <code>disabled</code> boolean that is <code>true</code> while any API call is in-flight.</p>
+<hr>
+<h2>Key State</h2>
+<table>
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>currentPet</code></td><td>`Pet \</td><td>null`</td><td>Full pet entity fetched from <code>GET /api/v1/pet</code>. Null during initial load.</td></tr>
+<tr><td><code>isLoading</code></td><td><code>boolean</code></td><td><code>true</code> while either API call is pending. Drives skeleton loader visibility.</td></tr>
+<tr><td><code>lastFedTimestamp</code></td><td>`string \</td><td>null`</td><td>ISO-8601 datetime from <code>pet.status.lastFedAt</code>. Displayed as relative time (&quot;2 hours ago&quot;).</td></tr>
+<tr><td><code>statusError</code></td><td>`string \</td><td>null`</td><td>Human-readable error string shown in an inline alert if either fetch fails.</td></tr>
+<tr><td><code>animationKey</code></td><td><code>string</code></td><td>Phaser animation key currently playing on the sprite, e.g. <code>&quot;idle&quot;</code>, <code>&quot;celebrate&quot;</code>. Set to <code>&quot;celebrate&quot;</code> briefly after a successful training session.</td></tr>
+</table>
+<p>State is held with <code>useState</code> / <code>useReducer</code> inside <code>PetDisplay</code>. No global store is needed for this screen because the data is local to the page session. The bearer token is read once from <code>localStorage</code> at mount time via a <code>useAuth</code> hook and attached to every request header.</p>
+<hr>
+<h2>API Calls</h2>
+<h3>GET /api/v1/pet</h3>
+<p>Fetches the player&#x27;s active pet entity including sprite metadata, level, type, and base stats. Called once on component mount. On success the response is stored in <code>currentPet</code>. On 401 the player is redirected to the login screen. On any other error <code>statusError</code> is set.</p>
+<pre><code class="">Authorization: Bearer &lt;token&gt;
+
+Response 200:
+{
+  &quot;id&quot;: &quot;pet_abc123&quot;,
+  &quot;name&quot;: &quot;Blazekin&quot;,
+  &quot;level&quot;: 12,
+  &quot;type&quot;: &quot;Fire&quot;,
+  &quot;spritesheet&quot;: &quot;/assets/sprites/fire-12.png&quot;,
+  &quot;stats&quot;: { &quot;hp&quot;: 84, &quot;maxHp&quot;: 100, &quot;atk&quot;: 62, &quot;maxAtk&quot;: 100,
+             &quot;def&quot;: 41, &quot;maxDef&quot;: 100, &quot;spd&quot;: 74, &quot;maxSpd&quot;: 100 }
+}</code></pre>
+<h3>GET /api/v1/pet/status</h3>
+<p>Fetches live status fields: <code>lastFedAt</code>, <code>energyLevel</code>, and <code>hungerLevel</code>. Called after the main pet fetch resolves (sequential, not parallel, because <code>lastFedTimestamp</code> is secondary information). Polled every 60 seconds while the tab is visible using <code>document.visibilityState</code> gating to avoid unnecessary requests in background tabs.</p>
+<pre><code class="">Response 200:
+{
+  &quot;lastFedAt&quot;: &quot;2026-05-04T08:12:00Z&quot;,
+  &quot;energyLevel&quot;: 73,
+  &quot;hungerLevel&quot;: 42
+}</code></pre>
+<hr>
+<h2>Interaction Flows</h2>
+<h3>Train Button</h3>
+<ol><li>User clicks <strong>Train</strong>. <code>ActionButtons</code> calls <code>onTrain</code>.</li><li><code>PetDisplay</code> sets <code>isLoading: true</code> and disables all three buttons.</li><li><code>POST /api/v1/pet/train</code> is dispatched with the bearer token.</li><li>On success: stats are updated in <code>currentPet</code>, <code>animationKey</code> is set to <code>&quot;celebrate&quot;</code> for 2 seconds, then reverts to <code>&quot;idle&quot;</code>.</li><li>On failure: <code>statusError</code> is populated; buttons re-enable after a 500 ms debounce to prevent rage-clicks.</li></ol>
+<h3>Challenge Button</h3>
+<ol><li>User clicks <strong>Challenge</strong>. React Router navigates to <code>/arena</code> (the Arena Battle screen).</li><li>The current <code>currentPet.id</code> is passed as route state so the arena screen does not need to re-fetch the pet.</li></ol>
+<h3>View Records Button</h3>
+<ol><li>Navigates to <code>/records/:petId</code> using React Router, passing the pet id as a URL segment.</li><li>PetDisplay does not unmount immediately; the route transition is animated with a slide-left CSS transition.</li></ol>
+<hr>
+<h2>Responsive Behavior</h2>
+<ul><li><strong>320 – 767 px (mobile):</strong> Single-column layout. Canvas is scaled to 120 × 120 px. Action buttons stack vertically with full width.</li><li><strong>768 – 1023 px (tablet):</strong> Card is centered at 400 px. Canvas renders at 160 × 160 px. Buttons arrange in a single row.</li><li><strong>1024 px and above (desktop):</strong> Card max-width 480 px with generous vertical whitespace. No layout changes from tablet beyond increased padding.</li></ul>
+<p>CSS <code>image-rendering: pixelated</code> is applied to the canvas element at all breakpoints to keep pixel art crisp regardless of scaling ratio.</p>
+<hr>
+<h2>Phaser 3 Integration Point</h2>
+<p><code>PetSprite</code> mounts a minimal Phaser 3 <code>Game</code> config targeting the <code>&lt;canvas id=&quot;pet-canvas&quot;&gt;</code> element:</p>
+<pre><code class="language-ts">new Phaser.Game({
+  type: Phaser.CANVAS,
+  canvas: document.getElementById(&#x27;pet-canvas&#x27;) as HTMLCanvasElement,
+  width: 160,
+  height: 160,
+  backgroundColor: &#x27;transparent&#x27;,
+  scene: PetSpriteScene,
+  transparent: true,
+});</code></pre>
+<p><code>PetSpriteScene</code> loads the spritesheet URL received from props, defines <code>idle</code> and <code>celebrate</code> animation keys using the frame data embedded in the sprite filename convention (<code>fire-12.png</code> → 8-frame sheet, 4 frames per row). The scene listens for a custom Phaser event <code>&#x27;setAnimation&#x27;</code> dispatched by <code>PetSprite</code> whenever the <code>animationKey</code> prop changes. The React <code>useEffect</code> cleanup calls <code>game.destroy(true)</code> to release the WebGL/Canvas context and remove the DOM canvas element.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,532 +1,407 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — Runbook — pixel-pet-arena</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runbook — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">Runbook — pixel-pet-arena</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>Runbook — pixel-pet-arena</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="runbook--pixel-pet-arena">Runbook — pixel-pet-arena</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>DOC-ID</strong>: RUNBOOK-PIXEL-PET-ARENA-20260504</p>
-<p class="doc-p"><strong>Status</strong>: ACTIVE</p>
-<p class="doc-p"><strong>Last Updated</strong>: 2026-05-04</p>
-<p class="doc-p"><strong>Maintainer</strong>: [ON-CALL-ENGINEER]</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="table-of-contents">Table of Contents</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">This runbook covers the full operational lifecycle for the pixel-pet-arena stack. Sections are ordered from routine operations to emergency response:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <a href="#deployment">Deployment</a> — pre-flight checklist, build and deploy steps, smoke tests, zero-downtime strategy</p>
-<p class="doc-p">2. <a href="#incident-response">Incident Response</a> — severity matrix (P0/P1/P2), escalation paths, and specific playbooks</p>
-<p class="doc-p">3. <a href="#rollback">Rollback</a> — backend image rollback, database migration revert, CDN cache invalidation</p>
-<p class="doc-p">4. <a href="#health-checks-and-monitoring">Health Checks and Monitoring</a> — <code>/health</code> schema, alert thresholds, observability setup</p>
-<p class="doc-p">5. <a href="#on-call-quick-reference">On-Call Quick Reference</a> — critical endpoints, env vars, common error codes, contacts</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="deployment">Deployment</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">This section covers the full deployment lifecycle for the pixel-pet-arena stack: Node.js/Fastify backend, React player frontend, and Vue 3 admin portal. Always run through the pre-deployment checklist before promoting any change to production.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="pre-deployment-checklist">Pre-Deployment Checklist</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Complete every item before starting a deploy. A missed item can cause downtime or data corruption.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>Database migrations</strong> — verify all pending Supabase migrations have been reviewed and tested in staging. Run <code>pnpm db:migrate:status</code> to confirm no unexecuted migrations remain.</p>
-<p class="doc-p">2. <strong>Environment variables</strong> — confirm the following are set in the target environment (Railway/Fly.io dashboard or secrets manager):</p>
-<ul class="doc-list">
-<li><code>DATABASE_URL</code> (Supabase connection string with connection pooling via PgBouncer)</li>
-<li><code>REDIS_URL</code> (Upstash Redis URL with TLS)</li>
-<li><code>JWT_SECRET</code> (≥ 32 bytes, base64url)</li>
-<li><code>SENDGRID_API_KEY</code></li>
-<li><code>ADMIN_TOTP_ISSUER</code></li>
-<li><code>FF_MARKETPLACE</code> (default: <code>false</code>)</li>
-<li><code>FF_ARENA_SUMO</code> (default: <code>true</code>)</li>
-<li><code>NODE_ENV=production</code></li>
-<li><code>LOG_LEVEL</code> (e.g. <code>info</code>)</li>
-</ul>
-<p class="doc-p">3. <strong>Feature flags</strong> — review <code>FF_MARKETPLACE</code> and <code>FF_ARENA_SUMO</code> values. <code>FF_MARKETPLACE</code> is disabled by default and must not be toggled without meeting the DAU threshold of 1,000 sustained for 2 weeks (<code>dau_marketplace_trigger = 1000</code>).</p>
-<p class="doc-p">4. <strong>CI pipeline</strong> — confirm all CI checks (lint, type-check, unit tests at ≥ 80% coverage, build) are green on the target commit SHA.</p>
-<p class="doc-p">5. <strong>Staging smoke test</strong> — validate that staging passed smoke tests (see Post-Deployment Smoke Tests below) within the last 24 hours.</p>
-<p class="doc-p">6. <strong>Change window</strong> — schedule deploys outside peak hours (UTC 14:00–22:00 covers US evening prime time; prefer UTC 06:00–10:00).</p>
-<p class="doc-p">7. <strong>Rollback plan</strong> — identify the last known-good image tag or commit SHA before starting.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="backend-deployment-steps">Backend Deployment Steps</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The backend is a Node.js 20 / Fastify 4 / TypeScript service deployed on Railway or Fly.io.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Pull the target branch and verify the commit SHA:</p>
-<pre class="doc-code"><code class="lang-bash">   git fetch origin
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Runbook</p>
+    <h1 class="banner-title">Runbook</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link active" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Runbook — pixel-pet-arena</h1>
+<p><strong>DOC-ID</strong>: RUNBOOK-PIXEL-PET-ARENA-20260504</p>
+<p><strong>Status</strong>: ACTIVE</p>
+<p><strong>Last Updated</strong>: 2026-05-04</p>
+<p><strong>Maintainer</strong>: [ON-CALL-ENGINEER]</p>
+<hr>
+<h2>Table of Contents</h2>
+<p>This runbook covers the full operational lifecycle for the pixel-pet-arena stack. Sections are ordered from routine operations to emergency response:</p>
+<ol><li><a href="#deployment" target="_blank" rel="noopener">Deployment</a> — pre-flight checklist, build and deploy steps, smoke tests, zero-downtime strategy</li><li><a href="#incident-response" target="_blank" rel="noopener">Incident Response</a> — severity matrix (P0/P1/P2), escalation paths, and specific playbooks</li><li><a href="#rollback" target="_blank" rel="noopener">Rollback</a> — backend image rollback, database migration revert, CDN cache invalidation</li><li><a href="#health-checks-and-monitoring" target="_blank" rel="noopener">Health Checks and Monitoring</a> — <code>/health</code> schema, alert thresholds, observability setup</li><li><a href="#on-call-quick-reference" target="_blank" rel="noopener">On-Call Quick Reference</a> — critical endpoints, env vars, common error codes, contacts</li></ol>
+<hr>
+<h2>Deployment</h2>
+<p>This section covers the full deployment lifecycle for the pixel-pet-arena stack: Node.js/Fastify backend, React player frontend, and Vue 3 admin portal. Always run through the pre-deployment checklist before promoting any change to production.</p>
+<h3>Pre-Deployment Checklist</h3>
+<p>Complete every item before starting a deploy. A missed item can cause downtime or data corruption.</p>
+<ol><li><strong>Database migrations</strong> — verify all pending Supabase migrations have been reviewed and tested in staging. Run <code>pnpm db:migrate:status</code> to confirm no unexecuted migrations remain.</li><li><strong>Environment variables</strong> — confirm the following are set in the target environment (Railway/Fly.io dashboard or secrets manager):</li></ol>
+<ul><li style="margin-left:1.5rem"><code>DATABASE_URL</code> (Supabase connection string with connection pooling via PgBouncer)</li><li style="margin-left:1.5rem"><code>REDIS_URL</code> (Upstash Redis URL with TLS)</li><li style="margin-left:1.5rem"><code>JWT_SECRET</code> (≥ 32 bytes, base64url)</li><li style="margin-left:1.5rem"><code>SENDGRID_API_KEY</code></li><li style="margin-left:1.5rem"><code>ADMIN_TOTP_ISSUER</code></li><li style="margin-left:1.5rem"><code>FF_MARKETPLACE</code> (default: <code>false</code>)</li><li style="margin-left:1.5rem"><code>FF_ARENA_SUMO</code> (default: <code>true</code>)</li><li style="margin-left:1.5rem"><code>NODE_ENV=production</code></li><li style="margin-left:1.5rem"><code>LOG_LEVEL</code> (e.g. <code>info</code>)</li></ul>
+<ol><li><strong>Feature flags</strong> — review <code>FF_MARKETPLACE</code> and <code>FF_ARENA_SUMO</code> values. <code>FF_MARKETPLACE</code> is disabled by default and must not be toggled without meeting the DAU threshold of 1,000 sustained for 2 weeks (<code>dau_marketplace_trigger = 1000</code>).</li><li><strong>CI pipeline</strong> — confirm all CI checks (lint, type-check, unit tests at ≥ 80% coverage, build) are green on the target commit SHA.</li><li><strong>Staging smoke test</strong> — validate that staging passed smoke tests (see Post-Deployment Smoke Tests below) within the last 24 hours.</li><li><strong>Change window</strong> — schedule deploys outside peak hours (UTC 14:00–22:00 covers US evening prime time; prefer UTC 06:00–10:00).</li><li><strong>Rollback plan</strong> — identify the last known-good image tag or commit SHA before starting.</li></ol>
+<h3>Backend Deployment Steps</h3>
+<p>The backend is a Node.js 20 / Fastify 4 / TypeScript service deployed on Railway or Fly.io.</p>
+<ol><li>Pull the target branch and verify the commit SHA:</li></ol>
+<pre><code class="language-bash">   git fetch origin
    git checkout &lt;SHA-or-tag&gt;</code></pre>
-<p class="doc-p">2. Build the production artifact:</p>
-<pre class="doc-code"><code class="lang-bash">   pnpm install --frozen-lockfile
+<ol><li>Build the production artifact:</li></ol>
+<pre><code class="language-bash">   pnpm install --frozen-lockfile
    pnpm build</code></pre>
-<p class="doc-p">3. Push or trigger the platform deployment:</p>
-<pre class="doc-code"><code class="lang-bash">   # Railway
+<ol><li>Push or trigger the platform deployment:</li></ol>
+<pre><code class="language-bash">   # Railway
    railway up --service api --environment production
 
    # Fly.io
    fly deploy --app pixel-pet-arena-api --image registry.fly.io/pixel-pet-arena-api:&lt;tag&gt;</code></pre>
-<p class="doc-p">4. Wait for the new instance to pass the health check. Poll until HTTP 200:</p>
-<pre class="doc-code"><code class="lang-bash">   until curl -sf https://api.pixel-pet-arena.com/health; do
-     echo "Waiting for health check…"; sleep 5
+<ol><li>Wait for the new instance to pass the health check. Poll until HTTP 200:</li></ol>
+<pre><code class="language-bash">   until curl -sf https://api.pixel-pet-arena.com/health; do
+     echo &quot;Waiting for health check…&quot;; sleep 5
    done
-   echo "Backend healthy"</code></pre>
-<p class="doc-p">5. Confirm the <code>/health</code> response body includes <code>"status": "healthy"</code> and reports database and Redis as connected (see <a href="#health-checks-and-monitoring">Health Checks and Monitoring</a>).</p>
-<p class="doc-p">6. Monitor error rate in the observability dashboard for 5 minutes. If error rate exceeds 1% (<code>observability_error_rate_alert_window = 5</code> min), this is a P1 event — initiate rollback immediately if the regression correlates with the deploy.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="frontend-player-build-and-cdn-deploy">Frontend (Player) Build and CDN Deploy</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The player frontend is React 18 + Phaser 3, built with Vite 5.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Build the production bundle:</p>
-<pre class="doc-code"><code class="lang-bash">   cd apps/player
+   echo &quot;Backend healthy&quot;</code></pre>
+<ol><li>Confirm the <code>/health</code> response body includes <code>&quot;status&quot;: &quot;healthy&quot;</code> and reports database and Redis as connected (see <a href="#health-checks-and-monitoring" target="_blank" rel="noopener">Health Checks and Monitoring</a>).</li><li>Monitor error rate in the observability dashboard for 5 minutes. If error rate exceeds 1% (<code>observability_error_rate_alert_window = 5</code> min), this is a P1 event — initiate rollback immediately if the regression correlates with the deploy.</li></ol>
+<h3>Frontend (Player) Build and CDN Deploy</h3>
+<p>The player frontend is React 18 + Phaser 3, built with Vite 5.</p>
+<ol><li>Build the production bundle:</li></ol>
+<pre><code class="language-bash">   cd apps/player
    pnpm install --frozen-lockfile
    pnpm build
    # Output: dist/</code></pre>
-<p class="doc-p">2. Verify bundle sizes meet budget (JS gzipped < 300 KB, CSS gzipped < 50 KB):</p>
-<pre class="doc-code"><code class="lang-bash">   pnpm build:analyze</code></pre>
-<p class="doc-p">3. Deploy to CDN (e.g. Vercel or Cloudflare Pages):</p>
-<pre class="doc-code"><code class="lang-bash">   # Vercel
+<ol><li>Verify bundle sizes meet budget (JS gzipped &lt; 300 KB, CSS gzipped &lt; 50 KB):</li></ol>
+<pre><code class="language-bash">   pnpm build:analyze</code></pre>
+<ol><li>Deploy to CDN (e.g. Vercel or Cloudflare Pages):</li></ol>
+<pre><code class="language-bash">   # Vercel
    vercel deploy --prod --token $VERCEL_TOKEN
 
    # Cloudflare Pages
    wrangler pages deploy dist --project-name pixel-pet-arena-player --branch main</code></pre>
-<p class="doc-p">4. Confirm the deployment URL returns the updated <code><meta name="build-sha"></code> matching the target commit.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="admin-portal-build-and-deploy">Admin Portal Build and Deploy</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The admin portal is Vue 3 + Element Plus + Pinia, also built with Vite 5.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Build the admin portal bundle:</p>
-<pre class="doc-code"><code class="lang-bash">   cd apps/admin
+<ol><li>Confirm the deployment URL returns the updated <code>&lt;meta name=&quot;build-sha&quot;&gt;</code> matching the target commit.</li></ol>
+<h3>Admin Portal Build and Deploy</h3>
+<p>The admin portal is Vue 3 + Element Plus + Pinia, also built with Vite 5.</p>
+<ol><li>Build the admin portal bundle:</li></ol>
+<pre><code class="language-bash">   cd apps/admin
    pnpm install --frozen-lockfile
    pnpm build
    # Output: dist/</code></pre>
-<p class="doc-p">2. Deploy (separate CDN project or subdomain — admin portal must not be served from the same origin as the player frontend):</p>
-<pre class="doc-code"><code class="lang-bash">   # Vercel (separate project)
+<ol><li>Deploy (separate CDN project or subdomain — admin portal must not be served from the same origin as the player frontend):</li></ol>
+<pre><code class="language-bash">   # Vercel (separate project)
    vercel deploy --prod --token $VERCEL_TOKEN
 
    # Or Cloudflare Pages
    wrangler pages deploy dist --project-name pixel-pet-arena-admin --branch main</code></pre>
-<p class="doc-p">3. Confirm that accessing <code>https://admin.pixel-pet-arena.com/</code> redirects unauthenticated requests to the login page.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="post-deployment-smoke-tests">Post-Deployment Smoke Tests</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Run these checks within 10 minutes of every production deploy:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>Health endpoint</strong> — <code>GET /health</code> returns HTTP 200 with <code>"status": "healthy"</code>.</p>
-<p class="doc-p">2. <strong>Leaderboard</strong> — <code>GET /api/v1/leaderboard</code> returns HTTP 200 with a <code>data</code> array of up to 100 entries (<code>leaderboard_top_display = 100</code>).</p>
-<p class="doc-p">3. <strong>Public pet page</strong> — <code>GET /api/v1/pets/:knownPetId</code> returns HTTP 200 with correct pet sprite seed and stats.</p>
-<p class="doc-p">4. <strong>Arena entry</strong> (use a test pet token) — <code>POST /api/v1/arena/enter</code> with a valid pet token returns HTTP 200 or HTTP 202, not a 5xx.</p>
-<p class="doc-p">5. <strong>Admin login</strong> — Access <code>https://admin.pixel-pet-arena.com/login</code>; verify the TOTP login form renders without JS errors.</p>
-<p class="doc-p">6. <strong>Static assets</strong> — Confirm player frontend loads at root URL with FCP under 1.5 seconds (<code>fcp_target = 1.5s</code>).</p>
-<p class="doc-p">7. <strong>Feature flag state</strong> — <code>GET /admin/api/config/runtime</code> (authenticated) confirms <code>FF_MARKETPLACE = false</code> and <code>FF_ARENA_SUMO</code> matches the intended state.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="zero-downtime-strategy">Zero-Downtime Strategy</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Both Railway and Fly.io support rolling deploys. The backend is stateless (session state stored in Redis, not in-process), making this safe.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>Railway: rolling deploy is the default; old instances drain existing connections while new instances accept new ones.</li>
-<li>Fly.io: <code>fly deploy</code> performs a rolling replacement by default with health check gating. Set <code>[deploy] strategy = "rolling"</code> in <code>fly.toml</code> to be explicit.</li>
-<li>Database migrations that are additive (add column, add index, add table) are safe to run before the deploy. Destructive migrations (drop column, rename) must be staged across two deploys: first deploy ignores the old column in code, second deploy drops it.</li>
-<li>CDN deploys for frontend and admin portal are atomic; new assets are hashed by Vite so old and new versions can coexist in cache during the cutover window.</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="incident-response">Incident Response</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">This section defines severity levels, SLAs, escalation paths, and first-responder playbooks for common failure scenarios.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="severity-matrix">Severity Matrix</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Severity</th><th>Definition</th><th>Response SLA</th><th>Escalation</th></tr></thead>
-<tbody>
-<tr><td>**P0**</td><td>Complete outage — all users cannot play; `GET /health` returns non-200 or is unreachable</td><td>Acknowledge within 5 min; resolve or roll back within 30 min</td><td>Page [ON-CALL-ENGINEER] immediately; escalate to [PLATFORM-LEAD] if not resolved in 15 min</td></tr>
-<tr><td>**P1**</td><td>Degraded performance — error rate > 1% (monitoring alert threshold) or P99 latency > 1,000 ms for any player-facing endpoint</td><td>Acknowledge within 15 min; restore to SLO within 60 min</td><td>Notify [ON-CALL-ENGINEER] via PagerDuty; loop in [DATABASE-OWNER] if DB or Redis implicated</td></tr>
-<tr><td>**P2**</td><td>Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works)</td><td>Acknowledge within 1 hour; resolve within 4 hours or next business day</td><td>Notify [ON-CALL-ENGINEER] via Slack `#incidents`; no escalation required unless degrading to P1</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="p0--complete-outage">P0 — Complete Outage</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>First responder actions (in order):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Check <code>/health</code> from an external network. Note the HTTP status and response body.</p>
-<p class="doc-p">2. Check the observability dashboard (Railway metrics / Fly.io metrics) for CPU, memory, and restart storms.</p>
-<p class="doc-p">3. Check Supabase dashboard for database health, connection count, and recent query errors.</p>
-<p class="doc-p">4. Check Upstash Redis dashboard for connectivity and memory usage.</p>
-<p class="doc-p">5. If the backend process is crash-looping, roll back immediately (see <a href="#rollback">Rollback</a>).</p>
-<p class="doc-p">6. If the database is unreachable, check Supabase status page (<code>status.supabase.com</code>). If a platform incident is confirmed, post status update and wait; do not attempt a migration during a DB outage.</p>
-<p class="doc-p">7. Communicate status in <code>#incidents</code> every 15 minutes until resolved.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="p1--degraded-performance">P1 — Degraded Performance</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Communication cadence</strong>: Post a status update in <code>#incidents</code> every 30 minutes until resolved.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>First responder actions:</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Identify the affected endpoint(s) from dashboard latency percentiles. Compare against SLO targets: read endpoints < 200 ms P99, write endpoints < 500 ms P99.</p>
-<p class="doc-p">2. Check DB connection pool utilization. Alert threshold is 80% (<code>infra_db_pool_alert_threshold = 80</code>). If pool is saturated, reduce traffic via rate limits or consider scaling the backend replicas.</p>
-<p class="doc-p">3. Check Redis memory usage. Alert threshold is 80% (<code>infra_redis_alert_threshold = 80</code>).</p>
-<p class="doc-p">4. If a recent deploy correlates with the degradation window, initiate rollback.</p>
-<p class="doc-p">5. If the issue is isolated to a feature protected by a flag (<code>FF_ARENA_SUMO</code>), disable the flag (see Feature Flag Emergency Toggle below).</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="p2--minor-issue">P2 — Minor Issue</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>First responder actions:</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Confirm the scope: which endpoint(s) are affected; what percentage of users are impacted.</p>
-<p class="doc-p">2. Identify whether a workaround is available (e.g. arena disabled but leaderboard works). Document the workaround in <code>#incidents</code>.</p>
-<p class="doc-p">3. Create a GitHub issue with full reproduction steps and link it in <code>#incidents</code>.</p>
-<p class="doc-p">4. If the issue affects a feature behind a flag, consider disabling the flag as a temporary mitigation.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="specific-incident-playbooks">Specific Incident Playbooks</h3>
-<div class="doc-gap"></div>
-<h4 class="doc-h4" id="redis-unavailable--leaderboard-fallback">Redis Unavailable → Leaderboard Fallback</h4>
-<div class="doc-gap"></div>
-<p class="doc-p">Redis is used for rate-limiting counters and the arena matchmaking queue. When Redis is unavailable:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Leaderboard</strong>: The frontend displays a stale-data banner (reads fall back to the last successful PostgreSQL snapshot). The player-facing banner appears at <code>leaderboard_update_lag_max = 30</code> seconds. The ops alert fires at <code>observability_leaderboard_lag_alert = 60</code> seconds. The 30–60 second window where players see the banner but no ops alert has fired is intentional — minor Redis blips that resolve within a minute should not page on-call. If the banner persists beyond 60 seconds, the ops alert fires and action is required.</li>
-<li><strong>Arena rate limiting</strong>: Arena battle rate limits are <strong>fail-open</strong> — if Redis is unavailable, rate limits are not enforced. This is an accepted risk designed to keep gameplay running; the failure is logged as an alert.</li>
-<li><strong>OTP code entry rate limiting</strong>: This is <strong>fail-closed</strong> — code entry is blocked when Redis is down to prevent brute-force bypass.</li>
-<li><strong>Matchmaking queue</strong>: Arena enter requests will time out after <code>arena_matchmaking_timeout = 30</code> seconds and fall back to an AI opponent.</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Actions:</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Check Upstash Redis status dashboard and connection string in environment variables.</p>
-<p class="doc-p">2. If <code>REDIS_URL</code> is correct and Upstash reports healthy, check for network/TLS issues from the backend host.</p>
-<p class="doc-p">3. If the Upstash outage is confirmed as a platform issue, open a support ticket with Upstash and set severity to P1.</p>
-<p class="doc-p">4. Do not restart the backend process for a Redis outage alone; the system is designed to degrade gracefully.</p>
-<div class="doc-gap"></div>
-<h4 class="doc-h4" id="database-connection-pool-exhausted">Database Connection Pool Exhausted</h4>
-<div class="doc-gap"></div>
-<p class="doc-p">The DB connection pool minimum is 20 connections (<code>db_connection_pool_min_connections = 20</code>). Alert fires at 80% pool utilization.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Actions:</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Check the observability dashboard for <code>db_connection_pool_utilization</code>. If above 80%, proceed.</p>
-<p class="doc-p">2. Identify long-running queries in Supabase dashboard (<code>Query Performance</code> tab). Kill any query running longer than 30 seconds that is blocking connections.</p>
-<p class="doc-p">3. Check for connection leaks: look for backend instances that have open idle connections but are not processing requests.</p>
-<p class="doc-p">4. If the backend is scaled to multiple replicas, reduce the per-instance pool size or scale back replicas temporarily.</p>
-<p class="doc-p">5. If Supabase's free-tier connection limit is the bottleneck, enable PgBouncer (Supabase → Database → Connection Pooling → Transaction mode).</p>
-<p class="doc-p">6. After connection count normalizes, monitor for 10 minutes before clearing the incident.</p>
-<div class="doc-gap"></div>
-<h4 class="doc-h4" id="admin-portal-locked-out">Admin Portal Locked Out</h4>
-<div class="doc-gap"></div>
-<p class="doc-p">Admin accounts lock after <code>admin_login_lockout_threshold = 10</code> consecutive failed login attempts. The lockout duration is 30 minutes (<code>admin_login_lockout_duration_minutes = 30</code>).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Actions (if waiting 30 minutes is acceptable):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Wait for the lockout to expire automatically (30-minute window).</p>
-<p class="doc-p">2. Advise the locked-out admin to ensure their TOTP code is from the correct time-synced authenticator app.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Actions (if immediate access is required):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Connect to the Supabase database (use the connection string from secrets manager, not from the locked-out admin's session):</p>
-<pre class="doc-code"><code class="lang-sql">   -- Find the locked account
+<ol><li>Confirm that accessing <code>https://admin.pixel-pet-arena.com/</code> redirects unauthenticated requests to the login page.</li></ol>
+<h3>Post-Deployment Smoke Tests</h3>
+<p>Run these checks within 10 minutes of every production deploy:</p>
+<ol><li><strong>Health endpoint</strong> — <code>GET /health</code> returns HTTP 200 with <code>&quot;status&quot;: &quot;healthy&quot;</code>.</li><li><strong>Leaderboard</strong> — <code>GET /api/v1/leaderboard</code> returns HTTP 200 with a <code>data</code> array of up to 100 entries (<code>leaderboard_top_display = 100</code>).</li><li><strong>Public pet page</strong> — <code>GET /api/v1/pets/:knownPetId</code> returns HTTP 200 with correct pet sprite seed and stats.</li><li><strong>Arena entry</strong> (use a test pet token) — <code>POST /api/v1/arena/enter</code> with a valid pet token returns HTTP 200 or HTTP 202, not a 5xx.</li><li><strong>Admin login</strong> — Access <code>https://admin.pixel-pet-arena.com/login</code>; verify the TOTP login form renders without JS errors.</li><li><strong>Static assets</strong> — Confirm player frontend loads at root URL with FCP under 1.5 seconds (<code>fcp_target = 1.5s</code>).</li><li><strong>Feature flag state</strong> — <code>GET /admin/api/config/runtime</code> (authenticated) confirms <code>FF_MARKETPLACE = false</code> and <code>FF_ARENA_SUMO</code> matches the intended state.</li></ol>
+<h3>Zero-Downtime Strategy</h3>
+<p>Both Railway and Fly.io support rolling deploys. The backend is stateless (session state stored in Redis, not in-process), making this safe.</p>
+<ul><li>Railway: rolling deploy is the default; old instances drain existing connections while new instances accept new ones.</li><li>Fly.io: <code>fly deploy</code> performs a rolling replacement by default with health check gating. Set <code>[deploy] strategy = &quot;rolling&quot;</code> in <code>fly.toml</code> to be explicit.</li><li>Database migrations that are additive (add column, add index, add table) are safe to run before the deploy. Destructive migrations (drop column, rename) must be staged across two deploys: first deploy ignores the old column in code, second deploy drops it.</li><li>CDN deploys for frontend and admin portal are atomic; new assets are hashed by Vite so old and new versions can coexist in cache during the cutover window.</li></ul>
+<hr>
+<h2>Incident Response</h2>
+<p>This section defines severity levels, SLAs, escalation paths, and first-responder playbooks for common failure scenarios.</p>
+<h3>Severity Matrix</h3>
+<table>
+<tr><th>Severity</th><th>Definition</th><th>Response SLA</th><th>Escalation</th></tr>
+<tr><td><strong>P0</strong></td><td>Complete outage — all users cannot play; <code>GET /health</code> returns non-200 or is unreachable</td><td>Acknowledge within 5 min; resolve or roll back within 30 min</td><td>Page [ON-CALL-ENGINEER] immediately; escalate to [PLATFORM-LEAD] if not resolved in 15 min</td></tr>
+<tr><td><strong>P1</strong></td><td>Degraded performance — error rate &gt; 1% (monitoring alert threshold) or P99 latency &gt; 1,000 ms for any player-facing endpoint</td><td>Acknowledge within 15 min; restore to SLO within 60 min</td><td>Notify [ON-CALL-ENGINEER] via PagerDuty; loop in [DATABASE-OWNER] if DB or Redis implicated</td></tr>
+<tr><td><strong>P2</strong></td><td>Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works)</td><td>Acknowledge within 1 hour; resolve within 4 hours or next business day</td><td>Notify [ON-CALL-ENGINEER] via Slack <code>#incidents</code>; no escalation required unless degrading to P1</td></tr>
+</table>
+<h3>P0 — Complete Outage</h3>
+<p><strong>First responder actions (in order):</strong></p>
+<ol><li>Check <code>/health</code> from an external network. Note the HTTP status and response body.</li><li>Check the observability dashboard (Railway metrics / Fly.io metrics) for CPU, memory, and restart storms.</li><li>Check Supabase dashboard for database health, connection count, and recent query errors.</li><li>Check Upstash Redis dashboard for connectivity and memory usage.</li><li>If the backend process is crash-looping, roll back immediately (see <a href="#rollback" target="_blank" rel="noopener">Rollback</a>).</li><li>If the database is unreachable, check Supabase status page (<code>status.supabase.com</code>). If a platform incident is confirmed, post status update and wait; do not attempt a migration during a DB outage.</li><li>Communicate status in <code>#incidents</code> every 15 minutes until resolved.</li></ol>
+<h3>P1 — Degraded Performance</h3>
+<p><strong>Communication cadence</strong>: Post a status update in <code>#incidents</code> every 30 minutes until resolved.</p>
+<p><strong>First responder actions:</strong></p>
+<ol><li>Identify the affected endpoint(s) from dashboard latency percentiles. Compare against SLO targets: read endpoints &lt; 200 ms P99, write endpoints &lt; 500 ms P99.</li><li>Check DB connection pool utilization. Alert threshold is 80% (<code>infra_db_pool_alert_threshold = 80</code>). If pool is saturated, reduce traffic via rate limits or consider scaling the backend replicas.</li><li>Check Redis memory usage. Alert threshold is 80% (<code>infra_redis_alert_threshold = 80</code>).</li><li>If a recent deploy correlates with the degradation window, initiate rollback.</li><li>If the issue is isolated to a feature protected by a flag (<code>FF_ARENA_SUMO</code>), disable the flag (see Feature Flag Emergency Toggle below).</li></ol>
+<h3>P2 — Minor Issue</h3>
+<p><strong>First responder actions:</strong></p>
+<ol><li>Confirm the scope: which endpoint(s) are affected; what percentage of users are impacted.</li><li>Identify whether a workaround is available (e.g. arena disabled but leaderboard works). Document the workaround in <code>#incidents</code>.</li><li>Create a GitHub issue with full reproduction steps and link it in <code>#incidents</code>.</li><li>If the issue affects a feature behind a flag, consider disabling the flag as a temporary mitigation.</li></ol>
+<hr>
+<h3>Specific Incident Playbooks</h3>
+<h4>Redis Unavailable → Leaderboard Fallback</h4>
+<p>Redis is used for rate-limiting counters and the arena matchmaking queue. When Redis is unavailable:</p>
+<ul><li><strong>Leaderboard</strong>: The frontend displays a stale-data banner (reads fall back to the last successful PostgreSQL snapshot). The player-facing banner appears at <code>leaderboard_update_lag_max = 30</code> seconds. The ops alert fires at <code>observability_leaderboard_lag_alert = 60</code> seconds. The 30–60 second window where players see the banner but no ops alert has fired is intentional — minor Redis blips that resolve within a minute should not page on-call. If the banner persists beyond 60 seconds, the ops alert fires and action is required.</li><li><strong>Arena rate limiting</strong>: Arena battle rate limits are <strong>fail-open</strong> — if Redis is unavailable, rate limits are not enforced. This is an accepted risk designed to keep gameplay running; the failure is logged as an alert.</li><li><strong>OTP code entry rate limiting</strong>: This is <strong>fail-closed</strong> — code entry is blocked when Redis is down to prevent brute-force bypass.</li><li><strong>Matchmaking queue</strong>: Arena enter requests will time out after <code>arena_matchmaking_timeout = 30</code> seconds and fall back to an AI opponent.</li></ul>
+<p><strong>Actions:</strong></p>
+<ol><li>Check Upstash Redis status dashboard and connection string in environment variables.</li><li>If <code>REDIS_URL</code> is correct and Upstash reports healthy, check for network/TLS issues from the backend host.</li><li>If the Upstash outage is confirmed as a platform issue, open a support ticket with Upstash and set severity to P1.</li><li>Do not restart the backend process for a Redis outage alone; the system is designed to degrade gracefully.</li></ol>
+<h4>Database Connection Pool Exhausted</h4>
+<p>The DB connection pool minimum is 20 connections (<code>db_connection_pool_min_connections = 20</code>). Alert fires at 80% pool utilization.</p>
+<p><strong>Actions:</strong></p>
+<ol><li>Check the observability dashboard for <code>db_connection_pool_utilization</code>. If above 80%, proceed.</li><li>Identify long-running queries in Supabase dashboard (<code>Query Performance</code> tab). Kill any query running longer than 30 seconds that is blocking connections.</li><li>Check for connection leaks: look for backend instances that have open idle connections but are not processing requests.</li><li>If the backend is scaled to multiple replicas, reduce the per-instance pool size or scale back replicas temporarily.</li><li>If Supabase&#x27;s free-tier connection limit is the bottleneck, enable PgBouncer (Supabase → Database → Connection Pooling → Transaction mode).</li><li>After connection count normalizes, monitor for 10 minutes before clearing the incident.</li></ol>
+<h4>Admin Portal Locked Out</h4>
+<p>Admin accounts lock after <code>admin_login_lockout_threshold = 10</code> consecutive failed login attempts. The lockout duration is 30 minutes (<code>admin_login_lockout_duration_minutes = 30</code>).</p>
+<p><strong>Actions (if waiting 30 minutes is acceptable):</strong></p>
+<ol><li>Wait for the lockout to expire automatically (30-minute window).</li><li>Advise the locked-out admin to ensure their TOTP code is from the correct time-synced authenticator app.</li></ol>
+<p><strong>Actions (if immediate access is required):</strong></p>
+<ol><li>Connect to the Supabase database (use the connection string from secrets manager, not from the locked-out admin&#x27;s session):</li></ol>
+<pre><code class="language-sql">   -- Find the locked account
    SELECT id, username, locked_until
    FROM admin_users
-   WHERE username = '&lt;admin_username&gt;';
+   WHERE username = &#x27;&lt;admin_username&gt;&#x27;;
 
    -- Clear the lockout (run only with explicit approval from platform lead)
    UPDATE admin_users
    SET locked_until = NULL, failed_login_count = 0
-   WHERE username = '&lt;admin_username&gt;';</code></pre>
-<p class="doc-p">2. Log the manual unlock action in the <code>#admin-ops</code> Slack channel with timestamp, operator, and reason. Supabase audit logs will also capture the query.</p>
-<p class="doc-p">3. If the account was locked due to a suspected credential compromise rather than operator error, do not unlock until the credential has been rotated.</p>
-<div class="doc-gap"></div>
-<h4 class="doc-h4" id="bot-detection-alert-flood--50-battles--60-min-from-one-pet">Bot Detection Alert Flood (> 50 battles / 60 min from one pet)</h4>
-<div class="doc-gap"></div>
-<p class="doc-p">The system auto-flags any pet with more than <code>bot_detection_battles_threshold = 50</code> battles within any 60-minute rolling window as <code>SUSPICIOUS</code>.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Actions:</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. In the admin portal, navigate to <strong>Moderation → Flagged Pets</strong>. Confirm the flagged pet's battle history using <code>GET /admin/api/battles?petId=<id>&limit=100</code>.</p>
-<p class="doc-p">2. Review the timestamps. If battles are uniformly spaced to the second or all originate from one IP, this is strong evidence of automation.</p>
-<p class="doc-p">3. If confirmed bot activity, ban the pet via <code>POST /admin/api/pets/:petId/ban</code> with a moderation reason (max 500 characters, <code>admin_moderation_reason_max_chars = 500</code>).</p>
-<p class="doc-p">4. If the alert is a false positive (e.g. a legitimate stress test or event), dismiss the flag and document the reason in the audit log.</p>
-<p class="doc-p">5. If the alert volume exceeds 5 distinct pets in 1 hour, escalate to P1 — this may indicate a coordinated bot attack. Consider temporarily lowering the arena battles-per-hour cap to 1 via the admin config endpoint. The default is <code>arena_rate_limit_battles_per_hour_default = 10</code>. Example:</p>
-<pre class="doc-code"><code class="lang-bash">   curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
-     -H "Cookie: session=&lt;admin_session_id&gt;" \
-     -H "Content-Type: application/json" \
-     -d '{"key": "arena_rate_limit_battles_per_hour", "value": 1}'</code></pre>
-<p class="doc-p">Restore to default (10) when the attack is resolved.</p>
-<div class="doc-gap"></div>
-<h4 class="doc-h4" id="sendgrid-email-delivery-failure">SendGrid Email Delivery Failure</h4>
-<div class="doc-gap"></div>
-<p class="doc-p">The platform sends transactional emails for the claim flow (OTP link and backup codes delivery). Email failures prevent new players from claiming their pets.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>P2 alert fires when</strong>: <code>email_failure_rate_30m > 2%</code></p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Actions:</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Check the SendGrid Activity Feed dashboard for bounce/block/spam reports. Look for delivery errors in the last 30 minutes.</p>
-<p class="doc-p">2. Verify <code>SENDGRID_API_KEY</code> is correct and not expired:</p>
-<pre class="doc-code"><code class="lang-bash">   curl -X GET "https://api.sendgrid.com/v3/user/profile" \
-     -H "Authorization: Bearer $SENDGRID_API_KEY"</code></pre>
-<p class="doc-p">A 401 response means the key is invalid or revoked.</p>
-<p class="doc-p">3. If the key is valid, check SendGrid status page (<code>status.sendgrid.com</code>) for an ongoing platform incident.</p>
-<p class="doc-p">4. If the failure is limited to a specific sender domain, check DNS records (SPF, DKIM, DMARC) in the Sendgrid → Settings → Sender Authentication dashboard.</p>
-<p class="doc-p">5. If SendGrid is fully down and the outage will exceed 30 minutes, assess whether to temporarily disable new pet claims to prevent a broken user experience (disable via <code>FF_CLAIM_FLOW</code> feature flag if it exists, or deploy a maintenance page for the claim endpoint).</p>
-<p class="doc-p">6. Once resolved, verify delivery is restored by triggering a test claim email through the staging environment.</p>
-<div class="doc-gap"></div>
-<h4 class="doc-h4" id="feature-flag-emergency-toggle">Feature Flag Emergency Toggle</h4>
-<div class="doc-gap"></div>
-<p class="doc-p">Feature flags are environment variables read at startup and cached in memory. Config changes propagate within 5 minutes (<code>config_cache_refresh_time_minutes = 5</code>).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>To disable FF_ARENA_SUMO (e.g. sumo battles causing data corruption):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">Option A — Runtime config (preferred, no restart required, takes effect within 5 min):</p>
-<pre class="doc-code"><code class="lang-bash"># Authenticated admin call
+   WHERE username = &#x27;&lt;admin_username&gt;&#x27;;</code></pre>
+<ol><li>Log the manual unlock action in the <code>#admin-ops</code> Slack channel with timestamp, operator, and reason. Supabase audit logs will also capture the query.</li><li>If the account was locked due to a suspected credential compromise rather than operator error, do not unlock until the credential has been rotated.</li></ol>
+<h4>Bot Detection Alert Flood (&gt; 50 battles / 60 min from one pet)</h4>
+<p>The system auto-flags any pet with more than <code>bot_detection_battles_threshold = 50</code> battles within any 60-minute rolling window as <code>SUSPICIOUS</code>.</p>
+<p><strong>Actions:</strong></p>
+<ol><li>In the admin portal, navigate to <strong>Moderation → Flagged Pets</strong>. Confirm the flagged pet&#x27;s battle history using <code>GET /admin/api/battles?petId=&lt;id&gt;&amp;limit=100</code>.</li><li>Review the timestamps. If battles are uniformly spaced to the second or all originate from one IP, this is strong evidence of automation.</li><li>If confirmed bot activity, ban the pet via <code>POST /admin/api/pets/:petId/ban</code> with a moderation reason (max 500 characters, <code>admin_moderation_reason_max_chars = 500</code>).</li><li>If the alert is a false positive (e.g. a legitimate stress test or event), dismiss the flag and document the reason in the audit log.</li><li>If the alert volume exceeds 5 distinct pets in 1 hour, escalate to P1 — this may indicate a coordinated bot attack. Consider temporarily lowering the arena battles-per-hour cap to 1 via the admin config endpoint. The default is <code>arena_rate_limit_battles_per_hour_default = 10</code>. Example:</li></ol>
+<pre><code class="language-bash">   curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
+     -H &quot;Cookie: session=&lt;admin_session_id&gt;&quot; \
+     -H &quot;Content-Type: application/json&quot; \
+     -d &#x27;{&quot;key&quot;: &quot;arena_rate_limit_battles_per_hour&quot;, &quot;value&quot;: 1}&#x27;</code></pre>
+<p>Restore to default (10) when the attack is resolved.</p>
+<h4>SendGrid Email Delivery Failure</h4>
+<p>The platform sends transactional emails for the claim flow (OTP link and backup codes delivery). Email failures prevent new players from claiming their pets.</p>
+<p><strong>P2 alert fires when</strong>: <code>email_failure_rate_30m &gt; 2%</code></p>
+<p><strong>Actions:</strong></p>
+<ol><li>Check the SendGrid Activity Feed dashboard for bounce/block/spam reports. Look for delivery errors in the last 30 minutes.</li><li>Verify <code>SENDGRID_API_KEY</code> is correct and not expired:</li></ol>
+<pre><code class="language-bash">   curl -X GET &quot;https://api.sendgrid.com/v3/user/profile&quot; \
+     -H &quot;Authorization: Bearer $SENDGRID_API_KEY&quot;</code></pre>
+<p>A 401 response means the key is invalid or revoked.</p>
+<ol><li>If the key is valid, check SendGrid status page (<code>status.sendgrid.com</code>) for an ongoing platform incident.</li><li>If the failure is limited to a specific sender domain, check DNS records (SPF, DKIM, DMARC) in the Sendgrid → Settings → Sender Authentication dashboard.</li><li>If SendGrid is fully down and the outage will exceed 30 minutes, assess whether to temporarily disable new pet claims to prevent a broken user experience (disable via <code>FF_CLAIM_FLOW</code> feature flag if it exists, or deploy a maintenance page for the claim endpoint).</li><li>Once resolved, verify delivery is restored by triggering a test claim email through the staging environment.</li></ol>
+<h4>Feature Flag Emergency Toggle</h4>
+<p>Feature flags are environment variables read at startup and cached in memory. Config changes propagate within 5 minutes (<code>config_cache_refresh_time_minutes = 5</code>).</p>
+<p><strong>To disable FF_ARENA_SUMO (e.g. sumo battles causing data corruption):</strong></p>
+<p>Option A — Runtime config (preferred, no restart required, takes effect within 5 min):</p>
+<pre><code class="language-bash"># Authenticated admin call
 curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
-  -H "Cookie: session=&lt;admin_session_id&gt;" \
-  -H "Content-Type: application/json" \
-  -d '{"key": "FF_ARENA_SUMO", "value": false}'</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Option B — Environment variable (requires redeploy):</p>
-<p class="doc-p">1. In Railway or Fly.io dashboard, set <code>FF_ARENA_SUMO=false</code>.</p>
-<p class="doc-p">2. Trigger a redeploy (see Backend Deployment Steps).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>To enable FF_MARKETPLACE (e.g. manually enabling for a qualifying DAU milestone):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">Confirm DAU ≥ 1,000 sustained for 2 weeks before enabling. Then:</p>
-<pre class="doc-code"><code class="lang-bash">curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
-  -H "Cookie: session=&lt;admin_session_id&gt;" \
-  -H "Content-Type: application/json" \
-  -d '{"key": "FF_MARKETPLACE", "value": true}'</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">Verify the change was applied within 5 minutes by calling <code>GET /admin/api/config/runtime</code> and confirming the new value.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="rollback">Rollback</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">Rollback is the primary recovery tool for deploy-caused regressions. Act quickly: the window for a safe rollback narrows as new data written under the new schema diverges from the old schema.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="backend-rollback-procedure">Backend Rollback Procedure</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Identify the last known-good image tag or commit SHA from the deployment history (Railway deploy log or Fly.io release list):</p>
-<pre class="doc-code"><code class="lang-bash">   # Fly.io — list recent releases
+  -H &quot;Cookie: session=&lt;admin_session_id&gt;&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{&quot;key&quot;: &quot;FF_ARENA_SUMO&quot;, &quot;value&quot;: false}&#x27;</code></pre>
+<p>Option B — Environment variable (requires redeploy):</p>
+<ol><li>In Railway or Fly.io dashboard, set <code>FF_ARENA_SUMO=false</code>.</li><li>Trigger a redeploy (see Backend Deployment Steps).</li></ol>
+<p><strong>To enable FF_MARKETPLACE (e.g. manually enabling for a qualifying DAU milestone):</strong></p>
+<p>Confirm DAU ≥ 1,000 sustained for 2 weeks before enabling. Then:</p>
+<pre><code class="language-bash">curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
+  -H &quot;Cookie: session=&lt;admin_session_id&gt;&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{&quot;key&quot;: &quot;FF_MARKETPLACE&quot;, &quot;value&quot;: true}&#x27;</code></pre>
+<p>Verify the change was applied within 5 minutes by calling <code>GET /admin/api/config/runtime</code> and confirming the new value.</p>
+<hr>
+<h2>Rollback</h2>
+<p>Rollback is the primary recovery tool for deploy-caused regressions. Act quickly: the window for a safe rollback narrows as new data written under the new schema diverges from the old schema.</p>
+<h3>Backend Rollback Procedure</h3>
+<ol><li>Identify the last known-good image tag or commit SHA from the deployment history (Railway deploy log or Fly.io release list):</li></ol>
+<pre><code class="language-bash">   # Fly.io — list recent releases
    fly releases --app pixel-pet-arena-api
 
    # Railway — view deployment history in dashboard, note the deployment ID</code></pre>
-<p class="doc-p">2. Roll back to the previous image:</p>
-<pre class="doc-code"><code class="lang-bash">   # Fly.io
+<ol><li>Roll back to the previous image:</li></ol>
+<pre><code class="language-bash">   # Fly.io
    fly deploy --app pixel-pet-arena-api --image registry.fly.io/pixel-pet-arena-api:&lt;previous-tag&gt;
 
    # Railway — redeploy a previous deployment from the dashboard (Deployments → select previous → Redeploy)</code></pre>
-<p class="doc-p">3. Wait for the health check to pass:</p>
-<pre class="doc-code"><code class="lang-bash">   until curl -sf https://api.pixel-pet-arena.com/health; do
-     echo "Waiting…"; sleep 5
+<ol><li>Wait for the health check to pass:</li></ol>
+<pre><code class="language-bash">   until curl -sf https://api.pixel-pet-arena.com/health; do
+     echo &quot;Waiting…&quot;; sleep 5
    done</code></pre>
-<p class="doc-p">4. Run the post-deployment smoke tests (see <a href="#deployment">Deployment</a>). Confirm all 7 checks pass.</p>
-<p class="doc-p">5. Open a GitHub issue documenting what went wrong, the rollback action taken, and the incident timeline.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="database-migration-rollback">Database Migration Rollback</h3>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>WARNING</strong>: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from [PLATFORM-LEAD] and a confirmed recent backup.</blockquote>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Step 0 — Verify backup before any migration rollback (mandatory):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Navigate to Supabase → Dashboard → Database → Backups.</p>
-<p class="doc-p">2. Confirm the most recent automated backup timestamp is within the last 24 hours.</p>
-<p class="doc-p">3. If the latest backup is stale or missing, trigger a manual backup: Supabase dashboard → Database → Backups → <code>Create backup</code> before proceeding.</p>
-<p class="doc-p">4. Record the backup ID in the <code>#incidents</code> thread.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Safe rollback (additive migrations only):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">If the migration only added columns or indexes and no application code has written to them yet, a rollback is relatively safe:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">The project uses Supabase CLI for migrations (schema files in <code>supabase/migrations/</code>).</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Production — mark a migration as reverted (does NOT run SQL; use when the schema already matches the pre-migration state):</strong></p>
-<pre class="doc-code"><code class="lang-bash">supabase migration repair --status reverted &lt;migration_version&gt;
+<ol><li>Run the post-deployment smoke tests (see <a href="#deployment" target="_blank" rel="noopener">Deployment</a>). Confirm all 7 checks pass.</li><li>Open a GitHub issue documenting what went wrong, the rollback action taken, and the incident timeline.</li></ol>
+<h3>Database Migration Rollback</h3>
+<blockquote><p><strong>WARNING</strong>: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from [PLATFORM-LEAD] and a confirmed recent backup.</p></blockquote>
+<p><strong>Step 0 — Verify backup before any migration rollback (mandatory):</strong></p>
+<ol><li>Navigate to Supabase → Dashboard → Database → Backups.</li><li>Confirm the most recent automated backup timestamp is within the last 24 hours.</li><li>If the latest backup is stale or missing, trigger a manual backup: Supabase dashboard → Database → Backups → <code>Create backup</code> before proceeding.</li><li>Record the backup ID in the <code>#incidents</code> thread.</li></ol>
+<p><strong>Safe rollback (additive migrations only):</strong></p>
+<p>If the migration only added columns or indexes and no application code has written to them yet, a rollback is relatively safe:</p>
+<p>The project uses Supabase CLI for migrations (schema files in <code>supabase/migrations/</code>).</p>
+<p><strong>Production — mark a migration as reverted (does NOT run SQL; use when the schema already matches the pre-migration state):</strong></p>
+<pre><code class="language-bash">supabase migration repair --status reverted &lt;migration_version&gt;
 # Example: supabase migration repair --status reverted 20260501120000</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Staging/local — full reset (destructive; never run in production):</strong></p>
-<pre class="doc-code"><code class="lang-bash">supabase db reset</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Check migration state:</strong></p>
-<pre class="doc-code"><code class="lang-bash">supabase migration list</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p">If the project has a <code>pnpm db:migrate:down</code> wrapper in <code>package.json</code>, verify what it calls before running in production:</p>
-<pre class="doc-code"><code class="lang-bash">cat package.json | grep -A3 "db:migrate"</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Unsafe rollback (destructive migrations):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">If the migration dropped or renamed columns, or if the new application code has already written data to new columns:</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>Do not run a down migration.</strong> Instead, forward-fix (see When NOT to Rollback below).</p>
-<p class="doc-p">2. If data loss already occurred, restore from the most recent Supabase point-in-time backup (Supabase → Database → Backups).</p>
-<p class="doc-p">3. Contact Supabase support if the backup restore window does not cover the incident.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="frontend-and-admin-portal-cdn-cache-invalidation">Frontend and Admin Portal CDN Cache Invalidation</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Vite produces content-hashed asset filenames, so a new deploy automatically serves new assets to users loading a fresh page. However, the entry-point HTML files (<code>index.html</code>) may be cached at the CDN edge.</p>
-<div class="doc-gap"></div>
-<p class="doc-p">1. Invalidate the CDN cache for <code>index.html</code> after every rollback:</p>
-<pre class="doc-code"><code class="lang-bash">   # Vercel — purge cache via API
-   curl -X POST "https://api.vercel.com/v1/projects/&lt;project-id&gt;/purge-cache" \
-     -H "Authorization: Bearer $VERCEL_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{"files": ["/index.html"]}'
+<p><strong>Staging/local — full reset (destructive; never run in production):</strong></p>
+<pre><code class="language-bash">supabase db reset</code></pre>
+<p><strong>Check migration state:</strong></p>
+<pre><code class="language-bash">supabase migration list</code></pre>
+<p>If the project has a <code>pnpm db:migrate:down</code> wrapper in <code>package.json</code>, verify what it calls before running in production:</p>
+<pre><code class="language-bash">cat package.json | grep -A3 &quot;db:migrate&quot;</code></pre>
+<p><strong>Unsafe rollback (destructive migrations):</strong></p>
+<p>If the migration dropped or renamed columns, or if the new application code has already written data to new columns:</p>
+<ol><li><strong>Do not run a down migration.</strong> Instead, forward-fix (see When NOT to Rollback below).</li><li>If data loss already occurred, restore from the most recent Supabase point-in-time backup (Supabase → Database → Backups).</li><li>Contact Supabase support if the backup restore window does not cover the incident.</li></ol>
+<h3>Frontend and Admin Portal CDN Cache Invalidation</h3>
+<p>Vite produces content-hashed asset filenames, so a new deploy automatically serves new assets to users loading a fresh page. However, the entry-point HTML files (<code>index.html</code>) may be cached at the CDN edge.</p>
+<ol><li>Invalidate the CDN cache for <code>index.html</code> after every rollback:</li></ol>
+<pre><code class="language-bash">   # Vercel — purge cache via API
+   curl -X POST &quot;https://api.vercel.com/v1/projects/&lt;project-id&gt;/purge-cache&quot; \
+     -H &quot;Authorization: Bearer $VERCEL_TOKEN&quot; \
+     -H &quot;Content-Type: application/json&quot; \
+     -d &#x27;{&quot;files&quot;: [&quot;/index.html&quot;]}&#x27;
 
    # Cloudflare — purge by URL
-   curl -X POST "https://api.cloudflare.com/client/v4/zones/&lt;zone-id&gt;/purge_cache" \
-     -H "Authorization: Bearer $CF_API_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{"files": ["https://pixel-pet-arena.com/index.html"]}'</code></pre>
-<p class="doc-p">2. Confirm users loading the site receive the rolled-back version by checking the <code><meta name="build-sha"></code> tag.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="when-not-to-rollback-forward-fix-instead">When NOT to Rollback (Forward-Fix Instead)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Prefer a forward-fix (deploy a corrected version forward) in these situations:</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>The migration has already written significant data under the new schema. Rolling back would delete that data.</li>
-<li>The bug is in a code path not yet exercised by users (e.g. a feature flag is still off). Deploy a fix forward without rolling back.</li>
-<li>The rollback would re-introduce a previously patched security vulnerability.</li>
-<li>More than 30 minutes have elapsed since the bad deploy and user data has been created under the new schema.</li>
-<li>The error is a configuration issue (wrong env var value), not a code issue. Fix the config and trigger a new deploy rather than reverting the image.</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p">In all forward-fix cases, acknowledge the incident, communicate the fix ETA, and deploy the corrected build through the normal CI pipeline.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="health-checks-and-monitoring">Health Checks and Monitoring</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">The <code>/health</code> endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="codehealthcode-response-schema"><code>/health</code> Response Schema</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">The endpoint must respond within <code>health_check_response_time = 500</code> ms.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Healthy response (HTTP 200):</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-json">{
-  "status": "healthy",
-  "timestamp": "2026-05-04T08:00:00.000Z",
-  "checks": {
-    "database": { "status": "healthy" },
-    "redis": { "status": "healthy" }
+   curl -X POST &quot;https://api.cloudflare.com/client/v4/zones/&lt;zone-id&gt;/purge_cache&quot; \
+     -H &quot;Authorization: Bearer $CF_API_TOKEN&quot; \
+     -H &quot;Content-Type: application/json&quot; \
+     -d &#x27;{&quot;files&quot;: [&quot;https://pixel-pet-arena.com/index.html&quot;]}&#x27;</code></pre>
+<ol><li>Confirm users loading the site receive the rolled-back version by checking the <code>&lt;meta name=&quot;build-sha&quot;&gt;</code> tag.</li></ol>
+<h3>When NOT to Rollback (Forward-Fix Instead)</h3>
+<p>Prefer a forward-fix (deploy a corrected version forward) in these situations:</p>
+<ul><li>The migration has already written significant data under the new schema. Rolling back would delete that data.</li><li>The bug is in a code path not yet exercised by users (e.g. a feature flag is still off). Deploy a fix forward without rolling back.</li><li>The rollback would re-introduce a previously patched security vulnerability.</li><li>More than 30 minutes have elapsed since the bad deploy and user data has been created under the new schema.</li><li>The error is a configuration issue (wrong env var value), not a code issue. Fix the config and trigger a new deploy rather than reverting the image.</li></ul>
+<p>In all forward-fix cases, acknowledge the incident, communicate the fix ETA, and deploy the corrected build through the normal CI pipeline.</p>
+<hr>
+<h2>Health Checks and Monitoring</h2>
+<p>The <code>/health</code> endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating.</p>
+<h3><code>/health</code> Response Schema</h3>
+<p>The endpoint must respond within <code>health_check_response_time = 500</code> ms.</p>
+<p><strong>Healthy response (HTTP 200):</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;healthy&quot;,
+  &quot;timestamp&quot;: &quot;2026-05-04T08:00:00.000Z&quot;,
+  &quot;checks&quot;: {
+    &quot;database&quot;: { &quot;status&quot;: &quot;healthy&quot; },
+    &quot;redis&quot;: { &quot;status&quot;: &quot;healthy&quot; }
   }
 }</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Degraded response (HTTP 200 with partial failures):</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-json">{
-  "status": "degraded",
-  "timestamp": "2026-05-04T08:00:00.000Z",
-  "checks": {
-    "database": { "status": "healthy" },
-    "redis": { "status": "down", "error": "Connection refused" }
+<p><strong>Degraded response (HTTP 200 with partial failures):</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;degraded&quot;,
+  &quot;timestamp&quot;: &quot;2026-05-04T08:00:00.000Z&quot;,
+  &quot;checks&quot;: {
+    &quot;database&quot;: { &quot;status&quot;: &quot;healthy&quot; },
+    &quot;redis&quot;: { &quot;status&quot;: &quot;down&quot;, &quot;error&quot;: &quot;Connection refused&quot; }
   }
 }</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Unhealthy response (HTTP 503):</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">Returned when the database is unreachable (the system cannot serve any requests without the database).</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-json">{
-  "status": "down",
-  "timestamp": "2026-05-04T08:00:00.000Z",
-  "checks": {
-    "database": { "status": "down", "error": "ECONNREFUSED" },
-    "redis": { "status": "healthy" }
+<p><strong>Unhealthy response (HTTP 503):</strong></p>
+<p>Returned when the database is unreachable (the system cannot serve any requests without the database).</p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;down&quot;,
+  &quot;timestamp&quot;: &quot;2026-05-04T08:00:00.000Z&quot;,
+  &quot;checks&quot;: {
+    &quot;database&quot;: { &quot;status&quot;: &quot;down&quot;, &quot;error&quot;: &quot;ECONNREFUSED&quot; },
+    &quot;redis&quot;: { &quot;status&quot;: &quot;healthy&quot; }
   }
 }</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="key-metrics-to-watch">Key Metrics to Watch</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Metric</th><th>Alert Threshold</th><th>Source</th></tr></thead>
-<tbody>
-<tr><td>API P99 latency (read)</td><td>> 200 ms</td><td>Observability dashboard</td></tr>
-<tr><td>API P99 latency (write)</td><td>> 500 ms</td><td>Observability dashboard</td></tr>
-<tr><td>Error rate (5-min window)</td><td>> 1%</td><td>`observability_error_rate_alert_window = 5 min`</td></tr>
-<tr><td>DB connection pool utilization</td><td>> 80%</td><td>`infra_db_pool_alert_threshold = 80`</td></tr>
-<tr><td>Redis memory usage</td><td>> 80%</td><td>`infra_redis_alert_threshold = 80`</td></tr>
-<tr><td>Arena battle queue depth</td><td>> 100 concurrent entries</td><td>`arena_matchmaking_concurrent_entries = 100`</td></tr>
-<tr><td>Arena battles total rate</td><td>< 10 battles/hr **platform-wide** for 2 h</td><td>Note: this is a platform-wide total, not per-pet (per-pet cap is also 10/hr via `arena_rate_limit_battles_per_hour_default`)</td></tr>
-<tr><td>Leaderboard update lag</td><td>> 60 s</td><td>`observability_leaderboard_lag_alert = 60 s`</td></tr>
-<tr><td>Pet claims rate</td><td>< 5 claims/hr for 2 h</td><td>`observability_pet_claims_drop_threshold = 5`</td></tr>
-<tr><td>SendGrid failure rate</td><td>> 2% over 30 min</td><td>`observability_email_failure_alert_window = 30 min`</td></tr>
-<tr><td>Any endpoint P99</td><td>> 1,000 ms</td><td>`observability_latency_alert_threshold = 1000 ms`</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="alert-thresholds-summary">Alert Thresholds Summary</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Configure the following alerts in your observability platform (Datadog, Grafana, or Railway's built-in metrics):</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-yaml">alerts:
+<h3>Key Metrics to Watch</h3>
+<table>
+<tr><th>Metric</th><th>Alert Threshold</th><th>Source</th></tr>
+<tr><td>API P99 latency (read)</td><td>&gt; 200 ms</td><td>Observability dashboard</td></tr>
+<tr><td>API P99 latency (write)</td><td>&gt; 500 ms</td><td>Observability dashboard</td></tr>
+<tr><td>Error rate (5-min window)</td><td>&gt; 1%</td><td><code>observability_error_rate_alert_window = 5 min</code></td></tr>
+<tr><td>DB connection pool utilization</td><td>&gt; 80%</td><td><code>infra_db_pool_alert_threshold = 80</code></td></tr>
+<tr><td>Redis memory usage</td><td>&gt; 80%</td><td><code>infra_redis_alert_threshold = 80</code></td></tr>
+<tr><td>Arena battle queue depth</td><td>&gt; 100 concurrent entries</td><td><code>arena_matchmaking_concurrent_entries = 100</code></td></tr>
+<tr><td>Arena battles total rate</td><td>&lt; 10 battles/hr <strong>platform-wide</strong> for 2 h</td><td>Note: this is a platform-wide total, not per-pet (per-pet cap is also 10/hr via <code>arena_rate_limit_battles_per_hour_default</code>)</td></tr>
+<tr><td>Leaderboard update lag</td><td>&gt; 60 s</td><td><code>observability_leaderboard_lag_alert = 60 s</code></td></tr>
+<tr><td>Pet claims rate</td><td>&lt; 5 claims/hr for 2 h</td><td><code>observability_pet_claims_drop_threshold = 5</code></td></tr>
+<tr><td>SendGrid failure rate</td><td>&gt; 2% over 30 min</td><td><code>observability_email_failure_alert_window = 30 min</code></td></tr>
+<tr><td>Any endpoint P99</td><td>&gt; 1,000 ms</td><td><code>observability_latency_alert_threshold = 1000 ms</code></td></tr>
+</table>
+<h3>Alert Thresholds Summary</h3>
+<p>Configure the following alerts in your observability platform (Datadog, Grafana, or Railway&#x27;s built-in metrics):</p>
+<pre><code class="language-yaml">alerts:
   - name: high_error_rate
     condition: error_rate_5m &gt; 0.01
     severity: P1
@@ -550,12 +425,12 @@ curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
   - name: low_pet_claims
     condition: pet_claims_per_hour &lt; 5 for 120m
     severity: P2
-    note: "Triage: check SendGrid delivery (email claim link); check for JS errors on claim page; see SendGrid Email Delivery Failure playbook"
+    note: &quot;Triage: check SendGrid delivery (email claim link); check for JS errors on claim page; see SendGrid Email Delivery Failure playbook&quot;
 
   - name: low_arena_battles
     condition: platform_arena_battles_per_hour &lt; 10 for 120m   # platform-wide total (distinct from per-pet cap)
     severity: P2
-    note: "Triage: check FF_ARENA_SUMO state (arena disabled?); check arena enter endpoint for 4xx/5xx spike; check Redis arena queue depth"
+    note: &quot;Triage: check FF_ARENA_SUMO state (arena disabled?); check arena enter endpoint for 4xx/5xx spike; check Redis arena queue depth&quot;
 
   - name: sendgrid_failure_rate
     condition: email_failure_rate_30m &gt; 0.02
@@ -564,67 +439,51 @@ curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
   - name: training_limit_hit_spike
     condition: training_limit_reached_per_hour &gt; 500
     severity: P2
-    note: "Spike may indicate UTC 00:00 reset bug (limits not resetting) or exploit attempt"</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="on-call-quick-reference">On-Call Quick Reference</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">A compact reference card for the first responder. Full API documentation is in <code>docs/API.md</code>.</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="critical-endpoints">Critical Endpoints</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
-<tbody>
-<tr><td>`GET`</td><td>`/health`</td><td>Liveness and readiness check; first thing to hit during any incident</td></tr>
-<tr><td>`GET`</td><td>`/api/v1/leaderboard`</td><td>Top 100 pets by arena score; verifies Redis + DB read path</td></tr>
-<tr><td>`POST`</td><td>`/api/v1/arena/enter`</td><td>Player enters matchmaking queue; verifies arena write path and Redis queue</td></tr>
-<tr><td>`GET`</td><td>`/api/v1/pets/:petId`</td><td>Public pet profile; verifies DB read and sprite seed generation</td></tr>
-<tr><td>`PUT`</td><td>`/admin/api/config/runtime`</td><td>Toggle feature flags and arena rate limits without a redeploy</td></tr>
-<tr><td>`GET`</td><td>`/admin/api/pets?flagged=true`</td><td>List SUSPICIOUS-flagged pets; used during bot detection incidents</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="environment-variables-checklist">Environment Variables Checklist</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">Confirm all of the following are present and non-empty before any deployment or debugging session:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-text">DATABASE_URL          # Supabase PostgreSQL connection string (pooler preferred)
+    note: &quot;Spike may indicate UTC 00:00 reset bug (limits not resetting) or exploit attempt&quot;</code></pre>
+<hr>
+<h2>On-Call Quick Reference</h2>
+<p>A compact reference card for the first responder. Full API documentation is in <code>docs/API.md</code>.</p>
+<h3>Critical Endpoints</h3>
+<table>
+<tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+<tr><td><code>GET</code></td><td><code>/health</code></td><td>Liveness and readiness check; first thing to hit during any incident</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/leaderboard</code></td><td>Top 100 pets by arena score; verifies Redis + DB read path</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/v1/arena/enter</code></td><td>Player enters matchmaking queue; verifies arena write path and Redis queue</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/v1/pets/:petId</code></td><td>Public pet profile; verifies DB read and sprite seed generation</td></tr>
+<tr><td><code>PUT</code></td><td><code>/admin/api/config/runtime</code></td><td>Toggle feature flags and arena rate limits without a redeploy</td></tr>
+<tr><td><code>GET</code></td><td><code>/admin/api/pets?flagged=true</code></td><td>List SUSPICIOUS-flagged pets; used during bot detection incidents</td></tr>
+</table>
+<h3>Environment Variables Checklist</h3>
+<p>Confirm all of the following are present and non-empty before any deployment or debugging session:</p>
+<pre><code class="">DATABASE_URL          # Supabase PostgreSQL connection string (pooler preferred)
 REDIS_URL             # Upstash Redis TLS URL
 JWT_SECRET            # ≥ 32 bytes base64url; used for TOTP setup token signing only — not for player auth or admin sessions
 SENDGRID_API_KEY      # SendGrid API key for transactional email
-ADMIN_TOTP_ISSUER     # Displayed in authenticator apps (e.g. "PixelPetArena Admin")
-FF_MARKETPLACE        # "false" (default) or "true"
-FF_ARENA_SUMO         # "true" (default) or "false"
-NODE_ENV              # Must be "production" in production
-LOG_LEVEL             # "info" or "warn" in production; "debug" for local troubleshooting
+ADMIN_TOTP_ISSUER     # Displayed in authenticator apps (e.g. &quot;PixelPetArena Admin&quot;)
+FF_MARKETPLACE        # &quot;false&quot; (default) or &quot;true&quot;
+FF_ARENA_SUMO         # &quot;true&quot; (default) or &quot;false&quot;
+NODE_ENV              # Must be &quot;production&quot; in production
+LOG_LEVEL             # &quot;info&quot; or &quot;warn&quot; in production; &quot;debug&quot; for local troubleshooting
 PORT                  # Default 3000; set by platform automatically</code></pre>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="common-error-codes">Common Error Codes</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">All API errors use the standard envelope defined in <code>docs/API.md §4.1</code>. Key error codes encountered during incidents:</p>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Error Code</th><th>HTTP Status</th><th>Meaning</th><th>Likely Cause</th></tr></thead>
-<tbody>
-<tr><td>`UNAUTHORIZED`</td><td>401</td><td>Missing or invalid Bearer token / admin session cookie</td><td>Expired session; token revoked; incorrect auth header format</td></tr>
-<tr><td>`FORBIDDEN`</td><td>403</td><td>Authenticated but insufficient permissions</td><td>Correct user, wrong role; pet banned (`PET_BANNED`)</td></tr>
-<tr><td>`ACCOUNT_LOCKED`</td><td>403</td><td>Admin account locked after 10 failed logins</td><td>Brute-force lockout; mistyped password; TOTP drift</td></tr>
-<tr><td>`TOTP_SETUP_REQUIRED`</td><td>403</td><td>First admin login; TOTP not yet enrolled</td><td>New admin account that has not completed TOTP setup flow</td></tr>
-<tr><td>`RATE_LIMITED`</td><td>429</td><td>Too many requests; `Retry-After` header present</td><td>Arena: > 10 battles/hr per pet; Admin: > 100 req/min</td></tr>
-<tr><td>`PET_BANNED`</td><td>403</td><td>Pet account is banned</td><td>Moderation action; bot detection ban</td></tr>
-<tr><td>`TRAINING_LIMIT_REACHED`</td><td>400</td><td>Pet has used all 3 training actions for today</td><td>Normal game limit (`training_actions_per_day = 3`); resets at UTC 00:00</td></tr>
-<tr><td>`STAT_AT_MAXIMUM`</td><td>400</td><td>Stat is already at 100</td><td>Pet stat has reached the cap (`pet_stat_max = 100`)</td></tr>
-<tr><td>`FF_DISABLED`</td><td>403</td><td>Feature is behind a disabled flag</td><td>`FF_MARKETPLACE = false` — marketplace not yet enabled</td></tr>
-<tr><td>`NOT_FOUND`</td><td>404</td><td>Resource does not exist</td><td>Incorrect pet ID or battle ID in the request path</td></tr>
-<tr><td>`CONFLICT`</td><td>409</td><td>Duplicate resource</td><td>Attempt to re-enter matchmaking while already queued</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="contact-list">Contact List</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Role</th><th>Contact</th></tr></thead>
-<tbody>
+<h3>Common Error Codes</h3>
+<p>All API errors use the standard envelope defined in <code>docs/API.md §4.1</code>. Key error codes encountered during incidents:</p>
+<table>
+<tr><th>Error Code</th><th>HTTP Status</th><th>Meaning</th><th>Likely Cause</th></tr>
+<tr><td><code>UNAUTHORIZED</code></td><td>401</td><td>Missing or invalid Bearer token / admin session cookie</td><td>Expired session; token revoked; incorrect auth header format</td></tr>
+<tr><td><code>FORBIDDEN</code></td><td>403</td><td>Authenticated but insufficient permissions</td><td>Correct user, wrong role; pet banned (<code>PET_BANNED</code>)</td></tr>
+<tr><td><code>ACCOUNT_LOCKED</code></td><td>403</td><td>Admin account locked after 10 failed logins</td><td>Brute-force lockout; mistyped password; TOTP drift</td></tr>
+<tr><td><code>TOTP_SETUP_REQUIRED</code></td><td>403</td><td>First admin login; TOTP not yet enrolled</td><td>New admin account that has not completed TOTP setup flow</td></tr>
+<tr><td><code>RATE_LIMITED</code></td><td>429</td><td>Too many requests; <code>Retry-After</code> header present</td><td>Arena: &gt; 10 battles/hr per pet; Admin: &gt; 100 req/min</td></tr>
+<tr><td><code>PET_BANNED</code></td><td>403</td><td>Pet account is banned</td><td>Moderation action; bot detection ban</td></tr>
+<tr><td><code>TRAINING_LIMIT_REACHED</code></td><td>400</td><td>Pet has used all 3 training actions for today</td><td>Normal game limit (<code>training_actions_per_day = 3</code>); resets at UTC 00:00</td></tr>
+<tr><td><code>STAT_AT_MAXIMUM</code></td><td>400</td><td>Stat is already at 100</td><td>Pet stat has reached the cap (<code>pet_stat_max = 100</code>)</td></tr>
+<tr><td><code>FF_DISABLED</code></td><td>403</td><td>Feature is behind a disabled flag</td><td><code>FF_MARKETPLACE = false</code> — marketplace not yet enabled</td></tr>
+<tr><td><code>NOT_FOUND</code></td><td>404</td><td>Resource does not exist</td><td>Incorrect pet ID or battle ID in the request path</td></tr>
+<tr><td><code>CONFLICT</code></td><td>409</td><td>Duplicate resource</td><td>Attempt to re-enter matchmaking while already queued</td></tr>
+</table>
+<h3>Contact List</h3>
+<table>
+<tr><th>Role</th><th>Contact</th></tr>
 <tr><td>Primary on-call engineer</td><td>[ON-CALL-ENGINEER]</td></tr>
 <tr><td>Platform lead (escalation)</td><td>[PLATFORM-LEAD] — escalate via PagerDuty P0 policy</td></tr>
 <tr><td>Database owner (Supabase issues)</td><td>[DATABASE-OWNER] — open Supabase support ticket if platform incident confirmed</td></tr>
@@ -632,9 +491,23 @@ PORT                  # Default 3000; set by platform automatically</code></pre>
 <tr><td>SendGrid support</td><td>https://support.sendgrid.com</td></tr>
 <tr><td>Railway support</td><td>https://railway.app/help</td></tr>
 <tr><td>Fly.io support</td><td>https://fly.io/docs/support/</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-    </div>
+</table></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,332 @@
+{
+  "index.html": {
+    "url": "index.html",
+    "title": "test 文件中心",
+    "excerpt": "pixel-pet-arena 🎮\nA pixel-art pet breeding, training, and battle arena game with cross-platform support (Web, iOS, Android) and competitive leaderboar"
+  },
+  "idea.html": {
+    "url": "idea.html",
+    "title": "構想文件 (IDEA)",
+    "excerpt": "IDEA Document Template\n&lt;!-- SDLC Requirements Engineering — Layer 0：Idea Capture --&gt;\n&lt;!-- 此文件是需求鏈的起點（IDEA → BRD → PRD → PDD → EDD），記錄最原始的構想輸入"
+  },
+  "brd.html": {
+    "url": "brd.html",
+    "title": "商業需求文件 (BRD)",
+    "excerpt": "BRD — Business Requirements Document\n&lt;!-- SDLC Requirements Engineering — Layer 1：Business Requirements --&gt;\n&lt;!-- 對應學術標準：ISO/IEC/IEEE 29148；對應"
+  },
+  "prd.html": {
+    "url": "prd.html",
+    "title": "產品需求文件 (PRD)",
+    "excerpt": "PRD — Product Requirements Document\n&lt;!-- SDLC Requirements Engineering — Layer 2：Product Requirements --&gt;\n&lt;!-- Upstream: IDEA-PIXEL-PET-ARENA"
+  },
+  "pdd.html": {
+    "url": "pdd.html",
+    "title": "產品設計文件 (PDD)",
+    "excerpt": "PDD — Product Design Document\n\nPlatform Scope Declaration（平台範圍宣告）\n Web（Browser） iOS Native Android Native Desktop App（Electron / macOS / Windows） Game"
+  },
+  "vdd.html": {
+    "url": "vdd.html",
+    "title": "視覺設計文件 (VDD)",
+    "excerpt": "VDD — Visual Design Document\n&lt;!-- SDLC Requirements Engineering — Layer 3.5: Visual Design --&gt;\n&lt;!-- Upstream: IDEA.md, BRD.md, PRD.md, PDD.md"
+  },
+  "edd.html": {
+    "url": "edd.html",
+    "title": "工程設計文件 (EDD)",
+    "excerpt": "EDD — Engineering Design Document\n\nDocument Control\n\n欄位內容\nDOC-IDEDD-PIXEL-PET-ARENA-20260503\n產品名稱Pixel Pet Arena\n文件版本v1.0\n狀態DRAFT\n作者AI Generated (gend"
+  },
+  "arch.html": {
+    "url": "arch.html",
+    "title": "架構設計",
+    "excerpt": "ARCH — System Architecture\n\nDocument Control\n\n欄位內容\nDOC-IDARCH-PIXEL-PET-ARENA-20260503\n產品名稱Pixel Pet Arena\n文件版本v1.0\n狀態DRAFT\n作者AI Generated (gendoc arc"
+  },
+  "api.html": {
+    "url": "api.html",
+    "title": "API 文件",
+    "excerpt": "API Specification — pixel-pet-arena\nDOC-ID: API-PIXEL-PET-ARENA-20260503\nVersion: v1.0\nStatus: DRAFT\nAuthor: AI Generated (gendoc api)\nDate: 2026-05-0"
+  },
+  "schema.html": {
+    "url": "schema.html",
+    "title": "Schema 文件",
+    "excerpt": "Database Schema — pixel-pet-arena\nDOC-ID: SCHEMA-PIXEL-PET-ARENA-20260503\nStatus: DRAFT\nUpstream: EDD-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20"
+  },
+  "frontend.html": {
+    "url": "frontend.html",
+    "title": "前端設計文件",
+    "excerpt": "FRONTEND.md — pixel-pet-arena\nDOC-ID: FRONTEND-PIXEL-PET-ARENA-20260503\nStatus: DRAFT\nUpstream: EDD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-2026"
+  },
+  "audio.html": {
+    "url": "audio.html",
+    "title": "音效設計文件",
+    "excerpt": "AUDIO — Audio Design and Implementation Guide\nDOC-ID: AUDIO-PIXEL-PET-ARENA-20260503\nProject: pixel-pet-arena\nVersion: v1.0\nStatus: DRAFT\nAuthor: AI G"
+  },
+  "anim.html": {
+    "url": "anim.html",
+    "title": "動畫特效文件",
+    "excerpt": "ANIM — Animation &amp; Sprite Design\nDOC-ID: ANIM-PIXEL-PET-ARENA-20260503\nProject: pixel-pet-arena\nVersion: v1.0\nStatus: DRAFT\nAuthor: AI Generated ("
+  },
+  "client_impl.html": {
+    "url": "client_impl.html",
+    "title": "客戶端實作規格",
+    "excerpt": "CLIENT_IMPL — Client Implementation Specification\n&lt;!-- SDLC Layer 4: Implementation Engineering --&gt;\n&lt;!-- Upstream: EDD.md (tech stack, archit"
+  },
+  "constants.html": {
+    "url": "constants.html",
+    "title": "業務常數文件",
+    "excerpt": "CONSTANTS — Global Quantitative Truth Source\n&lt;!-- 跨文件數值一致性的唯一真相來源（由 EDD Pass-0 生成） --&gt;\n&lt;!-- 所有下游文件（EDD/BDD/test-plan/runbook）必須讀取此文件並引用，不得自行填"
+  },
+  "test-plan.html": {
+    "url": "test-plan.html",
+    "title": "測試計畫 (Test Plan)",
+    "excerpt": "Test Plan — pixel-pet-arena\nDOC-ID: TEST-PLAN-PIXEL-PET-ARENA-20260503\nProject: pixel-pet-arena\nVersion: v1.0\nStatus: DRAFT\nAuthor: AI Generated (gend"
+  },
+  "runbook.html": {
+    "url": "runbook.html",
+    "title": "Runbook",
+    "excerpt": "Runbook — pixel-pet-arena\nDOC-ID: RUNBOOK-PIXEL-PET-ARENA-20260504\nStatus: ACTIVE\nLast Updated: 2026-05-04\nMaintainer: [ON-CALL-ENGINEER]\n\nTable of Co"
+  },
+  "local_deploy.html": {
+    "url": "local_deploy.html",
+    "title": "本地部署指南",
+    "excerpt": "Local Development Setup — pixel-pet-arena\nThis guide walks a developer joining the project for the first time through every step required to run all t"
+  },
+  "rtm.html": {
+    "url": "rtm.html",
+    "title": "需求追蹤矩陣 (RTM)",
+    "excerpt": "Requirement Traceability Matrix\n\nDOC-IDRTM-PIXEL-PET-001\nProjectpixel-pet-arena\nDate2026-05-03\nVersion1.0.0\n\n\nOverview\nThis Requirement Traceability M"
+  },
+  "align_report.html": {
+    "url": "align_report.html",
+    "title": "對齊報告",
+    "excerpt": "gendoc — Cross-File Alignment Audit Report\nProject: pixel-pet-arena\nDate: 2026-05-04\nExecution Mode: gendoc-align-check\nRepository Type: BDD Documenta"
+  },
+  "admin_impl.html": {
+    "url": "admin_impl.html",
+    "title": "Admin Impl",
+    "excerpt": "ADMIN_IMPL — Admin Portal Implementation Specification\n&lt;!-- SDLC Layer 4: Implementation Engineering --&gt;\n&lt;!-- Upstream: EDD.md (tech stack §3"
+  },
+  "align-report.html": {
+    "url": "align-report.html",
+    "title": "Align-Report",
+    "excerpt": "Cross-Document Alignment Report — pixel-pet-arena\nDOC-ID: ALIGN-PIXEL-PET-ARENA-20260504\nStatus: VERIFIED\nGenerated: 2026-05-04\nFixes Applied: 2026-05"
+  },
+  "align_fix_complete.html": {
+    "url": "align_fix_complete.html",
+    "title": "Align Fix Complete",
+    "excerpt": "✅ 對齐修復執行完成報告\n項目: pixel-pet-arena\n日期: 2026-05-04\n狀態: 🟢 所有可執行修復已完成 (23/30) | ⏳ 4 項已阻塞，3 項超出範圍\n\n📈 最終統計\n\n維度問題數已修復阻塞超出範圍完成度\nDim 011 ✅——100%\nDim 1119 ✅—282%"
+  },
+  "align_fix_summary.html": {
+    "url": "align_fix_summary.html",
+    "title": "Align Fix Summary",
+    "excerpt": "gendoc — Alignment Fix Execution Summary\nProject: pixel-pet-arena\nDate: 2026-05-04\nStatus: ✅ Documentation-Phase Fixes COMPLETE | ⚠️ Engineering-Phase"
+  },
+  "bdd-client.html": {
+    "url": "bdd-client.html",
+    "title": "Client BDD",
+    "excerpt": "admin-portal.feature\nFeature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (US-ADMIN-001, US-ADMIN-002, US-ADMIN-003)\n\n  Backgr"
+  },
+  "bdd-server.html": {
+    "url": "bdd-server.html",
+    "title": "Server BDD",
+    "excerpt": "admin-moderation.feature\nFeature: Admin Moderation — Pet Banning and Battle Flagging\n  As an admin moderator\n  I want to ban disruptive pets and flag "
+  },
+  "cicd.html": {
+    "url": "cicd.html",
+    "title": "Cicd",
+    "excerpt": "CI/CD Pipeline — pixel-pet-arena\nThis document describes the complete continuous integration and delivery pipeline for the pixel-pet-arena monorepo. I"
+  },
+  "contracts.html": {
+    "url": "contracts.html",
+    "title": "機器可讀合約",
+    "excerpt": "Machine-Readable Contracts Index\nGenerated by gendoc-gen-contracts from gendoc documentation pipeline.\nSource documents: docs/EDD.md, docs/API.md, doc"
+  },
+  "developer_guide.html": {
+    "url": "developer_guide.html",
+    "title": "Developer Guide",
+    "excerpt": "Developer Guide — pixel-pet-arena\nDOC-ID: DEVGUIDE-PIXEL-PET-ARENA-20260504\nStatus: ACTIVE\nLast Updated: 2026-05-04\nAudience: Engineers working day-to"
+  },
+  "implementation_readiness.html": {
+    "url": "implementation_readiness.html",
+    "title": "Implementation Readiness",
+    "excerpt": "實作完整度評估 — pixel-pet-arena\n1. 本地開發環境完整度：✅ 95% 可直接實作\n已具備的文檔（完整清單）\nLOCAL_DEPLOY.md (15KB) — 完整本地環境啟動指南✅ 前置軟件版本要求（Node 20, pnpm 9, Docker 24, Supabase CLI"
+  },
+  "manifest.html": {
+    "url": "manifest.html",
+    "title": "Manifest",
+    "excerpt": "MANIFEST — gendoc Pipeline Execution Plan\nProject: pixel-pet-arena\nGenerated: 2026-05-03\nPipeline Version: 3.0\nStatus: ✅ COMPLETE\n\n§1 Baseline Metrics"
+  },
+  "resource.html": {
+    "url": "resource.html",
+    "title": "Resource",
+    "excerpt": "pixel-pet-arena — AI Asset Production Order (RESOURCE)\nPurpose: This document is the structured AI asset production inventory listing all visual asset"
+  },
+  "background-jobs.html": {
+    "url": "background-jobs.html",
+    "title": "Background-Jobs",
+    "excerpt": "Background Jobs Specification\n&lt;!-- Recurring and async job definitions for pixel-pet-arena backend --&gt;\n&lt;!-- Upstream: EDD.md (§4), SCHEMA.md "
+  },
+  "req.html": {
+    "url": "req.html",
+    "title": "原始素材 (req/)",
+    "excerpt": "📎 原始素材 (req/)專案原始素材與需求附件，點擊下載。📎 附件與素材 (req/)共 1 個附件，點擊下載📎 idea-input.md (600 B)"
+  },
+  "diag-activity-arena-battle.html": {
+    "url": "diag-activity-arena-battle.html",
+    "title": "Activity Arena Battle",
+    "excerpt": "Activity Diagram — Arena Battle System Processing — pixel-pet-arena\n來源：PRD §6.3 Arena Battle Flow, EDD §5.3 Arena Endpoints, EDD §4.4 ArenaMatch\nflowc"
+  },
+  "diag-activity-claim-and-train.html": {
+    "url": "diag-activity-claim-and-train.html",
+    "title": "Activity Claim And Train",
+    "excerpt": "Activity Diagram — Claim Pet &amp; Training Flow — pixel-pet-arena\n來源：PRD §6 US-AUTH-001, US-AUTH-002, US-TRAIN-001, EDD §5.1–5.2\nflowchart TD\n    A(("
+  },
+  "diag-activity-gdpr-erasure.html": {
+    "url": "diag-activity-gdpr-erasure.html",
+    "title": "Activity Gdpr Erasure",
+    "excerpt": "Activity Diagram — GDPR Erasure &amp; Recovery Flow — pixel-pet-arena\n來源：PRD §7.8 GDPR Data Handling, EDD §6.5 GDPR/Data Handling Summary, EDD §5.6 GD"
+  },
+  "diag-cicd-deploy-production.html": {
+    "url": "diag-cicd-deploy-production.html",
+    "title": "Cicd Deploy Production",
+    "excerpt": "Production Deployment Flow (deploy-production.yml)\nThis document describes the production deployment pipeline for the pixel-pet-arena monorepo. Produc"
+  },
+  "diag-cicd-deploy-staging.html": {
+    "url": "diag-cicd-deploy-staging.html",
+    "title": "Cicd Deploy Staging",
+    "excerpt": "Staging Deployment Flow (deploy-staging.yml)\nThis document describes the staging deployment pipeline triggered by merges to the main branch of the pix"
+  },
+  "diag-cicd-pipeline-overview.html": {
+    "url": "diag-cicd-pipeline-overview.html",
+    "title": "Cicd Pipeline Overview",
+    "excerpt": "CI/CD Pipeline Overview\nThis document provides a high-level view of the complete CI/CD pipeline for the pixel-pet-arena monorepo, from a developer pus"
+  },
+  "diag-cicd-pr-gate.html": {
+    "url": "diag-cicd-pr-gate.html",
+    "title": "Cicd Pr Gate",
+    "excerpt": "PR Gate Workflow (ci.yml)\nThis document details the PR gate workflow defined in .github/workflows/ci.yml for the pixel-pet-arena monorepo. Every pull "
+  },
+  "diag-cicd-secrets-rotation.html": {
+    "url": "diag-cicd-secrets-rotation.html",
+    "title": "Cicd Secrets Rotation",
+    "excerpt": "Secrets Management Lifecycle\nThis document covers the complete secrets management lifecycle for the pixel-pet-arena monorepo, including how detect-sec"
+  },
+  "diag-class-application.html": {
+    "url": "diag-class-application.html",
+    "title": "Class Application",
+    "excerpt": "Class Diagram — Application Layer — pixel-pet-arena\n來源：EDD §3.8 Class Diagram, EDD §5 API Design, ARCH §2 Component Architecture\nclassDiagram\n    dire"
+  },
+  "diag-class-domain.html": {
+    "url": "diag-class-domain.html",
+    "title": "類別圖：領域模型",
+    "excerpt": "Domain Class Diagram — pixel-pet-arena\nOverview\nThis diagram covers all 12 domain entities defined in EDD §4 and SCHEMA.md §2. It models the\nstructura"
+  },
+  "diag-class-infra-presentation.html": {
+    "url": "diag-class-infra-presentation.html",
+    "title": "Class Infra Presentation",
+    "excerpt": "Class Diagram — Infrastructure + Presentation Layer — pixel-pet-arena\n來源：EDD §3.8 Class Diagram, EDD §5 API Design, ARCH §2 Component Architecture\ncla"
+  },
+  "diag-class-services.html": {
+    "url": "diag-class-services.html",
+    "title": "Class Services",
+    "excerpt": "Service Layer Class Diagram — pixel-pet-arena\nOverview\nThis diagram models the backend service layer that sits between the Fastify route handlers and "
+  },
+  "diag-communication.html": {
+    "url": "diag-communication.html",
+    "title": "協作圖",
+    "excerpt": "Communication Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §1.2 System Context, EDD §5 API Design\nflowchart LR\n    PlayerApp[&quot;Pl"
+  },
+  "diag-component-architecture.html": {
+    "url": "diag-component-architecture.html",
+    "title": "Component Architecture",
+    "excerpt": "Component Architecture Diagram — pixel-pet-arena\nOverview\nThis diagram shows the full system component architecture: client-side SPA frontends served "
+  },
+  "diag-component.html": {
+    "url": "diag-component.html",
+    "title": "元件圖",
+    "excerpt": "Component Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §2 Component Architecture, EDD §3.3–3.7 Technology Stack\nflowchart LR\n    subg"
+  },
+  "diag-deployment.html": {
+    "url": "diag-deployment.html",
+    "title": "部署圖",
+    "excerpt": "Deployment Diagram — pixel-pet-arena\n來源：EDD §3.8 Deployment Diagram, ARCH §7 Deployment Architecture, EDD §3.6 Hosting/Infrastructure\nflowchart TD\n   "
+  },
+  "diag-er-diagram.html": {
+    "url": "diag-er-diagram.html",
+    "title": "ER 關聯圖",
+    "excerpt": "Entity-Relationship Diagram — pixel-pet-arena\nOverview\nThis ER diagram covers all 12 PostgreSQL tables defined in SCHEMA.md §2, plus the Redis key-spa"
+  },
+  "diag-object-snapshot.html": {
+    "url": "diag-object-snapshot.html",
+    "title": "物件圖：快照",
+    "excerpt": "Object Diagram — pixel-pet-arena\n來源：EDD §4.1 Pet, §4.2 User, §4.3 ClaimCode, §4.4 ArenaMatch\nSnapshot 1 — Claimed Pet (IDLE state, Level 7)\nclassDiagr"
+  },
+  "diag-sequence-arena-battle.html": {
+    "url": "diag-sequence-arena-battle.html",
+    "title": "Sequence Arena Battle",
+    "excerpt": "Sequence Diagram — Arena Battle Matchmaking\nOverview\nThe arena battle flow handles matchmaking, battle outcome computation, and leaderboard score\nupda"
+  },
+  "diag-sequence-claim-flow.html": {
+    "url": "diag-sequence-claim-flow.html",
+    "title": "Sequence Claim Flow",
+    "excerpt": "Sequence Diagram — Pet Claim Email OTP Flow\nOverview\nThe claim flow is the identity foundation of pixel-pet-arena. Because there are no traditional us"
+  },
+  "diag-sequence-training.html": {
+    "url": "diag-sequence-training.html",
+    "title": "Sequence Training",
+    "excerpt": "Sequence Diagram — Pet Training\nOverview\nTraining is the core progression loop: a pet owner spends up to 3 daily actions\n(training_actions_per_day = 3"
+  },
+  "diag-state-arena-match.html": {
+    "url": "diag-state-arena-match.html",
+    "title": "State Arena Match",
+    "excerpt": "State Machine — Arena Match\nOverview\nAn arena match progresses through a well-defined lifecycle: from queue entry through matchmaking,\nbattle resoluti"
+  },
+  "diag-state-pet-lifecycle.html": {
+    "url": "diag-state-pet-lifecycle.html",
+    "title": "State Pet Lifecycle",
+    "excerpt": "State Machine — Pet Lifecycle\nOverview\nA pet in pixel-pet-arena moves through a defined lifecycle from procedural generation to an active\nclaimed stat"
+  },
+  "diag-use-case.html": {
+    "url": "diag-use-case.html",
+    "title": "用例圖 (Use Case)",
+    "excerpt": "Use Case Diagram — pixel-pet-arena\n來源：EDD §3.8 Use Case Diagram, PRD §4 Scope, PRD §3.2 Persona Cards\nflowchart TD\n    GuestPlayer[&quot;GuestPlayer\\n"
+  },
+  "blueprint__mock-mock_server_guide.html": {
+    "url": "blueprint__mock-mock_server_guide.html",
+    "title": "Mock Server Guide",
+    "excerpt": "Pixel Pet Arena — Mock Server 使用手冊\n適用版本： FastAPI Mock Server v1.0\nOpenAPI 規格： docs/blueprint/contracts/openapi.yaml\n最後更新： 2026-05-05\n\n目錄\n目錄結構前置需求安裝步驟啟"
+  },
+  "contracts__api-admin-contract.html": {
+    "url": "contracts__api-admin-contract.html",
+    "title": "Api Admin Contract",
+    "excerpt": "API–Admin Portal Contract\nThis document defines the stable interface contract between the Fastify 4 API backend (apps/api) and the Vue 3 + Element Plu"
+  },
+  "contracts__api-player-contract.html": {
+    "url": "contracts__api-player-contract.html",
+    "title": "Api Player Contract",
+    "excerpt": "API–Player Frontend Contract\nThis document defines the stable interface contract between the Fastify 4 API backend (apps/api) and the React 18 + Phase"
+  },
+  "contracts__event-schema-contract.html": {
+    "url": "contracts__event-schema-contract.html",
+    "title": "Event Schema Contract",
+    "excerpt": "Internal Event Schema Contract\nThis document defines the schema contracts for all Redis pub/sub messages and job queue events used internally by the p"
+  },
+  "prototype__admin-moderation-prototype.html": {
+    "url": "prototype__admin-moderation-prototype.html",
+    "title": "Admin Moderation Prototype",
+    "excerpt": "Admin Moderation Prototype Specification\nOverview\nThe Admin Moderation screens live in the Vue 3 + Element Plus admin portal running on port 5174. The"
+  },
+  "prototype__arena-battle-prototype.html": {
+    "url": "prototype__arena-battle-prototype.html",
+    "title": "Arena Battle Prototype",
+    "excerpt": "Arena Battle Prototype Specification\nOverview\nThe Arena Battle flow covers three sequential screens: opponent selection, live battle animation, and po"
+  },
+  "prototype__pet-display-prototype.html": {
+    "url": "prototype__pet-display-prototype.html",
+    "title": "Pet Display Prototype",
+    "excerpt": "Pet Display Prototype Specification\nOverview\nThe Pet Display page is the primary screen players see after login. It centers the player&#x27;s active p"
+  },
+  "req__idea-input.html": {
+    "url": "req__idea-input.html",
+    "title": "Idea Input",
+    "excerpt": "原始需求輸入\n一個HTML5的寵物網站，使用者不用登入，可以隨機跟一個寵物互動，覺得想養要給email，會寄一封密碼信給你，以及畫面有領取的URL，下次可依此URL回來跟寵物互動，養大的寵物可以跟其他寵物競賽，可以去競技場比賽跑，可以比相撲擂台等，若要讓寵物好，要訓練，給特殊食物，也可以把寵物交易，"
+  }
+}

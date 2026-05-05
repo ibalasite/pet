@@ -1,322 +1,320 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — pixel-pet-arena — AI Asset Production Order (RESOURCE)</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">pixel-pet-arena — AI Asset Production Order (RESOURCE)</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>pixel-pet-arena — AI Asset Production Order (RESOURCE)</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<div class="doc-gap"></div>
-<h1 class="doc-h1" id="pixel-pet-arena--ai-asset-production-order-resource">pixel-pet-arena — AI Asset Production Order (RESOURCE)</h1>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>Purpose</strong>: This document is the structured AI asset production inventory listing all visual assets required for pixel-pet-arena. Each row represents an independent production task including generation prompts, performance budgets, and delivery paths. Designers can submit prompts directly to AI generation tools once confirmed.</blockquote>
-<blockquote class="doc-quote"></blockquote>
-<blockquote class="doc-quote"><strong>Upstream sources</strong>: Derived from <code>docs/VDD.md</code>, <code>docs/EDD.md</code>, <code>docs/FRONTEND.md</code>, and <code>docs/CLIENT_IMPL.md</code>. To modify design specifications, update the relevant design documents first, then regenerate this document.</blockquote>
-<blockquote class="doc-quote"></blockquote>
-<blockquote class="doc-quote"><strong>Platform</strong>: Web (HTML5 SPA — Vercel CDN). Target engine: Phaser.js 3 + React 18. Sprite resolution: 32×32 px base frame (sprite_resolution_px = 32).</blockquote>
-<blockquote class="doc-quote"></blockquote>
-<blockquote class="doc-quote"><strong>No ANIM.md</strong>: Skeletal animation section (§2) covers Phaser.js sprite sheet animations only — no ANIM.md exists for this project.</blockquote>
-<blockquote class="doc-quote"><strong>No AUDIO.md</strong>: Audio is deferred to Phase 2 — §3 notes this explicitly.</blockquote>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="change-log">Change Log</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Version</th><th>Date</th><th>Author</th><th>Change</th></tr></thead>
-<tbody>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Resource</p>
+    <h1 class="banner-title">Resource</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link active" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>pixel-pet-arena — AI Asset Production Order (RESOURCE)</h1>
+<blockquote><p><strong>Purpose</strong>: This document is the structured AI asset production inventory listing all visual assets required for pixel-pet-arena. Each row represents an independent production task including generation prompts, performance budgets, and delivery paths. Designers can submit prompts directly to AI generation tools once confirmed.</p></blockquote>
+<p>&gt;</p>
+<blockquote><p><strong>Upstream sources</strong>: Derived from <code>docs/VDD.md</code>, <code>docs/EDD.md</code>, <code>docs/FRONTEND.md</code>, and <code>docs/CLIENT_IMPL.md</code>. To modify design specifications, update the relevant design documents first, then regenerate this document.</p></blockquote>
+<p>&gt;</p>
+<blockquote><p><strong>Platform</strong>: Web (HTML5 SPA — Vercel CDN). Target engine: Phaser.js 3 + React 18. Sprite resolution: 32×32 px base frame (sprite_resolution_px = 32).</p></blockquote>
+<p>&gt;</p>
+<blockquote><p><strong>No ANIM.md</strong>: Skeletal animation section (§2) covers Phaser.js sprite sheet animations only — no ANIM.md exists for this project.</p></blockquote>
+<blockquote><p><strong>No AUDIO.md</strong>: Audio is deferred to Phase 2 — §3 notes this explicitly.</p></blockquote>
+<hr>
+<h2>Change Log</h2>
+<table>
+<tr><th>Version</th><th>Date</th><th>Author</th><th>Change</th></tr>
 <tr><td>1.0.0</td><td>2026-05-03</td><td>Gen Agent</td><td>Initial generation — AI asset production order for pixel-pet-arena</td></tr>
 <tr><td>1.0.1</td><td>2026-05-04</td><td>Review Agent R6</td><td>Fix §1.2 wrong upstream ref (VDD §8.9→§8.3); fix RES-IMG-043 filename per VDD §7.6 naming (og-battle-result-template→og-battle-result); add RES-IMG-044 WebP fallback for OG battle result per VDD §7.5; renumber RES-IMG-044/045→045/046 (bg-landing-hero, bg-leaderboard); remove incorrect EDD §1 citation from §3 preamble; update §4 checklist and §5 license table</td></tr>
 <tr><td>1.0.2</td><td>2026-05-04</td><td>Review Agent R7</td><td>Fix RES-ANIM-005 wrong upstream citation (CLIENT_IMPL ANIM-08 victory → CLIENT_IMPL §5.3 ArenaBattleScene VICTORY state); ANIM-08 is the run cycle, not the victory animation</td></tr>
 <tr><td>1.0.3</td><td>2026-05-04</td><td>Review Agent R8</td><td>Add RES-IMG-017 bg-arena-sumo.avif (missing AVIF primary for sumo arena — VDD §7.5 requires AVIF+WebP for all full-width arena backgrounds); renumber RES-IMG-017→018 through RES-IMG-046→047; fix §2 preamble to include §5.3 source for battle-victory animation; update §4 checklist and §5 license table</td></tr>
-<tr><td>1.0.4</td><td>2026-05-04</td><td>Review Agent R9</td><td>Fix §1.2 section header wrong citation (VDD §4→§8.3 — VDD §4 is "Character & World Design" with no food item specs; VDD §8.3 is "My Pet Page" which includes food inventory); add missing §4 checklist entry for §1.2 food item sprites coverage</td></tr>
-<tr><td>1.0.5</td><td>2026-05-04</td><td>Review Agent R10</td><td>Fix RES-ANIM-001 description inaccurate wording: "recommended maximum" → "8 frames recommended" to match VDD §4.2 which sets 4 as minimum and 8 as recommended (not as a maximum cap)</td></tr>
+<tr><td>1.0.4</td><td>2026-05-04</td><td>Review Agent R9</td><td>Fix §1.2 section header wrong citation (VDD §4→§8.3 — VDD §4 is &quot;Character &amp; World Design&quot; with no food item specs; VDD §8.3 is &quot;My Pet Page&quot; which includes food inventory); add missing §4 checklist entry for §1.2 food item sprites coverage</td></tr>
+<tr><td>1.0.5</td><td>2026-05-04</td><td>Review Agent R10</td><td>Fix RES-ANIM-001 description inaccurate wording: &quot;recommended maximum&quot; → &quot;8 frames recommended&quot; to match VDD §4.2 which sets 4 as minimum and 8 as recommended (not as a maximum cap)</td></tr>
 <tr><td>1.0.6</td><td>2026-05-04</td><td>Review Agent R11</td><td>Add RES-IMG-046 og-default-1200x630.png and RES-IMG-047 og-battle-result-1200x630.png (missing PNG last-resort fallbacks for OG social card backgrounds — VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort); renumber RES-IMG-046/047→048/049 (bg-landing-hero, bg-leaderboard); update §4 checklist OG entry to include PNG last resort; update §5 license table</td></tr>
 <tr><td>1.0.7</td><td>2026-05-04</td><td>Review Agent R12</td><td>Add RES-IMG-050–061 — PNG fallback exports for all 12 SVG game UI icons (VDD §7.1 requires PNG-24 fallbacks for all SVG icons; §1.4 preamble acknowledged the requirement but no rows existed); update §1.4 preamble, §4 checklist, §5 license table</td></tr>
 <tr><td>1.0.8</td><td>2026-05-04</td><td>Review Agent R13</td><td>Fix §1.7 section header imprecise citation (VDD §8 → VDD §8.1 / §8.7); §8 is the parent heading for all Screen Visual Specs; §8.1 is the Landing Page spec (RES-IMG-048) and §8.7 is the Leaderboard Page spec (RES-IMG-049)</td></tr>
-<tr><td>1.0.9</td><td>2026-05-04</td><td>Review Agent R14</td><td>Fix RES-IMG-014 description inconsistency: description said "Primary AVIF target ≤ 150 KB; WebP fallback ≤ 200 KB" (describing both formats' budgets) — after R8 added RES-IMG-015 as a separate AVIF row, the WebP row's description was not updated; now reads "Full arena race backdrop WebP fallback (VDD §4.3 + §7.5). Served when AVIF is not supported." to match the consistent pattern of RES-IMG-016 (sumo WebP)</td></tr>
-<tr><td>1.0.10</td><td>2026-05-04</td><td>Review Agent R15</td><td>Fix RES-IMG-042 description inconsistency: description said "AVIF primary (≤150 KB), WebP fallback ≤200 KB" (describing both formats' budgets in the AVIF-only row) — R14 established the pattern that each format row describes only its own format; the OG default AVIF row was not updated when this pattern was applied; now reads "AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers." to match the consistent pattern of RES-IMG-044 (battle result AVIF primary)</td></tr>
-<tr><td>1.0.11</td><td>2026-05-04</td><td>Review Agent R16</td><td>Fix RES-IMG-043 description incomplete: missing "Served when AVIF is not supported." — all other WebP fallback rows (RES-IMG-014, RES-IMG-016) include a serving-context statement; RES-IMG-043 was the only WebP row without it; fix RES-IMG-044 description incomplete: ended with "AVIF primary format." — missing "(VDD §7.5)" citation and "Served preferentially over WebP for supported browsers." required by the consistent AVIF-row pattern established in R15 (RES-IMG-042)</td></tr>
-<tr><td>1.0.12</td><td>2026-05-04</td><td>Review Agent R17</td><td>Fix RES-IMG-016 description inconsistent serving-context statement: said "WebP fallback for supported browsers without AVIF." instead of the canonical pattern "Served when AVIF is not supported." used by all other WebP rows (RES-IMG-014, RES-IMG-043); fix RES-IMG-045 description missing serving-context statement: said "Required WebP fallback per VDD §7.5 (AVIF primary + WebP fallback for OG social card backgrounds)." — did not include "Served when AVIF is not supported." required by the consistent WebP-row pattern</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="field-reference">Field Reference</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Field</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`ID`</td><td>Unique asset identifier (RES-IMG-001, RES-ANIM-001, etc.)</td></tr>
-<tr><td>`filename`</td><td>Final deliverable filename (with extension)</td></tr>
-<tr><td>`type`</td><td>`image` / `animation` / `particle` / `font`</td></tr>
-<tr><td>`source_tool`</td><td>Generation tool (Stable Diffusion XL / Midjourney v6 / DALL-E 3 / hand-crafted pixel art tool / Aseprite)</td></tr>
-<tr><td>`prompt`</td><td>Ready-to-use generation prompt (English). For pixel art sprites, describes the pixel grid style, color constraints, and frame layout.</td></tr>
-<tr><td>`dimensions`</td><td>Image: W×H px; animation: frames × fps</td></tr>
-<tr><td>`file_size_budget`</td><td>Performance budget ceiling</td></tr>
-<tr><td>`status`</td><td>`needed` / `prompt_ready` / `generating` / `generated` / `approved` / `rejected`</td></tr>
-<tr><td>`output_path`</td><td>Final delivery path in repo</td></tr>
-<tr><td>`description`</td><td>Usage notes and design considerations</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="1-vdd-visual-asset-inventory-images--icons--illustrations">§1 VDD Visual Asset Inventory (Images / Icons / Illustrations)</h2>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>Upstream</strong>: <code>docs/VDD.md §4 Character & World Design</code> + <code>docs/VDD.md §5 UI Visual System</code> + <code>docs/VDD.md §7 Asset Pipeline</code> + <code>docs/VDD.md §8 Screen Visual Specs</code></blockquote>
-<blockquote class="doc-quote"></blockquote>
-<blockquote class="doc-quote">Platform detection: <strong>Web / Phaser.js</strong> → recommended source_tool: Stable Diffusion XL (pixel art) or Aseprite (hand-crafted pixel art). For UI/background assets: Midjourney v6 / DALL-E 3.</blockquote>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="11-pet-sprites-vdd-42--procedurally-generated">§1.1 Pet Sprites (VDD §4.2 — Procedurally Generated)</h3>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote">Pet sprites are deterministic from seed (same seed → same appearance). The assets below are <strong>template/reference sprites</strong> representing each rarity tier, used to establish visual language and serve as fallbacks. Runtime sprites are generated server-side from seeds. Max 16 colors per sprite (VDD §4.2 pixel art constraint).</blockquote>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-IMG-001</td><td>pet-common-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, common grey tier, flat grey palette `#b2bec3` border, 64x64px pixel grid, max 16 colors, hard pixel edges no antialiasing, transparent background, retro 8-bit RPG monster style, front-facing idle pose, `image-rendering: pixelated`</td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-common-reference-64.png</td><td>Common rarity reference sprite — flat grey border `#b2bec3`, matte finish, no glow. Used as visual language baseline and fallback.</td></tr>
-<tr><td>RES-IMG-002</td><td>pet-common-reference-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite thumbnail, common grey tier, flat grey `#b2bec3` border, 32x32px pixel grid, max 16 colors, hard pixel edges, transparent background, retro 8-bit style, front-facing idle pose</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-common-reference-32.png</td><td>Common rarity thumbnail (leaderboard, trade cards) — 32×32px @1x per VDD §4.2</td></tr>
-<tr><td>RES-IMG-003</td><td>pet-rare-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, rare teal tier, teal `#4ecdc4` border accent, slight teal glow effect, 64x64px pixel grid, max 16 colors, hard pixel edges no antialiasing, transparent background, retro 8-bit RPG style, front-facing idle pose</td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-rare-reference-64.png</td><td>Rare rarity reference sprite — teal border `#4ecdc4`, faint teal outer glow `rgba(78,205,196,0.3)`.</td></tr>
-<tr><td>RES-IMG-004</td><td>pet-epic-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, epic purple tier, purple `#a29bfe` border, 64x64px pixel grid, max 16 colors, hard pixel edges, transparent background, retro 8-bit RPG monster style, front-facing idle pose, more elaborate design than common</td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-epic-reference-64.png</td><td>Epic rarity reference sprite — purple border `#a29bfe`, animated shimmer border in CSS. More detailed design than common/rare.</td></tr>
-<tr><td>RES-IMG-005</td><td>pet-legendary-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, legendary gold tier, gold `#fdcb6e` border glow, 64x64px pixel grid, max 16 colors, hard pixel edges, transparent background, retro 8-bit RPG style, front-facing idle pose, most elaborate and distinct design, glowing aura feel</td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-legendary-reference-64.png</td><td>Legendary rarity reference sprite — gold border `#fdcb6e`, CRT glow effect via CSS `box-shadow`, animated shimmer. Highest visual tier.</td></tr>
-<tr><td>RES-IMG-006</td><td>pet-neglected-overlay-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art wilted overlay for pet sprite, drooping accessories wilted state, 64x64px, transparent except overlay elements, muted desaturated grey tones, hard pixel edges, 8-bit style</td><td>64×64px</td><td>≤ 10 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-neglected-overlay-64.png</td><td>Neglected state wilted accessory frame overlay (VDD §4.2). Applied on top of base sprite after (training_neglect_threshold_days = 3) days without training. Combined with CSS `filter: grayscale(60%) brightness(0.8)`.</td></tr>
-<tr><td>RES-IMG-007</td><td>pet-sheet-template-256x32.png</td><td>image</td><td>Aseprite</td><td>pixel art sprite sheet template, 8 animation frames in a single horizontal row, 32x32px per frame (sprite_resolution_px = 32), total 256x32px, idle animation cycle 4-8 frames at 30fps, creature placeholder silhouette, transparent background, 8-bit retro game style, hard pixel edges</td><td>256×32px</td><td>≤ 25 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-sheet-template-256x32.png</td><td>Reference sprite sheet atlas format: 8 frames × 32px = 256×32px single row (sprite_resolution_px = 32). Phaser.js `atlasJSON` format. Used to validate atlas layout before generating seed-specific sheets.</td></tr>
+<tr><td>1.0.9</td><td>2026-05-04</td><td>Review Agent R14</td><td>Fix RES-IMG-014 description inconsistency: description said &quot;Primary AVIF target ≤ 150 KB; WebP fallback ≤ 200 KB&quot; (describing both formats&#x27; budgets) — after R8 added RES-IMG-015 as a separate AVIF row, the WebP row&#x27;s description was not updated; now reads &quot;Full arena race backdrop WebP fallback (VDD §4.3 + §7.5). Served when AVIF is not supported.&quot; to match the consistent pattern of RES-IMG-016 (sumo WebP)</td></tr>
+<tr><td>1.0.10</td><td>2026-05-04</td><td>Review Agent R15</td><td>Fix RES-IMG-042 description inconsistency: description said &quot;AVIF primary (≤150 KB), WebP fallback ≤200 KB&quot; (describing both formats&#x27; budgets in the AVIF-only row) — R14 established the pattern that each format row describes only its own format; the OG default AVIF row was not updated when this pattern was applied; now reads &quot;AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers.&quot; to match the consistent pattern of RES-IMG-044 (battle result AVIF primary)</td></tr>
+<tr><td>1.0.11</td><td>2026-05-04</td><td>Review Agent R16</td><td>Fix RES-IMG-043 description incomplete: missing &quot;Served when AVIF is not supported.&quot; — all other WebP fallback rows (RES-IMG-014, RES-IMG-016) include a serving-context statement; RES-IMG-043 was the only WebP row without it; fix RES-IMG-044 description incomplete: ended with &quot;AVIF primary format.&quot; — missing &quot;(VDD §7.5)&quot; citation and &quot;Served preferentially over WebP for supported browsers.&quot; required by the consistent AVIF-row pattern established in R15 (RES-IMG-042)</td></tr>
+<tr><td>1.0.12</td><td>2026-05-04</td><td>Review Agent R17</td><td>Fix RES-IMG-016 description inconsistent serving-context statement: said &quot;WebP fallback for supported browsers without AVIF.&quot; instead of the canonical pattern &quot;Served when AVIF is not supported.&quot; used by all other WebP rows (RES-IMG-014, RES-IMG-043); fix RES-IMG-045 description missing serving-context statement: said &quot;Required WebP fallback per VDD §7.5 (AVIF primary + WebP fallback for OG social card backgrounds).&quot; — did not include &quot;Served when AVIF is not supported.&quot; required by the consistent WebP-row pattern</td></tr>
+</table>
+<hr>
+<h2>Field Reference</h2>
+<table>
+<tr><th>Field</th><th>Description</th></tr>
+<tr><td><code>ID</code></td><td>Unique asset identifier (RES-IMG-001, RES-ANIM-001, etc.)</td></tr>
+<tr><td><code>filename</code></td><td>Final deliverable filename (with extension)</td></tr>
+<tr><td><code>type</code></td><td><code>image</code> / <code>animation</code> / <code>particle</code> / <code>font</code></td></tr>
+<tr><td><code>source_tool</code></td><td>Generation tool (Stable Diffusion XL / Midjourney v6 / DALL-E 3 / hand-crafted pixel art tool / Aseprite)</td></tr>
+<tr><td><code>prompt</code></td><td>Ready-to-use generation prompt (English). For pixel art sprites, describes the pixel grid style, color constraints, and frame layout.</td></tr>
+<tr><td><code>dimensions</code></td><td>Image: W×H px; animation: frames × fps</td></tr>
+<tr><td><code>file_size_budget</code></td><td>Performance budget ceiling</td></tr>
+<tr><td><code>status</code></td><td><code>needed</code> / <code>prompt_ready</code> / <code>generating</code> / <code>generated</code> / <code>approved</code> / <code>rejected</code></td></tr>
+<tr><td><code>output_path</code></td><td>Final delivery path in repo</td></tr>
+<tr><td><code>description</code></td><td>Usage notes and design considerations</td></tr>
+</table>
+<hr>
+<h2>§1 VDD Visual Asset Inventory (Images / Icons / Illustrations)</h2>
+<blockquote><p><strong>Upstream</strong>: <code>docs/VDD.md §4 Character &amp; World Design</code> + <code>docs/VDD.md §5 UI Visual System</code> + <code>docs/VDD.md §7 Asset Pipeline</code> + <code>docs/VDD.md §8 Screen Visual Specs</code></p></blockquote>
+<p>&gt;</p>
+<blockquote><p>Platform detection: <strong>Web / Phaser.js</strong> → recommended source_tool: Stable Diffusion XL (pixel art) or Aseprite (hand-crafted pixel art). For UI/background assets: Midjourney v6 / DALL-E 3.</p></blockquote>
+<h3>§1.1 Pet Sprites (VDD §4.2 — Procedurally Generated)</h3>
+<blockquote><p>Pet sprites are deterministic from seed (same seed → same appearance). The assets below are <strong>template/reference sprites</strong> representing each rarity tier, used to establish visual language and serve as fallbacks. Runtime sprites are generated server-side from seeds. Max 16 colors per sprite (VDD §4.2 pixel art constraint).</p></blockquote>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-IMG-001</td><td>pet-common-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, common grey tier, flat grey palette <code>#b2bec3</code> border, 64x64px pixel grid, max 16 colors, hard pixel edges no antialiasing, transparent background, retro 8-bit RPG monster style, front-facing idle pose, <code>image-rendering: pixelated</code></td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-common-reference-64.png</td><td>Common rarity reference sprite — flat grey border <code>#b2bec3</code>, matte finish, no glow. Used as visual language baseline and fallback.</td></tr>
+<tr><td>RES-IMG-002</td><td>pet-common-reference-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite thumbnail, common grey tier, flat grey <code>#b2bec3</code> border, 32x32px pixel grid, max 16 colors, hard pixel edges, transparent background, retro 8-bit style, front-facing idle pose</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-common-reference-32.png</td><td>Common rarity thumbnail (leaderboard, trade cards) — 32×32px @1x per VDD §4.2</td></tr>
+<tr><td>RES-IMG-003</td><td>pet-rare-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, rare teal tier, teal <code>#4ecdc4</code> border accent, slight teal glow effect, 64x64px pixel grid, max 16 colors, hard pixel edges no antialiasing, transparent background, retro 8-bit RPG style, front-facing idle pose</td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-rare-reference-64.png</td><td>Rare rarity reference sprite — teal border <code>#4ecdc4</code>, faint teal outer glow <code>rgba(78,205,196,0.3)</code>.</td></tr>
+<tr><td>RES-IMG-004</td><td>pet-epic-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, epic purple tier, purple <code>#a29bfe</code> border, 64x64px pixel grid, max 16 colors, hard pixel edges, transparent background, retro 8-bit RPG monster style, front-facing idle pose, more elaborate design than common</td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-epic-reference-64.png</td><td>Epic rarity reference sprite — purple border <code>#a29bfe</code>, animated shimmer border in CSS. More detailed design than common/rare.</td></tr>
+<tr><td>RES-IMG-005</td><td>pet-legendary-reference-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>small cute creature pixel art sprite, legendary gold tier, gold <code>#fdcb6e</code> border glow, 64x64px pixel grid, max 16 colors, hard pixel edges, transparent background, retro 8-bit RPG style, front-facing idle pose, most elaborate and distinct design, glowing aura feel</td><td>64×64px</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-legendary-reference-64.png</td><td>Legendary rarity reference sprite — gold border <code>#fdcb6e</code>, CRT glow effect via CSS <code>box-shadow</code>, animated shimmer. Highest visual tier.</td></tr>
+<tr><td>RES-IMG-006</td><td>pet-neglected-overlay-64.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art wilted overlay for pet sprite, drooping accessories wilted state, 64x64px, transparent except overlay elements, muted desaturated grey tones, hard pixel edges, 8-bit style</td><td>64×64px</td><td>≤ 10 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-neglected-overlay-64.png</td><td>Neglected state wilted accessory frame overlay (VDD §4.2). Applied on top of base sprite after (training_neglect_threshold_days = 3) days without training. Combined with CSS <code>filter: grayscale(60%) brightness(0.8)</code>.</td></tr>
+<tr><td>RES-IMG-007</td><td>pet-sheet-template-256x32.png</td><td>image</td><td>Aseprite</td><td>pixel art sprite sheet template, 8 animation frames in a single horizontal row, 32x32px per frame (sprite_resolution_px = 32), total 256x32px, idle animation cycle 4-8 frames at 30fps, creature placeholder silhouette, transparent background, 8-bit retro game style, hard pixel edges</td><td>256×32px</td><td>≤ 25 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-sheet-template-256x32.png</td><td>Reference sprite sheet atlas format: 8 frames × 32px = 256×32px single row (sprite_resolution_px = 32). Phaser.js <code>atlasJSON</code> format. Used to validate atlas layout before generating seed-specific sheets.</td></tr>
 <tr><td>RES-IMG-008</td><td>pet-run-sheet-template-256x32.png</td><td>image</td><td>Aseprite</td><td>pixel art run cycle sprite sheet template, 8 animation frames horizontal row, 32x32px per frame (sprite_resolution_px = 32), total 256x32px, running motion 8-frame loop, creature placeholder, transparent background, 8-bit retro game, hard pixel edges</td><td>256×32px</td><td>≤ 25 KB</td><td>needed</td><td>public/assets/sprites/reference/pet-run-sheet-template-256x32.png</td><td>Arena race run cycle sprite sheet: 8 run frames × 32px = 256×32px (sprite_resolution_px = 32). Used in ArenaBattleScene ANIM-08 battle race cycle (VDD §4.2 + CLIENT_IMPL §5.1 ANIM-08 specify 8-frame run loop).</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="12-food-item-sprites-vdd-83--edd-0--food-buffs">§1.2 Food Item Sprites (VDD §8.3 / EDD §0 — Food Buffs)</h3>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote">Food items grant stat buffs (VDD §8.3 / EDD §0 FOOD_BUFF constants). Each food type is a distinct 32×32px pixel art item icon.</blockquote>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-IMG-009</td><td>food-speed-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, lightning bolt energy drink or feather, speed buff theme, 32x32px, bright yellow-gold `#fdcb6e` accent color, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, bold clear silhouette</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-speed-buff-32.png</td><td>Speed stat buff food item. Displayed in FoodInventory component on PetPage.</td></tr>
-<tr><td>RES-IMG-010</td><td>food-strength-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, dumbbell or meat protein food, strength buff theme, 32x32px, deep purple `#a29bfe` accent color, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, bold clear silhouette</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-strength-buff-32.png</td><td>Strength stat buff food item. Displayed in FoodInventory component on PetPage.</td></tr>
-<tr><td>RES-IMG-011</td><td>food-stamina-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, green herb or shield potion, stamina/defense buff theme, 32x32px, teal `#4ecdc4` accent color, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, bold clear silhouette</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-stamina-buff-32.png</td><td>Stamina stat buff food item. Displayed in FoodInventory component on PetPage.</td></tr>
-<tr><td>RES-IMG-012</td><td>food-all-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, golden star or rainbow candy, all-stats buff theme, 32x32px, gold `#fdcb6e` with rainbow shimmer hint, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, premium look</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-all-buff-32.png</td><td>All-stats buff food item (premium food type). Displayed in FoodInventory component on PetPage.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="13-arena--scene-backgrounds-vdd-43--75">§1.3 Arena & Scene Backgrounds (VDD §4.3 / §7.5)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-IMG-013</td><td>bg-arena-track-32x8.png</td><td>image</td><td>Aseprite</td><td>pixel art repeating track tile pattern, dark pixel grid 32x8px, dark charcoal `#2d2d5a` base with subtle lane markings, hard pixel edges, game arena floor tile for CSS background-repeat</td><td>32×8px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-track-32x8.png</td><td>Arena race track tile (VDD §4.3 + §7.5). Dark track tile pattern — repeating 16×8px conceptually, but delivered as 32×8 for pixel doubling. CSS: `background-repeat: repeat-x` on `--color-surface-overlay`.</td></tr>
-<tr><td>RES-IMG-014</td><td>bg-arena-race.webp</td><td>image</td><td>Midjourney v6</td><td>pixel art arena racing background, dark navy `#1a1a2e` base, retro game race track scene, checkered finish line alternating 4x4px squares, lane dividers 2px dashed, side audience stands pixel art style, atmospheric dark with minimal color, 8-bit retro game art style, wide cinematic view, no antialiasing</td><td>1920×400px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-race.webp</td><td>Full arena race backdrop WebP fallback (VDD §4.3 + §7.5). Served when AVIF is not supported. Used in ArenaScene Phaser background.</td></tr>
-<tr><td>RES-IMG-015</td><td>bg-arena-race.avif</td><td>image</td><td>Midjourney v6</td><td>pixel art arena racing background, dark navy `#1a1a2e` base, retro game race track scene, checkered finish line alternating 4x4px squares, lane dividers 2px dashed, side audience stands pixel art style, atmospheric dark with minimal color, 8-bit retro game art style, wide cinematic view, no antialiasing</td><td>1920×400px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-race.avif</td><td>Full arena race backdrop AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers.</td></tr>
-<tr><td>RES-IMG-016</td><td>bg-arena-sumo.webp</td><td>image</td><td>Midjourney v6</td><td>pixel art sumo arena background, dark navy `#1a1a2e` base, circular pixel ring with gold `#fdcb6e` border 4px wide, sumo ring interior `#242444` raised surface, darker push-out zone at ring edge, retro 8-bit game art, top-down slightly isometric view, atmospheric dark scene</td><td>1920×400px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-sumo.webp</td><td>Sumo arena backdrop WebP fallback (VDD §4.3 + §7.5 — behind FF_ARENA_SUMO feature flag). Served when AVIF is not supported.</td></tr>
-<tr><td>RES-IMG-017</td><td>bg-arena-sumo.avif</td><td>image</td><td>Midjourney v6</td><td>pixel art sumo arena background, dark navy `#1a1a2e` base, circular pixel ring with gold `#fdcb6e` border 4px wide, sumo ring interior `#242444` raised surface, darker push-out zone at ring edge, retro 8-bit game art, top-down slightly isometric view, atmospheric dark scene</td><td>1920×400px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-sumo.avif</td><td>Sumo arena backdrop AVIF primary format (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback for all full-width arena backgrounds. Served preferentially over WebP for supported browsers. Behind FF_ARENA_SUMO feature flag.</td></tr>
-<tr><td>RES-IMG-018</td><td>bg-page-pattern.svg</td><td>image</td><td>Aseprite / hand-crafted</td><td>subtle pixel art dot grid tileable pattern, 16x16px tile, dark navy on deep navy `#1a1a2e`, very low opacity dots, retro CRT scanline texture feel, pure SVG geometric, no raster content</td><td>16×16px tile (SVG, tileable)</td><td>≤ 10 KB</td><td>needed</td><td>public/assets/backgrounds/bg-page-pattern.svg</td><td>Subtle page background texture (VDD §7.5). Applied as optional texture on base surfaces. SVG primary; PNG fallback ≤ 20 KB.</td></tr>
-<tr><td>RES-IMG-019</td><td>bg-page-pattern-fallback.png</td><td>image</td><td>Aseprite</td><td>subtle pixel art dot grid tileable pattern, 16x16px tile, dark navy on deep navy `#1a1a2e`, very low opacity, retro CRT feel, rasterized fallback</td><td>16×16px tile (PNG tileable)</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/backgrounds/bg-page-pattern-fallback.png</td><td>PNG fallback for bg-page-pattern.svg (VDD §7.5). For browsers where SVG tiling causes rendering issues.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="14-ui-icons-vdd-72">§1.4 UI Icons (VDD §7.2)</h3>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote">Game UI icons: 24×24px custom pixel-art action icons + 16×16px rarity badge icons. SVG primary with <code>viewBox="0 0 24 24"</code> or <code>viewBox="0 0 16 16"</code> (VDD §7.2). Colors via <code>currentColor</code>. PNG fallback at corresponding pixel size per VDD §7.1 (RES-IMG-050–061). 12 custom pixel-art icons total: 8 at 24×24px for game interactions (RES-IMG-020–021, RES-IMG-026–031) and 4 at 16×16px for rarity badges (RES-IMG-022–025). Corresponding PNG fallbacks: RES-IMG-050–057 at 24×24px and RES-IMG-058–061 at 16×16px. Non-game navigation icons use Phosphor Icons v2.1 (Bold) — not listed here as they are an npm dependency, not a production asset.</blockquote>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-IMG-020</td><td>icon-arena-race-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art icon of running figure or race flag, 24x24px viewBox, grid-snapped paths no rounded corners, monochrome using currentColor, bold silhouette readable at small sizes</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-arena-race-24.svg</td><td>Race arena mode icon — used in ModeSelector and arena navigation. `aria-hidden="true"` decorative; parent button has `aria-label`.</td></tr>
+</table>
+<h3>§1.2 Food Item Sprites (VDD §8.3 / EDD §0 — Food Buffs)</h3>
+<blockquote><p>Food items grant stat buffs (VDD §8.3 / EDD §0 FOOD_BUFF constants). Each food type is a distinct 32×32px pixel art item icon.</p></blockquote>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-IMG-009</td><td>food-speed-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, lightning bolt energy drink or feather, speed buff theme, 32x32px, bright yellow-gold <code>#fdcb6e</code> accent color, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, bold clear silhouette</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-speed-buff-32.png</td><td>Speed stat buff food item. Displayed in FoodInventory component on PetPage.</td></tr>
+<tr><td>RES-IMG-010</td><td>food-strength-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, dumbbell or meat protein food, strength buff theme, 32x32px, deep purple <code>#a29bfe</code> accent color, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, bold clear silhouette</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-strength-buff-32.png</td><td>Strength stat buff food item. Displayed in FoodInventory component on PetPage.</td></tr>
+<tr><td>RES-IMG-011</td><td>food-stamina-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, green herb or shield potion, stamina/defense buff theme, 32x32px, teal <code>#4ecdc4</code> accent color, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, bold clear silhouette</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-stamina-buff-32.png</td><td>Stamina stat buff food item. Displayed in FoodInventory component on PetPage.</td></tr>
+<tr><td>RES-IMG-012</td><td>food-all-buff-32.png</td><td>image</td><td>Stable Diffusion XL</td><td>pixel art food item icon, golden star or rainbow candy, all-stats buff theme, 32x32px, gold <code>#fdcb6e</code> with rainbow shimmer hint, transparent background, hard pixel edges, 8-bit retro game item style, max 8 colors, premium look</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/food/food-all-buff-32.png</td><td>All-stats buff food item (premium food type). Displayed in FoodInventory component on PetPage.</td></tr>
+</table>
+<h3>§1.3 Arena &amp; Scene Backgrounds (VDD §4.3 / §7.5)</h3>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-IMG-013</td><td>bg-arena-track-32x8.png</td><td>image</td><td>Aseprite</td><td>pixel art repeating track tile pattern, dark pixel grid 32x8px, dark charcoal <code>#2d2d5a</code> base with subtle lane markings, hard pixel edges, game arena floor tile for CSS background-repeat</td><td>32×8px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-track-32x8.png</td><td>Arena race track tile (VDD §4.3 + §7.5). Dark track tile pattern — repeating 16×8px conceptually, but delivered as 32×8 for pixel doubling. CSS: <code>background-repeat: repeat-x</code> on <code>--color-surface-overlay</code>.</td></tr>
+<tr><td>RES-IMG-014</td><td>bg-arena-race.webp</td><td>image</td><td>Midjourney v6</td><td>pixel art arena racing background, dark navy <code>#1a1a2e</code> base, retro game race track scene, checkered finish line alternating 4x4px squares, lane dividers 2px dashed, side audience stands pixel art style, atmospheric dark with minimal color, 8-bit retro game art style, wide cinematic view, no antialiasing</td><td>1920×400px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-race.webp</td><td>Full arena race backdrop WebP fallback (VDD §4.3 + §7.5). Served when AVIF is not supported. Used in ArenaScene Phaser background.</td></tr>
+<tr><td>RES-IMG-015</td><td>bg-arena-race.avif</td><td>image</td><td>Midjourney v6</td><td>pixel art arena racing background, dark navy <code>#1a1a2e</code> base, retro game race track scene, checkered finish line alternating 4x4px squares, lane dividers 2px dashed, side audience stands pixel art style, atmospheric dark with minimal color, 8-bit retro game art style, wide cinematic view, no antialiasing</td><td>1920×400px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-race.avif</td><td>Full arena race backdrop AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers.</td></tr>
+<tr><td>RES-IMG-016</td><td>bg-arena-sumo.webp</td><td>image</td><td>Midjourney v6</td><td>pixel art sumo arena background, dark navy <code>#1a1a2e</code> base, circular pixel ring with gold <code>#fdcb6e</code> border 4px wide, sumo ring interior <code>#242444</code> raised surface, darker push-out zone at ring edge, retro 8-bit game art, top-down slightly isometric view, atmospheric dark scene</td><td>1920×400px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-sumo.webp</td><td>Sumo arena backdrop WebP fallback (VDD §4.3 + §7.5 — behind FF_ARENA_SUMO feature flag). Served when AVIF is not supported.</td></tr>
+<tr><td>RES-IMG-017</td><td>bg-arena-sumo.avif</td><td>image</td><td>Midjourney v6</td><td>pixel art sumo arena background, dark navy <code>#1a1a2e</code> base, circular pixel ring with gold <code>#fdcb6e</code> border 4px wide, sumo ring interior <code>#242444</code> raised surface, darker push-out zone at ring edge, retro 8-bit game art, top-down slightly isometric view, atmospheric dark scene</td><td>1920×400px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/backgrounds/bg-arena-sumo.avif</td><td>Sumo arena backdrop AVIF primary format (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback for all full-width arena backgrounds. Served preferentially over WebP for supported browsers. Behind FF_ARENA_SUMO feature flag.</td></tr>
+<tr><td>RES-IMG-018</td><td>bg-page-pattern.svg</td><td>image</td><td>Aseprite / hand-crafted</td><td>subtle pixel art dot grid tileable pattern, 16x16px tile, dark navy on deep navy <code>#1a1a2e</code>, very low opacity dots, retro CRT scanline texture feel, pure SVG geometric, no raster content</td><td>16×16px tile (SVG, tileable)</td><td>≤ 10 KB</td><td>needed</td><td>public/assets/backgrounds/bg-page-pattern.svg</td><td>Subtle page background texture (VDD §7.5). Applied as optional texture on base surfaces. SVG primary; PNG fallback ≤ 20 KB.</td></tr>
+<tr><td>RES-IMG-019</td><td>bg-page-pattern-fallback.png</td><td>image</td><td>Aseprite</td><td>subtle pixel art dot grid tileable pattern, 16x16px tile, dark navy on deep navy <code>#1a1a2e</code>, very low opacity, retro CRT feel, rasterized fallback</td><td>16×16px tile (PNG tileable)</td><td>≤ 20 KB</td><td>needed</td><td>public/assets/backgrounds/bg-page-pattern-fallback.png</td><td>PNG fallback for bg-page-pattern.svg (VDD §7.5). For browsers where SVG tiling causes rendering issues.</td></tr>
+</table>
+<h3>§1.4 UI Icons (VDD §7.2)</h3>
+<blockquote><p>Game UI icons: 24×24px custom pixel-art action icons + 16×16px rarity badge icons. SVG primary with <code>viewBox=&quot;0 0 24 24&quot;</code> or <code>viewBox=&quot;0 0 16 16&quot;</code> (VDD §7.2). Colors via <code>currentColor</code>. PNG fallback at corresponding pixel size per VDD §7.1 (RES-IMG-050–061). 12 custom pixel-art icons total: 8 at 24×24px for game interactions (RES-IMG-020–021, RES-IMG-026–031) and 4 at 16×16px for rarity badges (RES-IMG-022–025). Corresponding PNG fallbacks: RES-IMG-050–057 at 24×24px and RES-IMG-058–061 at 16×16px. Non-game navigation icons use Phosphor Icons v2.1 (Bold) — not listed here as they are an npm dependency, not a production asset.</p></blockquote>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-IMG-020</td><td>icon-arena-race-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art icon of running figure or race flag, 24x24px viewBox, grid-snapped paths no rounded corners, monochrome using currentColor, bold silhouette readable at small sizes</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-arena-race-24.svg</td><td>Race arena mode icon — used in ModeSelector and arena navigation. <code>aria-hidden=&quot;true&quot;</code> decorative; parent button has <code>aria-label</code>.</td></tr>
 <tr><td>RES-IMG-021</td><td>icon-arena-sumo-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art icon of two figures pushing or sumo ring circle, 24x24px viewBox, grid-snapped paths, monochrome currentColor, bold readable silhouette</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-arena-sumo-24.svg</td><td>Sumo arena mode icon — used in ModeSelector. Behind FF_ARENA_SUMO feature flag.</td></tr>
-<tr><td>RES-IMG-022</td><td>icon-rarity-common-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art diamond or star icon, common grey tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, minimalist pixel badge shape</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-common-16.svg</td><td>Common rarity badge icon — used in RarityBadge component and LeaderboardRow. Colored via CSS `--color-rarity-common` (#b2bec3).</td></tr>
-<tr><td>RES-IMG-023</td><td>icon-rarity-rare-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art diamond or star icon, rare teal tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, slightly more elaborate than common</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-rare-16.svg</td><td>Rare rarity badge icon. Colored via CSS `--color-rarity-rare` (#4ecdc4).</td></tr>
-<tr><td>RES-IMG-024</td><td>icon-rarity-epic-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art diamond or star icon, epic purple tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, more facets than rare</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-epic-16.svg</td><td>Epic rarity badge icon. Colored via CSS `--color-rarity-epic` (#a29bfe).</td></tr>
-<tr><td>RES-IMG-025</td><td>icon-rarity-legendary-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art crown or star burst icon, legendary gold tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, crown shape signaling highest tier</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-legendary-16.svg</td><td>Legendary rarity badge icon. Colored via CSS `--color-rarity-legendary` (#fdcb6e). Most elaborate of the 4 rarity icons.</td></tr>
+<tr><td>RES-IMG-022</td><td>icon-rarity-common-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art diamond or star icon, common grey tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, minimalist pixel badge shape</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-common-16.svg</td><td>Common rarity badge icon — used in RarityBadge component and LeaderboardRow. Colored via CSS <code>--color-rarity-common</code> (#b2bec3).</td></tr>
+<tr><td>RES-IMG-023</td><td>icon-rarity-rare-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art diamond or star icon, rare teal tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, slightly more elaborate than common</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-rare-16.svg</td><td>Rare rarity badge icon. Colored via CSS <code>--color-rarity-rare</code> (#4ecdc4).</td></tr>
+<tr><td>RES-IMG-024</td><td>icon-rarity-epic-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art diamond or star icon, epic purple tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, more facets than rare</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-epic-16.svg</td><td>Epic rarity badge icon. Colored via CSS <code>--color-rarity-epic</code> (#a29bfe).</td></tr>
+<tr><td>RES-IMG-025</td><td>icon-rarity-legendary-16.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art crown or star burst icon, legendary gold tier, 16x16px viewBox, grid-snapped paths, monochrome currentColor, crown shape signaling highest tier</td><td>16×16px (SVG)</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-legendary-16.svg</td><td>Legendary rarity badge icon. Colored via CSS <code>--color-rarity-legendary</code> (#fdcb6e). Most elaborate of the 4 rarity icons.</td></tr>
 <tr><td>RES-IMG-026</td><td>icon-training-run-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art running shoe or lightning bolt icon, speed training action, 24x24px viewBox, grid-snapped paths, monochrome currentColor, bold clear silhouette</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-run-24.svg</td><td>Run/Speed training action icon — used in TrainingActionCard.</td></tr>
 <tr><td>RES-IMG-027</td><td>icon-training-strength-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art dumbbell or fist icon, strength training action, 24x24px viewBox, grid-snapped paths, monochrome currentColor, bold readable at 24px</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-strength-24.svg</td><td>Strength training action icon — used in TrainingActionCard.</td></tr>
 <tr><td>RES-IMG-028</td><td>icon-training-stamina-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art shield or heart icon, stamina training action, 24x24px viewBox, grid-snapped paths, monochrome currentColor, bold clear shape</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-stamina-24.svg</td><td>Stamina training action icon — used in TrainingActionCard.</td></tr>
 <tr><td>RES-IMG-029</td><td>icon-food-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art food bowl or apple icon, food inventory action, 24x24px viewBox, grid-snapped paths, monochrome currentColor, clear readable silhouette</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-food-24.svg</td><td>Food inventory icon — used in FoodInventory component header and NavBar.</td></tr>
 <tr><td>RES-IMG-030</td><td>icon-share-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art share or link arrow icon, social share action, 24x24px viewBox, grid-snapped paths, monochrome currentColor, bold pixel art style share symbol</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-share-24.svg</td><td>Share battle / pet page icon — used in ShareBattleButton and BattleRecordsPage.</td></tr>
 <tr><td>RES-IMG-031</td><td>icon-copy-24.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art clipboard copy icon, 24x24px viewBox, grid-snapped paths, monochrome currentColor, two overlapping rectangles pixel style</td><td>24×24px (SVG)</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-copy-24.svg</td><td>Copy to clipboard icon — used in URLReveal (claim pet URL copy button).</td></tr>
-<tr><td>RES-IMG-050</td><td>icon-arena-race-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-arena-race-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-arena-race-24.png</td><td>PNG fallback for icon-arena-race-24.svg (VDD §7.1 — for browsers without reliable SVG support).</td></tr>
-<tr><td>RES-IMG-051</td><td>icon-arena-sumo-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-arena-sumo-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-arena-sumo-24.png</td><td>PNG fallback for icon-arena-sumo-24.svg (VDD §7.1). Behind FF_ARENA_SUMO feature flag.</td></tr>
-<tr><td>RES-IMG-052</td><td>icon-training-run-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-training-run-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-run-24.png</td><td>PNG fallback for icon-training-run-24.svg (VDD §7.1).</td></tr>
-<tr><td>RES-IMG-053</td><td>icon-training-strength-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-training-strength-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-strength-24.png</td><td>PNG fallback for icon-training-strength-24.svg (VDD §7.1).</td></tr>
-<tr><td>RES-IMG-054</td><td>icon-training-stamina-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-training-stamina-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-stamina-24.png</td><td>PNG fallback for icon-training-stamina-24.svg (VDD §7.1).</td></tr>
-<tr><td>RES-IMG-055</td><td>icon-food-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-food-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-food-24.png</td><td>PNG fallback for icon-food-24.svg (VDD §7.1).</td></tr>
-<tr><td>RES-IMG-056</td><td>icon-share-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-share-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-share-24.png</td><td>PNG fallback for icon-share-24.svg (VDD §7.1).</td></tr>
-<tr><td>RES-IMG-057</td><td>icon-copy-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-copy-24.svg, 24x24px, hard pixel edges, monochrome `currentColor` baked to `#e8e8f0` for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-copy-24.png</td><td>PNG fallback for icon-copy-24.svg (VDD §7.1).</td></tr>
-<tr><td>RES-IMG-058</td><td>icon-rarity-common-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-common-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#b2bec3` (Common rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-common-16.png</td><td>PNG fallback for icon-rarity-common-16.svg (VDD §7.1). Color baked to `--color-rarity-common` (#b2bec3).</td></tr>
-<tr><td>RES-IMG-059</td><td>icon-rarity-rare-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-rare-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#4ecdc4` (Rare rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-rare-16.png</td><td>PNG fallback for icon-rarity-rare-16.svg (VDD §7.1). Color baked to `--color-rarity-rare` (#4ecdc4).</td></tr>
-<tr><td>RES-IMG-060</td><td>icon-rarity-epic-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-epic-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#a29bfe` (Epic rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-epic-16.png</td><td>PNG fallback for icon-rarity-epic-16.svg (VDD §7.1). Color baked to `--color-rarity-epic` (#a29bfe).</td></tr>
-<tr><td>RES-IMG-061</td><td>icon-rarity-legendary-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-legendary-16.svg, 16x16px, hard pixel edges, monochrome `currentColor` baked to `#fdcb6e` (Legendary rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-legendary-16.png</td><td>PNG fallback for icon-rarity-legendary-16.svg (VDD §7.1). Color baked to `--color-rarity-legendary` (#fdcb6e).</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="15-logo--brand-assets-vdd-34--74">§1.5 Logo & Brand Assets (VDD §3.4 / §7.4)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-IMG-032</td><td>logo-primary-dark.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art wordmark "pixel-pet-arena" in Press Start 2P font style, dark background variant, near-white `#e8e8f0` color, 160x32px, hard pixel edges, grid-aligned letterforms, pure SVG vector</td><td>160×32px (SVG)</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/brand/logo-primary-dark.svg</td><td>Primary logo — dark surfaces. Nav bar logo (160×32px). VDD §3.4 + §7.4. SVG primary; SVGO optimized.</td></tr>
-<tr><td>RES-IMG-033</td><td>logo-primary-dark.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>pixel art wordmark "pixel-pet-arena", Press Start 2P style, near-white `#e8e8f0`, dark background, 320x64px @2x, hard pixel edges, PNG-24 with alpha</td><td>320×64px @2x</td><td>≤ 50 KB</td><td>needed</td><td>public/assets/brand/logo-primary-dark.png</td><td>PNG @2x export of primary logo (VDD §7.4). Used where SVG rendering is unreliable.</td></tr>
-<tr><td>RES-IMG-034</td><td>logo-inverted.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art wordmark "pixel-pet-arena" in Press Start 2P font style, light background variant, dark navy `#1a1a2e` color, 160x32px, hard pixel edges, grid-aligned letterforms</td><td>160×32px (SVG)</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/brand/logo-inverted.svg</td><td>Inverted logo — light background contexts (VDD §7.4). Admin portal and print-adjacent uses.</td></tr>
-<tr><td>RES-IMG-035</td><td>logo-inverted.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>pixel art wordmark, light background, dark navy `#1a1a2e`, 320x64px @2x, hard pixel edges</td><td>320×64px @2x</td><td>≤ 50 KB</td><td>needed</td><td>public/assets/brand/logo-inverted.png</td><td>PNG @2x export of inverted logo (VDD §7.4).</td></tr>
+<tr><td>RES-IMG-050</td><td>icon-arena-race-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-arena-race-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-arena-race-24.png</td><td>PNG fallback for icon-arena-race-24.svg (VDD §7.1 — for browsers without reliable SVG support).</td></tr>
+<tr><td>RES-IMG-051</td><td>icon-arena-sumo-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-arena-sumo-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-arena-sumo-24.png</td><td>PNG fallback for icon-arena-sumo-24.svg (VDD §7.1). Behind FF_ARENA_SUMO feature flag.</td></tr>
+<tr><td>RES-IMG-052</td><td>icon-training-run-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-training-run-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-run-24.png</td><td>PNG fallback for icon-training-run-24.svg (VDD §7.1).</td></tr>
+<tr><td>RES-IMG-053</td><td>icon-training-strength-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-training-strength-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-strength-24.png</td><td>PNG fallback for icon-training-strength-24.svg (VDD §7.1).</td></tr>
+<tr><td>RES-IMG-054</td><td>icon-training-stamina-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-training-stamina-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-training-stamina-24.png</td><td>PNG fallback for icon-training-stamina-24.svg (VDD §7.1).</td></tr>
+<tr><td>RES-IMG-055</td><td>icon-food-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-food-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-food-24.png</td><td>PNG fallback for icon-food-24.svg (VDD §7.1).</td></tr>
+<tr><td>RES-IMG-056</td><td>icon-share-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-share-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-share-24.png</td><td>PNG fallback for icon-share-24.svg (VDD §7.1).</td></tr>
+<tr><td>RES-IMG-057</td><td>icon-copy-24.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-copy-24.svg, 24x24px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#e8e8f0</code> for fallback</td><td>24×24px</td><td>≤ 2 KB</td><td>needed</td><td>public/assets/icons/icon-copy-24.png</td><td>PNG fallback for icon-copy-24.svg (VDD §7.1).</td></tr>
+<tr><td>RES-IMG-058</td><td>icon-rarity-common-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-common-16.svg, 16x16px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#b2bec3</code> (Common rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-common-16.png</td><td>PNG fallback for icon-rarity-common-16.svg (VDD §7.1). Color baked to <code>--color-rarity-common</code> (#b2bec3).</td></tr>
+<tr><td>RES-IMG-059</td><td>icon-rarity-rare-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-rare-16.svg, 16x16px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#4ecdc4</code> (Rare rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-rare-16.png</td><td>PNG fallback for icon-rarity-rare-16.svg (VDD §7.1). Color baked to <code>--color-rarity-rare</code> (#4ecdc4).</td></tr>
+<tr><td>RES-IMG-060</td><td>icon-rarity-epic-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-epic-16.svg, 16x16px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#a29bfe</code> (Epic rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-epic-16.png</td><td>PNG fallback for icon-rarity-epic-16.svg (VDD §7.1). Color baked to <code>--color-rarity-epic</code> (#a29bfe).</td></tr>
+<tr><td>RES-IMG-061</td><td>icon-rarity-legendary-16.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>PNG-24 rasterized export of icon-rarity-legendary-16.svg, 16x16px, hard pixel edges, monochrome <code>currentColor</code> baked to <code>#fdcb6e</code> (Legendary rarity) for fallback</td><td>16×16px</td><td>≤ 1 KB</td><td>needed</td><td>public/assets/icons/icon-rarity-legendary-16.png</td><td>PNG fallback for icon-rarity-legendary-16.svg (VDD §7.1). Color baked to <code>--color-rarity-legendary</code> (#fdcb6e).</td></tr>
+</table>
+<h3>§1.5 Logo &amp; Brand Assets (VDD §3.4 / §7.4)</h3>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-IMG-032</td><td>logo-primary-dark.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art wordmark &quot;pixel-pet-arena&quot; in Press Start 2P font style, dark background variant, near-white <code>#e8e8f0</code> color, 160x32px, hard pixel edges, grid-aligned letterforms, pure SVG vector</td><td>160×32px (SVG)</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/brand/logo-primary-dark.svg</td><td>Primary logo — dark surfaces. Nav bar logo (160×32px). VDD §3.4 + §7.4. SVG primary; SVGO optimized.</td></tr>
+<tr><td>RES-IMG-033</td><td>logo-primary-dark.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>pixel art wordmark &quot;pixel-pet-arena&quot;, Press Start 2P style, near-white <code>#e8e8f0</code>, dark background, 320x64px @2x, hard pixel edges, PNG-24 with alpha</td><td>320×64px @2x</td><td>≤ 50 KB</td><td>needed</td><td>public/assets/brand/logo-primary-dark.png</td><td>PNG @2x export of primary logo (VDD §7.4). Used where SVG rendering is unreliable.</td></tr>
+<tr><td>RES-IMG-034</td><td>logo-inverted.svg</td><td>image</td><td>Aseprite / hand-crafted SVG</td><td>pixel art wordmark &quot;pixel-pet-arena&quot; in Press Start 2P font style, light background variant, dark navy <code>#1a1a2e</code> color, 160x32px, hard pixel edges, grid-aligned letterforms</td><td>160×32px (SVG)</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/brand/logo-inverted.svg</td><td>Inverted logo — light background contexts (VDD §7.4). Admin portal and print-adjacent uses.</td></tr>
+<tr><td>RES-IMG-035</td><td>logo-inverted.png</td><td>image</td><td>Aseprite / hand-crafted PNG export</td><td>pixel art wordmark, light background, dark navy <code>#1a1a2e</code>, 320x64px @2x, hard pixel edges</td><td>320×64px @2x</td><td>≤ 50 KB</td><td>needed</td><td>public/assets/brand/logo-inverted.png</td><td>PNG @2x export of inverted logo (VDD §7.4).</td></tr>
 <tr><td>RES-IMG-036</td><td>mark-32.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon mark, standalone pixel creature silhouette without wordmark, 32x32px monochrome mark, hard pixel edges, works at favicon size, pure black foreground on transparent</td><td>32×32px</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/brand/mark-32.png</td><td>Standalone pixel pet mark (VDD §7.4). Used for favicon (32×32px), browser tab, PWA icon base.</td></tr>
-<tr><td>RES-IMG-037</td><td>mark-64.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon mark, standalone pixel creature silhouette, 64x64px, hard pixel edges, dark navy background `#1a1a2e`, gold `#fdcb6e` accent, social avatar scale</td><td>64×64px</td><td>≤ 15 KB</td><td>needed</td><td>public/assets/brand/mark-64.png</td><td>64×64 standalone mark (VDD §7.4). Social avatar, app icon contexts.</td></tr>
-<tr><td>RES-IMG-038</td><td>mark-128.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon mark, standalone pixel creature, 128x128px, dark navy background `#1a1a2e`, gold `#fdcb6e` accent, app icon quality, hard pixel edges, detailed at 128px</td><td>128×128px</td><td>≤ 30 KB</td><td>needed</td><td>public/assets/brand/mark-128.png</td><td>128×128 standalone mark (VDD §7.4). PWA icon, higher-resolution app icon.</td></tr>
-<tr><td>RES-IMG-039</td><td>favicon-32.ico</td><td>image</td><td>Aseprite</td><td>pixel art pet icon 32x32px, ICO format, multi-size (16x16, 32x32), dark background, recognizable at 16px tab size, hard pixel edges</td><td>32×32px (ICO with 16×16 embedded)</td><td>≤ 5 KB</td><td>needed</td><td>public/favicon.ico</td><td>Favicon ICO file. Includes 16×16 and 32×32 sizes. Served from `/public/favicon.ico`.</td></tr>
-<tr><td>RES-IMG-040</td><td>favicon-192.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon 192x192px PNG, dark navy background `#1a1a2e`, gold `#fdcb6e` pet mark, PWA icon, hard pixel edges, `image-rendering: pixelated` intended</td><td>192×192px</td><td>≤ 30 KB</td><td>needed</td><td>public/favicon-192.png</td><td>PWA icon 192×192px for `manifest.json`.</td></tr>
-<tr><td>RES-IMG-041</td><td>favicon-512.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon 512x512px PNG, dark navy background `#1a1a2e`, gold `#fdcb6e` pet mark, PWA splash icon, hard pixel edges</td><td>512×512px</td><td>≤ 80 KB</td><td>needed</td><td>public/favicon-512.png</td><td>PWA icon 512×512px for `manifest.json` and splash screen.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="16-og--social-card-assets-vdd-88--75--76">§1.6 OG / Social Card Assets (VDD §8.8 / §7.5 / §7.6)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-IMG-042</td><td>og-default-1200x630.avif</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art game card, 1200x630px, deep navy `#1a1a2e` background, "pixel-pet-arena" wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold `#fdcb6e`, purple `#a29bfe`, teal `#4ecdc4`, retro game aesthetic, premium collectible game social share card, hard pixel art style</td><td>1200×630px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/og/og-default-1200x630.avif</td><td>Default OG card (no specific pet). Used for landing page, leaderboard, and generic social shares. AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers.</td></tr>
-<tr><td>RES-IMG-043</td><td>og-default-1200x630.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art game card, 1200x630px, deep navy `#1a1a2e` background, "pixel-pet-arena" wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold `#fdcb6e`, purple `#a29bfe`, teal `#4ecdc4`, retro game aesthetic, premium collectible game social share card, hard pixel art style</td><td>1200×630px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/og/og-default-1200x630.webp</td><td>Default OG card WebP fallback (VDD §7.5). Served when AVIF is not supported.</td></tr>
-<tr><td>RES-IMG-044</td><td>og-battle-result-1200x630.avif</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art battle result card template, 1200x630px, deep navy `#1a1a2e` background, two pixel creature placeholder silhouettes side by side, gold `#fdcb6e` "WIN" pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style</td><td>1200×630px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/og/og-battle-result-1200x630.avif</td><td>Battle result OG card template (VDD §8.8). Pre-rendered per-pet at runtime by server using this as base layout. AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers.</td></tr>
-<tr><td>RES-IMG-045</td><td>og-battle-result-1200x630.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art battle result card template, 1200x630px, deep navy `#1a1a2e` background, two pixel creature placeholder silhouettes side by side, gold `#fdcb6e` "WIN" pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style</td><td>1200×630px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/og/og-battle-result-1200x630.webp</td><td>Battle result OG card template WebP fallback (VDD §7.5). Served when AVIF is not supported.</td></tr>
-<tr><td>RES-IMG-046</td><td>og-default-1200x630.png</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art game card, 1200x630px, deep navy `#1a1a2e` background, "pixel-pet-arena" wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold `#fdcb6e`, purple `#a29bfe`, teal `#4ecdc4`, retro game aesthetic, premium collectible game social share card, hard pixel art style</td><td>1200×630px</td><td>≤ 400 KB</td><td>needed</td><td>public/assets/og/og-default-1200x630.png</td><td>Default OG card PNG last-resort fallback (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort for OG social card backgrounds. Served only when AVIF and WebP are both unavailable.</td></tr>
-<tr><td>RES-IMG-047</td><td>og-battle-result-1200x630.png</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art battle result card template, 1200x630px, deep navy `#1a1a2e` background, two pixel creature placeholder silhouettes side by side, gold `#fdcb6e` "WIN" pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style</td><td>1200×630px</td><td>≤ 400 KB</td><td>needed</td><td>public/assets/og/og-battle-result-1200x630.png</td><td>Battle result OG card template PNG last-resort fallback (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort for OG social card backgrounds. Served only when AVIF and WebP are both unavailable.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="17-ui-scene-backgrounds--page-level-visuals-vdd-81--87">§1.7 UI Scene Backgrounds / Page-Level Visuals (VDD §8.1 / §8.7)</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-IMG-048</td><td>bg-landing-hero.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art landing page hero background, 1920x1080px, deep navy `#1a1a2e` to dark charcoal `#242444` gradient, subtle pixel grid texture, retro CRT glow atmospheric effect, no specific characters, abstract depth and atmosphere, premium dark game aesthetic --ar 16:9 --v 6</td><td>1920×1080px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-landing-hero.webp</td><td>Landing page hero background (VDD §8.1). Serves as atmosphere behind PetCanvas. Lazy-loaded below the canvas.</td></tr>
-<tr><td>RES-IMG-049</td><td>bg-leaderboard.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art leaderboard page background, 1920x1080px, deep navy `#1a1a2e` base, subtle pixel trophy or podium motif, editorial hierarchy feel, retro game scoreboard aesthetic, muted to not compete with table content --ar 16:9 --v 6</td><td>1920×1080px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-leaderboard.webp</td><td>Leaderboard page background (VDD §8.7). Subtle, does not compete with table F-pattern scan. Lazy-loaded.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="2-animation-asset-inventory-phaserjs-sprite-sheets">§2 Animation Asset Inventory (Phaser.js Sprite Sheets)</h2>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>Note</strong>: <code>docs/ANIM.md</code> does not exist for this project. This section covers Phaser.js sprite sheet animations defined in <code>docs/CLIENT_IMPL.md §5.1 Animation List</code> and <code>docs/VDD.md §4.2</code>. No skeletal (Spine/.skel) animations are used — this is a Web/Phaser.js project.</blockquote>
-<blockquote class="doc-quote"></blockquote>
-<blockquote class="doc-quote">All Phaser sprite sheet animations use PNG sprite atlases loaded via <code>this.load.spritesheet()</code>. The 6 Phaser sprite sheet assets are derived from CLIENT_IMPL.md §5.1 Animation List (idle, bounce, training-effort, battle-run, victory-particles) and CLIENT_IMPL.md §5.3 ArenaBattleScene state machine (battle-victory — 4-frame victory sequence in the VICTORY state). Note: the neglected state (ANIM-04) is a CSS <code>filter</code> overlay — not a Phaser sprite sheet — and is therefore covered by RES-IMG-006 in §1.1, not listed here.</blockquote>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
-<tr><td>RES-ANIM-001</td><td>pet-idle-sheet-ref-256x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet idle animation sprite sheet, 8 frames horizontal single row, 32x32px per frame = 256x32px total (sprite_resolution_px = 32), gentle bobbing or breathing idle motion, 30fps loop, max 16 colors, transparent background, hard pixel edges, retro 8-bit game character</td><td>8f × 30fps (256×32px)</td><td>≤ 25 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-idle-sheet-ref-256x32.png</td><td>Idle animation reference sheet (CLIENT_IMPL ANIM-01). 8 frames (VDD §4.2: minimum is 4 frames, 8 frames recommended — this reference uses the recommended 8), 30 FPS continuous loop. Phaser key: `idle`. Used in PetIdleScene. Actual per-seed sheets generated server-side from seed.</td></tr>
-<tr><td>RES-ANIM-002</td><td>pet-bounce-sheet-ref-64x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet bounce interaction sprite sheet, 2 frames horizontal, 32x32px per frame = 64x32px (sprite_resolution_px = 32), frame 1 scale 1.15x squished, frame 2 return to normal, click/tap response animation, transparent background, hard pixel edges</td><td>2f × 30fps (64×32px)</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-bounce-sheet-ref-64x32.png</td><td>Bounce/interaction animation reference (CLIENT_IMPL ANIM-02). 2-frame sequence, (pet_interaction_response_ms = 200)ms total. Triggered on canvas click/tap via Phaser `pointerdown`.</td></tr>
+<tr><td>RES-IMG-037</td><td>mark-64.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon mark, standalone pixel creature silhouette, 64x64px, hard pixel edges, dark navy background <code>#1a1a2e</code>, gold <code>#fdcb6e</code> accent, social avatar scale</td><td>64×64px</td><td>≤ 15 KB</td><td>needed</td><td>public/assets/brand/mark-64.png</td><td>64×64 standalone mark (VDD §7.4). Social avatar, app icon contexts.</td></tr>
+<tr><td>RES-IMG-038</td><td>mark-128.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon mark, standalone pixel creature, 128x128px, dark navy background <code>#1a1a2e</code>, gold <code>#fdcb6e</code> accent, app icon quality, hard pixel edges, detailed at 128px</td><td>128×128px</td><td>≤ 30 KB</td><td>needed</td><td>public/assets/brand/mark-128.png</td><td>128×128 standalone mark (VDD §7.4). PWA icon, higher-resolution app icon.</td></tr>
+<tr><td>RES-IMG-039</td><td>favicon-32.ico</td><td>image</td><td>Aseprite</td><td>pixel art pet icon 32x32px, ICO format, multi-size (16x16, 32x32), dark background, recognizable at 16px tab size, hard pixel edges</td><td>32×32px (ICO with 16×16 embedded)</td><td>≤ 5 KB</td><td>needed</td><td>public/favicon.ico</td><td>Favicon ICO file. Includes 16×16 and 32×32 sizes. Served from <code>/public/favicon.ico</code>.</td></tr>
+<tr><td>RES-IMG-040</td><td>favicon-192.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon 192x192px PNG, dark navy background <code>#1a1a2e</code>, gold <code>#fdcb6e</code> pet mark, PWA icon, hard pixel edges, <code>image-rendering: pixelated</code> intended</td><td>192×192px</td><td>≤ 30 KB</td><td>needed</td><td>public/favicon-192.png</td><td>PWA icon 192×192px for <code>manifest.json</code>.</td></tr>
+<tr><td>RES-IMG-041</td><td>favicon-512.png</td><td>image</td><td>Aseprite</td><td>pixel art pet icon 512x512px PNG, dark navy background <code>#1a1a2e</code>, gold <code>#fdcb6e</code> pet mark, PWA splash icon, hard pixel edges</td><td>512×512px</td><td>≤ 80 KB</td><td>needed</td><td>public/favicon-512.png</td><td>PWA icon 512×512px for <code>manifest.json</code> and splash screen.</td></tr>
+</table>
+<h3>§1.6 OG / Social Card Assets (VDD §8.8 / §7.5 / §7.6)</h3>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-IMG-042</td><td>og-default-1200x630.avif</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art game card, 1200x630px, deep navy <code>#1a1a2e</code> background, &quot;pixel-pet-arena&quot; wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold <code>#fdcb6e</code>, purple <code>#a29bfe</code>, teal <code>#4ecdc4</code>, retro game aesthetic, premium collectible game social share card, hard pixel art style</td><td>1200×630px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/og/og-default-1200x630.avif</td><td>Default OG card (no specific pet). Used for landing page, leaderboard, and generic social shares. AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers.</td></tr>
+<tr><td>RES-IMG-043</td><td>og-default-1200x630.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art game card, 1200x630px, deep navy <code>#1a1a2e</code> background, &quot;pixel-pet-arena&quot; wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold <code>#fdcb6e</code>, purple <code>#a29bfe</code>, teal <code>#4ecdc4</code>, retro game aesthetic, premium collectible game social share card, hard pixel art style</td><td>1200×630px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/og/og-default-1200x630.webp</td><td>Default OG card WebP fallback (VDD §7.5). Served when AVIF is not supported.</td></tr>
+<tr><td>RES-IMG-044</td><td>og-battle-result-1200x630.avif</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art battle result card template, 1200x630px, deep navy <code>#1a1a2e</code> background, two pixel creature placeholder silhouettes side by side, gold <code>#fdcb6e</code> &quot;WIN&quot; pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style</td><td>1200×630px</td><td>≤ 150 KB</td><td>needed</td><td>public/assets/og/og-battle-result-1200x630.avif</td><td>Battle result OG card template (VDD §8.8). Pre-rendered per-pet at runtime by server using this as base layout. AVIF primary format (VDD §7.5). Served preferentially over WebP for supported browsers.</td></tr>
+<tr><td>RES-IMG-045</td><td>og-battle-result-1200x630.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art battle result card template, 1200x630px, deep navy <code>#1a1a2e</code> background, two pixel creature placeholder silhouettes side by side, gold <code>#fdcb6e</code> &quot;WIN&quot; pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style</td><td>1200×630px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/og/og-battle-result-1200x630.webp</td><td>Battle result OG card template WebP fallback (VDD §7.5). Served when AVIF is not supported.</td></tr>
+<tr><td>RES-IMG-046</td><td>og-default-1200x630.png</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art game card, 1200x630px, deep navy <code>#1a1a2e</code> background, &quot;pixel-pet-arena&quot; wordmark in Press Start 2P font upper left, abstract pixel creature silhouette center, rarity color accents gold <code>#fdcb6e</code>, purple <code>#a29bfe</code>, teal <code>#4ecdc4</code>, retro game aesthetic, premium collectible game social share card, hard pixel art style</td><td>1200×630px</td><td>≤ 400 KB</td><td>needed</td><td>public/assets/og/og-default-1200x630.png</td><td>Default OG card PNG last-resort fallback (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort for OG social card backgrounds. Served only when AVIF and WebP are both unavailable.</td></tr>
+<tr><td>RES-IMG-047</td><td>og-battle-result-1200x630.png</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art battle result card template, 1200x630px, deep navy <code>#1a1a2e</code> background, two pixel creature placeholder silhouettes side by side, gold <code>#fdcb6e</code> &quot;WIN&quot; pixel text left, space for pet sprite (128x128px) left zone + name + rarity badge center + W/L record right, retro game social card, hard pixel art style</td><td>1200×630px</td><td>≤ 400 KB</td><td>needed</td><td>public/assets/og/og-battle-result-1200x630.png</td><td>Battle result OG card template PNG last-resort fallback (VDD §7.5). VDD §7.5 requires AVIF primary + WebP fallback + PNG last resort for OG social card backgrounds. Served only when AVIF and WebP are both unavailable.</td></tr>
+</table>
+<h3>§1.7 UI Scene Backgrounds / Page-Level Visuals (VDD §8.1 / §8.7)</h3>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-IMG-048</td><td>bg-landing-hero.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art landing page hero background, 1920x1080px, deep navy <code>#1a1a2e</code> to dark charcoal <code>#242444</code> gradient, subtle pixel grid texture, retro CRT glow atmospheric effect, no specific characters, abstract depth and atmosphere, premium dark game aesthetic --ar 16:9 --v 6</td><td>1920×1080px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-landing-hero.webp</td><td>Landing page hero background (VDD §8.1). Serves as atmosphere behind PetCanvas. Lazy-loaded below the canvas.</td></tr>
+<tr><td>RES-IMG-049</td><td>bg-leaderboard.webp</td><td>image</td><td>Midjourney v6</td><td>dark luxury pixel art leaderboard page background, 1920x1080px, deep navy <code>#1a1a2e</code> base, subtle pixel trophy or podium motif, editorial hierarchy feel, retro game scoreboard aesthetic, muted to not compete with table content --ar 16:9 --v 6</td><td>1920×1080px</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/backgrounds/bg-leaderboard.webp</td><td>Leaderboard page background (VDD §8.7). Subtle, does not compete with table F-pattern scan. Lazy-loaded.</td></tr>
+</table>
+<hr>
+<h2>§2 Animation Asset Inventory (Phaser.js Sprite Sheets)</h2>
+<blockquote><p><strong>Note</strong>: <code>docs/ANIM.md</code> does not exist for this project. This section covers Phaser.js sprite sheet animations defined in <code>docs/CLIENT_IMPL.md §5.1 Animation List</code> and <code>docs/VDD.md §4.2</code>. No skeletal (Spine/.skel) animations are used — this is a Web/Phaser.js project.</p></blockquote>
+<p>&gt;</p>
+<blockquote><p>All Phaser sprite sheet animations use PNG sprite atlases loaded via <code>this.load.spritesheet()</code>. The 6 Phaser sprite sheet assets are derived from CLIENT_IMPL.md §5.1 Animation List (idle, bounce, training-effort, battle-run, victory-particles) and CLIENT_IMPL.md §5.3 ArenaBattleScene state machine (battle-victory — 4-frame victory sequence in the VICTORY state). Note: the neglected state (ANIM-04) is a CSS <code>filter</code> overlay — not a Phaser sprite sheet — and is therefore covered by RES-IMG-006 in §1.1, not listed here.</p></blockquote>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
+<tr><td>RES-ANIM-001</td><td>pet-idle-sheet-ref-256x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet idle animation sprite sheet, 8 frames horizontal single row, 32x32px per frame = 256x32px total (sprite_resolution_px = 32), gentle bobbing or breathing idle motion, 30fps loop, max 16 colors, transparent background, hard pixel edges, retro 8-bit game character</td><td>8f × 30fps (256×32px)</td><td>≤ 25 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-idle-sheet-ref-256x32.png</td><td>Idle animation reference sheet (CLIENT_IMPL ANIM-01). 8 frames (VDD §4.2: minimum is 4 frames, 8 frames recommended — this reference uses the recommended 8), 30 FPS continuous loop. Phaser key: <code>idle</code>. Used in PetIdleScene. Actual per-seed sheets generated server-side from seed.</td></tr>
+<tr><td>RES-ANIM-002</td><td>pet-bounce-sheet-ref-64x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet bounce interaction sprite sheet, 2 frames horizontal, 32x32px per frame = 64x32px (sprite_resolution_px = 32), frame 1 scale 1.15x squished, frame 2 return to normal, click/tap response animation, transparent background, hard pixel edges</td><td>2f × 30fps (64×32px)</td><td>≤ 8 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-bounce-sheet-ref-64x32.png</td><td>Bounce/interaction animation reference (CLIENT_IMPL ANIM-02). 2-frame sequence, (pet_interaction_response_ms = 200)ms total. Triggered on canvas click/tap via Phaser <code>pointerdown</code>.</td></tr>
 <tr><td>RES-ANIM-003</td><td>pet-effort-sheet-ref-96x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet training effort animation sprite sheet, 3 frames horizontal, 32x32px per frame = 96x32px (sprite_resolution_px = 32), exertion/workout motion frames, sweat particles or effort pose, 400ms duration, transparent background, hard pixel edges</td><td>3f × 30fps (96×32px)</td><td>≤ 10 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-effort-sheet-ref-96x32.png</td><td>Training effort animation reference (CLIENT_IMPL ANIM-03). 3-frame sequence, 400ms. Triggered on successful training action mutation.</td></tr>
-<tr><td>RES-ANIM-004</td><td>pet-run-sheet-ref-256x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet run cycle sprite sheet, 8 frames horizontal single row, 32x32px per frame = 256x32px (sprite_resolution_px = 32), forward running motion 8-frame loop, transparent background, hard pixel edges, arena battle race animation</td><td>8f × 30fps (256×32px)</td><td>≤ 25 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-run-sheet-ref-256x32.png</td><td>Arena battle race run cycle reference (CLIENT_IMPL ANIM-08). 8-frame run loop sheet per VDD §4.2 ("8-frame run cycle") and CLIENT_IMPL §5.1 ANIM-08 ("8-frame run loop"); loop repeated in Phaser for 5–15s arena match duration (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15). Used in ArenaBattleScene.</td></tr>
+<tr><td>RES-ANIM-004</td><td>pet-run-sheet-ref-256x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet run cycle sprite sheet, 8 frames horizontal single row, 32x32px per frame = 256x32px (sprite_resolution_px = 32), forward running motion 8-frame loop, transparent background, hard pixel edges, arena battle race animation</td><td>8f × 30fps (256×32px)</td><td>≤ 25 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-run-sheet-ref-256x32.png</td><td>Arena battle race run cycle reference (CLIENT_IMPL ANIM-08). 8-frame run loop sheet per VDD §4.2 (&quot;8-frame run cycle&quot;) and CLIENT_IMPL §5.1 ANIM-08 (&quot;8-frame run loop&quot;); loop repeated in Phaser for 5–15s arena match duration (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15). Used in ArenaBattleScene.</td></tr>
 <tr><td>RES-ANIM-005</td><td>pet-victory-sheet-ref-128x32.png</td><td>animation</td><td>Aseprite</td><td>pixel art pet victory celebration sprite sheet, 4 frames horizontal, 32x32px per frame = 128x32px (sprite_resolution_px = 32), winner celebration jump or raise arms pose, joyful pixel animation, transparent background, hard pixel edges</td><td>4f × 30fps (128×32px)</td><td>≤ 15 KB</td><td>needed</td><td>public/assets/sprites/anim-ref/pet-victory-sheet-ref-128x32.png</td><td>Battle victory animation reference (CLIENT_IMPL §5.3 ArenaBattleScene VICTORY state). 4-frame victory sequence played when winner is determined in ArenaBattleScene. Followed by gold particle burst ANIM-09.</td></tr>
-<tr><td>RES-ANIM-006</td><td>vfx-victory-particles-sheet-256x256.png</td><td>particle</td><td>Aseprite</td><td>pixel art particle sprite sheet for victory burst, 8x8 frames grid = 256x256px total, 64 frames of 32x32px particle frames, 2x2px gold square particles `#fdcb6e`, various scatter trajectories, transparent background, hard pixel edges, 8-bit style sparkle</td><td>256×256px (8×8 frames, 32×32 each)</td><td>≤ 50 KB</td><td>needed</td><td>public/assets/sprites/vfx/vfx-victory-particles-sheet-256x256.png</td><td>Victory particle burst texture (CLIENT_IMPL ANIM-09). 24 gold 2×2px square particles, burst from winner sprite in ArenaBattleScene. `Phaser.GameObjects.Particles` system. Particle source color: Legendary gold `#fdcb6e`.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="3-audio-asset-inventory-bgm--sfx">§3 Audio Asset Inventory (BGM / SFX)</h2>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>No AUDIO.md exists for this project</strong>. Per <code>docs/CLIENT_IMPL.md §6</code>, audio is <strong>explicitly deferred to Phase 2</strong>. The player app Phase 1 build includes zero audio assets.</blockquote>
-<blockquote class="doc-quote"></blockquote>
-<blockquote class="doc-quote">This section documents the Phase 2 planned audio assets for reference. All items below have <code>status: needed</code> and are not blocking Phase 1 delivery.</blockquote>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote">Phase 2 audio plan — not blocking Phase 1. Defined in CLIENT_IMPL.md §6.1 Audio List (Phase 2 — Planned).</blockquote>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr></thead>
-<tbody>
+<tr><td>RES-ANIM-006</td><td>vfx-victory-particles-sheet-256x256.png</td><td>particle</td><td>Aseprite</td><td>pixel art particle sprite sheet for victory burst, 8x8 frames grid = 256x256px total, 64 frames of 32x32px particle frames, 2x2px gold square particles <code>#fdcb6e</code>, various scatter trajectories, transparent background, hard pixel edges, 8-bit style sparkle</td><td>256×256px (8×8 frames, 32×32 each)</td><td>≤ 50 KB</td><td>needed</td><td>public/assets/sprites/vfx/vfx-victory-particles-sheet-256x256.png</td><td>Victory particle burst texture (CLIENT_IMPL ANIM-09). 24 gold 2×2px square particles, burst from winner sprite in ArenaBattleScene. <code>Phaser.GameObjects.Particles</code> system. Particle source color: Legendary gold <code>#fdcb6e</code>.</td></tr>
+</table>
+<hr>
+<h2>§3 Audio Asset Inventory (BGM / SFX)</h2>
+<blockquote><p><strong>No AUDIO.md exists for this project</strong>. Per <code>docs/CLIENT_IMPL.md §6</code>, audio is <strong>explicitly deferred to Phase 2</strong>. The player app Phase 1 build includes zero audio assets.</p></blockquote>
+<p>&gt;</p>
+<blockquote><p>This section documents the Phase 2 planned audio assets for reference. All items below have <code>status: needed</code> and are not blocking Phase 1 delivery.</p></blockquote>
+<blockquote><p>Phase 2 audio plan — not blocking Phase 1. Defined in CLIENT_IMPL.md §6.1 Audio List (Phase 2 — Planned).</p></blockquote>
+<table>
+<tr><th>ID</th><th>filename</th><th>type</th><th>source_tool</th><th>prompt</th><th>dimensions</th><th>file_size_budget</th><th>status</th><th>output_path</th><th>description</th></tr>
 <tr><td>RES-SFX-001</td><td>sfx_ui_click.ogg</td><td>sfx</td><td>ElevenLabs SFX</td><td>short crisp pixel-art UI click sound, retro 8-bit button press, slight satisfying click, 0.2 seconds, game UI interaction sound</td><td>0.2s</td><td>≤ 50 KB</td><td>needed</td><td>public/assets/audio/sfx/sfx_ui_click.ogg</td><td>UI button click SFX (CLIENT_IMPL SFX-01). Triggered on all button/CTA clicks. Phase 2 only.</td></tr>
 <tr><td>RES-SFX-002</td><td>sfx_claim_success.ogg</td><td>sfx</td><td>ElevenLabs SFX</td><td>pixel-art victory jingle short, retro 8-bit success fanfare, celebratory 3-note ascending melody, 1.5 seconds, coin collect style</td><td>1.5s</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/audio/sfx/sfx_claim_success.ogg</td><td>Claim success SFX (CLIENT_IMPL SFX-02). Triggered on URLReveal mount after successful pet claim. Phase 2 only.</td></tr>
 <tr><td>RES-SFX-003</td><td>sfx_training_done.ogg</td><td>sfx</td><td>ElevenLabs SFX</td><td>short pixel-art training complete chime, retro 8-bit positive sound, level-up style brief sound, 0.8 seconds, satisfying achievement sound</td><td>0.8s</td><td>≤ 100 KB</td><td>needed</td><td>public/assets/audio/sfx/sfx_training_done.ogg</td><td>Training complete SFX (CLIENT_IMPL SFX-03). Triggered on training mutation success. Phase 2 only.</td></tr>
 <tr><td>RES-SFX-004</td><td>sfx_battle_win.ogg</td><td>sfx</td><td>ElevenLabs SFX</td><td>pixel-art victory fanfare, retro 8-bit win music short loop, heroic ascending melody, triumphant celebration sound, 2 seconds</td><td>2.0s</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/audio/sfx/sfx_battle_win.ogg</td><td>Battle WIN SFX (CLIENT_IMPL SFX-04). Triggered on WIN result received. Phase 2 only.</td></tr>
 <tr><td>RES-SFX-005</td><td>sfx_battle_loss.ogg</td><td>sfx</td><td>ElevenLabs SFX</td><td>pixel-art defeat sound effect, retro 8-bit descending tone, sad wah-wah game over sound, not too harsh, 1.5 seconds</td><td>1.5s</td><td>≤ 200 KB</td><td>needed</td><td>public/assets/audio/sfx/sfx_battle_loss.ogg</td><td>Battle LOSS SFX (CLIENT_IMPL SFX-05). Triggered on LOSS result received. Phase 2 only.</td></tr>
-<tr><td>RES-BGM-001</td><td>bgm_arena.ogg</td><td>bgm</td><td>Suno v3</td><td>retro 8-bit chiptune arena battle music, fast-paced competitive energy, NES/SNES game style, loopable, 90bpm, 2 minutes, high tension pixel game soundtrack, loop-friendly start and end points</td><td>120s</td><td>≤ 5 MB</td><td>needed</td><td>public/assets/audio/bgm/bgm_arena.ogg</td><td>Arena BGM (CLIENT_IMPL BGM-01). Plays on arena route enter, stops on route leave. Howler.js streaming (`html5: true`). Phase 2 only.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="4-review-checklist">§4 Review Checklist</h2>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li>[x] §1 VDD Visual Assets: VDD.md §4 all pet rarity tiers (Common, Rare, Epic, Legendary) have corresponding RES-IMG rows (RES-IMG-001 to RES-IMG-008); sprite sheet frames use 32×32px (sprite_resolution_px = 32)</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §4 neglected state sprite overlay covered (RES-IMG-006)</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §8.3 food item sprites covered (RES-IMG-009 to RES-IMG-012) — 4 food buff icon types (speed, strength, stamina, all-stats) at 32×32px per FoodInventory component</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §7.2 UI icon set covered (RES-IMG-020 to RES-IMG-031) — 12 custom pixel-art icons: 8 at 24×24px SVG (game interactions) + 4 at 16×16px SVG (rarity badges)</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §7.1 PNG fallback exports covered for all 12 SVG game UI icons (RES-IMG-050 to RES-IMG-061) — 8 at 24×24px PNG (RES-IMG-050–057) + 4 at 16×16px PNG (RES-IMG-058–061)</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §7.4 logo/brand assets covered (RES-IMG-032 to RES-IMG-041) — logo primary/inverted, favicon, PWA icons</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §8.1 landing page hero background covered (RES-IMG-048)</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §8.7 leaderboard background covered (RES-IMG-049)</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §4.3 arena backgrounds (race + sumo tiles + full backdrop) covered (RES-IMG-013 to RES-IMG-017) — includes AVIF primary (RES-IMG-015 race, RES-IMG-017 sumo) + WebP fallback (RES-IMG-014 race, RES-IMG-016 sumo) per VDD §7.5</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §7.5 page background pattern covered (RES-IMG-018, RES-IMG-019)</li>
-<li>[x] §1 VDD Visual Assets: VDD.md §8.8 OG social card template covered (RES-IMG-042 to RES-IMG-047) — AVIF primary + WebP fallback + PNG last resort per VDD §7.5</li>
-<li>[x] §2 ANIM sprite animations: All 6 CLIENT_IMPL.md §5 Phaser.js animation states covered (idle, bounce, effort, run, victory, particles) (RES-ANIM-001 to RES-ANIM-006); run cycle is 8 frames × 32px = 256×32px per VDD §4.2 and CLIENT_IMPL §5.1 ANIM-08</li>
-<li>[x] §2 ANIM sprite animations: ANIM.md does not exist — §2 covers Phaser.js sprite sheet animations only (N/A — ANIM.md does not exist)</li>
-<li>[x] §3 AUDIO assets: AUDIO.md does not exist — §3 documents Phase 2 planned audio only (N/A — AUDIO.md does not exist; audio is Phase 2 per CLIENT_IMPL §6)</li>
-<li>[x] All <code>file_size_budget</code> fields have concrete values, compliant with Web platform limits: critical-path images ≤ 200 KB, lazy-loaded ≤ 1 MB, sprites ≤ 50 KB, SFX ≤ 200 KB (CLIENT_IMPL §4.4), BGM ≤ 5 MB</li>
-<li>[x] All <code>prompt</code> fields are filled with ready-to-use English prompts</li>
-<li>[x] All <code>output_path</code> values are consistent with CLIENT_IMPL.md §4.1 directory structure (<code>public/assets/</code>, <code>apps/player/src/assets/</code> conventions)</li>
-<li>[x] No bare <code>{{...}}</code> placeholders remaining (excluding template example rows)</li>
-<li>[x] No duplicate IDs within same prefix (RES-IMG-001 through RES-IMG-061, RES-ANIM-001 through RES-ANIM-006, RES-SFX-001 through RES-SFX-005, RES-BGM-001)</li>
-<li>[x] §5 License Management: all §1/§2/§3 asset IDs have corresponding license records</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="5-license--source-tracking">§5 License & Source Tracking</h2>
-<div class="doc-gap"></div>
-<blockquote class="doc-quote"><strong>Purpose</strong>: Records license type and source reference for each asset, for legal review and compliance.</blockquote>
-<blockquote class="doc-quote">All AI-generated assets use the respective tool's terms of service as the license reference.</blockquote>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>ID</th><th>filename</th><th>license_type</th><th>license_ref</th><th>Notes</th></tr></thead>
-<tbody>
+<tr><td>RES-BGM-001</td><td>bgm_arena.ogg</td><td>bgm</td><td>Suno v3</td><td>retro 8-bit chiptune arena battle music, fast-paced competitive energy, NES/SNES game style, loopable, 90bpm, 2 minutes, high tension pixel game soundtrack, loop-friendly start and end points</td><td>120s</td><td>≤ 5 MB</td><td>needed</td><td>public/assets/audio/bgm/bgm_arena.ogg</td><td>Arena BGM (CLIENT_IMPL BGM-01). Plays on arena route enter, stops on route leave. Howler.js streaming (<code>html5: true</code>). Phase 2 only.</td></tr>
+</table>
+<hr>
+<h2>§4 Review Checklist</h2>
+<ul><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §4 all pet rarity tiers (Common, Rare, Epic, Legendary) have corresponding RES-IMG rows (RES-IMG-001 to RES-IMG-008); sprite sheet frames use 32×32px (sprite_resolution_px = 32)</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §4 neglected state sprite overlay covered (RES-IMG-006)</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §8.3 food item sprites covered (RES-IMG-009 to RES-IMG-012) — 4 food buff icon types (speed, strength, stamina, all-stats) at 32×32px per FoodInventory component</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §7.2 UI icon set covered (RES-IMG-020 to RES-IMG-031) — 12 custom pixel-art icons: 8 at 24×24px SVG (game interactions) + 4 at 16×16px SVG (rarity badges)</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §7.1 PNG fallback exports covered for all 12 SVG game UI icons (RES-IMG-050 to RES-IMG-061) — 8 at 24×24px PNG (RES-IMG-050–057) + 4 at 16×16px PNG (RES-IMG-058–061)</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §7.4 logo/brand assets covered (RES-IMG-032 to RES-IMG-041) — logo primary/inverted, favicon, PWA icons</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §8.1 landing page hero background covered (RES-IMG-048)</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §8.7 leaderboard background covered (RES-IMG-049)</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §4.3 arena backgrounds (race + sumo tiles + full backdrop) covered (RES-IMG-013 to RES-IMG-017) — includes AVIF primary (RES-IMG-015 race, RES-IMG-017 sumo) + WebP fallback (RES-IMG-014 race, RES-IMG-016 sumo) per VDD §7.5</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §7.5 page background pattern covered (RES-IMG-018, RES-IMG-019)</li><li style="list-style:none"><input type="checkbox" checked disabled> §1 VDD Visual Assets: VDD.md §8.8 OG social card template covered (RES-IMG-042 to RES-IMG-047) — AVIF primary + WebP fallback + PNG last resort per VDD §7.5</li><li style="list-style:none"><input type="checkbox" checked disabled> §2 ANIM sprite animations: All 6 CLIENT_IMPL.md §5 Phaser.js animation states covered (idle, bounce, effort, run, victory, particles) (RES-ANIM-001 to RES-ANIM-006); run cycle is 8 frames × 32px = 256×32px per VDD §4.2 and CLIENT_IMPL §5.1 ANIM-08</li><li style="list-style:none"><input type="checkbox" checked disabled> §2 ANIM sprite animations: ANIM.md does not exist — §2 covers Phaser.js sprite sheet animations only (N/A — ANIM.md does not exist)</li><li style="list-style:none"><input type="checkbox" checked disabled> §3 AUDIO assets: AUDIO.md does not exist — §3 documents Phase 2 planned audio only (N/A — AUDIO.md does not exist; audio is Phase 2 per CLIENT_IMPL §6)</li><li style="list-style:none"><input type="checkbox" checked disabled> All <code>file_size_budget</code> fields have concrete values, compliant with Web platform limits: critical-path images ≤ 200 KB, lazy-loaded ≤ 1 MB, sprites ≤ 50 KB, SFX ≤ 200 KB (CLIENT_IMPL §4.4), BGM ≤ 5 MB</li><li style="list-style:none"><input type="checkbox" checked disabled> All <code>prompt</code> fields are filled with ready-to-use English prompts</li><li style="list-style:none"><input type="checkbox" checked disabled> All <code>output_path</code> values are consistent with CLIENT_IMPL.md §4.1 directory structure (<code>public/assets/</code>, <code>apps/player/src/assets/</code> conventions)</li><li style="list-style:none"><input type="checkbox" checked disabled> No bare <code>{{...}}</code> placeholders remaining (excluding template example rows)</li><li style="list-style:none"><input type="checkbox" checked disabled> No duplicate IDs within same prefix (RES-IMG-001 through RES-IMG-061, RES-ANIM-001 through RES-ANIM-006, RES-SFX-001 through RES-SFX-005, RES-BGM-001)</li><li style="list-style:none"><input type="checkbox" checked disabled> §5 License Management: all §1/§2/§3 asset IDs have corresponding license records</li></ul>
+<hr>
+<h2>§5 License &amp; Source Tracking</h2>
+<blockquote><p><strong>Purpose</strong>: Records license type and source reference for each asset, for legal review and compliance.</p></blockquote>
+<blockquote><p>All AI-generated assets use the respective tool&#x27;s terms of service as the license reference.</p></blockquote>
+<table>
+<tr><th>ID</th><th>filename</th><th>license_type</th><th>license_ref</th><th>Notes</th></tr>
 <tr><td>RES-IMG-001</td><td>pet-common-reference-64.png</td><td>AI-generated</td><td>https://stability.ai/terms-of-service</td><td>§1.1 Common pet reference sprite — Stable Diffusion XL</td></tr>
 <tr><td>RES-IMG-002</td><td>pet-common-reference-32.png</td><td>AI-generated</td><td>https://stability.ai/terms-of-service</td><td>§1.1 Common pet thumbnail — Stable Diffusion XL</td></tr>
 <tr><td>RES-IMG-003</td><td>pet-rare-reference-64.png</td><td>AI-generated</td><td>https://stability.ai/terms-of-service</td><td>§1.1 Rare pet reference sprite — Stable Diffusion XL</td></tr>
@@ -390,9 +388,23 @@
 <tr><td>RES-SFX-004</td><td>sfx_battle_win.ogg</td><td>AI-generated</td><td>https://elevenlabs.io/terms</td><td>§3 Battle win SFX — ElevenLabs SFX. Phase 2 only.</td></tr>
 <tr><td>RES-SFX-005</td><td>sfx_battle_loss.ogg</td><td>AI-generated</td><td>https://elevenlabs.io/terms</td><td>§3 Battle loss SFX — ElevenLabs SFX. Phase 2 only.</td></tr>
 <tr><td>RES-BGM-001</td><td>bgm_arena.ogg</td><td>AI-generated</td><td>https://suno.com/terms</td><td>§3 Arena BGM — Suno v3. Phase 2 only.</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-    </div>
+</table></main>
   </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

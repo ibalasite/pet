@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Schema Contract — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › contracts/ › Event Schema Contract</p>
+    <h1 class="banner-title">contracts/ › Event Schema Contract</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details open>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link active" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Internal Event Schema Contract</h1>
+<p>This document defines the schema contracts for all Redis pub/sub messages and job queue events used internally by the pixel-pet-arena backend (<code>apps/api</code>). These contracts govern communication between the API request handlers, background workers, and any future microservices. Consumers must validate incoming payloads against the schemas defined here and reject or dead-letter events that fail validation rather than silently processing corrupt data.</p>
+<hr>
+<h2>Job Queue Architecture</h2>
+<p>All background jobs use a Redis-backed queue (BullMQ) with the queue name prefixed <code>ppa:jobs:</code>. Each job payload is a JSON object stored as a BullMQ job data field. Workers run within the same <code>apps/api</code> process in the current architecture but are designed to be extractable into standalone workers without payload schema changes. Job IDs are UUIDs generated by the enqueuing code; BullMQ&#x27;s internal numeric IDs are not exposed in business logic.</p>
+<p>Three primary job queues exist: <code>ppa:jobs:pet-generation</code>, <code>ppa:jobs:arena-battle</code>, and <code>ppa:jobs:gdpr-erasure</code>. Each queue has a single dedicated worker handler registered at startup. Cross-queue dependencies are handled by having one job enqueue another upon completion—workers never call other workers directly. All job data fields are serialised as JSON; no binary payloads are used.</p>
+<hr>
+<h2>Pet Generation Job</h2>
+<p><strong>Queue</strong>: <code>ppa:jobs:pet-generation</code></p>
+<p>Enqueued by: <code>POST /api/v1/pet/generate</code> request handler.</p>
+<p>Consumed by: <code>PetGenerationWorker</code>.</p>
+<h3>Payload Schema</h3>
+<pre><code class="language-json">{
+  &quot;jobType&quot;: &quot;PET_GENERATION&quot;,
+  &quot;jobId&quot;: &quot;uuid-v4&quot;,
+  &quot;playerId&quot;: &quot;uuid-v4&quot;,
+  &quot;requestedAt&quot;: &quot;ISO-8601 datetime string&quot;,
+  &quot;generationSeed&quot;: &quot;hex string (32 chars)&quot;,
+  &quot;allowedSpeciesPool&quot;: [&quot;glacicat&quot;, &quot;pyrofox&quot;, &quot;stoneback&quot;, &quot;zephyrwing&quot;]
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>jobType</code></td><td><code>string</code></td><td>Yes</td><td>Must be <code>&quot;PET_GENERATION&quot;</code> — used for worker routing validation</td></tr>
+<tr><td><code>jobId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Stable ID used for idempotency checks</td></tr>
+<tr><td><code>playerId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>The player who triggered generation</td></tr>
+<tr><td><code>requestedAt</code></td><td><code>string</code> (ISO-8601)</td><td>Yes</td><td>Wall-clock time at enqueue; used for SLA monitoring</td></tr>
+<tr><td><code>generationSeed</code></td><td><code>string</code></td><td>Yes</td><td>32-char hex seed for deterministic sprite and stat generation</td></tr>
+<tr><td><code>allowedSpeciesPool</code></td><td><code>string[]</code></td><td>Yes</td><td>Non-empty array; controls which species the RNG selects from</td></tr>
+</table>
+<h3>Worker Output Contract</h3>
+<p>On success the worker writes the new pet record to PostgreSQL/Supabase and publishes a <code>PET_GENERATED</code> Redis pub/sub event (see Redis Pub/Sub Events section). On failure after all retries are exhausted, the worker publishes a <code>PET_GENERATION_FAILED</code> event and marks the player&#x27;s pending generation slot as <code>failed</code> in the database so the player frontend can display an error and allow a retry.</p>
+<hr>
+<h2>Arena Battle Job</h2>
+<p><strong>Queue</strong>: <code>ppa:jobs:arena-battle</code></p>
+<p>Enqueued by: <code>POST /api/v1/arena/battle</code> request handler (after validating the challenge and move selection).</p>
+<p>Consumed by: <code>ArenaBattleWorker</code>.</p>
+<h3>Payload Schema</h3>
+<pre><code class="language-json">{
+  &quot;jobType&quot;: &quot;ARENA_BATTLE&quot;,
+  &quot;jobId&quot;: &quot;uuid-v4&quot;,
+  &quot;battleId&quot;: &quot;uuid-v4&quot;,
+  &quot;challengeId&quot;: &quot;uuid-v4&quot;,
+  &quot;playerPetId&quot;: &quot;uuid-v4&quot;,
+  &quot;opponentPetId&quot;: &quot;uuid-v4&quot;,
+  &quot;playerMoveId&quot;: &quot;ice_shard&quot;,
+  &quot;enqueuedAt&quot;: &quot;ISO-8601 datetime string&quot;,
+  &quot;battleEngineVersion&quot;: &quot;1&quot;
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>jobType</code></td><td><code>string</code></td><td>Yes</td><td>Must be <code>&quot;ARENA_BATTLE&quot;</code></td></tr>
+<tr><td><code>jobId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Idempotency key</td></tr>
+<tr><td><code>battleId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Pre-allocated battle record ID</td></tr>
+<tr><td><code>challengeId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>The challenge this battle resolves</td></tr>
+<tr><td><code>playerPetId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Attacking player&#x27;s pet</td></tr>
+<tr><td><code>opponentPetId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Opponent pet drawn from matchmaking</td></tr>
+<tr><td><code>playerMoveId</code></td><td><code>string</code></td><td>Yes</td><td>Move slug selected by the player (e.g. <code>&quot;ice_shard&quot;</code>)</td></tr>
+<tr><td><code>enqueuedAt</code></td><td><code>string</code> (ISO-8601)</td><td>Yes</td><td>Enqueue timestamp for latency SLA tracking</td></tr>
+<tr><td><code>battleEngineVersion</code></td><td><code>string</code></td><td>Yes</td><td>Engine version string; workers must reject jobs for unsupported versions</td></tr>
+</table>
+<h3>Worker Output Contract</h3>
+<p>The battle worker computes the full turn-by-turn simulation, persists the result to the <code>battles</code> table in PostgreSQL, updates both pets&#x27; experience and level in a single transaction, and publishes a <code>BATTLE_RESOLVED</code> Redis pub/sub event. The <code>POST /api/v1/arena/battle</code> endpoint currently runs the battle synchronously in-process for sub-200ms battles; the job queue path exists for battles projected to take longer and for future async WebSocket delivery.</p>
+<hr>
+<h2>GDPR Erasure Job</h2>
+<p><strong>Queue</strong>: <code>ppa:jobs:gdpr-erasure</code></p>
+<p>Enqueued by: <code>DELETE /api/v1/admin/users/:id/gdpr-erase</code> request handler (superadmin only).</p>
+<p>Consumed by: <code>GdprErasureWorker</code>.</p>
+<h3>Payload Schema</h3>
+<pre><code class="language-json">{
+  &quot;jobType&quot;: &quot;GDPR_ERASURE&quot;,
+  &quot;jobId&quot;: &quot;uuid-v4&quot;,
+  &quot;playerId&quot;: &quot;uuid-v4&quot;,
+  &quot;requestedByAdminId&quot;: &quot;uuid-v4&quot;,
+  &quot;requestedAt&quot;: &quot;ISO-8601 datetime string&quot;,
+  &quot;erasureScope&quot;: [&quot;account&quot;, &quot;pets&quot;, &quot;battle_history&quot;, &quot;leaderboard_entries&quot;],
+  &quot;auditToken&quot;: &quot;hex string (64 chars)&quot;
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>jobType</code></td><td><code>string</code></td><td>Yes</td><td>Must be <code>&quot;GDPR_ERASURE&quot;</code></td></tr>
+<tr><td><code>jobId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Idempotency key; duplicate jobs with same <code>jobId</code> are skipped</td></tr>
+<tr><td><code>playerId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Player to erase</td></tr>
+<tr><td><code>requestedByAdminId</code></td><td><code>string</code> (UUID)</td><td>Yes</td><td>Audit trail: which admin issued the request</td></tr>
+<tr><td><code>requestedAt</code></td><td><code>string</code> (ISO-8601)</td><td>Yes</td><td>Timestamp for regulatory audit log</td></tr>
+<tr><td><code>erasureScope</code></td><td><code>string[]</code></td><td>Yes</td><td>Must be the full set <code>[&quot;account&quot;,&quot;pets&quot;,&quot;battle_history&quot;,&quot;leaderboard_entries&quot;]</code>; partial erasure is not supported</td></tr>
+<tr><td><code>auditToken</code></td><td><code>string</code></td><td>Yes</td><td>64-char hex token stored in the immutable audit log before erasure begins</td></tr>
+</table>
+<h3>Worker Output Contract</h3>
+<p>The worker performs erasure steps in order: revoke player bearer token → anonymise battle history records (replace display name with <code>[deleted]</code>) → delete pet records → delete player account row. Each step is wrapped in a database transaction. After all steps succeed the worker writes a completion record to the <code>gdpr_erasure_log</code> table (which is retained for regulatory purposes despite the player data being removed) and publishes a <code>GDPR_ERASURE_COMPLETE</code> Redis pub/sub event. This job has no retry budget beyond 1 attempt because partial erasure on retry could leave inconsistent state; failures are escalated to the <code>ppa:jobs:gdpr-erasure:dead</code> dead-letter queue and alert the on-call engineer.</p>
+<hr>
+<h2>Redis Pub/Sub Event Schemas</h2>
+<p>Beyond job queues, the API publishes real-time notification events on Redis pub/sub channels for internal fan-out.</p>
+<h3>PET_GENERATED</h3>
+<p><strong>Channel</strong>: <code>ppa:events:pet</code></p>
+<pre><code class="language-json">{
+  &quot;eventType&quot;: &quot;PET_GENERATED&quot;,
+  &quot;petId&quot;: &quot;uuid-v4&quot;,
+  &quot;playerId&quot;: &quot;uuid-v4&quot;,
+  &quot;species&quot;: &quot;glacicat&quot;,
+  &quot;spriteKey&quot;: &quot;glacicat_blue_lv1&quot;,
+  &quot;publishedAt&quot;: &quot;ISO-8601 datetime string&quot;
+}</code></pre>
+<p>Consumed by: WebSocket notification handler (to push pet-ready notification to the player frontend).</p>
+<h3>BATTLE_RESOLVED</h3>
+<p><strong>Channel</strong>: <code>ppa:events:battle</code></p>
+<pre><code class="language-json">{
+  &quot;eventType&quot;: &quot;BATTLE_RESOLVED&quot;,
+  &quot;battleId&quot;: &quot;uuid-v4&quot;,
+  &quot;outcome&quot;: &quot;win&quot;,
+  &quot;playerPetId&quot;: &quot;uuid-v4&quot;,
+  &quot;opponentPetId&quot;: &quot;uuid-v4&quot;,
+  &quot;publishedAt&quot;: &quot;ISO-8601 datetime string&quot;
+}</code></pre>
+<p>Consumed by: leaderboard cache invalidation handler; WebSocket notification handler.</p>
+<h3>GDPR_ERASURE_COMPLETE</h3>
+<p><strong>Channel</strong>: <code>ppa:events:admin</code></p>
+<pre><code class="language-json">{
+  &quot;eventType&quot;: &quot;GDPR_ERASURE_COMPLETE&quot;,
+  &quot;playerId&quot;: &quot;uuid-v4&quot;,
+  &quot;erasedAt&quot;: &quot;ISO-8601 datetime string&quot;,
+  &quot;requestedByAdminId&quot;: &quot;uuid-v4&quot;
+}</code></pre>
+<p>Consumed by: Redis session cleanup handler (invalidates any active admin or player sessions for the erased player ID).</p>
+<hr>
+<h2>Error and Retry Policy</h2>
+<p>Job queue retry behaviour is configured per queue in BullMQ options:</p>
+<table>
+<tr><th>Queue</th><th>Max Attempts</th><th>Backoff Strategy</th><th>Backoff Delay</th></tr>
+<tr><td><code>ppa:jobs:pet-generation</code></td><td>3</td><td>Exponential</td><td>2 s base</td></tr>
+<tr><td><code>ppa:jobs:arena-battle</code></td><td>3</td><td>Exponential</td><td>1 s base</td></tr>
+<tr><td><code>ppa:jobs:gdpr-erasure</code></td><td>1</td><td>None</td><td>N/A</td></tr>
+</table>
+<p>Failed jobs that exhaust all retry attempts are moved to the corresponding dead-letter queue (<code>&lt;queue-name&gt;:dead</code>). A monitoring process polls dead-letter queues every 60 seconds and emits a structured log entry at <code>error</code> level; a Supabase-backed alert rule fires a PagerDuty notification when dead-letter depth exceeds 5 entries. Workers must never throw unhandled errors—all exceptions must be caught, logged with the <code>jobId</code> and <code>jobType</code>, and re-thrown so BullMQ can manage the retry/fail lifecycle correctly. Idempotency is enforced for all three job types: before executing, each worker checks whether a success record already exists for the given <code>jobId</code> and returns early if so, preventing duplicate side effects on BullMQ at-least-once delivery.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

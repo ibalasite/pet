@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cicd Pr Gate — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Cicd Pr Gate</p>
+    <h1 class="banner-title">Cicd Pr Gate</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link active" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>PR Gate Workflow (ci.yml)</h1>
+<p>This document details the PR gate workflow defined in <code>.github/workflows/ci.yml</code> for the pixel-pet-arena monorepo. Every pull request targeting <code>main</code> must pass all checks before it is eligible for merge. The gate runs lint, TypeScript type-checking, unit tests, integration tests, Docker builds for all three services, an end-to-end smoke test against the built containers, and a <code>detect-secrets</code> security scan to prevent credential leakage into the repository history.</p>
+<h2>Workflow Trigger and Runner Context</h2>
+<p>The <code>ci.yml</code> workflow triggers on <code>pull_request</code> events targeting <code>main</code> and on direct pushes to <code>main</code>. Jobs run on <code>ubuntu-latest</code> GitHub-hosted runners. The pnpm workspace is bootstrapped with Node.js 20 and the lockfile is used for deterministic installs. A PostgreSQL service container and a Redis service container are started as job services for the integration test job.</p>
+<div class="diagram-container"><pre class="mermaid">flowchart TD
+    PUSH([PR Opened / Pushed\ngithub.event pull_request])
+
+    subgraph LINT_TC [Lint &amp; Type-Check — parallel]
+        LINT[pnpm lint\nESLint across api · player-app · admin-app]
+        TC[pnpm typecheck\ntsc --noEmit all packages]
+    end
+
+    subgraph UNIT [Unit Tests — parallel per package]
+        UNIT_API[api unit tests\nVitest · coverage ≥ 80%]
+        UNIT_PLAYER[player-app unit tests\nVitest · coverage ≥ 80%]
+        UNIT_ADMIN[admin-app unit tests\nVitest · coverage ≥ 80%]
+    end
+
+    subgraph INTEGRATION [Integration Tests]
+        PG_SVC[PostgreSQL 15 service\nlocalhost:5432]
+        REDIS_SVC[Redis 7 service\nlocalhost:6379]
+        SUPABASE_MIG[supabase migration up\napply schema to test DB]
+        INT_API[api integration tests\nFastify inject · DB + Redis]
+    end
+
+    subgraph BUILD [Docker Builds — parallel]
+        BUILD_API[docker build api\nmulti-stage TypeScript compile]
+        BUILD_PLAYER[docker build player-app\nnginx:alpine · port 80]
+        BUILD_ADMIN[docker build admin-app\nnginx:alpine · port 80]
+    end
+
+    E2E[E2E Smoke Tests\nPlaywright against docker-compose stack]
+
+    SEC_SCAN[detect-secrets scan\n--baseline .secrets.baseline\nfail on new secrets]
+
+    RESULT{All checks\npassed?}
+    BLOCK([PR Blocked\nCheck annotations on diff])
+    PASS([PR Gate Passed\nReady for merge])
+
+    PUSH --&gt; LINT_TC
+    LINT_TC --&gt; UNIT
+    UNIT --&gt; INTEGRATION
+    PG_SVC --&gt; SUPABASE_MIG
+    SUPABASE_MIG --&gt; INT_API
+    REDIS_SVC --&gt; INT_API
+    INTEGRATION --&gt; BUILD
+    BUILD --&gt; E2E
+    E2E --&gt; SEC_SCAN
+    SEC_SCAN --&gt; RESULT
+    RESULT -- No --&gt; BLOCK
+    RESULT -- Yes --&gt; PASS
+
+    style BLOCK fill:#e63946,color:#fff
+    style PASS fill:#2a9d8f,color:#fff
+    style RESULT fill:#f0a500,color:#000
+    style SEC_SCAN fill:#457b9d,color:#fff</pre></div>
+<h2>Job Dependency Graph</h2>
+<p>The jobs are structured to maximise parallelism while preserving correctness. Lint and type-check run concurrently in the first wave. Unit tests fan out across the three workspace packages in parallel once the lint/type-check wave succeeds. Integration tests require a clean schema applied via <code>supabase migration up</code> against the PostgreSQL service container. Docker builds fan out after integration tests pass. The E2E smoke test runs after all three images are built and a temporary <code>docker-compose</code> stack is started. The security scan runs last but is non-blocking for unrelated job failures — it only fails the gate if <code>detect-secrets</code> reports new findings not present in <code>.secrets.baseline</code>.</p>
+<div class="diagram-container"><pre class="mermaid">sequenceDiagram
+    participant GH as GitHub Actions Runner
+    participant LINT as ESLint / tsc
+    participant TEST as Vitest (unit + integration)
+    participant DB as PostgreSQL 15 (service)
+    participant REDIS as Redis 7 (service)
+    participant DOCKER as Docker Build
+    participant PW as Playwright Smoke
+    participant DS as detect-secrets
+
+    GH-&gt;&gt;LINT: Run ESLint (all packages)
+    GH-&gt;&gt;LINT: Run tsc --noEmit (all packages)
+    LINT--&gt;&gt;GH: lint OK / fail annotations
+    GH-&gt;&gt;TEST: Run unit tests (api, player-app, admin-app)
+    TEST--&gt;&gt;GH: unit coverage reports
+    GH-&gt;&gt;DB: Start PostgreSQL service container
+    GH-&gt;&gt;REDIS: Start Redis service container
+    DB--&gt;&gt;GH: ready
+    REDIS--&gt;&gt;GH: ready
+    GH-&gt;&gt;DB: supabase migration up
+    DB--&gt;&gt;GH: schema applied
+    GH-&gt;&gt;TEST: Run integration tests (api)
+    TEST--&gt;&gt;GH: integration results
+    GH-&gt;&gt;DOCKER: Build api image (multi-stage)
+    GH-&gt;&gt;DOCKER: Build player-app image (nginx)
+    GH-&gt;&gt;DOCKER: Build admin-app image (nginx)
+    DOCKER--&gt;&gt;GH: images built
+    GH-&gt;&gt;PW: docker-compose up + playwright test
+    PW--&gt;&gt;GH: smoke test results
+    GH-&gt;&gt;DS: detect-secrets scan
+    DS--&gt;&gt;GH: baseline diff result
+    GH--&gt;&gt;GH: Aggregate job results → pass/fail</pre></div>
+<h2>Security Scan Details</h2>
+<p>The <code>detect-secrets</code> scanner runs with <code>--baseline .secrets.baseline</code> so that pre-approved findings are suppressed. Any newly detected high-entropy string, AWS key pattern, GitHub token, or database DSN that does not appear in the baseline causes the job to exit with a non-zero status, blocking the merge. The baseline file is committed to the repository and updated deliberately via <code>detect-secrets scan --baseline .secrets.baseline</code> in a dedicated housekeeping PR. This ensures the PR gate enforces a zero-tolerance policy on newly introduced secrets without penalising developers for existing managed entries.</p>
+<h2>Test Coverage Requirements</h2>
+<p>All three workspace packages are required to meet an 80% line coverage threshold enforced by Vitest&#x27;s built-in coverage reporter. Coverage reports are uploaded as GitHub Actions artifacts and are also reported as PR check annotations. A coverage drop below threshold fails the unit test job and blocks the PR gate.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

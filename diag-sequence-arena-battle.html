@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequence Arena Battle — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Sequence Arena Battle</p>
+    <h1 class="banner-title">Sequence Arena Battle</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link active" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Sequence Diagram — Arena Battle Matchmaking</h1>
+<h2>Overview</h2>
+<p>The arena battle flow handles matchmaking, battle outcome computation, and leaderboard score</p>
+<p>updates. Players enter via <code>POST /api/v1/arena/enter</code> and the server holds a long-poll (HTTP</p>
+<p>long-polling) for up to 30 seconds (<code>arena_matchmaking_timeout_seconds = 30</code>) waiting for an</p>
+<p>opponent. If no opponent is found and the player accepted AI (<code>acceptAI: true</code>), an AI battle is</p>
+<p>resolved immediately. The battle outcome uses a seeded random ±15% modifier</p>
+<p>(<code>arena_battle_outcome_random_modifier_percent = 15</code>) for deterministic replay.</p>
+<p>Two modes are supported:</p>
+<ul><li><strong>RACE</strong> — primary determining stat is <code>stat_speed</code></li><li><strong>SUMO</strong> — primary determining stat is <code>stat_strength</code></li></ul>
+<p>Rate limit: 10 battles/hour per pet by default (<code>arena_rate_limit_battles_per_hour_default = 10</code>),</p>
+<p>admin-tunable between 1 and 50 (<code>arena_rate_limit_admin_min = 1</code>, <code>arena_rate_limit_admin_max = 50</code>).</p>
+<h2>Diagram</h2>
+<div class="diagram-container"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor Player
+    participant PlayerApp as Player App&lt;br/&gt;(React + Phaser.js)
+    participant API as Game API Server&lt;br/&gt;(Fastify)
+    participant Redis
+    participant PG as PostgreSQL
+
+    Note over Player,PG: Pre-flight Checks
+
+    Player-&gt;&gt;PlayerApp: Select mode (RACE / SUMO), click Enter Arena
+    PlayerApp-&gt;&gt;API: POST /api/v1/arena/enter&lt;br/&gt;{ petId, mode, acceptAI }
+    API-&gt;&gt;Redis: GET rl:arena:{pet_id}&lt;br/&gt;(rate limit: 10/hr default — arena_rate_limit_battles_per_hour_default = 10)
+    alt Rate limit exceeded
+        Redis--&gt;&gt;API: count ≥ limit
+        API--&gt;&gt;PlayerApp: HTTP 429 Retry-After header
+        PlayerApp--&gt;&gt;Player: &quot;Battle limit reached. Try again later.&quot;
+    else Within limit
+        API-&gt;&gt;PG: SELECT pets WHERE id = petId AND is_banned = FALSE
+        alt Pet banned
+            PG--&gt;&gt;API: is_banned = TRUE
+            API--&gt;&gt;PlayerApp: HTTP 403 { code: &quot;PET_BANNED&quot; }
+        else Pet allowed
+            PG--&gt;&gt;API: pet stats + active food buffs
+            Note over API: Compute effective stats:&lt;br/&gt;effectiveStat = baseStat + stat_delta (food buff)
+
+            Note over Player,PG: Matchmaking Phase (30 s window — arena_matchmaking_timeout_seconds = 30)
+
+            API-&gt;&gt;Redis: ZADD matchmaking:queue:{mode}&lt;br/&gt;score=enqueue_epoch_ms&lt;br/&gt;member=&quot;{petId}:{epoch}&quot;
+            API-&gt;&gt;Redis: ZPOPMIN matchmaking:queue:{mode}&lt;br/&gt;(atomic pop of oldest entry — SCHEMA §4.2)&lt;br/&gt;discard if age &gt; 45 s (stale, arena_matchmaking_timeout_seconds = 30 + 15 s buffer)
+            alt Opponent found within 30 s (arena_matchmaking_timeout_seconds = 30)
+                Redis--&gt;&gt;API: opponentEntry = &quot;{opponentPetId}:{epoch}&quot;
+                API-&gt;&gt;Redis: ZREM matchmaking:queue:{mode} petEntry
+                API-&gt;&gt;PG: SELECT pets WHERE id = opponentPetId
+                PG--&gt;&gt;API: opponent stats + food buffs
+            else Timeout (30 s — arena_matchmaking_timeout_seconds = 30) — no human opponent
+                Redis--&gt;&gt;API: no match
+                API-&gt;&gt;Redis: ZREM matchmaking:queue:{mode} petEntry
+                alt acceptAI = true
+                    API-&gt;&gt;API: Generate AI opponent stats
+                    Note over API: AI battle proceeds below
+                else acceptAI = false
+                    API--&gt;&gt;PlayerApp: HTTP 408&lt;br/&gt;{ code: &quot;MATCHMAKING_TIMEOUT&quot; }
+                    Note right of API: Rate-limit counter NOT incremented on timeout
+                    PlayerApp--&gt;&gt;Player: &quot;No opponent found. Try AI battle?&quot;
+                end
+            end
+
+            Note over Player,PG: Battle Resolution
+
+            API-&gt;&gt;API: seed = crypto.randomInt()&lt;br/&gt;modifier_a = seed-based ±15%&lt;br/&gt;modifier_b = inversely derived&lt;br/&gt;(arena_battle_outcome_random_modifier_percent = 15)
+            API-&gt;&gt;API: Compute effectiveStatA = baseStat_a × (1 + modifier_a) + stat_delta_a&lt;br/&gt;Compute effectiveStatB = baseStat_b × (1 + modifier_b) + stat_delta_b&lt;br/&gt;winner = higher effective stat&lt;br/&gt;Tie-break: earlier enqueue epoch wins (challenger)
+            API-&gt;&gt;API: duration = random(5, 15) seconds&lt;br/&gt;(arena_match_duration_min_seconds = 5,&lt;br/&gt;arena_match_duration_max_seconds = 15)
+            API-&gt;&gt;API: Build battle_log JSONB event sequence
+
+            Note over Player,PG: Persist Result &amp; Update Score
+
+            API-&gt;&gt;PG: BEGIN TRANSACTION&lt;br/&gt;INSERT INTO arena_matches&lt;br/&gt;(pet_a_id, pet_b_id, is_ai_opponent, mode,&lt;br/&gt;winner_pet_id, random_seed, stat_delta_a,&lt;br/&gt;stat_delta_b, duration_seconds, battle_log)&lt;br/&gt;COMMIT
+            PG--&gt;&gt;API: matchId
+            API-&gt;&gt;Redis: INCR rl:arena:{pet_id} EX 3600&lt;br/&gt;(record battle consumption,&lt;br/&gt;TTL = 3600 s — arena_rate_limit_counter_window_hours = 1)
+            alt PvP match (is_ai_opponent = false)
+                API-&gt;&gt;Redis: MULTI&lt;br/&gt;ZADD leaderboard:global score=winnerNewScore member=winnerPetId&lt;br/&gt;ZADD leaderboard:global score=loserNewScore member=loserPetId&lt;br/&gt;EXEC&lt;br/&gt;(both ZADDs in MULTI/EXEC pipeline for atomicity)
+            else AI match (is_ai_opponent = true)
+                API-&gt;&gt;Redis: ZADD leaderboard:global&lt;br/&gt;score=newLeaderboardScore member=petId&lt;br/&gt;(player&#x27;s pet only — no AI synthetic entry)
+            end
+            Note right of Redis: Update lag ≤ 30 s&lt;br/&gt;(leaderboard_update_lag_max_seconds = 30)
+
+            Note over Player,PG: Animate &amp; Display Result
+
+            API--&gt;&gt;PlayerApp: HTTP 200&lt;br/&gt;{ matchId, result: WIN|LOSS,&lt;br/&gt;opponentPetId, isAiOpponent,&lt;br/&gt;statDelta, newLeaderboardScore }
+            PlayerApp-&gt;&gt;PlayerApp: Launch Phaser.js BattleAnimation&lt;br/&gt;(5–15 s animation window)
+            PlayerApp--&gt;&gt;Player: Show BattleResultCard (WIN / LOSS variant)
+            Note right of PlayerApp: Battle records page shows last 20&lt;br/&gt;(arena_battle_records_display_count = 20)
+        end
+    end
+
+    Note over Player,PG: Bot Detection (Background)
+
+    Note right of Redis: Bot detection: &gt; 50 battles in 60-min window&lt;br/&gt;(bot_detection_battles_threshold = 50,&lt;br/&gt;bot_detection_window_minutes = 60)&lt;br/&gt;triggers admin suspicious-activity flag</pre></div>
+<h2>Notes</h2>
+<ul><li><strong>Matchmaking pop</strong>: <code>ZPOPMIN matchmaking:queue:{mode}</code> atomically pops the oldest entry</li></ul>
+<p>(SCHEMA §4.2). If the popped entry is stale (age &gt; ~45 s = <code>arena_matchmaking_timeout_seconds = 30</code></p>
+<ul><li style="margin-left:1.0rem">15 s buffer), it is silently discarded and the consumer retries. Entry format:</li></ul>
+<p><code>&quot;{petId}:{enqueue_epoch_ms}&quot;</code>.</p>
+<ul><li><strong>Rate limit not incremented on timeout</strong>: If matchmaking times out without finding an opponent,</li></ul>
+<p>the battle counter <code>rl:arena:{pet_id}</code> is NOT incremented, so the player does not lose a</p>
+<p>battle slot for a failed queue attempt.</p>
+<ul><li><strong>AI opponent</strong>: When <code>acceptAI: true</code> and no human is found, the AI opponent is synthesized in</li></ul>
+<p>memory; no <code>pet_b_id</code> row is written — <code>is_ai_opponent = TRUE</code> and <code>pet_b_id = NULL</code> in</p>
+<p><code>arena_matches</code>.</p>
+<ul><li><strong>Dual leaderboard ZADD for PvP</strong>: After a human-vs-human battle, both winner and loser scores</li></ul>
+<p>are updated via a Redis MULTI/EXEC pipeline (`ZADD leaderboard:global score=winnerNewScore</p>
+<p>member=winnerPetId<code> + </code>ZADD leaderboard:global score=loserNewScore member=loserPetId`) for</p>
+<p>atomicity. For AI matches (<code>is_ai_opponent = true</code>), only the requesting player&#x27;s pet receives a</p>
+<p>ZADD — no synthetic AI entry is written.</p>
+<ul><li><strong>Leaderboard score formula</strong>: <code>win_rate × battles_played × level_multiplier</code> (ARCH P2). The</li></ul>
+<p>Redis sorted set (<code>leaderboard:global</code>) is authoritative; PostgreSQL <code>leaderboard_snapshots</code> is</p>
+<p>the durable backup, retaining top 500 entries (<code>leaderboard_snapshot_retention_top_n = 500</code>).</p>
+<ul><li><strong>Banned pet leaderboard removal</strong>: When a pet is banned, <code>ZREM leaderboard:global petId</code> is</li></ul>
+<p>called within 5 minutes (<code>leaderboard_ban_reflection_time_minutes = 5</code>).</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

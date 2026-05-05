@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Moderation Prototype — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › prototype/ › Admin Moderation Prototype</p>
+    <h1 class="banner-title">prototype/ › Admin Moderation Prototype</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details open>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link active" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Admin Moderation Prototype Specification</h1>
+<h2>Overview</h2>
+<p>The Admin Moderation screens live in the Vue 3 + Element Plus admin portal running on port 5174. They are accessible only after a successful TOTP login, which sets a Redis-backed session cookie. The portal exposes three primary moderation surfaces: a Pet Management table for banning problematic pets, a Suspicious Battles panel for reviewing potentially cheated matches, and a GDPR Erasure workflow for processing right-to-erasure requests. Role-based visibility gates certain destructive actions to <code>superadmin</code> users only, while <code>moderator</code> users see read-only or limited-action views of the same data.</p>
+<hr>
+<h2>Screen 1 — Pet Management Table</h2>
+<p>The Pet Management table is the default landing screen after login. It shows all registered pets across the platform with support for pagination, free-text search, type filtering, and ban/unban actions.</p>
+<pre><code class="">┌────────────────────────────────────────────────────────────────────┐
+│  pixel-pet-arena Admin                          [admin@arena ▾]    │
+├──────────────┬─────────────────────────────────────────────────────┤
+│  Pets        │  Pet Management                                      │
+│  Battles     │                                                      │
+│  GDPR        │  Search: [________________]  Type: [All ▾]  [Filter]│
+│  Settings    │                                                      │
+│              │  ┌──────┬──────────┬──────┬───────┬────────────────┐│
+│              │  │ ID   │ Name     │ Lvl  │ Owner │ Status  Action ││
+│              │  ├──────┼──────────┼──────┼───────┼────────────────┤│
+│              │  │abc12 │ Blazekin │  12  │ user1 │ Active  [Ban]  ││
+│              │  │volt4 │ Voltclaw │  11  │ user2 │ Active  [Ban]  ││
+│              │  │emb99 │ Emberfang│  13  │ user3 │ BANNED  [Unban]││
+│              │  └──────┴──────────┴──────┴───────┴────────────────┘│
+│              │                                                      │
+│              │  Showing 3 of 1,204 pets  [&lt; 1  2  3 ... 101 &gt;]     │
+└──────────────┴─────────────────────────────────────────────────────┘</code></pre>
+<p>The table is built with the <code>el-table</code> component from Element Plus, using server-side pagination (<code>el-pagination</code> component configured with <code>layout=&quot;prev, pager, next, total&quot;</code>). The search field debounces 300 ms before dispatching <code>GET /api/v1/admin/pets</code>. The <strong>Type</strong> dropdown maps to the <code>type</code> query param (<code>Fire</code>, <code>Water</code>, <code>Electric</code>, etc.). Each row&#x27;s Status badge uses <code>el-tag</code> with <code>type=&quot;success&quot;</code> for Active and <code>type=&quot;danger&quot;</code> for Banned.</p>
+<h3>API Call — GET /api/v1/admin/pets</h3>
+<pre><code class="">GET /api/v1/admin/pets?page=1&amp;limit=20&amp;search=blaze&amp;type=Fire
+Cookie: session=&lt;redis-session-token&gt;
+
+Response 200:
+{
+  &quot;pets&quot;: [
+    {
+      &quot;id&quot;: &quot;pet_abc123&quot;,
+      &quot;name&quot;: &quot;Blazekin&quot;,
+      &quot;level&quot;: 12,
+      &quot;type&quot;: &quot;Fire&quot;,
+      &quot;ownerId&quot;: &quot;user_001&quot;,
+      &quot;ownerUsername&quot;: &quot;dragonfly&quot;,
+      &quot;status&quot;: &quot;active&quot;,
+      &quot;bannedAt&quot;: null,
+      &quot;bannedReason&quot;: null
+    }
+  ],
+  &quot;total&quot;: 1204,
+  &quot;page&quot;: 1,
+  &quot;limit&quot;: 20
+}</code></pre>
+<h3>Ban / Unban Action</h3>
+<p>Clicking <strong>Ban</strong> opens an <code>el-dialog</code> confirmation modal that requires the moderator to enter a ban reason (minimum 10 characters, validated client-side before submission). On confirm, <code>PUT /api/v1/admin/pets/:id/ban</code> is called with <code>{ &quot;reason&quot;: &quot;...&quot; }</code>. On success the row status badge updates optimistically. <code>superadmin</code> users also see a <strong>Permanent Ban</strong> checkbox in the dialog that sets <code>{ &quot;permanent&quot;: true }</code> in the request body; moderators see only the standard time-limited ban form.</p>
+<p><strong>Unban</strong> triggers a simpler <code>el-popconfirm</code> inline confirmation with the text &quot;Restore this pet to active status?&quot; before calling <code>DELETE /api/v1/admin/pets/:id/ban</code>, which lifts the ban and returns the pet to active status. Using a dedicated endpoint keeps the ban and unban operations semantically distinct and easier to audit in server logs.</p>
+<hr>
+<h2>Screen 2 — Suspicious Battles Panel</h2>
+<p>The Suspicious Battles panel surfaces battle records that the server&#x27;s anomaly detection has flagged as potentially manipulated. Each flagged battle has a computed suspicion score (0–100). Moderators can review and clear flags; superadmins can additionally void a battle and roll back the associated XP changes.</p>
+<pre><code class="">┌────────────────────────────────────────────────────────────────────┐
+│  Suspicious Battles                         Refresh  [Auto ▾]      │
+│                                                                     │
+│  Filter: Score ≥ [70__]  Status: [Pending ▾]   [Apply]            │
+│                                                                     │
+│  ┌──────────┬──────────────┬──────┬──────────┬────────────────────┐│
+│  │ Battle ID│ Participants │ Mode │ Score    │ Actions            ││
+│  ├──────────┼──────────────┼──────┼──────────┼────────────────────┤│
+│  │ btl_001  │ Blazekin vs  │ Sumo │ 94 ████▓ │ [Review] [Void]   ││
+│  │          │ Emberfang    │      │          │  (superadmin only) ││
+│  ├──────────┼──────────────┼──────┼──────────┼────────────────────┤│
+│  │ btl_002  │ Voltclaw vs  │ Race │ 72 ███░░ │ [Review]           ││
+│  │          │ Tidecrest    │      │          │                    ││
+│  └──────────┴──────────────┴──────┴──────────┴────────────────────┘│
+│                                                                     │
+│  12 flagged battles pending review                                  │
+└────────────────────────────────────────────────────────────────────┘</code></pre>
+<p>The suspicion score renders as a colored <code>el-progress</code> bar: green (0–49), amber (50–79), red (80–100). Clicking <strong>Review</strong> opens a side drawer (<code>el-drawer</code> direction=&quot;rtl&quot;) showing the full <code>battleLog</code> array in a timeline format built with <code>el-timeline</code>. The reviewer can mark the battle as &quot;Cleared — False Positive&quot; or &quot;Confirmed Suspicious&quot; using radio buttons in the drawer footer, which calls <code>PUT /api/v1/admin/battles/:id/review</code> with <code>{ &quot;verdict&quot;: &quot;cleared&quot; | &quot;confirmed&quot; }</code>. The <strong>Void</strong> action is only rendered in the DOM for <code>superadmin</code> role sessions via <code>v-if=&quot;isSuperadmin&quot;</code> — <code>moderator</code> sessions never receive the button, avoiding reliance on CSS-only hiding for security-sensitive actions. Void calls <code>DELETE /api/v1/admin/battles/:id</code> which rolls back all XP changes for both participants and marks the battle record as voided.</p>
+<h3>API Calls</h3>
+<pre><code class="">GET /api/v1/admin/battles/suspicious?minScore=70&amp;status=pending&amp;page=1&amp;limit=20
+Cookie: session=&lt;redis-session-token&gt;
+
+Response 200:
+{
+  &quot;battles&quot;: [
+    {
+      &quot;id&quot;: &quot;battle_btl001&quot;,
+      &quot;mode&quot;: &quot;sumo&quot;,
+      &quot;participants&quot;: [
+        { &quot;petId&quot;: &quot;pet_abc123&quot;, &quot;name&quot;: &quot;Blazekin&quot; },
+        { &quot;petId&quot;: &quot;pet_emb99&quot;,  &quot;name&quot;: &quot;Emberfang&quot; }
+      ],
+      &quot;suspicionScore&quot;: 94,
+      &quot;flagReasons&quot;: [&quot;abnormal_damage_variance&quot;, &quot;frame_timing_anomaly&quot;],
+      &quot;status&quot;: &quot;pending&quot;,
+      &quot;foughtAt&quot;: &quot;2026-05-04T06:30:00Z&quot;
+    }
+  ],
+  &quot;total&quot;: 12
+}</code></pre>
+<p>Auto-refresh uses a 30-second polling interval driven by <code>setInterval</code> in the Vue <code>onMounted</code> hook, cleared in <code>onUnmounted</code>. The interval can be disabled via the <strong>Auto</strong> dropdown which switches between Off / 30 s / 60 s. A WebSocket upgrade path is noted for future implementation — connecting to <code>ws://localhost:3000/admin/battles/stream</code> would push new flagged battles in real time without polling.</p>
+<hr>
+<h2>Screen 3 — GDPR Erasure Workflow</h2>
+<p>The GDPR Erasure screen provides a structured, auditable multi-step form for processing Article 17 right-to-erasure requests. Only <code>superadmin</code> users can access this section. <code>moderator</code> sessions never reach this screen: the left nav item is absent entirely (rendered with <code>v-if=&quot;isSuperadmin&quot;</code>), and the Vue Router <code>beforeEach</code> guard redirects any direct <code>/gdpr</code> navigation back to the dashboard before the component mounts.</p>
+<pre><code class="">┌────────────────────────────────────────────────────────────────────┐
+│  GDPR Erasure                                                       │
+│                                                                     │
+│  Step 1 of 3: Find User                                            │
+│  ●──────────────○──────────────○                                   │
+│                                                                     │
+│  Search by:  ○ Username  ● Email                                   │
+│  Email: [user@example.com_________________]   [Search]             │
+│                                                                     │
+│  Results:                                                           │
+│  ┌────────────────────────────────────────────────────────────┐    │
+│  │  user_001  ·  dragonfly  ·  dragonfly@example.com          │    │
+│  │  Registered: 2025-01-15  ·  Pets: 2  ·  Battles: 87  [✓]  │    │
+│  └────────────────────────────────────────────────────────────┘    │
+│                                                                     │
+│  [Next →]                                                           │
+└────────────────────────────────────────────────────────────────────┘</code></pre>
+<p>The workflow is a three-step <code>el-steps</code> component:</p>
+<p><strong>Step 1 — Find User:</strong> Free-text search against username or email. Returns a single matched user record with summary stats. The admin selects the target user and advances.</p>
+<p><strong>Step 2 — Confirm Scope:</strong> A checklist (<code>el-checkbox-group</code>) shows what will be erased: account credentials, pet records, battle history, leaderboard entries. All checkboxes are pre-ticked and non-interactive (erasure is always full scope to comply with GDPR completeness requirements). A mandatory text input requires the admin to type the user&#x27;s email address verbatim as a deliberate confirmation step — the <strong>Confirm Erasure</strong> button remains disabled until the typed email exactly matches the selected user record.</p>
+<p><strong>Step 3 — Erasure Receipt:</strong> After <code>DELETE /api/v1/admin/users/:id/gdpr-erase</code> returns 202 Accepted, the screen shows a non-dismissible confirmation panel displaying the erasure job ID, timestamp, and the admin&#x27;s session username for audit log purposes. Erasure is processed asynchronously via the <code>ppa:jobs:gdpr-erasure</code> BullMQ queue — the 202 response confirms the job has been enqueued, not that deletion is already complete. The admin can print or copy this receipt. No navigation away from this screen is possible until the receipt is acknowledged.</p>
+<h3>API Call — DELETE /api/v1/admin/users/:id/gdpr-erase</h3>
+<pre><code class="">DELETE /api/v1/admin/users/user_001/gdpr-erase
+Cookie: session=&lt;redis-session-token&gt;
+Content-Type: application/json
+
+{
+  &quot;confirmationEmail&quot;: &quot;dragonfly@example.com&quot;,
+  &quot;requestReference&quot;: &quot;GDPR-2026-0504-001&quot;
+}
+
+Response 202:
+{
+  &quot;jobId&quot;: &quot;erasure_abc789&quot;,
+  &quot;enqueuedAt&quot;: &quot;2026-05-04T10:45:00Z&quot;,
+  &quot;adminUsername&quot;: &quot;admin@arena&quot;,
+  &quot;userId&quot;: &quot;user_001&quot;,
+  &quot;status&quot;: &quot;queued&quot;,
+  &quot;queue&quot;: &quot;ppa:jobs:gdpr-erasure&quot;
+}</code></pre>
+<p>If the user has outstanding marketplace listings (when <code>FF_MARKETPLACE</code> becomes <code>true</code>) the API will return <code>409 Conflict</code> with a <code>pendingListings</code> field. The erasure workflow will surface a blocking warning at Step 2 instructing the admin to first cancel all listings through the Marketplace admin screen before retrying erasure.</p>
+<hr>
+<h2>Component Reuse Patterns</h2>
+<p>The admin portal uses Element Plus consistently across all three screens to ensure visual coherence and reduce custom CSS surface area.</p>
+<table>
+<tr><th>Pattern</th><th>Element Plus Component</th><th>Usage</th></tr>
+<tr><td>Data tables</td><td><code>el-table</code> + <code>el-table-column</code></td><td>Pet list, suspicious battles list</td></tr>
+<tr><td>Pagination</td><td><code>el-pagination</code></td><td>All paginated tables</td></tr>
+<tr><td>Search input</td><td><code>el-input</code> with <code>prefix-icon</code></td><td>Pet search, GDPR user search</td></tr>
+<tr><td>Dropdown filter</td><td><code>el-select</code> + <code>el-option</code></td><td>Type filter, status filter</td></tr>
+<tr><td>Confirm dialogs</td><td><code>el-dialog</code> (rich) or <code>el-popconfirm</code> (inline)</td><td>Ban reason, void battle</td></tr>
+<tr><td>Side detail view</td><td><code>el-drawer</code></td><td>Battle log review</td></tr>
+<tr><td>Multi-step form</td><td><code>el-steps</code> + <code>el-step</code></td><td>GDPR erasure flow</td></tr>
+<tr><td>Notifications</td><td><code>ElMessage.success/error</code></td><td>Post-action feedback toasts</td></tr>
+<tr><td>Role badges</td><td><code>el-tag</code></td><td>Status indicators, role chips</td></tr>
+<tr><td>Progress</td><td><code>el-progress</code></td><td>Suspicion score visualization</td></tr>
+</table>
+<p>All tables share a composable <code>useAdminTable</code> that wraps pagination state (<code>currentPage</code>, <code>pageSize</code>, <code>total</code>), loading state, and the generic fetch function. This composable is injected into each screen&#x27;s <code>setup()</code> function, keeping page components lean and the pagination logic DRY. The <code>el-table</code> <code>row-class-name</code> prop is used on the Pet Management table to apply a <code>.row--banned</code> CSS class for banned pets (desaturated row background), and <code>.row--high-suspicion</code> on the battles table for scores above 80.</p>
+<hr>
+<h2>Authorization Gating</h2>
+<p>Role enforcement is layered at two levels. The Vue Router <code>beforeEach</code> guard reads the <code>role</code> field from the Pinia <code>adminSession</code> store (populated from the <code>POST /api/v1/admin/auth/login</code> response after successful TOTP verification — the httpOnly session cookie is inaccessible to JavaScript by design) and redirects <code>moderator</code> users away from the <code>/gdpr</code> route entirely. Within permitted screens, individual action buttons check a <code>useAdminSession</code> composable that exposes <code>isSuperadmin: boolean</code>. Destructive controls (Permanent Ban checkbox, Void Battle button, GDPR nav item) are conditionally rendered with <code>v-if=&quot;isSuperadmin&quot;</code> rather than <code>v-show</code> to ensure the elements are not present in the DOM for moderator sessions, preventing any client-side bypass. The Fastify API enforces the same role check independently on every request using the Redis session data, so frontend-only role checks are treated as UX improvements rather than security boundaries.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequence Claim Flow — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Sequence Claim Flow</p>
+    <h1 class="banner-title">Sequence Claim Flow</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link active" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Sequence Diagram — Pet Claim Email OTP Flow</h1>
+<h2>Overview</h2>
+<p>The claim flow is the identity foundation of pixel-pet-arena. Because there are no traditional user</p>
+<p>accounts, a 6-digit email OTP (<code>claim_code_digits = 6</code>) is the only mechanism by which a player</p>
+<p>takes ownership of a pet. On successful verification the server issues a 32-byte URL-safe Base64</p>
+<p>token (<code>pet_access_token_min_bytes = 32</code>) that becomes the player&#x27;s permanent credential — stored</p>
+<p>only as a SHA-256 hash in <code>pets.owner_token_hash</code>. The raw token is transmitted exactly once and</p>
+<p>must be bookmarked by the player.</p>
+<p>This diagram covers:</p>
+<ol><li>Guest arrives and gets a random pet displayed (GET /api/v1/pets/random).</li><li>Player initiates the claim (POST /api/v1/claim).</li><li>Player enters the OTP (POST /api/v1/claim/verify).</li><li>Token recovery via POST /api/v1/claim/recover follows the same verify path.</li></ol>
+<h2>Diagram</h2>
+<div class="diagram-container"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor Player
+    participant PlayerApp as Player App&lt;br/&gt;(React + Phaser.js)
+    participant API as Game API Server&lt;br/&gt;(Fastify)
+    participant Redis
+    participant PG as PostgreSQL
+    participant Email as Email Service&lt;br/&gt;(SendGrid / Nodemailer)
+
+    Note over Player,Email: Phase 1 — Guest Preview
+
+    Player-&gt;&gt;PlayerApp: Visit landing page
+    PlayerApp-&gt;&gt;API: GET /api/v1/pets/random
+    API-&gt;&gt;PG: INSERT INTO pets (seed, rarity, generation_meta,&lt;br/&gt;reserved_until = NOW()+24h (pet_reservation_ttl_hours = 24))
+    PG--&gt;&gt;API: petId, seed, rarity, stats
+    API--&gt;&gt;PlayerApp: { petId, seed, rarity, petName, stats, reservedUntil }
+    PlayerApp-&gt;&gt;Player: Render Phaser.js 32×32 px sprite&lt;br/&gt;(sprite_resolution_px = 32)&lt;br/&gt;Show RarityBadge + ClaimCTA
+
+    Note over Player,Email: Phase 2 — Claim Initiation (POST /api/v1/claim)
+
+    Player-&gt;&gt;PlayerApp: Enter email, check age confirmation
+    PlayerApp-&gt;&gt;API: POST /api/v1/claim&lt;br/&gt;{ email, petId, ageConfirmed: true }
+    API-&gt;&gt;Redis: INCR rl:claim:{email_hash} TTL=3600s&lt;br/&gt;(limit: 5 attempts/hr — auth_rate_limit_claim_attempts_per_hour = 5)
+    alt Rate limit exceeded
+        Redis--&gt;&gt;API: count &gt; 5 (auth_rate_limit_claim_attempts_per_hour = 5)
+        API-&gt;&gt;Redis: SET rl:claim:cooldown:{email_hash} TTL=60s&lt;br/&gt;(claim_email_retry_cooldown_seconds = 60)
+        API--&gt;&gt;PlayerApp: HTTP 429 Retry-After: 60&lt;br/&gt;(claim_email_retry_cooldown_seconds = 60)
+        PlayerApp--&gt;&gt;Player: &quot;Too many attempts. Try again in 60 s.&quot;&lt;br/&gt;(claim_email_retry_cooldown_seconds = 60)
+    else Within limit
+        Redis--&gt;&gt;API: count ≤ 5 (auth_rate_limit_claim_attempts_per_hour = 5)
+        API-&gt;&gt;PG: SELECT owner_token_hash FROM pets WHERE id = petId
+        alt Pet already claimed
+            PG--&gt;&gt;API: owner_token_hash IS NOT NULL
+            API--&gt;&gt;PlayerApp: HTTP 400 { code: &quot;ALREADY_CLAIMED&quot; }
+        else Pet unclaimed
+            PG--&gt;&gt;API: owner_token_hash IS NULL
+            API-&gt;&gt;API: code = crypto.randomInt(100000, 1000000)&lt;br/&gt;code_hash = SHA-256(code)&lt;br/&gt;expires_at = NOW() + 15 min (claim_code_expiry_minutes = 15)
+            API-&gt;&gt;PG: INSERT INTO claim_codes&lt;br/&gt;(pet_id, email_hash, code_hash, expires_at)
+            PG--&gt;&gt;API: claimId
+            API-&gt;&gt;Email: sendClaimCode(to: email, code, petName)
+            Email--&gt;&gt;API: delivered (or failover to Nodemailer after 3 failures&lt;br/&gt;sendgrid_failover_consecutive_failures = 3)
+            API--&gt;&gt;PlayerApp: HTTP 200 { claimId, expiresAt }
+            PlayerApp--&gt;&gt;Player: Show 6-digit code entry form&lt;br/&gt;Display 15-min countdown timer&lt;br/&gt;(claim_code_expiry_minutes = 15)
+        end
+    end
+
+    Note over Player,Email: Phase 3 — OTP Verification (POST /api/v1/claim/verify)
+
+    Player-&gt;&gt;PlayerApp: Enter 6-digit OTP code
+    PlayerApp-&gt;&gt;API: POST /api/v1/claim/verify&lt;br/&gt;{ claimId, code }
+    API-&gt;&gt;Redis: INCR rl:code_entry:{session_id} TTL=900s&lt;br/&gt;(limit: 10 — auth_rate_limit_code_entry_attempts_per_session = 10)
+    alt Code entry limit exceeded (fail-closed)
+        Redis--&gt;&gt;API: count &gt; 10 OR Redis unavailable&lt;br/&gt;(auth_rate_limit_code_entry_attempts_per_session = 10)
+        API-&gt;&gt;Redis: SET rl:code_entry:cooldown:{session_id} TTL=60s&lt;br/&gt;(claim_email_retry_cooldown_seconds = 60)
+        API--&gt;&gt;PlayerApp: HTTP 429 { code: &quot;MAX_ATTEMPTS_REACHED&quot; }
+    else Within limit
+        API-&gt;&gt;PG: SELECT * FROM claim_codes&lt;br/&gt;WHERE id = claimId AND expires_at &gt; NOW()
+        alt Code not found or expired
+            PG--&gt;&gt;API: no row
+            API--&gt;&gt;PlayerApp: HTTP 400 { code: &quot;CODE_EXPIRED&quot; }
+        else Code found
+            PG--&gt;&gt;API: code_hash, email_hash, pet_id
+            API-&gt;&gt;API: Verify SHA-256(code) == stored code_hash
+            alt Code invalid
+                API-&gt;&gt;PG: UPDATE claim_codes SET attempts = attempts + 1
+                API--&gt;&gt;PlayerApp: HTTP 400 { code: &quot;INVALID_CODE&quot; }
+            else Code valid
+                API-&gt;&gt;API: petToken = crypto.randomBytes(32) base64url&lt;br/&gt;(pet_access_token_min_bytes = 32)&lt;br/&gt;tokenHash = SHA-256(petToken)
+                API-&gt;&gt;PG: BEGIN TRANSACTION&lt;br/&gt;UPSERT claim_identities (email_hash, email_encrypted)&lt;br/&gt;  ON CONFLICT (email_hash)&lt;br/&gt;  DO UPDATE SET email_encrypted = EXCLUDED.email_encrypted&lt;br/&gt;  RETURNING id → identityId&lt;br/&gt;UPDATE pets SET owner_token_hash = tokenHash,&lt;br/&gt;  claimed_at = NOW(), reserved_until = NULL,&lt;br/&gt;  claim_identity_id = identityId&lt;br/&gt;UPDATE claim_codes SET used_at = NOW()&lt;br/&gt;COMMIT
+                PG--&gt;&gt;API: updated
+                API-&gt;&gt;Redis: DEL rl:code_entry:{session_id}
+                API--&gt;&gt;PlayerApp: HTTP 200&lt;br/&gt;{ petToken, petId, petUrl }
+                PlayerApp--&gt;&gt;Player: URLReveal component&lt;br/&gt;&quot;Bookmark this URL — it is your only access key&quot;
+            end
+        end
+    end
+
+    Note over Player,Email: Background — Cleanup Jobs
+
+    Note right of PG: Claim codes purged 72h after creation or&lt;br/&gt;first use, whichever is LATER (claim_token_cleanup_ttl_hours = 72)
+    Note right of PG: Unclaimed pets deleted every 6h where&lt;br/&gt;reserved_until &lt; NOW() AND owner_token_hash IS NULL&lt;br/&gt;(pet_reservation_ttl_hours = 24)</pre></div>
+<h2>Notes</h2>
+<ul><li><strong>Fail-closed on Redis unavailability</strong>: OTP code entry (<code>rl:code_entry:{session_id}</code>) is</li></ul>
+<p>fail-closed — if Redis is unreachable, the verify endpoint returns HTTP 429 rather than allowing</p>
+<p>brute-force bypass (ARCH P5).</p>
+<ul><li><strong>Anti-enumeration</strong>: <code>POST /api/v1/claim/recover</code> always returns HTTP 200 with a <code>claimId</code></li></ul>
+<p>regardless of whether the email/petId match, preventing email enumeration. The <code>claimId</code> is</p>
+<p>functional only when the combination matches a claimed pet.</p>
+<ul><li><strong>Token transmission</strong>: <code>petToken</code> is transmitted exactly once in the HTTP 200 response body.</li></ul>
+<p>The server stores only <code>SHA-256(petToken)</code> in <code>pets.owner_token_hash</code>. A lost token requires</p>
+<p>the recovery flow.</p>
+<ul><li><strong>Email OTP expiry warning</strong>: The UI displays an accessibility warning at 2 minutes remaining</li></ul>
+<p>(<code>a11y_claim_code_warning_before_expiry_minutes = 2</code>) using an <code>aria-live</code> region.</p>
+<ul><li><strong>GDPR</strong>: Raw email is never written to the database. Only <code>email_hash</code> (SHA-256 of lowercased</li></ul>
+<p>email) and <code>email_encrypted</code> (AES-256-GCM) are persisted in <code>claim_identities</code>.</p></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

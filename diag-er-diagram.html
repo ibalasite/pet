@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ER 關聯圖 — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › ER 關聯圖</p>
+    <h1 class="banner-title">ER 關聯圖</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link active" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Entity-Relationship Diagram — pixel-pet-arena</h1>
+<h2>Overview</h2>
+<p>This ER diagram covers all 12 PostgreSQL tables defined in SCHEMA.md §2, plus the Redis key-space</p>
+<p>structures defined in EDD §4.8 (shown as notes). Tables are grouped by domain:</p>
+<ul><li><strong>Identity &amp; Auth</strong>: <code>claim_identities</code>, <code>claim_codes</code>, <code>admin_accounts</code></li><li><strong>Pet Core</strong>: <code>pets</code>, <code>training_logs</code>, <code>food_buffs</code></li><li><strong>Arena</strong>: <code>arena_matches</code></li><li><strong>Leaderboard</strong>: <code>leaderboard_snapshots</code></li><li><strong>Marketplace (Phase 3 / FF_MARKETPLACE)</strong>: <code>marketplace_listings</code>, <code>marketplace_transactions</code></li><li><strong>Governance</strong>: <code>admin_audit_log</code>, <code>gdpr_requests</code></li></ul>
+<p>All IDs are UUID (<code>gen_random_uuid()</code>) except <code>admin_audit_log.id</code> which is <code>BIGSERIAL</code> for</p>
+<p>monotonic ordering. All timestamps are <code>TIMESTAMPTZ</code>.</p>
+<h2>Diagram</h2>
+<div class="diagram-container"><pre class="mermaid">erDiagram
+    claim_identities {
+        UUID id PK
+        VARCHAR_64 email_hash UK
+        BYTEA email_encrypted
+        TIMESTAMPTZ deletion_requested_at
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    pets {
+        UUID id PK
+        BIGINT seed UK
+        rarity_enum rarity
+        VARCHAR_64 pet_name
+        SMALLINT stat_speed
+        SMALLINT stat_strength
+        SMALLINT stat_stamina
+        SMALLINT level
+        INTEGER total_training_actions
+        TIMESTAMPTZ last_trained_at
+        VARCHAR_64 owner_token_hash
+        TIMESTAMPTZ claimed_at
+        UUID claim_identity_id FK
+        TIMESTAMPTZ reserved_until
+        BOOLEAN is_banned
+        TEXT banned_reason
+        TIMESTAMPTZ banned_at
+        JSONB generation_meta
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    claim_codes {
+        UUID id PK
+        UUID pet_id FK
+        VARCHAR_64 email_hash
+        VARCHAR_64 code_hash
+        TIMESTAMPTZ expires_at
+        TIMESTAMPTZ used_at
+        SMALLINT attempts
+        TIMESTAMPTZ created_at
+    }
+
+    training_logs {
+        UUID id PK
+        UUID pet_id FK
+        training_type_enum training_type
+        SMALLINT stat_delta
+        SMALLINT stat_after
+        TIMESTAMPTZ completed_at
+    }
+
+    food_buffs {
+        UUID id PK
+        UUID pet_id FK
+        VARCHAR_50 food_type
+        buff_stat_enum buff_stat
+        SMALLINT magnitude
+        BOOLEAN is_permanent
+        TIMESTAMPTZ expires_at
+        TIMESTAMPTZ consumed_at
+        TIMESTAMPTZ record_expires_at
+    }
+
+    arena_matches {
+        UUID id PK
+        UUID pet_a_id FK
+        UUID pet_b_id FK
+        BOOLEAN is_ai_opponent
+        arena_mode_enum mode
+        UUID winner_pet_id FK
+        BIGINT random_seed
+        SMALLINT stat_delta_a
+        SMALLINT stat_delta_b
+        SMALLINT duration_seconds
+        JSONB battle_log
+        BOOLEAN is_flagged
+        TIMESTAMPTZ flagged_at
+        TIMESTAMPTZ completed_at
+        TIMESTAMPTZ updated_at
+    }
+
+    leaderboard_snapshots {
+        UUID id PK
+        TIMESTAMPTZ snapshot_time
+        JSONB entries
+        TIMESTAMPTZ created_at
+    }
+
+    marketplace_listings {
+        UUID id PK
+        UUID pet_id FK
+        VARCHAR_64 seller_token_hash
+        INTEGER price_credits
+        listing_status_enum status
+        TIMESTAMPTZ listed_at
+        TIMESTAMPTZ expires_at
+        TIMESTAMPTZ completed_at
+        TIMESTAMPTZ updated_at
+    }
+
+    marketplace_transactions {
+        UUID id PK
+        UUID listing_id FK, UK
+        UUID pet_id FK
+        VARCHAR_64 seller_token_hash
+        VARCHAR_64 buyer_token_hash
+        INTEGER price_credits
+        INTEGER fee_credits
+        TIMESTAMPTZ listed_at
+        TIMESTAMPTZ completed_at
+    }
+
+    admin_accounts {
+        UUID id PK
+        VARCHAR_64 username UK
+        TEXT password_hash
+        TEXT totp_secret_encrypted
+        JSONB totp_backup_codes_hash
+        admin_role_enum role
+        TIMESTAMPTZ last_login_at
+        SMALLINT failed_attempts
+        TIMESTAMPTZ locked_until
+        TIMESTAMPTZ deactivated_at
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    admin_audit_log {
+        BIGSERIAL id PK
+        UUID admin_id FK
+        VARCHAR_128 action
+        VARCHAR_64 target_type
+        TEXT target_id
+        JSONB detail
+        VARCHAR_64 ip_address_hash
+        TIMESTAMPTZ created_at
+    }
+
+    gdpr_requests {
+        UUID id PK
+        UUID claim_identity_id FK
+        UUID initiating_pet_id FK
+        gdpr_request_type_enum request_type
+        gdpr_request_status_enum status
+        TIMESTAMPTZ submitted_at
+        TIMESTAMPTZ completed_at
+        TIMESTAMPTZ updated_at
+        TEXT admin_notes
+    }
+
+    %% Relationships
+    claim_identities ||--o{ pets : &quot;claim_identity_id (SET NULL)&quot;
+    claim_identities ||--o{ gdpr_requests : &quot;claim_identity_id (RESTRICT)&quot;
+
+    pets ||--o{ claim_codes : &quot;pet_id (CASCADE)&quot;
+    pets ||--o{ training_logs : &quot;pet_id (CASCADE)&quot;
+    pets ||--o{ food_buffs : &quot;pet_id (CASCADE)&quot;
+    pets ||--o{ arena_matches : &quot;pet_a_id (RESTRICT)&quot;
+    pets |o--o{ arena_matches : &quot;pet_b_id (SET NULL)&quot;
+    pets |o--o{ arena_matches : &quot;winner_pet_id (SET NULL)&quot;
+    pets ||--o{ marketplace_listings : &quot;pet_id (RESTRICT)&quot;
+    pets ||--o{ marketplace_transactions : &quot;pet_id (RESTRICT)&quot;
+    pets |o--o{ gdpr_requests : &quot;initiating_pet_id (SET NULL)&quot;
+
+    marketplace_listings ||--o| marketplace_transactions : &quot;listing_id (RESTRICT)&quot;
+
+    admin_accounts |o--o{ admin_audit_log : &quot;admin_id (RESTRICT, nullable)&quot;</pre></div>
+<h2>Enum Types</h2>
+<p>All enums are created as PostgreSQL <code>ENUM</code> types before any table DDL.</p>
+<table>
+<tr><th>Enum</th><th>Values</th><th>Used by</th></tr>
+<tr><td><code>rarity_enum</code></td><td>COMMON, RARE, EPIC, LEGENDARY</td><td><code>pets.rarity</code></td></tr>
+<tr><td><code>arena_mode_enum</code></td><td>RACE, SUMO</td><td><code>arena_matches.mode</code></td></tr>
+<tr><td><code>training_type_enum</code></td><td>RUN, STRENGTH, STAMINA</td><td><code>training_logs.training_type</code></td></tr>
+<tr><td><code>buff_stat_enum</code></td><td>speed, strength, stamina</td><td><code>food_buffs.buff_stat</code></td></tr>
+<tr><td><code>listing_status_enum</code></td><td>active, cancelled, sold</td><td><code>marketplace_listings.status</code></td></tr>
+<tr><td><code>admin_role_enum</code></td><td>super_admin, moderator, read_only</td><td><code>admin_accounts.role</code></td></tr>
+<tr><td><code>gdpr_request_type_enum</code></td><td>erasure, data_access, restrict_processing, object_leaderboard, rectification</td><td><code>gdpr_requests.request_type</code></td></tr>
+<tr><td><code>gdpr_request_status_enum</code></td><td>pending, processing, completed, failed</td><td><code>gdpr_requests.status</code></td></tr>
+</table>
+<h2>Key Constraints &amp; Business Rules</h2>
+<ul><li><strong><code>pets.owner_token_hash</code></strong>: SHA-256 of the 32-byte URL token (<code>pet_access_token_min_bytes = 32</code>).</li></ul>
+<p>Raw token never stored. Paired with <code>claimed_at</code> (both NULL = unclaimed; both set = claimed),</p>
+<p>enforced by <code>chk_pet_claim_consistency</code>.</p>
+<ul><li><strong><code>pets.level</code></strong> is derived: <code>MAX(1, FLOOR(total_training_actions / 10))</code></li></ul>
+<p>(<code>pet_level_formula_divisor = 10</code>) capped at <code>pet_level_max = 100</code>.</p>
+<ul><li><strong><code>arena_matches.duration_seconds</code></strong>: constrained <code>BETWEEN 5 AND 15</code></li></ul>
+<p>(<code>arena_match_duration_min_seconds = 5</code>, <code>arena_match_duration_max_seconds = 15</code>).</p>
+<ul><li><strong><code>food_buffs.record_expires_at</code></strong>: <code>consumed_at + 30 days</code></li></ul>
+<p>(<code>food_buff_record_retention_days = 30</code>). Background cleanup job targets this column.</p>
+<ul><li><strong><code>admin_audit_log.id</code></strong>: <code>BIGSERIAL</code> (not UUID) for monotonic log ordering.</li></ul>
+<p>Retention: 2 years (<code>admin_audit_log_retention_years = 2</code>).</p>
+<ul><li><strong><code>marketplace_transactions</code></strong>: immutable append-only; <code>listing_id</code> has a UNIQUE constraint</li></ul>
+<p>ensuring one transaction per listing. <code>fee_credits = FLOOR(price_credits × 0.05)</code></p>
+<p>(<code>trade_transaction_fee_percent = 5</code>).</p>
+<ul><li><strong>DDL execution order</strong>: <code>claim_identities</code> before <code>pets</code>; <code>marketplace_listings</code> before</li></ul>
+<p><code>marketplace_transactions</code>; <code>admin_accounts</code> before <code>admin_audit_log</code>.</p>
+<h2>Redis Key-Space (Non-Relational, for Reference)</h2>
+<table>
+<tr><th>Key Pattern</th><th>TTL</th><th>Purpose</th></tr>
+<tr><td><code>rl:claim:{email_hash}</code></td><td>3600 s</td><td>Claim attempt counter (limit: 5/hr — <code>auth_rate_limit_claim_attempts_per_hour = 5</code>)</td></tr>
+<tr><td><code>rl:claim:cooldown:{email_hash}</code></td><td>60 s</td><td>Post-limit cooldown (<code>claim_email_retry_cooldown_seconds = 60</code>)</td></tr>
+<tr><td><code>rl:arena:{pet_id}</code></td><td>3600 s</td><td>Arena battle counter (default 10/hr — <code>arena_battles_per_pet_per_hour_default = 10</code>; TTL = 3600 s — <code>arena_rate_limit_counter_window_hours = 1</code>)</td></tr>
+<tr><td><code>rl:code_entry:{session_id}</code></td><td>900 s</td><td>OTP attempt counter (limit: 10 — <code>auth_rate_limit_code_entry_attempts_per_session = 10</code>)</td></tr>
+<tr><td><code>rl:code_entry:cooldown:{session_id}</code></td><td>60 s</td><td>Post-limit code-entry cooldown (<code>claim_email_retry_cooldown_seconds = 60</code>)</td></tr>
+<tr><td><code>rl:admin_login:{ip_hash}</code></td><td>900 s</td><td>Admin login IP rate limit (<code>admin_login_ip_rate_limit_attempts = 10</code>, <code>admin_login_ip_rate_limit_window_seconds = 900</code>)</td></tr>
+<tr><td><code>rl:admin:{admin_id}</code></td><td>60 s</td><td>Per-admin request rate limit (100/min — <code>admin_portal_requests_per_minute_per_account = 100</code>)</td></tr>
+<tr><td><code>leaderboard:global</code></td><td>no TTL</td><td>Sorted set; score = arena_score; member = petId</td></tr>
+<tr><td><code>matchmaking:queue:{mode}</code></td><td>no TTL</td><td>Sorted set; score = enqueue epoch</td></tr>
+<tr><td><code>session:admin:{session_id}</code></td><td>14400 s</td><td>Admin session JSON (<code>admin_session_inactivity_expiry_hours = 4</code>)</td></tr>
+<tr><td><code>token:blacklist:{token_hash}</code></td><td>259200 s</td><td>Revoked pet tokens (<code>claim_token_cleanup_ttl_hours = 72</code>)</td></tr>
+<tr><td><code>config:runtime</code></td><td>300 s</td><td>Cached runtime config (<code>config_cache_refresh_time_minutes = 5</code>)</td></tr>
+</table></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

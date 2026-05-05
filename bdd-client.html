@@ -1,306 +1,1227 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — BDD — Client Feature Specifications</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client BDD — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">BDD — Client Feature Specifications</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>BDD — Client Feature Specifications</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="bdd--client-feature-specifications">BDD — Client Feature Specifications</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><!-- Client-side Gherkin test specifications for pixel-pet-arena frontend (Player App + Admin Portal) --></p>
-<p class="doc-p"><!-- Authored by: gendoc-align-fix --></p>
-<p class="doc-p"><!-- Date: 2026-05-04 --></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="overview">Overview</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">This document summarizes the 9 client-side BDD feature files that specify the frontend UI/UX, user flows, and component behavior for pixel-pet-arena. These specifications ensure the player app and admin portal conform to PRD acceptance criteria and design requirements.</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Total Coverage:</strong> 9 client features, 50+ scenarios, 10 PRD user stories linked</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="player-app-features">Player App Features</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="1-arena-ui-codefeaturesclientarena-uifeaturecode">1. Arena UI (<code>features/client/arena-ui.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-ARENA-001, US-ARENA-002</p>
-<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates arena entry, matchmaking UI, battle animation, and rate limit feedback.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Mode Selection</strong>: Player selects RACE or SUMO mode and enters arena via button</li>
-<li><strong>Matchmaking Status</strong>: "Finding opponent..." display with aria-live="polite" and aria-busy="true"</li>
-<li><strong>Opponent Found</strong>: Battle animation plays for 5–15 seconds; navigates to <code>/arena/result/:matchId</code></li>
-<li><strong>Matchmaking Timeout</strong>: No opponent within 30 seconds triggers AIOfferModal</li>
-<li><strong>Rate Limit Display</strong>: HTTP 429 response shows countdown timer for next available battle</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> ModeSelector, PreBattlePanel, MatchmakingStatus, ArenaScene (Phaser), ResultModal</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="2-email-claim-flow-ui-codefeaturesclientclaim-flow-uifeaturecode">2. Email Claim Flow UI (<code>features/client/claim-flow-ui.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-AUTH-001, US-AUTH-002</p>
-<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates two-step email OTP claim flow: email entry → OTP verification → success state.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Email Entry</strong>: Guest enters email and confirms age (13+); advances to OTP step</li>
-<li><strong>Age Verification</strong>: Claim blocked without age confirmation checkbox</li>
-<li><strong>Already Claimed</strong>: Inline error if pet already has owner</li>
-<li><strong>OTP Verification</strong>: 6-digit code entry field with countdown timer</li>
-<li><strong>Code Expiry</strong>: After 15 minutes, error message "Code expired, request new code"</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> ClaimFlow (compound), ClaimEmailForm, ClaimCodeForm, SuccessMessage</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>email_claim_flow_steps_max = 3</code>, <code>claim_code_digits = 6</code>, <code>claim_code_expiry_minutes = 15</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="3-battle-records-page-codefeaturesclientbattle-recordsfeaturecode">3. Battle Records Page (<code>features/client/battle-records.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-RECORD-001</p>
-<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates battle history display, stat differential, public access, and share URL.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Records Display</strong>: Last 20 battles ordered by date descending (AC-010-2)</li>
-<li><strong>Stat Differential</strong>: Shows advantage/disadvantage vs. opponent for each battle (e.g., "Speed: +7")</li>
-<li><strong>Public Access</strong>: No authentication required; page accessible via <code>/pet/:petId/records</code> (AC-010-1)</li>
-<li><strong>Share Button</strong>: Generates shareable URL with Open Graph metadata (pet name, rarity, win count)</li>
-<li><strong>Empty State</strong>: "No battles yet" message when pet has no records</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> BattleRecordsPage, BattleHistoryTable, BattleHistoryRow, PetSummaryCard, ShareModal</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>arena_battle_records_display_count = 20</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="4-food-system-ui-codefeaturesclientfood-systemfeaturecode">4. Food System UI (<code>features/client/food-system.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-FOOD-001</p>
-<p class="doc-p"><strong>Scenarios:</strong> 4+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates food inventory, buff application, and buff duration indicator.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Inventory Display</strong>: Grid/list of FoodItem cards with stat icons and buff magnitude</li>
-<li><strong>Apply Buff</strong>: "Use" button triggers buff application; optimistic update + server confirmation</li>
-<li><strong>Buff Active Indicator</strong>: Badge or timer showing buff expiry time (e.g., "12h remaining")</li>
-<li><strong>Permanent vs. Temporary</strong>: Different styling for permanent bonuses vs. 24h temporary buffs</li>
-<li><strong>Empty Inventory</strong>: Message when player has no food items</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> FoodInventory, FoodItem, BuffIndicator, BuffActiveModal</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="5-leaderboard-ui-codefeaturesclientleaderboard-uifeaturecode">5. Leaderboard UI (<code>features/client/leaderboard-ui.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-BOARD-001, US-RARITY-001</p>
-<p class="doc-p"><strong>Scenarios:</strong> 5+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates global leaderboard ranking display, rarity badges, and owner rank banner.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Public Access</strong>: No authentication required for leaderboard view (AC-009-3)</li>
-<li><strong>Top 100 Display</strong>: Leaderboard table with up to 100 rows (AC-009-4)</li>
-<li><strong>Auto-Refresh</strong>: TanStack Query refetches every 30 seconds (AC-009-2)</li>
-<li><strong>Rarity Filter</strong>: Tabs to filter by Common, Rare, Epic, Legendary (AC-002-5)</li>
-<li><strong>Owner Rank</strong>: Banner highlighting player's own pet position on board</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> LeaderboardPage, LeaderboardTable, LeaderboardRow, RarityFilter, OwnerRankBanner</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>leaderboard_update_lag_max_seconds = 30</code>, <code>leaderboard_top_display = 100</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="6-pet-display-codefeaturesclientpet-displayfeaturecode">6. Pet Display (<code>features/client/pet-display.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-PET-001, US-PET-002</p>
-<p class="doc-p"><strong>Scenarios:</strong> 3+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates landing page pet generation, stat display, and food buff visual indicator.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Token Generation</strong>: Visiting "/" generates new pet_token via GET /api/v1/pets/random</li>
-<li><strong>Pet Canvas</strong>: Pixel art rendered with Phaser, role="img", aria-label with pet name</li>
-<li><strong>Stat Bars</strong>: Visual bars for Speed, Strength, Stamina with current/max values</li>
-<li><strong>Buff Indicator</strong>: Icon/badge showing active food buff on stat bar</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> PetCanvas, StatBars, BuffIndicator, LandingPage</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>pet_access_token_min_bytes = 32</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="7-settings-page-codefeaturesclientsettingsfeaturecode">7. Settings Page (<code>features/client/settings.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> User-level preferences (no specific PRD story)</p>
-<p class="doc-p"><strong>Scenarios:</strong> 3+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates settings modal/page for theme, audio, and notification preferences.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Settings Menu</strong>: Accessible from navbar; dismissible via close button or Escape</li>
-<li><strong>Theme Toggle</strong>: Switch between light and dark mode (persists to localStorage)</li>
-<li><strong>Audio Toggle</strong>: Enable/disable background music and SFX</li>
-<li><strong>Notification Toggle</strong>: Enable/disable browser notifications for arena results</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> SettingsModal, ThemeToggle, AudioToggle, NotificationToggle</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="8-training-ui-codefeaturesclienttraining-uifeaturecode">8. Training UI (<code>features/client/training-ui.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-TRAIN-001</p>
-<p class="doc-p"><strong>Scenarios:</strong> 4+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates training action selection, daily cap enforcement, and stat change feedback.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Action Cards</strong>: Three TrainingActionCard options (RUN, STRENGTH, STAMINA)</li>
-<li><strong>Daily Cap</strong>: Display "3 actions remaining today" counter; block 4th attempt (AC-006-5)</li>
-<li><strong>Stat Change</strong>: StatChangeIndicator shows +1/+2/+3 point delta and updated total</li>
-<li><strong>Error Feedback</strong>: HTTP 400 "TRAINING_LIMIT_REACHED" shows inline error</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> TrainingPage, TrainingActionCard, StatChangeIndicator, TrainingInputForm</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>training_actions_per_day = 3</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="admin-portal-features">Admin Portal Features</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="9-admin-portal-codefeaturesclientadmin-portalfeaturecode">9. Admin Portal (<code>features/client/admin-portal.feature</code>)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Linked PRD User Stories:</strong> US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006</p>
-<p class="doc-p"><strong>Scenarios:</strong> 15+</p>
-<div class="doc-gap"></div>
-<p class="doc-p">Validates admin authentication, pet moderation, GDPR erasure, leaderboard management, and system configuration.</p>
-<div class="doc-gap"></div>
-<ul class="doc-list">
-<li><strong>Admin Login</strong>: Email-based login with httpOnly SameSite=Strict session cookie (AC-011-1)</li>
-<li><strong>Session Timeout</strong>: Session expires after 4 hours of inactivity (AC-011-2)</li>
-<li><strong>Moderation Queue</strong>: View SUSPICIOUS pets and bans; submit reason ≤500 chars (AC-013-2)</li>
-<li><strong>GDPR Erasure</strong>: Approve/deny erasure requests; view SLA status (AC-016-1, AC-016-2)</li>
-<li><strong>Leaderboard Reset</strong>: Admin action to reset leaderboard; reflects within 5 minutes (AC-009-5)</li>
-<li><strong>Runtime Parameters</strong>: Tune arena_rate_limit_battles_per_hour, rarity weights, etc. (US-ADMIN-003)</li>
-<li><strong>Game Economy</strong>: Configure food buff multipliers, arena entry cost, battle cooldown (US-ADMIN-006)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key UI Components:</strong> AdminPortal, Moderation Queue, PetDetailModal, GDPRRequestList, ConfigPanel, ParameterInputForm</p>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Key Constants Referenced:</strong> <code>admin_moderation_reason_max_chars = 500</code>, <code>admin_session_inactivity_expiry_hours = 4</code></p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="cross-reference-prd-acceptance-criteria">Cross-Reference: PRD Acceptance Criteria</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>AC ID</th><th>Story</th><th>Covered By</th><th>Status</th></tr></thead>
-<tbody>
-<tr><td>AC-002-5</td><td>US-RARITY-001</td><td>Leaderboard UI</td><td>✓</td></tr>
-<tr><td>AC-006-5</td><td>US-TRAIN-001</td><td>Training UI</td><td>✓</td></tr>
-<tr><td>AC-009-1</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
-<tr><td>AC-009-2</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
-<tr><td>AC-009-3</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
-<tr><td>AC-009-4</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
-<tr><td>AC-009-5</td><td>US-BOARD-001</td><td>Leaderboard UI</td><td>✓</td></tr>
-<tr><td>AC-010-1</td><td>US-RECORD-001</td><td>Battle Records</td><td>✓</td></tr>
-<tr><td>AC-010-2</td><td>US-RECORD-001</td><td>Battle Records</td><td>✓</td></tr>
-<tr><td>AC-011-1</td><td>US-ADMIN-001</td><td>Admin Portal</td><td>✓</td></tr>
-<tr><td>AC-011-2</td><td>US-ADMIN-001</td><td>Admin Portal</td><td>✓</td></tr>
-<tr><td>AC-013-2</td><td>US-ADMIN-005</td><td>Admin Portal</td><td>✓</td></tr>
-<tr><td>AC-016-1</td><td>US-AUTH-002</td><td>Admin Portal</td><td>✓</td></tr>
-<tr><td>AC-016-2</td><td>US-AUTH-002</td><td>Admin Portal</td><td>✓</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="how-to-use-this-document">How to Use This Document</h2>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>For Frontend Developers</strong>: Quick reference for UI/UX specifications and component interactions.</p>
-<p class="doc-p">2. <strong>For QA/E2E Testers</strong>: Cross-reference scenario steps against <code>features/client/</code> feature files to create Playwright test implementations.</p>
-<p class="doc-p">3. <strong>For Product/Design</strong>: Verify all frontend flows match PRD acceptance criteria and design system.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Generated:</strong> 2026-05-04</p>
-<p class="doc-p"><strong>Last Updated:</strong> 2026-05-04</p>
-<p class="doc-p"><strong>Maintainer:</strong> Product Engineering Team</p>
-<div class="doc-gap"></div>
-    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Client BDD Scenarios</p>
+    <h1 class="banner-title">Client BDD Scenarios</h1>
   </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link active" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link active" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h2>admin-portal.feature</h2>
+<pre><code class="language-gherkin">Feature: Admin Portal — Login with TOTP, Moderation Queue, and Ban Action UI (US-ADMIN-001, US-ADMIN-002, US-ADMIN-003)
+
+  Background:
+    Given the admin portal is loaded at &quot;/admin/login&quot;
+    And the Vue 3 + Element Plus admin app uses httpOnly session cookies for authentication
+
+  # --- Admin login (TOTP) ---
+
+  Scenario: Admin submits valid credentials with TOTP code and is redirected to dashboard
+    Given the LoginPage.vue is showing an ElForm with an email input, password input, and TOTP code input
+    And POST /admin/api/auth/login responds HTTP 200 with Set-Cookie: session=&lt;id&gt;; HttpOnly; SameSite=Strict; Secure; Path=/admin
+    When the admin enters valid &quot;email&quot;, &quot;password&quot;, and a current &quot;totpCode&quot;
+    And clicks the &quot;Login&quot; button
+    Then POST /admin/api/auth/login is called with body {&quot;email&quot;: &quot;...&quot;, &quot;password&quot;: &quot;...&quot;, &quot;totpCode&quot;: &quot;...&quot;}
+    And the Pinia useAdminAuthStore sets isAuthenticated = true and the role field
+    And Vue Router navigates to &quot;/admin/dashboard&quot;
+    And the TOTP code input field is cleared immediately after submission
+
+  Scenario: First-time admin login without TOTP enrolled — redirected to TOTP setup
+    Given the admin has not enrolled a TOTP device
+    And POST /admin/api/auth/login responds HTTP 403 with error code &quot;TOTP_SETUP_REQUIRED&quot; and a &quot;setupToken&quot;
+    And POST /admin/api/auth/totp/setup responds HTTP 200 with a QR code URL and backup codes
+    When the admin submits credentials without a TOTP code
+    Then Vue Router navigates to &quot;/admin/totp-setup&quot;
+    And the TotpSetupPage.vue renders a QR code and calls POST /admin/api/auth/totp/setup with {&quot;setupToken&quot;: &quot;...&quot;}
+    And backup codes are displayed exactly once
+
+  Scenario: Invalid admin credentials return inline error
+    Given the admin has entered an incorrect password
+    And POST /admin/api/auth/login responds HTTP 401 with error code &quot;UNAUTHORIZED&quot;
+    When the admin clicks the &quot;Login&quot; button
+    Then an inline error message &quot;Invalid credentials.&quot; is shown on the LoginPage ElForm
+    And the user remains on &quot;/admin/login&quot;
+
+  Scenario: Account locked after repeated failed logins — lock message displayed
+    Given the admin has made (admin_login_lockout_threshold = 10) consecutive failed login attempts
+    And POST /admin/api/auth/login responds HTTP 403 with error code &quot;ACCOUNT_LOCKED&quot; and &quot;unlockedAt&quot;
+    When the admin clicks the &quot;Login&quot; button
+    Then the LoginPage shows the account is locked and displays the unlock time from the &quot;unlockedAt&quot; field
+
+  Scenario: IP rate limit on login — 15-minute countdown shown
+    Given the IP address has made (admin_login_ip_rate_limit_attempts = 10) requests within (admin_login_ip_rate_limit_window_seconds = 900) seconds (15 minutes)
+    And POST /admin/api/auth/login responds HTTP 429
+    When the admin submits the login form
+    Then a rate-limit message is displayed with a countdown of up to 900 seconds
+
+  Scenario: Unauthenticated access to admin route redirects to login
+    Given the admin user is not authenticated (no valid session cookie)
+    When the user navigates directly to &quot;/admin/pets&quot;
+    Then the user is redirected to &quot;/admin/login&quot;
+
+  Scenario: Session expiry during admin work — redirect to login
+    Given the admin is authenticated and viewing &quot;/admin/pets&quot;
+    And the session has been inactive for more than (admin_session_inactivity_expiry_hours = 4) hours
+    And any admin API call responds HTTP 401
+    When an admin API call is made
+    Then Vue Router navigates to &quot;/admin/login&quot;
+
+  # --- Pet moderation queue ---
+
+  Scenario: Admin views pet list and filters by SUSPICIOUS status
+    Given the admin is authenticated as a moderator or super_admin
+    And the admin has navigated to &quot;/admin/pets&quot;
+    And GET /admin/api/pets responds HTTP 200 with pet entries
+    When the PetListPage.vue loads
+    Then GET /admin/api/pets is called with the session cookie
+    And the ElTable displays pet rows with columns: pet ID, masked owner email, rarity, level, arena record, creation date
+    And an ElSelect filter for status &quot;SUSPICIOUS&quot; is available
+
+  Scenario: Admin bans a pet with a reason
+    Given the admin is on &quot;/admin/pets&quot; and can see a pet with petId &quot;bad-pet-001&quot;
+    And POST /admin/api/pets/bad-pet-001/ban responds HTTP 200
+    When the admin clicks the &quot;Ban&quot; button on the pet row
+    And the admin types a reason of at most (admin_moderation_reason_max_chars = 500) characters in the PetBanModal.vue reason field
+    And the admin clicks &quot;Confirm Ban&quot;
+    Then POST /admin/api/pets/bad-pet-001/ban is called with body {&quot;reason&quot;: &quot;&lt;reason&gt;&quot;}
+    And the pet row status is updated to &quot;BANNED&quot; in the ElTable
+
+  Scenario: Ban reason exceeding 500 characters is rejected client-side
+    Given the PetBanModal is open for petId &quot;bad-pet-001&quot;
+    When the admin types a reason of 501 or more characters in the reason field
+    Then the &quot;Confirm Ban&quot; button remains disabled or an inline validation error is shown
+    And POST /admin/api/pets/bad-pet-001/ban is NOT called
+
+  # --- Admin leaderboard moderation ---
+
+  Scenario: Admin leaderboard shows up to 500 entries with SUSPICIOUS flag badges
+    Given the admin has navigated to &quot;/admin/leaderboard&quot;
+    And GET /admin/api/leaderboard responds with up to (leaderboard_admin_view = 500) entries
+    When the AdminLeaderboardPage.vue renders
+    Then the ElTable shows all returned entries without pagination
+    And pets with more than (bot_detection_battles_threshold = 50) battles in the last (bot_detection_window_minutes = 60) minutes have a SuspiciousFlagBadge component visible
+
+  Scenario: Admin removes a suspicious pet from the leaderboard
+    Given the AdminLeaderboardPage shows petId &quot;cheat-pet-007&quot; with a SuspiciousFlagBadge
+    And DELETE /admin/api/leaderboard/cheat-pet-007 responds HTTP 200
+    When the admin clicks &quot;Remove from Leaderboard&quot; on that row
+    Then DELETE /admin/api/leaderboard/cheat-pet-007 is called with the session cookie
+    And the row for &quot;cheat-pet-007&quot; disappears from the AdminLeaderboardPage ElTable
+
+  Scenario: Admin adjusts max battles per hour via runtime config panel
+    Given the admin is authenticated as a super_admin and has navigated to &quot;/admin/config/runtime&quot;
+    And the RuntimeConfigPage.vue is showing an ElForm with an ElInputNumber for &quot;Max Battles Per Hour&quot;
+    When the admin changes the value to 15 (within the allowed range of 1 to 50)
+    And clicks &quot;Save&quot;
+    Then PUT /admin/api/config/runtime is called with the updated value
+    And a success confirmation is displayed in the RuntimeConfigPage.vue
+</code></pre>
+<h2>arena-ui.feature</h2>
+<pre><code class="language-gherkin">Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display (US-ARENA-001, US-ARENA-002)
+
+  Background:
+    Given the player app is loaded
+    And a valid &quot;pet_token&quot; of at least (pet_access_token_min_bytes = 32) bytes is stored in localStorage
+    And the user has navigated to the ArenaPage at &quot;/arena&quot;
+
+  # --- Mode selection and arena entry ---
+
+  Scenario: Owner selects RACE mode and clicks Enter Arena — matchmaking begins
+    Given the ModeSelector component shows two options: &quot;RACE&quot; and &quot;SUMO&quot;
+    And no prior HTTP 429 rate limit response is stored in the Zustand arena slice
+    When the owner clicks the &quot;RACE&quot; option in ModeSelector
+    And the owner clicks the &quot;Enter Arena&quot; button in PreBattlePanel
+    Then POST /api/v1/arena/enter is called with body {&quot;petId&quot;: &quot;&lt;petId&gt;&quot;, &quot;mode&quot;: &quot;RACE&quot;}
+    And the Authorization header contains the Bearer token from localStorage
+    And the MatchmakingStatus component appears with text &quot;Finding opponent...&quot;
+    And the MatchmakingStatus has aria-live=&quot;polite&quot; and aria-busy=&quot;true&quot;
+
+  Scenario: Opponent found within matchmaking timeout — battle animation plays
+    Given the MatchmakingStatus is showing &quot;Finding opponent...&quot;
+    And the owner has clicked the &quot;Enter Arena&quot; button in PreBattlePanel
+    And POST /api/v1/arena/enter responds HTTP 200 with &quot;matchId&quot;, &quot;result&quot;, and &quot;opponentPetId&quot;
+    When the opponent is matched and the response is received before the (arena_matchmaking_timeout_seconds = 30)-second timeout
+    Then a 3-2-1 pre-battle countdown animation plays in the ArenaPage
+    And the ArenaScene Phaser component loads and plays the battle animation
+    And the battle animation lasts between (arena_match_duration_min_seconds = 5) and (arena_match_duration_max_seconds = 15) seconds
+    And the app navigates to &quot;/arena/result/:matchId&quot; after the animation completes
+
+  Scenario: No opponent found — AIOfferModal is shown after 30-second timeout
+    Given the owner has clicked the &quot;Enter Arena&quot; button in PreBattlePanel
+    And POST /api/v1/arena/enter responds HTTP 408 with error code &quot;MATCHMAKING_TIMEOUT&quot; after the (arena_matchmaking_timeout_seconds = 30)-second timeout elapses
+    When the matchmaking timeout fires
+    Then the MatchmakingStatus text changes to &quot;No opponent found&quot;
+    And the AIOfferModal appears with role=&quot;dialog&quot; and aria-modal=&quot;true&quot;
+    And the modal has a focus trap: Tab cycles focus within the modal while it is open
+    And the modal is dismissible via the Escape key
+
+  Scenario: User accepts AI opponent from AIOfferModal — battle proceeds
+    Given the AIOfferModal is visible after a matchmaking timeout
+    And the selected battle mode is &quot;RACE&quot;
+    And POST /api/v1/arena/enter responds HTTP 200 with &quot;matchId&quot;, &quot;result&quot;, and &quot;opponentPetId&quot;
+    When the owner clicks the &quot;Accept AI Opponent&quot; button inside the modal
+    Then POST /api/v1/arena/enter is re-called with body {&quot;petId&quot;: &quot;&lt;petId&gt;&quot;, &quot;mode&quot;: &quot;RACE&quot;, &quot;acceptAI&quot;: true} to signal AI opponent acceptance
+    And the battle animation plays and the result page is shown at &quot;/arena/result/:matchId&quot;
+
+  # --- Rate limit UI ---
+
+  Scenario: Arena rate limit reached — RateLimitBanner shown and Enter Arena disabled
+    Given the owner has already entered (arena_rate_limit_battles_per_hour_default = 10) arena battles in the current hour
+    And POST /api/v1/arena/enter responds HTTP 429 with a &quot;Retry-After&quot; header
+    When the owner clicks the &quot;Enter Arena&quot; button in PreBattlePanel
+    Then the Zustand arena slice stores the rate limit state
+    And the RateLimitBanner component renders with role=&quot;alert&quot; and aria-live=&quot;assertive&quot;
+    And the RateLimitBanner displays a countdown timer showing the remaining time until the rate limit resets
+    And the &quot;Enter Arena&quot; button in PreBattlePanel is disabled for the duration of the cooldown
+
+  Scenario: Rate limit countdown expires — Enter Arena button re-enabled
+    Given the RateLimitBanner is visible with a countdown timer
+    When the Retry-After duration elapses
+    Then the RateLimitBanner component disappears
+    And the &quot;Enter Arena&quot; button becomes enabled again
+
+  Scenario: Banned pet cannot enter arena
+    Given the player&#x27;s pet has been banned by an admin
+    And POST /api/v1/arena/enter responds HTTP 403 with error code &quot;PET_BANNED&quot;
+    When the owner clicks the &quot;Enter Arena&quot; button in PreBattlePanel
+    Then a ban notice is displayed on the ArenaPage
+    And the &quot;Enter Arena&quot; button remains disabled
+    And the user is not navigated away from &quot;/arena&quot;
+
+  # --- Battle result display ---
+
+  Scenario: Battle result page shows WIN card with stat comparison and share button
+    Given the match is complete and the player&#x27;s pet won
+    And the app has navigated to &quot;/arena/result/:matchId&quot;
+    And GET /api/v1/arena/match/:matchId responds HTTP 200 with &quot;result&quot;: &quot;WIN&quot;
+    When the ResultPage renders
+    Then the BattleResultCard displays in &quot;WIN&quot; variant with the pet&#x27;s name and win indicator
+    And the StatComparison component shows both pets&#x27; stats side by side
+    And the ShareBattleButton component is visible and copies the public &quot;/arena/result/:matchId&quot; URL when clicked
+
+  Scenario: Battle result page shows LOSS card
+    Given the match is complete and the player&#x27;s pet lost
+    And the app has navigated to &quot;/arena/result/:matchId&quot;
+    And GET /api/v1/arena/match/:matchId responds HTTP 200 with &quot;result&quot;: &quot;LOSS&quot;
+    When the ResultPage renders
+    Then the BattleResultCard displays in &quot;LOSS&quot; variant
+
+  Scenario: SUMO mode is available alongside RACE in the ModeSelector
+    Given the ArenaPage is loaded with the FF_ARENA_SUMO feature flag enabled
+    And both &quot;RACE&quot; and &quot;SUMO&quot; option buttons are visible and focusable
+    When the owner selects &quot;SUMO&quot; in the ModeSelector and clicks the &quot;Enter Arena&quot; button
+    Then POST /api/v1/arena/enter is called with body {&quot;petId&quot;: &quot;&lt;petId&gt;&quot;, &quot;mode&quot;: &quot;SUMO&quot;}
+</code></pre>
+<h2>battle-records.feature</h2>
+<pre><code class="language-gherkin">Feature: Battle Records Page — View History, Share URL, and Public Access (US-RECORD-001)
+
+  Background:
+    Given the player app is loaded
+    And the user is on the BattleRecordsPage at &quot;/pet/:petId/records&quot;
+
+  # --- Battle records display ---
+
+  Scenario: Owner views battle records for their pet — shows last 20 battles
+    Given a claimed pet with petId &quot;pet-abc123&quot; has (arena_battle_records_display_count = 20) stored battle records
+    And GET /api/v1/pets/:petId/records responds HTTP 200 with an array of battle record objects ordered by date descending
+    When the BattleRecordsPage loads
+    Then the BattleHistoryTable renders with up to 20 BattleHistoryRow components
+    And each row displays: date, opponent pet name, mode (RACE|SUMO), result (WIN|LOSS), stat comparison
+    And the table has semantic markup with &quot;&lt;table&gt;&quot; and &quot;&lt;th scope=&quot;col&quot;&gt;&quot; column headers
+    And the rows are ordered with the most recent battle at the top
+
+  Scenario: Battle records table shows stat differential for each battle
+    Given a BattleHistoryRow for a RACE match between the player&#x27;s pet (speed 45) and opponent (speed 38)
+    When the BattleRecordsPage renders
+    Then the row displays &quot;Speed: +7&quot; or similar, indicating the player&#x27;s speed advantage at the time of battle
+    And the stat differential is readable by screen readers via aria-label
+
+  Scenario: Public battle records page accessible without authentication
+    Given a user (guest) navigates to &quot;/pet/:petId/records&quot; without a pet_token
+    When the BattleRecordsPage loads
+    Then GET /api/v1/pets/:petId/records is called WITHOUT an Authorization header
+    And the BattleHistoryTable and PetSummaryCard render publicly
+    And no &quot;Sign in to see more&quot; or auth prompt is shown
+
+  Scenario: Battle records page shows pet summary card with rarity and level
+    Given the PetSummaryCard is rendered on the BattleRecordsPage
+    When the pet&#x27;s stats are &quot;level: 5, rarity: EPIC, wins: 12, losses: 8&quot;
+    Then the card displays the pet&#x27;s sprite canvas (via PetCanvas component)
+    And the card shows &quot;Level 5&quot; and &quot;EPIC&quot; rarity badge with appropriate color
+    And the win/loss record is displayed as &quot;12 wins, 8 losses&quot;
+
+  Scenario: Clicking a battle row highlights stat comparison between both pets
+    Given the BattleRecordsPage is displayed with a table of battle rows
+    When the user clicks or taps a specific BattleHistoryRow
+    Then the row background color changes to a highlight state
+    And the StatComparison component expands to show full stat breakdowns for both players
+
+  # --- Shareable battle URLs ---
+
+  Scenario: Owner clicks ShareBattleButton and URL is copied to clipboard
+    Given the BattleRecordsPage is displayed with a ShareBattleButton at the top or bottom
+    When the owner clicks the &quot;Share Battle Results&quot; button
+    Then the button text briefly changes to &quot;Copied!&quot; or shows a checkmark
+    And the public battle records URL &quot;/pet/:petId/records&quot; is copied to the system clipboard
+    And the user can share this URL on social media or forums
+
+  Scenario: Social share card generation for shareable battle URL
+    Given a user shares the public URL &quot;/pet/:petId/records&quot; on Twitter or Discord
+    When the link is previewed
+    Then an Open Graph card is displayed with:
+      | Meta Tag | Expected Value |
+      | og:title | &quot;Pet A vs Pet B&quot; |
+      | og:image | [sprite_image_url] with 1200x630px dimensions |
+      | og:description | &quot;Pet A won with 12 total wins&quot; |
+      | og:url | https://pixel-pet-arena.com/battles/[match_id] |
+      | og:type | website |
+    And the preview is visually appealing on Twitter, Discord, and Facebook
+    And all URLs are absolute and properly percent-encoded
+    And image dimensions are optimized for social platform compatibility
+
+  Scenario: Guest views opponent&#x27;s battle records after shared URL
+    Given a guest receives a shared URL &quot;/pet/:petId/records&quot; for opponent &quot;Zara&quot;
+    And they click the link
+    When the BattleRecordsPage loads
+    Then the page displays Zara&#x27;s battle history publicly
+    And the page shows a &quot;Get Your Own Pet&quot; or &quot;Claim Your Pet&quot; CTA at the bottom
+    And clicking the CTA redirects to &quot;/&quot; to start the claim flow
+
+  # --- Win/loss variations ---
+
+  Scenario: Battle record row shows WIN indicator with green color
+    Given a battle record in the BattleHistoryTable where the result is &quot;WIN&quot;
+    When the BattleHistoryRow renders
+    Then the result cell displays &quot;WIN&quot; with a green background or check icon
+    And the cell passes a 4.5:1 contrast ratio check against its background
+
+  Scenario: Battle record row shows LOSS indicator with red color
+    Given a battle record where the result is &quot;LOSS&quot;
+    When the BattleHistoryRow renders
+    Then the result cell displays &quot;LOSS&quot; with a red background or X icon
+    And the cell passes a 4.5:1 contrast ratio check
+
+  Scenario: Battles against AI opponent are marked distinctly
+    Given a battle record where the opponent is an AI-generated pet (not a real player)
+    When the BattleHistoryRow renders
+    Then the opponent name cell displays &quot;(AI)&quot; or a bot icon badge
+    And the row is visually distinguishable from player-vs-player battles
+
+  # --- Pagination and loading states ---
+
+  Scenario: Empty battle records state shown when no battles exist
+    Given a recently claimed pet with no battles played
+    And GET /api/v1/pets/:petId/records responds HTTP 200 with an empty array
+    When the BattleRecordsPage loads
+    Then the BattleHistoryTable is not displayed
+    And a friendly message &quot;No battles yet. Enter the arena to get started!&quot; is shown
+    And an &quot;Enter Arena&quot; button is visible that navigates to &quot;/arena&quot;
+
+  Scenario: Battle records page loads with skeleton loaders during fetch
+    Given GET /api/v1/pets/:petId/records is pending (takes 2+ seconds)
+    When the BattleRecordsPage mounts
+    Then skeleton loaders appear in the BattleHistoryTable placeholder rows
+    And the PetSummaryCard shows a skeleton loader for the sprite canvas
+
+  # --- Accessibility ---
+
+  Scenario: Battle records table is keyboard navigable
+    Given the BattleRecordsPage is rendered with a BattleHistoryTable
+    When the user navigates using the Tab key
+    Then each BattleHistoryRow is focusable
+    And pressing Enter on a focused row highlights it
+    And the table has proper &quot;&lt;table&gt;&quot;, &quot;&lt;thead&gt;&quot;, &quot;&lt;tbody&gt;&quot;, and &quot;&lt;tr&gt;&quot; structure
+
+  Scenario: Battle result colors pass contrast ratio checks
+    Given the BattleHistoryTable with WIN (green) and LOSS (red) result indicators
+    When tested with a contrast analyzer
+    Then each color meets the 4.5:1 minimum contrast ratio for text on its background
+    And the colors are distinguishable for color-blind users (not red/green alone)
+
+  Scenario: Responsive battle records table on mobile (320px viewport)
+    Given the viewport width is 320px (mobile)
+    When the BattleRecordsPage loads
+    Then the BattleHistoryTable adapts to a mobile-friendly view (e.g., stacked rows or horizontal scroll)
+    And the pet sprite remains visible and properly sized
+    And the table does not cause horizontal overflow beyond the viewport
+
+  # --- Pagination on client ---
+
+  Scenario: Battle records pagination with load more button
+    Given a pet has 45 total battle records
+    And the first page shows 20 records
+    And the server response includes pagination_cursor = &quot;offset_20&quot; and hasMore = true
+    When the BattleRecordsPage renders
+    Then a &quot;Load More&quot; button is displayed below the table
+    And clicking the button calls GET /api/v1/arena/history/:petId?cursor=offset_20
+    And the next 20 battles are appended to the table
+    And the button is disabled until the next page loads
+
+  Scenario: Load more button hidden when all records fetched
+    Given a pet has 8 total battle records
+    And GET /api/v1/arena/history/:petId returns all 8 records
+    And the response indicates hasMore = false
+    When the BattleRecordsPage renders
+    Then the &quot;Load More&quot; button is not displayed
+    And the message &quot;You&#x27;ve reached the end of battle history&quot; is shown
+
+  Scenario: Pagination preserves scroll position when loading more
+    Given the user scrolls to the bottom of the 20-battle table
+    And clicks the &quot;Load More&quot; button
+    When the next 20 battles load
+    Then the scroll position remains near the load-more button
+    And the user can immediately see the newly loaded battles without re-scrolling
+</code></pre>
+<h2>claim-flow-ui.feature</h2>
+<pre><code class="language-gherkin">Feature: Email Claim Flow UI — Two-Step OTP Flow in Player App (US-AUTH-001, US-AUTH-002)
+
+  Background:
+    Given the player app is loaded
+    And the user has navigated to the ClaimPage at &quot;/claim&quot;
+    And the ClaimFlow compound component is showing step &quot;email&quot; (step 1 of email_claim_flow_steps_max = 3)
+
+  # --- Step 1: Email entry ---
+
+  Scenario: Guest submits valid email and age confirmation — advances to OTP step
+    Given the ClaimEmailForm shows an email input field and an age confirmation checkbox &quot;I am at least 13 years old&quot;
+    And POST /api/v1/claim/request responds HTTP 200 with &quot;claimId&quot; and &quot;expiresAt&quot;
+    When the guest enters a valid email &quot;player@example.com&quot;
+    And the guest checks the age confirmation checkbox
+    And the guest clicks &quot;Send Claim Code&quot;
+    Then POST /api/v1/claim/request is called with body {&quot;email&quot;: &quot;player@example.com&quot;, &quot;petId&quot;: &quot;&lt;petId&gt;&quot;, &quot;ageConfirmed&quot;: true}
+    And the Zustand claim slice stores the claimId
+    And the ClaimFlow advances to step &quot;code&quot; rendering the ClaimCodeForm
+
+  Scenario: Email form blocks submission without age confirmation
+    Given the ClaimEmailForm is visible
+    When the guest enters a valid email but leaves the age confirmation checkbox unchecked
+    And the guest clicks &quot;Send Claim Code&quot;
+    Then POST /api/v1/claim/request is NOT called
+    And an inline error &quot;Age confirmation required&quot; is shown and the checkbox is re-highlighted
+
+  Scenario: Already-claimed pet shows inline error
+    Given the pet being claimed already has an owner
+    And POST /api/v1/claim/request responds HTTP 400 with error code &quot;ALREADY_CLAIMED&quot;
+    When the guest submits the claim email form
+    Then an inline error message &quot;This pet is already owned.&quot; is shown on the ClaimEmailForm
+    And the user remains on step &quot;email&quot;
+
+  Scenario: Email claim rate limit — cooldown banner shown
+    Given the guest has already made (auth_rate_limit_claim_attempts_per_hour = 5) claim requests in the current hour
+    And POST /api/v1/claim/request responds HTTP 429 with a &quot;Retry-After&quot; header
+    When the guest submits another email claim request
+    Then a cooldown banner is shown indicating the user must wait (claim_email_retry_cooldown_seconds = 60) seconds
+    And the email input and submit button are disabled during the cooldown
+
+  # --- Step 2: OTP entry ---
+
+  Scenario: Guest enters correct 6-digit OTP within expiry window — advances to reveal
+    Given the ClaimCodeForm is visible (step &quot;code&quot;)
+    And the OTP &quot;123456&quot; is valid and was issued within (claim_code_expiry_minutes = 15) minutes
+    And POST /api/v1/claim/verify responds HTTP 200 with &quot;petToken&quot;, &quot;petId&quot;, and &quot;petUrl&quot;
+    When the guest enters &quot;123456&quot; in the (claim_code_digits = 6)-digit OTP input
+    And the guest clicks &quot;Verify Code&quot;
+    Then POST /api/v1/claim/verify is called with body {&quot;claimId&quot;: &quot;&lt;claimId&gt;&quot;, &quot;code&quot;: &quot;123456&quot;}
+    And the pet_token key is written to localStorage
+    And the Zustand claim slice advances to step &quot;reveal&quot;
+
+  Scenario: Invalid OTP — shake animation and error message shown
+    Given the ClaimCodeForm is visible (step &quot;code&quot;)
+    And POST /api/v1/claim/verify responds HTTP 400 with error code &quot;INVALID_CODE&quot;
+    When the guest enters the wrong 6-digit code and clicks &quot;Verify Code&quot;
+    Then the OTP digit input boxes play a red shake animation
+    And an error message is displayed below the input
+    And the OTP inputs remain enabled for retry
+
+  Scenario: Expired OTP — re-request button shown
+    Given the ClaimCodeForm is visible and the OTP has expired after (claim_code_expiry_minutes = 15) minutes
+    And POST /api/v1/claim/verify responds HTTP 400 with error code &quot;CODE_EXPIRED&quot;
+    When the guest submits the expired code
+    Then the error message &quot;Claim code has expired. Please request a new one.&quot; is shown
+    And a &quot;Request a new code&quot; button is visible that re-initiates POST /api/v1/claim/request
+
+  Scenario: ExpiryWarning activates when 2 minutes or fewer remain before OTP expiry
+    Given the ClaimCodeForm is visible and (a11y_claim_code_warning_before_expiry_minutes = 2) minutes or fewer remain before OTP expiry
+    When the OTP countdown timer ticks
+    Then the ExpiryWarning renders with role=&quot;alert&quot; and aria-live=&quot;assertive&quot;
+    And the warning text includes the remaining minutes as a countdown
+
+  Scenario: Max OTP attempts reached — all inputs disabled with Retry-After countdown
+    Given the guest has made (auth_rate_limit_code_entry_attempts_per_session = 10) failed OTP attempts in this session
+    And POST /api/v1/claim/verify responds HTTP 429 with error code &quot;MAX_ATTEMPTS_REACHED&quot;
+    When the guest enters another OTP code and clicks &quot;Verify Code&quot;
+    Then all OTP digit inputs are disabled
+    And the submit button is disabled
+    And a Retry-After countdown is displayed and announced via aria-live=&quot;assertive&quot;
+
+  # --- Step 3: URL Reveal ---
+
+  Scenario: Claim reveal step shows pet URL with copy button and navigates to pet page
+    Given the ClaimFlow is in step &quot;reveal&quot; and the petToken and petUrl have been received
+    When the URLReveal component renders
+    Then the unique pet URL is displayed in a read-only field
+    And a &quot;Copy&quot; button is visible that copies the petUrl to the clipboard
+    And the app automatically navigates to &quot;/pet/:petId&quot; after the token is stored in localStorage
+</code></pre>
+<h2>food-system.feature</h2>
+<pre><code class="language-gherkin">Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (US-FOOD-001)
+
+  Background:
+    Given the player app is loaded
+    And a valid &quot;pet_token&quot; of at least (pet_access_token_min_bytes = 32) bytes is stored in localStorage
+    And the user is on the PetPage at &quot;/pet/:petId&quot;
+
+  # --- Food inventory display ---
+
+  Scenario: Food inventory renders list of available food items with stat icons
+    Given the FoodInventory component is visible on the PetPage
+    And GET /api/v1/pets/:petId responds HTTP 200 with &quot;foodItems&quot; array containing food buff objects
+    When the FoodInventory component mounts
+    Then the FoodInventory renders a grid or list of FoodItem cards
+    And each FoodItem card displays:
+      - The stat it targets (Speed, Strength, Stamina) with an icon
+      - The buff magnitude (e.g., &quot;+5 Speed&quot;)
+      - The buff type (permanent or temporary with duration)
+      - A &quot;Use&quot; button
+
+  Scenario: Empty food inventory shows helpful message
+    Given a pet with no food items in the inventory
+    And GET /api/v1/pets/:petId returns HTTP 200 with &quot;foodItems&quot;: []
+    When the FoodInventory component renders
+    Then the message &quot;No food items available&quot; is displayed
+    And a hint &quot;Earn food by battling or completing training streaks&quot; is shown
+    And no FoodItem cards are rendered
+
+  Scenario: Food item card displays buff duration for temporary buffs
+    Given a FoodItem with isPermanent = false and expiresAt = &quot;2026-05-05T10:30:00Z&quot;
+    When the FoodItem card renders
+    Then the card displays the remaining duration (e.g., &quot;Expires in 2h 30m&quot;)
+    And the duration countdown updates in real-time
+
+  Scenario: Food item card displays &quot;Permanent&quot; label for permanent buffs
+    Given a FoodItem with isPermanent = true
+    When the FoodItem card renders
+    Then the card displays &quot;Permanent Buff&quot; or similar permanent indicator
+    And no expiry timer is shown
+
+  # --- Apply food buff interaction ---
+
+  Scenario: Owner clicks &quot;Use&quot; button on food item and stat increments
+    Given the FoodInventory shows a food item with stat = &quot;speed&quot; and magnitude = 5
+    And the pet&#x27;s current speed = 45
+    And POST /api/v1/pets/:petId/feed responds HTTP 200 with &quot;updatedStats&quot;: {speed: 50, ...} and &quot;buffApplied&quot;
+    When the owner clicks the &quot;Use&quot; button on the FoodItem
+    Then POST /api/v1/pets/:petId/feed is called with the Authorization header and the food buff type
+    And the Authorization header contains the Bearer token from localStorage
+    And the Speed StatBar animates to 50 with a visual transition
+    And a glow animation appears around the pet sprite (warm glow color)
+    And GET /api/v1/pets/:petId is re-fetched to refresh all stats
+
+  Scenario: Buff stat already at maximum — use button disabled with tooltip
+    Given a pet with speed = (pet_stat_max = 100)
+    And a food item that targets the speed stat
+    When the FoodItem card renders
+    Then the &quot;Use&quot; button is disabled (grayed out)
+    And a tooltip appears on hover: &quot;This stat is already at maximum&quot;
+
+  Scenario: HTTP 400 STAT_AT_MAXIMUM response shows toast error
+    Given a pet with strength = 100 and a food item targeting strength
+    And POST /api/v1/pets/:petId/feed responds HTTP 400 with error code &quot;STAT_AT_MAXIMUM&quot;
+    When the owner clicks the &quot;Use&quot; button
+    Then a toast notification appears: &quot;Stat is already at maximum (100)&quot;
+    And the FoodItem remains visible and enabled for retrying other stats
+
+  # --- Stat bar buff indicator ---
+
+  Scenario: Temporary buff applied — buff badge appears on StatBar with countdown
+    Given the owner has applied a temporary speed buff that expires in 45 minutes
+    And the response &quot;buffApplied&quot;: {stat: &quot;speed&quot;, magnitude: 5, isPermanent: false, expiresAt: &quot;...&quot;}
+    When the StatsPanel re-renders
+    Then the Speed StatBar shows a buff badge or icon indicating an active temporary buff
+    And the badge displays a countdown timer: &quot;Expires in 45m&quot;
+    And the timer updates every second and decrements
+
+  Scenario: Buff expires — buff badge disappears from StatBar
+    Given a Speed StatBar showing a temporary buff expiring in 30 seconds
+    When 30 seconds elapse and the buff expiry time passes
+    Then the buff badge disappears from the StatBar
+    And the stat value remains elevated (the buff effect is already applied to the base stat)
+    And the countdown timer stops and is removed from the page
+
+  Scenario: Permanent buff applied — buff badge shown without countdown
+    Given the owner has applied a permanent buff to strength
+    And the response &quot;buffApplied&quot;: {stat: &quot;strength&quot;, magnitude: 10, isPermanent: true, expiresAt: null}
+    When the StatsPanel re-renders
+    Then the Strength StatBar shows a buff badge indicating a permanent buff
+    And no countdown timer appears on the badge
+
+  Scenario: Multiple buffs on same stat displayed on StatBar
+    Given a Speed StatBar with two active buffs (e.g., temporary +3 and permanent +5)
+    When the StatsPanel renders
+    Then both buff badges are visible on the Speed StatBar
+    And each badge shows its type (permanent or temporary) and remaining duration
+    And the total speed value reflects both buffs combined
+
+  # --- Food use animation ---
+
+  Scenario: Pet sprite plays animation when food is applied
+    Given the owner clicks &quot;Use&quot; on a food item
+    And POST /api/v1/pets/:petId/feed responds HTTP 200
+    When the food buff is applied
+    Then the PetCanvas pet sprite plays a brief animation:
+      - Pet scales and blinks (0.2s scale 1.05 → 1.0)
+      - A warm glow effect surrounds the pet (200ms)
+    And the animation completes before the StatBar animation starts
+
+  Scenario: Reduced motion disables food use animation
+    Given the user has &quot;prefers-reduced-motion: reduce&quot; enabled
+    When the owner applies a food buff
+    Then the PetCanvas pet sprite does NOT animate
+    And only the StatBar updates without animation
+    And the stat value appears instantly
+
+  # --- Multiple food items and inventory management ---
+
+  Scenario: Multiple food items of same type shown separately in inventory
+    Given the pet has 3 identical &quot;Speed +5&quot; food items in the inventory
+    When the FoodInventory renders
+    Then three separate FoodItem cards are displayed (one for each)
+    And the owner can use any of them by clicking the &quot;Use&quot; button on the desired card
+
+  Scenario: Food item removed from inventory after use
+    Given the FoodInventory shows a food item card
+    And the owner clicks &quot;Use&quot; and the API call succeeds
+    When the FoodInventory is refreshed (GET /api/v1/pets/:petId)
+    Then the used food item disappears from the inventory grid
+    And the remaining food items are displayed
+
+  # --- Keyboard navigation ---
+
+  Scenario: Food items are keyboard navigable with Tab and activatable with Enter
+    Given the FoodInventory is rendered with multiple FoodItem cards
+    When the user navigates using Tab
+    Then each FoodItem &quot;Use&quot; button is focusable
+    And pressing Enter on a focused &quot;Use&quot; button applies the food buff
+    And visual focus indicator (pixel-art ring) is visible on focused buttons
+
+  # --- Accessibility for buff indicators ---
+
+  Scenario: Buff countdown timer announced to screen readers
+    Given a temporary buff with remaining duration on a StatBar
+    When the countdown timer updates
+    Then the StatBar has aria-label that includes the buff description and remaining time (e.g., &quot;Speed, 50 out of 100, with temporary +5 buff expiring in 30 minutes&quot;)
+    And the aria-live region is updated (throttled to avoid flooding)
+</code></pre>
+<h2>leaderboard-ui.feature</h2>
+<pre><code class="language-gherkin">Feature: Leaderboard UI — Display, Rarity Filter, Owner Rank Banner, and Degraded State (US-BOARD-001, US-RARITY-001)
+
+  Background:
+    Given the player app is loaded
+    And the user has navigated to the LeaderboardPage at &quot;/leaderboard&quot;
+
+  # --- Normal leaderboard display ---
+
+  Scenario: Public leaderboard loads top 100 pets without authentication
+    Given no &quot;pet_token&quot; is present in localStorage
+    And GET /api/v1/leaderboard?page=1&amp;limit=100 responds HTTP 200 with an array of up to (leaderboard_top_display = 100) pet entries
+    When the LeaderboardPage renders
+    Then the LeaderboardTable renders with up to 100 LeaderboardRow components
+    And the table has semantic markup with &quot;&lt;table&gt;&quot; containing &quot;&lt;th scope=&quot;col&quot;&gt;&quot; column headers
+    And no login prompt or token is required to view the page
+
+  Scenario: Leaderboard auto-refreshes every 30 seconds via TanStack Query
+    Given the LeaderboardPage is mounted
+    And (leaderboard_update_lag_max_seconds = 30) seconds have elapsed since the last fetch
+    And GET /api/v1/leaderboard responds HTTP 200 with refreshed pet entries
+    When the TanStack Query stale timer fires a background refetch
+    Then the LeaderboardTable updates to reflect the refreshed data without a full page reload
+
+  Scenario: Rarity filter updates URL and refetches leaderboard
+    Given the LeaderboardPage is loaded showing all rarities
+    And GET /api/v1/leaderboard?rarity=EPIC&amp;page=1&amp;limit=100 responds HTTP 200 with EPIC rarity pet entries
+    When the owner clicks the &quot;Epic&quot; tab in the RarityFilter component
+    Then the browser URL changes to &quot;/leaderboard?rarity=EPIC&quot;
+    And GET /api/v1/leaderboard?rarity=EPIC&amp;page=1&amp;limit=100 is called
+    And only EPIC rarity pets are shown in the LeaderboardTable
+
+  Scenario: Rarity filter selection is preserved on page refresh
+    Given the user is on &quot;/leaderboard?rarity=RARE&quot;
+    And GET /api/v1/leaderboard?rarity=RARE&amp;page=1&amp;limit=100 responds HTTP 200 with RARE rarity pet entries
+    When the page is refreshed
+    Then the &quot;Rare&quot; tab is active in RarityFilter
+    And GET /api/v1/leaderboard?rarity=RARE&amp;page=1&amp;limit=100 is called on mount
+
+  Scenario: Owner rank banner shows when pet token is present and pet is in top 100
+    Given a &quot;pet_token&quot; is present in localStorage identifying pet &quot;abc123&quot;
+    And GET /api/v1/leaderboard/rank/abc123 responds HTTP 200 with {&quot;rank&quot;: 47, &quot;petName&quot;: &quot;Zara&quot;}
+    When the LeaderboardPage renders
+    Then the OwnerRankBanner component is visible with text &quot;Your pet Zara is ranked #47&quot;
+    And the OwnerRankBanner has role=&quot;status&quot;
+
+  Scenario: Owner rank banner shows when pet is ranked below top 100
+    Given a &quot;pet_token&quot; is present in localStorage identifying pet &quot;abc123&quot;
+    And GET /api/v1/leaderboard/rank/abc123 responds HTTP 200 with {&quot;rank&quot;: 342, &quot;petName&quot;: &quot;Bolt&quot;}
+    When the LeaderboardPage renders
+    Then the OwnerRankBanner shows &quot;Your pet Bolt is ranked #342&quot;
+    And the pet is not visible in the main LeaderboardTable (which only displays top 100)
+
+  Scenario: Owner rank banner is hidden when no pet token is present
+    Given no &quot;pet_token&quot; is in localStorage
+    When the LeaderboardPage renders
+    Then the OwnerRankBanner component is not rendered
+
+  Scenario: Clicking a leaderboard row navigates to the pet&#x27;s battle records page
+    Given the LeaderboardTable shows a row for pet &quot;Blaze&quot; with petId &quot;xyz789&quot;
+    When the user clicks or presses Enter on the &quot;Blaze&quot; LeaderboardRow
+    Then the app navigates to &quot;/pet/xyz789/records&quot;
+
+  # --- Degraded leaderboard state ---
+
+  Scenario: Degraded leaderboard banner shown when Redis is unavailable
+    Given GET /api/v1/leaderboard responds HTTP 200 but with response body field &quot;degraded&quot;: true indicating stale/cached data from a degraded Redis backend
+    When the LeaderboardPage renders the response
+    Then an orange &quot;Live data temporarily unavailable&quot; banner is visible above the LeaderboardTable
+    And the banner has a color that meets 4.5:1 contrast ratio against its background
+
+  Scenario: Banned pet removed from leaderboard within 5 minutes of admin ban
+    Given a pet with petId &quot;bad123&quot; is visible at rank 12 in the LeaderboardTable
+    And the pet &quot;bad123&quot; has been banned by an admin
+    And GET /api/v1/leaderboard responds HTTP 200 with refreshed entries not including &quot;bad123&quot;
+    When (leaderboard_ban_reflection_time_minutes = 5) minutes have elapsed and the leaderboard auto-refresh fires
+    Then &quot;bad123&quot; no longer appears in any LeaderboardRow in the LeaderboardTable
+</code></pre>
+<h2>pet-display.feature</h2>
+<pre><code class="language-gherkin">Feature: Pet Display — Token Generation, Stat Bars, and Food Buff Indicator (US-PET-001, US-PET-002, US-FOOD-001)
+
+  Background:
+    Given the player app is loaded at the root URL &quot;/&quot;
+    And the API base is &quot;https://api.pixel-pet-arena.example.com&quot;
+
+  # --- Pet token generation ---
+
+  Scenario: Guest visits the landing page and a new pet token is generated
+    Given no &quot;pet_token&quot; key exists in localStorage
+    When the browser loads &quot;/&quot;
+    Then GET /api/v1/pets/random is called without an Authorization header
+    And the response body contains a &quot;seed&quot; field and a &quot;rarity&quot; field
+    And a &quot;pet_token&quot; entry is written to localStorage with a value of at least (pet_access_token_min_bytes = 32) bytes
+    And the PetCanvas component renders inside a div with role=&quot;img&quot; and aria-label=&quot;Pixel pet canvas&quot;
+
+  Scenario: Returning guest has an existing token — no new pet is generated
+    Given a &quot;pet_token&quot; value of at least (pet_access_token_min_bytes = 32) bytes is present in localStorage
+    When the browser loads &quot;/pet/:petId&quot;
+    Then GET /api/v1/pets/:petId is called with the header &quot;Authorization: Bearer &lt;token&gt;&quot;
+    And GET /api/v1/pets/random is NOT called
+    And the PetCanvas component renders the sprite corresponding to the stored token
+
+  Scenario: Pet page loads and displays stat bars for speed, strength, and stamina
+    Given a claimed pet is accessible at &quot;/pet/:petId&quot;
+    And GET /api/v1/pets/:petId returns HTTP 200 with &quot;speed&quot;, &quot;strength&quot;, and &quot;stamina&quot; values between 1 and 100
+    When the StatsPanel component renders
+    Then a StatBar labeled &quot;Speed&quot; is visible with a width proportional to the speed value out of (pet_stat_max = 100)
+    And a StatBar labeled &quot;Strength&quot; is visible with a width proportional to the strength value
+    And a StatBar labeled &quot;Stamina&quot; is visible with a width proportional to the stamina value
+    And each StatBar element has an aria-label announcing the stat name and current value
+
+  Scenario: Pixel art canvas renders with pixelated image rendering
+    Given a pet is displayed on the LandingPage
+    When the PetCanvas div is inspected
+    Then the container has the CSS property &quot;image-rendering: pixelated&quot;
+    And the Phaser game canvas dimensions are (sprite_resolution_px = 32) × 2 = 64 CSS px wide and 64 CSS px tall
+
+  Scenario: Neglected pet displays desaturated visual state after threshold exceeded
+    Given a claimed pet&#x27;s &quot;last_trained_at&quot; timestamp is more than (training_neglect_threshold_days = 3) days ago
+    When the PetPage at &quot;/pet/:petId&quot; loads
+    Then the PetCanvas container has the CSS class &quot;pet-canvas--neglected&quot;
+    And the canvas wrapper has CSS filter &quot;grayscale(60%) brightness(0.8)&quot; applied
+    And the NeglectedState component is visible on the page
+
+  Scenario: Reduced motion preference suppresses Phaser idle animation
+    Given the OS/browser has &quot;prefers-reduced-motion: reduce&quot; enabled
+    When the PetCanvas mounts and PetCanvasEngine initializes
+    Then the Phaser animation loop is paused and a static sprite frame is rendered
+    And the CSS rarity shimmer animations are suppressed via &quot;@media (prefers-reduced-motion: reduce)&quot;
+
+  Scenario: Temporary food buff indicator shown on StatsPanel with countdown timer
+    Given a claimed pet has an active temporary food buff on the &quot;speed&quot; stat
+    And the buff was applied via POST /api/v1/food/apply and the response &quot;buffApplied.isPermanent&quot; is false
+    And the response &quot;buffApplied.expiresAt&quot; is a future timestamp
+    When the PetPage at &quot;/pet/:petId&quot; renders the StatsPanel
+    Then a buff badge is visible on the Speed StatBar
+    And the buff badge displays a countdown timer showing the remaining duration until &quot;expiresAt&quot;
+    And the buff indicator disappears once the &quot;expiresAt&quot; time has passed
+
+  Scenario: Legendary pet displays animated shimmer border
+    Given a claimed pet has rarity &quot;LEGENDARY&quot;
+    When the PetPage renders
+    Then the PetCanvas wrapper has the CSS class &quot;rarity-legendary&quot;
+    And the element has the CSS animation &quot;legendary-shimmer 2s ease-in-out infinite&quot; applied from rarity.css
+
+  # --- Pet Seed Uniqueness &amp; Generation Validation ---
+
+  Scenario: Pet seed uniqueness is guaranteed across generation requests
+    Given 100 consecutive calls to GET /api/v1/pets/random via the landing page
+    When seeds from all 100 generated pets are collected by the client
+    Then no two pets share the same seed value
+    And the uniqueness constraint on the server side is verified in tests
+
+  Scenario: Random pet generation returns valid unclaimed pet with rarity distribution
+    Given a request to GET /api/v1/pets/random without authentication
+    When the endpoint is called multiple times (sample size ≥ 1000)
+    Then rarity distribution follows expected:
+      | Rarity    | Target | Tolerance |
+      | COMMON    | 60%    | ±2%       |
+      | RARE      | 25%    | ±2%       |
+      | EPIC      | 12%    | ±2%       |
+      | LEGENDARY | 3%     | ±2%       |
+    And each pet has fields: id, seed, rarity, stats (speed, strength, stamina all = 10)
+    And reservedUntil is set to NOW() + 24 hours
+
+  Scenario: Retrieve claimed pet shows owner-only fields when authenticated
+    Given a claimed pet with petId &quot;pet-uuid-003&quot; and valid petToken
+    When GET /api/v1/pets/:petId is called with Authorization: Bearer {petToken}
+    Then the response includes isOwner = true and claimedAt timestamp
+    And stats.level is calculated from total_training_actions
+    And isNeglected reflects whether pet was trained within 3 days
+
+  Scenario: Retrieve pet without authentication shows public data only
+    Given a claimed pet with petId &quot;pet-uuid-004&quot;
+    When GET /api/v1/pets/:petId is called WITHOUT authentication header
+    Then the response includes all fields EXCEPT claimedAt
+    And isOwner field is set to false
+    And status is HTTP 200 (no 401 error)
+</code></pre>
+<h2>settings.feature</h2>
+<pre><code class="language-gherkin">Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (User Settings)
+
+  Background:
+    Given the player app is loaded
+    And a valid &quot;pet_token&quot; is stored in localStorage
+    And the user has access to settings via navbar menu or settings page
+
+  # --- Settings page access ---
+
+  Scenario: Owner opens settings from navbar menu
+    Given the player is on any page with the NavBar visible
+    When the owner clicks a settings icon or menu button in the NavBar
+    Then a settings dropdown or modal appears
+    And options for &quot;Theme&quot;, &quot;Audio&quot;, and &quot;Notifications&quot; are visible
+    And a &quot;Close&quot; button or Escape key dismisses the settings
+
+  Scenario: Settings preferences persist in localStorage
+    Given the user is on the SettingsPage
+    And the user changes the theme from &quot;Dark&quot; to &quot;Light&quot;
+    When the user closes the settings page
+    And refreshes the page
+    Then the &quot;Light&quot; theme is applied
+    And the theme preference is persisted in localStorage under a &quot;theme&quot; key
+
+  # --- Dark mode / Light mode toggle ---
+
+  Scenario: User toggles dark mode on and off
+    Given the SettingsPage shows a &quot;Dark Mode&quot; toggle switch
+    And the default mode is &quot;Dark&quot;
+    When the user clicks the toggle to switch to &quot;Light&quot;
+    Then the page background color changes from dark (#1a1a2e) to light (e.g., #f5f5f0)
+    And text color inverts appropriately to maintain 4.5:1 contrast ratio
+    And the toggle switch visual state updates to show &quot;Light&quot; is selected
+
+  Scenario: Dark mode colors maintain accessibility contrast ratios
+    Given the dark mode is enabled
+    When the page renders with dark background and light text
+    Then the text color (e.g., #e8e8f0) on dark surface (#1a1a2e) has a contrast ratio of at least 4.5:1
+    And all interactive elements (buttons, links) maintain 3:1 contrast for focus states
+
+  Scenario: Light mode colors maintain accessibility contrast ratios
+    Given the light mode is enabled
+    When the page renders
+    Then the text color on light surface has a contrast ratio of at least 4.5:1
+    And buttons and interactive elements meet the same contrast minimums
+
+  Scenario: Rarity badge colors adapt to theme
+    Given a Legendary pet with rarity badge in Dark mode
+    And the user switches to Light mode
+    When the RarityBadge component re-renders
+    Then the badge color adjusts to remain legible and visually compelling in Light mode
+    And the animated shimmer (if present) maintains visual appeal in both themes
+
+  # --- Audio and sound settings ---
+
+  Scenario: Owner disables sound effects globally
+    Given the SettingsPage shows a &quot;Sound Effects&quot; toggle
+    And sound is enabled by default
+    When the owner clicks the toggle to disable sound
+    Then no sound is played for subsequent interactions (button clicks, stat changes, arena)
+    And the setting is stored in localStorage
+
+  Scenario: Owner re-enables sound effects
+    Given sound effects are currently disabled
+    When the owner clicks the toggle to re-enable sound
+    Then sound plays for the next interaction (button click)
+    And a confirmation sound plays to indicate the toggle worked
+
+  Scenario: Sound setting does not affect reduced-motion behavior
+    Given the user has &quot;prefers-reduced-motion: reduce&quot; enabled at the OS level
+    And sound effects are enabled in settings
+    When the user performs an action (e.g., trains a pet)
+    Then animations are still suppressed (per reduced-motion preference)
+    But sound effects play (if sound is enabled in settings)
+    These are independent settings
+
+  # --- Notification preferences ---
+
+  Scenario: Owner enables/disables push notifications
+    Given the SettingsPage shows a &quot;Notifications&quot; toggle
+    And notifications are enabled by default
+    When the owner clicks to disable notifications
+    Then no push notifications are sent for subsequent pet events (training complete, arena available)
+    And the setting is stored in localStorage
+
+  Scenario: Owner views notification channels
+    Given the owner navigates to Notification settings
+    When the settings section expands
+    Then checkboxes are visible for:
+      - Daily training reminder (enabled by default)
+      - Arena battles available (enabled by default)
+      - Pet level up (enabled by default)
+    And the owner can toggle each channel independently
+
+  Scenario: Owner enables daily training reminder notification
+    Given notification reminders are disabled
+    When the owner checks the &quot;Daily training reminder&quot; checkbox
+    Then the browser requests notification permission (if not already granted)
+    And the user is asked to confirm the permission
+    And the setting is stored if the user grants permission
+
+  # --- Settings form behavior ---
+
+  Scenario: Changes to settings are applied immediately
+    Given the user is on the SettingsPage with the theme set to &quot;Dark&quot;
+    When the user clicks the theme toggle to &quot;Light&quot;
+    Then the page theme changes immediately without requiring a save button
+    And no &quot;Save Settings&quot; action is required
+
+  Scenario: Settings modal or panel can be closed without saving
+    Given the SettingsPage is open and the user has made changes
+    When the user clicks the X button or presses Escape
+    Then the settings modal closes
+    And all changes are persisted (no &quot;Cancel&quot; or &quot;Revert&quot; action needed)
+    And the user is returned to the previous page
+
+  Scenario: Reset to defaults button restores original settings
+    Given the user has customized multiple settings (theme, sound, notifications)
+    When a &quot;Reset to Defaults&quot; button is visible and clicked
+    Then all settings revert to:
+      - Theme: Dark
+      - Sound: Enabled
+      - Notifications: Enabled
+    And a confirmation message appears: &quot;Settings reset to defaults&quot;
+
+  # --- Accessibility of settings controls ---
+
+  Scenario: Settings toggle switches are keyboard operable
+    Given the SettingsPage is open with toggle switches for theme and sound
+    When the user navigates using Tab to a toggle switch
+    And presses Space or Enter
+    Then the toggle state changes
+    And a visual focus indicator is visible on the toggle
+
+  Scenario: Settings labels are properly associated with inputs
+    Given the SettingsPage shows &quot;Dark Mode&quot; label with a toggle switch
+    When inspected in the browser DevTools
+    Then the &lt;label&gt; element is properly associated with the toggle via a matching &quot;for&quot; and &quot;id&quot; attribute
+    Or the label wraps the input element
+    And screen readers correctly announce the label and current state
+
+  Scenario: Settings form has proper heading hierarchy
+    Given the SettingsPage is open
+    When inspected for heading structure
+    Then a top-level &lt;h1&gt; or &lt;h2&gt; reads &quot;Settings&quot;
+    And subsections (Theme, Audio, Notifications) have &lt;h3&gt; headings
+    And no heading levels are skipped
+
+  # --- Settings validation ---
+
+  Scenario: Invalid settings are prevented from being saved
+    Given a hypothetical settings form with a numeric input (e.g., notification delay)
+    When the user enters a non-numeric value (e.g., &quot;abc&quot;)
+    Then the field shows a validation error
+    And the invalid value is not persisted to localStorage
+    And the previous valid value is retained
+
+  # --- Settings responsiveness ---
+
+  Scenario: Settings panel is accessible on mobile (320px viewport)
+    Given the viewport width is 320px (mobile)
+    When the user opens the settings
+    Then the settings panel or modal is fully visible without horizontal overflow
+    And toggle switches and buttons are at least 44×44px for touch interaction
+    And text is readable without zooming
+
+  Scenario: Settings layout adapts to small screens
+    Given the viewport width is 375px (mobile)
+    When the SettingsPage renders
+    Then the layout is single-column
+    And all controls (toggles, buttons) are vertically stacked
+    And no controls are hidden or require horizontal scrolling
+</code></pre>
+<h2>training-ui.feature</h2>
+<pre><code class="language-gherkin">Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAIN-001)
+
+  Background:
+    Given the player app is loaded
+    And a valid &quot;pet_token&quot; of at least (pet_access_token_min_bytes = 32) bytes is stored in localStorage
+    And the user is on the TrainingPage at &quot;/pet/:petId/train&quot;
+    And GET /api/v1/pets/:petId returns HTTP 200 with the pet&#x27;s current stats
+
+  # --- Happy path training ---
+
+  Scenario: Owner performs a RUN training action and StatChangeIndicator appears
+    Given the TrainingPage is showing three TrainingActionCard components labeled &quot;RUN&quot;, &quot;STRENGTH&quot;, and &quot;STAMINA&quot;
+    And the &quot;actionsRemainingToday&quot; value is 3 (training_actions_per_day = 3)
+    And POST /api/v1/training responds HTTP 200 with &quot;statDelta&quot;, &quot;updatedStats&quot;, and &quot;actionsRemainingToday&quot;
+    When the owner clicks the &quot;Train&quot; button on the &quot;RUN&quot; action card
+    Then POST /api/v1/training is called with body {&quot;training_type&quot;: &quot;RUN&quot;}
+    And the Authorization header contains the Bearer token from localStorage
+    And the StatChangeIndicator component appears showing &quot;+X Speed&quot;
+    And the StatChangeIndicator is visible for (training_stat_display_duration_seconds = 2) seconds then disappears
+    And the Speed StatBar in StatsPanel animates to the new speed value
+    And GET /api/v1/pets/:petId is re-fetched
+
+  Scenario: STRENGTH training action increments strength stat
+    Given &quot;actionsRemainingToday&quot; is 2
+    And POST /api/v1/training responds HTTP 200 with &quot;statDelta&quot;, &quot;updatedStats&quot;, and &quot;actionsRemainingToday&quot;
+    When the owner clicks the &quot;Train&quot; button on the &quot;STRENGTH&quot; action card
+    Then POST /api/v1/training is called with body {&quot;training_type&quot;: &quot;STRENGTH&quot;}
+    And the StatChangeIndicator shows &quot;+X Strength&quot; for (training_stat_display_duration_seconds = 2) seconds
+    And the Strength StatBar animates to the updated value
+
+  Scenario: STAMINA training action increments stamina stat
+    Given &quot;actionsRemainingToday&quot; is 1
+    And POST /api/v1/training responds HTTP 200 with &quot;statDelta&quot;, &quot;updatedStats&quot;, and &quot;actionsRemainingToday&quot;
+    When the owner clicks the &quot;Train&quot; button on the &quot;STAMINA&quot; action card
+    Then POST /api/v1/training is called with body {&quot;training_type&quot;: &quot;STAMINA&quot;}
+    And the StatChangeIndicator shows &quot;+X Stamina&quot; for (training_stat_display_duration_seconds = 2) seconds
+
+  # --- Daily cap enforcement ---
+
+  Scenario: All training actions exhausted — cards disabled and DailyResetTimer appears
+    Given the owner has already used all (training_actions_per_day = 3) daily training actions
+    And GET /api/v1/pets/:petId responds HTTP 200 with &quot;actionsRemainingToday&quot;: 0
+    When the TrainingPage renders
+    Then all three TrainingActionCard &quot;Train&quot; buttons are disabled
+    And the DailyResetTimer component is visible showing a countdown to UTC 00:00
+    And the DailyResetTimer has aria-live=&quot;polite&quot; and announces the remaining time throttled at 60-second intervals and at ≤ 5 minutes remaining
+    And no &quot;Come back tomorrow&quot; or exhaustion message is shown without also showing the DailyResetTimer
+
+  Scenario: Daily reset at UTC 00:00 re-enables training cards
+    Given all (training_actions_per_day = 3) training actions were exhausted and the DailyResetTimer is showing
+    And GET /api/v1/pets/:petId responds HTTP 200 with &quot;actionsRemainingToday&quot;: 3
+    When the UTC clock reaches 00:00
+    Then GET /api/v1/pets/:petId is re-fetched
+    And the three TrainingActionCard &quot;Train&quot; buttons become enabled again
+    And the DailyResetTimer component disappears from the page
+
+  Scenario: Stat already at maximum — toast shown and that stat card stays disabled
+    Given the pet&#x27;s speed stat is already at (pet_stat_max = 100)
+    And POST /api/v1/training responds HTTP 400 with error code &quot;STAT_AT_MAXIMUM&quot;
+    When the owner clicks the &quot;Train&quot; button on the &quot;RUN&quot; action card
+    Then a toast notification appears with message &quot;Stat is already at maximum&quot;
+    And the &quot;RUN&quot; action card &quot;Train&quot; button is disabled with a &quot;Max&quot; indicator
+    And the &quot;STRENGTH&quot; and &quot;STAMINA&quot; action card buttons remain enabled
+
+  Scenario: Training action renders with correct tab-order for keyboard navigation
+    Given the TrainingPage is loaded with three action cards
+    When the user navigates using the Tab key
+    Then the focus order follows: &quot;RUN&quot; card → RUN Train button → &quot;STRENGTH&quot; card → STRENGTH Train button → &quot;STAMINA&quot; card → STAMINA Train button
+    And each &quot;Train&quot; button is activatable via Enter or Space
+
+  Scenario: HTTP 401 during training clears token and redirects to home
+    Given the owner is on the TrainingPage
+    And POST /api/v1/training responds HTTP 401
+    When the owner clicks the &quot;Train&quot; button on any action card
+    Then the &quot;pet_token&quot; key is removed from localStorage
+    And the app navigates to &quot;/&quot;
+
+  # --- Server-side training behavior ---
+
+  Scenario: Training action increments stat within valid range
+    Given a pet with stat_speed = 25 and a valid petToken
+    And the pet has remaining training actions today (&lt; 3 used)
+    When POST /api/v1/training is called with trainingType = &quot;RUN&quot;
+    Then the system returns HTTP 200
+    And stat_speed is incremented by a random integer in [1, 3]
+    And new stat_speed is between 26 and 28 inclusive
+    And a training_logs record is created with training_type, stat_delta, and stat_after values
+
+  Scenario: Training action increments total_training_actions for level formula
+    Given a pet with total_training_actions = 27 (current level = 2)
+    When a training action is submitted successfully
+    Then total_training_actions is incremented to 28
+    And level calculation: FLOOR(28 / 10) = 2 (no level change yet)
+    When 2 more training actions are submitted successfully
+    Then total_training_actions = 30 and level = 3
+
+  Scenario: Training disabled on banned pet returns HTTP 403
+    Given a pet with is_banned = true and a valid petToken
+    When POST /api/v1/training is called
+    Then the system returns HTTP 403 with error code PET_BANNED
+    And no training is applied
+
+  Scenario: Daily training limit resets at UTC midnight
+    Given a pet that completed 3 training actions at 23:59 UTC
+    When the UTC day rolls over to 00:00 UTC
+    And the same pet submits a new training request
+    Then the request is accepted with actionsRemainingToday = 2
+    And the daily counter has reset
+</code></pre></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

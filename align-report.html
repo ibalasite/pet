@@ -1,511 +1,400 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pixel-pet-arena — gendoc — Cross-File Alignment Audit Report</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Align-Report — test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
-    :root {
-      --bg-deep: #060610; --bg-panel: #0e0e20; --bg-card: #14142e;
-      --border: #252545; --border-bright: #3838aa;
-      --accent-cyan: #00e5ff; --accent-purple: #bb86fc;
-      --accent-yellow: #ffd740; --accent-green: #69ff47;
-      --pixel-font: 'Press Start 2P', monospace;
-      --retro-font: 'VT323', monospace;
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg-deep); color: #e0e0ff; font-family: var(--retro-font); font-size: 18px; min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px); pointer-events: none; z-index: 0; }
-    nav { background: var(--bg-panel); border-bottom: 2px solid var(--border-bright); padding: 1rem 2rem; display: flex; gap: 1rem; align-items: center; position: sticky; top: 0; z-index: 100; }
-    nav a { color: var(--accent-cyan); text-decoration: none; font-family: var(--pixel-font); font-size: 9px; }
-    nav a:hover { color: var(--accent-yellow); }
-    nav .breadcrumb { color: #666; font-family: var(--pixel-font); font-size: 8px; }
-    .main { max-width: 960px; margin: 2rem auto; padding: 0 2rem; position: relative; z-index: 1; }
-    .doc-header { background: var(--bg-panel); border: 2px solid var(--border-bright); border-radius: 4px; padding: 2rem; margin-bottom: 2rem; }
-    .doc-header h1 { font-family: var(--pixel-font); font-size: 14px; color: var(--accent-cyan); line-height: 1.6; }
-    .doc-header .meta { color: #8888aa; font-size: 14px; margin-top: 0.5rem; }
-    .doc-content { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
-    .doc-h1 { font-family: var(--pixel-font); font-size: 13px; color: var(--accent-cyan); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-bright); line-height: 1.8; }
-    .doc-h2 { font-family: var(--pixel-font); font-size: 11px; color: var(--accent-purple); margin: 1.5rem 0 0.75rem; line-height: 1.8; }
-    .doc-h3 { font-family: var(--pixel-font); font-size: 9px; color: var(--accent-yellow); margin: 1.2rem 0 0.6rem; line-height: 1.8; }
-    .doc-h4 { font-family: var(--pixel-font); font-size: 8px; color: var(--accent-green); margin: 1rem 0 0.5rem; line-height: 1.8; }
-    .doc-p { line-height: 1.7; margin: 0.6rem 0; color: #c8c8e8; }
-    .doc-p code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 15px; }
-    .doc-code { background: #0a0a1e; border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .doc-code code { font-family: 'Courier New', monospace; font-size: 13px; color: #aaddff; white-space: pre; line-height: 1.5; }
-    .doc-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .doc-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .doc-table th { background: var(--bg-card); color: var(--accent-yellow); padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; font-family: var(--pixel-font); font-size: 9px; }
-    .doc-table td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); color: #c8c8e8; }
-    .doc-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-    .doc-list { padding-left: 1.5rem; margin: 0.5rem 0; }
-    .doc-list li { color: #c8c8e8; margin: 0.3rem 0; line-height: 1.6; }
-    .doc-list li code { background: #1a1a35; color: var(--accent-cyan); padding: 1px 5px; border-radius: 3px; font-size: 14px; }
-    .doc-hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
-    .doc-gap { height: 0.5rem; }
-    .doc-quote { border-left: 3px solid var(--accent-purple); padding: 0.5rem 1rem; color: #9999cc; font-style: italic; background: rgba(187,134,252,0.05); margin: 0.5rem 0; }
-    a { color: var(--accent-cyan); text-decoration: none; }
-    a:hover { color: var(--accent-yellow); text-decoration: underline; }
-    strong { color: var(--accent-yellow); }
-    em { color: #aa88ff; }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">⌂ Index</a>
-    <span class="breadcrumb">›</span>
-    <span class="breadcrumb">gendoc — Cross-File Alignment Audit Report</span>
-  </nav>
-  <div class="main">
-    <div class="doc-header">
-      <h1>gendoc — Cross-File Alignment Audit Report</h1>
-      <div class="meta">pixel-pet-arena · Documentation</div>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">test</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
     </div>
-    <div class="doc-content">
-<h1 class="doc-h1" id="gendoc--cross-file-alignment-audit-report">gendoc — Cross-File Alignment Audit Report</h1>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Project:</strong> pixel-pet-arena</p>
-<p class="doc-p"><strong>Date:</strong> 2026-05-04</p>
-<p class="doc-p"><strong>Execution Mode:</strong> gendoc-align-check</p>
-<p class="doc-p"><strong>Repository Type:</strong> BDD Documentation + Game Design Specification (no implementation code)</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="executive-summary">Executive Summary</h2>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Dimension</th><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>Total</th><th>Status</th></tr></thead>
-<tbody>
-<tr><td>**0: File Existence**</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>⚠️</td></tr>
-<tr><td>**1: Doc → Doc**</td><td>0</td><td>2</td><td>5</td><td>4</td><td>11</td><td>⚠️</td></tr>
-<tr><td>**2: Doc → Code**</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>🔴</td></tr>
-<tr><td>**3: Code → Test**</td><td>1</td><td>2</td><td>0</td><td>0</td><td>3</td><td>🔴</td></tr>
-<tr><td>**4: Doc → Test**</td><td>2</td><td>5</td><td>2</td><td>0</td><td>9</td><td>🔴</td></tr>
-<tr><td>**5: UML/RTM Quality**</td><td>0</td><td>2</td><td>3</td><td>0</td><td>5</td><td>⚠️</td></tr>
-<tr><td>**TOTAL**</td><td>**4**</td><td>**12**</td><td>**10**</td><td>**4**</td><td>**30**</td><td>🔴</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Overall Status:</strong> ⚠️ <strong>MODERATE RISK</strong> — Project has comprehensive documentation (28 files, 1,797 BDD lines) but critical gaps in:</p>
-<p class="doc-p">1. Test implementation (0 step definitions, 0 executable tests)</p>
-<p class="doc-p">2. Source code (specification-only repository)</p>
-<p class="doc-p">3. Traceability (RTM incomplete, missing scenario mappings)</p>
-<p class="doc-p">4. Supporting documentation (README, background job specs, UML diagrams)</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="dimension-0-mandatory-file-existence">Dimension 0: Mandatory File Existence</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="findings">Findings</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] MISSING: docs/README.md</strong></p>
-<ul class="doc-list">
-<li>Impact: Project lacks high-level overview for contributors</li>
-<li>Fix: Create README.md with project summary, setup instructions, and documentation navigation</li>
-<li>Auto-fixable: YES (documentation only)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Status:</strong> 1/1 file checks failed</p>
-<p class="doc-p"><strong>Severity Distribution:</strong> HIGH=1</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="dimension-1-document--document-alignment">Dimension 1: Document → Document Alignment</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="critical-findings-011">Critical Findings (0/11)</h3>
-<p class="doc-p">None</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="high-priority-findings-211">High-Priority Findings (2/11)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] BDD-client.md and BDD-server.md Missing</strong></p>
-<ul class="doc-list">
-<li>Issue: BDD specifications are present in features/<em>.feature and features/client/</em>.feature but summarized documentation files are absent</li>
-<li>Impact: New team members cannot understand test strategy at a glance; traceability to PRD is implicit rather than explicit</li>
-<li>Fix: Create docs/BDD-server.md and docs/BDD-client.md summarizing each feature file's scenarios and linking to PRD AC numbers</li>
-<li>Auto-fixable: YES (consolidate feature file headers into markdown)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] Feature Flag Gating Logic Not Clearly Separated from SCHEMA</strong></p>
-<ul class="doc-list">
-<li>Issue: EDD §4.11-4.12 defines marketplace as "Phase 3 — FF_MARKETPLACE required", but SCHEMA.md creates marketplace tables unconditionally</li>
-<li>Impact: Future maintainers may not understand that table presence ≠ feature active</li>
-<li>Fix: Add note to SCHEMA.md §2.8: "marketplace_listings and marketplace_transactions tables exist in base schema. Feature flag FF_MARKETPLACE gates all write endpoints and admin/player UIs; read-only queries on empty tables are safe."</li>
-<li>Auto-fixable: YES (documentation clarification)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="medium-priority-findings-511">Medium-Priority Findings (5/11)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] EDD § 4.3 ClaimCode Background Job Not Documented</strong></p>
-<ul class="doc-list">
-<li>Issue: SCHEMA.md §2.3 defines indexes for cleanup (idx_claim_codes_created_at, idx_claim_codes_used_at) but the actual scheduled job deletion logic is not specified</li>
-<li>Impact: Operations team may overlook implementing the cleanup job</li>
-<li>Fix: Create docs/background-jobs.md documenting all recurring jobs (claim code cleanup 72h, leaderboard snapshots, food buff record cleanup, pet reservation expiry)</li>
-<li>Auto-fixable: NO (requires ops collaboration)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] FRONTEND.md Missing Token Recovery Flow</strong></p>
-<ul class="doc-list">
-<li>Issue: PRD US-AUTH-002 AC-004-2 specifies "player can request new access link", API.md defines POST /api/v1/claim/recover, but FRONTEND.md §5.1 (Pet Claim Flow) does not include recovery UI component</li>
-<li>Impact: Frontend implementation may be unclear about where/when to show recover link</li>
-<li>Fix: Add FRONTEND §5.2 "Token Recovery Flow" with component diagram</li>
-<li>Auto-fixable: YES (documentation + component design)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] Social OG Tag Fields Not Fully Specified in API Response</strong></p>
-<ul class="doc-list">
-<li>Issue: VDD §7 (Asset Pipeline) requires pet name, rarity, win count, and sprite image for Open Graph cards. API.md GET /api/v1/arena/match/:matchId returns name/rarity/level but NOT winCount summary</li>
-<li>Impact: Client may compute winRate from match history, but OG tags could be incomplete</li>
-<li>Fix: API.md should clarify that GET /api/v1/arena/history/:petId (not /arena/match/:matchId) is the source for OG metadata, including win count summary</li>
-<li>Auto-fixable: YES (API documentation clarification)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] Admin Session TTL Not Explicitly Stated in FRONTEND</strong></p>
-<ul class="doc-list">
-<li>Issue: SCHEMA.md §4.3 documents Redis TTL = 14400s (4h) for admin sessions, but FRONTEND.md §3.2 (Admin Portal) does not state this timeout explicitly</li>
-<li>Impact: Frontend session refresh logic may diverge from backend TTL</li>
-<li>Fix: FRONTEND §3.5 (Routing, Admin Auth) should state: "Admin sessions expire after 4 hours of inactivity (admin_session_inactivity_expiry_hours = 14400)"</li>
-<li>Auto-fixable: YES (documentation)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] PRD AC Numbers Not Cross-Referenced in EDD Data Models</strong></p>
-<ul class="doc-list">
-<li>Issue: PRD defines AC-005-6 ("stat at max = 100"), EDD §4.1 Pet table has CHECK constraint, but no comment links constraint to AC number</li>
-<li>Impact: Future maintainers cannot trace constraint justification back to requirement</li>
-<li>Fix: Add EDD.md column comments: <code>COMMENT: "Range enforced by PRD AC-005-6"</code></li>
-<li>Auto-fixable: YES (documentation)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="low-priority-findings-411">Low-Priority Findings (4/11)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[LOW] ARCH vs. EDD Service Specification Redundancy</strong></p>
-<ul class="doc-list">
-<li>Issue: Both ARCH.md and EDD.md state that API and Admin servers are separate Node.js/Fastify processes</li>
-<li>Impact: None (acceptable duplication at different abstraction levels)</li>
-<li>Fix: No action needed</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[LOW] Admin Portal Route Prefix Inconsistency</strong></p>
-<ul class="doc-list">
-<li>Issue: FRONTEND.md §3.5 states path <code>/admin</code>, ARCH.md §2.1 mentions "separate Vite application" without confirming prefix</li>
-<li>Impact: Deployment-time configuration issue (can be changed via VITE_ADMIN_BASE_URL env var)</li>
-<li>Fix: Add FRONTEND.md note: "Route prefix <code>/admin</code> is configurable via VITE_ADMIN_BASE_URL environment variable"</li>
-<li>Auto-fixable: YES (documentation)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[LOW] CONSTANTS Definition Not Hyperlinked</strong></p>
-<ul class="doc-list">
-<li>Issue: EDD.md §0 references CONSTANTS-PIXEL-PET-ARENA but does not link to a CONSTANTS.md file</li>
-<li>Impact: Navigation difficulty only</li>
-<li>Fix: Add hyperlinks to EDD.md §0 constant table referencing CONSTANTS.md sections</li>
-<li>Auto-fixable: YES (documentation links)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="dimension-2-document--code-alignment">Dimension 2: Document → Code Alignment</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="critical-findings-11">Critical Findings (1/1)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[CRITICAL] NO SOURCE CODE REPOSITORY — SPECIFICATION-ONLY PROJECT</strong></p>
-<ul class="doc-list">
-<li>Issue: This repository contains only BDD feature specifications (features/), documentation (docs/), and pipeline templates (templates/). NO implementation code exists in src/, no ORM models, no route handlers, no migrations.</li>
-<li>Impact: Dimension 2 audit cannot validate API.md ↔ implementation, SCHEMA.md ↔ database models, ARCH.md ↔ component organization</li>
-<li>Recommendation:</li>
-<li><strong>Option A</strong> (Documentation-only audit): This repo is for design/documentation only. Code alignment checks are N/A.</li>
-<li><strong>Option B</strong> (Full-stack validation): Provide the actual backend repository (Node.js/Fastify API, database migrations, route handlers) to validate against SCHEMA.md, API.md, EDD.md, ARCH.md</li>
-<li>Auto-fixable: NO (requires linking to code repository)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Note:</strong> All other Dimension 2 findings (API endpoint validation, SCHEMA model coverage, directory structure alignment) are blocked pending source code availability.</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="dimension-3-code--test-alignment">Dimension 3: Code → Test Alignment</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="critical-findings-13">Critical Findings (1/3)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[CRITICAL] BDD Features Without Test Implementation — Zero Executable Tests</strong></p>
-<ul class="doc-list">
-<li>Issue: 23 feature files (1,797 lines of Gherkin) have <strong>no corresponding step definitions, test runners, or executable test code</strong>. All scenarios are specifications only.</li>
-<li>Unimplemented feature files:</li>
-<li>Server: arena-battle.feature, claim-flow.feature, gdpr-erasure.feature, leaderboard.feature, suspicious-detection.feature, training-food.feature (172 steps)</li>
-<li>Client: admin-portal.feature, arena-ui.feature, battle-records.feature, claim-flow-ui.feature, food-system.feature, leaderboard-ui.feature, pet-display.feature, settings.feature, training-ui.feature (1,071 steps)</li>
-<li>Root: auth-login.feature, pet-management.feature, pet-training.feature, arena-combat.feature, arena-leaderboard.feature, trading-system.feature, admin-moderation.feature, admin-gdpr.feature (554 steps)</li>
-<li>Impact: 100% of BDD scenarios are unrunnable; test coverage = 0%</li>
-<li>Root Cause: This is a specification repository without an accompanying test implementation repository</li>
-<li>Fix:</li>
-</ul>
-<p class="doc-p">1. Create step definitions for Cucumber (Backend BDD via cucumber-js + Node.js test harness)</p>
-<p class="doc-p">2. Create E2E test implementations for Playwright (Frontend BDD via playwright + cucumber-js)</p>
-<p class="doc-p">3. Set up CI/CD pipeline to execute tests on every commit</p>
-<ul class="doc-list">
-<li>Auto-fixable: NO (requires engineering implementation of 50+ step definitions)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="high-priority-findings-23">High-Priority Findings (2/3)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] Server-Side Step Definitions Missing</strong></p>
-<ul class="doc-list">
-<li>Issue: 6 server feature files (172 Gherkin scenario steps) have no Cucumber step implementation</li>
-<li>Impact: Backend API business logic is unvalidated; no regression prevention capability</li>
-<li>Files affected: features/server/*.feature</li>
-<li>Fix: Implement Cucumber step definitions mapping Given/When/Then to API test calls</li>
-<li>Auto-fixable: NO</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] Client-Side Step Definitions Missing</strong></p>
-<ul class="doc-list">
-<li>Issue: 10 client feature files (1,071 Gherkin scenario steps) have no Playwright/E2E test implementation</li>
-<li>Impact: Frontend UI/UX is unvalidated; no end-to-end test automation</li>
-<li>Files affected: features/client/*.feature</li>
-<li>Fix: Implement Playwright test harness with Cucumber integration for client scenarios</li>
-<li>Auto-fixable: NO</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="dimension-4-document--test-alignment">Dimension 4: Document → Test Alignment</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="critical-findings-29">Critical Findings (2/9)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[CRITICAL] Test Implementation Layer Missing — Test Coverage = 0%</strong></p>
-<ul class="doc-list">
-<li>Issue: BDD feature files (131 total scenarios) exist but zero test infrastructure (no step definitions, no test runners, no CI/CD integration)</li>
-<li>Impact: All 131 BDD scenarios are aspirational specifications with no execution capability</li>
-<li>Fix: Implement full test stack (cucumber-js + Node.js for backend, Playwright for E2E)</li>
-<li>Auto-fixable: NO</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[CRITICAL] Root-Level Feature Files Conflict with Server/Client Organization</strong></p>
-<ul class="doc-list">
-<li>Issue: 8 feature files at /features/*.feature (auth-login.feature, arena-combat.feature, etc.) appear to duplicate content from /features/server/ and /features/client/. RTM references only server/ and client/ features, leaving root features orphaned from traceability matrix.</li>
-<li>Impact: Unclear which feature files are authoritative (root 798 lines vs. server+client 743 lines); duplicate specification effort</li>
-<li>Root Cause: Unclear migration from root organization to subdirectory organization</li>
-<li>Fix: Either (1) remove root-level features and consolidate into server/client directories, or (2) formally document which are canonical and update RTM to list all feature locations</li>
-<li>Auto-fixable: MAYBE (if root features are deprecated, can be archived)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="high-priority-findings-59">High-Priority Findings (5/9)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] AC-007-8 MISSING HTTP 429 Rate Limit Response Scenario</strong></p>
-<ul class="doc-list">
-<li>Issue: PRD AC-007-8 (Arena rate limit 10 battles/hour) requires HTTP 429 with Retry-After header and specific UI countdown timer message. Server feature arena-battle.feature has only 3 scenarios and does not validate 429 response structure. Client arena-ui.feature has "rate limit" scenarios but no pairing to HTTP 429 error response.</li>
-<li>Impact: AC-007-8 partially tested; error response validation missing</li>
-<li>Fix: Add scenario to server arena-battle.feature validating HTTP 429 response body with Retry-After header and countdown time</li>
-<li>Auto-fixable: NO (new scenario required)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] US-RARITY-001 — Rarity Scoring Algorithm Has No Server Test</strong></p>
-<ul class="doc-list">
-<li>Issue: RTM marks US-RARITY-001 as "Partial" (⚠️). Rarity probabilistic distribution (Common 60%, Rare 25%, Epic 12%, Legendary 3%) is mentioned in AC-002-5 but has no server BDD feature or unit test. Client leaderboard-ui.feature tests legendary border rendering but server-side algorithm is untested.</li>
-<li>Impact: AC-002-5 rarity distribution validation missing; statistical guarantee unverified</li>
-<li>Fix: Create features/server/rarity-scoring.feature with scenarios validating the probabilistic distribution across 10,000+ pet generations</li>
-<li>Auto-fixable: NO</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] US-RECORD-001 — Battle Records Partially Tested</strong></p>
-<ul class="doc-list">
-<li>Issue: RTM marks US-RECORD-001 as "Partial" (⚠️). Client feature battle-records.feature (126 lines, 16 scenarios) exists, but no server BDD feature validates record persistence, pagination, or Open Graph generation.</li>
-<li>Impact: AC-010-1 through AC-010-6 (public battle records page) lack server-side BDD validation</li>
-<li>Fix: Create features/server/battle-records.feature with scenarios for persistence, pagination boundary (last 20 battles), empty state, and OG meta tag generation</li>
-<li>Auto-fixable: NO</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] AC-003-6 Email Enumeration Prevention — Timing Assertion Missing</strong></p>
-<ul class="doc-list">
-<li>Issue: AC-003-6 requires "identical response structure and timing" for valid/invalid pet IDs. Server feature claim-flow.feature has scenario "Email enumeration prevention" but lacks timing assertion (only checks response structure).</li>
-<li>Impact: Timing-based security vulnerability not validated</li>
-<li>Fix: Add timing measurement assertion (< 50ms variance) to email enumeration scenario in features/server/claim-flow.feature</li>
-<li>Auto-fixable: MAYBE (add assertion to existing scenario)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] FRONTEND.md Pages Not Fully Mapped to BDD Client Features</strong></p>
-<ul class="doc-list">
-<li>Issue: FRONTEND.md §2.1 lists LandingPage, ClaimPage, PetPage, TrainingUI, ArenaUI, LeaderboardPage, BattleRecordsPage, SettingsPage. Not all map cleanly to feature files. E.g., admin SettingsPage (ADMIN_IMPL.md) references admin-portal.feature, but player SettingsPage references settings.feature — naming ambiguity.</li>
-<li>Impact: Unclear component-to-feature mapping</li>
-<li>Fix: Clarify FRONTEND.md that player-app settings.feature is for user-level settings; admin settings are in ADMIN_IMPL.md/admin-portal.feature</li>
-<li>Auto-fixable: MAYBE (clarify naming)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="medium-priority-findings-29">Medium-Priority Findings (2/9)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] AC-016-2 GDPR Email Hashing SLA Ambiguity — 24h vs 7d</strong></p>
-<ul class="doc-list">
-<li>Issue: AC-016-2 states "email_encrypted set to NULL within 24 hours (not the full 7-day window — completed within 1 day, reported as compliant within 7 days)". Server feature gdpr-erasure.feature scenario says "within 24 hours" but does not distinguish between internal SLA (24h) and external SLA (7d).</li>
-<li>Impact: Scenario wording does not make explicit the two-tier SLA</li>
-<li>Fix: Clarify scenario: "email_encrypted is hashed within 24 hours (internal SLA) and user is notified within 7 days (external SLA)"</li>
-<li>Auto-fixable: YES (clarify scenario wording)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] AC-013-4 Admin Search Performance — "≤2 seconds for 1M records" Has No Load Test</strong></p>
-<ul class="doc-list">
-<li>Issue: AC-013-4 requires search within 2 seconds for "up to 1 million records". No performance test scenario exists in BDD features or test-plan.md to validate this boundary.</li>
-<li>Impact: Performance boundary unverified</li>
-<li>Fix: Add load test scenario in test-plan.md documenting 1M record search validation</li>
-<li>Auto-fixable: NO (requires performance test infrastructure)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="dimension-5-umlrtm-quality">Dimension 5: UML/RTM Quality</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="high-priority-findings-25">High-Priority Findings (2/5)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] EDD Class Diagram Incomplete — 0 Classes Found (<6 minimum)</strong></p>
-<ul class="doc-list">
-<li>Issue: EDD.md is expected to contain class diagrams, but scanning found 0 class definitions and 0 diagram sections (< 6 classes, < 9 UML diagrams expected)</li>
-<li>Impact: EDD lacks visual architecture representation; difficult for new developers to understand entity relationships</li>
-<li>Fix: Add class diagrams to EDD.md §2 showing Pet, Arena, ClaimCode, User, Food, Battle, Leaderboard, Session, Transaction entities and their relationships</li>
-<li>Auto-fixable: NO (requires UML architecture design)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[HIGH] RTM Does Not Reference All BDD Scenario Files</strong></p>
-<ul class="doc-list">
-<li>Issue: RTM.md table rows (57) do not map to all BDD feature files (23 files). RTM contains only references to server/ and client/ features, omitting 8 root-level feature files.</li>
-<li>Impact: 798 lines of specification code (root features) are not part of the official traceability matrix</li>
-<li>Fix: Either (1) remove root features or (2) add all feature file references to RTM with explicit mapping to each PRD AC</li>
-<li>Auto-fixable: MAYBE (if root features are consolidated)</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="medium-priority-findings-35">Medium-Priority Findings (3/5)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] PlantUML Diagram Files Missing</strong></p>
-<ul class="doc-list">
-<li>Issue: docs/diagrams/puml/ directory does not exist or contains no .puml files</li>
-<li>Impact: Automated diagram generation from code is not enabled</li>
-<li>Fix: Create docs/diagrams/puml/ directory and generate PlantUML source files for each UML diagram</li>
-<li>Auto-fixable: NO (requires diagram tool integration)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] UML 9 Major Diagrams Incomplete — 0/9 Found</strong></p>
-<ul class="doc-list">
-<li>Issue: Expected 9 major UML diagrams (Class, Sequence, State, Component, Deployment, Use Case, Interaction, Timing, Profile) in EDD.md, but none found</li>
-<li>Impact: Architectural documentation incomplete; difficult to understand system design</li>
-<li>Fix: Add 9 UML diagram sections to EDD.md covering core architecture</li>
-<li>Auto-fixable: NO (requires architecture design work)</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>[MEDIUM] RTM.csv Not Found — Machine-Readable Traceability Missing</strong></p>
-<ul class="doc-list">
-<li>Issue: docs/RTM.csv does not exist; only RTM.md (markdown table) is available</li>
-<li>Impact: Traceability matrix cannot be easily imported into test management tools or automated dashboards</li>
-<li>Fix: Generate docs/RTM.csv with columns: AC_ID, AC_Description, BDD_Scenario, Test_ID, Coverage_Status</li>
-<li>Auto-fixable: YES (export RTM.md table to CSV)</li>
-</ul>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="recommendations-by-priority">Recommendations by Priority</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="blocking-complete-before-proceeding">BLOCKING (Complete Before Proceeding)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">1. <strong>[CRITICAL]</strong> Implement test execution layer:</p>
-<ul class="doc-list">
-<li>Create step definitions for 23 BDD feature files (50+ step definitions)</li>
-<li>Set up Cucumber-JS test runner for backend, Playwright for E2E</li>
-<li>Configure CI/CD pipeline to run tests on commits</li>
-<li><strong>Owner:</strong> Backend + QA Engineering</li>
-<li><strong>Effort:</strong> 2-3 weeks</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p">2. <strong>[CRITICAL]</strong> Clarify root vs. server/client feature organization:</p>
-<ul class="doc-list">
-<li>Remove or consolidate 8 root-level feature files OR update RTM to include them</li>
-<li>Ensure single source of truth for each scenario</li>
-<li><strong>Owner:</strong> BA/QA Lead</li>
-<li><strong>Effort:</strong> 2-3 days</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="high-complete-within-1-sprint">HIGH (Complete Within 1 Sprint)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">3. Add missing documentation files:</p>
-<ul class="doc-list">
-<li>Create docs/README.md (project overview)</li>
-<li>Create docs/BDD-server.md and docs/BDD-client.md (test strategy)</li>
-<li>Create docs/background-jobs.md (ops spec)</li>
-<li><strong>Effort:</strong> 3 days</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p">4. Create comprehensive UML diagrams in EDD.md:</p>
-<ul class="doc-list">
-<li>Class diagram (entity relationships)</li>
-<li>Sequence diagrams (auth, battle, leaderboard flows)</li>
-<li>State diagrams (pet, battle states)</li>
-<li><strong>Effort:</strong> 1 week</li>
-</ul>
-<div class="doc-gap"></div>
-<p class="doc-p">5. Reconcile RTM with all feature files:</p>
-<ul class="doc-list">
-<li>Map all 23 BDD feature files to RTM</li>
-<li>Generate RTM.csv for tool integration</li>
-<li><strong>Effort:</strong> 2-3 days</li>
-</ul>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="medium-document-improvements">MEDIUM (Document Improvements)</h3>
-<div class="doc-gap"></div>
-<p class="doc-p">6. Clarify feature flag logic in SCHEMA.md and EDD.md</p>
-<p class="doc-p">7. Add explicit GDPR SLA wording (24h internal vs. 7d external)</p>
-<p class="doc-p">8. Cross-reference PRD AC numbers in EDD column comments</p>
-<p class="doc-p">9. Add FRONTEND token recovery flow (§5.2)</p>
-<p class="doc-p">10. Clarify admin session TTL in FRONTEND.md</p>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="next-steps">Next Steps</h2>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Immediate Actions:</strong></p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash"># Option A: Fix documentation alignment only (Dimensions 0, 1, 5)
-/gendoc-align-fix docs
-
-# Option B: Full pipeline (including code/test alignment, requires implementation repos)
-# Not applicable until source code repository is provided</code></pre>
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>For Full-Stack Alignment:</strong></p>
-<div class="doc-gap"></div>
-<p class="doc-p">When backend implementation code (Node.js/Fastify, database migrations) and test implementations (Cucumber step definitions, Playwright tests) are available, run:</p>
-<div class="doc-gap"></div>
-<pre class="doc-code"><code class="lang-bash">/gendoc-align-check  # Re-run all 5 dimensions</code></pre>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<h2 class="doc-h2" id="appendix-finding-summaries">Appendix: Finding Summaries</h2>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="by-layer">By Layer</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Layer</th><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th></tr></thead>
-<tbody>
-<tr><td>Dimension 0: File Existence</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
-<tr><td>Dimension 1: Doc → Doc</td><td>0</td><td>2</td><td>5</td><td>4</td></tr>
-<tr><td>Dimension 2: Doc → Code</td><td>1*</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>Dimension 3: Code → Test</td><td>1*</td><td>2</td><td>0</td><td>0</td></tr>
-<tr><td>Dimension 4: Doc → Test</td><td>2</td><td>5</td><td>2</td><td>0</td></tr>
-<tr><td>Dimension 5: UML/RTM</td><td>0</td><td>2</td><td>3</td><td>0</td></tr>
-<tr><td>**TOTAL**</td><td>**4**</td><td>**12**</td><td>**10**</td><td>**4**</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<p class="doc-p">*Dimension 2 & 3 findings are blocked (code repository unavailable).</p>
-<div class="doc-gap"></div>
-<h3 class="doc-h3" id="by-fix-complexity">By Fix Complexity</h3>
-<div class="doc-gap"></div>
-<div class="doc-table-wrap"><table class="doc-table">
-<thead><tr><th>Category</th><th>Count</th><th>Auto-Fixable</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td>Critical</td><td>4</td><td>NO</td><td>Requires engineering (test implementation, code repo)</td></tr>
-<tr><td>Documentation</td><td>13</td><td>YES</td><td>Can be written/updated immediately</td></tr>
-<tr><td>Architectural</td><td>8</td><td>NO</td><td>Requires design review + implementation</td></tr>
-<tr><td>Organization</td><td>3</td><td>MAYBE</td><td>Depends on consolidation decision</td></tr>
-<tr><td>Clarification</td><td>2</td><td>YES</td><td>Simple wording improvements</td></tr>
-</tbody></table></div>
-<div class="doc-gap"></div>
-<hr class="doc-hr">
-<div class="doc-gap"></div>
-<p class="doc-p"><strong>Report Generated:</strong> 2026-05-04 23:15 UTC</p>
-<p class="doc-p"><strong>Status:</strong> Ready for /gendoc-align-fix (documentation phase)</p>
-<p class="doc-p"><strong>Blocking Items:</strong> 2 (test implementation, source code availability)</p>
-<div class="doc-gap"></div>
-    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">test</a> › Align-Report</p>
+    <h1 class="banner-title">Align-Report</h1>
   </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link active" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
+<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
+<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
+<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Cross-Document Alignment Report — pixel-pet-arena</h1>
+<p><strong>DOC-ID</strong>: ALIGN-PIXEL-PET-ARENA-20260504</p>
+<p><strong>Status</strong>: VERIFIED</p>
+<p><strong>Generated</strong>: 2026-05-04</p>
+<p><strong>Fixes Applied</strong>: 2026-05-04</p>
+<p><strong>Verified</strong>: 2026-05-03</p>
+<p><strong>Scope</strong>: docs/EDD.md, docs/API.md, docs/SCHEMA.md, docs/PRD.md, docs/ARCH.md,</p>
+<p>docs/CICD.md, docs/FRONTEND.md, docs/test-plan.md, docs/RTM.md,</p>
+<p>docs/LOCAL_DEPLOY.md, docs/runbook.md, docs/DEVELOPER_GUIDE.md</p>
+<hr>
+<h2>Alignment Issues</h2>
+<p>Each issue is cited with the exact document and section where the inconsistency or error</p>
+<p>was found, compared against the authoritative facts established in the project ground</p>
+<p>truth.</p>
+<hr>
+<h3>ISSUE-001 — Health endpoint path: runbook.md uses <code>/api/v1/health</code> instead of <code>/health</code></h3>
+<p><strong>Location</strong>: <code>docs/runbook.md</code> — §Deployment / Post-Deployment Smoke Tests (line 129),</p>
+<p>§Deployment / Backend Deployment Steps (lines 71, 76), §Incident Response / P0 (line 156,</p>
+<p>164), §Health Checks and Monitoring (line 435), §On-Call Quick Reference (line 572).</p>
+<p><strong>Description</strong>: The authoritative health endpoint is <code>GET /health</code> (no <code>/api/v1</code> prefix).</p>
+<p><code>docs/API.md §10</code> explicitly defines <code>GET /health</code> and the response</p>
+<p><code>{&quot;status&quot;:&quot;healthy&quot;,&quot;checks&quot;:{...},&quot;timestamp&quot;:&quot;...&quot;}</code>. <code>docs/CICD.md</code> correctly uses</p>
+<p><code>/health</code> throughout (lines 52, 452, 660, 901, 1276–1277). However, <code>docs/runbook.md</code></p>
+<p>repeatedly refers to the endpoint as <code>/api/v1/health</code> — e.g., post-deploy smoke test step 1</p>
+<p>reads &quot;GET <code>/api/v1/health</code> returns HTTP 200 with <code>\&quot;status\&quot;: \&quot;ok\&quot;</code>&quot;, and the P0</p>
+<p>definition uses <code>GET /api/v1/health</code>. This means on-call engineers following the runbook</p>
+<p>would poll a path that returns HTTP 404 during an incident.</p>
+<p><strong>Severity</strong>: HIGH — operational impact during real incidents.</p>
+<p><strong>Recommendation</strong>: Replace every occurrence of <code>/api/v1/health</code> in <code>docs/runbook.md</code> with</p>
+<p><code>/health</code> to match the canonical definition in <code>docs/API.md §10</code> and <code>docs/CICD.md</code>.</p>
+<hr>
+<h3>ISSUE-002 — Health response body: runbook.md uses <code>&quot;status&quot;:&quot;ok&quot;</code> instead of <code>&quot;status&quot;:&quot;healthy&quot;</code></h3>
+<p><strong>Location</strong>: <code>docs/runbook.md</code> — §Deployment / Post-Deployment Smoke Tests (line 129),</p>
+<p>§Deployment / Backend Deployment Steps (line 76), §Health Checks and Monitoring (line 445).</p>
+<p><strong>Description</strong>: The authoritative health response (from <code>docs/API.md §10</code> and confirmed in</p>
+<p><code>docs/CICD.md</code> line 1277) uses <code>&quot;status&quot;:&quot;healthy&quot;</code> for a fully operational API. The runbook</p>
+<p>smoke-test checklist says &quot;returns HTTP 200 with <code>\&quot;status\&quot;: \&quot;ok\&quot;</code>&quot;, and the detailed</p>
+<p>health schema in the runbook shows <code>&quot;status&quot;: &quot;ok&quot;</code> as the top-level healthy value (line 445).</p>
+<p>The runbook also defines a three-value <code>status</code> field (<code>ok</code>, <code>degraded</code>, <code>error</code>) rather than</p>
+<p>the API-spec values (<code>healthy</code>, <code>degraded</code>, <code>down</code>). An operator verifying a deployment</p>
+<p>against the runbook schema will apply the wrong acceptance criteria.</p>
+<p><strong>Severity</strong>: HIGH — the runbook is the canonical operational reference for on-call</p>
+<p>engineers. An incorrect expected response body leads to incorrect incident triage.</p>
+<p><strong>Recommendation</strong>: Correct runbook.md §Health Checks and Monitoring to use <code>&quot;status&quot;:&quot;healthy&quot;</code> (200),</p>
+<p><code>&quot;status&quot;:&quot;degraded&quot;</code> (200 with partial failures), and <code>&quot;status&quot;:&quot;down&quot;</code> (503), matching</p>
+<p><code>docs/API.md §10</code>. Remove the extended fields (<code>version</code>, <code>buildSha</code>, <code>featureFlags</code>,</p>
+<p><code>email</code> check) unless those fields are also added to <code>docs/API.md §10</code>.</p>
+<hr>
+<h3>ISSUE-003 — JWT_SECRET purpose mislabelled in runbook.md On-Call Quick Reference</h3>
+<p><strong>Location</strong>: <code>docs/runbook.md</code> — §On-Call Quick Reference (line 586).</p>
+<p><strong>Description</strong>: The runbook quick-reference table describes <code>JWT_SECRET</code> as &quot;used for claim</p>
+<p>token signing&quot;. The authoritative description — confirmed in `docs/LOCAL_DEPLOY.md §Key</p>
+<p>environment variables<code> (line 86), </code>docs/DEVELOPER_GUIDE.md §2.4<code> (line 856), </code>docs/CICD.md</p>
+<p>§Secrets Management<code> (line 1222), and </code>docs/API.md §2.2<code> — is that </code>JWT_SECRET` signs the</p>
+<p>short-lived <strong>TOTP setup token</strong> returned during first-time admin enrollment only. It is</p>
+<p>explicitly <strong>not</strong> used for claim tokens (player auth uses raw opaque bearer tokens) and not</p>
+<p>used for admin sessions (those are Redis-backed httpOnly cookies). Describing it as &quot;claim</p>
+<p>token signing&quot; could mislead an on-call engineer into believing player tokens are JWTs, which</p>
+<p>would cause incorrect incident diagnosis.</p>
+<p><strong>Severity</strong>: MEDIUM — misleading description may cause incorrect debugging decisions.</p>
+<p><strong>Recommendation</strong>: Update the quick-reference entry in <code>docs/runbook.md</code> to read: &quot;signs the</p>
+<p>short-lived TOTP setup token returned during first-time admin enrollment only — not used for</p>
+<p>player auth or admin sessions.&quot;</p>
+<hr>
+<h3>ISSUE-004 — Local migration command: LOCAL_DEPLOY.md uses <code>supabase db push</code>; authoritative command is <code>supabase migration up</code></h3>
+<p><strong>Location</strong>: <code>docs/LOCAL_DEPLOY.md</code> — §Setup Steps / Step 3 (lines 153–162).</p>
+<p><strong>Description</strong>: <code>docs/LOCAL_DEPLOY.md</code> step 3 tells developers to run <code>supabase db push</code> and</p>
+<p>mentions <code>pnpm db:migrate</code> as an alternative. The Supabase CLI v2 canonical local migration</p>
+<p>command for replaying pending migration files is <code>supabase migration up</code>. <code>docs/DEVELOPER_GUIDE.md</code></p>
+<p>(lines 277, 825) and <code>docs/diagrams/cicd-pr-gate.md</code> (lines 27, 88) consistently use</p>
+<p><code>supabase migration up</code>. <code>supabase db push</code> is a Supabase-hosted-project command that pushes a</p>
+<p>local schema diff to a remote project — it is not the correct command for applying migration</p>
+<p>files to a local Supabase Docker stack and may produce unexpected behaviour on a fresh clone.</p>
+<p><strong>Severity</strong>: MEDIUM — causes confusion for new developers onboarding to the project.</p>
+<p><strong>Recommendation</strong>: Replace <code>supabase db push</code> in <code>docs/LOCAL_DEPLOY.md §Step 3</code> with</p>
+<p><code>supabase migration up</code>, consistent with <code>docs/DEVELOPER_GUIDE.md</code> and the CI gate diagram.</p>
+<hr>
+<h3>ISSUE-005 — detect-secrets baseline update command: CICD.md uses <code>--update</code> flag; DEVELOPER_GUIDE.md and all diagrams use <code>--baseline</code></h3>
+<p><strong>Location</strong>: <code>docs/CICD.md</code> — §Secrets Detection (line 1029); <code>docs/DEVELOPER_GUIDE.md</code></p>
+<p>(line 684); <code>docs/diagrams/cicd-secrets-rotation.md</code> (line 30, 141); <code>docs/diagrams/cicd-pr-gate.md</code> (line 39, 105).</p>
+<p><strong>Description</strong>: <code>docs/CICD.md §Secrets Detection</code> instructs developers to run</p>
+<p><code>detect-secrets scan --update .secrets.baseline</code> to add a false positive to the baseline.</p>
+<p>In contrast, <code>docs/DEVELOPER_GUIDE.md</code> (line 684), <code>docs/diagrams/cicd-secrets-rotation.md</code>,</p>
+<p>and <code>docs/diagrams/cicd-pr-gate.md</code> all show <code>detect-secrets scan --baseline .secrets.baseline</code>.</p>
+<p>The authoritative command per the known facts is <code>detect-secrets scan --baseline .secrets.baseline</code>.</p>
+<p>The <code>--update</code> flag variant is used in older versions of detect-secrets; using the wrong flag</p>
+<p>on the installed version will either fail silently or not update the baseline, potentially</p>
+<p>blocking a legitimate PR permanently.</p>
+<p><strong>Severity</strong>: MEDIUM — affects developer experience on any PR that triggers a false positive.</p>
+<p><strong>Recommendation</strong>: Align <code>docs/CICD.md §Secrets Detection</code> to use</p>
+<p><code>detect-secrets scan --baseline .secrets.baseline</code>, matching all other documents and the</p>
+<p>authoritative command.</p>
+<hr>
+<h3>ISSUE-006 — RTM user story count (17) disagrees with test-plan.md user story count (18)</h3>
+<p><strong>Location</strong>: <code>docs/RTM.md</code> — Overview (line 14) and Coverage table (line 86);</p>
+<p><code>docs/test-plan.md</code> — §1.1 (line 39), §2.2 (line 83).</p>
+<p><strong>Description</strong>: <code>docs/RTM.md</code> states &quot;all 17 user stories&quot; and the coverage table shows 17</p>
+<p>total rows. <code>docs/test-plan.md §1.1</code> lists &quot;the 18 user stories&quot; and enumerates them by ID,</p>
+<p>including US-ADMIN-006 (Game Economy Configuration). Counting the RTM requirements table</p>
+<p>confirms that US-ADMIN-006 is absent from <code>docs/RTM.md</code>. US-ADMIN-006 is a P1 story with</p>
+<p>acceptance criteria defined in the PRD and integration/E2E test requirements listed in</p>
+<p><code>docs/test-plan.md §2.2</code>. Its omission from the RTM leaves a traceability gap for that story.</p>
+<p><strong>Severity</strong>: MEDIUM — traceability gap for a P1 user story; compliance risk for any audit</p>
+<p>requiring a complete RTM.</p>
+<p><strong>Recommendation</strong>: Add a US-ADMIN-006 row to <code>docs/RTM.md</code>, mapping it to</p>
+<p><code>admin-portal.feature</code> (client BDD), integration tests, and E2E tests as documented in</p>
+<p><code>docs/test-plan.md §2.2</code>, and update the total count from 17 to 18.</p>
+<hr>
+<h3>ISSUE-007 — test-plan.md unit test file paths use <code>packages/</code> directory layout; CICD.md and DEVELOPER_GUIDE.md use <code>apps/</code> layout</h3>
+<p><strong>Location</strong>: <code>docs/test-plan.md</code> — §5 Unit Tests (lines 298, 330, 362, 401, 433, 451),</p>
+<p>§6 Integration Tests (lines 480, 526, 551, 590), §13.1 Coverage table (lines 1506–1510);</p>
+<p><code>docs/CICD.md</code> — coverage assertion paths (lines 203–205); <code>docs/DEVELOPER_GUIDE.md</code></p>
+<p>(line 430, 657, 663).</p>
+<p><strong>Description</strong>: Unit and integration test file paths throughout <code>docs/test-plan.md</code> are</p>
+<p>written as <code>packages/api/src/...</code>, <code>packages/player-app/src/...</code>, and</p>
+<p><code>packages/admin-app/src/...</code>. The project&#x27;s directory layout as consistently used by</p>
+<p><code>docs/CICD.md</code>, <code>docs/DEVELOPER_GUIDE.md</code>, and <code>docs/LOCAL_DEPLOY.md</code> is <code>apps/api/</code>,</p>
+<p><code>apps/player/</code>, and <code>apps/admin/</code>. The CICD coverage assertion script reads</p>
+<p><code>apps/api/coverage/</code>, <code>apps/player/coverage/</code>, and <code>apps/admin/coverage/</code>. A developer</p>
+<p>navigating the test-plan paths will not find the files.</p>
+<p><strong>Severity</strong>: LOW — documentation inconsistency; no runtime impact, but impairs</p>
+<p>onboarding and code review.</p>
+<p><strong>Recommendation</strong>: Update all <code>packages/api/</code>, <code>packages/player-app/</code>, and</p>
+<p><code>packages/admin-app/</code> path references in <code>docs/test-plan.md</code> to <code>apps/api/</code>, <code>apps/player/</code>,</p>
+<p>and <code>apps/admin/</code> respectively, to match the canonical directory layout.</p>
+<hr>
+<h2>Cross-Document Gaps</h2>
+<p>The following items are present or clearly specified in one document but absent from or</p>
+<p>contradicted by one or more others. Each entry references the source document and the</p>
+<p>document(s) where the item is missing.</p>
+<hr>
+<h3>GAP-001 — runbook.md health schema includes fields (<code>version</code>, <code>buildSha</code>, <code>featureFlags</code>, <code>email</code>) absent from API.md §10</h3>
+<p><strong>Present in</strong>: <code>docs/runbook.md §Health Checks and Monitoring</code> (the healthy JSON example</p>
+<p>includes <code>&quot;status&quot;:&quot;ok&quot;</code>, <code>&quot;version&quot;</code>, <code>&quot;buildSha&quot;</code>, <code>&quot;featureFlags&quot;</code>, and an <code>&quot;email&quot;</code> check</p>
+<p>block).</p>
+<p><strong>Absent from / contradicted by</strong>: <code>docs/API.md §10</code> (lines 2489–2515), which defines the</p>
+<p>health response as containing only <code>status</code>, <code>checks.database</code>, <code>checks.redis</code>, and</p>
+<p><code>timestamp</code>. The CICD expected response at line 1277 also shows only those four fields.</p>
+<p><strong>Impact</strong>: Operators reading the runbook will expect richer fields that the API does not</p>
+<p>return. Load balancer or monitoring configurations built from the runbook schema will check</p>
+<p>for fields that do not exist.</p>
+<hr>
+<h3>GAP-002 — US-ADMIN-006 missing from RTM but tested in test-plan.md</h3>
+<p><strong>Present in</strong>: <code>docs/test-plan.md §2.2</code> (US-ADMIN-006 row), <code>docs/PRD.md</code> (US-ADMIN-006</p>
+<p>defined as P1 story), <code>docs/CICD.md §Coverage Enforcement</code> (implicit coverage requirement).</p>
+<p><strong>Absent from</strong>: <code>docs/RTM.md</code> requirements table and test-cases table.</p>
+<p><strong>Impact</strong>: If the RTM is used as the traceability artifact for a compliance review or sprint</p>
+<p>sign-off, US-ADMIN-006&#x27;s test coverage is invisible. See also ISSUE-006 above.</p>
+<hr>
+<h3>GAP-003 — runbook.md health checks reference <code>/api/v1/health</code> while CICD.md and API.md use <code>/health</code></h3>
+<p>Detailed in ISSUE-001. As a cross-document gap, the runbook represents the only document in</p>
+<p>the set that uses the wrong path. All other documents (<code>docs/API.md</code>, <code>docs/CICD.md</code>,</p>
+<p><code>docs/LOCAL_DEPLOY.md</code>, <code>docs/DEVELOPER_GUIDE.md</code>) correctly use <code>GET /health</code>.</p>
+<hr>
+<h3>GAP-004 — detect-secrets <code>--update</code> vs <code>--baseline</code> flag undocumented discrepancy</h3>
+<p><strong>Present in (--update variant)</strong>: <code>docs/CICD.md §Secrets Detection</code>.</p>
+<p><strong>Present in (--baseline variant, authoritative)</strong>: <code>docs/DEVELOPER_GUIDE.md</code>,</p>
+<p><code>docs/diagrams/cicd-secrets-rotation.md</code>, <code>docs/diagrams/cicd-pr-gate.md</code>.</p>
+<p><strong>Impact</strong>: A developer who finds the instructions in <code>docs/CICD.md</code> first may run the wrong</p>
+<p>command when attempting to add a false positive to the baseline. See ISSUE-005.</p>
+<hr>
+<h3>GAP-005 — runbook.md JWT_SECRET description disagrees with all other documents</h3>
+<p><strong>Described correctly in</strong>: <code>docs/LOCAL_DEPLOY.md §Key environment variables</code>,</p>
+<p><code>docs/DEVELOPER_GUIDE.md §2.4</code>, <code>docs/CICD.md §Secrets Management</code>, <code>docs/API.md §2.2</code>,</p>
+<p><code>docs/test-plan.md §3.3</code>.</p>
+<p><strong>Described incorrectly in</strong>: <code>docs/runbook.md §On-Call Quick Reference</code> (&quot;used for claim</p>
+<p>token signing&quot;). See ISSUE-003.</p>
+<hr>
+<h3>GAP-006 — LOCAL_DEPLOY.md uses <code>supabase db push</code> while other documents use <code>supabase migration up</code></h3>
+<p><strong>Present in (supabase db push)</strong>: <code>docs/LOCAL_DEPLOY.md §Step 3</code>.</p>
+<p><strong>Absent from / contradicted by</strong>: <code>docs/DEVELOPER_GUIDE.md</code> (lines 277, 825, 1042),</p>
+<p><code>docs/diagrams/cicd-pr-gate.md</code> (lines 27, 88) — all of which use <code>supabase migration up</code>.</p>
+<p><strong>Impact</strong>: Developers following LOCAL_DEPLOY.md will run an incorrect command. See ISSUE-004.</p>
+<hr>
+<h3>GAP-007 — Runbook health check schema has three-value <code>status</code> (<code>ok</code>, <code>degraded</code>, <code>error</code>) vs API.md three-value (<code>healthy</code>, <code>degraded</code>, <code>down</code>)</h3>
+<p><strong>Present in</strong>: <code>docs/runbook.md §Health Checks and Monitoring</code> — the degraded example uses</p>
+<p><code>&quot;status&quot;: &quot;degraded&quot;</code> and the unhealthy response uses <code>&quot;status&quot;: &quot;error&quot;</code> (line 491).</p>
+<p><strong>Contradicted by</strong>: <code>docs/API.md §10</code> (line 2515), which defines: <code>healthy</code>, <code>degraded</code>,</p>
+<p><code>down</code>. The CICD comment at line 1277 also shows <code>&quot;status&quot;:&quot;healthy&quot;</code>. The runbook uses <code>&quot;ok&quot;</code></p>
+<p>for the healthy state and <code>&quot;error&quot;</code> for the fully down state — two of three values differ.</p>
+<hr>
+<h2>Alignment Summary</h2>
+<p>Overall, the pixel-pet-arena documentation set is well-structured and shows strong</p>
+<p>internal consistency across the majority of its documents. The CONSTANTS.md source of truth</p>
+<p>is consistently referenced by ID across EDD.md, API.md, SCHEMA.md, ARCH.md, and PRD.md with</p>
+<p>no detected numeric contradictions. Authentication model (raw opaque bearer tokens for</p>
+<p>players, Redis-backed httpOnly cookies for admins, JWT used only for TOTP setup token) is</p>
+<p>correctly and consistently described in API.md, EDD.md, ARCH.md, FRONTEND.md, LOCAL_DEPLOY.md,</p>
+<p>DEVELOPER_GUIDE.md, and test-plan.md. pnpm filter names (<code>api</code>, <code>player-app</code>, <code>admin-app</code>)</p>
+<p>are used consistently in CICD.md, DEVELOPER_GUIDE.md, and LOCAL_DEPLOY.md. Email encryption</p>
+<p>(AES-256-GCM via EMAIL_ENCRYPTION_KEY) is consistently described in all documents that</p>
+<p>reference it. Redis roles (leaderboard, job queue, admin session store, rate limits, token</p>
+<p>blacklist) are consistently enumerated in EDD.md, ARCH.md, and API.md.</p>
+<p><strong>Issues found</strong>: 7 alignment issues across 5 document pairs.</p>
+<p><strong>Severity breakdown</strong>:</p>
+<ul><li>HIGH: 2 (ISSUE-001, ISSUE-002) — both in runbook.md, affecting the health endpoint path</li></ul>
+<p>and response schema used during live incidents.</p>
+<ul><li>MEDIUM: 4 (ISSUE-003, ISSUE-004, ISSUE-005, ISSUE-006) — JWT_SECRET mislabel, local</li></ul>
+<p>migration command, detect-secrets flag variant, RTM traceability gap.</p>
+<ul><li>LOW: 1 (ISSUE-007) — test file path layout in test-plan.md.</li></ul>
+<p><strong>Coverage metrics</strong>:</p>
+<table>
+<tr><th>Document</th><th>Issues found</th><th>Role</th></tr>
+<tr><td>runbook.md</td><td>3 (ISSUE-001, 002, 003)</td><td>Operational reference — highest priority fixes</td></tr>
+<tr><td>LOCAL_DEPLOY.md</td><td>1 (ISSUE-004)</td><td>Developer onboarding</td></tr>
+<tr><td>CICD.md</td><td>1 (ISSUE-005)</td><td>CI/CD pipeline spec</td></tr>
+<tr><td>RTM.md</td><td>1 (ISSUE-006)</td><td>Traceability matrix</td></tr>
+<tr><td>test-plan.md</td><td>1 (ISSUE-007)</td><td>Test specification</td></tr>
+</table>
+<p><strong>Recommended fix priority</strong>:</p>
+<ol><li>Correct runbook.md health endpoint path to <code>GET /health</code> and response body to <code>&quot;status&quot;:&quot;healthy&quot;</code> (ISSUE-001, ISSUE-002).</li><li>Correct runbook.md JWT_SECRET description (ISSUE-003).</li><li>Align LOCAL_DEPLOY.md migration command to <code>supabase migration up</code> (ISSUE-004).</li><li>Align CICD.md detect-secrets flag to <code>--baseline</code> (ISSUE-005).</li><li>Add US-ADMIN-006 to RTM.md (ISSUE-006).</li><li>Update test-plan.md file path layout from <code>packages/</code> to <code>apps/</code> (ISSUE-007).</li></ol>
+<p>All 7 issues are correctible without architectural change. None affect the EDD, API,</p>
+<p>SCHEMA, or ARCH documents, which are internally consistent and mutually aligned.</p>
+<hr>
+<h2>Fix Status</h2>
+<p>All 7 alignment issues have been resolved in commit <code>docs(gendoc)[ALIGN-FIX]</code> and verified on 2026-05-03.</p>
+<table>
+<tr><th>Issue</th><th>Severity</th><th>File</th><th>Fix Applied</th><th>Status</th></tr>
+<tr><td>ISSUE-001</td><td>HIGH</td><td><code>docs/runbook.md</code></td><td>All occurrences of <code>/api/v1/health</code> replaced with <code>/health</code> (lines 17, 71, 76, 129, 156, 164, 346, 435, 437, 572)</td><td>VERIFIED ✅</td></tr>
+<tr><td>ISSUE-002</td><td>HIGH</td><td><code>docs/runbook.md</code></td><td>Health response status values corrected: <code>&quot;ok&quot;</code> → <code>&quot;healthy&quot;</code>, <code>&quot;error&quot;</code> → <code>&quot;down&quot;</code>; schema aligned to <code>docs/API.md §10</code></td><td>VERIFIED ✅</td></tr>
+<tr><td>ISSUE-003</td><td>MEDIUM</td><td><code>docs/runbook.md</code></td><td><code>JWT_SECRET</code> description updated to &quot;used for TOTP setup token signing only — not for player auth or admin sessions&quot;</td><td>VERIFIED ✅</td></tr>
+<tr><td>ISSUE-004</td><td>MEDIUM</td><td><code>docs/LOCAL_DEPLOY.md</code></td><td><code>supabase db push</code> replaced with <code>supabase migration up</code> in Step 3</td><td>VERIFIED ✅</td></tr>
+<tr><td>ISSUE-005</td><td>MEDIUM</td><td><code>docs/CICD.md</code></td><td><code>detect-secrets scan --update</code> replaced with <code>detect-secrets scan --baseline</code></td><td>VERIFIED ✅</td></tr>
+<tr><td>ISSUE-006</td><td>MEDIUM</td><td><code>docs/RTM.md</code></td><td>US-ADMIN-006 (Game Economy Configuration, P1) added to requirements table, test-cases table, and coverage summary; total count updated from 17 to 18</td><td>VERIFIED ✅</td></tr>
+<tr><td>ISSUE-007</td><td>LOW</td><td><code>docs/test-plan.md</code></td><td>All <code>packages/api/</code>, <code>packages/player-app/</code>, <code>packages/admin-app/</code> paths updated to <code>apps/api/</code>, <code>apps/player/</code>, <code>apps/admin/</code></td><td>VERIFIED ✅</td></tr>
+</table>
+<h2>Verification</h2>
+<p><strong>Verification Date</strong>: 2026-05-03</p>
+<p><strong>Method</strong>: grep checks and manual review of each affected document and section</p>
+<p><strong>Result</strong>: All clear — every fix confirmed present; no regressions detected</p>
+<h3>Verification Detail</h3>
+<table>
+<tr><th>Issue</th><th>Verification Check</th><th>Result</th></tr>
+<tr><td>ISSUE-001</td><td><code>grep -n &quot;api/v1/health&quot; docs/runbook.md</code> — no matches</td><td>CLEAR ✅</td></tr>
+<tr><td>ISSUE-002</td><td><code>grep -n &#x27;&quot;status&quot;: &quot;ok&quot;&#x27; docs/runbook.md</code> and <code>&#x27;&quot;status&quot;: &quot;error&quot;&#x27;</code> — no matches; <code>&quot;healthy&quot;</code> and <code>&quot;down&quot;</code> confirmed present</td><td>CLEAR ✅</td></tr>
+<tr><td>ISSUE-003</td><td>Manual review of <code>docs/runbook.md §On-Call Quick Reference</code> JWT_SECRET row — updated description confirmed</td><td>CLEAR ✅</td></tr>
+<tr><td>ISSUE-004</td><td><code>grep -n &quot;supabase db push&quot; docs/LOCAL_DEPLOY.md</code> — no matches; <code>supabase migration up</code> confirmed in Step 3</td><td>CLEAR ✅</td></tr>
+<tr><td>ISSUE-005</td><td><code>grep -n &quot;detect-secrets.*--update&quot; docs/CICD.md</code> — no matches; <code>--baseline</code> confirmed present</td><td>CLEAR ✅</td></tr>
+<tr><td>ISSUE-006</td><td>Manual review of <code>docs/RTM.md</code> requirements table — US-ADMIN-006 row confirmed present; total count shows 18</td><td>CLEAR ✅</td></tr>
+<tr><td>ISSUE-007</td><td>`grep -rn &quot;packages/api\</td><td>packages/player-app\</td><td>packages/admin-app&quot; docs/test-plan.md<code> — no matches; </code>apps/api/<code>, </code>apps/player/<code>, </code>apps/admin/` confirmed throughout</td><td>CLEAR ✅</td></tr>
+</table></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>
