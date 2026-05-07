@@ -1,0 +1,72 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "ownerEmailMasked": "p***@example.com",
+    "rarity": "RARE",
+    "level": 7,
+    "battlesPlayed": 17,
+    "winRate": 0.706,
+    "isBanned": false,
+    "createdAt": "2026-04-15T09:30:00Z"
+  },
+  {
+    "id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+    "ownerEmailMasked": "a***@example.com",
+    "rarity": "COMMON",
+    "level": 4,
+    "battlesPlayed": 8,
+    "winRate": 0.524,
+    "isBanned": false,
+    "createdAt": "2026-04-20T14:00:00Z"
+  },
+  {
+    "id": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+    "ownerEmailMasked": "t***@example.com",
+    "rarity": "EPIC",
+    "level": 18,
+    "battlesPlayed": 36,
+    "winRate": 0.781,
+    "isBanned": false,
+    "createdAt": "2026-03-28T16:40:00Z"
+  },
+  {
+    "id": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+    "ownerEmailMasked": "s***@example.com",
+    "rarity": "LEGENDARY",
+    "level": 42,
+    "battlesPlayed": 84,
+    "winRate": 0.892,
+    "isBanned": false,
+    "createdAt": "2026-02-14T07:55:00Z"
+  },
+  {
+    "id": "af0e1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+    "ownerEmailMasked": "f***@example.com",
+    "rarity": "RARE",
+    "level": 6,
+    "battlesPlayed": 16,
+    "winRate": 0.625,
+    "isBanned": false,
+    "createdAt": "2026-04-10T11:25:00Z"
+  },
+  {
+    "id": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6",
+    "ownerEmailMasked": "i***@example.com",
+    "rarity": "EPIC",
+    "level": 16,
+    "battlesPlayed": 30,
+    "winRate": 0.733,
+    "isBanned": false,
+    "createdAt": "2026-04-05T17:50:00Z"
+  },
+  {
+    "id": "c2d3e4f5-a6b7-c8d9-e0f1-a2b3c4d5e6f7",
+    "ownerEmailMasked": "p***@example.com",
+    "rarity": "COMMON",
+    "level": 3,
+    "battlesPlayed": 5,
+    "winRate": 0.4,
+    "isBanned": true,
+    "createdAt": "2026-04-12T08:55:00Z"
+  }
+]

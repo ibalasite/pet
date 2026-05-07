@@ -1,0 +1,28 @@
+{
+  "claimFunnel": {
+    "guestPetsCreated": 18420,
+    "claimsInitiated": 6213,
+    "otpVerified": 5184,
+    "tokensIssued": 5184,
+    "claimConversionRate": 0.281
+  },
+  "rarityDistribution": [
+    { "rarity": "COMMON", "count": 919, "percent": 60.0 },
+    { "rarity": "RARE", "count": 383, "percent": 25.0 },
+    { "rarity": "EPIC", "count": 184, "percent": 12.0 },
+    { "rarity": "LEGENDARY", "count": 46, "percent": 3.0 }
+  ],
+  "engagementMetrics": {
+    "averageDailyActiveUsers": 1240,
+    "averageBattlesPerActivePet": 3.4,
+    "averageTrainingActionsPerActivePet": 2.1,
+    "neglectedPetsCount": 287
+  },
+  "marketplaceMetrics": {
+    "totalListings": 0,
+    "completedTransactions": 0,
+    "totalFeesCollected": 0,
+    "note": "FF_MARKETPLACE disabled — marketplace inactive"
+  },
+  "generatedAt": "2026-05-03T11:45:00Z"
+}

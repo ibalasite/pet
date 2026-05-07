@@ -1,0 +1,34 @@
+{
+  "summary": {
+    "totalPets": 1532,
+    "claimedPets": 1187,
+    "guestPets": 345,
+    "bannedPets": 23,
+    "activeAdmins": 4,
+    "battlesLast24h": 4283,
+    "battlesLast7d": 28471,
+    "newClaimsLast24h": 47,
+    "openGdprRequests": 3
+  },
+  "charts": {
+    "claimConversionTrend": [
+      { "date": "2026-04-27", "claims": 38 },
+      { "date": "2026-04-28", "claims": 42 },
+      { "date": "2026-04-29", "claims": 51 },
+      { "date": "2026-04-30", "claims": 45 },
+      { "date": "2026-05-01", "claims": 49 },
+      { "date": "2026-05-02", "claims": 52 },
+      { "date": "2026-05-03", "claims": 47 }
+    ],
+    "battleVolumeTrend": [
+      { "date": "2026-04-27", "battles": 3920 },
+      { "date": "2026-04-28", "battles": 4105 },
+      { "date": "2026-04-29", "battles": 4287 },
+      { "date": "2026-04-30", "battles": 4012 },
+      { "date": "2026-05-01", "battles": 4198 },
+      { "date": "2026-05-02", "battles": 4666 },
+      { "date": "2026-05-03", "battles": 4283 }
+    ]
+  },
+  "generatedAt": "2026-05-03T11:45:00Z"
+}

@@ -1,138 +1,250 @@
 [
   {
-    "id": "a3f7c2d1-84e5-4b9f-b6a2-1d0e3c7f9b4e",
-    "name": "FlameWisp",
-    "rarity": "LEGENDARY",
-    "level": 28,
-    "element": "FIRE",
-    "stats": {
-      "attack": 78,
-      "defense": 52,
-      "speed": 74,
-      "stamina": 61
-    },
-    "ownerId": "u1a2b3c4-d5e6-7f8a-9b0c-d1e2f3a4b5c6",
-    "ownerName": "PixelKnight99",
-    "createdAt": "2026-04-03T09:14:22Z",
-    "updatedAt": "2026-05-01T18:30:05Z"
-  },
-  {
-    "id": "b5e8d4a2-c7f1-4e3b-a9d6-2c1f5a8e0b7d",
-    "name": "GlacierFang",
-    "rarity": "EPIC",
-    "level": 22,
-    "element": "ICE",
-    "stats": {
-      "attack": 64,
-      "defense": 70,
-      "speed": 48,
-      "stamina": 72
-    },
-    "ownerId": "u2b3c4d5-e6f7-8a9b-0c1d-e2f3a4b5c6d7",
-    "ownerName": "ArcticBlaze",
-    "createdAt": "2026-04-07T14:25:11Z",
-    "updatedAt": "2026-04-29T11:12:43Z"
-  },
-  {
-    "id": "c9a1e6b3-f2d8-4c7a-b0e5-3d4g6b9c2e1f",
-    "name": "VoltMane",
-    "rarity": "EPIC",
-    "level": 19,
-    "element": "LIGHTNING",
-    "stats": {
-      "attack": 70,
-      "defense": 38,
-      "speed": 80,
-      "stamina": 45
-    },
-    "ownerId": "u3c4d5e6-f7a8-9b0c-1d2e-f3a4b5c6d7e8",
-    "ownerName": "StormRider7",
-    "createdAt": "2026-04-10T07:55:34Z",
-    "updatedAt": "2026-05-02T09:44:17Z"
-  },
-  {
-    "id": "d2f4b8c5-a1e9-4d6c-b3f7-4e5h7c0d3f2g",
-    "name": "StonePaw",
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "seed": 7381923847561029,
     "rarity": "RARE",
-    "level": 14,
-    "element": "EARTH",
+    "petName": "Crimson Vexor",
     "stats": {
-      "attack": 42,
-      "defense": 68,
-      "speed": 28,
-      "stamina": 75
+      "speed": 34,
+      "strength": 28,
+      "stamina": 41,
+      "level": 7
     },
-    "ownerId": "u4d5e6f7-a8b9-0c1d-2e3f-a4b5c6d7e8f9",
-    "ownerName": "RockSolid44",
-    "createdAt": "2026-04-12T16:08:50Z",
-    "updatedAt": "2026-04-25T14:22:31Z"
+    "totalTrainingActions": 72,
+    "lastTrainedAt": "2026-05-02T18:45:00Z",
+    "ownerTokenHash": "a3c8f5e2b1d4a7c9e6f0b8d2a5c3e7f1b4d8c2a6e9f3b5d7c0a4e8f2b6d9c3a7",
+    "claimedAt": "2026-04-15T09:32:00Z",
+    "claimIdentityId": "11111111-2222-3333-4444-555566667777",
+    "reservedUntil": null,
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "generationMeta": {
+      "body": "lizard",
+      "head": "horned",
+      "colorPalette": "crimson_gold",
+      "accessory": "cape",
+      "rarityTrait": "shimmering_scales",
+      "pattern": "diagonal_stripe"
+    },
+    "createdAt": "2026-04-15T09:30:00Z",
+    "updatedAt": "2026-05-02T18:45:00Z"
   },
   {
-    "id": "e6c3a9d7-b4f0-4e8d-c2g8-5f6i8d1e4g3h",
-    "name": "CinderClaw",
-    "rarity": "RARE",
-    "level": 11,
-    "element": "FIRE",
-    "stats": {
-      "attack": 55,
-      "defense": 33,
-      "speed": 58,
-      "stamina": 40
-    },
-    "ownerId": "u5e6f7a8-b9c0-1d2e-3f4a-b5c6d7e8f9a0",
-    "ownerName": "EmberCore",
-    "createdAt": "2026-04-15T11:30:07Z",
-    "updatedAt": "2026-04-28T16:55:09Z"
-  },
-  {
-    "id": "f8d5b2e9-c6a1-4f9e-d4h9-6g7j9e2f5h4i",
-    "name": "IronTusk",
-    "rarity": "UNCOMMON",
-    "level": 8,
-    "element": "METAL",
-    "stats": {
-      "attack": 38,
-      "defense": 62,
-      "speed": 22,
-      "stamina": 58
-    },
-    "ownerId": "u6f7a8b9-c0d1-2e3f-4a5b-c6d7e8f9a0b1",
-    "ownerName": "SteelForge",
-    "createdAt": "2026-04-18T08:42:19Z",
-    "updatedAt": "2026-05-03T10:18:44Z"
-  },
-  {
-    "id": "g1e7c4f0-d8b2-4a0f-e5i0-7h8k0f3g6i5j",
-    "name": "MossHaven",
-    "rarity": "UNCOMMON",
-    "level": 5,
-    "element": "NATURE",
-    "stats": {
-      "attack": 20,
-      "defense": 45,
-      "speed": 35,
-      "stamina": 65
-    },
-    "ownerId": "u7a8b9c0-d1e2-3f4a-5b6c-d7e8f9a0b1c2",
-    "ownerName": "GreenThumb",
-    "createdAt": "2026-04-21T13:19:55Z",
-    "updatedAt": "2026-04-30T07:36:28Z"
-  },
-  {
-    "id": "h4f9d6g2-e0c3-4b1g-f7j1-8i9l1g4h7j6k",
-    "name": "SkyDrift",
+    "id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+    "seed": 4823917625108437,
     "rarity": "COMMON",
-    "level": 3,
-    "element": "WIND",
+    "petName": "Azure Stomper",
     "stats": {
-      "attack": 18,
-      "defense": 15,
-      "speed": 55,
-      "stamina": 30
+      "speed": 18,
+      "strength": 22,
+      "stamina": 19,
+      "level": 4
     },
-    "ownerId": "u8b9c0d1-e2f3-4a5b-6c7d-e8f9a0b1c2d3",
-    "ownerName": "CloudWatcher",
-    "createdAt": "2026-04-25T10:05:33Z",
-    "updatedAt": "2026-05-04T15:50:12Z"
+    "totalTrainingActions": 41,
+    "lastTrainedAt": "2026-05-01T10:12:00Z",
+    "ownerTokenHash": "b4d9c6f3a2e5b8c1d4f7a0c3e6b9d2f5a8c1e4b7d0a3c6e9b2d5a8c1e4f7b0d3",
+    "claimedAt": "2026-04-20T14:05:00Z",
+    "claimIdentityId": "22222222-3333-4444-5555-666677778888",
+    "reservedUntil": null,
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "generationMeta": {
+      "body": "feline",
+      "head": "round",
+      "colorPalette": "azure_silver",
+      "accessory": "collar",
+      "rarityTrait": "soft_fur",
+      "pattern": "spotted"
+    },
+    "createdAt": "2026-04-20T14:00:00Z",
+    "updatedAt": "2026-05-01T10:12:00Z"
+  },
+  {
+    "id": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+    "seed": 1029384756102937,
+    "rarity": "EPIC",
+    "petName": "Thunderpaw Elder",
+    "stats": {
+      "speed": 52,
+      "strength": 67,
+      "stamina": 58,
+      "level": 18
+    },
+    "totalTrainingActions": 184,
+    "lastTrainedAt": "2026-05-03T08:30:00Z",
+    "ownerTokenHash": "c5e0d7f4b3a6c9e2d5f8b1a4c7e0d3f6b9a2c5e8d1f4b7a0c3e6d9f2b5a8c1e4",
+    "claimedAt": "2026-03-28T16:42:00Z",
+    "claimIdentityId": "33333333-4444-5555-6666-777788889999",
+    "reservedUntil": null,
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "generationMeta": {
+      "body": "wolf",
+      "head": "majestic",
+      "colorPalette": "violet_storm",
+      "accessory": "lightning_charm",
+      "rarityTrait": "thunder_aura",
+      "pattern": "jagged"
+    },
+    "createdAt": "2026-03-28T16:40:00Z",
+    "updatedAt": "2026-05-03T08:30:00Z"
+  },
+  {
+    "id": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+    "seed": 5647382910564738,
+    "rarity": "LEGENDARY",
+    "petName": "Solaris Phoenix",
+    "stats": {
+      "speed": 88,
+      "strength": 79,
+      "stamina": 95,
+      "level": 42
+    },
+    "totalTrainingActions": 425,
+    "lastTrainedAt": "2026-05-03T11:15:00Z",
+    "ownerTokenHash": "d6f1e8a5c4b7d0f3a6e9c2b5d8f1a4c7e0b3d6f9a2c5e8b1d4f7a0c3e6b9d2f5",
+    "claimedAt": "2026-02-14T08:00:00Z",
+    "claimIdentityId": "44444444-5555-6666-7777-88889999aaaa",
+    "reservedUntil": null,
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "generationMeta": {
+      "body": "phoenix",
+      "head": "crowned",
+      "colorPalette": "solar_flare",
+      "accessory": "sun_pendant",
+      "rarityTrait": "radiant_wings",
+      "pattern": "feathered_blaze"
+    },
+    "createdAt": "2026-02-14T07:55:00Z",
+    "updatedAt": "2026-05-03T11:15:00Z"
+  },
+  {
+    "id": "9e0f1a2b-3c4d-5e6f-7a8b-9c0d1e2f3a4b",
+    "seed": 9876543210987654,
+    "rarity": "COMMON",
+    "petName": "Mossy Nibbler",
+    "stats": {
+      "speed": 12,
+      "strength": 11,
+      "stamina": 14,
+      "level": 2
+    },
+    "totalTrainingActions": 18,
+    "lastTrainedAt": "2026-04-25T22:10:00Z",
+    "ownerTokenHash": null,
+    "claimedAt": null,
+    "claimIdentityId": null,
+    "reservedUntil": "2026-05-08T12:00:00Z",
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "generationMeta": {
+      "body": "rodent",
+      "head": "round",
+      "colorPalette": "moss_brown",
+      "accessory": "leaf_hat",
+      "rarityTrait": "tiny_paws",
+      "pattern": "speckled"
+    },
+    "createdAt": "2026-05-07T12:00:00Z",
+    "updatedAt": "2026-05-07T12:00:00Z"
+  },
+  {
+    "id": "af0e1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+    "seed": 2468013579246801,
+    "rarity": "RARE",
+    "petName": "Frost Whisker",
+    "stats": {
+      "speed": 30,
+      "strength": 24,
+      "stamina": 33,
+      "level": 6
+    },
+    "totalTrainingActions": 64,
+    "lastTrainedAt": "2026-05-02T20:00:00Z",
+    "ownerTokenHash": "e7a2f9b6d5c8e1b4f7a0c3d6e9b2c5f8d1a4e7c0b3d6f9a2c5e8b1d4f7a0c3e6",
+    "claimedAt": "2026-04-10T11:30:00Z",
+    "claimIdentityId": "55555555-6666-7777-8888-9999aaaabbbb",
+    "reservedUntil": null,
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "generationMeta": {
+      "body": "fox",
+      "head": "perky",
+      "colorPalette": "ice_blue",
+      "accessory": "scarf",
+      "rarityTrait": "frost_breath",
+      "pattern": "snowflake"
+    },
+    "createdAt": "2026-04-10T11:25:00Z",
+    "updatedAt": "2026-05-02T20:00:00Z"
+  },
+  {
+    "id": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6",
+    "seed": 1357902468135790,
+    "rarity": "EPIC",
+    "petName": "Ironclad Brutus",
+    "stats": {
+      "speed": 38,
+      "strength": 71,
+      "stamina": 64,
+      "level": 16
+    },
+    "totalTrainingActions": 162,
+    "lastTrainedAt": "2026-05-03T07:20:00Z",
+    "ownerTokenHash": "f8b3c0a7e6d9c2f5b8e1a4d7c0f3b6e9a2c5d8f1b4e7a0c3d6f9b2e5a8c1d4f7",
+    "claimedAt": "2026-04-05T18:00:00Z",
+    "claimIdentityId": "66666666-7777-8888-9999-aaaabbbbcccc",
+    "reservedUntil": null,
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "generationMeta": {
+      "body": "rhino",
+      "head": "armored",
+      "colorPalette": "steel_grey",
+      "accessory": "shield_plate",
+      "rarityTrait": "iron_hide",
+      "pattern": "plated"
+    },
+    "createdAt": "2026-04-05T17:50:00Z",
+    "updatedAt": "2026-05-03T07:20:00Z"
+  },
+  {
+    "id": "c2d3e4f5-a6b7-c8d9-e0f1-a2b3c4d5e6f7",
+    "seed": 8642097531864209,
+    "rarity": "COMMON",
+    "petName": "Pip Squeak",
+    "stats": {
+      "speed": 16,
+      "strength": 9,
+      "stamina": 12,
+      "level": 3
+    },
+    "totalTrainingActions": 28,
+    "lastTrainedAt": "2026-04-29T15:45:00Z",
+    "ownerTokenHash": "a9c4d1b8e7f0a3c6b9d2e5a8c1f4b7d0e3a6c9b2d5e8a1f4c7b0d3e6a9c2f5b8",
+    "claimedAt": "2026-04-12T09:00:00Z",
+    "claimIdentityId": "77777777-8888-9999-aaaa-bbbbccccdddd",
+    "reservedUntil": null,
+    "isBanned": true,
+    "bannedReason": "Inappropriate pet name detected after community report",
+    "bannedAt": "2026-05-03T10:00:00Z",
+    "generationMeta": {
+      "body": "rodent",
+      "head": "round",
+      "colorPalette": "beige",
+      "accessory": "tiny_hat",
+      "rarityTrait": "quick_feet",
+      "pattern": "plain"
+    },
+    "createdAt": "2026-04-12T08:55:00Z",
+    "updatedAt": "2026-05-03T10:00:00Z"
   }
 ]

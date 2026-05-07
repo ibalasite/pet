@@ -1,0 +1,107 @@
+[
+  {
+    "listingId": "ml111111-2222-3333-4444-555566667777",
+    "petId": "af0e1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+    "sellerTokenHash": "e7a2f9b6d5c8e1b4f7a0c3d6e9b2c5f8d1a4e7c0b3d6f9a2c5e8b1d4f7a0c3e6",
+    "priceCredits": 1900,
+    "status": "active",
+    "listedAt": "2026-05-03T10:20:00Z",
+    "expiresAt": "2026-05-10T10:20:00Z",
+    "completedAt": null,
+    "updatedAt": "2026-05-03T10:20:00Z",
+    "petSummary": {
+      "petName": "Frost Whisker",
+      "rarity": "RARE",
+      "level": 6,
+      "stats": {
+        "speed": 30,
+        "strength": 24,
+        "stamina": 33
+      }
+    }
+  },
+  {
+    "listingId": "ml222222-3333-4444-5555-666677778888",
+    "petId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+    "sellerTokenHash": "c5e0d7f4b3a6c9e2d5f8b1a4c7e0d3f6b9a2c5e8d1f4b7a0c3e6d9f2b5a8c1e4",
+    "priceCredits": 5800,
+    "status": "active",
+    "listedAt": "2026-05-04T08:15:00Z",
+    "expiresAt": "2026-05-11T08:15:00Z",
+    "completedAt": null,
+    "updatedAt": "2026-05-04T08:15:00Z",
+    "petSummary": {
+      "petName": "Thunderpaw Elder",
+      "rarity": "EPIC",
+      "level": 18,
+      "stats": {
+        "speed": 52,
+        "strength": 67,
+        "stamina": 58
+      }
+    }
+  },
+  {
+    "listingId": "ml333333-4444-5555-6666-777788889999",
+    "petId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+    "sellerTokenHash": "b4d9c6f3a2e5b8c1d4f7a0c3e6b9d2f5a8c1e4b7d0a3c6e9b2d5a8c1e4f7b0d3",
+    "priceCredits": 900,
+    "status": "active",
+    "listedAt": "2026-05-05T14:00:00Z",
+    "expiresAt": null,
+    "completedAt": null,
+    "updatedAt": "2026-05-05T14:00:00Z",
+    "petSummary": {
+      "petName": "Azure Stomper",
+      "rarity": "COMMON",
+      "level": 4,
+      "stats": {
+        "speed": 18,
+        "strength": 22,
+        "stamina": 19
+      }
+    }
+  },
+  {
+    "listingId": "ml444444-5555-6666-7777-88889999aaaa",
+    "petId": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6",
+    "sellerTokenHash": "f8b3c0a7e6d9c2f5b8e1a4d7c0f3b6e9a2c5d8f1b4e7a0c3d6f9b2e5a8c1d4f7",
+    "priceCredits": 4200,
+    "status": "sold",
+    "listedAt": "2026-04-28T12:00:00Z",
+    "expiresAt": "2026-05-05T12:00:00Z",
+    "completedAt": "2026-05-02T16:30:00Z",
+    "updatedAt": "2026-05-02T16:30:00Z",
+    "petSummary": {
+      "petName": "Ironclad Brutus",
+      "rarity": "EPIC",
+      "level": 16,
+      "stats": {
+        "speed": 38,
+        "strength": 71,
+        "stamina": 64
+      }
+    }
+  },
+  {
+    "listingId": "ml555555-6666-7777-8888-9999aaaabbbb",
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "sellerTokenHash": "a3c8f5e2b1d4a7c9e6f0b8d2a5c3e7f1b4d8c2a6e9f3b5d7c0a4e8f2b6d9c3a7",
+    "priceCredits": 1700,
+    "status": "cancelled",
+    "listedAt": "2026-04-25T09:30:00Z",
+    "expiresAt": "2026-05-02T09:30:00Z",
+    "completedAt": "2026-04-27T11:15:00Z",
+    "updatedAt": "2026-04-27T11:15:00Z",
+    "petSummary": {
+      "petName": "Crimson Vexor",
+      "rarity": "RARE",
+      "level": 7,
+      "stats": {
+        "speed": 34,
+        "strength": 28,
+        "stamina": 41
+      }
+    }
+  }
+]

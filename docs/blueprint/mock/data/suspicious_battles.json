@@ -1,0 +1,31 @@
+[
+  {
+    "matchId": "d4e5f6a7-b8c9-0123-defa-bc4567890123",
+    "petAId": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6",
+    "petBId": "550e8400-e29b-41d4-a716-446655440000",
+    "mode": "SUMO",
+    "winnerPetId": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6",
+    "completedAt": "2026-05-02T19:30:00Z",
+    "isFlagged": true,
+    "flaggedAt": "2026-05-03T13:20:00Z",
+    "suspicionScore": 0.87,
+    "suspicionReasons": [
+      "Win rate against opponent above 95% on 5+ rematches",
+      "Battle completed in minimum duration (5s) consistently"
+    ]
+  },
+  {
+    "matchId": "f6a7b8c9-d0e1-2345-fabc-de6789012345",
+    "petAId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+    "petBId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+    "mode": "RACE",
+    "winnerPetId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+    "completedAt": "2026-05-01T13:10:00Z",
+    "isFlagged": false,
+    "flaggedAt": null,
+    "suspicionScore": 0.62,
+    "suspicionReasons": [
+      "Same IP hash for both pet owners over last 24h"
+    ]
+  }
+]

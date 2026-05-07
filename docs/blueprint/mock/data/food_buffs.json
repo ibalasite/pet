@@ -1,0 +1,35 @@
+[
+  {
+    "id": "fb111111-2222-3333-4444-555566667777",
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "foodType": "speed_berry",
+    "buffStat": "speed",
+    "magnitude": 5,
+    "isPermanent": false,
+    "expiresAt": "2026-05-04T18:45:00Z",
+    "consumedAt": "2026-05-03T18:45:00Z",
+    "recordExpiresAt": "2026-06-02T18:45:00Z"
+  },
+  {
+    "id": "fb222222-3333-4444-5555-666677778888",
+    "petId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+    "foodType": "iron_kibble",
+    "buffStat": "strength",
+    "magnitude": 3,
+    "isPermanent": true,
+    "expiresAt": null,
+    "consumedAt": "2026-04-20T10:00:00Z",
+    "recordExpiresAt": "2026-05-20T10:00:00Z"
+  },
+  {
+    "id": "fb333333-4444-5555-6666-777788889999",
+    "petId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+    "foodType": "stamina_potion",
+    "buffStat": "stamina",
+    "magnitude": 4,
+    "isPermanent": false,
+    "expiresAt": "2026-05-04T08:30:00Z",
+    "consumedAt": "2026-05-03T08:30:00Z",
+    "recordExpiresAt": "2026-06-02T08:30:00Z"
+  }
+]

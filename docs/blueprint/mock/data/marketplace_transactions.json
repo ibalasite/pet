@@ -1,0 +1,35 @@
+[
+  {
+    "transactionId": "mt111111-2222-3333-4444-555566667777",
+    "listingId": "ml444444-5555-6666-7777-88889999aaaa",
+    "petId": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6",
+    "sellerTokenHash": "f8b3c0a7e6d9c2f5b8e1a4d7c0f3b6e9a2c5d8f1b4e7a0c3d6f9b2e5a8c1d4f7",
+    "buyerTokenHash": "d6f1e8a5c4b7d0f3a6e9c2b5d8f1a4c7e0b3d6f9a2c5e8b1d4f7a0c3e6b9d2f5",
+    "priceCredits": 4200,
+    "feeCredits": 210,
+    "listedAt": "2026-04-28T12:00:00Z",
+    "completedAt": "2026-05-02T16:30:00Z"
+  },
+  {
+    "transactionId": "mt222222-3333-4444-5555-666677778888",
+    "listingId": "ml000000-0000-0000-0000-000000000001",
+    "petId": "9e0f1a2b-3c4d-5e6f-7a8b-9c0d1e2f3a4b",
+    "sellerTokenHash": "111111111111111111111111111111111111111111111111111111111111aaaa",
+    "buyerTokenHash": "b4d9c6f3a2e5b8c1d4f7a0c3e6b9d2f5a8c1e4b7d0a3c6e9b2d5a8c1e4f7b0d3",
+    "priceCredits": 750,
+    "feeCredits": 37,
+    "listedAt": "2026-04-15T10:00:00Z",
+    "completedAt": "2026-04-18T14:25:00Z"
+  },
+  {
+    "transactionId": "mt333333-4444-5555-6666-777788889999",
+    "listingId": "ml000000-0000-0000-0000-000000000002",
+    "petId": "c2d3e4f5-a6b7-c8d9-e0f1-a2b3c4d5e6f7",
+    "sellerTokenHash": "222222222222222222222222222222222222222222222222222222222222bbbb",
+    "buyerTokenHash": "a9c4d1b8e7f0a3c6b9d2e5a8c1f4b7d0e3a6c9b2d5e8a1f4c7b0d3e6a9c2f5b8",
+    "priceCredits": 600,
+    "feeCredits": 30,
+    "listedAt": "2026-04-08T09:30:00Z",
+    "completedAt": "2026-04-12T08:55:00Z"
+  }
+]

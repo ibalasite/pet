@@ -1,0 +1,21 @@
+[
+  {
+    "id": "ls111111-2222-3333-4444-555566667777",
+    "snapshotTime": "2026-05-03T00:00:00Z",
+    "entries": [
+      { "rank": 1, "petId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a", "petName": "Solaris Phoenix", "score": 487.3, "winRate": 0.892, "rarity": "LEGENDARY", "level": 42 },
+      { "rank": 2, "petId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f", "petName": "Thunderpaw Elder", "score": 264.5, "winRate": 0.781, "rarity": "EPIC", "level": 18 },
+      { "rank": 3, "petId": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6", "petName": "Ironclad Brutus", "score": 218.8, "winRate": 0.733, "rarity": "EPIC", "level": 16 }
+    ],
+    "createdAt": "2026-05-03T00:00:05Z"
+  },
+  {
+    "id": "ls222222-3333-4444-5555-666677778888",
+    "snapshotTime": "2026-05-02T00:00:00Z",
+    "entries": [
+      { "rank": 1, "petId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a", "petName": "Solaris Phoenix", "score": 472.1, "winRate": 0.885, "rarity": "LEGENDARY", "level": 41 },
+      { "rank": 2, "petId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f", "petName": "Thunderpaw Elder", "score": 258.3, "winRate": 0.778, "rarity": "EPIC", "level": 18 }
+    ],
+    "createdAt": "2026-05-02T00:00:05Z"
+  }
+]

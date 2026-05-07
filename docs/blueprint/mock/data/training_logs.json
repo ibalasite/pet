@@ -1,0 +1,42 @@
+[
+  {
+    "id": "tl111111-2222-3333-4444-555566667777",
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "trainingType": "RUN",
+    "statDelta": 2,
+    "statAfter": 34,
+    "completedAt": "2026-05-02T18:45:00Z"
+  },
+  {
+    "id": "tl222222-3333-4444-5555-666677778888",
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "trainingType": "STRENGTH",
+    "statDelta": 1,
+    "statAfter": 28,
+    "completedAt": "2026-05-02T12:10:00Z"
+  },
+  {
+    "id": "tl333333-4444-5555-6666-777788889999",
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "trainingType": "STAMINA",
+    "statDelta": 3,
+    "statAfter": 41,
+    "completedAt": "2026-05-01T19:30:00Z"
+  },
+  {
+    "id": "tl444444-5555-6666-7777-88889999aaaa",
+    "petId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+    "trainingType": "STAMINA",
+    "statDelta": 3,
+    "statAfter": 95,
+    "completedAt": "2026-05-03T11:15:00Z"
+  },
+  {
+    "id": "tl555555-6666-7777-8888-9999aaaabbbb",
+    "petId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+    "trainingType": "STRENGTH",
+    "statDelta": 2,
+    "statAfter": 67,
+    "completedAt": "2026-05-03T08:30:00Z"
+  }
+]

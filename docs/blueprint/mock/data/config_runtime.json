@@ -1,0 +1,14 @@
+{
+  "arenaBattlesPerPetPerHour": 10,
+  "arenaMatchmakingTimeoutSeconds": 30,
+  "arenaBattleOutcomeRandomModifierPercent": 15,
+  "trainingActionsPerDay": 3,
+  "trainingNeglectThresholdDays": 3,
+  "petReservationTtlHours": 24,
+  "claimCodeExpiryMinutes": 15,
+  "emailClaimAttemptsPerHourPerEmail": 5,
+  "adminPortalRequestsPerMinutePerAccount": 100,
+  "configCacheRefreshTimeMinutes": 5,
+  "lastUpdatedAt": "2026-05-03T08:15:00Z",
+  "lastUpdatedBy": "super_admin_jane"
+}

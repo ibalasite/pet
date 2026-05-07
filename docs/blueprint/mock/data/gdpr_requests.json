@@ -1,0 +1,68 @@
+[
+  {
+    "jobId": "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8",
+    "claimIdentityId": "11111111-2222-3333-4444-555566667777",
+    "initiatingPetId": "550e8400-e29b-41d4-a716-446655440000",
+    "requestType": "erasure",
+    "status": "processing",
+    "submittedAt": "2026-05-01T09:00:00Z",
+    "completedAt": null,
+    "adminNotes": null,
+    "updatedAt": "2026-05-01T09:00:00Z"
+  },
+  {
+    "jobId": "4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+    "claimIdentityId": "22222222-3333-4444-5555-666677778888",
+    "initiatingPetId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+    "requestType": "data_access",
+    "status": "completed",
+    "submittedAt": "2026-04-15T11:20:00Z",
+    "completedAt": "2026-04-20T13:45:00Z",
+    "adminNotes": "Data export delivered via secure email",
+    "updatedAt": "2026-04-20T13:45:00Z"
+  },
+  {
+    "jobId": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
+    "claimIdentityId": "33333333-4444-5555-6666-777788889999",
+    "initiatingPetId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+    "requestType": "restrict_processing",
+    "status": "pending",
+    "submittedAt": "2026-05-03T07:00:00Z",
+    "completedAt": null,
+    "adminNotes": null,
+    "updatedAt": "2026-05-03T07:00:00Z"
+  },
+  {
+    "jobId": "6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c",
+    "claimIdentityId": "44444444-5555-6666-7777-88889999aaaa",
+    "initiatingPetId": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+    "requestType": "object_leaderboard",
+    "status": "pending",
+    "submittedAt": "2026-05-02T16:00:00Z",
+    "completedAt": null,
+    "adminNotes": null,
+    "updatedAt": "2026-05-02T16:00:00Z"
+  },
+  {
+    "jobId": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
+    "claimIdentityId": "55555555-6666-7777-8888-9999aaaabbbb",
+    "initiatingPetId": "af0e1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+    "requestType": "rectification",
+    "status": "completed",
+    "submittedAt": "2026-04-22T10:00:00Z",
+    "completedAt": "2026-04-22T22:15:00Z",
+    "adminNotes": "Email address corrected and re-encrypted",
+    "updatedAt": "2026-04-22T22:15:00Z"
+  },
+  {
+    "jobId": "8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e",
+    "claimIdentityId": "66666666-7777-8888-9999-aaaabbbbcccc",
+    "initiatingPetId": "b1c2d3e4-f5a6-b7c8-d9e0-f1a2b3c4d5e6",
+    "requestType": "erasure",
+    "status": "failed",
+    "submittedAt": "2026-04-10T08:00:00Z",
+    "completedAt": "2026-04-17T08:00:00Z",
+    "adminNotes": "Failed to retrieve associated audit log row; manual escalation required",
+    "updatedAt": "2026-04-17T08:00:00Z"
+  }
+]

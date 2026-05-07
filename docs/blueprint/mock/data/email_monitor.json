@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "sentLast24h": 421,
+    "deliveredLast24h": 412,
+    "bouncedLast24h": 6,
+    "complainedLast24h": 1,
+    "failedLast24h": 2,
+    "deliveryRate": 0.979
+  },
+  "bouncesByCategory": [
+    { "category": "hard_bounce", "count": 4 },
+    { "category": "soft_bounce", "count": 2 }
+  ],
+  "recentEvents": [
+    {
+      "eventId": "ev111111-2222-3333-4444-555566667777",
+      "type": "delivered",
+      "messageType": "claim_otp",
+      "emailHash": "f1d2c3b4a5968778695a4b3c2d1e0fa9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3",
+      "occurredAt": "2026-05-03T11:30:00Z"
+    },
+    {
+      "eventId": "ev222222-3333-4444-5555-666677778888",
+      "type": "bounced",
+      "messageType": "claim_otp",
+      "emailHash": "abc1d2c3b4a5968778695a4b3c2d1e0fa9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4",
+      "occurredAt": "2026-05-03T11:15:00Z"
+    },
+    {
+      "eventId": "ev333333-4444-5555-6666-777788889999",
+      "type": "delivered",
+      "messageType": "gdpr_completion",
+      "emailHash": "e2d3c4b5a6978889786b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f",
+      "occurredAt": "2026-05-03T10:45:00Z"
+    }
+  ],
+  "generatedAt": "2026-05-03T11:45:00Z"
+}

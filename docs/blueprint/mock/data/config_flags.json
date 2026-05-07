@@ -1,0 +1,32 @@
+{
+  "FF_MARKETPLACE": {
+    "enabled": false,
+    "description": "Enables Phase 3 marketplace endpoints (list/buy/cancel)",
+    "lastUpdatedAt": "2026-04-01T00:00:00Z",
+    "lastUpdatedBy": "super_admin_jane"
+  },
+  "FF_AI_OPPONENT_FALLBACK": {
+    "enabled": true,
+    "description": "Enables AI opponent fallback when matchmaking times out",
+    "lastUpdatedAt": "2026-02-15T00:00:00Z",
+    "lastUpdatedBy": "super_admin_jane"
+  },
+  "FF_LEADERBOARD_SOCIAL_SHARE": {
+    "enabled": true,
+    "description": "Enables Open Graph social-share cards for leaderboard entries",
+    "lastUpdatedAt": "2026-03-10T00:00:00Z",
+    "lastUpdatedBy": "super_admin_jane"
+  },
+  "FF_GDPR_SELF_SERVICE": {
+    "enabled": true,
+    "description": "Enables /api/v1/gdpr/* self-service endpoints",
+    "lastUpdatedAt": "2026-01-20T00:00:00Z",
+    "lastUpdatedBy": "super_admin_jane"
+  },
+  "FF_TRAINING_NEGLECT_VISUALS": {
+    "enabled": true,
+    "description": "Enables visual neglect-state rendering on pet detail page",
+    "lastUpdatedAt": "2026-03-22T00:00:00Z",
+    "lastUpdatedBy": "super_admin_jane"
+  }
+}

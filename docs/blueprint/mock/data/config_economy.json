@@ -1,0 +1,19 @@
+{
+  "tradeTransactionFeePercent": 5,
+  "tradeMinPriceFormulaLevelCoeff": 100,
+  "tradeMinPriceFormulaRarityCoeff": 500,
+  "marketplaceTradeAntiflipProtectionDays": 7,
+  "rarityCommonPercent": 60,
+  "rarityRarePercent": 25,
+  "rarityEpicPercent": 12,
+  "rarityLegendaryPercent": 3,
+  "rarityMultiplierCommon": 1,
+  "rarityMultiplierRare": 2,
+  "rarityMultiplierEpic": 4,
+  "rarityMultiplierLegendary": 8,
+  "foodBuffMultiplierAdminMin": 0.5,
+  "foodBuffMultiplierAdminMax": 5.0,
+  "foodBuffRecordRetentionDays": 30,
+  "lastUpdatedAt": "2026-05-02T14:30:00Z",
+  "lastUpdatedBy": "super_admin_jane"
+}

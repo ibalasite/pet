@@ -1,0 +1,26 @@
+[
+  {
+    "id": "11111111-2222-3333-4444-555566667777",
+    "emailHash": "f1d2c3b4a5968778695a4b3c2d1e0fa9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3",
+    "emailMasked": "p***@example.com",
+    "deletionRequestedAt": null,
+    "createdAt": "2026-04-15T09:30:00Z",
+    "updatedAt": "2026-04-15T09:30:00Z"
+  },
+  {
+    "id": "22222222-3333-4444-5555-666677778888",
+    "emailHash": "e2d3c4b5a6978889786b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f",
+    "emailMasked": "a***@example.com",
+    "deletionRequestedAt": null,
+    "createdAt": "2026-04-20T14:00:00Z",
+    "updatedAt": "2026-04-20T14:00:00Z"
+  },
+  {
+    "id": "33333333-4444-5555-6666-777788889999",
+    "emailHash": "d3e4c5b6a7889998897c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a",
+    "emailMasked": "t***@example.com",
+    "deletionRequestedAt": null,
+    "createdAt": "2026-03-28T16:40:00Z",
+    "updatedAt": "2026-03-28T16:40:00Z"
+  }
+]
