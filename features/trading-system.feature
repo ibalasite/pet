@@ -1,4 +1,5 @@
-Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection
+@US-TRADE-001 @FF_MARKETPLACE
+Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-TRADE-001) [FF_MARKETPLACE]
   As a pet owner
   I want to list my pet for sale in the marketplace
   So that I can trade pets with other players

@@ -1,4 +1,5 @@
-Feature: Pet Rarity Distribution Algorithm (US-GEN-001)
+@US-PET-002 @US-RARITY-001
+Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
   As a game designer
   I want to verify that pet rarity follows the specified probability distribution
   So that players get a balanced experience without gaming the system
