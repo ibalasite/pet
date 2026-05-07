@@ -18,15 +18,15 @@ AC-004-1,Returned pet owner enters unique URL token (bookmarkable),US-AUTH-002,c
 AC-004-2,Player can request new access link if URL expires/lost,US-AUTH-002,claim-flow.feature,server,8,BDD,Covered,,P0
 AC-004-3,Invalid or expired URL returns HTTP 404,US-AUTH-002,claim-flow.feature,server,8,Integration,Covered,,P0
 AC-004-4,URL token refreshed on each login; old tokens invalidated,US-AUTH-002,claim-flow.feature,server,8,Integration,Covered,,P0
-AC-005-1,Training action selects one of three types: RUN/STRENGTH/STAMINA,US-TRAIN-001,training-food.feature,server,2,BDD,Covered,,P0
-AC-005-2,Selected stat incremented by [1..3] points (random),US-TRAIN-001,training-food.feature,server,2,Unit,Covered,,P0
-AC-005-3,Stat capped at 100; buff applied stats cannot exceed 100,US-TRAIN-001,training-food.feature,server,2,Unit,Covered,,P0
-AC-005-4,3 training actions allowed per day (UTC reset),US-TRAIN-001,training-food.feature,server,2,Integration,Covered,,P0
-AC-005-5,Stat max cap enforced (PRD AC-005-6 range [1..100]),US-TRAIN-001,training-food.feature,server,2,Unit,Covered,,P0
-AC-006-1,Food buff types: SPEED_BOOST / STRENGTH_BOOST / STAMINA_BOOST,US-FOOD-001,training-food.feature,server,2,BDD,Covered,,P0
-AC-006-2,Buff multiplier applied for duration (1.5x stat boost example),US-FOOD-001,training-food.feature,server,2,Unit,Covered,,P0
-AC-006-3,Buff expires after fixed duration; pet stats revert,US-FOOD-001,training-food.feature,server,2,Integration,Covered,,P0
-AC-006-4,Buff does not allow stat to exceed 100 (cap enforced),US-FOOD-001,training-food.feature,server,2,Unit,Covered,,P0
+AC-005-1,Training action selects one of three types: RUN/STRENGTH/STAMINA,US-TRAIN-001,training-food.feature,server,3,BDD,Covered,,P0
+AC-005-2,Selected stat incremented by [1..3] points (random),US-TRAIN-001,training-food.feature,server,3,Unit,Covered,,P0
+AC-005-3,Stat capped at 100; buff applied stats cannot exceed 100,US-TRAIN-001,training-food.feature,server,3,Unit,Covered,,P0
+AC-005-4,3 training actions allowed per day (UTC reset),US-TRAIN-001,training-food.feature,server,3,Integration,Covered,,P0
+AC-005-5,Stat max cap enforced (PRD AC-005-6 range [1..100]),US-TRAIN-001,training-food.feature,server,3,Unit,Covered,,P0
+AC-006-1,Food buff types: SPEED_BOOST / STRENGTH_BOOST / STAMINA_BOOST,US-FOOD-001,training-food.feature,server,3,BDD,Covered,,P0
+AC-006-2,Buff multiplier applied for duration (1.5x stat boost example),US-FOOD-001,training-food.feature,server,3,Unit,Covered,,P0
+AC-006-3,Buff expires after fixed duration; pet stats revert,US-FOOD-001,training-food.feature,server,3,Integration,Covered,,P0
+AC-006-4,Buff does not allow stat to exceed 100 (cap enforced),US-FOOD-001,training-food.feature,server,3,Unit,Covered,,P0
 AC-007-1,Player can enter arena in RACE mode (speed-based),US-ARENA-001,arena-battle.feature,server,7,BDD,Covered,,P0
 AC-007-2,Player can enter arena in SUMO mode (strength-based),US-ARENA-002,arena-battle.feature,server,7,BDD,Covered,,P0
 AC-007-3,Matchmaking timeout 30s; AI opponent offered if no human opponent,US-ARENA-001,arena-battle.feature,server,7,Integration,Covered,,P0
