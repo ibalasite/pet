@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/AuditLog",
+  "title": "AuditLog",
+  "description": "Immutable audit trail of all admin actions. Source: docs/EDD.md §4.10; docs/SCHEMA.md §2.11 audit_logs. Renamed from legacy admin_audit_log (commit 27e2ab5). Retention: 2 years (admin_audit_log_retention_years).",
+  "type": "object",
+  "required": [
+    "id",
+    "action",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "format": "int64",
+      "minimum": 1,
+      "description": "BIGSERIAL PK; sequential ordering for log replay."
+    },
+    "adminId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Actor admin user id. FK to admin_users.id (ON DELETE RESTRICT). NULL for failed-login attempts with unknown username."
+    },
+    "action": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "Dotted action identifier, e.g., 'pet.ban', 'config.arena_rate_limit', 'admin.login.failed'."
+    },
+    "targetType": {
+      "type": ["string", "null"],
+      "maxLength": 64,
+      "enum": [
+        "pet",
+        "arena_match",
+        "leaderboard_entry",
+        "config_runtime",
+        "config_economy",
+        "gdpr_request",
+        "admin_user",
+        null
+      ],
+      "description": "Entity type the action targets."
+    },
+    "targetId": {
+      "type": ["string", "null"],
+      "description": "UUID or natural key of the affected entity."
+    },
+    "detail": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "description": "Action-specific JSONB payload (e.g., flag reason, before/after values for config changes)."
+    },
+    "ipAddressHash": {
+      "type": ["string", "null"],
+      "maxLength": 64,
+      "description": "SHA-256 hash of the raw client IP. Raw IP never stored. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS)."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp the log row was inserted (immutable)."
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.10 + docs/SCHEMA.md §2.11 audit_logs",
+  "x-stereotype": "<<Entity>>",
+  "x-renamed-from": "admin_audit_log (commit 27e2ab5)"
+}

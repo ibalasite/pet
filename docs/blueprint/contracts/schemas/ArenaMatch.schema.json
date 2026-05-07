@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/ArenaMatch",
+  "title": "ArenaMatch",
+  "description": "Arena battle record. Source: docs/EDD.md §4.4; docs/SCHEMA.md §2.4 arena_matches. Outcome uses seeded random ±15% modifier (random_seed enables deterministic replay).",
+  "type": "object",
+  "required": [
+    "id",
+    "petAId",
+    "isAiOpponent",
+    "mode",
+    "randomSeed",
+    "statDeltaA",
+    "statDeltaB",
+    "durationSeconds",
+    "battleLog",
+    "completedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "petAId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Challenger pet id (FK pets.id, ON DELETE RESTRICT for audit integrity)."
+    },
+    "petBId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Opponent pet id. NULL for AI opponents or if the pet row was removed."
+    },
+    "isAiOpponent": {
+      "type": "boolean",
+      "description": "TRUE if the opponent was an AI fallback (used after 30s matchmaking timeout)."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["RACE", "SUMO"],
+      "description": "Battle mode."
+    },
+    "winnerPetId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Winner pet id. NULL if pet row was removed; tie-break prevents true draws."
+    },
+    "randomSeed": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Seeded random for ±15% modifier reproducibility (deterministic replay)."
+    },
+    "statDeltaA": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Net stat value used for petA after buff."
+    },
+    "statDeltaB": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Net stat value used for petB after buff."
+    },
+    "durationSeconds": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 15,
+      "description": "Battle duration in seconds (CONSTANTS arena_match_duration_min/max_seconds = 5..15)."
+    },
+    "battleLog": {
+      "type": "array",
+      "description": "Structured event sequence for replay (JSONB).",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.4 + docs/SCHEMA.md §2.4 arena_matches",
+  "x-stereotype": "<<Entity>>"
+}

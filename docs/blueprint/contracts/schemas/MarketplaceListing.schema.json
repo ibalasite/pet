@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/MarketplaceListing",
+  "title": "MarketplaceListing",
+  "description": "Marketplace listing for a pet. Source: docs/EDD.md §4.12; docs/SCHEMA.md §2.8 marketplace_listings. Phase 3 — gated by FF_MARKETPLACE.",
+  "type": "object",
+  "required": [
+    "id",
+    "petId",
+    "sellerTokenHash",
+    "priceCredits",
+    "status",
+    "listedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Marketplace listing id (PK). Used as listingId in API requests.",
+      "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+    },
+    "petId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Pet being listed. ON DELETE RESTRICT — a listed pet cannot be deleted while an active listing exists."
+    },
+    "sellerTokenHash": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "SHA-256 hash of the seller's pet access token used to verify ownership."
+    },
+    "priceCredits": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Asking price in food credits (CHECK price_credits > 0). Min price formula: (pet_level * 100) + (rarity_multiplier * 500)."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "cancelled", "sold"],
+      "description": "Lifecycle status. Only one 'active' listing is allowed per pet (idx_marketplace_listings_active_pet UNIQUE)."
+    },
+    "listedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the listing was created."
+    },
+    "expiresAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Optional expiry timestamp. NULL = no expiry."
+    },
+    "completedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Set when status transitions to 'sold' or 'cancelled'."
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.12 + docs/SCHEMA.md §2.8 marketplace_listings",
+  "x-stereotype": "<<Entity>>"
+}

@@ -493,6 +493,106 @@
           }
         }
       }
+    },
+    {
+      "description": "buy active marketplace listing creates an immutable MarketplaceTransaction",
+      "providerState": "FF_MARKETPLACE is on AND listing 9f8e7d6c-5b4a-3210-fedc-ba9876543210 is active AND the requesting buyer is not the seller AND the pet is outside the 7-day anti-flip window",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/marketplace/listings/9f8e7d6c-5b4a-3210-fedc-ba9876543210/buy",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "transaction": {
+              "transactionId": "1a2b3c4d-5e6f-7890-abcd-ef1234567890",
+              "listingId": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+              "petId": "550e8400-e29b-41d4-a716-446655440000",
+              "priceCredits": 1500,
+              "feeCredits": 75,
+              "listedAt": "2026-04-30T08:00:00Z",
+              "completedAt": "2026-05-01T09:30:00Z"
+            },
+            "newOwnerPetAccessTokenIssued": true
+          },
+          "error": null
+        },
+        "matchingRules": {
+          "$.body.data.transaction.transactionId": { "match": "regex", "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" },
+          "$.body.data.transaction.listingId": { "match": "regex", "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" },
+          "$.body.data.transaction.petId": { "match": "regex", "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" },
+          "$.body.data.transaction.priceCredits": { "match": "integer" },
+          "$.body.data.transaction.feeCredits": { "match": "integer" },
+          "$.body.data.transaction.listedAt": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z" },
+          "$.body.data.transaction.completedAt": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z" },
+          "$.body.data.newOwnerPetAccessTokenIssued": { "match": "type" }
+        }
+      }
+    },
+    {
+      "description": "buy fails with 409 when the buyer is the listing seller (self-trade)",
+      "providerState": "FF_MARKETPLACE is on AND listing 9f8e7d6c-5b4a-3210-fedc-ba9876543210 is active AND the requesting token hash equals the listing seller token hash",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/marketplace/listings/9f8e7d6c-5b4a-3210-fedc-ba9876543210/buy",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        }
+      },
+      "response": {
+        "status": 409,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "MARKETPLACE_SELF_TRADE_FORBIDDEN",
+            "message": "Sellers cannot buy their own listings.",
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "buy fails with 422 when the pet is inside the 7-day anti-flip window",
+      "providerState": "FF_MARKETPLACE is on AND listing 9f8e7d6c-5b4a-3210-fedc-ba9876543210 is active AND pet 550e8400-e29b-41d4-a716-446655440000 was last traded within marketplace_trade_antiflip_protection_days days",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/marketplace/listings/9f8e7d6c-5b4a-3210-fedc-ba9876543210/buy",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+        }
+      },
+      "response": {
+        "status": 422,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "data": null,
+          "error": {
+            "code": "MARKETPLACE_ANTIFLIP_WINDOW_ACTIVE",
+            "message": "This pet was traded in the last 7 days and cannot be re-listed yet.",
+            "details": {
+              "antiflipDaysRemaining": 3
+            }
+          }
+        }
+      }
     }
   ],
   "metadata": {

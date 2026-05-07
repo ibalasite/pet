@@ -862,6 +862,63 @@ components:
         - price
         - transactedAt
 
+    MarketplaceTransaction:
+      type: object
+      description: |
+        Immutable record of a completed marketplace trade. Created on successful purchase
+        of a marketplace listing. Source: docs/EDD.md §4.11; docs/SCHEMA.md §2.9
+        marketplace_transactions. Renamed from legacy TradeRecord.
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+          description: Marketplace transaction id (PK).
+        listingId:
+          type: string
+          format: uuid
+          description: Originating listing id (FK to marketplace_listings; ON DELETE RESTRICT).
+        petId:
+          type: string
+          format: uuid
+          description: Pet traded; denormalised from listing for fast anti-flip queries.
+        priceCredits:
+          type: integer
+          minimum: 1
+          description: Final agreed sale price in food credits.
+        feeCredits:
+          type: integer
+          minimum: 0
+          description: Platform fee (5% of price; FLOOR(priceCredits * 0.05)). May be 0 when priceCredits < 20.
+        listedAt:
+          type: string
+          format: date-time
+          description: Copied verbatim from the listing row at trade time for audit traceability.
+        completedAt:
+          type: string
+          format: date-time
+          description: UTC timestamp when the trade completed and the immutable record was inserted.
+      required:
+        - transactionId
+        - listingId
+        - petId
+        - priceCredits
+        - feeCredits
+        - listedAt
+        - completedAt
+
+    BuyListingResponse:
+      type: object
+      description: Successful purchase response. Wraps a MarketplaceTransaction.
+      properties:
+        transaction:
+          $ref: '#/components/schemas/MarketplaceTransaction'
+        newOwnerPetAccessTokenIssued:
+          type: boolean
+          description: True iff a new pet access token was issued to the buyer.
+      required:
+        - transaction
+        - newOwnerPetAccessTokenIssued
+
     # ---------------------------------------------------------------
     # Admin schemas
     # ---------------------------------------------------------------
@@ -2239,6 +2296,10 @@ paths:
     post:
       operationId: buyMarketplaceListing
       summary: Purchase a marketplace listing (requires FF_MARKETPLACE)
+      description: |
+        Completes a marketplace trade and persists an immutable
+        MarketplaceTransaction (docs/SCHEMA.md §2.9 marketplace_transactions).
+        A 5% platform fee is applied (FLOOR(price * 0.05); may be 0 for price < 20).
       tags:
         - Marketplace
       security:
@@ -2252,7 +2313,7 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Purchase completed; 5% platform fee applied
+          description: Purchase completed; immutable MarketplaceTransaction created
           content:
             application/json:
               schema:
@@ -2261,9 +2322,12 @@ paths:
                   success:
                     type: boolean
                   data:
-                    type: object
+                    $ref: '#/components/schemas/BuyListingResponse'
                   error:
                     nullable: true
+                required:
+                  - success
+                  - data
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':

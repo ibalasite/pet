@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/LeaderboardSnapshot",
+  "title": "LeaderboardSnapshot",
+  "description": "Durable snapshot of the top-N leaderboard. Source: docs/EDD.md §4.6; docs/SCHEMA.md §2.5 leaderboard_snapshots. The class diagram label was clarified to LeaderboardSnapshot in commit 56f64fa to match SCHEMA. The live, authoritative leaderboard is the Redis sorted set leaderboard:global; this table is the durable backup used for historical reporting.",
+  "type": "object",
+  "required": [
+    "id",
+    "snapshotTime",
+    "entries"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Snapshot row id (PK)."
+    },
+    "snapshotTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of when the snapshot was captured."
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 500,
+      "description": "Top-N entries (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500).",
+      "items": {
+        "$ref": "LeaderboardEntry.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.6 + docs/SCHEMA.md §2.5 leaderboard_snapshots",
+  "x-stereotype": "<<Entity>>",
+  "x-renamed-from": "Leaderboard → LeaderboardSnapshot (commit 56f64fa)"
+}

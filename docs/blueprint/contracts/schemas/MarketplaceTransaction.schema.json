@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/MarketplaceTransaction",
+  "title": "MarketplaceTransaction",
+  "description": "Immutable record of a completed marketplace trade. Source: docs/EDD.md §4.11; docs/SCHEMA.md §2.9 marketplace_transactions. Renamed from legacy TradeRecord (commit ef5c3a9).",
+  "type": "object",
+  "required": [
+    "id",
+    "listingId",
+    "petId",
+    "sellerTokenHash",
+    "buyerTokenHash",
+    "priceCredits",
+    "feeCredits",
+    "listedAt",
+    "completedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Marketplace transaction id (PK).",
+      "example": "1a2b3c4d-5e6f-7890-abcd-ef1234567890"
+    },
+    "listingId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "FK to marketplace_listings.id (ON DELETE RESTRICT). uq_marketplace_transactions_listing UNIQUE — exactly one completed transaction per listing.",
+      "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+    },
+    "petId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Pet traded. Denormalised from listing for fast anti-flip queries.",
+      "example": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    "sellerTokenHash": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "SHA-256 hash of the seller's pet access token at the moment of sale. Raw token never stored.",
+      "example": "0fcef0e9c2cb2c1d8a7f3a4e1b2d3c4e5f6a7b8c9d0e1f2a3b4c5d6e7f809011"
+    },
+    "buyerTokenHash": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "SHA-256 hash of the buyer's pet access token at the moment of purchase.",
+      "example": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+    },
+    "priceCredits": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Final agreed sale price in food credits (CHECK price_credits > 0). Denormalised from the listing for financial-audit immutability.",
+      "example": 1500
+    },
+    "feeCredits": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Platform fee in food credits: FLOOR(priceCredits * 0.05). MAY be 0 for priceCredits < 20. CONSTANT trade_transaction_fee_percent = 5.",
+      "example": 75
+    },
+    "listedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Copied verbatim from marketplace_listings.listed_at at trade time for audit traceability.",
+      "example": "2026-04-30T08:00:00Z"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the trade completed and the immutable record was inserted. Doubles as the anti-flip reference point.",
+      "example": "2026-05-01T09:30:00Z"
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.11 + docs/SCHEMA.md §2.9 marketplace_transactions",
+  "x-stereotype": "<<Entity>>",
+  "x-renamed-from": "TradeRecord (commit ef5c3a9)"
+}

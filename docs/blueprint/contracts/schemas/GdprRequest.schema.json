@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/GdprRequest",
+  "title": "GdprRequest",
+  "description": "GDPR data-subject request record. Source: docs/EDD.md §4.13; docs/SCHEMA.md §2.12 gdpr_requests.",
+  "type": "object",
+  "required": [
+    "id",
+    "claimIdentityId",
+    "requestType",
+    "status",
+    "submittedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Returned as jobId in API responses."
+    },
+    "claimIdentityId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Data subject (FK claim_identities.id ON DELETE RESTRICT). One erasure covers all pets under this identity."
+    },
+    "initiatingPetId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Pet whose access token authenticated the self-service request. NULL for admin-initiated requests."
+    },
+    "requestType": {
+      "type": "string",
+      "enum": [
+        "erasure",
+        "data_access",
+        "restrict_processing",
+        "object_leaderboard",
+        "rectification"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "processing", "completed", "failed"]
+    },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "completedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "adminNotes": {
+      "type": ["string", "null"],
+      "description": "Filled by admin on completion."
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.13 + docs/SCHEMA.md §2.12 gdpr_requests",
+  "x-stereotype": "<<Entity>>"
+}

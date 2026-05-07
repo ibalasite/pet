@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/ClaimIdentity",
+  "title": "ClaimIdentity",
+  "description": "Email-anchored player identity. Source: docs/EDD.md §4.2; docs/SCHEMA.md §2.1 claim_identities. Renamed from a Mermaid-generic 'User' label (commit 56f64fa). Raw email is never stored — only the SHA-256 hash and AES-256-GCM ciphertext.",
+  "type": "object",
+  "required": [
+    "id",
+    "emailHash",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Claim identity id (PK)."
+    },
+    "emailHash": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "SHA-256 hex hash of the lowercased email. UNIQUE — used as the lookup key for claim retries."
+    },
+    "emailEncrypted": {
+      "type": ["string", "null"],
+      "contentEncoding": "base64",
+      "description": "AES-256-GCM ciphertext of the email. Set to NULL within 7 days of a GDPR deletion request."
+    },
+    "deletionRequestedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "UTC timestamp when the data subject submitted a GDPR erasure request. NULL = no pending erasure."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the identity row was created (first claim)."
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.2 + docs/SCHEMA.md §2.1 claim_identities",
+  "x-stereotype": "<<Entity>>",
+  "x-renamed-from": "User → ClaimIdentity (commit 56f64fa)"
+}

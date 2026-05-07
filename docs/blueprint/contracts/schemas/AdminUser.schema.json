@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/AdminUser",
+  "title": "AdminUser",
+  "description": "Admin operator account. Source: docs/EDD.md §4.9; docs/SCHEMA.md §2.10 admin_users. Renamed from legacy admin_accounts (commit 27e2ab5). Never hard-deleted (audit_logs.admin_id FK requires the row).",
+  "type": "object",
+  "required": [
+    "id",
+    "username",
+    "passwordHash",
+    "role",
+    "failedAttempts",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Admin user id (PK)."
+    },
+    "username": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Login identifier (UNIQUE uq_admin_users_username). Used as the credential for login alongside password and TOTP."
+    },
+    "passwordHash": {
+      "type": "string",
+      "description": "bcrypt hash of the password. Min work factor: 12."
+    },
+    "totpSecretEncrypted": {
+      "type": ["string", "null"],
+      "description": "AES-256-GCM encrypted TOTP secret. NULL until TOTP enrollment is completed; first login returns TOTP_SETUP_REQUIRED until set."
+    },
+    "totpBackupCodesHash": {
+      "type": ["array", "null"],
+      "description": "Array of SHA-256 hashes of the 10 single-use backup codes. Consumed entry removed on use. NULL until enrollment.",
+      "items": { "type": "string" }
+    },
+    "role": {
+      "type": "string",
+      "enum": ["super_admin", "moderator", "read_only"],
+      "description": "Admin role. Drives RBAC permission resolution."
+    },
+    "lastLoginAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "UTC timestamp of the most recent successful login. NULL until the first successful login."
+    },
+    "failedAttempts": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Consecutive failed-login counter (chk_admin_users_failed_attempts_nonneg). Reset to 0 on successful login."
+    },
+    "lockedUntil": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Lockout expiry. Non-NULL and in future = account is temporarily locked (10 failures triggers 30-minute lock)."
+    },
+    "deactivatedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Soft-deactivation timestamp. Non-NULL = account permanently deactivated; login blocked. Row is never hard-deleted."
+    },
+    "updatedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Updated by application on every mutation (password, TOTP, role, lockout, deactivation)."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Row creation timestamp."
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.9 + docs/SCHEMA.md §2.10 admin_users",
+  "x-stereotype": "<<Entity>>",
+  "x-renamed-from": "admin_accounts (commit 27e2ab5)"
+}

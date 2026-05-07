@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/TrainingLog",
+  "title": "TrainingLog",
+  "description": "Per-action pet training event. Source: docs/EDD.md §4.5; docs/SCHEMA.md §2.6 training_logs. Daily cap: 3 actions per pet (TRAINING_ACTIONS_PER_DAY = 3).",
+  "type": "object",
+  "required": [
+    "id",
+    "petId",
+    "trainingType",
+    "statDelta",
+    "statAfter",
+    "completedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "petId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Pet id (FK pets.id, ON DELETE CASCADE)."
+    },
+    "trainingType": {
+      "type": "string",
+      "enum": ["RUN", "STRENGTH", "STAMINA"],
+      "description": "Training discipline (drives which stat increments)."
+    },
+    "statDelta": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Stat points awarded by this action (uniform random 1..3)."
+    },
+    "statAfter": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Stat value after this action (post-increment)."
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.5 + docs/SCHEMA.md §2.6 training_logs",
+  "x-stereotype": "<<Entity>>"
+}

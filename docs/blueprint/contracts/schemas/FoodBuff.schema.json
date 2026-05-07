@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pixel-pet-arena.contracts/FoodBuff",
+  "title": "FoodBuff",
+  "description": "Pet food buff record (temporary or permanent stat boost). Source: docs/EDD.md §4.7; docs/SCHEMA.md §2.7 food_buffs. Record retention: 30 days post-consumption (FOOD_BUFF_RECORD_RETENTION_DAYS).",
+  "type": "object",
+  "required": [
+    "id",
+    "petId",
+    "foodType",
+    "buffStat",
+    "magnitude",
+    "isPermanent",
+    "consumedAt",
+    "recordExpiresAt"
+  ],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "petId": { "type": "string", "format": "uuid" },
+    "foodType": { "type": "string", "maxLength": 50 },
+    "buffStat": {
+      "type": "string",
+      "enum": ["speed", "strength", "stamina"]
+    },
+    "magnitude": { "type": "integer", "minimum": 1 },
+    "isPermanent": { "type": "boolean" },
+    "expiresAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Buff expiry. NULL for permanent buffs."
+    },
+    "consumedAt": { "type": "string", "format": "date-time" },
+    "recordExpiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "consumedAt + 30 days; cleanup job deletes the row when this expires (the buff effect is enforced separately)."
+    }
+  },
+  "additionalProperties": false,
+  "x-source": "docs/EDD.md §4.7 + docs/SCHEMA.md §2.7 food_buffs",
+  "x-stereotype": "<<Entity>>"
+}
