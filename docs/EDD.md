@@ -286,12 +286,12 @@ This section provides comprehensive UML and architecture diagrams documenting th
 
 ### Class Diagram — Domain Entities & Relationships
 
-The class diagram below illustrates the core domain entities (Pet, User/ClaimIdentity, ClaimCode, ArenaMatch, etc.) and their relationships. Each class maps directly to a PostgreSQL table defined in §4.
+The class diagram below illustrates the core domain entities (Pet, ClaimIdentity, ClaimCode, ArenaMatch, etc.) and their relationships. Each class maps directly to a PostgreSQL table defined in §4. Entity stem names align with SCHEMA tables (singular CamelCase ↔ snake_case plural is the standard ORM convention): `ClaimIdentity ↔ claim_identities`, `Pet ↔ pets`, `ClaimCode ↔ claim_codes`, `ArenaMatch ↔ arena_matches`, `TrainingLog ↔ training_logs`, `LeaderboardSnapshot ↔ leaderboard_snapshots`. The canonical class diagrams in `docs/diagrams/class-domain.md` use the same names with full UML relationship semantics (composition, aggregation, inheritance, realization, association, dependency).
 
 ``` puml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-class User {
+class ClaimIdentity {
   id: UUID
   email_hash: VARCHAR(64)
   email_encrypted: BYTEA
@@ -338,7 +338,7 @@ class TrainingLog {
   stat_delta: [1..3]
 }
 
-class Leaderboard {
+class LeaderboardSnapshot {
   id: UUID
   snapshot_time: TIMESTAMPTZ
   entries: JSONB [top 500]
@@ -346,11 +346,11 @@ class Leaderboard {
   +getTopPets(limit): Pet[]
 }
 
-User "1" -- "*" Pet : claims
+ClaimIdentity "1" -- "*" Pet : claims
 Pet "1" -- "*" ArenaMatch : participates
 Pet "1" -- "*" TrainingLog : records
 ClaimCode "1" -- "1" Pet : unlocks
-Leaderboard "1" -- "*" Pet : ranks
+LeaderboardSnapshot "1" -- "*" Pet : ranks
 ```
 
 **See also**: `docs/diagrams/puml/class-diagram.puml` (source file)
