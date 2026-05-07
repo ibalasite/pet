@@ -255,7 +255,32 @@ Rationale for Vue 3 + Element Plus: The admin portal is data-dense (tables, form
 
 ---
 
-## §3.8 UML Diagrams & Architecture Visualizations
+### §3.8 Environment & Service Port Matrix
+
+This subsection is the canonical contract for service ports across all environments. `docs/LOCAL_DEPLOY.md`, `docker-compose.yml`, k8s manifests, and CI/CD workflows must reference these values; downstream documents inherit from this table.
+
+| Service | Local (host) | Local container | Staging | Production | k8s service port | Source of truth |
+|---|---|---|---|---|---|---|
+| Player frontend (Vite dev server) | 5173 | — (built static assets only) | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
+| Admin frontend (Vite dev server) | 5174 | — (built static assets only) | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
+| API server (Fastify) | 3000 | 3000 | 8080 | 8080 | 8080 | EDD §10.1 |
+| PostgreSQL (Supabase local) | 54322 | 5432 | n/a (managed) | n/a (managed) | 5432 | LOCAL_DEPLOY §6 |
+| Supabase API gateway | 54321 | 8000 | managed | managed | n/a | LOCAL_DEPLOY §6 |
+| Supabase Studio | 54323 | 3000 | managed | managed | n/a | LOCAL_DEPLOY §6 |
+| Inbucket (local email inbox) | 54324 | 9000 | n/a | n/a | n/a | LOCAL_DEPLOY §6 |
+| Redis (Upstash / local docker) | 6379 | 6379 | n/a (Upstash REST) | n/a (Upstash REST) | 6379 | LOCAL_DEPLOY §3 |
+
+**Notes**:
+- Local-host columns are the values bound on `localhost` and used in `.env.local` (`API_PORT=3000`, `VITE_API_BASE_URL=http://localhost:3000`, `REDIS_URL=redis://localhost:6379`, `SUPABASE_URL=http://localhost:54321`).
+- Container columns are the in-network ports used by docker-compose service-to-service traffic.
+- Staging and Production use managed providers (Vercel, Railway, Supabase, Upstash) where the visible "port" is abstracted by the provider; the API server still binds 8080 inside the container for k8s readiness probes.
+- Any change to this matrix MUST be mirrored in LOCAL_DEPLOY.md, `docker-compose.yml`, the helm chart `values.yaml`, and the CI/CD environment files in the same commit.
+
+---
+
+## §3.9 UML Diagrams & Architecture Visualizations
+
+> **Cross-reference**: The full UML 9-set is maintained as standalone files under `docs/diagrams/`. The inline diagrams in this section preserve historical EDD context; for the canonical, regenerated diagrams (including Object, Activity, Communication, and the rebuilt Class diagrams with full inheritance / composition / aggregation / realization / association / dependency relationships) consult the cross-reference table at the end of this section.
 
 This section provides comprehensive UML and architecture diagrams documenting the system design, data flows, state transitions, and component interactions. All diagrams are authored in PlantUML; source files are maintained in `docs/diagrams/puml/`.
 
@@ -589,6 +614,31 @@ Event flows and data transformations:
 
 **See also**: `docs/diagrams/puml/dataflow-diagram.puml`
 
+### §3.9.1 Canonical UML 9-set — Cross-reference Table
+
+The standalone UML files under `docs/diagrams/` are the **canonical** source for the standard UML 9-set required by reviewers. The inline diagrams above are kept for historical readability inside this document, but downstream tools (RTM, code-gen scaffold, ARCH review) consume the standalone files.
+
+| # | UML 9-set diagram | Canonical file | Inline reference (this section) |
+|---|---|---|---|
+| 1 | Use Case | `docs/diagrams/use-case.md` | "Use Case Diagram" subsection above |
+| 2 | Class — Domain | `docs/diagrams/class-domain.md` | "Class Diagram" subsection above (legacy 6-class view) |
+| 3 | Class — Application | `docs/diagrams/class-application.md` | (not inlined; see canonical) |
+| 4 | Class — Infrastructure / Presentation | `docs/diagrams/class-infra-presentation.md` | (not inlined; see canonical) |
+| 5 | Object Diagram (snapshot) | `docs/diagrams/object-snapshot.md` | (not inlined; see canonical) |
+| 6 | Sequence (5 flows) | `docs/diagrams/sequence-claim-flow.md`, `sequence-claim-flow-error.md`, `sequence-arena-battle.md`, `sequence-arena-enter-error.md`, `sequence-training.md` | "Sequence Diagrams" subsection above (Claim + Battle) |
+| 7 | State Machine | `docs/diagrams/state-machine-pet-lifecycle.md`, `docs/diagrams/state-machine-arena-match.md` | "State Machines" subsection above |
+| 8 | Activity | `docs/diagrams/activity-claim-and-train.md`, `activity-arena-battle.md`, `activity-gdpr-erasure.md` | (not inlined; see canonical) |
+| 9 | Communication | `docs/diagrams/communication.md` | (not inlined; see canonical) |
+| + | Component | `docs/diagrams/component.md` | "Component Diagram" subsection above |
+| + | Deployment | `docs/diagrams/deployment.md` | "Deployment Diagram" subsection above |
+| + | Entity-Relationship | `docs/diagrams/er-diagram.md` | (SCHEMA §1 ER overview also covers this) |
+
+The canonical class diagrams (`class-domain.md`, `class-application.md`, `class-infra-presentation.md`) include the full set of UML class relationships: **inheritance (`<|--`)**, **realization (`<|..`)**, **composition (`*--`)**, **aggregation (`o--`)**, **association (`-->`)**, and **dependency (`..>`)** — closing the prior gap flagged in earlier reviews where the inline domain diagram only used association.
+
+**CI/CD UML and Spring Modulith UML**: Five CI/CD diagrams (`cicd-*.md`, `infra-local-topology.md`, `developer-workflow-activity.md`) and two Modulith diagrams (`modulith/`) are also generated and live alongside the 9-set.
+
+**Frontend UML 16-set**: All `frontend-*.md` files cover the client-side counterpart (Use Case, 3 Class, Object, 3 Sequence, 2 State, 3 Activity, Component, Deployment, Communication). Listed in `docs/MANIFEST.md`.
+
 ---
 
 ## §4. Data Models
@@ -832,7 +882,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 **Retention**: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years.
 **Indexes**: idx_audit_logs_created_at ON audit_logs(created_at DESC); idx_audit_logs_admin_id ON audit_logs(admin_id, created_at DESC)
 
-### §4.11 TradeRecord (Phase 3 — FF_MARKETPLACE)
+### §4.11 MarketplaceTransaction (Phase 3 — FF_MARKETPLACE)
 
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
@@ -846,7 +896,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 | listed_at | TIMESTAMPTZ | NOT NULL | |
 | completed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
-**Indexes**: idx_trade_records_listing ON trade_records(listing_id); idx_trade_records_pet ON trade_records(pet_id); idx_trade_records_completed ON trade_records(completed_at DESC)
+**Indexes**: idx_marketplace_transactions_completed ON marketplace_transactions(completed_at DESC); idx_marketplace_transactions_pet_completed ON marketplace_transactions(pet_id, completed_at DESC) (the listing_id FK is covered by the implicit index from the uq_marketplace_transactions_listing UNIQUE constraint)
 
 ### §4.12 MarketplaceListing (Phase 3 — FF_MARKETPLACE)
 
@@ -863,7 +913,7 @@ redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invali
 
 **Indexes**: idx_marketplace_listings_status ON marketplace_listings(status) WHERE status = 'active'; idx_marketplace_listings_pet ON marketplace_listings(pet_id); idx_marketplace_listings_listed_at ON marketplace_listings(listed_at DESC); `CREATE UNIQUE INDEX idx_marketplace_listings_active_pet ON marketplace_listings(pet_id) WHERE status = 'active'` — prevents duplicate concurrent active listings per pet at DB level
 
-**Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `completed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in trade_records before accepting a new listing. `completed_at` (purchase timestamp) is used — not `listed_at` — because the protection window begins when the buyer takes ownership.
+**Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `completed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in marketplace_transactions before accepting a new listing. `completed_at` (purchase timestamp) is used — not `listed_at` — because the protection window begins when the buyer takes ownership.
 
 **Min-price formula**: `price_credits ≥ (pet_level × TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF) + (rarity_multiplier × TRADE_MIN_PRICE_FORMULA_RARITY_COEFF)` where TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF = 100, TRADE_MIN_PRICE_FORMULA_RARITY_COEFF = 500, and rarity_multiplier values are: Common = 1 (RARITY_MULTIPLIER_COMMON), Rare = 2 (RARITY_MULTIPLIER_RARE), Epic = 4 (RARITY_MULTIPLIER_EPIC), Legendary = 8 (RARITY_MULTIPLIER_LEGENDARY).
 
@@ -1674,7 +1724,7 @@ Metrics collected via Prometheus exporters on API servers and Redis. Dashboard i
 **Goal**: Enable P2P pet trading and complete admin portal. Corresponds to General Availability milestone.
 
 **Scope**:
-- PostgreSQL schema: `trade_records`, `marketplace_listings` tables
+- PostgreSQL schema: `marketplace_transactions`, `marketplace_listings` tables
 - Marketplace: Feature flag `FF_MARKETPLACE` enabled when DAU sustains >1,000 for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000)
 - Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE_PERCENT = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days)
 - Admin portal: Full GDPR deletion workflow, game economy configuration (food buff multipliers 0.5×–5.0×, arena entry cost/cooldown), email delivery monitor, analytics dashboard, audit log, role management
