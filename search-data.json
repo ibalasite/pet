@@ -92,12 +92,12 @@
   "rtm.html": {
     "url": "rtm.html",
     "title": "需求追蹤矩陣 (RTM)",
-    "excerpt": "Requirement Traceability Matrix\n\nDOC-IDRTM-PIXEL-PET-001\nProjectpixel-pet-arena\nDate2026-05-03\nVersion1.0.0\n\n\nOverview\nThis Requirement Traceability M"
+    "excerpt": "Requirement Traceability Matrix\n\nDOC-IDRTM-PIXEL-PET-001\nProjectpixel-pet-arena\nDate2026-05-08\nVersion1.1.0\nLast refresh2026-05-08 (align-fix: regener"
   },
   "align_report.html": {
     "url": "align_report.html",
     "title": "對齊報告",
-    "excerpt": "gendoc — Cross-File Alignment Audit Report\nProject: pixel-pet-arena\nDate: 2026-05-04\nExecution Mode: gendoc-align-check\nRepository Type: BDD Documenta"
+    "excerpt": "Alignment Scan Report — Pixel Pet Arena (Post-Fix Verification)\n\nMetadataValue\nProject/Users/tobala/projects/pet\nScan timestamp (UTC)2026-05-07T20:57Z"
   },
   "admin_impl.html": {
     "url": "admin_impl.html",
@@ -184,60 +184,40 @@
     "title": "Activity Gdpr Erasure",
     "excerpt": "Activity Diagram — GDPR Erasure &amp; Recovery Flow — pixel-pet-arena\n來源：PRD §7.8 GDPR Data Handling, EDD §6.5 GDPR/Data Handling Summary, EDD §5.6 GD"
   },
-  "diag-cicd-deploy-production.html": {
-    "url": "diag-cicd-deploy-production.html",
-    "title": "Cicd Deploy Production",
-    "excerpt": "Production Deployment Flow (deploy-production.yml)\nThis document describes the production deployment pipeline for the pixel-pet-arena monorepo. Produc"
+  "diag-cicd-pipeline-sequence.html": {
+    "url": "diag-cicd-pipeline-sequence.html",
+    "title": "Cicd Pipeline Sequence",
+    "excerpt": "CI Pipeline Sequence Diagram — pixel-pet-arena\n來源：docs/CICD.md §2 GitHub Actions Workflows + §3 PR Gate + §4 ArgoCD GitOps\n描述從 git push / Pull Request"
   },
-  "diag-cicd-deploy-staging.html": {
-    "url": "diag-cicd-deploy-staging.html",
-    "title": "Cicd Deploy Staging",
-    "excerpt": "Staging Deployment Flow (deploy-staging.yml)\nThis document describes the staging deployment pipeline triggered by merges to the main branch of the pix"
+  "diag-cicd-pr-gate-activity.html": {
+    "url": "diag-cicd-pr-gate-activity.html",
+    "title": "Cicd Pr Gate Activity",
+    "excerpt": "PR Gate Activity Diagram — pixel-pet-arena\n來源：docs/CICD.md §3 PR Gate Requirements + §2 GitHub Actions Workflows\n描述 Pull Request 從建立到滿足合併條件的完整 Gate 檢查"
   },
-  "diag-cicd-pipeline-overview.html": {
-    "url": "diag-cicd-pipeline-overview.html",
-    "title": "Cicd Pipeline Overview",
-    "excerpt": "CI/CD Pipeline Overview\nThis document provides a high-level view of the complete CI/CD pipeline for the pixel-pet-arena monorepo, from a developer pus"
-  },
-  "diag-cicd-pr-gate.html": {
-    "url": "diag-cicd-pr-gate.html",
-    "title": "Cicd Pr Gate",
-    "excerpt": "PR Gate Workflow (ci.yml)\nThis document details the PR gate workflow defined in .github/workflows/ci.yml for the pixel-pet-arena monorepo. Every pull "
-  },
-  "diag-cicd-secrets-rotation.html": {
-    "url": "diag-cicd-secrets-rotation.html",
-    "title": "Cicd Secrets Rotation",
-    "excerpt": "Secrets Management Lifecycle\nThis document covers the complete secrets management lifecycle for the pixel-pet-arena monorepo, including how detect-sec"
+  "diag-cicd-secret-flow.html": {
+    "url": "diag-cicd-secret-flow.html",
+    "title": "Cicd Secret Flow",
+    "excerpt": "CI/CD Secret Flow Diagram — pixel-pet-arena\n來源：docs/CICD.md §6 Secrets Management + §3.2 detect-secrets + docs/LOCAL_DEPLOY.md §5\n描述 CI/CD pipeline 中 "
   },
   "diag-class-application.html": {
     "url": "diag-class-application.html",
     "title": "Class Application",
-    "excerpt": "Class Diagram — Application Layer — pixel-pet-arena\n來源：EDD §3.8 Class Diagram, EDD §5 API Design, ARCH §2 Component Architecture\nclassDiagram\n    dire"
+    "excerpt": "Class Diagram — Application Layer（pixel-pet-arena）\n來源：EDD §5 API 設計 + API.md §5 / §6 端點清單\n本圖收錄應用層 UseCase（每個 PRD AC 對應一個）、ApplicationService（跨 UseCase"
   },
   "diag-class-domain.html": {
     "url": "diag-class-domain.html",
     "title": "類別圖：領域模型",
-    "excerpt": "Domain Class Diagram — pixel-pet-arena\nOverview\nThis diagram covers all 12 domain entities defined in EDD §4 and SCHEMA.md §2. It models the\nstructura"
+    "excerpt": "Class Diagram — Domain Layer（pixel-pet-arena）\n來源：EDD §3.8 / §4，SCHEMA.md §2，ARCH.md §3\n本圖收錄領域層核心 Aggregate Root、Entity、Value Object、Domain Event 與 Rep"
   },
   "diag-class-infra-presentation.html": {
     "url": "diag-class-infra-presentation.html",
     "title": "Class Infra Presentation",
-    "excerpt": "Class Diagram — Infrastructure + Presentation Layer — pixel-pet-arena\n來源：EDD §3.8 Class Diagram, EDD §5 API Design, ARCH §2 Component Architecture\ncla"
-  },
-  "diag-class-services.html": {
-    "url": "diag-class-services.html",
-    "title": "Class Services",
-    "excerpt": "Service Layer Class Diagram — pixel-pet-arena\nOverview\nThis diagram models the backend service layer that sits between the Fastify route handlers and "
+    "excerpt": "Class Diagram — Infrastructure + Presentation Layer（pixel-pet-arena）\n來源：EDD §3 技術棧 + §5 API 設計 + ARCH.md §3 元件架構\n本圖收錄基礎設施層（Repository 實作、外部服務 Adapter）"
   },
   "diag-communication.html": {
     "url": "diag-communication.html",
     "title": "協作圖",
     "excerpt": "Communication Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §1.2 System Context, EDD §5 API Design\nflowchart LR\n    PlayerApp[&quot;Pl"
-  },
-  "diag-component-architecture.html": {
-    "url": "diag-component-architecture.html",
-    "title": "Component Architecture",
-    "excerpt": "Component Architecture Diagram — pixel-pet-arena\nOverview\nThis diagram shows the full system component architecture: client-side SPA frontends served "
   },
   "diag-component.html": {
     "url": "diag-component.html",
@@ -249,10 +229,20 @@
     "title": "部署圖",
     "excerpt": "Deployment Diagram — pixel-pet-arena\n來源：EDD §3.8 Deployment Diagram, ARCH §7 Deployment Architecture, EDD §3.6 Hosting/Infrastructure\nflowchart TD\n   "
   },
+  "diag-developer-workflow-activity.html": {
+    "url": "diag-developer-workflow-activity.html",
+    "title": "Developer Workflow Activity",
+    "excerpt": "Developer Daily Workflow Activity Diagram — pixel-pet-arena\n來源：docs/DEVELOPER_GUIDE.md §1 Local Development + docs/CICD.md §3.3 Pre-PR Checklist\n描述開發者"
+  },
   "diag-er-diagram.html": {
     "url": "diag-er-diagram.html",
     "title": "ER 關聯圖",
     "excerpt": "Entity-Relationship Diagram — pixel-pet-arena\nOverview\nThis ER diagram covers all 12 PostgreSQL tables defined in SCHEMA.md §2, plus the Redis key-spa"
+  },
+  "diag-infra-local-topology.html": {
+    "url": "diag-infra-local-topology.html",
+    "title": "Infra Local Topology",
+    "excerpt": "Local Infrastructure Topology — pixel-pet-arena\n來源：docs/CICD.md §4 ArgoCD + §6 Secrets Management + docs/LOCAL_DEPLOY.md namespaces\n描述 Rancher Desktop"
   },
   "diag-object-snapshot.html": {
     "url": "diag-object-snapshot.html",
@@ -262,37 +252,127 @@
   "diag-sequence-arena-battle.html": {
     "url": "diag-sequence-arena-battle.html",
     "title": "Sequence Arena Battle",
-    "excerpt": "Sequence Diagram — Arena Battle Matchmaking\nOverview\nThe arena battle flow handles matchmaking, battle outcome computation, and leaderboard score\nupda"
+    "excerpt": "Sequence Diagram — Arena Battle Matchmaking\n來源：docs/EDD.md §3.8 Sequence Diagrams + docs/API.md §5.3 Arena Endpoints\nOverview\nThe arena battle flow ha"
+  },
+  "diag-sequence-arena-enter-error.html": {
+    "url": "diag-sequence-arena-enter-error.html",
+    "title": "Sequence Arena Enter Error",
+    "excerpt": "Sequence Diagram — Arena Enter Error Paths\n來源：docs/API.md §5.3 Arena Endpoints + §4 Error Code Reference\n聚焦 POST /api/v1/arena/enter 的 4 條 Error Path："
+  },
+  "diag-sequence-claim-flow-error.html": {
+    "url": "diag-sequence-claim-flow-error.html",
+    "title": "Sequence Claim Flow Error",
+    "excerpt": "Sequence Diagram — Claim Flow Error Paths\n來源：docs/API.md §5.1 Claim Endpoints + §4 Error Code Reference\n聚焦 Claim Flow 的 4 條獨立 Error Path：(1) Email sch"
   },
   "diag-sequence-claim-flow.html": {
     "url": "diag-sequence-claim-flow.html",
     "title": "Sequence Claim Flow",
-    "excerpt": "Sequence Diagram — Pet Claim Email OTP Flow\nOverview\nThe claim flow is the identity foundation of pixel-pet-arena. Because there are no traditional us"
+    "excerpt": "Sequence Diagram — Pet Claim Email OTP Flow\n來源：docs/EDD.md §3.8 Sequence + docs/API.md §5.1 Claim Flow Endpoints\nOverview\nThe claim flow is the identi"
   },
   "diag-sequence-training.html": {
     "url": "diag-sequence-training.html",
     "title": "Sequence Training",
-    "excerpt": "Sequence Diagram — Pet Training\nOverview\nTraining is the core progression loop: a pet owner spends up to 3 daily actions\n(training_actions_per_day = 3"
+    "excerpt": "Sequence Diagram — Pet Training\n來源：docs/EDD.md §3.8 Sequence + docs/API.md §5.2 Pet Endpoints\nOverview\nTraining is the core progression loop: a pet ow"
   },
-  "diag-state-arena-match.html": {
-    "url": "diag-state-arena-match.html",
-    "title": "State Arena Match",
-    "excerpt": "State Machine — Arena Match\nOverview\nAn arena match progresses through a well-defined lifecycle: from queue entry through matchmaking,\nbattle resoluti"
+  "diag-state-machine-arena-match.html": {
+    "url": "diag-state-machine-arena-match.html",
+    "title": "State Machine Arena Match",
+    "excerpt": "State Machine — Arena Match\n來源：docs/EDD.md §3.8 Battle Match State Machine + §4.4 ArenaMatch entity\nOverview\nAn arena match progresses through a well-"
   },
-  "diag-state-pet-lifecycle.html": {
-    "url": "diag-state-pet-lifecycle.html",
-    "title": "State Pet Lifecycle",
-    "excerpt": "State Machine — Pet Lifecycle\nOverview\nA pet in pixel-pet-arena moves through a defined lifecycle from procedural generation to an active\nclaimed stat"
+  "diag-state-machine-pet-lifecycle.html": {
+    "url": "diag-state-machine-pet-lifecycle.html",
+    "title": "State Machine Pet Lifecycle",
+    "excerpt": "State Machine — Pet Lifecycle\n來源：docs/EDD.md §3.8 Pet State Machine + §4.1 Pet entity\nOverview\nA pet in pixel-pet-arena moves through a defined lifecy"
   },
   "diag-use-case.html": {
     "url": "diag-use-case.html",
     "title": "用例圖 (Use Case)",
     "excerpt": "Use Case Diagram — pixel-pet-arena\n來源：EDD §3.8 Use Case Diagram, PRD §4 Scope, PRD §3.2 Persona Cards\nflowchart TD\n    GuestPlayer[&quot;GuestPlayer\\n"
   },
+  "diag-frontend-activity-gameplay.html": {
+    "url": "diag-frontend-activity-gameplay.html",
+    "title": "前端活動圖：遊戲主流程",
+    "excerpt": "Frontend Activity Diagram — Main Gameplay Flow\n來源：docs/FRONTEND.md §5 Key UI Flows + docs/PRD.md §3 User Stories + docs/PDD.md\n描述玩家進入網站後的主要遊戲循環：從進站、認領"
+  },
+  "diag-frontend-activity-init.html": {
+    "url": "diag-frontend-activity-init.html",
+    "title": "前端活動圖：初始化",
+    "excerpt": "Frontend Activity Diagram — Client Initialization\n來源：docs/FRONTEND.md §1 Overview + §6 Performance Budget + §8.1 Token Storage\n描述客戶端從首次載入到完成初始化的完整序列，包"
+  },
+  "diag-frontend-activity-ui.html": {
+    "url": "diag-frontend-activity-ui.html",
+    "title": "前端活動圖：UI 互動",
+    "excerpt": "Frontend Activity Diagram — UI Interaction Flow（Training Action）\n來源：docs/FRONTEND.md §5.3 Training Interaction + docs/PDD.md §UI flows\n描述「點擊訓練按鈕」這個關鍵 "
+  },
+  "diag-frontend-class-component.html": {
+    "url": "diag-frontend-class-component.html",
+    "title": "前端類別圖：元件",
+    "excerpt": "Frontend Class Diagram — UI Component Layer\n來源：docs/FRONTEND.md §2.2 React Component Tree + docs/VDD.md §UI Components\n描述 React 18 + TypeScript Player"
+  },
+  "diag-frontend-class-scene.html": {
+    "url": "diag-frontend-class-scene.html",
+    "title": "前端類別圖：場景控制器",
+    "excerpt": "Frontend Class Diagram — Scene Controller Layer\n來源：docs/FRONTEND.md §2.5 Routing + §2.3 Phaser Integration + VDD.md §Scene Transitions\n描述 Player App 的"
+  },
+  "diag-frontend-class-services.html": {
+    "url": "diag-frontend-class-services.html",
+    "title": "前端類別圖：Client 服務",
+    "excerpt": "Frontend Class Diagram — Client Service Layer\n來源：docs/FRONTEND.md §2.6 API Client + §2.4 State Management + docs/API.md\n描述 Player App 的網路通訊層、狀態管理層與資料模"
+  },
+  "diag-frontend-communication.html": {
+    "url": "diag-frontend-communication.html",
+    "title": "前端協作圖：WS 協議",
+    "excerpt": "Frontend Communication Diagram — Client/Server Message Flow\n來源：docs/FRONTEND.md §2.6 API Client + docs/API.md §5 Endpoints\n描述 Player App、Admin SPA 與後端"
+  },
+  "diag-frontend-component.html": {
+    "url": "diag-frontend-component.html",
+    "title": "前端元件圖：Cocos 節點樹",
+    "excerpt": "Frontend Component Diagram — React + Phaser Node Tree\n來源：docs/FRONTEND.md §2.2 React Component Tree + §2.3 Phaser Integration Pattern\n描述 Player App 的完"
+  },
+  "diag-frontend-deployment.html": {
+    "url": "diag-frontend-deployment.html",
+    "title": "前端部署圖：建構管線",
+    "excerpt": "Frontend Deployment Diagram — Build &amp; Distribution Pipeline\n來源：docs/FRONTEND.md §1.3 Build Tooling + docs/ARCH.md §7.1 Infrastructure Overview + d"
+  },
+  "diag-frontend-object-snapshot.html": {
+    "url": "diag-frontend-object-snapshot.html",
+    "title": "前端物件圖：UI 快照",
+    "excerpt": "Frontend Object Diagram — Runtime Snapshot\n來源：docs/FRONTEND.md §2.4 State Management + docs/VDD.md §UI States\n描述「玩家剛贏完一場 RACE 對戰，正在 BattleResultPage 上"
+  },
+  "diag-frontend-sequence-scene.html": {
+    "url": "diag-frontend-sequence-scene.html",
+    "title": "前端循序圖：場景切換",
+    "excerpt": "Frontend Sequence — Scene Transition (PetPage → ArenaPage → BattleResultPage)\n來源：docs/FRONTEND.md §2.5 React Router v6 + §2.3 Phaser Integration\n描述玩家從"
+  },
+  "diag-frontend-sequence-shoot.html": {
+    "url": "diag-frontend-sequence-shoot.html",
+    "title": "前端循序圖：射擊流程",
+    "excerpt": "Frontend Sequence — Main Game Interaction (Train + Enter Arena + Battle Result)\n來源：docs/FRONTEND.md §5.3 Training Interaction + §5.5 Arena Battle Flow"
+  },
+  "diag-frontend-sequence-ws.html": {
+    "url": "diag-frontend-sequence-ws.html",
+    "title": "前端循序圖：WS 協議",
+    "excerpt": "Frontend Sequence — HTTP Long-Polling Protocol\n來源：docs/FRONTEND.md §2.6 API Client + docs/API.md §5.3 Arena Endpoints\n注意：本系統採 HTTP Long-Polling 取代 Web"
+  },
+  "diag-frontend-state-scene.html": {
+    "url": "diag-frontend-state-scene.html",
+    "title": "前端狀態機：場景",
+    "excerpt": "Frontend State Machine — Scene Lifecycle\n來源：docs/FRONTEND.md §2.5 React Router v6 + §5 Key UI Flows\n描述 Player App 客戶端的「scene 狀態機」：從首頁到認領、養成、競技、結算、登出 /"
+  },
+  "diag-frontend-state-ui.html": {
+    "url": "diag-frontend-state-ui.html",
+    "title": "前端狀態機：UI",
+    "excerpt": "Frontend State Machine — TrainingActionCard UI\n來源：docs/FRONTEND.md §5.3 Training Interaction + docs/VDD.md §UI States\n描述「TrainingActionCard」這個關鍵互動 UI "
+  },
+  "diag-frontend-use-case.html": {
+    "url": "diag-frontend-use-case.html",
+    "title": "前端用例圖",
+    "excerpt": "Frontend Use Case Diagram — pixel-pet-arena Player App\n來源：docs/FRONTEND.md §2 Player App + docs/PDD.md §UI flows + docs/PRD.md §3 User Stories\n涵蓋玩家在 R"
+  },
   "blueprint__mock-mock_server_guide.html": {
     "url": "blueprint__mock-mock_server_guide.html",
     "title": "Mock Server Guide",
-    "excerpt": "Pixel Pet Arena — Mock Server 使用手冊\n適用版本： FastAPI Mock Server v1.0\nOpenAPI 規格： docs/blueprint/contracts/openapi.yaml\n最後更新： 2026-05-05\n\n目錄\n目錄結構前置需求安裝步驟啟"
+    "excerpt": "pixel-pet-arena - Mock Server 使用手冊\n適用版本： FastAPI Mock Server v1.0\n上游規格： docs/API.md (53 endpoints) + docs/SCHEMA.md (12 entities)\n最後更新： 2026-05-08\n本 M"
   },
   "contracts__api-admin-contract.html": {
     "url": "contracts__api-admin-contract.html",
@@ -332,7 +412,7 @@
   "puml--diagrams-puml-class-diagram.html": {
     "url": "puml--diagrams-puml-class-diagram.html",
     "title": "Class Diagram",
-    "excerpt": "Class Diagram@startuml pixel-pet-arena-class-diagram\n\n!define ENTITY #F5F5F5\n!define PROCESS #E8F4F8\n!define EXTERNAL #FFF5E6\n\nskinparam linetype orth"
+    "excerpt": "Class DiagramUserid: UUIDemail_hash: VARCHAR(64)email_encrypted: BYTEAdeletion_requested_at: TIMESTAMPTZcreated_at: TIMESTAMPTZupdated_at: TIMESTAMPTZ"
   },
   "puml--diagrams-puml-component-diagram.html": {
     "url": "puml--diagrams-puml-component-diagram.html",

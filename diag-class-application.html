@@ -128,241 +128,485 @@
 <a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
 <a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
 <a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
-<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
-<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
 <a class="sidebar__link active" href="diag-class-application.html">📐 Class Application</a>
 <a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
 <a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
 <a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
 <a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
 <a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
 <a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
 <a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
 <a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
 <a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
 <a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
-<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
 <a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
 </div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>Class Diagram — Application Layer — pixel-pet-arena</h1>
-<blockquote><p>來源：EDD §3.8 Class Diagram, EDD §5 API Design, ARCH §2 Component Architecture</p></blockquote>
+    <main class="doc-content"><h1>Class Diagram — Application Layer（pixel-pet-arena）</h1>
+<blockquote><p>來源：EDD §5 API 設計 + API.md §5 / §6 端點清單</p></blockquote>
+<p>本圖收錄應用層 UseCase（每個 PRD AC 對應一個）、ApplicationService（跨 UseCase 編排）、</p>
+<p>DTO（Command / Query / Response）以及 Port 介面（外部服務抽象）。</p>
 <div class="diagram-container"><pre class="mermaid">classDiagram
     direction TB
 
-    class ClaimPetUseCase {
+    %% ============================================================
+    %% Use Cases — Player（每個對應 PRD AC）
+    %% ============================================================
+    class StartClaimUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -petService: IPetService
-        -emailService: IEmailPort
-        -claimRepo: IClaimRepository
-        +execute(cmd: ClaimPetCommand) Promise~ClaimPetResponseDTO~
+        -claimCodeRepo : IClaimCodeRepository
+        -emailPort : IEmailPort
+        +execute(cmd: StartClaimCommand) StartClaimResponse
     }
 
     class VerifyClaimUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -claimRepo: IClaimRepository
-        -petRepo: IPetRepository
-        -identityRepo: IIdentityRepository
-        +execute(cmd: VerifyClaimCommand) Promise~VerifyClaimResponseDTO~
+        -petRepo : IPetRepository
+        -claimCodeRepo : IClaimCodeRepository
+        -tokenIssuer : ITokenIssuer
+        +execute(cmd: VerifyClaimCommand) VerifyClaimResponse
+    }
+
+    class RecoverClaimUseCase {
+        &lt;&lt;UseCase&gt;&gt;
+        -claimCodeRepo : IClaimCodeRepository
+        -emailPort : IEmailPort
+        +execute(cmd: RecoverClaimCommand) RecoverClaimResponse
     }
 
     class TrainPetUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -petRepo: IPetRepository
-        -trainingRepo: ITrainingRepository
-        -rateLimiter: IRateLimitPort
-        +execute(cmd: TrainPetCommand) Promise~TrainResultDTO~
+        -petRepo : IPetRepository
+        -trainingLogRepo : ITrainingLogRepository
+        -rateLimiter : IRateLimiterPort
+        +execute(cmd: TrainPetCommand) TrainPetResponse
     }
 
     class FeedPetUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -petRepo: IPetRepository
-        -foodRepo: IFoodRepository
-        +execute(cmd: FeedPetCommand) Promise~FeedResultDTO~
+        -petRepo : IPetRepository
+        -foodBuffRepo : IFoodBuffRepository
+        +execute(cmd: FeedPetCommand) FeedPetResponse
     }
 
     class EnterArenaUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -arenaRepo: IArenaRepository
-        -petRepo: IPetRepository
-        -rateLimiter: IRateLimitPort
-        -matchQueue: IMatchQueuePort
-        +execute(cmd: EnterArenaCommand) Promise~ArenaEntryDTO~
+        -petRepo : IPetRepository
+        -matchRepo : IArenaMatchRepository
+        -matchmaker : IMatchmakingPort
+        -leaderboardRepo : ILeaderboardRepository
+        -rateLimiter : IRateLimiterPort
+        +execute(cmd: EnterArenaCommand) EnterArenaResponse
     }
 
-    class ResolveMatchUseCase {
+    class GetArenaMatchUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -arenaRepo: IArenaRepository
-        -leaderboardRepo: ILeaderboardRepository
-        -petRepo: IPetRepository
-        +execute(cmd: ResolveMatchCommand) Promise~MatchResultDTO~
+        -matchRepo : IArenaMatchRepository
+        +execute(query: GetArenaMatchQuery) ArenaMatchResponse
     }
 
     class GetLeaderboardUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -leaderboardCache: ILeaderboardPort
-        -petRepo: IPetRepository
-        +execute(query: LeaderboardQuery) Promise~LeaderboardDTO~
+        -leaderboardRepo : ILeaderboardRepository
+        +execute(query: GetLeaderboardQuery) LeaderboardResponse
     }
 
-    class AdminBanPetUseCase {
+    class RequestGdprErasureUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -petRepo: IPetRepository
-        -auditRepo: IAuditRepository
-        +execute(cmd: BanPetCommand) Promise~void~
+        -gdprRepo : IGdprRequestRepository
+        -claimRepo : IClaimIdentityRepository
+        +execute(cmd: GdprErasureCommand) GdprErasureResponse
     }
 
-    class ProcessGdprErasureUseCase {
+    %% ============================================================
+    %% Use Cases — Admin
+    %% ============================================================
+    class AdminLoginUseCase {
         &lt;&lt;UseCase&gt;&gt;
-        -identityRepo: IIdentityRepository
-        -petRepo: IPetRepository
-        -gdprRepo: IGdprRepository
-        +execute(cmd: GdprErasureCommand) Promise~void~
+        -adminRepo : IAdminRepository
+        -totpVerifier : ITotpPort
+        -sessionStore : ISessionStorePort
+        -auditLogger : IAuditPort
+        +execute(cmd: AdminLoginCommand) AdminLoginResponse
     }
 
-    class ClaimPetCommand {
+    class BanPetUseCase {
+        &lt;&lt;UseCase&gt;&gt;
+        -petRepo : IPetRepository
+        -leaderboardRepo : ILeaderboardRepository
+        -auditLogger : IAuditPort
+        +execute(cmd: BanPetCommand) BanPetResponse
+    }
+
+    class UnbanPetUseCase {
+        &lt;&lt;UseCase&gt;&gt;
+        -petRepo : IPetRepository
+        -auditLogger : IAuditPort
+        +execute(cmd: UnbanPetCommand) UnbanPetResponse
+    }
+
+    class FlagBattleUseCase {
+        &lt;&lt;UseCase&gt;&gt;
+        -matchRepo : IArenaMatchRepository
+        -auditLogger : IAuditPort
+        +execute(cmd: FlagBattleCommand) FlagBattleResponse
+    }
+
+    class UpdateRuntimeConfigUseCase {
+        &lt;&lt;UseCase&gt;&gt;
+        -configStore : IConfigStorePort
+        -auditLogger : IAuditPort
+        +execute(cmd: UpdateRuntimeConfigCommand) RuntimeConfigResponse
+    }
+
+    %% ============================================================
+    %% Application Services（跨 UseCase 編排）
+    %% ============================================================
+    class ArenaOrchestrationService {
+        &lt;&lt;ApplicationService&gt;&gt;
+        -enterArenaUC : EnterArenaUseCase
+        -leaderboardRepo : ILeaderboardRepository
+        -eventBus : IEventBusPort
+        +runMatchmakingCycle(petId: UUID) ArenaMatchResponse
+        +applyMatchOutcome(match: ArenaMatch) void
+    }
+
+    class PetLifecycleService {
+        &lt;&lt;ApplicationService&gt;&gt;
+        -petRepo : IPetRepository
+        -claimCodeRepo : IClaimCodeRepository
+        +cleanupReservedPets(now: DateTime) Integer
+        +cleanupExpiredClaimCodes(now: DateTime) Integer
+    }
+
+    class GdprPipelineService {
+        &lt;&lt;ApplicationService&gt;&gt;
+        -gdprRepo : IGdprRequestRepository
+        -petRepo : IPetRepository
+        -claimRepo : IClaimIdentityRepository
+        +executeErasure(requestId: UUID, adminId: UUID) void
+    }
+
+    %% ============================================================
+    %% Command / Query DTOs
+    %% ============================================================
+    class StartClaimCommand {
         &lt;&lt;DTO&gt;&gt;
-        +email: String
-        +petId: UUID
+        +email : String
+        +petId : UUID
     }
 
     class VerifyClaimCommand {
         &lt;&lt;DTO&gt;&gt;
-        +claimId: UUID
-        +code: String
+        +claimId : UUID
+        +otpCode : String
+        +petId : UUID
+    }
+
+    class RecoverClaimCommand {
+        &lt;&lt;DTO&gt;&gt;
+        +email : String
+        +petId : UUID
     }
 
     class TrainPetCommand {
         &lt;&lt;DTO&gt;&gt;
-        +petId: UUID
-        +accessToken: String
-        +trainingType: TrainingType
+        +petId : UUID
+        +trainingType : TrainingType
+        +ownerToken : String
+    }
+
+    class FeedPetCommand {
+        &lt;&lt;DTO&gt;&gt;
+        +petId : UUID
+        +foodType : String
+        +ownerToken : String
     }
 
     class EnterArenaCommand {
         &lt;&lt;DTO&gt;&gt;
-        +petId: UUID
-        +accessToken: String
-        +mode: ArenaMode
+        +petId : UUID
+        +mode : ArenaMode
+        +acceptAi : Boolean
+        +ownerToken : String
     }
 
-    class ClaimPetResponseDTO {
+    class BanPetCommand {
         &lt;&lt;DTO&gt;&gt;
-        +claimId: UUID
-        +expiresAt: DateTime
-        +maskedEmail: String
+        +petId : UUID
+        +reason : String
+        +adminId : UUID
     }
 
-    class VerifyClaimResponseDTO {
+    class UnbanPetCommand {
         &lt;&lt;DTO&gt;&gt;
-        +accessToken: String
-        +petId: UUID
-        +uniqueUrl: String
+        +petId : UUID
+        +adminId : UUID
     }
 
-    class TrainResultDTO {
+    class FlagBattleCommand {
         &lt;&lt;DTO&gt;&gt;
-        +statDelta: Integer
-        +newStat: Integer
-        +trainingType: TrainingType
-        +remainingActionsToday: Integer
+        +matchId : UUID
+        +reason : String
+        +adminId : UUID
     }
 
-    class ArenaEntryDTO {
+    class UpdateRuntimeConfigCommand {
         &lt;&lt;DTO&gt;&gt;
-        +matchId: UUID
-        +status: MatchStatus
-        +estimatedWaitSeconds: Integer
+        +keyValuePairs : Map~String_String~
+        +adminId : UUID
     }
 
-    class LeaderboardDTO {
+    class GetLeaderboardQuery {
         &lt;&lt;DTO&gt;&gt;
-        +entries: List~LeaderboardEntryDTO~
-        +snapshotTime: DateTime
-        +totalPets: Integer
+        +limit : Integer
+        +offset : Integer
+        +mode : ArenaMode
     }
 
-    class LeaderboardQuery {
+    class GetArenaMatchQuery {
         &lt;&lt;DTO&gt;&gt;
-        +limit: Integer
-        +offset: Integer
-        +rarityFilter: RarityType
+        +matchId : UUID
+        +ownerToken : String
     }
 
+    class GdprErasureCommand {
+        &lt;&lt;DTO&gt;&gt;
+        +claimIdentityId : UUID
+        +initiatingPetId : UUID
+        +ownerToken : String
+    }
+
+    class AdminLoginCommand {
+        &lt;&lt;DTO&gt;&gt;
+        +username : String
+        +password : String
+        +totpCode : String
+        +ipAddress : String
+    }
+
+    %% ============================================================
+    %% Response DTOs
+    %% ============================================================
+    class StartClaimResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +claimId : UUID
+        +expiresAt : DateTime
+    }
+
+    class VerifyClaimResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +accessToken : String
+        +pet : PetView
+    }
+
+    class TrainPetResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +pet : PetView
+        +trainingLog : TrainingLogView
+    }
+
+    class EnterArenaResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +matchId : UUID
+        +status : MatchmakingStatus
+        +retryAfterSeconds : Integer
+    }
+
+    class ArenaMatchResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +match : ArenaMatchView
+    }
+
+    class LeaderboardResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +entries : List~LeaderboardEntryView~
+        +snapshotTime : DateTime
+    }
+
+    class AdminLoginResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +sessionToken : String
+        +adminProfile : AdminProfileView
+        +permissions : List~String~
+    }
+
+    class BanPetResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +pet : PetView
+        +bannedAt : DateTime
+    }
+
+    class GdprErasureResponse {
+        &lt;&lt;DTO&gt;&gt;
+        +requestId : UUID
+        +status : GdprRequestStatus
+    }
+
+    %% ============================================================
+    %% Ports（外部服務介面 — 由 Infra 層實作）
+    %% ============================================================
     class IEmailPort {
-        &lt;&lt;Port&gt;&gt;
-        +sendClaimOtp(email: String, code: String, petId: UUID) Promise~void~
-        +sendClaimRecovery(email: String, petUrl: String) Promise~void~
+        &lt;&lt;interface&gt;&gt;
+        +sendOtpEmail(toEmail: String, otpCode: String, expiresInMin: Integer) void
+        +sendErasureConfirmation(toEmail: String) void
     }
 
-    class IRateLimitPort {
-        &lt;&lt;Port&gt;&gt;
-        +checkTrainingLimit(petId: UUID) Promise~boolean~
-        +checkArenaLimit(petId: UUID) Promise~boolean~
-        +checkClaimLimit(email: String) Promise~boolean~
-        +incrementCounter(key: String, windowSeconds: Integer) Promise~Integer~
+    class IRateLimiterPort {
+        &lt;&lt;interface&gt;&gt;
+        +increment(key: String, windowSeconds: Integer) Integer
+        +get(key: String) Integer
+        +reset(key: String) void
     }
 
-    class IMatchQueuePort {
-        &lt;&lt;Port&gt;&gt;
-        +enqueue(petId: UUID, mode: ArenaMode) Promise~void~
-        +dequeue(timeoutSeconds: Integer) Promise~UUID~
-        +getQueueLength() Promise~Integer~
+    class IMatchmakingPort {
+        &lt;&lt;interface&gt;&gt;
+        +enqueue(petId: UUID, mode: ArenaMode) void
+        +findOpponent(petId: UUID, mode: ArenaMode, timeoutMs: Integer) Optional~UUID~
+        +dequeue(petId: UUID, mode: ArenaMode) void
     }
 
-    class ILeaderboardPort {
-        &lt;&lt;Port&gt;&gt;
-        +getTopPets(limit: Integer) Promise~List~LeaderboardEntryDTO~~
-        +getRank(petId: UUID) Promise~Integer~
-        +updateScore(petId: UUID, score: Integer) Promise~void~
+    class ITotpPort {
+        &lt;&lt;interface&gt;&gt;
+        +verify(secret: String, code: String) Boolean
+        +generateSecret(username: String) String
     }
 
-    class TrainingType {
-        &lt;&lt;enumeration&gt;&gt;
-        SPEED
-        STRENGTH
-        STAMINA
+    class ISessionStorePort {
+        &lt;&lt;interface&gt;&gt;
+        +create(adminId: UUID, ttlSeconds: Integer) String
+        +get(sessionToken: String) Optional~AdminSession~
+        +revoke(sessionToken: String) void
     }
 
-    class ArenaMode {
-        &lt;&lt;enumeration&gt;&gt;
-        RACE
-        SUMO
+    class IAuditPort {
+        &lt;&lt;interface&gt;&gt;
+        +record(adminId: UUID, action: String, targetType: String, targetId: String, detail: Map) void
     }
 
-    class MatchStatus {
-        &lt;&lt;enumeration&gt;&gt;
-        FINDING
-        READY
-        IN_PROGRESS
-        RESOLVED
+    class IConfigStorePort {
+        &lt;&lt;interface&gt;&gt;
+        +get(key: String) Optional~String~
+        +put(key: String, value: String, adminId: UUID) void
+        +listAll() Map~String_String~
     }
 
-    ClaimPetUseCase ..&gt; ClaimPetCommand : uses
-    ClaimPetUseCase ..&gt; ClaimPetResponseDTO : returns
-    ClaimPetUseCase ..&gt; IEmailPort : uses
-    VerifyClaimUseCase ..&gt; VerifyClaimCommand : uses
-    VerifyClaimUseCase ..&gt; VerifyClaimResponseDTO : returns
-    TrainPetUseCase ..&gt; TrainPetCommand : uses
-    TrainPetUseCase ..&gt; TrainResultDTO : returns
-    TrainPetUseCase ..&gt; IRateLimitPort : uses
-    EnterArenaUseCase ..&gt; EnterArenaCommand : uses
-    EnterArenaUseCase ..&gt; ArenaEntryDTO : returns
-    EnterArenaUseCase ..&gt; IRateLimitPort : uses
-    EnterArenaUseCase ..&gt; IMatchQueuePort : uses
-    GetLeaderboardUseCase ..&gt; LeaderboardQuery : uses
-    GetLeaderboardUseCase ..&gt; LeaderboardDTO : returns
-    GetLeaderboardUseCase ..&gt; ILeaderboardPort : uses
-    TrainPetCommand ..&gt; TrainingType : uses
-    EnterArenaCommand ..&gt; ArenaMode : uses
-    ArenaEntryDTO ..&gt; MatchStatus : uses</pre></div></main>
+    class ITokenIssuer {
+        &lt;&lt;interface&gt;&gt;
+        +issuePetAccessToken() String
+        +hashToken(plainToken: String) String
+    }
+
+    class IEventBusPort {
+        &lt;&lt;interface&gt;&gt;
+        +publish(event: DomainEvent) void
+    }
+
+    %% ============================================================
+    %% Relationships
+    %% ============================================================
+
+    %% Inheritance（&lt;|--）— 所有 UseCase 繼承基類
+    StartClaimUseCase --|&gt; UseCaseBase
+    VerifyClaimUseCase --|&gt; UseCaseBase
+    TrainPetUseCase --|&gt; UseCaseBase
+    EnterArenaUseCase --|&gt; UseCaseBase
+    AdminLoginUseCase --|&gt; UseCaseBase
+    BanPetUseCase --|&gt; UseCaseBase
+
+    class UseCaseBase {
+        &lt;&lt;abstract&gt;&gt;
+        +execute(input: DTO) DTO
+        #validate(input: DTO) void
+    }
+
+    %% Realization（&lt;|..）— ApplicationService 實作 IOrchestrator interface（DIP）
+    IOrchestrator &lt;|.. ArenaOrchestrationService
+
+    class IOrchestrator {
+        &lt;&lt;interface&gt;&gt;
+        +runMatchmakingCycle(petId: UUID) ArenaMatchResponse
+    }
+
+    %% Composition（*--）— ApplicationService 強組合多個 UseCase
+    ArenaOrchestrationService &quot;1&quot; *-- &quot;1&quot; EnterArenaUseCase : composes
+    GdprPipelineService &quot;1&quot; *-- &quot;1&quot; RequestGdprErasureUseCase : composes
+
+    %% Aggregation（o--）— UseCase 聚合 Port 介面引用（注入但不擁有）
+    EnterArenaUseCase &quot;1&quot; o-- &quot;1&quot; IMatchmakingPort : uses
+    EnterArenaUseCase &quot;1&quot; o-- &quot;1&quot; IRateLimiterPort : uses
+    StartClaimUseCase &quot;1&quot; o-- &quot;1&quot; IEmailPort : uses
+    AdminLoginUseCase &quot;1&quot; o-- &quot;1&quot; ITotpPort : uses
+    AdminLoginUseCase &quot;1&quot; o-- &quot;1&quot; ISessionStorePort : uses
+    BanPetUseCase &quot;1&quot; o-- &quot;1&quot; IAuditPort : uses
+
+    %% Association（--&gt;）— UseCase 接收 Command DTO 並回傳 Response DTO
+    StartClaimUseCase --&gt; StartClaimCommand : accepts
+    StartClaimUseCase --&gt; StartClaimResponse : returns
+    VerifyClaimUseCase --&gt; VerifyClaimCommand : accepts
+    VerifyClaimUseCase --&gt; VerifyClaimResponse : returns
+    TrainPetUseCase --&gt; TrainPetCommand : accepts
+    TrainPetUseCase --&gt; TrainPetResponse : returns
+    EnterArenaUseCase --&gt; EnterArenaCommand : accepts
+    EnterArenaUseCase --&gt; EnterArenaResponse : returns
+    AdminLoginUseCase --&gt; AdminLoginCommand : accepts
+    AdminLoginUseCase --&gt; AdminLoginResponse : returns
+    BanPetUseCase --&gt; BanPetCommand : accepts
+    BanPetUseCase --&gt; BanPetResponse : returns
+
+    %% Dependency（..&gt;）— UseCase 依賴 Domain Event 發送
+    EnterArenaUseCase ..&gt; IEventBusPort : publishes events via
+    TrainPetUseCase ..&gt; IEventBusPort : publishes events via
+    GdprPipelineService ..&gt; IEventBusPort : publishes events via
+    VerifyClaimUseCase ..&gt; ITokenIssuer : issues token via</pre></div>
+<h2>技術說明</h2>
+<p>Application Layer 是業務流程的編排中樞，每個 <code>&lt;&lt;UseCase&gt;&gt;</code> 對應 PRD §3 的一個 AC（如</p>
+<p><code>TrainPetUseCase</code> 對應 AC-PET-TRAIN-001）。所有 UseCase 透過建構式注入 Repository 介面</p>
+<p>（<code>IPetRepository</code> 等）和 Port 介面（<code>IEmailPort</code>、<code>IRateLimiterPort</code>、<code>IMatchmakingPort</code> 等），</p>
+<p>完全不依賴 Infrastructure 具體實作（DIP 嚴格遵守）。</p>
+<p><code>&lt;&lt;DTO&gt;&gt;</code> Command 與 Query 為輸入邊界，由 Presentation Layer（Controller）從 HTTP Request 解析後</p>
+<p>注入；Response DTO 為輸出邊界，避免 Domain Object 洩漏到 HTTP 層。</p>
+<p><code>&lt;&lt;Port&gt;&gt;</code> 介面共 9 個（<code>IEmailPort</code> / <code>IRateLimiterPort</code> / <code>IMatchmakingPort</code> / <code>ITotpPort</code> /</p>
+<p><code>ISessionStorePort</code> / <code>IAuditPort</code> / <code>IConfigStorePort</code> / <code>ITokenIssuer</code> / <code>IEventBusPort</code>），</p>
+<p>皆於 <code>class-infra-presentation.md</code> 由具體 Adapter 實作（<code>&lt;|..</code> Realization 箭頭方向：</p>
+<p>Infrastructure → Application）。</p>
+<p><code>&lt;&lt;ApplicationService&gt;&gt;</code> <code>ArenaOrchestrationService</code> / <code>PetLifecycleService</code> / <code>GdprPipelineService</code></p>
+<p>組合多個 UseCase 完成跨流程業務（如 Arena 一次完整對戰需要 EnterArena + Leaderboard 更新 + Event</p>
+<p>派送），符合 Single Responsibility 原則。</p>
+<p>關係涵蓋 6 種：</p>
+<ol><li><strong>Inheritance（<code>&lt;|--</code>）</strong>: UseCase 繼承 <code>UseCaseBase</code> 抽象基類</li><li><strong>Realization（<code>&lt;|..</code>）</strong>: <code>ArenaOrchestrationService</code> 實作 <code>IOrchestrator</code> 介面</li><li><strong>Composition（<code><em>--</code>）</strong>: <code>ArenaOrchestrationService </em>-- EnterArenaUseCase</code>（編排者擁有 UseCase 生命週期）</li><li><strong>Aggregation（<code>o--</code>）</strong>: UseCase 聚合 Port 介面（注入但不擁有）</li><li><strong>Association（<code>--&gt;</code>）</strong>: UseCase <code>--&gt; Command/Response</code></li><li><strong>Dependency（<code>..&gt;</code>）</strong>: UseCase <code>..&gt; IEventBusPort</code>（依賴事件匯流排）</li></ol>
+<h2>白話說明</h2>
+<p>這層是「翻譯員」：把網路請求變成業務指令，呼叫對的領域物件處理，再把結果包裝成 HTTP 回應。</p>
+<p>所有外部依賴（寄信、限速、配對）都用「介面」抽象，方便測試時換成假的、實際運行時換成真的。</p></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端狀態機：UI — pet</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">pet</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      <a class="nav-gh-link" href="https://github.com/ibalasite/pet" target="_blank" rel="noopener">⌥ GitHub</a>
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 前端狀態機：UI</p>
+    <h1 class="banner-title">前端狀態機：UI</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📐 PlantUML</summary>
+<a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-deployment.html">Deployment</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-auth.html">Sequence Auth</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-battle.html">Sequence Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-battle.html">State Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
+<a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link active" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Frontend State Machine — TrainingActionCard UI</h1>
+<blockquote><p>來源：docs/FRONTEND.md §5.3 Training Interaction + docs/VDD.md §UI States</p></blockquote>
+<p>描述「TrainingActionCard」這個關鍵互動 UI 元件的所有狀態與轉換。</p>
+<p>此元件決定玩家是否可訓練、訓練是否成功、是否觸發冷卻。</p>
+<div class="diagram-container"><pre class="mermaid">stateDiagram-v2
+    [*] --&gt; IDLE : mount [pet loaded] / read daily quota from PetStore
+
+    state IDLE {
+        [*] --&gt; NORMAL_IDLE
+        NORMAL_IDLE --&gt; HOVERED : mouse enter [pointer in bounds] / show tooltip
+        HOVERED --&gt; NORMAL_IDLE : mouse leave [pointer out of bounds] / hide tooltip
+        HOVERED --&gt; ACTIVATED : click [user intent] / call onAction
+        NORMAL_IDLE --&gt; ACTIVATED : click via keyboard [Enter / Space pressed] / call onAction
+    }
+
+    IDLE --&gt; EXECUTING : click action [daily quota &gt; 0, no inflight] / disable + show spinner
+    IDLE --&gt; DISABLED : daily quota === 0 [training_daily_quota_remaining = 0] / show &quot;Daily limit&quot;
+
+    state EXECUTING {
+        [*] --&gt; SENDING_REQUEST
+        SENDING_REQUEST --&gt; AWAITING_RESPONSE : fetch sent [request inflight] / track promise
+    }
+
+    EXECUTING --&gt; SUCCESS : API 200 [response.ok] / update PetStore + show stat delta
+    EXECUTING --&gt; ERROR_RATE_LIMIT : API 429 [over daily limit] / show &quot;Daily limit reached&quot;
+    EXECUTING --&gt; ERROR_NETWORK : fetch failed [network error or timeout 5s] / show &quot;Network error&quot;
+    EXECUTING --&gt; ERROR_AUTH : API 401 [token invalid] / show &quot;Re-claim required&quot; + redirect
+
+    state SUCCESS {
+        [*] --&gt; SHOWING_DELTA
+        SHOWING_DELTA --&gt; ANIMATING : animation requested [reducedMotion=false] / play stat-up tween
+        ANIMATING --&gt; COMPLETE : tween end [duration=2s] / fade indicator
+        SHOWING_DELTA --&gt; COMPLETE : reducedMotion [reducedMotion=true] / skip animation
+    }
+
+    SUCCESS --&gt; IDLE : timeout [completed delta visible &gt;=2s] / re-enable card
+    SUCCESS --&gt; DISABLED : daily quota now 0 [post-action quota reached] / lock card
+
+    state ERROR_RATE_LIMIT {
+        [*] --&gt; RATE_BANNER_VISIBLE
+        RATE_BANNER_VISIBLE --&gt; COUNTING_DOWN : every 1s tick [ttl &gt; 0] / decrement countdown
+        COUNTING_DOWN --&gt; RATE_BANNER_VISIBLE : tick [ttl &gt; 0] / re-render
+    }
+
+    ERROR_RATE_LIMIT --&gt; IDLE : daily reset [now &gt; resetAt] / clear banner + re-enable
+
+    state ERROR_NETWORK {
+        [*] --&gt; RETRY_PROMPT
+        RETRY_PROMPT --&gt; RETRYING : click retry [user gesture] / re-attempt fetch
+        RETRY_PROMPT --&gt; CANCELLED : click dismiss [user gesture] / hide toast
+    }
+
+    ERROR_NETWORK --&gt; EXECUTING : RETRYING fired [user click retry] / re-send request
+    ERROR_NETWORK --&gt; IDLE : CANCELLED [user dismissed] / clear error state
+
+    ERROR_AUTH --&gt; [*] : token cleared [tokenStore.clear()] / redirect to /claim
+
+    DISABLED --&gt; IDLE : daily reset [now &gt;= 00:00 UTC + offset] / restore quota
+
+    note right of EXECUTING
+        Loading spinner visible
+        Card click disabled
+        Other cards remain enabled
+        unless they share quota.
+    end note
+
+    note right of SUCCESS
+        StatChangeIndicator visible
+        for training_stat_display_duration_seconds = 2
+        Then auto-dismiss.
+    end note
+
+    note right of DISABLED
+        Visually muted (opacity 0.4)
+        Card click is no-op
+        Tooltip: &quot;Comes back at 00:00 UTC&quot;
+    end note
+
+    note left of ERROR_NETWORK
+        Toast persists until dismissed
+        or retry succeeds.
+        Max 3 retry attempts (1s, 2s, 4s).
+    end note</pre></div>
+<h2>State 對應 UI 變化</h2>
+<table>
+<tr><th>State</th><th>Visual</th><th>Aria Label</th><th>Click Behavior</th></tr>
+<tr><td>IDLE.NORMAL_IDLE</td><td>full opacity, hover tint</td><td><code>aria-label=&quot;Train Speed&quot;</code></td><td>enabled</td></tr>
+<tr><td>IDLE.HOVERED</td><td>scale 1.05 + tooltip</td><td>(same)</td><td>enabled</td></tr>
+<tr><td>EXECUTING</td><td>spinner overlay</td><td><code>aria-busy=&quot;true&quot;</code></td><td>disabled</td></tr>
+<tr><td>SUCCESS.ANIMATING</td><td>green +2 bubble tween up</td><td><code>aria-live=&quot;polite&quot; Speed +2</code></td><td>(no-op)</td></tr>
+<tr><td>SUCCESS.COMPLETE</td><td>full opacity + delta gone</td><td>(same)</td><td>enabled</td></tr>
+<tr><td>ERROR_RATE_LIMIT</td><td>red badge + countdown</td><td><code>aria-live=&quot;assertive&quot;</code></td><td>disabled</td></tr>
+<tr><td>ERROR_NETWORK</td><td>toast notification</td><td>(toast a11y)</td><td>enabled (retry)</td></tr>
+<tr><td>ERROR_AUTH</td><td>redirect imminent</td><td><code>aria-live=&quot;assertive&quot;</code></td><td>(no-op)</td></tr>
+<tr><td>DISABLED</td><td>grey 0.4 opacity</td><td><code>aria-disabled=&quot;true&quot;</code></td><td>(no-op)</td></tr>
+</table>
+<h2>Triggers Reference</h2>
+<table>
+<tr><th>Trigger</th><th>Source</th><th>Frequency</th></tr>
+<tr><td><code>click</code></td><td>user mouse / touch</td><td>once per gesture</td></tr>
+<tr><td><code>keyboard</code></td><td>Enter/Space on focused card</td><td>once per gesture</td></tr>
+<tr><td><code>mouse enter / leave</code></td><td>pointer event</td><td>continuous while present</td></tr>
+<tr><td><code>fetch sent</code></td><td>TanStack Query useMutation</td><td>per attempt</td></tr>
+<tr><td><code>API 200/4xx/5xx</code></td><td>server response</td><td>once per attempt</td></tr>
+<tr><td><code>tween end</code></td><td>Phaser tween onComplete</td><td>per animation</td></tr>
+<tr><td><code>daily reset</code></td><td>system (clock + interval)</td><td>once per day</td></tr>
+<tr><td><code>tick</code></td><td>setInterval 1s</td><td>continuous during ERROR_RATE_LIMIT</td></tr>
+</table>
+<h2>Notes</h2>
+<ul><li>所有 transition label 使用 <code>trigger [guard] / action</code> 格式（無 <code>&lt;br/&gt;</code> 違規）</li><li><code>DISABLED</code> 與 <code>ERROR_RATE_LIMIT</code> 視覺類似但語意不同：DISABLED 是預期狀態（每日重置），RATE_LIMIT 是 hard error</li><li>Reduced motion preference 影響 SUCCESS 子狀態流（跳過 ANIMATING）</li><li>所有 ERROR_* 狀態都可從 IDLE 重新進入，這是 React idempotent 設計的好處</li></ul></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

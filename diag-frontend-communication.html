@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端協作圖：WS 協議 — pet</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">pet</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      <a class="nav-gh-link" href="https://github.com/ibalasite/pet" target="_blank" rel="noopener">⌥ GitHub</a>
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 前端協作圖：WS 協議</p>
+    <h1 class="banner-title">前端協作圖：WS 協議</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📐 PlantUML</summary>
+<a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-deployment.html">Deployment</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-auth.html">Sequence Auth</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-battle.html">Sequence Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-battle.html">State Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
+<a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link active" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Frontend Communication Diagram — Client/Server Message Flow</h1>
+<blockquote><p>來源：docs/FRONTEND.md §2.6 API Client + docs/API.md §5 Endpoints</p></blockquote>
+<p>描述 Player App、Admin SPA 與後端 API 的所有訊息協作。本系統為純 HTTP（無 WebSocket），訊息分類：</p>
+<ul><li>系統訊息（health check, telemetry）</li><li>認領流程（claim flow）</li><li>遊戲事件（pet, training, arena）</li><li>廣播 / 公開（leaderboard, battle records）</li></ul>
+<div class="diagram-container"><pre class="mermaid">flowchart LR
+    subgraph PlayerSide [&quot;Player App&lt;br/&gt;React 18 + Phaser.js 3&lt;br/&gt;+ Vite 5&quot;]
+        PlayerApp[&quot;Player App&lt;br/&gt;(localhost:5173 dev /&lt;br/&gt;pet.local prod)&quot;]
+    end
+
+    subgraph AdminSide [&quot;Admin Portal&lt;br/&gt;Vue 3 + Element Plus +&lt;br/&gt;Vite 5&quot;]
+        AdminApp[&quot;Admin SPA&lt;br/&gt;(localhost:5174 dev /&lt;br/&gt;admin.pet.local prod)&quot;]
+    end
+
+    subgraph Server [&quot;Game / Admin API Server&lt;br/&gt;(Fastify 4 + Node.js 20)&lt;br/&gt;:3000 intra / :443 ingress&quot;]
+        APIServer[&quot;Fastify Routes&lt;br/&gt;/api/v1/* (player) +&lt;br/&gt;/admin/api/* (admin)&quot;]
+        DB[(&quot;PostgreSQL 16&quot;)]
+        Redis[(&quot;Redis 7.2&quot;)]
+        APIServer --&gt; DB
+        APIServer --&gt; Redis
+    end
+
+    subgraph SystemMessages [&quot;1. System Messages&quot;]
+        S1[&quot;1: GET /health/ready&lt;br/&gt;HTTPS:443&lt;br/&gt;poll every 30s&quot;]
+        S2[&quot;2: 200 {status: &#x27;ready&#x27;}&lt;br/&gt;(or 503 degraded)&quot;]
+        S3[&quot;3: POST /telemetry/event&lt;br/&gt;HTTPS:443 (Sentry)&lt;br/&gt;fire-and-forget&quot;]
+    end
+
+    subgraph ClaimMessages [&quot;2. Claim Flow Messages&quot;]
+        C1[&quot;4: POST /api/v1/claim&lt;br/&gt;{email, petId}&lt;br/&gt;HTTPS:443&quot;]
+        C2[&quot;5: 200 {claimId, expiresAt: ISO8601}&quot;]
+        C3[&quot;6: POST /api/v1/claim/verify&lt;br/&gt;{claimId, otpCode, petId}&lt;br/&gt;HTTPS:443&quot;]
+        C4[&quot;7: 200 {accessToken, pet}&quot;]
+        C5[&quot;8: POST /api/v1/claim/recover&lt;br/&gt;{email, petId}&lt;br/&gt;HTTPS:443&quot;]
+        C6[&quot;9: 200 {claimId} (new claim)&quot;]
+    end
+
+    subgraph GameMessages [&quot;3. Game Event Messages&quot;]
+        G1[&quot;10: GET /api/v1/pets/random&lt;br/&gt;HTTPS:443&quot;]
+        G2[&quot;11: 200 {pet}&quot;]
+        G3[&quot;12: GET /api/v1/pets/:petId&lt;br/&gt;HTTPS:443&lt;br/&gt;Header: X-Pet-Token&quot;]
+        G4[&quot;13: 200 {pet}&quot;]
+        G5[&quot;14: POST /api/v1/pets/:petId/train&lt;br/&gt;{trainingType}&quot;]
+        G6[&quot;15: 200 {pet, trainingLog}&quot;]
+        G7[&quot;16: POST /api/v1/pets/:petId/feed&lt;br/&gt;{foodType}&quot;]
+        G8[&quot;17: 200 {pet, foodBuff}&quot;]
+        G9[&quot;18: POST /api/v1/arena/enter&lt;br/&gt;{petId, mode, acceptAi}&lt;br/&gt;(long-poll up to 30s)&quot;]
+        G10[&quot;19: 200 {matchId, status: READY,&lt;br/&gt;opponentPetId, durationSeconds}&quot;]
+        G11[&quot;20: GET /api/v1/arena/match/:matchId&lt;br/&gt;HTTPS:443&quot;]
+        G12[&quot;21: 200 {ArenaMatch with battleLog}&quot;]
+        G13[&quot;22: GET /api/v1/arena/history/:petId&lt;br/&gt;HTTPS:443&quot;]
+        G14[&quot;23: 200 {matches: ArenaMatch[]}&quot;]
+    end
+
+    subgraph BroadcastMessages [&quot;4. Broadcast / Public Messages&quot;]
+        B1[&quot;24: GET /api/v1/leaderboard&lt;br/&gt;?limit=100&amp;rarity=&amp;mode=RACE&lt;br/&gt;HTTPS:443&quot;]
+        B2[&quot;25: 200 {entries, snapshotTime}&quot;]
+        B3[&quot;26: GET /api/v1/leaderboard/rank/:petId&lt;br/&gt;HTTPS:443&quot;]
+        B4[&quot;27: 200 {rank, score, total}&quot;]
+    end
+
+    subgraph GdprMessages [&quot;5. GDPR Messages&quot;]
+        GD1[&quot;28: POST /api/v1/gdpr/request&lt;br/&gt;{requestType: &#x27;erasure&#x27;, ...}&lt;br/&gt;Header: X-Pet-Token&quot;]
+        GD2[&quot;29: 200 {jobId, status: &#x27;pending&#x27;}&quot;]
+        GD3[&quot;30: GET /api/v1/gdpr/request/status?jobId=...&lt;br/&gt;HTTPS:443&quot;]
+        GD4[&quot;31: 200 {status, completedAt?}&quot;]
+    end
+
+    subgraph AdminMessages [&quot;6. Admin Messages&quot;]
+        A1[&quot;32: POST /admin/api/auth/login&lt;br/&gt;{username, password, totpCode}&lt;br/&gt;HTTPS:443&quot;]
+        A2[&quot;33: 200 {sessionToken, permissions}&lt;br/&gt;Set-Cookie: admin_session=&lt;br/&gt;HttpOnly; Secure&quot;]
+        A3[&quot;34: GET /admin/api/pets&lt;br/&gt;?page=1&amp;limit=50&amp;filter=banned&lt;br/&gt;+ Cookie admin_session&quot;]
+        A4[&quot;35: 200 {items, total, page, limit}&quot;]
+        A5[&quot;36: POST /admin/api/pets/:petId/ban&lt;br/&gt;{reason}&quot;]
+        A6[&quot;37: 200 {pet}&quot;]
+        A7[&quot;38: PUT /admin/api/config/runtime&lt;br/&gt;{keyValuePairs}&quot;]
+        A8[&quot;39: 200 {keyValuePairs}&quot;]
+        A9[&quot;40: GET /admin/api/dashboard&lt;br/&gt;HTTPS:443&quot;]
+        A10[&quot;41: 200 {metrics, recentEvents}&quot;]
+    end
+
+    PlayerApp --&gt;|S1| APIServer
+    APIServer --&gt;|S2| PlayerApp
+    PlayerApp -.-&gt;|S3 async| APIServer
+
+    PlayerApp --&gt;|C1| APIServer
+    APIServer --&gt;|C2| PlayerApp
+    PlayerApp --&gt;|C3| APIServer
+    APIServer --&gt;|C4| PlayerApp
+    PlayerApp --&gt;|C5| APIServer
+    APIServer --&gt;|C6| PlayerApp
+
+    PlayerApp --&gt;|G1| APIServer
+    APIServer --&gt;|G2| PlayerApp
+    PlayerApp --&gt;|G3| APIServer
+    APIServer --&gt;|G4| PlayerApp
+    PlayerApp --&gt;|G5| APIServer
+    APIServer --&gt;|G6| PlayerApp
+    PlayerApp --&gt;|G7| APIServer
+    APIServer --&gt;|G8| PlayerApp
+    PlayerApp --&gt;|G9| APIServer
+    APIServer --&gt;|G10| PlayerApp
+    PlayerApp --&gt;|G11| APIServer
+    APIServer --&gt;|G12| PlayerApp
+    PlayerApp --&gt;|G13| APIServer
+    APIServer --&gt;|G14| PlayerApp
+
+    PlayerApp --&gt;|B1| APIServer
+    APIServer --&gt;|B2| PlayerApp
+    PlayerApp --&gt;|B3| APIServer
+    APIServer --&gt;|B4| PlayerApp
+
+    PlayerApp --&gt;|GD1| APIServer
+    APIServer --&gt;|GD2| PlayerApp
+    PlayerApp --&gt;|GD3| APIServer
+    APIServer --&gt;|GD4| PlayerApp
+
+    AdminApp --&gt;|A1| APIServer
+    APIServer --&gt;|A2| AdminApp
+    AdminApp --&gt;|A3| APIServer
+    APIServer --&gt;|A4| AdminApp
+    AdminApp --&gt;|A5| APIServer
+    APIServer --&gt;|A6| AdminApp
+    AdminApp --&gt;|A7| APIServer
+    APIServer --&gt;|A8| AdminApp
+    AdminApp --&gt;|A9| APIServer
+    APIServer --&gt;|A10| AdminApp
+
+    classDef sysClass fill:#f4f4ff,stroke:#669
+    classDef claimClass fill:#fff4e0,stroke:#963
+    classDef gameClass fill:#e8ffe8,stroke:#393
+    classDef broadcastClass fill:#fff0f4,stroke:#936
+    classDef gdprClass fill:#f8f0ff,stroke:#639
+    classDef adminClass fill:#ffe8e0,stroke:#c33
+
+    class S1,S2,S3 sysClass
+    class C1,C2,C3,C4,C5,C6 claimClass
+    class G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14 gameClass
+    class B1,B2,B3,B4 broadcastClass
+    class GD1,GD2,GD3,GD4 gdprClass
+    class A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 adminClass</pre></div>
+<h2>Message Categories</h2>
+<h3>1. System Messages（1-3）</h3>
+<ul><li>Health check polling、telemetry async fire-and-forget。</li></ul>
+<h3>2. Claim Flow Messages（4-9）</h3>
+<ul><li>Email OTP 認領流程 + 遺失 URL 恢復流程，全部 Player App → Server。</li></ul>
+<h3>3. Game Event Messages（10-23）</h3>
+<ul><li>寵物 CRUD、訓練、餵食、競技場 enter / get / history。</li><li><code>POST /arena/enter</code> 為 long-poll（最久 30 秒）。</li></ul>
+<h3>4. Broadcast / Public Messages（24-27）</h3>
+<ul><li>排行榜（無 token 公開可讀）、單一寵物 rank 查詢。</li></ul>
+<h3>5. GDPR Messages（28-31）</h3>
+<ul><li>資料刪除請求 + 狀態查詢（已認領玩家專屬）。</li></ul>
+<h3>6. Admin Messages（32-41）</h3>
+<ul><li>Admin Login + RBAC Pet Management + Runtime Config + Dashboard。</li><li>所有 admin 訊息附 <code>Cookie: admin_session=</code> httpOnly。</li></ul>
+<h2>Notes</h2>
+<ul><li><strong>No WebSocket</strong>：本系統 HTTP 即可（API.md §5.3 Scope note）；長時間連線僅有 <code>POST /arena/enter</code> 30 秒 long-poll。</li><li><strong>Bidirectional 完整覆蓋</strong>：所有 Player → Server 訊息都有 Server → Player 回應對應；Admin 同樣 bidirectional。</li><li><strong>訊息序號連續（1-41）</strong>：完整覆蓋 API.md §5 Player + §6 Admin 主要 endpoints。</li><li><strong>協定統一 HTTPS:443</strong>：production；local dev 走 :3000 HTTP（透過 Vite proxy）。</li><li><strong>Authorization headers</strong>：</li><li style="margin-left:1.0rem">Player: <code>X-Pet-Token: {token}</code>（32-byte URL-safe base64）</li><li style="margin-left:1.0rem">Admin: httpOnly Cookie <code>admin_session={opaque-token}</code></li></ul></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

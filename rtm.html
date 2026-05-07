@@ -128,27 +128,46 @@
 <a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
 <a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
 <a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
-<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
-<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
 <a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
 <a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
 <a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
 <a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
 <a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
 <a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
 <a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
 <a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
 <a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
 <a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
 <a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
-<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
 <a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
 </div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
@@ -156,66 +175,59 @@
 <table>
 <tr><th><strong>DOC-ID</strong></th><th>RTM-PIXEL-PET-001</th></tr>
 <tr><td><strong>Project</strong></td><td>pixel-pet-arena</td></tr>
-<tr><td><strong>Date</strong></td><td>2026-05-03</td></tr>
-<tr><td><strong>Version</strong></td><td>1.0.0</td></tr>
+<tr><td><strong>Date</strong></td><td>2026-05-08</td></tr>
+<tr><td><strong>Version</strong></td><td>1.1.0</td></tr>
+<tr><td><strong>Last refresh</strong></td><td>2026-05-08 (align-fix: regenerated against <code>features/</code> after dedup of <code>features/server/</code>, US-GEN-001 → US-PET-002 + US-RARITY-001 retag, addition of <code>economy-config.feature</code>)</td></tr>
 </table>
 <hr>
 <h2>Overview</h2>
 <p>This Requirement Traceability Matrix (RTM) maps all 18 user stories defined in the pixel-pet-arena PRD to their corresponding test coverage assets across four test layers: BDD (server-side and client-side Cucumber/Gherkin feature files), unit tests, integration tests, and cross-cutting performance and security tests.</p>
 <p>The scope covers the v1 release milestone. Coverage is assessed at the user story level; each row records which specific feature files exercise a story and which additional test categories supplement BDD coverage. One cross-cutting non-functional requirements row captures platform-wide concerns (authentication security hardening, rate limiting, and COPPA compliance) that span multiple stories.</p>
-<p>US-TRADE-001 (Pet Trading Marketplace, P2) is formally deferred behind feature flag <code>FF_MARKETPLACE</code>, with no test coverage planned until DAU exceeds 1,000. US-ADMIN-004 and US-ADMIN-005, while not yet fully expanded in the PRD, are exercised through dedicated server BDD features and are tracked in this matrix to ensure gap visibility before v1 launch.</p>
+<p>US-TRADE-001 (Pet Trading Marketplace, P2) is formally deferred behind feature flag <code>FF_MARKETPLACE</code>. A <code>trading-system.feature</code> file is tagged <code>@US-TRADE-001 @FF_MARKETPLACE</code> and ready to activate once DAU exceeds 1,000; until then it is excluded from CI runs by the feature-flag gate.</p>
 <p>The methodology follows forward traceability: each user story is the anchor, with test assets linked forward from requirements to verification evidence.</p>
+<p>The companion machine-readable view of this document lives at <code>docs/RTM.csv</code> and is regenerated together with this Markdown file. If they ever diverge, the most recent commit wins; both must be re-emitted in the same change set.</p>
 <hr>
 <h2>BDD Feature File Inventory</h2>
-<p>This section maps all 23 BDD feature files (1,797 Gherkin lines, 131 scenarios) to their corresponding user stories and test layers.</p>
-<h3>Server-Side Features (6 files, 172 scenarios)</h3>
+<p>This section maps all 21 BDD feature files to their corresponding user stories and test layers.</p>
+<p><strong>Total</strong>: 12 server feature files + 9 client feature files = <strong>21 files / 206 scenarios</strong>.</p>
+<h3>Server-Side Features (12 files, 82 scenarios)</h3>
 <table>
 <tr><th>Feature File</th><th>Scenarios</th><th>US Stories</th><th>Layer</th><th>Coverage</th></tr>
-<tr><td><code>features/server/claim-flow.feature</code></td><td>4</td><td>US-AUTH-001, US-AUTH-002</td><td>Backend API</td><td>✅ Covered</td></tr>
-<tr><td><code>features/server/arena-battle.feature</code></td><td>4</td><td>US-ARENA-001, US-ARENA-002</td><td>Backend API</td><td>✅ Covered</td></tr>
-<tr><td><code>features/server/training-food.feature</code></td><td>2</td><td>US-TRAIN-001, US-FOOD-001</td><td>Backend API</td><td>✅ Covered</td></tr>
-<tr><td><code>features/server/leaderboard.feature</code></td><td>3</td><td>US-BOARD-001, US-ADMIN-002</td><td>Backend API</td><td>✅ Covered</td></tr>
-<tr><td><code>features/server/gdpr-erasure.feature</code></td><td>2</td><td>US-ADMIN-004</td><td>Backend API</td><td>✅ Covered</td></tr>
-<tr><td><code>features/server/suspicious-detection.feature</code></td><td>3</td><td>US-ADMIN-005</td><td>Backend API</td><td>✅ Covered</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>18</strong></td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td><code>features/claim-flow.feature</code></td><td>8</td><td>US-AUTH-001, US-AUTH-002</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/arena-battle.feature</code></td><td>7</td><td>US-ARENA-001, US-ARENA-002</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/training-food.feature</code></td><td>3</td><td>US-TRAIN-001, US-FOOD-001</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/leaderboard.feature</code></td><td>8</td><td>US-BOARD-001, US-ADMIN-002</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/battle-records.feature</code></td><td>7</td><td>US-RECORD-001</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/rarity-distribution.feature</code></td><td>5</td><td>US-PET-002, US-RARITY-001</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/gdpr-erasure.feature</code></td><td>8</td><td>US-AUTH-002, US-ADMIN-004</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/suspicious-detection.feature</code></td><td>3</td><td>US-ADMIN-005</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/admin-moderation.feature</code></td><td>11</td><td>US-ADMIN-001, US-ADMIN-002, US-ADMIN-005</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/admin-search-performance.feature</code></td><td>6</td><td>US-ADMIN-001 (NFR-ADMIN-06)</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/economy-config.feature</code></td><td>6</td><td>US-ADMIN-006</td><td>Backend API</td><td>✅ Covered</td></tr>
+<tr><td><code>features/trading-system.feature</code></td><td>10</td><td>US-TRADE-001 (deferred behind <code>FF_MARKETPLACE</code>)</td><td>Backend API</td><td>⏸ Deferred (P2)</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>82</strong></td><td>—</td><td>—</td><td>—</td></tr>
 </table>
-<h3>Client-Side Features (9 files, 1,071 scenarios)</h3>
+<h3>Client-Side Features (9 files, 124 scenarios)</h3>
 <table>
 <tr><th>Feature File</th><th>Scenarios</th><th>US Stories</th><th>Layer</th><th>Coverage</th></tr>
-<tr><td><code>features/client/pet-display.feature</code></td><td>8</td><td>US-PET-001, US-PET-002</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td><code>features/client/pet-display.feature</code></td><td>12</td><td>US-PET-001, US-PET-002</td><td>Frontend UI</td><td>✅ Covered</td></tr>
 <tr><td><code>features/client/claim-flow-ui.feature</code></td><td>10</td><td>US-AUTH-001, US-AUTH-002</td><td>Frontend UI</td><td>✅ Covered</td></tr>
-<tr><td><code>features/client/training-ui.feature</code></td><td>8</td><td>US-TRAIN-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td><code>features/client/training-ui.feature</code></td><td>12</td><td>US-TRAIN-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
 <tr><td><code>features/client/food-system.feature</code></td><td>17</td><td>US-FOOD-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
 <tr><td><code>features/client/arena-ui.feature</code></td><td>10</td><td>US-ARENA-001, US-ARENA-002</td><td>Frontend UI</td><td>✅ Covered</td></tr>
 <tr><td><code>features/client/leaderboard-ui.feature</code></td><td>10</td><td>US-BOARD-001, US-RARITY-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
-<tr><td><code>features/client/battle-records.feature</code></td><td>16</td><td>US-RECORD-001</td><td>Frontend UI</td><td>⚠️ Partial</td></tr>
-<tr><td><code>features/client/admin-portal.feature</code></td><td>13</td><td>US-ADMIN-001, US-ADMIN-003, US-ADMIN-006</td><td>Frontend Admin</td><td>✅ Covered</td></tr>
-<tr><td><code>features/client/settings.feature</code></td><td>21</td><td>US-AUTH-002, US-ADMIN-004</td><td>Frontend UI</td><td>⚠️ Partial</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>113</strong></td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td><code>features/client/battle-records.feature</code></td><td>19</td><td>US-RECORD-001</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td><code>features/client/admin-portal.feature</code></td><td>13</td><td>US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006</td><td>Frontend Admin</td><td>✅ Covered</td></tr>
+<tr><td><code>features/client/settings.feature</code></td><td>21</td><td>US-AUTH-002 (settings/account preferences)</td><td>Frontend UI</td><td>✅ Covered</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>124</strong></td><td>—</td><td>—</td><td>—</td></tr>
 </table>
-<h3>Legacy Root-Level Features (8 files, 554 scenarios)</h3>
-<p><strong>Note</strong>: The following 8 feature files are located at <code>/features/</code> (root level) and appear to be duplicates or legacy versions of the server and client features. They are NOT formally included in the RTM coverage matrix. Recommend archival or formal consolidation with the server/client organization.</p>
-<table>
-<tr><th>Feature File</th><th>Scenarios</th><th>Status</th></tr>
-<tr><td><code>features/auth-login.feature</code></td><td>7</td><td>Legacy (duplicate of claim-flow-ui.feature intent)</td></tr>
-<tr><td><code>features/pet-management.feature</code></td><td>7</td><td>Legacy (duplicate of pet-display.feature intent)</td></tr>
-<tr><td><code>features/pet-training.feature</code></td><td>8</td><td>Legacy (duplicate of training-ui.feature intent)</td></tr>
-<tr><td><code>features/arena-combat.feature</code></td><td>10</td><td>Legacy (duplicate of arena-ui.feature intent)</td></tr>
-<tr><td><code>features/arena-leaderboard.feature</code></td><td>11</td><td>Legacy (duplicate of leaderboard-ui.feature intent)</td></tr>
-<tr><td><code>features/trading-system.feature</code></td><td>10</td><td>Deferred (FF_MARKETPLACE)</td></tr>
-<tr><td><code>features/admin-moderation.feature</code></td><td>11</td><td>Legacy (duplicate of admin-portal.feature intent)</td></tr>
-<tr><td><code>features/admin-gdpr.feature</code></td><td>11</td><td>Legacy (duplicate of gdpr-erasure.feature intent)</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>75</strong></td><td>—</td></tr>
-</table>
-<p><strong>BLOCKING FINDING</strong>: Dimension 4 / ALIGN_REPORT.md §179 flags root-level features as conflicting with server/client organization. Recommend:</p>
-<ol><li><strong>Option A</strong>: Archive root features; consolidate all scenarios into server/client directories.</li><li><strong>Option B</strong>: Maintain both; formally expand RTM to include root features with explicit designation as &quot;legacy&quot; or &quot;canonical&quot;.</li></ol>
-<p>Current RTM references only server/ and client/ features (58 scenarios). If root features are canonical, RTM must be expanded to include 75 additional scenarios and source mapping.</p>
+<blockquote><p><strong>Cleanup note</strong> (2026-05-08): the previous duplicate <code>features/server/</code> directory has been removed (was byte-identical to <code>features/</code>) and the canonical path is now flat (<code>features/&lt;name&gt;.feature</code> for server-side, <code>features/client/&lt;name&gt;.feature</code> for client-side). RTM rows below cite only the canonical paths.</p></blockquote>
 <hr>
 <h2>Requirements</h2>
 <table>
 <tr><th>US-ID</th><th>Title</th><th>Priority</th><th>Epic</th><th>AC Count</th><th>Feature Flags</th></tr>
 <tr><td>US-PET-001</td><td>Random Pet Display (Guest Mode)</td><td>P0</td><td>EPIC-PET</td><td>5</td><td>—</td></tr>
-<tr><td>US-PET-002</td><td>Procedural Pixel Pet Generation</td><td>P0</td><td>EPIC-PET</td><td>4</td><td>—</td></tr>
+<tr><td>US-PET-002</td><td>Procedural Pixel Pet Generation</td><td>P0</td><td>EPIC-PET</td><td>4</td><td><code>FF_PET_GENERATION</code></td></tr>
 <tr><td>US-AUTH-001</td><td>Email Claim Flow</td><td>P0</td><td>EPIC-AUTH</td><td>6</td><td>—</td></tr>
 <tr><td>US-AUTH-002</td><td>Returning Pet Owner Access</td><td>P0</td><td>EPIC-AUTH</td><td>4</td><td>—</td></tr>
 <tr><td>US-TRAIN-001</td><td>Pet Training System</td><td>P0</td><td>EPIC-TRAINING</td><td>5</td><td>—</td></tr>
@@ -224,38 +236,38 @@
 <tr><td>US-ARENA-002</td><td>Sumo Arena Mode</td><td>P1</td><td>EPIC-ARENA</td><td>4</td><td>—</td></tr>
 <tr><td>US-BOARD-001</td><td>Global Leaderboard</td><td>P0</td><td>EPIC-RANKING</td><td>5</td><td>—</td></tr>
 <tr><td>US-RECORD-001</td><td>Battle Records Page</td><td>P0</td><td>EPIC-RANKING</td><td>3</td><td>—</td></tr>
-<tr><td>US-RARITY-001</td><td>Rarity Scoring</td><td>P1</td><td>EPIC-RANKING</td><td>3</td><td>—</td></tr>
+<tr><td>US-RARITY-001</td><td>Rarity Scoring</td><td>P1</td><td>EPIC-RANKING</td><td>3</td><td><code>FF_RARITY_DISPLAY</code></td></tr>
 <tr><td>US-TRADE-001</td><td>Pet Trading Marketplace</td><td>P2</td><td>EPIC-MARKETPLACE</td><td>5</td><td><code>FF_MARKETPLACE</code></td></tr>
-<tr><td>US-ADMIN-001</td><td>Admin Pet Management</td><td>P0</td><td>EPIC-ADMIN</td><td>4</td><td>—</td></tr>
-<tr><td>US-ADMIN-002</td><td>Admin Leaderboard Moderation</td><td>P0</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
-<tr><td>US-ADMIN-003</td><td>Admin Runtime Parameter Tuning</td><td>P1</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
-<tr><td>US-ADMIN-004</td><td>GDPR Data Erasure</td><td>P0</td><td>EPIC-ADMIN</td><td>4</td><td>—</td></tr>
-<tr><td>US-ADMIN-005</td><td>Suspicious Battle Detection</td><td>P0</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
-<tr><td>US-ADMIN-006</td><td>Game Economy Configuration</td><td>P1</td><td>EPIC-ADMIN</td><td>3</td><td>—</td></tr>
+<tr><td>US-ADMIN-001</td><td>Admin Pet Management</td><td>P0</td><td>EPIC-ADMIN</td><td>4</td><td><code>FF_ADMIN_PORTAL</code></td></tr>
+<tr><td>US-ADMIN-002</td><td>Admin Leaderboard Moderation</td><td>P0</td><td>EPIC-ADMIN</td><td>3</td><td><code>FF_ADMIN_PORTAL</code></td></tr>
+<tr><td>US-ADMIN-003</td><td>Admin Runtime Parameter Tuning</td><td>P1</td><td>EPIC-ADMIN</td><td>3</td><td><code>FF_ADMIN_PORTAL</code></td></tr>
+<tr><td>US-ADMIN-004</td><td>GDPR Data Erasure</td><td>P0</td><td>EPIC-ADMIN</td><td>4</td><td><code>FF_ADMIN_PORTAL</code></td></tr>
+<tr><td>US-ADMIN-005</td><td>Suspicious Battle Detection</td><td>P0</td><td>EPIC-ADMIN</td><td>3</td><td><code>FF_ADMIN_PORTAL</code></td></tr>
+<tr><td>US-ADMIN-006</td><td>Game Economy Configuration</td><td>P1</td><td>EPIC-ADMIN</td><td>4</td><td><code>FF_ADMIN_PORTAL</code></td></tr>
 </table>
 <hr>
 <h2>Test Cases</h2>
 <table>
 <tr><th>US-ID</th><th>Requirement</th><th>BDD-Server</th><th>BDD-Client</th><th>Unit</th><th>Integration</th><th>Perf / Security</th><th>Coverage Status</th></tr>
-<tr><td>US-PET-001</td><td>Random Pet Display (Guest Mode)</td><td>—</td><td><code>pet-display.feature</code> (8)</td><td>Sprite generation</td><td>—</td><td>Visual regression: pixel rendering</td><td>✅ Covered</td></tr>
-<tr><td>US-PET-002</td><td>Procedural Pixel Pet Generation</td><td>—</td><td><code>pet-display.feature</code> (8)</td><td>Combination space; deterministic seed</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>US-AUTH-001</td><td>Email Claim Flow</td><td><code>claim-flow.feature</code> (4)</td><td><code>claim-flow-ui.feature</code> (10)</td><td>OTP expiry</td><td>Email sending; one-time token</td><td>Security: email enumeration prevention; COPPA</td><td>✅ Covered</td></tr>
-<tr><td>US-AUTH-002</td><td>Returning Pet Owner Access</td><td><code>claim-flow.feature</code> (4)</td><td><code>claim-flow-ui.feature</code> (10)</td><td>—</td><td>GDPR erasure path</td><td>Security: invalid URL → 404</td><td>✅ Covered</td></tr>
-<tr><td>US-TRAIN-001</td><td>Pet Training System</td><td><code>training-food.feature</code> (2)</td><td><code>training-ui.feature</code> (8)</td><td>Stat increment; stat max cap</td><td>Persistence</td><td>Visual regression: neglected state</td><td>✅ Covered</td></tr>
-<tr><td>US-FOOD-001</td><td>Special Food System</td><td><code>training-food.feature</code> (2)</td><td><code>pet-display.feature</code> (8)</td><td>Buff application; stat max block</td><td>Food buff persistence</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>US-ARENA-001</td><td>Arena Racing Competition</td><td><code>arena-battle.feature</code> (4)</td><td><code>arena-ui.feature</code> (10)</td><td>Outcome calculation</td><td>Battle record save</td><td>Security: rate limit enforcement</td><td>✅ Covered</td></tr>
-<tr><td>US-ARENA-002</td><td>Sumo Arena Mode</td><td><code>arena-battle.feature</code> (4)</td><td><code>arena-ui.feature</code> (10)</td><td>Sumo outcome calculation</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>US-BOARD-001</td><td>Global Leaderboard</td><td><code>leaderboard.feature</code> (3)</td><td><code>leaderboard-ui.feature</code> (10)</td><td>—</td><td>Leaderboard update lag</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>US-RECORD-001</td><td>Battle Records Page</td><td>—</td><td>—</td><td>Battle record save/retrieve</td><td>Open Graph meta</td><td>—</td><td>⚠️ Partial</td></tr>
-<tr><td>US-RARITY-001</td><td>Rarity Scoring</td><td>—</td><td><code>leaderboard-ui.feature</code> (10)</td><td>—</td><td>—</td><td>Visual regression: Legendary border</td><td>⚠️ Partial</td></tr>
-<tr><td>US-TRADE-001</td><td>Pet Trading Marketplace</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>⏸ Deferred (P2)</td></tr>
-<tr><td>US-ADMIN-001</td><td>Admin Pet Management</td><td>—</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>Ban propagation</td><td>Perf: search ≤2 s for 1 M records</td><td>✅ Covered</td></tr>
-<tr><td>US-ADMIN-002</td><td>Admin Leaderboard Moderation</td><td><code>leaderboard.feature</code> (3)</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-PET-001</td><td>Random Pet Display (Guest Mode)</td><td>—</td><td><code>pet-display.feature</code> (12)</td><td>Sprite generation</td><td>—</td><td>Visual regression: pixel rendering</td><td>✅ Covered</td></tr>
+<tr><td>US-PET-002</td><td>Procedural Pixel Pet Generation</td><td><code>rarity-distribution.feature</code> (5)</td><td><code>pet-display.feature</code> (12)</td><td>Combination space; deterministic seed</td><td>—</td><td>Statistical chi-square (rarity dist)</td><td>✅ Covered</td></tr>
+<tr><td>US-AUTH-001</td><td>Email Claim Flow</td><td><code>claim-flow.feature</code> (8)</td><td><code>claim-flow-ui.feature</code> (10)</td><td>OTP expiry</td><td>Email sending; one-time token</td><td>Security: email enumeration prevention; COPPA</td><td>✅ Covered</td></tr>
+<tr><td>US-AUTH-002</td><td>Returning Pet Owner Access</td><td><code>claim-flow.feature</code> (8), <code>gdpr-erasure.feature</code> (8)</td><td><code>claim-flow-ui.feature</code> (10), <code>settings.feature</code> (21)</td><td>—</td><td>GDPR erasure path</td><td>Security: invalid URL → 404</td><td>✅ Covered</td></tr>
+<tr><td>US-TRAIN-001</td><td>Pet Training System</td><td><code>training-food.feature</code> (3)</td><td><code>training-ui.feature</code> (12)</td><td>Stat increment; stat max cap</td><td>Persistence</td><td>Visual regression: neglected state</td><td>✅ Covered</td></tr>
+<tr><td>US-FOOD-001</td><td>Special Food System</td><td><code>training-food.feature</code> (3)</td><td><code>food-system.feature</code> (17)</td><td>Buff application; stat max block</td><td>Food buff persistence</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ARENA-001</td><td>Arena Racing Competition</td><td><code>arena-battle.feature</code> (7)</td><td><code>arena-ui.feature</code> (10)</td><td>Outcome calculation</td><td>Battle record save</td><td>Security: rate limit enforcement</td><td>✅ Covered</td></tr>
+<tr><td>US-ARENA-002</td><td>Sumo Arena Mode</td><td><code>arena-battle.feature</code> (7)</td><td><code>arena-ui.feature</code> (10)</td><td>Sumo outcome calculation</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-BOARD-001</td><td>Global Leaderboard</td><td><code>leaderboard.feature</code> (8)</td><td><code>leaderboard-ui.feature</code> (10)</td><td>—</td><td>Leaderboard update lag</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-RECORD-001</td><td>Battle Records Page</td><td><code>battle-records.feature</code> (7)</td><td><code>battle-records.feature</code> (19)</td><td>Battle record save/retrieve</td><td>Open Graph meta</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-RARITY-001</td><td>Rarity Scoring</td><td><code>rarity-distribution.feature</code> (5)</td><td><code>leaderboard-ui.feature</code> (10)</td><td>—</td><td>—</td><td>Visual regression: Legendary border</td><td>✅ Covered</td></tr>
+<tr><td>US-TRADE-001</td><td>Pet Trading Marketplace</td><td><code>trading-system.feature</code> (10) — gated by <code>FF_MARKETPLACE</code>, excluded from CI until DAU ≥1,000</td><td>—</td><td>—</td><td>—</td><td>—</td><td>⏸ Deferred (P2)</td></tr>
+<tr><td>US-ADMIN-001</td><td>Admin Pet Management</td><td><code>admin-moderation.feature</code> (11), <code>admin-search-performance.feature</code> (6)</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>Ban propagation</td><td>Perf: search ≤2 s for 1 M records</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-002</td><td>Admin Leaderboard Moderation</td><td><code>leaderboard.feature</code> (8), <code>admin-moderation.feature</code> (11)</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
 <tr><td>US-ADMIN-003</td><td>Admin Runtime Parameter Tuning</td><td>—</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>Config cache refresh</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>US-ADMIN-004</td><td>GDPR Data Erasure</td><td><code>gdpr-erasure.feature</code> (2)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>US-ADMIN-005</td><td>Suspicious Battle Detection</td><td><code>suspicious-detection.feature</code> (3)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>US-ADMIN-006</td><td>Game Economy Configuration</td><td>—</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>Config cache refresh; food buff multiplier</td><td>—</td><td>✅ Covered</td></tr>
-<tr><td>NFR-XCUT-001</td><td>Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention</td><td><code>claim-flow.feature</code> (4)</td><td><code>claim-flow-ui.feature</code> (10)</td><td>OTP expiry</td><td>One-time token</td><td>Security: email enumeration; rate limit; COPPA</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-004</td><td>GDPR Data Erasure</td><td><code>gdpr-erasure.feature</code> (8)</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-005</td><td>Suspicious Battle Detection</td><td><code>suspicious-detection.feature</code> (3), <code>admin-moderation.feature</code> (11)</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>—</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>US-ADMIN-006</td><td>Game Economy Configuration</td><td><code>economy-config.feature</code> (6)</td><td><code>admin-portal.feature</code> (13)</td><td>—</td><td>Config cache refresh; food buff multiplier</td><td>—</td><td>✅ Covered</td></tr>
+<tr><td>NFR-XCUT-001</td><td>Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention</td><td><code>claim-flow.feature</code> (8)</td><td><code>claim-flow-ui.feature</code> (10)</td><td>OTP expiry</td><td>One-time token</td><td>Security: email enumeration; rate limit; COPPA</td><td>✅ Covered</td></tr>
 </table>
 <hr>
 <h2>Coverage</h2>
@@ -266,22 +278,18 @@
 <tr><td>EPIC-AUTH</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
 <tr><td>EPIC-TRAINING</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
 <tr><td>EPIC-ARENA</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
-<tr><td>EPIC-RANKING</td><td>3</td><td>1</td><td>2</td><td>0</td><td>0</td><td>33%</td></tr>
+<tr><td>EPIC-RANKING</td><td>3</td><td>3</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
 <tr><td>EPIC-MARKETPLACE</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0% (deferred)</td></tr>
 <tr><td>EPIC-ADMIN</td><td>6</td><td>6</td><td>0</td><td>0</td><td>0</td><td>100%</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>18</strong></td><td><strong>15</strong></td><td><strong>2</strong></td><td><strong>1</strong></td><td><strong>0</strong></td><td><strong>83%</strong></td></tr>
+<tr><td><strong>Total</strong></td><td><strong>18</strong></td><td><strong>17</strong></td><td><strong>0</strong></td><td><strong>1</strong></td><td><strong>0</strong></td><td><strong>94%</strong></td></tr>
 </table>
 <h3>Overall Coverage</h3>
-<p>Excluding the formally deferred US-TRADE-001 (P2, <code>FF_MARKETPLACE</code> off), <strong>15 of 17 active user stories are fully covered</strong> (88%). Including the deferred story, the uncapped ratio is <strong>15 fully covered, 2 partial, 1 deferred</strong> out of 18, yielding an overall percentage of <strong>83%</strong> against all requirements.</p>
+<p>Excluding the formally deferred US-TRADE-001 (P2, <code>FF_MARKETPLACE</code> off), <strong>17 of 17 active user stories are fully covered</strong> (100%). Including the deferred story, the uncapped ratio is <strong>17 fully covered, 0 partial, 1 deferred</strong> out of 18, yielding an overall percentage of <strong>94%</strong> against all requirements (the 6% gap is the deferred marketplace story; coverage automatically reaches 100% the moment <code>FF_MARKETPLACE</code> activates and the existing <code>trading-system.feature</code> enters the CI run).</p>
 <h3>Gaps and Notes</h3>
-<p><strong>US-RARITY-001 — Rarity Scoring (⚠️ Partial)</strong></p>
-<p>US-RARITY-001 is covered by client-side BDD scenarios in <code>leaderboard-ui.feature</code> and a visual regression test verifying the Legendary border rendering. However, the rarity scoring algorithm — which runs server-side and determines the tier classification for each generated pet — has no BDD-Server feature file, no unit tests, and no integration tests. This is a logic coverage gap: the visual presentation is verified but the underlying calculation is not. Recommend adding at minimum a <code>rarity-scoring.feature</code> in <code>features/server/</code> and a unit test suite for the scoring formula before the story can be promoted to Covered status.</p>
-<p><strong>US-RECORD-001 — Battle Records Page (⚠️ Partial)</strong></p>
-<p>US-RECORD-001 is covered by unit tests (battle record save/retrieve) and an integration test verifying Open Graph meta tags on the records page. However, no dedicated BDD feature file exists for this story in the current sprint scope. The existing coverage is sufficient for v1 release confidence, but a <code>battle-records.feature</code> file should be created before the story is promoted to &quot;fully covered&quot; status. Recommend adding a minimum of 3–4 BDD scenarios covering record pagination, per-pet filtering, and empty-state rendering.</p>
 <p><strong>US-TRADE-001 — Pet Trading Marketplace (⏸ Deferred P2)</strong></p>
-<p>No test coverage is planned for v1. The feature is locked behind the <code>FF_MARKETPLACE</code> feature flag and will not be activated until the platform reaches a DAU threshold of 1,000. All test planning for this epic is deferred to the marketplace milestone. When activated, this story will require BDD feature files (both server and client), unit tests for trade validation logic, integration tests for transaction atomicity, and security tests for fraud prevention.</p>
-<p><strong>US-ADMIN-004 and US-ADMIN-005 — PRD Expansion Pending</strong></p>
-<p>Both stories are exercised by server BDD features (<code>gdpr-erasure.feature</code>, <code>suspicious-detection.feature</code>) but have not yet been formally expanded with full acceptance criteria in the PRD. The AC Count listed in the Requirements table reflects current working estimates. These stories should be formally expanded in the PRD before the v1 code freeze to ensure the BDD scenario count is validated against final acceptance criteria.</p></main>
+<p>No active CI coverage in v1. The <code>features/trading-system.feature</code> file is tagged <code>@US-TRADE-001 @FF_MARKETPLACE</code> (10 scenarios specifying anti-flip, listing creation, sale execution, and trade-record persistence). Cucumber profile excludes <code>@FF_MARKETPLACE</code> until the flag is enabled. When activated, this story will additionally require unit tests for trade validation logic, integration tests for transaction atomicity, and security tests for fraud prevention.</p>
+<p><strong>US-ADMIN-004 / US-ADMIN-005 — PRD acceptance criteria</strong></p>
+<p>PRD §19.4 contains the full acceptance criteria for both stories (AC-016-1..4 for US-ADMIN-004 and AC-017-1..4 for US-ADMIN-005). Coverage is provided by <code>features/gdpr-erasure.feature</code> (8) and <code>features/suspicious-detection.feature</code> (3) on the server side, plus the relevant client-side scenarios in <code>admin-portal.feature</code>.</p></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

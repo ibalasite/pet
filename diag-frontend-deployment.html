@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端部署圖：建構管線 — pet</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">pet</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      <a class="nav-gh-link" href="https://github.com/ibalasite/pet" target="_blank" rel="noopener">⌥ GitHub</a>
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 前端部署圖：建構管線</p>
+    <h1 class="banner-title">前端部署圖：建構管線</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📐 PlantUML</summary>
+<a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-deployment.html">Deployment</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-auth.html">Sequence Auth</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-battle.html">Sequence Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-battle.html">State Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
+<a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link active" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Frontend Deployment Diagram — Build &amp; Distribution Pipeline</h1>
+<blockquote><p>來源：docs/FRONTEND.md §1.3 Build Tooling + docs/ARCH.md §7.1 Infrastructure Overview + docs/CICD.md §4 ArgoCD</p></blockquote>
+<p>描述 Player App 與 Admin Portal 的建構平台、CDN 分發、靜態資源版本控制策略。</p>
+<div class="diagram-container"><pre class="mermaid">graph TD
+    subgraph Source [&quot;Source Repository&quot;]
+        Repo[&quot;GitHub&lt;br/&gt;github.com/owner/pixel-pet-arena&lt;br/&gt;monorepo (pnpm workspace)&quot;]
+        PlayerSrc[&quot;packages/player-app/&lt;br/&gt;React 18 + Phaser.js 3 +&lt;br/&gt;TypeScript 5 + Vite 5&quot;]
+        AdminSrc[&quot;packages/admin-app/&lt;br/&gt;Vue 3 + Element Plus +&lt;br/&gt;TypeScript 5 + Vite 5&quot;]
+        Repo --&gt; PlayerSrc
+        Repo --&gt; AdminSrc
+    end
+
+    subgraph BuildPipeline [&quot;GitHub Actions Build Pipeline&quot;]
+        BuildPlayer[&quot;build-player&lt;br/&gt;tool: vite build&lt;br/&gt;output: dist/player-app/&lt;br/&gt;JS chunks ≤300KB gzipped&lt;br/&gt;CSS ≤30KB&quot;]
+        BuildAdmin[&quot;build-admin&lt;br/&gt;tool: vite build&lt;br/&gt;output: dist/admin-app/&lt;br/&gt;JS chunks ≤500KB gzipped&lt;br/&gt;CSS ≤80KB (Element Plus base)&quot;]
+
+        DockerImagePlayer[&quot;docker build player-app&lt;br/&gt;Image: ghcr.io/owner/player-app:sha-XXXXXXX&lt;br/&gt;base: nginx:alpine 1.27.x&lt;br/&gt;config: serve dist/ on :80&quot;]
+        DockerImageAdmin[&quot;docker build admin-app&lt;br/&gt;Image: ghcr.io/owner/admin-app:sha-XXXXXXX&lt;br/&gt;base: nginx:alpine 1.27.x&quot;]
+
+        PlayerSrc --&gt; BuildPlayer
+        AdminSrc --&gt; BuildAdmin
+        BuildPlayer --&gt; DockerImagePlayer
+        BuildAdmin --&gt; DockerImageAdmin
+    end
+
+    subgraph Registry [&quot;Container Registry&quot;]
+        GHCR[(&quot;ghcr.io/owner/player-app&lt;br/&gt;tags: sha-XXXXXXX (staging),&lt;br/&gt;v1.x.x (production)&lt;br/&gt;retention: 90 days&quot;)]
+        GHCRAdmin[(&quot;ghcr.io/owner/admin-app&lt;br/&gt;(same tagging)&quot;)]
+        DockerImagePlayer --&gt;|&quot;docker push HTTPS:443&quot;| GHCR
+        DockerImageAdmin --&gt;|&quot;docker push HTTPS:443&quot;| GHCRAdmin
+    end
+
+    subgraph K8sStaging [&quot;K8s Cluster — Staging Namespace&quot;]
+        ArgoStaging[&quot;ArgoCD Application&lt;br/&gt;(syncs k8s/staging/ overlay)&lt;br/&gt;poll: every 3 min&quot;]
+        PlayerSvcStaging[&quot;player-app Service&lt;br/&gt;type: ClusterIP, :80&lt;br/&gt;replicas: 2&quot;]
+        AdminSvcStaging[&quot;admin-app Service&lt;br/&gt;type: ClusterIP, :80&lt;br/&gt;replicas: 1&quot;]
+        IngressStaging[&quot;nginx Ingress&lt;br/&gt;host: staging.pet.local (player)&lt;br/&gt;host: admin-staging.pet.local (admin)&lt;br/&gt;TLS 1.3 via cert-manager&lt;br/&gt;Replicas: 2&quot;]
+        ArgoStaging --&gt;|&quot;kubectl apply&quot;| PlayerSvcStaging
+        ArgoStaging --&gt;|&quot;kubectl apply&quot;| AdminSvcStaging
+        IngressStaging --&gt;|&quot;HTTP:80 path-based&quot;| PlayerSvcStaging
+        IngressStaging --&gt;|&quot;HTTP:80 path-based&quot;| AdminSvcStaging
+        GHCR -.-&gt;|&quot;docker pull HTTPS:443&lt;br/&gt;(via imagePullSecret)&quot;| PlayerSvcStaging
+        GHCRAdmin -.-&gt;|&quot;docker pull&quot;| AdminSvcStaging
+    end
+
+    subgraph K8sProd [&quot;K8s Cluster — Production Namespace&quot;]
+        ArgoProd[&quot;ArgoCD Application&lt;br/&gt;(syncs k8s/production/ overlay)&lt;br/&gt;tag-based: v*.*.* trigger&quot;]
+        PlayerSvcProd[&quot;player-app Service&lt;br/&gt;replicas: 3, HPA 3-20&quot;]
+        AdminSvcProd[&quot;admin-app Service&lt;br/&gt;replicas: 2, HPA 2-10&quot;]
+        IngressProd[&quot;nginx Ingress&lt;br/&gt;host: pet.local (player)&lt;br/&gt;host: admin.pet.local (admin)&lt;br/&gt;TLS 1.3 via cert-manager&lt;br/&gt;Replicas: 3 (HA)&quot;]
+        ArgoProd --&gt;|&quot;kubectl apply&quot;| PlayerSvcProd
+        ArgoProd --&gt;|&quot;kubectl apply&quot;| AdminSvcProd
+        IngressProd --&gt;|&quot;HTTP:80&quot;| PlayerSvcProd
+        IngressProd --&gt;|&quot;HTTP:80&quot;| AdminSvcProd
+        GHCR -.-&gt;|&quot;docker pull&quot;| PlayerSvcProd
+        GHCRAdmin -.-&gt;|&quot;docker pull&quot;| AdminSvcProd
+    end
+
+    subgraph CDN [&quot;CDN / Edge (optional, future)&quot;]
+        Cloudflare[&quot;Cloudflare CDN&lt;br/&gt;(future: pet.example.com)&lt;br/&gt;cache-control: 1 year hash assets&lt;br/&gt;HTML: no-store&quot;]
+    end
+
+    subgraph BrowserClients [&quot;Browser Clients (worldwide)&quot;]
+        BrowserPlayer[&quot;Player Browser&lt;br/&gt;Chrome / Firefox / Safari&lt;br/&gt;iOS Safari 17+&quot;]
+        BrowserAdmin[&quot;Admin Browser&lt;br/&gt;Chrome / Edge&lt;br/&gt;(corporate)&quot;]
+    end
+
+    BrowserPlayer --&gt;|&quot;HTTPS:443&lt;br/&gt;TLS 1.3&lt;br/&gt;cert: pet.local (cert-manager)&quot;| IngressProd
+    BrowserPlayer -.-&gt;|&quot;future: HTTPS:443&lt;br/&gt;via Cloudflare&quot;| Cloudflare
+    Cloudflare -.-&gt;|&quot;origin pull&quot;| IngressProd
+    BrowserAdmin --&gt;|&quot;HTTPS:443&lt;br/&gt;+ IP whitelist&quot;| IngressProd
+
+    classDef sourceClass fill:#fff4e0,stroke:#963
+    classDef buildClass fill:#e8f0ff,stroke:#369
+    classDef regClass fill:#fff0f8,stroke:#963
+    classDef k8sClass fill:#e8ffe8,stroke:#393
+    classDef edgeClass fill:#f8e8ff,stroke:#639
+    classDef clientClass fill:#fffce0,stroke:#996
+
+    class Repo,PlayerSrc,AdminSrc sourceClass
+    class BuildPlayer,BuildAdmin,DockerImagePlayer,DockerImageAdmin buildClass
+    class GHCR,GHCRAdmin regClass
+    class ArgoStaging,PlayerSvcStaging,AdminSvcStaging,IngressStaging,ArgoProd,PlayerSvcProd,AdminSvcProd,IngressProd k8sClass
+    class Cloudflare edgeClass
+    class BrowserPlayer,BrowserAdmin clientClass</pre></div>
+<h2>Build Targets</h2>
+<table>
+<tr><th>Target</th><th>Tool</th><th>Output</th><th>Bundle Budget</th></tr>
+<tr><td>Player App (Web/H5)</td><td>Vite 5 (rolldown roadmap)</td><td><code>dist/player-app/</code></td><td>JS ≤ 300KB gz, CSS ≤ 30KB</td></tr>
+<tr><td>Admin Portal</td><td>Vite 5</td><td><code>dist/admin-app/</code></td><td>JS ≤ 500KB gz, CSS ≤ 80KB</td></tr>
+<tr><td>Phaser atlases</td><td>Phaser TexturePacker</td><td><code>public/atlases/{rarity}/</code></td><td>each atlas ≤ 256KB</td></tr>
+<tr><td>Sprite generation</td><td>seed-deterministic</td><td>runtime canvas</td><td>(no bundle impact)</td></tr>
+</table>
+<h2>Static Asset Versioning</h2>
+<ul><li><strong>Hashed file names</strong>：<code>main.[hash].js</code>、<code>vendor.[hash].js</code>、<code>pet-{rarity}-[hash].png</code></li><li><strong>Cache-Control</strong>：靜態 hash 檔 <code>max-age=31536000, immutable</code>（1 year）</li><li><strong>HTML shell</strong>：<code>Cache-Control: no-store, must-revalidate</code>（每次重打）</li><li><strong>Service Worker</strong>：cache versioning by app version stamp（<code>v1.4.2-{sha}</code>）</li></ul>
+<h2>Deployment Targets</h2>
+<table>
+<tr><th>Environment</th><th>URL</th><th>Trigger</th><th>Tag</th></tr>
+<tr><td>Staging Player</td><td>staging.pet.local</td><td>merge to main</td><td><code>sha-XXXXXXX</code></td></tr>
+<tr><td>Staging Admin</td><td>admin-staging.pet.local</td><td>merge to main</td><td><code>sha-XXXXXXX</code></td></tr>
+<tr><td>Production Player</td><td>pet.local</td><td>push tag <code>v<em>.</em>.*</code></td><td><code>v1.x.x</code></td></tr>
+<tr><td>Production Admin</td><td>admin.pet.local</td><td>push tag <code>v<em>.</em>.*</code></td><td><code>v1.x.x</code></td></tr>
+</table>
+<h2>Build Toolchain（CICD.md §4）</h2>
+<pre><code class="">git push → GitHub Actions
+  → pnpm install (cached)
+  → pnpm --filter player-app build (vite build)
+  → pnpm --filter admin-app build
+  → docker build (per-app multi-stage Dockerfile)
+  → docker push to ghcr.io
+  → kustomize edit set image (k8s/staging/)
+  → git commit + push (overlay update)
+  → ArgoCD detects → syncs to k8s
+  → readinessProbe → traffic shift</code></pre>
+<h2>Notes</h2>
+<ul><li>兩個 SPA 共享同一個 Container Registry，但部署為獨立 Deployment + Service</li><li>nginx Ingress 用 host-based routing 區分 player vs admin（不同 hostname）</li><li>Cloudflare 為未來 plan，目前直接走 K8s Ingress</li><li>Production 部署需要手動 approve GitHub Environment（CICD.md §5）</li></ul></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
