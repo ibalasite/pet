@@ -10,6 +10,14 @@ Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
     When the owner submits a fourth POST /api/v1/training request for "trainee-token-001" on the same day
     Then the server responds with HTTP 400 and error code "TRAINING_LIMIT_REACHED"
 
+  Scenario: Level formula computes deterministically from accumulated stat sum
+    Given pet "leveler-token-001" has a stat triplet (speed=20, strength=10, stamina=5) summing to 35 stat points
+    When the level computation runs for "leveler-token-001"
+    Then pet.level equals FLOOR(35 / (pet_level_formula_divisor = 10)) = 3
+    When pet "leveler-token-001" later reaches a stat sum of 1050
+    Then pet.level equals MIN(FLOOR(1050 / 10), pet_level_max = 100) = 100
+    And the level value never exceeds (pet_level_max = 100)
+
   Scenario: Temporary food buff applies bonus stat during an arena battle and expires after duration
     Given pet "buffed-pet-token" has a base speed stat of 50
     And a food buff of (food_buff_example_temp_amount_stat_points = 5) speed points has been applied to "buffed-pet-token" via POST /api/v1/food/apply with the food_buffs row recording expires_at (food_buff_example_temp_duration_hours = 24) hours from now
