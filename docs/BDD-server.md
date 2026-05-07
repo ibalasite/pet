@@ -8,13 +8,15 @@
 
 ## Overview
 
-This document summarizes the 6 server-side BDD feature files that specify the backend API and business logic for pixel-pet-arena. Each feature file contains Gherkin scenarios that validate acceptance criteria from the PRD.
+This document summarizes the 12 server-side BDD feature files that specify the backend API and business logic for pixel-pet-arena. Each feature file contains Gherkin scenarios that validate acceptance criteria from the PRD.
 
-**Total Coverage:** 6 server features, 18 core scenarios, 8 PRD user stories linked
+**Total Coverage:** 12 server features, 81 scenarios, 14 PRD user stories linked (including US-ADMIN-006 economy config and US-TRADE-001 marketplace deferred behind `FF_MARKETPLACE`).
+
+> The six feature files originally summarized in detail below cover the v1 P0 scope (arena, claim, GDPR, leaderboard, training, suspicious detection). The full list of 12 feature files (including `admin-moderation`, `admin-search-performance`, `battle-records`, `economy-config`, `rarity-distribution`, `trading-system`) is enumerated in `docs/RTM.md` §"Server-Side Features" and is the authoritative inventory.
 
 ---
 
-## 1. Arena Battle System (`features/server/arena-battle.feature`)
+## 1. Arena Battle System (`features/arena-battle.feature`)
 
 **Linked PRD User Stories:** US-ARENA-001, US-ARENA-002  
 **Scenarios:** 5
@@ -31,7 +33,7 @@ Validates the core battle matchmaking and battle resolution system.
 
 ---
 
-## 2. Email Claim Flow (`features/server/claim-flow.feature`)
+## 2. Email Claim Flow (`features/claim-flow.feature`)
 
 **Linked PRD User Stories:** US-AUTH-001, US-AUTH-002  
 **Scenarios:** 4
@@ -47,7 +49,7 @@ Validates the email-based pet ownership claim process (zero-account-barrier).
 
 ---
 
-## 3. GDPR Data Erasure (`features/server/gdpr-erasure.feature`)
+## 3. GDPR Data Erasure (`features/gdpr-erasure.feature`)
 
 **Linked PRD User Stories:** US-AUTH-002, US-ADMIN-004  
 **Scenarios:** 2
@@ -61,7 +63,7 @@ Validates user data erasure and privacy compliance (GDPR Article 17).
 
 ---
 
-## 4. Global Leaderboard (`features/server/leaderboard.feature`)
+## 4. Global Leaderboard (`features/leaderboard.feature`)
 
 **Linked PRD User Stories:** US-BOARD-001, US-ADMIN-002  
 **Scenarios:** 3
@@ -76,7 +78,7 @@ Validates the global leaderboard ranking system and admin moderation integration
 
 ---
 
-## 5. Training and Food System (`features/server/training-food.feature`)
+## 5. Training and Food System (`features/training-food.feature`)
 
 **Linked PRD User Stories:** US-TRAIN-001, US-FOOD-001  
 **Scenarios:** 2
@@ -90,7 +92,7 @@ Validates pet stat progression and temporary buff mechanics.
 
 ---
 
-## 6. Suspicious Battle Detection (`features/server/suspicious-detection.feature`)
+## 6. Suspicious Battle Detection (`features/suspicious-detection.feature`)
 
 **Linked PRD User Stories:** US-ADMIN-005  
 **Scenarios:** 3
@@ -133,7 +135,7 @@ Validates bot/spam detection and admin moderation workflow.
 ## How to Use This Document
 
 1. **For Developers**: Use this as a quick reference for what backend functionality is specified.
-2. **For QA**: Cross-reference scenario steps against the feature files in `features/server/` to understand expected behavior.
+2. **For QA**: Cross-reference scenario steps against the feature files in `features/` to understand expected behavior.
 3. **For Product**: Use AC mapping above to verify all PRD requirements are covered by test specifications.
 
 ---
