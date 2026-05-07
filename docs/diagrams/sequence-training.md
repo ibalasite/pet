@@ -1,4 +1,13 @@
+---
+diagram: sequence-training
+uml-type: Sequence Diagram（Training — POST /api/v1/pets/:petId/train Happy + Error）
+source: docs/EDD.md §3.8 Sequence + docs/API.md §5.2 Pet Endpoints
+generated: 2026-05-08T00:00:00Z
+---
+
 # Sequence Diagram — Pet Training
+
+> 來源：docs/EDD.md §3.8 Sequence + docs/API.md §5.2 Pet Endpoints
 
 ## Overview
 

@@ -1,4 +1,13 @@
+---
+diagram: sequence-arena-battle
+uml-type: Sequence Diagram（Arena Battle — POST /api/v1/arena/enter Happy + Error）
+source: docs/EDD.md §3.8 Sequence + docs/API.md §5.3 Arena
+generated: 2026-05-08T00:00:00Z
+---
+
 # Sequence Diagram — Arena Battle Matchmaking
+
+> 來源：docs/EDD.md §3.8 Sequence Diagrams + docs/API.md §5.3 Arena Endpoints
 
 ## Overview
 

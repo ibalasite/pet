@@ -1,4 +1,13 @@
+---
+diagram: sequence-claim-flow
+uml-type: Sequence Diagram（Claim — POST /api/v1/claim + verify Happy + Error）
+source: docs/EDD.md §3.8 Sequence + docs/API.md §5.1 Claim Flow
+generated: 2026-05-08T00:00:00Z
+---
+
 # Sequence Diagram — Pet Claim Email OTP Flow
+
+> 來源：docs/EDD.md §3.8 Sequence + docs/API.md §5.1 Claim Flow Endpoints
 
 ## Overview
 

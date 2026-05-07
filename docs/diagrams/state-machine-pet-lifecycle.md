@@ -1,4 +1,13 @@
+---
+diagram: state-machine-pet-lifecycle
+uml-type: State Machine Diagram（Pet Entity Lifecycle）
+source: docs/EDD.md §3.8 Pet State Machine + §4.1 Pet
+generated: 2026-05-08T00:00:00Z
+---
+
 # State Machine — Pet Lifecycle
+
+> 來源：docs/EDD.md §3.8 Pet State Machine + §4.1 Pet entity
 
 ## Overview
 

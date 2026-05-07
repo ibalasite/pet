@@ -1,4 +1,13 @@
+---
+diagram: state-machine-arena-match
+uml-type: State Machine Diagram（ArenaMatch Entity Lifecycle）
+source: docs/EDD.md §3.8 Battle Match State Machine + §4.4 ArenaMatch
+generated: 2026-05-08T00:00:00Z
+---
+
 # State Machine — Arena Match
+
+> 來源：docs/EDD.md §3.8 Battle Match State Machine + §4.4 ArenaMatch entity
 
 ## Overview
 
