@@ -24,7 +24,7 @@ All column names use `snake_case`. All IDs are `UUID` (generated via `gen_random
 
 ## 2. Tables
 
-> **DDL execution order**: The PostgreSQL `ENUM` types defined in §3 must be created **before** any table in this section. Run all `CREATE TYPE` statements from §3 first, then execute the `CREATE TABLE` statements below in the order §2.1 → §2.12. Within the table definitions, §2.1 (`claim_identities`) must precede §2.2 (`pets`) because `pets.claim_identity_id` carries a foreign key to `claim_identities`; similarly, §2.8 (`marketplace_listings`) must precede §2.9 (`marketplace_transactions`), and §2.10 (`admin_accounts`) must precede §2.11 (`admin_audit_log`).
+> **DDL execution order**: The PostgreSQL `ENUM` types defined in §3 must be created **before** any table in this section. Run all `CREATE TYPE` statements from §3 first, then execute the `CREATE TABLE` statements below in the order §2.1 → §2.12. Within the table definitions, §2.1 (`claim_identities`) must precede §2.2 (`pets`) because `pets.claim_identity_id` carries a foreign key to `claim_identities`; similarly, §2.8 (`marketplace_listings`) must precede §2.9 (`marketplace_transactions`), and §2.10 (`admin_users`) must precede §2.11 (`audit_logs`).
 
 ### 2.1 `claim_identities`
 
@@ -265,7 +265,7 @@ COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Food buff bonus (delta) added t
 COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Food buff bonus (delta) added to pet_b''s base stat for this match. 0 = no active buff or AI opponent. Always >= 0 (chk_arena_match_stat_delta_b_nonneg).';
 COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 seconds (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15).';
 COMMENT ON COLUMN arena_matches.battle_log IS 'Structured event sequence array for client-side replay.';
-COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to admin_audit_log.detail, not stored here.';
+COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to audit_logs.detail, not stored here.';
 COMMENT ON COLUMN arena_matches.flagged_at IS 'Timestamp when the match was most recently flagged. NULL when is_flagged = FALSE.';
 COMMENT ON COLUMN arena_matches.updated_at IS 'Updated by the application on every mutation: when is_flagged is set to TRUE (POST .../flag) or cleared to FALSE (DELETE .../flag). Unchanged on insert-only path.';
 ```
@@ -512,12 +512,12 @@ CREATE INDEX idx_marketplace_transactions_pet_completed
 
 ---
 
-### 2.10 `admin_accounts`
+### 2.10 `admin_users`
 
 Admin operator credentials. Accounts are never hard-deleted — deactivation is a soft-delete via `deactivated_at`. The audit log holds a FK to this table, requiring row retention.
 
 ```sql
-CREATE TABLE admin_accounts (
+CREATE TABLE admin_users (
     id                      UUID        NOT NULL DEFAULT gen_random_uuid(),
     username                VARCHAR(64) NOT NULL,
     password_hash           TEXT        NOT NULL,
@@ -531,36 +531,36 @@ CREATE TABLE admin_accounts (
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT pk_admin_accounts PRIMARY KEY (id),
-    CONSTRAINT uq_admin_accounts_username UNIQUE (username),
-    CONSTRAINT chk_admin_accounts_failed_attempts_nonneg
+    CONSTRAINT pk_admin_users PRIMARY KEY (id),
+    CONSTRAINT uq_admin_users_username UNIQUE (username),
+    CONSTRAINT chk_admin_users_failed_attempts_nonneg
         CHECK (failed_attempts >= 0)
 );
 
-COMMENT ON COLUMN admin_accounts.username IS 'Login identifier. Unique (uq_admin_accounts_username). Max 64 characters (VARCHAR(64)). Used as the login credential alongside password and TOTP.';
-COMMENT ON COLUMN admin_accounts.password_hash IS 'bcrypt hash. Minimum work factor: 12.';
-COMMENT ON COLUMN admin_accounts.totp_secret_encrypted IS 'AES-256-GCM encrypted TOTP secret. NULL until TOTP enrollment is completed. First login returns TOTP_SETUP_REQUIRED until this is set.';
-COMMENT ON COLUMN admin_accounts.totp_backup_codes_hash IS 'Array of SHA-256 hashes of the 10 single-use backup codes. Consumed entry is removed from array on use. NULL until enrollment.';
-COMMENT ON COLUMN admin_accounts.role IS 'super_admin | moderator | read_only.';
-COMMENT ON COLUMN admin_accounts.last_login_at IS 'UTC timestamp of the most recent successful login (i.e. passed password check + TOTP verification). NULL until the first successful login. Updated on every successful authentication.';
-COMMENT ON COLUMN admin_accounts.failed_attempts IS 'Consecutive failed login counter. Reset to 0 on successful login.';
-COMMENT ON COLUMN admin_accounts.locked_until IS 'Non-NULL and in future = account is locked. Set after 10 consecutive failures (admin_login_lockout_threshold = 10) for 30 minutes (admin_login_lockout_duration_minutes = 30). NOT used for permanent deactivation.';
-COMMENT ON COLUMN admin_accounts.deactivated_at IS 'Non-NULL = account is permanently deactivated. Set by DELETE /admin/api/roles/:adminId (soft-deactivate). Prevents login. Row is never hard-deleted.';
-COMMENT ON COLUMN admin_accounts.updated_at IS 'Updated by the application on every mutation: password change, TOTP enrollment/reset, role change, lockout set/cleared, and deactivation.';
+COMMENT ON COLUMN admin_users.username IS 'Login identifier. Unique (uq_admin_users_username). Max 64 characters (VARCHAR(64)). Used as the login credential alongside password and TOTP.';
+COMMENT ON COLUMN admin_users.password_hash IS 'bcrypt hash. Minimum work factor: 12.';
+COMMENT ON COLUMN admin_users.totp_secret_encrypted IS 'AES-256-GCM encrypted TOTP secret. NULL until TOTP enrollment is completed. First login returns TOTP_SETUP_REQUIRED until this is set.';
+COMMENT ON COLUMN admin_users.totp_backup_codes_hash IS 'Array of SHA-256 hashes of the 10 single-use backup codes. Consumed entry is removed from array on use. NULL until enrollment.';
+COMMENT ON COLUMN admin_users.role IS 'super_admin | moderator | read_only.';
+COMMENT ON COLUMN admin_users.last_login_at IS 'UTC timestamp of the most recent successful login (i.e. passed password check + TOTP verification). NULL until the first successful login. Updated on every successful authentication.';
+COMMENT ON COLUMN admin_users.failed_attempts IS 'Consecutive failed login counter. Reset to 0 on successful login.';
+COMMENT ON COLUMN admin_users.locked_until IS 'Non-NULL and in future = account is locked. Set after 10 consecutive failures (admin_login_lockout_threshold = 10) for 30 minutes (admin_login_lockout_duration_minutes = 30). NOT used for permanent deactivation.';
+COMMENT ON COLUMN admin_users.deactivated_at IS 'Non-NULL = account is permanently deactivated. Set by DELETE /admin/api/roles/:adminId (soft-deactivate). Prevents login. Row is never hard-deleted.';
+COMMENT ON COLUMN admin_users.updated_at IS 'Updated by the application on every mutation: password change, TOTP enrollment/reset, role change, lockout set/cleared, and deactivation.';
 ```
 
 ```sql
--- username: uq_admin_accounts_username UNIQUE constraint creates an implicit index for login lookups; no separate index needed.
+-- username: uq_admin_users_username UNIQUE constraint creates an implicit index for login lookups; no separate index needed.
 ```
 
 ---
 
-### 2.11 `admin_audit_log`
+### 2.11 `audit_logs`
 
 Immutable audit trail of all admin actions. Uses `BIGSERIAL` for sequential ordering. Retention: 2 years (`admin_audit_log_retention_years = 2`).
 
 ```sql
-CREATE TABLE admin_audit_log (
+CREATE TABLE audit_logs (
     id               BIGSERIAL   NOT NULL,
     admin_id         UUID        NULL,
     action           VARCHAR(128) NOT NULL,
@@ -570,30 +570,30 @@ CREATE TABLE admin_audit_log (
     ip_address_hash  VARCHAR(64) NULL,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT pk_admin_audit_log PRIMARY KEY (id),
-    CONSTRAINT fk_admin_audit_log_admin
-        FOREIGN KEY (admin_id) REFERENCES admin_accounts(id) ON DELETE RESTRICT
+    CONSTRAINT pk_audit_logs PRIMARY KEY (id),
+    CONSTRAINT fk_audit_logs_admin
+        FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE RESTRICT
 );
 
-COMMENT ON COLUMN admin_audit_log.id IS 'BIGSERIAL for monotonic log ordering.';
-COMMENT ON COLUMN admin_audit_log.admin_id IS 'Actor admin account. NULL for failed logins with an unrecognized username.';
-COMMENT ON COLUMN admin_audit_log.action IS 'Dot-namespaced action string, e.g. pet.ban, config.arena_rate_limit, admin_user.deactivate.';
-COMMENT ON COLUMN admin_audit_log.target_type IS 'pet | arena_match | leaderboard_entry | config_runtime | config_economy | gdpr_request | admin_user.';
-COMMENT ON COLUMN admin_audit_log.target_id IS 'UUID or key of the affected entity.';
-COMMENT ON COLUMN admin_audit_log.detail IS 'JSONB blob of action-specific context. Shape varies by action: e.g. for pet.ban: {reason, previous_is_banned}; for arena_match.flag: {reason}; for config.*: {previous_value, new_value}. NULL for actions with no additional context.';
-COMMENT ON COLUMN admin_audit_log.ip_address_hash IS 'SHA-256 hash of the raw request IP. Raw IP is never stored. Retained 90 days (ip_address_log_retention_days = 90).';
+COMMENT ON COLUMN audit_logs.id IS 'BIGSERIAL for monotonic log ordering.';
+COMMENT ON COLUMN audit_logs.admin_id IS 'Actor admin account. NULL for failed logins with an unrecognized username.';
+COMMENT ON COLUMN audit_logs.action IS 'Dot-namespaced action string, e.g. pet.ban, config.arena_rate_limit, admin_user.deactivate.';
+COMMENT ON COLUMN audit_logs.target_type IS 'pet | arena_match | leaderboard_entry | config_runtime | config_economy | gdpr_request | admin_user.';
+COMMENT ON COLUMN audit_logs.target_id IS 'UUID or key of the affected entity.';
+COMMENT ON COLUMN audit_logs.detail IS 'JSONB blob of action-specific context. Shape varies by action: e.g. for pet.ban: {reason, previous_is_banned}; for arena_match.flag: {reason}; for config.*: {previous_value, new_value}. NULL for actions with no additional context.';
+COMMENT ON COLUMN audit_logs.ip_address_hash IS 'SHA-256 hash of the raw request IP. Raw IP is never stored. Retained 90 days (ip_address_log_retention_days = 90).';
 ```
 
 ```sql
 -- Background retention job: deletes rows older than 2 years (admin_audit_log_retention_years = 2).
--- Query: DELETE FROM admin_audit_log WHERE created_at < NOW() - INTERVAL '2 years'
-CREATE INDEX idx_admin_audit_log_created_at ON admin_audit_log (created_at DESC);
-CREATE INDEX idx_admin_audit_log_admin_id   ON admin_audit_log (admin_id, created_at DESC);
+-- Query: DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '2 years'
+CREATE INDEX idx_audit_logs_created_at ON audit_logs (created_at DESC);
+CREATE INDEX idx_audit_logs_admin_id   ON audit_logs (admin_id, created_at DESC);
 -- Background job target: nulls ip_address_hash after 90 days (ip_address_log_retention_days = 90).
 -- Query: UPDATE ... SET ip_address_hash = NULL WHERE ip_address_hash IS NOT NULL AND created_at < NOW() - INTERVAL '90 days'
 -- Partial predicate keeps the index tiny — once nulled, rows drop out of the index automatically.
-CREATE INDEX idx_admin_audit_log_ip_hash_cleanup
-    ON admin_audit_log (created_at)
+CREATE INDEX idx_audit_logs_ip_hash_cleanup
+    ON audit_logs (created_at)
     WHERE ip_address_hash IS NOT NULL;
 ```
 
@@ -778,8 +778,8 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 | `food_buffs` | 30 days after `consumed_at` (`record_expires_at` column; cleaned by background job) | `food_buff_record_retention_days = 30` |
 | `marketplace_listings` | Indefinite (referenced by transactions; `ON DELETE RESTRICT`) | — |
 | `marketplace_transactions` | Indefinite (financial audit trail) | — |
-| `admin_accounts` | Indefinite (never hard-deleted; audit log FK) | — |
-| `admin_audit_log` | 2 years (GDPR Art. 30 compliance) | `admin_audit_log_retention_years = 2` |
+| `admin_users` | Indefinite (never hard-deleted; audit log FK) | — |
+| `audit_logs` | 2 years (GDPR Art. 30 compliance) | `admin_audit_log_retention_years = 2` |
 | `gdpr_requests` | Indefinite (legal compliance record) | — |
 | `rl:*` Redis counters | Per key TTL (60 s – 3600 s) | Various `rate_limits.*` constants |
 | `session:admin:*` | 14400 s inactivity / absolute 28800 s | `admin_session_inactivity_expiry_hours = 4`, `admin_session_absolute_expiry_hours = 8` |
@@ -787,7 +787,7 @@ All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in s
 | `leaderboard:global` | No expiry; entries removed on ban or GDPR erasure | — |
 | `matchmaking:queue:*` | No key-level TTL; stale entries (older than `arena_matchmaking_timeout_seconds = 30` s plus grace) are discarded by the consumer | `arena_matchmaking_timeout_seconds = 30` |
 | `config:runtime` | 300 s rolling TTL; re-populated by next admin config write or cache-refresh cycle | `config_cache_refresh_time_minutes = 5` |
-| `admin_audit_log.ip_address_hash` | 90 days (column is set to NULL after 90 d by background job) | `ip_address_log_retention_days = 90` |
+| `audit_logs.ip_address_hash` | 90 days (column is set to NULL after 90 d by background job) | `ip_address_log_retention_days = 90` |
 | Unclaimed `pets` (guest preview) | Background job deletes `reserved_until < NOW() AND owner_token_hash IS NULL` on an implementation-defined schedule (no constant; run frequency is an operational decision) | `pet_reservation_ttl_hours = 24` |
 
 ---
@@ -810,14 +810,14 @@ Partial indexes on boolean and nullable columns are preferred over full-table in
 - `idx_claim_codes_used_at` — `WHERE used_at IS NOT NULL`: used by the 72-hour background cleanup job which must find rows whose first-use time has passed.
 - `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
 - `idx_claim_identities_deletion` — `WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL`: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once `email_encrypted` is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.
-- `idx_admin_audit_log_ip_hash_cleanup` — `WHERE ip_address_hash IS NOT NULL`: used by the background job that nulls `ip_address_hash` after 90 days (`ip_address_log_retention_days = 90`). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by `idx_claim_identities_deletion`.
+- `idx_audit_logs_ip_hash_cleanup` — `WHERE ip_address_hash IS NOT NULL`: used by the background job that nulls `ip_address_hash` after 90 days (`ip_address_log_retention_days = 90`). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by `idx_claim_identities_deletion`.
 - `idx_pets_claim_identity` — `WHERE claim_identity_id IS NOT NULL`: only claimed pets have this FK set; the partial index supports the GDPR erasure lookup query (`SELECT id FROM pets WHERE claim_identity_id = $1`) efficiently and also serves the FK integrity scan. See §6.5 for the full query pattern.
 
 ### 6.2 Composite Indexes
 
 - `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort. The leading column of each index also serves PostgreSQL's FK integrity scan for `ON DELETE RESTRICT` (pet_a_id) and `ON DELETE SET NULL` (pet_b_id), eliminating the need for separate single-column indexes.
 - `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. The leading `pet_id` column also serves the FK CASCADE scan (`ON DELETE CASCADE`), making a separate `idx_training_logs_pet_id` unnecessary.
-- `idx_admin_audit_log_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor across the full 2-year retention window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`, `admin_audit_log_retention_years = 2`).
+- `idx_audit_logs_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor across the full 2-year retention window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`, `admin_audit_log_retention_years = 2`).
 - `idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)` — supports the anti-flip eligibility check (`marketplace_trade_antiflip_protection_days = 7`). The query `SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1` is fully served by the composite index without a separate heap sort. The leading `pet_id` column also covers the FK RESTRICT scan (`ON DELETE RESTRICT`), eliminating the need for a separate single-column `idx_marketplace_transactions_pet` index.
 - `idx_gdpr_requests_identity (claim_identity_id, submitted_at DESC)` — supports the query `WHERE claim_identity_id = $1 ORDER BY submitted_at DESC` for listing all requests by a data subject. The leading column also serves the FK RESTRICT scan (`ON DELETE RESTRICT`).
 - `idx_gdpr_requests_status (status, submitted_at)` — supports the admin work queue query `WHERE status IN ('pending', 'processing') ORDER BY submitted_at` for processing requests in FIFO order.
@@ -865,7 +865,7 @@ These full-table indexes cover FK scans, sort-only queries, and background job t
 - `idx_marketplace_listings_listed_at (listed_at DESC)` — supports the admin and public marketplace browse query `ORDER BY listed_at DESC`.
 - `idx_marketplace_transactions_completed (completed_at DESC)` — supports admin transaction audit queries ordered by recency.
 - `idx_leaderboard_snapshots_time (snapshot_time DESC)` — supports both the historical reporting query (`SELECT ... ORDER BY snapshot_time DESC LIMIT 1`) and the 12-month rolling retention DELETE (`WHERE snapshot_time < NOW() - INTERVAL '12 months'`; `leaderboard_snapshot_retention_months = 12`). Not partial because all rows have a non-NULL `snapshot_time`.
-- `idx_admin_audit_log_created_at (created_at DESC)` — supports audit log search queries and the 2-year row retention DELETE (`WHERE created_at < NOW() - INTERVAL '2 years'`; `admin_audit_log_retention_years = 2`). The composite `idx_admin_audit_log_admin_id` additionally covers filtered searches by actor. Not partial because all rows have a non-NULL `created_at`.
+- `idx_audit_logs_created_at (created_at DESC)` — supports audit log search queries and the 2-year row retention DELETE (`WHERE created_at < NOW() - INTERVAL '2 years'`; `admin_audit_log_retention_years = 2`). The composite `idx_audit_logs_admin_id` additionally covers filtered searches by actor. Not partial because all rows have a non-NULL `created_at`.
 
 ### 6.7 Connection Pool Sizing
 
