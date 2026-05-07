@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端活動圖：初始化 — pet</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">pet</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      <a class="nav-gh-link" href="https://github.com/ibalasite/pet" target="_blank" rel="noopener">⌥ GitHub</a>
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 前端活動圖：初始化</p>
+    <h1 class="banner-title">前端活動圖：初始化</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📐 PlantUML</summary>
+<a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-deployment.html">Deployment</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-auth.html">Sequence Auth</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-battle.html">Sequence Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-battle.html">State Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
+<a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link active" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Frontend Activity Diagram — Client Initialization</h1>
+<blockquote><p>來源：docs/FRONTEND.md §1 Overview + §6 Performance Budget + §8.1 Token Storage</p></blockquote>
+<p>描述客戶端從首次載入到完成初始化的完整序列，包含資源預載、token 驗證、Service Worker 啟動、</p>
+<p>Phaser 引擎初始化等步驟，並標注每步的 timeout 與 fallback。</p>
+<div class="diagram-container"><pre class="mermaid">flowchart TD
+    Start([&quot;瀏覽器訪問 https://pet.local/&quot;]) --&gt; SW
+
+    subgraph BootPhase [&quot;Boot Phase（critical path: ~600ms target）&quot;]
+        SW{&quot;Service Worker&lt;br/&gt;已註冊？&quot;}
+        SW --&gt;|NO| RegSW[&quot;registerServiceWorker&lt;br/&gt;(&#x27;/sw.js&#x27;)&quot;]
+        SW --&gt;|YES| HtmlParse
+        RegSW --&gt; HtmlParse[&quot;瀏覽器解析 index.html&lt;br/&gt;+ critical CSS inline&quot;]
+        HtmlParse --&gt; JsLoad[&quot;loading vendor.js + main.js&lt;br/&gt;(deferred + module preload)&quot;]
+        JsLoad --&gt; ReactBoot[&quot;React.createRoot + render&lt;br/&gt;App.tsx&quot;]
+    end
+
+    subgraph HydratePhase [&quot;Hydrate Phase（runs in parallel）&quot;]
+        ReactBoot --&gt; ParallelHydrate
+        ParallelHydrate{&quot;並行初始化&quot;}
+        ParallelHydrate --&gt;|fork| InitTokenStore[&quot;TokenStore.hydrate()&lt;br/&gt;讀 localStorage.pet_access_token&quot;]
+        ParallelHydrate --&gt;|fork| InitUiStore[&quot;UiStore.hydrate()&lt;br/&gt;讀 theme + reducedMotion&quot;]
+        ParallelHydrate --&gt;|fork| InitTelemetry[&quot;TelemetryClient.init&lt;br/&gt;(Sentry SDK lazy)&quot;]
+        InitTokenStore --&gt; JoinHydrate
+        InitUiStore --&gt; JoinHydrate
+        InitTelemetry --&gt; JoinHydrate
+        JoinHydrate{&quot;join: stores ready&quot;}
+    end
+
+    subgraph TokenPhase [&quot;Token Validation Phase&quot;]
+        JoinHydrate --&gt; TokenCheck{&quot;TokenStore&lt;br/&gt;has token？&quot;}
+        TokenCheck --&gt;|NO| ToLanding[&quot;render LandingPage&lt;br/&gt;fetchRandomPet()&quot;]
+        TokenCheck --&gt;|YES| TokenValidate[&quot;validate format&lt;br/&gt;(32-byte base64url regex)&quot;]
+
+        TokenValidate --&gt;|invalid format| TokenInvalid([&quot;clear token&lt;br/&gt;navigate /&quot;]) --&gt; ToLanding
+        TokenValidate --&gt;|valid format| FetchOwnPet[&quot;GET /api/v1/pets/:petId&lt;br/&gt;Header: X-Pet-Token&quot;]
+
+        FetchOwnPet --&gt; ApiResp{&quot;API 回應？&quot;}
+        ApiResp --&gt;|200| LoadPet[&quot;PetStore.setPet(pet)&lt;br/&gt;render PetPage&quot;]
+        ApiResp --&gt;|401 token invalid| TokenInvalid
+        ApiResp --&gt;|404 pet not found| PetMissing([&quot;clear token&lt;br/&gt;navigate / + toast&quot;])
+        ApiResp --&gt;|5xx server error| RetryOrFallback{&quot;retry attempt&lt;br/&gt;&lt; 3?&quot;}
+        ApiResp --&gt;|network timeout 5s| RetryOrFallback
+
+        RetryOrFallback --&gt;|YES retry| BackoffWait[&quot;exponential wait&lt;br/&gt;(1s / 2s / 4s)&quot;] --&gt; FetchOwnPet
+        RetryOrFallback --&gt;|NO max retried| OfflineFallback([&quot;render OfflineBanner&lt;br/&gt;store last good state&quot;])
+
+        PetMissing --&gt; ToLanding
+    end
+
+    subgraph PhaserPhase [&quot;Phaser Engine Init Phase&quot;]
+        LoadPet --&gt; InitPhaser{&quot;PetCanvas&lt;br/&gt;mounted？&quot;}
+        InitPhaser --&gt;|YES| PhaserConfig[&quot;build Phaser.GameConfig&lt;br/&gt;type=AUTO, size 640x360&quot;]
+        PhaserConfig --&gt; PhaserCreate[&quot;new Phaser.Game(config)&lt;br/&gt;~150ms typical&quot;]
+        PhaserCreate --&gt; PreloadAssets
+
+        subgraph AtlasLoad [&quot;Asset Preload&quot;]
+            PreloadAssets[&quot;preload sprite atlases&lt;br/&gt;(common.atlas, rarity-{R}.atlas)&quot;]
+            PreloadAssets --&gt; LoadProgress{&quot;loading&lt;br/&gt;progress?&quot;}
+            LoadProgress --&gt;|&lt; 100%| ProgressBar[&quot;更新 LoadingBar UI&quot;]
+            LoadProgress --&gt;|100%| AssetsReady[&quot;all atlases loaded&quot;]
+            ProgressBar --&gt; LoadProgress
+        end
+
+        AssetsReady --&gt; SceneStart[&quot;scene.start(&#x27;IdlePet&#x27;, {pet})&quot;]
+        SceneStart --&gt; AnimRun[&quot;Phaser scene running&lt;br/&gt;(60 FPS WebGL)&quot;]
+    end
+
+    subgraph BackgroundPhase [&quot;Background Tasks（non-blocking）&quot;]
+        ReactBoot --&gt; StartHealthCheck
+        StartHealthCheck[&quot;start /health/ready&lt;br/&gt;polling every 30s&quot;]
+        StartHealthCheck --&gt; HealthOk{&quot;online？&quot;}
+        HealthOk --&gt;|YES| Listening[&quot;UiStore.online = true&quot;]
+        HealthOk --&gt;|NO 3 consecutive fails| OfflineBanner([&quot;UiStore.online = false&lt;br/&gt;show OfflineBanner&quot;])
+
+        ReactBoot --&gt; ServiceWorkerActivate
+        ServiceWorkerActivate[&quot;Service Worker activate&lt;br/&gt;cache &#x27;critical.v{version}&#x27;&quot;]
+        ServiceWorkerActivate --&gt; SwReady[&quot;Service Worker controlling page&quot;]
+    end
+
+    AnimRun --&gt; Done([&quot;✓ Client fully initialized&lt;br/&gt;main thread idle, ready for input&quot;])
+    ToLanding --&gt; Done
+    OfflineFallback --&gt; Done
+
+    classDef errClass fill:#ffe0e0,stroke:#d33
+    classDef okClass fill:#e0ffe0,stroke:#393
+    classDef bgClass fill:#f4f4ff,stroke:#669
+    class TokenInvalid,PetMissing,OfflineFallback,OfflineBanner errClass
+    class LoadPet,Done,Listening,SwReady okClass
+    class StartHealthCheck,HealthOk,ServiceWorkerActivate,SwReady bgClass</pre></div>
+<h2>Phase Timing Targets（FRONTEND.md §6.1 CWV）</h2>
+<table>
+<tr><th>Phase</th><th>Target</th><th>Critical Metric</th></tr>
+<tr><td>Boot Phase</td><td>≤ 600ms</td><td>FCP (First Contentful Paint) ≤ 1.5s</td></tr>
+<tr><td>Hydrate Phase</td><td>≤ 200ms</td><td>TBT (Total Blocking Time) ≤ 200ms</td></tr>
+<tr><td>Token Phase</td><td>≤ 300ms</td><td>LCP including pet sprite ≤ 2.5s</td></tr>
+<tr><td>Phaser Phase</td><td>≤ 400ms</td><td>Phaser Game ready event</td></tr>
+<tr><td>Total</td><td>≤ 1.5s</td><td>Pet visible &amp; interactive</td></tr>
+</table>
+<h2>Timeout / Fallback per Step</h2>
+<table>
+<tr><th>Step</th><th>Timeout</th><th>On Failure</th></tr>
+<tr><td>RegSW</td><td>non-blocking</td><td>Continue without SW; report to telemetry</td></tr>
+<tr><td>FetchOwnPet</td><td>5s timeout</td><td>Exponential backoff (1s, 2s, 4s); max 3 retries</td></tr>
+<tr><td>PhaserCreate</td><td>1s</td><td>Hide canvas; show static fallback image</td></tr>
+<tr><td>PreloadAssets</td><td>3s per atlas</td><td>Show error state with retry button</td></tr>
+<tr><td>Health Check</td><td>5s</td><td>Mark offline after 3 consecutive failures</td></tr>
+</table>
+<h2>Fork/Join Operations</h2>
+<p><strong>HydratePhase</strong> 包含 3 條並行：TokenStore / UiStore / Telemetry — 任一完成不依賴其他兩個。</p>
+<p><strong>BackgroundPhase</strong> 與 main path 並行：Health check 與 SW activate 不阻塞首屏渲染。</p>
+<h2>Error Recovery / Retry</h2>
+<ul><li>所有 5xx 與 timeout 進入 <code>RetryOrFallback</code>，最多 3 次 exponential backoff</li><li>401 token invalid 直接清除 token 並導去登入頁（不重試）</li><li>Asset preload 失敗時，提供「重試」按鈕讓使用者主動重試</li><li>Service Worker 註冊失敗不影響 critical path（telemetry 記錄即可）</li></ul>
+<h2>Service Worker Cache Strategy</h2>
+<ul><li><code>cache_first</code>：static atlases、CSS、JS chunks</li><li><code>network_first</code>：API responses（fallback to cache only when offline）</li><li><code>stale_while_revalidate</code>：HTML shell（fast paint + background update）</li></ul></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

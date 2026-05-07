@@ -128,228 +128,398 @@
 <a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
 <a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
 <a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
-<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
-<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
 <a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
 <a class="sidebar__link active" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
 <a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
 <a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
 <a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
 <a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
 <a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
 <a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
 <a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
 <a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
 <a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
-<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
 <a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
 </div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>Domain Class Diagram — pixel-pet-arena</h1>
-<h2>Overview</h2>
-<p>This diagram covers all 12 domain entities defined in EDD §4 and SCHEMA.md §2. It models the</p>
-<p>structural relationships between pets, identities, claims, training, arena matches, leaderboard</p>
-<p>snapshots, food buffs, marketplace tables, admin accounts, audit log, and GDPR requests.</p>
-<p>Key design constraints reflected here:</p>
-<ul><li>Pet access tokens (≥32 bytes; <code>pet_access_token_min_bytes = 32</code>) are <strong>never</strong> stored; only the</li></ul>
-<p>SHA-256 hash appears as <code>owner_token_hash</code>.</p>
-<ul><li>Email is stored only as AES-256-GCM ciphertext plus a SHA-256 lookup hash (GDPR P6 principle).</li><li><code>level</code> is a derived column: <code>MAX(1, FLOOR(total_training_actions / 10))</code> capped at 100</li></ul>
-<p>(<code>pet_level_formula_divisor = 10</code>, <code>pet_level_max = 100</code>).</p>
-<h2>Diagram</h2>
+    <main class="doc-content"><h1>Class Diagram — Domain Layer（pixel-pet-arena）</h1>
+<blockquote><p>來源：EDD §3.8 / §4，SCHEMA.md §2，ARCH.md §3</p></blockquote>
+<p>本圖收錄領域層核心 Aggregate Root、Entity、Value Object、Domain Event 與 Repository 抽象介面，</p>
+<p>反映 EDD §3.1b SOLID 對應表中的 DIP 設計（Domain 不依賴 Infrastructure）。</p>
 <div class="diagram-container"><pre class="mermaid">classDiagram
     direction TB
 
-    class ClaimIdentity {
-        +UUID id
-        +VARCHAR(64) email_hash
-        +BYTEA email_encrypted
-        +TIMESTAMPTZ deletion_requested_at
-        +TIMESTAMPTZ created_at
-        +TIMESTAMPTZ updated_at
+    %% ============================================================
+    %% Aggregate Roots &amp; Entities
+    %% ============================================================
+    class Pet {
+        &lt;&lt;AggregateRoot&gt;&gt;
+        +id : UUID
+        +seed : Long
+        +rarity : Rarity
+        +petName : String
+        +stats : PetStats
+        +level : Integer
+        +totalTrainingActions : Integer
+        +lastTrainedAt : DateTime
+        +ownerTokenHash : String
+        +claimIdentityId : UUID
+        +reservedUntil : DateTime
+        +isBanned : Boolean
+        +bannedReason : String
+        +createdAt : DateTime
+        +updatedAt : DateTime
+        +deriveLevel() Integer
+        +train(type: TrainingType, seed: Long) TrainingLog
+        +feed(food: FoodType) FoodBuff
+        +banByAdmin(reason: String, adminId: UUID) void
+        +unban(adminId: UUID) void
+        +canEnterArena() Boolean
+        +applyMatchResult(result: BattleResult) void
     }
 
-    class Pet {
-        +UUID id
-        +BIGINT seed
-        +rarity_enum rarity
-        +VARCHAR(64) pet_name
-        +SMALLINT stat_speed
-        +SMALLINT stat_strength
-        +SMALLINT stat_stamina
-        +SMALLINT level
-        +INTEGER total_training_actions
-        +TIMESTAMPTZ last_trained_at
-        +VARCHAR(64) owner_token_hash
-        +TIMESTAMPTZ claimed_at
-        +UUID claim_identity_id
-        +TIMESTAMPTZ reserved_until
-        +BOOLEAN is_banned
-        +TEXT banned_reason
-        +TIMESTAMPTZ banned_at
-        +JSONB generation_meta
-        +TIMESTAMPTZ created_at
-        +TIMESTAMPTZ updated_at
-        +deriveLevel() SMALLINT
+    class ClaimIdentity {
+        &lt;&lt;Entity&gt;&gt;
+        +id : UUID
+        +emailHash : String
+        +emailEncrypted : Bytes
+        +deletionRequestedAt : DateTime
+        +createdAt : DateTime
+        +updatedAt : DateTime
+        +requestErasure() GdprRequest
+        +isPendingDeletion() Boolean
     }
 
     class ClaimCode {
-        +UUID id
-        +UUID pet_id
-        +VARCHAR(64) email_hash
-        +VARCHAR(64) code_hash
-        +TIMESTAMPTZ expires_at
-        +TIMESTAMPTZ used_at
-        +SMALLINT attempts
-        +TIMESTAMPTZ created_at
+        &lt;&lt;Entity&gt;&gt;
+        +id : UUID
+        +petId : UUID
+        +emailHash : String
+        +codeHash : String
+        +expiresAt : DateTime
+        +usedAt : DateTime
+        +attempts : Integer
+        +createdAt : DateTime
+        +verify(plainCode: String) Boolean
+        +incrementAttempts() void
+        +isExpired() Boolean
     }
 
     class ArenaMatch {
-        +UUID id
-        +UUID pet_a_id
-        +UUID pet_b_id
-        +BOOLEAN is_ai_opponent
-        +arena_mode_enum mode
-        +UUID winner_pet_id
-        +BIGINT random_seed
-        +SMALLINT stat_delta_a
-        +SMALLINT stat_delta_b
-        +SMALLINT duration_seconds
-        +JSONB battle_log
-        +BOOLEAN is_flagged
-        +TIMESTAMPTZ flagged_at
-        +TIMESTAMPTZ completed_at
-        +TIMESTAMPTZ updated_at
+        &lt;&lt;AggregateRoot&gt;&gt;
+        +id : UUID
+        +petAId : UUID
+        +petBId : UUID
+        +isAiOpponent : Boolean
+        +mode : ArenaMode
+        +winnerPetId : UUID
+        +randomSeed : Long
+        +statDeltaA : Integer
+        +statDeltaB : Integer
+        +durationSeconds : Integer
+        +battleLog : BattleLog
+        +isFlagged : Boolean
+        +completedAt : DateTime
+        +resolveOutcome(petA: Pet, petB: Pet, seed: Long) UUID
+        +flagByAdmin(reason: String) void
+        +unflag() void
+        +isImmutable() Boolean
     }
 
     class TrainingLog {
-        +UUID id
-        +UUID pet_id
-        +training_type_enum training_type
-        +SMALLINT stat_delta
-        +SMALLINT stat_after
-        +TIMESTAMPTZ completed_at
+        &lt;&lt;Entity&gt;&gt;
+        +id : UUID
+        +petId : UUID
+        +trainingType : TrainingType
+        +statDelta : Integer
+        +statAfter : Integer
+        +completedAt : DateTime
     }
 
     class LeaderboardSnapshot {
-        +UUID id
-        +TIMESTAMPTZ snapshot_time
-        +JSONB entries
-        +TIMESTAMPTZ created_at
+        &lt;&lt;Entity&gt;&gt;
+        +id : UUID
+        +snapshotTime : DateTime
+        +entries : List~LeaderboardEntry~
+        +createdAt : DateTime
+        +findRankByPetId(petId: UUID) Integer
     }
 
     class FoodBuff {
-        +UUID id
-        +UUID pet_id
-        +VARCHAR(50) food_type
-        +buff_stat_enum buff_stat
-        +SMALLINT magnitude
-        +BOOLEAN is_permanent
-        +TIMESTAMPTZ expires_at
-        +TIMESTAMPTZ consumed_at
-        +TIMESTAMPTZ record_expires_at
-    }
-
-    class MarketplaceListing {
-        +UUID id
-        +UUID pet_id
-        +VARCHAR(64) seller_token_hash
-        +INTEGER price_credits
-        +listing_status_enum status
-        +TIMESTAMPTZ listed_at
-        +TIMESTAMPTZ expires_at
-        +TIMESTAMPTZ completed_at
-        +TIMESTAMPTZ updated_at
-    }
-
-    class MarketplaceTransaction {
-        +UUID id
-        +UUID listing_id
-        +UUID pet_id
-        +VARCHAR(64) seller_token_hash
-        +VARCHAR(64) buyer_token_hash
-        +INTEGER price_credits
-        +INTEGER fee_credits
-        +TIMESTAMPTZ listed_at
-        +TIMESTAMPTZ completed_at
-    }
-
-    class AdminAccount {
-        +UUID id
-        +VARCHAR(64) username
-        +TEXT password_hash
-        +TEXT totp_secret_encrypted
-        +JSONB totp_backup_codes_hash
-        +admin_role_enum role
-        +TIMESTAMPTZ last_login_at
-        +SMALLINT failed_attempts
-        +TIMESTAMPTZ locked_until
-        +TIMESTAMPTZ deactivated_at
-        +TIMESTAMPTZ created_at
-        +TIMESTAMPTZ updated_at
-    }
-
-    class AdminAuditLog {
-        +BIGSERIAL id
-        +UUID admin_id
-        +VARCHAR(128) action
-        +VARCHAR(64) target_type
-        +TEXT target_id
-        +JSONB detail
-        +VARCHAR(64) ip_address_hash
-        +TIMESTAMPTZ created_at
+        &lt;&lt;Entity&gt;&gt;
+        +id : UUID
+        +petId : UUID
+        +foodType : String
+        +buffStat : BuffStat
+        +magnitude : Integer
+        +isPermanent : Boolean
+        +expiresAt : DateTime
+        +consumedAt : DateTime
+        +isActive(now: DateTime) Boolean
     }
 
     class GdprRequest {
-        +UUID id
-        +UUID claim_identity_id
-        +UUID initiating_pet_id
-        +gdpr_request_type_enum request_type
-        +gdpr_request_status_enum status
-        +TIMESTAMPTZ submitted_at
-        +TIMESTAMPTZ completed_at
-        +TIMESTAMPTZ updated_at
-        +TEXT admin_notes
+        &lt;&lt;Entity&gt;&gt;
+        +id : UUID
+        +claimIdentityId : UUID
+        +initiatingPetId : UUID
+        +requestType : GdprRequestType
+        +status : GdprRequestStatus
+        +submittedAt : DateTime
+        +completedAt : DateTime
+        +adminNotes : String
+        +approve(adminId: UUID) void
+        +reject(adminId: UUID, reason: String) void
     }
 
+    %% ============================================================
+    %% Value Objects
+    %% ============================================================
+    class PetStats {
+        &lt;&lt;ValueObject&gt;&gt;
+        +speed : Integer
+        +strength : Integer
+        +stamina : Integer
+        +effective(buff: FoodBuff) PetStats
+        +sumWithCap(delta: Integer) PetStats
+    }
+
+    class BattleLog {
+        &lt;&lt;ValueObject&gt;&gt;
+        +modeApplied : ArenaMode
+        +effectiveStatA : Integer
+        +effectiveStatB : Integer
+        +randomModifierPercent : Integer
+        +tieBreakerRule : String
+        +toJson() String
+    }
+
+    class LeaderboardEntry {
+        &lt;&lt;ValueObject&gt;&gt;
+        +petId : UUID
+        +rank : Integer
+        +score : Integer
+        +rarity : Rarity
+        +petName : String
+    }
+
+    class TokenHash {
+        &lt;&lt;ValueObject&gt;&gt;
+        +value : String
+        +algorithm : String
+        +equals(other: TokenHash) Boolean
+        +matches(plainToken: String) Boolean
+    }
+
+    %% ============================================================
+    %% Enumerations
+    %% ============================================================
+    class Rarity {
+        &lt;&lt;enumeration&gt;&gt;
+        COMMON
+        RARE
+        EPIC
+        LEGENDARY
+    }
+
+    class ArenaMode {
+        &lt;&lt;enumeration&gt;&gt;
+        RACE
+        SUMO
+    }
+
+    class TrainingType {
+        &lt;&lt;enumeration&gt;&gt;
+        SPEED
+        STRENGTH
+        STAMINA
+    }
+
+    class BuffStat {
+        &lt;&lt;enumeration&gt;&gt;
+        SPEED
+        STRENGTH
+        STAMINA
+        ALL
+    }
+
+    class GdprRequestType {
+        &lt;&lt;enumeration&gt;&gt;
+        ERASURE
+        DATA_ACCESS
+        RESTRICT_PROCESSING
+        OBJECT_LEADERBOARD
+        RECTIFICATION
+    }
+
+    class GdprRequestStatus {
+        &lt;&lt;enumeration&gt;&gt;
+        PENDING
+        APPROVED
+        REJECTED
+        COMPLETED
+    }
+
+    %% ============================================================
+    %% Domain Events
+    %% ============================================================
+    class PetClaimedEvent {
+        &lt;&lt;DomainEvent&gt;&gt;
+        +petId : UUID
+        +claimIdentityId : UUID
+        +occurredAt : DateTime
+    }
+
+    class PetTrainedEvent {
+        &lt;&lt;DomainEvent&gt;&gt;
+        +petId : UUID
+        +trainingType : TrainingType
+        +statDelta : Integer
+        +occurredAt : DateTime
+    }
+
+    class ArenaMatchResolvedEvent {
+        &lt;&lt;DomainEvent&gt;&gt;
+        +matchId : UUID
+        +winnerPetId : UUID
+        +loserPetId : UUID
+        +mode : ArenaMode
+        +occurredAt : DateTime
+    }
+
+    class GdprErasureRequestedEvent {
+        &lt;&lt;DomainEvent&gt;&gt;
+        +requestId : UUID
+        +claimIdentityId : UUID
+        +occurredAt : DateTime
+    }
+
+    %% ============================================================
+    %% Repository Interfaces (DIP — Domain owns the abstraction)
+    %% ============================================================
+    class IPetRepository {
+        &lt;&lt;interface&gt;&gt;
+        +findById(petId: UUID) Optional~Pet~
+        +findByOwnerHash(tokenHash: String) List~Pet~
+        +save(pet: Pet) Pet
+        +delete(petId: UUID) void
+        +findReservedExpired(now: DateTime) List~Pet~
+    }
+
+    class IClaimCodeRepository {
+        &lt;&lt;interface&gt;&gt;
+        +findById(claimId: UUID) Optional~ClaimCode~
+        +save(code: ClaimCode) ClaimCode
+        +deleteExpired(now: DateTime) Integer
+    }
+
+    class IArenaMatchRepository {
+        &lt;&lt;interface&gt;&gt;
+        +findById(matchId: UUID) Optional~ArenaMatch~
+        +save(match: ArenaMatch) ArenaMatch
+        +findHistoryByPetId(petId: UUID, limit: Integer) List~ArenaMatch~
+    }
+
+    class ILeaderboardRepository {
+        &lt;&lt;interface&gt;&gt;
+        +addOrUpdate(entry: LeaderboardEntry) void
+        +getTop(limit: Integer) List~LeaderboardEntry~
+        +getRank(petId: UUID) Integer
+        +remove(petId: UUID) void
+    }
+
+    %% ============================================================
     %% Relationships
-    ClaimIdentity &quot;1&quot; --&gt; &quot;0..*&quot; Pet : claim_identity_id (SET NULL on delete)
-    ClaimIdentity &quot;1&quot; --&gt; &quot;0..*&quot; GdprRequest : claim_identity_id (RESTRICT on delete)
+    %% ============================================================
 
-    Pet &quot;1&quot; --&gt; &quot;0..*&quot; ClaimCode : pet_id (CASCADE on delete)
-    Pet &quot;1&quot; --&gt; &quot;0..*&quot; TrainingLog : pet_id (CASCADE on delete)
-    Pet &quot;1&quot; --&gt; &quot;0..*&quot; FoodBuff : pet_id (CASCADE on delete)
-    Pet &quot;1&quot; --&gt; &quot;0..*&quot; ArenaMatch : pet_a_id (RESTRICT on delete)
-    Pet &quot;0..1&quot; --&gt; &quot;0..*&quot; ArenaMatch : pet_b_id (SET NULL on delete)
-    Pet &quot;0..1&quot; --&gt; &quot;0..*&quot; ArenaMatch : winner_pet_id (SET NULL on delete)
-    Pet &quot;1&quot; --&gt; &quot;0..*&quot; MarketplaceListing : pet_id (RESTRICT on delete)
-    Pet &quot;1&quot; --&gt; &quot;0..*&quot; MarketplaceTransaction : pet_id (RESTRICT on delete)
-    Pet &quot;0..1&quot; --&gt; &quot;0..*&quot; GdprRequest : initiating_pet_id (SET NULL on delete)
+    %% Inheritance（&lt;|--）— Domain Event 抽象基類
+    PetClaimedEvent --|&gt; DomainEventBase
+    PetTrainedEvent --|&gt; DomainEventBase
+    ArenaMatchResolvedEvent --|&gt; DomainEventBase
+    GdprErasureRequestedEvent --|&gt; DomainEventBase
 
-    MarketplaceListing &quot;1&quot; --&gt; &quot;0..1&quot; MarketplaceTransaction : listing_id (RESTRICT on delete)
+    class DomainEventBase {
+        &lt;&lt;abstract&gt;&gt;
+        +eventId : UUID
+        +occurredAt : DateTime
+        +toJson() String
+    }
 
-    AdminAccount &quot;0..1&quot; --&gt; &quot;0..*&quot; AdminAuditLog : admin_id (RESTRICT on delete, nullable)</pre></div>
-<h2>Notes</h2>
-<ul><li><strong>Rarity weights</strong> (admin-tunable, must sum to 100%): COMMON = 60% (<code>rarity_common_percent = 60</code>),</li></ul>
-<p>RARE = 25% (<code>rarity_rare_percent = 25</code>), EPIC = 12% (<code>rarity_epic_percent = 12</code>),</p>
-<p>LEGENDARY = 3% (<code>rarity_legendary_percent = 3</code>).</p>
-<ul><li><strong>Stat range</strong>: all three stats default to 10 (<code>pet_stat_default = 10</code>) and are capped at</li></ul>
-<p>1–100 (<code>pet_stat_min = 1</code>, <code>pet_stat_max = 100</code>).</p>
-<ul><li><strong>Arena duration</strong>: <code>duration_seconds</code> constrained to 5–15 s (<code>arena_match_duration_min_seconds = 5</code>,</li></ul>
-<p><code>arena_match_duration_max_seconds = 15</code>); <code>random_seed</code> enables deterministic ±15% replay</p>
-<p>(<code>arena_battle_outcome_random_modifier_percent = 15</code>).</p>
-<ul><li><strong>MarketplaceListing / MarketplaceTransaction</strong> are Phase 3 features gated by <code>FF_MARKETPLACE</code>.</li></ul>
-<p>The platform fee is 5% (<code>trade_transaction_fee_percent = 5</code>).</p>
-<ul><li><strong>AdminAuditLog</strong> retention is 2 years (<code>admin_audit_log_retention_years = 2</code>); the table uses</li></ul>
-<p><code>BIGSERIAL</code> for monotonic ordering rather than UUID.</p>
-<ul><li><strong>GdprRequest</strong> <code>request_type</code> values: erasure, data_access, restrict_processing,</li></ul>
-<p>object_leaderboard, rectification.</p></main>
+    %% Realization（&lt;|..）— Aggregate 實作 Repository 抽象（這裡 placeholder，由 Infra 層具體實作）
+    IPetRepository &lt;|.. PetRepositoryAdapter : realized by Infra
+    class PetRepositoryAdapter {
+        &lt;&lt;placeholder&gt;&gt;
+        +note : See class-infra-presentation.md
+    }
+
+    %% Composition（*--）— Pet 聚合根擁有 PetStats（生命週期一致）
+    Pet &quot;1&quot; *-- &quot;1&quot; PetStats : owns
+
+    %% Aggregation（o--）— Pet 聚合 TrainingLog / FoodBuff（生命週期可獨立）
+    Pet &quot;1&quot; o-- &quot;0..*&quot; TrainingLog : aggregates
+    Pet &quot;1&quot; o-- &quot;0..*&quot; FoodBuff : aggregates
+
+    %% Association（--&gt;）— ClaimIdentity 關聯多個 Pet（claim 關係）
+    ClaimIdentity &quot;1&quot; --&gt; &quot;0..*&quot; Pet : claims
+    ClaimIdentity &quot;1&quot; --&gt; &quot;0..*&quot; GdprRequest : initiates
+    ArenaMatch &quot;1&quot; --&gt; &quot;2&quot; Pet : participants
+    LeaderboardSnapshot &quot;1&quot; --&gt; &quot;0..500&quot; LeaderboardEntry : ranks
+
+    %% Dependency（..&gt;）— ArenaMatch 解析時依賴 PetStats（read-only）
+    ArenaMatch ..&gt; PetStats : reads for resolveOutcome
+    Pet ..&gt; PetClaimedEvent : emits
+    Pet ..&gt; PetTrainedEvent : emits
+    ArenaMatch ..&gt; ArenaMatchResolvedEvent : emits
+    GdprRequest ..&gt; GdprErasureRequestedEvent : emits
+    ClaimCode ..&gt; Pet : unlocks</pre></div>
+<h2>技術說明</h2>
+<p>本圖嚴格遵守 Hexagonal / Clean Architecture 中 Domain Layer 的孤立性原則：</p>
+<p>所有 <code>&lt;&lt;Repository&gt;&gt;</code> 介面（<code>IPetRepository</code>、<code>IClaimCodeRepository</code>、<code>IArenaMatchRepository</code>、</p>
+<p><code>ILeaderboardRepository</code>）以介面形式定義於 Domain，具體實作落於 <code>class-infra-presentation.md</code>，</p>
+<p>透過 <code>&lt;|..</code> Realization 箭頭（方向：Infrastructure → Domain）滿足 DIP（依賴反轉原則）。</p>
+<p><code>&lt;&lt;AggregateRoot&gt;&gt;</code> 共兩個（<code>Pet</code>、<code>ArenaMatch</code>），各自封裝其變更不變式：<code>Pet.train</code> 內部維護</p>
+<p><code>level = MAX(1, FLOOR(totalTrainingActions / 10))</code>（<code>pet_level_formula_divisor = 10</code>，上限</p>
+<p><code>pet_level_max = 100</code>）；<code>ArenaMatch.resolveOutcome</code> 套用 ±15% 種子隨機偏移</p>
+<p>（<code>arena_battle_outcome_random_modifier_percent = 15</code>）並執行 RACE/SUMO 模式分流。</p>
+<p><code>&lt;&lt;ValueObject&gt;&gt;</code> <code>PetStats</code> / <code>BattleLog</code> / <code>LeaderboardEntry</code> / <code>TokenHash</code> 為不可變值物件，</p>
+<p>所有變更透過 <code>effective()</code> / <code>sumWithCap()</code> 等回傳新副本的方法達成。</p>
+<p><code>&lt;&lt;DomainEvent&gt;&gt;</code> 4 個事件對應 EDD §4.6 領域事件清單，由 Aggregate Root 在狀態轉移時發出，</p>
+<p>透過 Application 層的 EventDispatcher 派送至外部監聽者（不在本層實作）。</p>
+<p>關係涵蓋 6 種：</p>
+<ol><li><strong>Inheritance（<code>&lt;|--</code>）</strong>: 4 個 DomainEvent 繼承 <code>DomainEventBase</code> 抽象基類</li><li><strong>Realization（<code>&lt;|..</code>）</strong>: <code>IPetRepository</code> ← <code>PetRepositoryAdapter</code> placeholder（具體於 Infra 層）</li><li><strong>Composition（<code>*--</code>）</strong>: <code>Pet</code> 強組合 <code>PetStats</code>（值物件生命週期完全綁定 Pet）</li><li><strong>Aggregation（<code>o--</code>）</strong>: <code>Pet</code> 聚合 <code>TrainingLog</code> / <code>FoodBuff</code>（記錄可獨立查詢）</li><li><strong>Association（<code>--&gt;</code>）</strong>: <code>ClaimIdentity --&gt; Pet</code>、<code>ArenaMatch --&gt; Pet</code>（多對多業務關聯）</li><li><strong>Dependency（<code>..&gt;</code>）</strong>: Aggregate Root <code>..&gt; DomainEvent</code>（發出事件依賴）；<code>ClaimCode ..&gt; Pet</code></li></ol>
+<h2>白話說明</h2>
+<p>寵物（Pet）和競技場對戰（ArenaMatch）是這個遊戲的兩大主體；玩家用 email 取得身份（ClaimIdentity），</p>
+<p>身份可以擁有多隻寵物。每隻寵物有三項能力（速度、力量、耐力），玩家透過訓練讓寵物成長，</p>
+<p>也可以參加競技場與其他寵物對戰，勝負記錄會更新到全球排行榜。</p></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

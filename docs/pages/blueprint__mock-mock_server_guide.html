@@ -128,408 +128,288 @@
 <a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
 <a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
 <a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-deploy-production.html">📐 Cicd Deploy Production</a>
-<a class="sidebar__link" href="diag-cicd-deploy-staging.html">📐 Cicd Deploy Staging</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-overview.html">📐 Cicd Pipeline Overview</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate.html">📐 Cicd Pr Gate</a>
-<a class="sidebar__link" href="diag-cicd-secrets-rotation.html">📐 Cicd Secrets Rotation</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
 <a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
 <a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
 <a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-class-services.html">📐 Class Services</a>
 <a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component-architecture.html">📐 Component Architecture</a>
 <a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
 <a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
 <a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
 <a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
 <a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
 <a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
 <a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-arena-match.html">📐 State Arena Match</a>
-<a class="sidebar__link" href="diag-state-pet-lifecycle.html">📐 State Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
 <a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
 </div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>Pixel Pet Arena — Mock Server 使用手冊</h1>
+    <main class="doc-content"><h1>pixel-pet-arena - Mock Server 使用手冊</h1>
 <blockquote><p><strong>適用版本：</strong> FastAPI Mock Server v1.0</p></blockquote>
-<blockquote><p><strong>OpenAPI 規格：</strong> <code>docs/blueprint/contracts/openapi.yaml</code></p></blockquote>
-<blockquote><p><strong>最後更新：</strong> 2026-05-05</p></blockquote>
+<blockquote><p><strong>上游規格：</strong> docs/API.md (53 endpoints) + docs/SCHEMA.md (12 entities)</p></blockquote>
+<blockquote><p><strong>最後更新：</strong> 2026-05-08</p></blockquote>
+<p>本 Mock Server 根據 docs/API.md 與 docs/SCHEMA.md 自動生成，提供 1:1 對應的 53 個 API endpoint，</p>
+<p>供 frontend 工程師（HTML5 / Cocos / Unity / 後台介面）在 backend 完成前獨立開發。</p>
 <hr>
 <h2>目錄</h2>
-<ol><li><a href="#1-目錄結構" target="_blank" rel="noopener">目錄結構</a></li><li><a href="#2-前置需求" target="_blank" rel="noopener">前置需求</a></li><li><a href="#3-安裝步驟" target="_blank" rel="noopener">安裝步驟</a></li><li><a href="#4-啟動-mock-server" target="_blank" rel="noopener">啟動 Mock Server</a></li><li><a href="#5-postman-匯入" target="_blank" rel="noopener">Postman 匯入</a></li><li><a href="#6-frontend-串接設定" target="_blank" rel="noopener">Frontend 串接設定</a></li><li><a href="#7-特殊測試情境" target="_blank" rel="noopener">特殊測試情境</a></li><li><a href="#8-修改假資料" target="_blank" rel="noopener">修改假資料</a></li><li><a href="#9-endpoint-清單" target="_blank" rel="noopener">Endpoint 清單</a></li><li><a href="#10-常見問題" target="_blank" rel="noopener">常見問題</a></li><li><a href="#11-進階對接-backend" target="_blank" rel="noopener">進階：對接 Backend</a></li></ol>
+<ol><li><a href="#1-目錄結構" target="_blank" rel="noopener">目錄結構</a></li><li><a href="#2-前置需求" target="_blank" rel="noopener">前置需求</a></li><li><a href="#3-安裝步驟" target="_blank" rel="noopener">安裝步驟</a></li><li><a href="#4-啟動-mock-server" target="_blank" rel="noopener">啟動 Mock Server</a></li><li><a href="#5-postman-匯入" target="_blank" rel="noopener">Postman 匯入</a></li><li><a href="#6-frontend-串接設定" target="_blank" rel="noopener">Frontend 串接設定</a></li><li><a href="#7-認證模擬" target="_blank" rel="noopener">認證模擬</a></li><li><a href="#8-特殊測試情境" target="_blank" rel="noopener">特殊測試情境</a></li><li><a href="#9-修改假資料" target="_blank" rel="noopener">修改假資料</a></li><li><a href="#10-endpoint-一覽" target="_blank" rel="noopener">Endpoint 一覽</a></li><li><a href="#11-常見問題" target="_blank" rel="noopener">常見問題</a></li><li><a href="#12-進階對接-backend" target="_blank" rel="noopener">進階：對接 Backend</a></li></ol>
 <hr>
 <h2>1. 目錄結構</h2>
 <pre><code class="">docs/blueprint/mock/
-├── main.py                   # FastAPI 應用程式進入點
-├── requirements.txt          # Python 依賴套件清單
-├── .env.example              # 環境變數範例檔
-├── routers/
-│   ├── claim.py              # Claim 流程路由（3 個端點）
-│   ├── pets.py               # 寵物資料與訓練路由（5 個端點）
-│   ├── arena.py              # 競技場對戰路由（3 個端點）
-│   ├── leaderboard.py        # 排行榜路由（2 個端點）
-│   ├── gdpr.py               # GDPR 自助路由（2 個端點）
-│   └── marketplace.py        # 交易市場路由（5 個端點）
-├── data/
-│   ├── pets.json             # 寵物假資料（8 筆範例）
-│   ├── arena.json            # 競技場對戰記錄假資料
-│   ├── leaderboard.json      # 排行榜假資料
-│   └── marketplace.json      # 市場掛單假資料
-└── MOCK_SERVER_GUIDE.md      # 本文件</code></pre>
+├── main.py                  # 單一 FastAPI 應用，含全部 53 個 endpoint
+├── requirements.txt         # Python 依賴
+├── MOCK_SERVER_GUIDE.md     # 本文件
+└── data/                    # 假資料（依 SCHEMA.md 12 個 entity 切分）
+    ├── pets.json / pets_empty.json
+    ├── arena.json / arena_empty.json
+    ├── leaderboard.json / leaderboard_empty.json
+    ├── leaderboard_snapshots.json / leaderboard_snapshots_empty.json
+    ├── training_logs.json / training_logs_empty.json
+    ├── food_buffs.json / food_buffs_empty.json
+    ├── marketplace_listings.json / marketplace_listings_empty.json
+    ├── marketplace_transactions.json / marketplace_transactions_empty.json
+    ├── claim_identities.json / claim_identities_empty.json
+    ├── gdpr_requests.json / gdpr_requests_empty.json
+    ├── admin_users.json / admin_users_empty.json
+    ├── admin_pets.json / admin_pets_empty.json
+    ├── audit_logs.json / audit_logs_empty.json
+    ├── suspicious_battles.json / suspicious_battles_empty.json
+    ├── config_runtime.json
+    ├── config_economy.json
+    ├── config_flags.json
+    ├── dashboard.json
+    ├── analytics.json
+    └── email_monitor.json</code></pre>
+<blockquote><p>整個 docs/blueprint/mock/ 目錄可以直接打包帶走。</p></blockquote>
 <hr>
 <h2>2. 前置需求</h2>
-<table>
-<tr><th>項目</th><th>最低版本</th><th>建議版本</th></tr>
-<tr><td>Python</td><td>3.10</td><td>3.12</td></tr>
-<tr><td>pip</td><td>22.0</td><td>最新版</td></tr>
-<tr><td>(選用) venv / virtualenv</td><td>—</td><td>內建 venv 即可</td></tr>
-</table>
-<p>確認 Python 版本：</p>
-<pre><code class="language-bash">python --version
-# 或
-python3 --version</code></pre>
-<p>確認 pip 版本：</p>
-<pre><code class="language-bash">pip --version</code></pre>
+<ul><li>Python 3.10 以上（macOS / Linux / Windows 皆可）</li><li>pip</li></ul>
+<pre><code class="language-bash">python3 --version   # macOS / Linux
+python --version    # Windows</code></pre>
 <hr>
 <h2>3. 安裝步驟</h2>
 <h3>macOS / Linux</h3>
-<pre><code class="language-bash"># 1. 進入 mock 目錄
-cd docs/blueprint/mock
-
-# 2. 建立虛擬環境
+<pre><code class="language-bash">cd docs/blueprint/mock
 python3 -m venv .venv
-
-# 3. 啟動虛擬環境
 source .venv/bin/activate
-
-# 4. 安裝依賴套件
 pip install -r requirements.txt</code></pre>
-<h3>Windows（Command Prompt）</h3>
-<pre><code class="language-cmd">:: 1. 進入 mock 目錄
-cd docs\blueprint\mock
-
-:: 2. 建立虛擬環境
+<h3>Windows</h3>
+<pre><code class="language-cmd">cd docs\blueprint\mock
 python -m venv .venv
-
-:: 3. 啟動虛擬環境
-.venv\Scripts\activate.bat
-
-:: 4. 安裝依賴套件
+.venv\Scripts\activate
 pip install -r requirements.txt</code></pre>
-<h3>Windows（PowerShell）</h3>
-<pre><code class="language-powershell"># 1. 進入 mock 目錄
-Set-Location docs\blueprint\mock
-
-# 2. 建立虛擬環境
-python -m venv .venv
-
-# 3. 啟動虛擬環境（若出現執行原則錯誤，請先執行 Set-ExecutionPolicy RemoteSigned）
-.venv\Scripts\Activate.ps1
-
-# 4. 安裝依賴套件
-pip install -r requirements.txt</code></pre>
-<blockquote><p><strong>提示：</strong> 若 <code>requirements.txt</code> 尚不存在，可手動安裝最低依賴：</p></blockquote>
-<blockquote><p>```bash</p></blockquote>
-<blockquote><p>pip install fastapi uvicorn[standard]</p></blockquote>
-<blockquote><p>```</p></blockquote>
 <hr>
 <h2>4. 啟動 Mock Server</h2>
-<h3>基本啟動指令</h3>
-<pre><code class="language-bash"># 在 docs/blueprint/mock 目錄下執行
-uvicorn main:app --reload --host 0.0.0.0 --port 8000</code></pre>
-<h3>指定自訂 Port</h3>
-<pre><code class="language-bash">uvicorn main:app --reload --host 0.0.0.0 --port 8080</code></pre>
-<h3>靜默模式（不顯示重新載入訊息）</h3>
-<pre><code class="language-bash">uvicorn main:app --host 0.0.0.0 --port 8000</code></pre>
-<h3>可用 URL 一覽</h3>
+<pre><code class="language-bash">uvicorn main:app --reload</code></pre>
+<p>啟動後可存取：</p>
 <table>
-<tr><th>名稱</th><th>URL</th><th>說明</th></tr>
-<tr><td>API 根路徑</td><td><code>http://localhost:8000</code></td><td>REST API 主要入口</td></tr>
-<tr><td>Swagger UI</td><td><code>http://localhost:8000/docs</code></td><td>互動式 API 文件（可直接測試）</td></tr>
-<tr><td>ReDoc</td><td><code>http://localhost:8000/redoc</code></td><td>閱讀友善的 API 文件</td></tr>
-<tr><td>OpenAPI JSON</td><td><code>http://localhost:8000/openapi.json</code></td><td>機器可讀的 OpenAPI 規格</td></tr>
-<tr><td>健康檢查</td><td><code>http://localhost:8000/health</code></td><td>服務狀態確認</td></tr>
+<tr><th>服務</th><th>URL</th></tr>
+<tr><td>API Server</td><td>http://localhost:8000</td></tr>
+<tr><td>Swagger UI（互動測試）</td><td>http://localhost:8000/docs</td></tr>
+<tr><td>ReDoc（文件閱讀）</td><td>http://localhost:8000/redoc</td></tr>
+<tr><td>OpenAPI JSON</td><td>http://localhost:8000/openapi.json</td></tr>
+<tr><td>Health check</td><td>http://localhost:8000/health</td></tr>
 </table>
-<p>啟動成功後終端機會顯示：</p>
-<pre><code class="">INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [xxxxx]
-INFO:     Started server process [xxxxx]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.</code></pre>
 <hr>
 <h2>5. Postman 匯入</h2>
-<h3>方法一：從 URL 匯入（推薦）</h3>
-<ol><li>開啟 Postman，點選左上角 <strong>Import</strong></li><li>選擇 <strong>Link</strong> 頁籤</li><li>輸入以下 URL：</li></ol>
-<pre><code class="">   http://localhost:8000/openapi.json</code></pre>
-<ol><li>點選 <strong>Continue</strong> → <strong>Import</strong></li><li>Postman 會自動建立 Collection，包含所有 20 個端點</li></ol>
-<blockquote><p><strong>注意：</strong> 需先啟動 Mock Server 才能從 URL 匯入。</p></blockquote>
-<h3>方法二：從檔案匯入</h3>
-<ol><li>確認 OpenAPI 規格檔案位置：</li></ol>
-<pre><code class="">   docs/blueprint/contracts/openapi.yaml</code></pre>
-<ol><li>開啟 Postman，點選 <strong>Import</strong></li><li>選擇 <strong>File</strong> 頁籤</li><li>拖拉或選取 <code>openapi.yaml</code> 檔案</li><li>點選 <strong>Import</strong></li></ol>
-<h3>設定環境變數（建議）</h3>
-<p>在 Postman 建立一個 Environment，設定以下變數：</p>
-<table>
-<tr><th>變數名稱</th><th>初始值</th></tr>
-<tr><td><code>base_url</code></td><td><code>http://localhost:8000</code></td></tr>
-<tr><td><code>pet_token</code></td><td>（執行 Claim 流程後取得）</td></tr>
-</table>
+<h3>方法一：直接從 URL 匯入（推薦）</h3>
+<ol><li>確認 Mock Server 已啟動</li><li>Postman → Import → Link</li><li>輸入：<code>http://localhost:8000/openapi.json</code></li></ol>
+<h3>方法二：下載後匯入</h3>
+<pre><code class="language-bash">curl http://localhost:8000/openapi.json -o openapi.json</code></pre>
+<p>再到 Postman Import → 選擇 openapi.json。</p>
 <hr>
 <h2>6. Frontend 串接設定</h2>
-<h3>Vite / React 專案設定</h3>
-<p>在專案根目錄建立或編輯 <code>.env.local</code> 檔案：</p>
-<pre><code class="language-env"># 開發環境 — 指向本地 Mock Server
-VITE_API_BASE_URL=http://localhost:8000
-
-# 正式環境 — 替換為真實 Backend URL
-# VITE_API_BASE_URL=https://api.pixel-pet-arena.com</code></pre>
-<blockquote><p><strong>重要：</strong> <code>.env.local</code> 已在 <code>.gitignore</code> 中，不會被提交到版本庫。</p></blockquote>
-<h3>TypeScript 環境變數型別宣告</h3>
-<p>在 <code>src/vite-env.d.ts</code> 或 <code>src/env.d.ts</code> 新增：</p>
-<pre><code class="language-typescript">interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}</code></pre>
-<h3>基礎 fetch 範例</h3>
-<pre><code class="language-typescript">// src/lib/api.ts
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-// 取得隨機寵物（無需認證）
-export async function getRandomPet() {
-  const res = await fetch(`${BASE_URL}/api/v1/pets/random`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const { data } = await res.json();
-  return data;
-}
-
-// 取得特定寵物資訊（可帶 Bearer Token）
-export async function getPet(petId: string, petToken?: string) {
-  const headers: HeadersInit = { &#x27;Content-Type&#x27;: &#x27;application/json&#x27; };
-  if (petToken) {
-    headers[&#x27;Authorization&#x27;] = `Bearer ${petToken}`;
-  }
-  const res = await fetch(`${BASE_URL}/api/v1/pets/${petId}`, { headers });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const { data } = await res.json();
-  return data;
-}
-
-// 訓練寵物（需要 Bearer Token）
-export async function trainPet(
-  petId: string,
-  trainingType: &#x27;RUN&#x27; | &#x27;STRENGTH&#x27; | &#x27;STAMINA&#x27;,
-  petToken: string
-) {
-  const res = await fetch(`${BASE_URL}/api/v1/pets/${petId}/train`, {
-    method: &#x27;POST&#x27;,
-    headers: {
-      &#x27;Content-Type&#x27;: &#x27;application/json&#x27;,
-      &#x27;Authorization&#x27;: `Bearer ${petToken}`,
-    },
-    body: JSON.stringify({ trainingType }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const { data } = await res.json();
-  return data;
-}</code></pre>
-<h3>使用 React Query 的範例</h3>
-<pre><code class="language-typescript">// src/hooks/usePet.ts
-import { useQuery } from &#x27;@tanstack/react-query&#x27;;
-import { getPet } from &#x27;../lib/api&#x27;;
-
-export function usePet(petId: string, petToken?: string) {
-  return useQuery({
-    queryKey: [&#x27;pet&#x27;, petId],
-    queryFn: () =&gt; getPet(petId, petToken),
-    enabled: !!petId,
-  });
-}</code></pre>
+<h3>Vite / Vue / React (.env.development)</h3>
+<pre><code class="language-env">VITE_API_BASE_URL=http://localhost:8000</code></pre>
+<pre><code class="language-ts">const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/pets/random`);
+const data = await res.json();</code></pre>
+<h3>Cocos Creator</h3>
+<pre><code class="language-ts">const API_BASE = &quot;http://localhost:8000&quot;;</code></pre>
+<h3>Unity (C#)</h3>
+<pre><code class="language-csharp">const string API_BASE = &quot;http://localhost:8000&quot;;</code></pre>
 <hr>
-<h2>7. 特殊測試情境</h2>
-<p>Mock Server 支援透過 Query String 參數觸發特殊回應，方便前端測試各種邊界情況。</p>
+<h2>7. 認證模擬</h2>
+<p>Mock server 提供兩種認證模擬：</p>
+<h3>Pet Token (Player API)</h3>
+<p>帶任意非空 Bearer Token 即可通過：</p>
+<pre><code class="language-http">Authorization: Bearer dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t</code></pre>
+<p>或透過 query string：<code>?token=&lt;任意字串&gt;</code>。</p>
+<h3>Admin Session (Admin API)</h3>
+<p>帶 Cookie 標頭，內容用以下慣例切換角色：</p>
 <table>
-<tr><th>參數</th><th>型別</th><th>說明</th><th>範例</th></tr>
-<tr><td><code>scenario=empty</code></td><td>string</td><td>回傳空陣列或空資料</td><td><code>GET /api/v1/leaderboard?scenario=empty</code></td></tr>
-<tr><td><code>delay=&lt;ms&gt;</code></td><td>number</td><td>延遲指定毫秒後回應（模擬慢速網路）</td><td><code>GET /api/v1/pets/random?delay=2000</code></td></tr>
-<tr><td><code>error=true</code></td><td>boolean</td><td>強制回傳 500 Internal Server Error</td><td><code>GET /api/v1/arena/history/{petId}?error=true</code></td></tr>
-<tr><td><code>error=400</code></td><td>number</td><td>回傳指定 HTTP 錯誤碼</td><td><code>POST /api/v1/arena/enter?error=429</code></td></tr>
+<tr><th>Cookie 值</th><th>對應角色</th></tr>
+<tr><td><code>super-admin-session</code></td><td>super_admin</td></tr>
+<tr><td><code>readonly-session</code></td><td>read_only</td></tr>
+<tr><td>其他任意非空字串</td><td>moderator</td></tr>
+<tr><td>缺失</td><td>401 UNAUTHORIZED</td></tr>
 </table>
-<h3>使用情境範例</h3>
-<p><strong>測試空排行榜顯示：</strong></p>
-<pre><code class="">GET http://localhost:8000/api/v1/leaderboard?scenario=empty</code></pre>
-<p><strong>模擬 2 秒網路延遲（測試 Loading 狀態）：</strong></p>
-<pre><code class="">GET http://localhost:8000/api/v1/pets/random?delay=2000</code></pre>
-<p><strong>測試伺服器錯誤處理：</strong></p>
-<pre><code class="">POST http://localhost:8000/api/v1/claim?error=true</code></pre>
-<p><strong>測試速率限制錯誤（429）：</strong></p>
-<pre><code class="">POST http://localhost:8000/api/v1/arena/enter?error=429</code></pre>
+<p>範例：</p>
+<pre><code class="language-http">Cookie: super-admin-session=mock</code></pre>
 <hr>
-<h2>8. 修改假資料</h2>
-<p>所有假資料儲存於 <code>docs/blueprint/mock/data/</code> 目錄下的 JSON 檔案中。直接編輯這些檔案即可改變 Mock Server 的回應內容。</p>
-<h3>資料檔案說明</h3>
+<h2>8. 特殊測試情境</h2>
+<p>每個 endpoint 接受以下 query parameters：</p>
 <table>
-<tr><th>檔案</th><th>對應資源</th><th>說明</th></tr>
-<tr><td><code>data/pets.json</code></td><td>Pets, Claim</td><td>寵物基本資料，包含稀有度、等級、屬性、Stats</td></tr>
-<tr><td><code>data/arena.json</code></td><td>Arena</td><td>競技場對戰記錄與歷史</td></tr>
-<tr><td><code>data/leaderboard.json</code></td><td>Leaderboard</td><td>排行榜排名與分數</td></tr>
-<tr><td><code>data/marketplace.json</code></td><td>Marketplace</td><td>市場掛單列表與交易歷史</td></tr>
+<tr><th>參數</th><th>說明</th><th>範例</th></tr>
+<tr><td><code>scenario=empty</code></td><td>回傳空陣列 / 空集合</td><td><code>GET /api/v1/leaderboard?scenario=empty</code></td></tr>
+<tr><td><code>delay=1500</code></td><td>延遲 1500 毫秒（最多 5 秒）</td><td><code>GET /api/v1/pets/random?delay=1500</code></td></tr>
+<tr><td><code>error=true</code></td><td>模擬 500 錯誤</td><td><code>GET /api/v1/leaderboard?error=true</code></td></tr>
 </table>
-<h3>編輯 <code>pets.json</code> 範例</h3>
-<p>目前 <code>data/pets.json</code> 包含 8 筆寵物範例資料。若要新增一筆：</p>
-<pre><code class="language-json">{
-  &quot;id&quot;: &quot;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;,
-  &quot;name&quot;: &quot;新寵物名稱&quot;,
-  &quot;rarity&quot;: &quot;COMMON&quot;,
-  &quot;level&quot;: 1,
-  &quot;element&quot;: &quot;FIRE&quot;,
-  &quot;stats&quot;: {
-    &quot;attack&quot;: 30,
-    &quot;defense&quot;: 25,
-    &quot;speed&quot;: 40,
-    &quot;stamina&quot;: 35
-  },
-  &quot;ownerId&quot;: &quot;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;,
-  &quot;ownerName&quot;: &quot;TestPlayer&quot;,
-  &quot;createdAt&quot;: &quot;2026-05-05T00:00:00Z&quot;,
-  &quot;updatedAt&quot;: &quot;2026-05-05T00:00:00Z&quot;
-}</code></pre>
-<h3>欄位值參考</h3>
-<p><strong>rarity 可選值：</strong></p>
-<ul><li><code>COMMON</code></li><li><code>RARE</code></li><li><code>EPIC</code></li><li><code>LEGENDARY</code></li></ul>
-<p><strong>element 可選值：</strong></p>
-<ul><li><code>FIRE</code> / <code>ICE</code> / <code>LIGHTNING</code> / <code>EARTH</code> / <code>METAL</code> / <code>NATURE</code> / <code>WIND</code></li></ul>
-<h3>注意事項</h3>
-<ul><li>編輯 JSON 後，若 Mock Server 以 <code>--reload</code> 模式啟動，<strong>不需要重啟</strong>，Uvicorn 會自動偵測檔案變更並重新載入。</li><li>若未使用 <code>--reload</code>，請手動重啟 Mock Server（<code>Ctrl+C</code> 後再次執行 <code>uvicorn</code> 指令）。</li><li>JSON 格式錯誤會導致 Mock Server 啟動失敗，可使用 <code>jsonlint</code> 或編輯器的 JSON 驗證功能確認格式。</li></ul>
+<p>特殊行為（POST /api/v1/claim/verify）：</p>
+<ul><li><code>code = &quot;000000&quot;</code> → 回傳 INVALID_CODE</li><li><code>code = &quot;111111&quot;</code> → 回傳 CODE_EXPIRED</li><li>其他任意 6 位數 → 成功並回傳 mock petToken</li></ul>
 <hr>
-<h2>9. Endpoint 清單</h2>
-<p>共 20 個 Player API 端點，分為 6 個資源群組。</p>
-<h3>Claim（寵物認領）</h3>
+<h2>9. 修改假資料</h2>
+<p>假資料存放在 data/ 目錄，可直接用任何文字編輯器修改 JSON 檔案。</p>
+<p>--reload 模式下會自動重新載入。</p>
+<blockquote><p>注意：mock server 為純讀取，不會把 POST/PUT/DELETE 寫回 JSON 檔。</p></blockquote>
+<blockquote><p>寫操作會回傳合理的成功 envelope，但不持久化。</p></blockquote>
+<h3>主要資料表（對齊 SCHEMA.md 規範名稱）</h3>
 <table>
-<tr><th>方法</th><th>路徑</th><th>說明</th><th>認證</th></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/claim</code></td><td>發送 OTP，啟動認領流程</td><td>無</td></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/claim/verify</code></td><td>驗證 OTP，取得 Pet Token</td><td>無</td></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/claim/recover</code></td><td>寄出找回連結的 OTP</td><td>無</td></tr>
-</table>
-<h3>Pets（寵物管理）</h3>
-<table>
-<tr><th>方法</th><th>路徑</th><th>說明</th><th>認證</th></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/pets/random</code></td><td>產生隨機未認領寵物（訪客顯示用）</td><td>無</td></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/pets/{petId}</code></td><td>取得寵物公開資料</td><td>選用 Bearer</td></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/pets/{petId}/stats</code></td><td>取得完整訓練面板</td><td>選用 Bearer</td></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/pets/{petId}/train</code></td><td>執行一次訓練動作</td><td>Bearer 必填</td></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/pets/{petId}/feed</code></td><td>餵食，套用食物增益</td><td>Bearer 必填</td></tr>
-</table>
-<h3>Arena（競技場）</h3>
-<table>
-<tr><th>方法</th><th>路徑</th><th>說明</th><th>認證</th></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/arena/enter</code></td><td>進入配對佇列（長輪詢，最長 30 秒）</td><td>Bearer 必填</td></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/arena/match/{matchId}</code></td><td>取得完整對戰記錄</td><td>無</td></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/arena/history/{petId}</code></td><td>取得最近 20 場對戰歷史</td><td>無</td></tr>
-</table>
-<h3>Leaderboard（排行榜）</h3>
-<table>
-<tr><th>方法</th><th>路徑</th><th>說明</th><th>認證</th></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/leaderboard</code></td><td>全球排行榜（前 100 名）</td><td>無</td></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/leaderboard/rank/{petId}</code></td><td>查詢特定寵物排名</td><td>無</td></tr>
-</table>
-<h3>GDPR（隱私權自助服務）</h3>
-<table>
-<tr><th>方法</th><th>路徑</th><th>說明</th><th>認證</th></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/gdpr/request</code></td><td>提交 GDPR 請求</td><td>Bearer 必填</td></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/gdpr/request/status</code></td><td>查詢 GDPR 請求狀態</td><td>Bearer 必填</td></tr>
-</table>
-<h3>Marketplace（交易市場，需要 FF_MARKETPLACE 功能旗標）</h3>
-<table>
-<tr><th>方法</th><th>路徑</th><th>說明</th><th>認證</th></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/marketplace/listings</code></td><td>瀏覽市場掛單</td><td>無</td></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/marketplace/listings</code></td><td>建立新掛單</td><td>Bearer 必填</td></tr>
-<tr><td><code>DELETE</code></td><td><code>/api/v1/marketplace/listings/{listingId}</code></td><td>取消掛單</td><td>Bearer 必填</td></tr>
-<tr><td><code>POST</code></td><td><code>/api/v1/marketplace/listings/{listingId}/buy</code></td><td>購買掛單</td><td>Bearer 必填</td></tr>
-<tr><td><code>GET</code></td><td><code>/api/v1/marketplace/history/{petId}</code></td><td>取得寵物交易歷史（僅限擁有者）</td><td>Bearer 必填</td></tr>
+<tr><th>檔案</th><th>對應 SCHEMA.md table</th><th>說明</th></tr>
+<tr><td><code>pets.json</code></td><td><code>pets</code></td><td>寵物（claimed / guest / banned）</td></tr>
+<tr><td><code>arena.json</code></td><td><code>arena_matches</code></td><td>競技場戰役紀錄</td></tr>
+<tr><td><code>leaderboard.json</code></td><td>(Redis ZSET)</td><td>全域排行榜</td></tr>
+<tr><td><code>leaderboard_snapshots.json</code></td><td><code>leaderboard_snapshots</code></td><td>排行榜歷史快照</td></tr>
+<tr><td><code>training_logs.json</code></td><td><code>training_logs</code></td><td>訓練動作紀錄</td></tr>
+<tr><td><code>food_buffs.json</code></td><td><code>food_buffs</code></td><td>食物 buff 紀錄</td></tr>
+<tr><td><code>marketplace_listings.json</code></td><td><code>marketplace_listings</code></td><td>市場掛單</td></tr>
+<tr><td><code>marketplace_transactions.json</code></td><td><code>marketplace_transactions</code></td><td>完成交易紀錄</td></tr>
+<tr><td><code>claim_identities.json</code></td><td><code>claim_identities</code></td><td>玩家身份（email hash）</td></tr>
+<tr><td><code>gdpr_requests.json</code></td><td><code>gdpr_requests</code></td><td>GDPR 請求佇列</td></tr>
+<tr><td><code>admin_users.json</code></td><td><code>admin_users</code></td><td>後台帳號</td></tr>
+<tr><td><code>audit_logs.json</code></td><td><code>audit_logs</code></td><td>後台操作稽核日誌</td></tr>
+<tr><td><code>admin_pets.json</code></td><td>(view of <code>pets</code>)</td><td>後台寵物列表（含 owner mask）</td></tr>
+<tr><td><code>suspicious_battles.json</code></td><td>(analytics view)</td><td>可疑戰役佇列</td></tr>
+<tr><td><code>config_runtime.json</code></td><td>(Redis cache)</td><td>runtime 可調設定</td></tr>
+<tr><td><code>config_economy.json</code></td><td>(Redis cache)</td><td>economy 可調設定</td></tr>
+<tr><td><code>config_flags.json</code></td><td>(feature flags)</td><td>功能旗標</td></tr>
+<tr><td><code>dashboard.json</code></td><td>(aggregate view)</td><td>後台儀表板資料</td></tr>
+<tr><td><code>analytics.json</code></td><td>(aggregate view)</td><td>後台分析資料</td></tr>
+<tr><td><code>email_monitor.json</code></td><td>(SES feed)</td><td>郵件投遞監控</td></tr>
 </table>
 <hr>
-<h2>10. 常見問題</h2>
-<h3>Q1：Port 8000 已被佔用，無法啟動</h3>
-<p><strong>錯誤訊息：</strong></p>
-<pre><code class="">ERROR:    [Errno 48] Address already in use</code></pre>
-<p><strong>解決方式：</strong></p>
-<p>macOS / Linux — 查詢佔用 Port 的程序：</p>
-<pre><code class="language-bash">lsof -i :8000
-kill -9 &lt;PID&gt;</code></pre>
-<p>Windows — 查詢佔用 Port 的程序：</p>
-<pre><code class="language-cmd">netstat -ano | findstr :8000
-taskkill /PID &lt;PID&gt; /F</code></pre>
-<p>或直接改用其他 Port 啟動：</p>
-<pre><code class="language-bash">uvicorn main:app --reload --port 8080</code></pre>
+<h2>10. Endpoint 一覽</h2>
+<p>完整 endpoint 列表（共 53 個 + <code>/</code> + <code>/health</code>）：</p>
+<h3>5.1 Claim Flow (3)</h3>
+<pre><code class="">POST   /api/v1/claim
+POST   /api/v1/claim/verify
+POST   /api/v1/claim/recover</code></pre>
+<h3>5.2 Pet Endpoints (5)</h3>
+<pre><code class="">GET    /api/v1/pets/random
+GET    /api/v1/pets/{petId}
+GET    /api/v1/pets/{petId}/stats
+POST   /api/v1/pets/{petId}/train
+POST   /api/v1/pets/{petId}/feed</code></pre>
+<h3>5.3 Arena (3)</h3>
+<pre><code class="">POST   /api/v1/arena/enter
+GET    /api/v1/arena/match/{matchId}
+GET    /api/v1/arena/history/{petId}</code></pre>
+<h3>5.4 Leaderboard (2)</h3>
+<pre><code class="">GET    /api/v1/leaderboard
+GET    /api/v1/leaderboard/rank/{petId}</code></pre>
+<h3>5.5 GDPR Self-Service (2)</h3>
+<pre><code class="">POST   /api/v1/gdpr/request
+GET    /api/v1/gdpr/request/status</code></pre>
+<h3>5.6 Marketplace (5; FF_MARKETPLACE)</h3>
+<pre><code class="">GET    /api/v1/marketplace/listings
+POST   /api/v1/marketplace/listings
+DELETE /api/v1/marketplace/listings/{listingId}
+POST   /api/v1/marketplace/listings/{listingId}/buy
+GET    /api/v1/marketplace/history/{petId}</code></pre>
+<h3>6.1 Admin Auth (4)</h3>
+<pre><code class="">POST   /admin/api/auth/login
+POST   /admin/api/auth/totp/setup
+POST   /admin/api/auth/logout
+POST   /admin/api/auth/totp/verify</code></pre>
+<h3>6.2 Admin Roles (4; super_admin only)</h3>
+<pre><code class="">GET    /admin/api/roles
+POST   /admin/api/roles
+DELETE /admin/api/roles/{adminId}
+POST   /admin/api/roles/{adminId}/totp/reset</code></pre>
+<h3>6.3 Admin Pets (5)</h3>
+<pre><code class="">GET    /admin/api/pets
+GET    /admin/api/pets/{petId}
+PUT    /admin/api/pets/{petId}
+POST   /admin/api/pets/{petId}/ban
+POST   /admin/api/pets/{petId}/unban</code></pre>
+<h3>6.4 Admin Battles (4)</h3>
+<pre><code class="">GET    /admin/api/battles
+GET    /admin/api/suspicious
+POST   /admin/api/battles/{matchId}/flag
+DELETE /admin/api/battles/{matchId}/flag</code></pre>
+<h3>6.5 Admin Leaderboard (2)</h3>
+<pre><code class="">GET    /admin/api/leaderboard
+DELETE /admin/api/leaderboard/{petId}</code></pre>
+<h3>6.6 Admin Configuration (6)</h3>
+<pre><code class="">GET    /admin/api/config/runtime
+PUT    /admin/api/config/runtime
+GET    /admin/api/config/economy
+PUT    /admin/api/config/economy
+GET    /admin/api/config/flags
+PUT    /admin/api/config/flags/{flag}</code></pre>
+<h3>6.7 Admin GDPR Queue (3; super_admin only)</h3>
+<pre><code class="">GET    /admin/api/gdpr
+POST   /admin/api/gdpr/delete
+PATCH  /admin/api/gdpr/{requestId}</code></pre>
+<h3>6.8 Admin Audit Log (1; super_admin only)</h3>
+<pre><code class="">GET    /admin/api/audit</code></pre>
+<h3>6.9 Admin Dashboard (3)</h3>
+<pre><code class="">GET    /admin/api/dashboard
+GET    /admin/api/analytics
+GET    /admin/api/email/monitor</code></pre>
+<h3>Health (2)</h3>
+<pre><code class="">GET    /
+GET    /health</code></pre>
 <hr>
-<h3>Q2：前端出現 CORS 錯誤</h3>
-<p><strong>錯誤訊息（瀏覽器 Console）：</strong></p>
-<pre><code class="">Access to fetch at &#x27;http://localhost:8000/...&#x27; from origin &#x27;http://localhost:5173&#x27;
-has been blocked by CORS policy</code></pre>
-<p><strong>原因：</strong> Mock Server 預設允許的 Origin 不包含你的前端開發伺服器 Port。</p>
-<p><strong>解決方式：</strong> 編輯 <code>main.py</code>，在 <code>CORSMiddleware</code> 設定中新增你的前端 Origin：</p>
-<pre><code class="language-python">from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        &quot;http://localhost:5173&quot;,   # Vite 預設 Port
-        &quot;http://localhost:3000&quot;,   # 其他前端框架
-        &quot;http://localhost:4173&quot;,   # Vite preview
-    ],
-    allow_credentials=True,
-    allow_methods=[&quot;*&quot;],
-    allow_headers=[&quot;*&quot;],
-)</code></pre>
-<p>開發期間也可暫時設定 <code>allow_origins=[&quot;*&quot;]</code>（僅限本地開發，請勿用於正式環境）。</p>
+<h2>11. 常見問題</h2>
+<h3>Q: Port 8000 被佔用？</h3>
+<pre><code class="language-bash">uvicorn main:app --reload --port 8001</code></pre>
+<p>Frontend 環境變數也要同步改為 http://localhost:8001。</p>
+<h3>Q: CORS 錯誤？</h3>
+<p>Mock Server 預設開放所有來源（allow_origins=[&quot;*&quot;]）。如仍有問題，</p>
+<p>確認 frontend 的 fetch 沒有同時設定 credentials: &quot;include&quot; + *。</p>
+<h3>Q: 401 UNAUTHORIZED？</h3>
+<p>請確認：</p>
+<ul><li>Player API：帶上 Authorization: Bearer &lt;token&gt; 或 ?token=&lt;任意字串&gt;</li><li>Admin API：帶上 Cookie: &lt;任意非空值&gt;，依角色慣例（見 §7）</li></ul>
+<h3>Q: Windows 執行 uvicorn 報錯？</h3>
+<p>確認 pip 安裝到正確的 Python 版本：</p>
+<pre><code class="language-cmd">python -m uvicorn main:app --reload</code></pre>
+<h3>Q: Mock 回傳空資料？</h3>
+<p>加 ?scenario=empty 會回傳空集合。預設 scenario 是 normal。</p>
 <hr>
-<h3>Q3：Windows 上 uvicorn 指令找不到</h3>
-<p><strong>錯誤訊息：</strong></p>
-<pre><code class="">&#x27;uvicorn&#x27; is not recognized as an internal or external command</code></pre>
-<p><strong>原因：</strong> 虛擬環境未啟動，或 Python Scripts 目錄不在 PATH 中。</p>
-<p><strong>解決方式：</strong></p>
-<p>方法一：確認虛擬環境已啟動（PowerShell）：</p>
-<pre><code class="language-powershell">.venv\Scripts\Activate.ps1
-uvicorn main:app --reload</code></pre>
-<p>方法二：使用 <code>python -m</code> 方式執行：</p>
-<pre><code class="language-cmd">python -m uvicorn main:app --reload --port 8000</code></pre>
-<p>方法三：若 PowerShell 禁止執行腳本：</p>
-<pre><code class="language-powershell">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+<h2>12. 進階：對接 Backend</h2>
+<p>當 backend 完成後，僅需修改 frontend 的環境變數：</p>
+<pre><code class="language-env">VITE_API_BASE_URL=https://api.pixel-pet-arena.com</code></pre>
+<p>無需修改任何 frontend 業務代碼，因為 mock 與 backend 共享同一份 OpenAPI / API.md 規範。</p>
 <hr>
-<h3>Q4：Mock Server 回應 422 Unprocessable Entity</h3>
-<p><strong>原因：</strong> 請求 Body 或 Path Parameter 格式不符合 OpenAPI 規格。常見原因：</p>
-<ul><li><code>petId</code> 必須為 UUID 格式（<code>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code>）</li><li>必填欄位缺少（如 <code>trainingType</code>、<code>email</code>）</li><li>列舉值錯誤（如 <code>rarity</code> 只接受 <code>COMMON</code> / <code>RARE</code> / <code>EPIC</code> / <code>LEGENDARY</code>）</li></ul>
-<p>請參考 Swagger UI（<code>http://localhost:8000/docs</code>）確認正確的請求格式。</p>
-<hr>
-<h3>Q5：<code>--reload</code> 模式下 Mock Server 頻繁重啟</h3>
-<p><strong>原因：</strong> <code>data/*.json</code> 檔案被頻繁修改，觸發 Uvicorn 的檔案監控重載。</p>
-<p><strong>解決方式：</strong> 使用 <code>--reload-dir</code> 限制監控範圍，只監控 Python 程式碼：</p>
-<pre><code class="language-bash">uvicorn main:app --reload --reload-dir routers --reload-dir .</code></pre>
-<hr>
-<h2>11. 進階：對接 Backend</h2>
-<p>當真實 Backend 準備就緒後，<strong>只需修改一個環境變數</strong>即可將前端切換至正式 API，無需更改任何程式碼。</p>
-<h3>切換方式</h3>
-<p>編輯 <code>.env.local</code>（或正式部署的環境設定）：</p>
-<pre><code class="language-env"># 開發時使用 Mock Server
-# VITE_API_BASE_URL=http://localhost:8000
-
-# 切換至正式 Backend
-VITE_API_BASE_URL=https://api.pixel-pet-arena.com</code></pre>
-<h3>各環境對應 URL</h3>
-<table>
-<tr><th>環境</th><th><code>VITE_API_BASE_URL</code> 值</th></tr>
-<tr><td>本地 Mock</td><td><code>http://localhost:8000</code></td></tr>
-<tr><td>本地 Backend</td><td><code>http://localhost:3000</code></td></tr>
-<tr><td>Staging</td><td><code>https://staging-api.pixel-pet-arena.com</code></td></tr>
-<tr><td>Production</td><td><code>https://api.pixel-pet-arena.com</code></td></tr>
-</table>
-<h3>注意事項</h3>
-<ul><li>Mock Server <strong>不驗證</strong> Bearer Token 的有效性，任何字串都會被接受。真實 Backend 會嚴格驗證 32 位元 URL-safe Base64 格式的 Pet Token。</li><li>Marketplace 端點需要功能旗標 <code>FF_MARKETPLACE</code> 啟用。Mock Server 可透過特殊參數模擬此行為；真實 Backend 需由管理員在後台開啟旗標。</li><li>Mock Server 的資料在重啟後會重置為 <code>data/*.json</code> 的初始狀態，真實 Backend 資料則持久化儲存於資料庫。</li></ul></main>
+<blockquote><p><strong>產生來源：</strong> gendoc-gen-mock skill</p></blockquote>
+<blockquote><p>對齊規範：docs/API.md v1.0、docs/SCHEMA.md v1.0、docs/EDD.md</p></blockquote></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

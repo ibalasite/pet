@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端元件圖：Cocos 節點樹 — pet</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    /* ─── Sidebar collapsible folder groups ─── */
+    .sidebar__section details { border: none; }
+    .sidebar__section details > summary {
+      cursor: pointer; list-style: none; display: flex; align-items: center;
+      gap: 0.375rem; padding: 0 1rem; margin-bottom: 0.375rem;
+      font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; user-select: none;
+    }
+    .sidebar__section details > summary::-webkit-details-marker { display: none; }
+    .sidebar__section details > summary::before {
+      content: '▶'; font-size: 0.5rem; flex-shrink: 0;
+      transition: transform 150ms; color: var(--text-muted);
+    }
+    .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
+    .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">pet</a>
+    <div class="nav-controls">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="搜尋文件...">
+        <div class="search-results"></div>
+      </div>
+      <a class="nav-gh-link" href="https://github.com/ibalasite/pet" target="_blank" rel="noopener">⌥ GitHub</a>
+      <button class="sidebar-toggle" id="sidebarToggle" title="收合/展開側欄">☰</button>
+    </div>
+  </header>
+  <div class="doc-page-banner">
+    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 前端元件圖：Cocos 節點樹</p>
+    <h1 class="banner-title">前端元件圖：Cocos 節點樹</h1>
+  </div>
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="文件導覽">
+      <div class="sidebar__section">
+<div class="sidebar__label">文件</div>
+<a class="sidebar__link" href="index.html">🏠 首頁</a>
+<a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
+<a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
+<a class="sidebar__link" href="prd.html">📝 產品需求文件 (PRD)</a>
+<a class="sidebar__link" href="pdd.html">🎨 產品設計文件 (PDD)</a>
+<a class="sidebar__link" href="vdd.html">🖼️ 視覺設計文件 (VDD)</a>
+<a class="sidebar__link" href="edd.html">🏗️ 工程設計文件 (EDD)</a>
+<a class="sidebar__link" href="arch.html">🧩 架構設計</a>
+<a class="sidebar__link" href="api.html">🔌 API 文件</a>
+<a class="sidebar__link" href="schema.html">🗄️ Schema 文件</a>
+<a class="sidebar__link" href="frontend.html">🖥️ 前端設計文件</a>
+<a class="sidebar__link" href="audio.html">🔊 音效設計文件</a>
+<a class="sidebar__link" href="anim.html">🎬 動畫特效文件</a>
+<a class="sidebar__link" href="client_impl.html">🖥 客戶端實作規格</a>
+<a class="sidebar__link" href="constants.html">🔢 業務常數文件</a>
+<a class="sidebar__link" href="test-plan.html">✅ 測試計畫 (Test Plan)</a>
+<a class="sidebar__link" href="runbook.html">📖 Runbook</a>
+<a class="sidebar__link" href="local_deploy.html">🚀 本地部署指南</a>
+<a class="sidebar__link" href="rtm.html">🗂️ 需求追蹤矩陣 (RTM)</a>
+<a class="sidebar__link" href="align_report.html">🔍 對齊報告</a>
+<a class="sidebar__link" href="admin_impl.html">📄 Admin Impl</a>
+<a class="sidebar__link" href="align-report.html">📄 Align-Report</a>
+<a class="sidebar__link" href="align_fix_complete.html">📄 Align Fix Complete</a>
+<a class="sidebar__link" href="align_fix_summary.html">📄 Align Fix Summary</a>
+<a class="sidebar__link" href="bdd-client.html">📄 Bdd-Client</a>
+<a class="sidebar__link" href="bdd-server.html">📄 Bdd-Server</a>
+<a class="sidebar__link" href="cicd.html">📄 Cicd</a>
+<a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
+<a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
+<a class="sidebar__link" href="manifest.html">📄 Manifest</a>
+<a class="sidebar__link" href="resource.html">📄 Resource</a>
+<a class="sidebar__link" href="background-jobs.html">📄 Background-Jobs</a>
+<a class="sidebar__link" href="bdd-server.html">🧪 Server BDD</a>
+<a class="sidebar__link" href="bdd-client.html">🧪 Client BDD</a>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 blueprint/</summary>
+<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 contracts/</summary>
+<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📁 prototype/</summary>
+<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📎 req/</summary>
+<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
+<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+</details>
+</div>
+<div class="sidebar__section">
+<details>
+<summary>📐 PlantUML</summary>
+<a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
+<a class="sidebar__link" href="puml--diagrams-puml-deployment.html">Deployment</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-auth.html">Sequence Auth</a>
+<a class="sidebar__link" href="puml--diagrams-puml-sequence-battle.html">Sequence Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-battle.html">State Battle</a>
+<a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
+<a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
+</details>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Server UML</div>
+<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
+<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
+<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
+<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
+</div>
+<div class="sidebar__section">
+<div class="sidebar__label">Frontend UML</div>
+<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link active" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
+</div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebarResizer"></div>
+    <main class="doc-content"><h1>Frontend Component Diagram — React + Phaser Node Tree</h1>
+<blockquote><p>來源：docs/FRONTEND.md §2.2 React Component Tree + §2.3 Phaser Integration Pattern</p></blockquote>
+<p>描述 Player App 的完整 React 元件樹（DOM）與 Phaser canvas 內部 scene 樹（WebGL）的階層結構。</p>
+<div class="diagram-container"><pre class="mermaid">graph TD
+    subgraph ReactTree [&quot;React Component Tree (DOM)&quot;]
+        App[&quot;App&lt;br/&gt;元件: AppProvider, ErrorBoundary&lt;br/&gt;資源: src/App.tsx&quot;]
+        App --&gt; Layout[&quot;Layout&lt;br/&gt;元件: NavBar, Outlet, Toaster&lt;br/&gt;資源: src/components/Layout.tsx&quot;]
+        Layout --&gt; NavBar[&quot;NavBar&lt;br/&gt;元件: NavLink × N&lt;br/&gt;資源: src/components/NavBar.tsx&lt;br/&gt;active: hasPetToken=true&quot;]
+        Layout --&gt; Router[&quot;Router (React Router v6)&lt;br/&gt;元件: 路由樹&quot;]
+
+        Router --&gt; LandingPage[&quot;LandingPage&lt;br/&gt;元件: PetCanvas, RarityHint, ClaimCTA&lt;br/&gt;資源: src/pages/LandingPage.tsx&lt;br/&gt;active: 訪客&quot;]
+        LandingPage --&gt; PetCanvas_L[&quot;PetCanvas (random)&lt;br/&gt;元件: PetCanvasEngine bridge&lt;br/&gt;資源: src/components/PetCanvas.tsx&quot;]
+
+        Router --&gt; ClaimPage[&quot;ClaimPage&lt;br/&gt;元件: ClaimFlow (3-step)&lt;br/&gt;資源: src/pages/ClaimPage.tsx&lt;br/&gt;active: 認領流程&quot;]
+        ClaimPage --&gt; ClaimEmailForm[&quot;ClaimEmailForm&lt;br/&gt;元件: EmailField, SubmitButton&lt;br/&gt;資源: src/components/ClaimEmailForm.tsx&lt;br/&gt;active: step=&#x27;email&#x27;&quot;]
+        ClaimPage --&gt; ClaimCodeForm[&quot;ClaimCodeForm&lt;br/&gt;元件: OtpField, Countdown&lt;br/&gt;資源: src/components/ClaimCodeForm.tsx&lt;br/&gt;active: step=&#x27;code&#x27;&quot;]
+        ClaimPage --&gt; URLReveal[&quot;URLReveal&lt;br/&gt;元件: CopyButton, BookmarkPrompt&lt;br/&gt;資源: src/components/URLReveal.tsx&lt;br/&gt;active: step=&#x27;url&#x27;&quot;]
+
+        Router --&gt; PetPage[&quot;PetPage&lt;br/&gt;元件: PetCanvas, StatsPanel, TrainingEntry, ArenaEntry, FoodInventory&lt;br/&gt;資源: src/pages/PetPage.tsx&lt;br/&gt;active: 已認領玩家&quot;]
+        PetPage --&gt; PetCanvas_P[&quot;PetCanvas (own pet)&lt;br/&gt;資源: src/components/PetCanvas.tsx&quot;]
+        PetPage --&gt; RarityBadge[&quot;RarityBadge&lt;br/&gt;資源: src/components/RarityBadge.tsx&quot;]
+        PetPage --&gt; StatsPanel[&quot;StatsPanel&lt;br/&gt;元件: StatBar × 3&lt;br/&gt;資源: src/components/StatsPanel.tsx&quot;]
+        StatsPanel --&gt; StatBar1[&quot;StatBar speed&lt;br/&gt;資源: src/components/StatBar.tsx&quot;]
+        StatsPanel --&gt; StatBar2[&quot;StatBar strength&quot;]
+        StatsPanel --&gt; StatBar3[&quot;StatBar stamina&quot;]
+        PetPage --&gt; TrainingEntry[&quot;TrainingEntry&lt;br/&gt;元件: 連結按鈕&lt;br/&gt;資源: src/components/TrainingEntry.tsx&quot;]
+        PetPage --&gt; ArenaEntry[&quot;ArenaEntry&lt;br/&gt;元件: 連結按鈕&quot;]
+        PetPage --&gt; FoodInventory[&quot;FoodInventory&lt;br/&gt;元件: FoodItem × N&lt;br/&gt;資源: src/components/FoodInventory.tsx&quot;]
+        PetPage --&gt; NeglectedState[&quot;NeglectedState (overlay)&lt;br/&gt;active: days_idle ≥ 3&quot;]
+
+        Router --&gt; TrainingPage[&quot;TrainingPage&lt;br/&gt;元件: TrainingActions, StatChangeIndicator, DailyResetTimer, TrainingStreak&lt;br/&gt;資源: src/pages/TrainingPage.tsx&quot;]
+        TrainingPage --&gt; TrainingActionCard1[&quot;TrainingActionCard SPEED&lt;br/&gt;資源: src/components/TrainingActionCard.tsx&quot;]
+        TrainingPage --&gt; TrainingActionCard2[&quot;TrainingActionCard STRENGTH&quot;]
+        TrainingPage --&gt; TrainingActionCard3[&quot;TrainingActionCard STAMINA&quot;]
+        TrainingPage --&gt; StatChangeIndicator[&quot;StatChangeIndicator&lt;br/&gt;active: 訓練後 2 秒&quot;]
+
+        Router --&gt; ArenaPage[&quot;ArenaPage&lt;br/&gt;元件: ModeSelector, MatchmakingStatus, AIOfferModal, RateLimitBanner&lt;br/&gt;資源: src/pages/ArenaPage.tsx&quot;]
+        ArenaPage --&gt; ModeSelector[&quot;ModeSelector&lt;br/&gt;options: RACE / SUMO&quot;]
+        ArenaPage --&gt; MatchmakingStatus[&quot;MatchmakingStatus&lt;br/&gt;active: 30s long-poll&quot;]
+        ArenaPage --&gt; AIOfferModal[&quot;AIOfferModal&lt;br/&gt;active: timeout 30s 後&quot;]
+        ArenaPage --&gt; RateLimitBanner[&quot;RateLimitBanner&lt;br/&gt;active: 429 received&quot;]
+
+        Router --&gt; BattleResultPage[&quot;BattleResultPage&lt;br/&gt;元件: BattleAnimation, BattleResultCard, ShareBattleButton, ActionButtons&lt;br/&gt;資源: src/pages/BattleResultPage.tsx&quot;]
+        BattleResultPage --&gt; BattleAnimation[&quot;BattleAnimation&lt;br/&gt;元件: PetCanvasEngine bridge to BattleScene&lt;br/&gt;資源: src/components/BattleAnimation.tsx&quot;]
+        BattleResultPage --&gt; BattleResultCard[&quot;BattleResultCard&lt;br/&gt;variants: WIN / LOSS&lt;br/&gt;資源: src/components/BattleResultCard.tsx&quot;]
+        BattleResultPage --&gt; StatComparison[&quot;StatComparison&quot;]
+
+        Router --&gt; LeaderboardPage[&quot;LeaderboardPage&lt;br/&gt;元件: RarityFilter, LeaderboardTable&lt;br/&gt;資源: src/pages/LeaderboardPage.tsx&quot;]
+        LeaderboardPage --&gt; LeaderboardTable[&quot;LeaderboardTable&lt;br/&gt;元件: LeaderboardRow × 100&quot;]
+        LeaderboardPage --&gt; OwnerRankBanner[&quot;OwnerRankBanner&lt;br/&gt;active: 已認領玩家&quot;]
+
+        Router --&gt; GdprPage[&quot;GdprPage&lt;br/&gt;元件: GdprRequestForm, GdprStatusBanner&lt;br/&gt;資源: src/pages/GdprPage.tsx&lt;br/&gt;active: token valid&quot;]
+    end
+
+    subgraph PhaserTree [&quot;Phaser Canvas Internal Scene Tree (WebGL)&quot;]
+        Game[&quot;Phaser.Game&lt;br/&gt;元件: SceneManager, CacheManager, Input&lt;br/&gt;資源: src/phaser/PetCanvasEngine.ts&lt;br/&gt;config: AUTO renderer, 640x360&quot;]
+        Game --&gt; BootScene[&quot;BootScene&lt;br/&gt;preload critical assets&quot;]
+        BootScene --&gt; IdlePetScene[&quot;IdlePetScene&lt;br/&gt;元件: PetSprite, IdleAnimController&lt;br/&gt;active: PetPage / LandingPage&quot;]
+        BootScene --&gt; BattleScene[&quot;BattleScene&lt;br/&gt;元件: PetSprite × 2, BgTilemap, FxManager&lt;br/&gt;active: BattleResultPage 期間&quot;]
+        BootScene --&gt; ResultScene[&quot;ResultScene&lt;br/&gt;元件: ConfettiEmitter, FadeMask&lt;br/&gt;active: BattleScene 結束後&quot;]
+
+        IdlePetScene --&gt; PetSprite_I[&quot;PetSprite (own pet)&lt;br/&gt;texture: rarity-{R}/idle.png&lt;br/&gt;animation: idle_loop&quot;]
+        BattleScene --&gt; PetSprite_A[&quot;PetSprite player&lt;br/&gt;texture: rarity-{R}/battle.png&quot;]
+        BattleScene --&gt; PetSprite_B[&quot;PetSprite opponent&lt;br/&gt;texture: rarity-{R}/battle.png&quot;]
+        BattleScene --&gt; BgTilemap[&quot;BgTilemap&lt;br/&gt;tilemap: race-track.json&quot;]
+        BattleScene --&gt; FxManager[&quot;FxManager&lt;br/&gt;particles, screenshake&quot;]
+    end
+
+    subgraph SharedAssets [&quot;Shared Asset / Service Layer&quot;]
+        AssetMgr[&quot;AssetManager&lt;br/&gt;load atlases on demand&quot;]
+        AudioMgr[&quot;AudioManager&lt;br/&gt;BGM + SFX&quot;]
+        EventBus[&quot;EventBus (window)&lt;br/&gt;cross-component decoupled&quot;]
+        ApiClientShared[&quot;ApiClient (singleton)&lt;br/&gt;resource: src/services/ApiClient.ts&quot;]
+    end
+
+    PetCanvas_L --&gt; Game
+    PetCanvas_P --&gt; Game
+    BattleAnimation --&gt; Game
+
+    Game --&gt; AssetMgr
+    Game --&gt; AudioMgr
+    BattleResultPage --&gt; EventBus
+    Router --&gt; ApiClientShared
+
+    classDef pageClass fill:#e8f4ff,stroke:#369,color:#036
+    classDef compClass fill:#f0fff0,stroke:#393
+    classDef phaserClass fill:#fff0f4,stroke:#963
+    classDef sharedClass fill:#f8f0ff,stroke:#639
+
+    class App,Layout,Router,LandingPage,ClaimPage,PetPage,TrainingPage,ArenaPage,BattleResultPage,LeaderboardPage,GdprPage pageClass
+    class NavBar,RarityBadge,StatsPanel,StatBar1,StatBar2,StatBar3,TrainingEntry,ArenaEntry,FoodInventory,NeglectedState,TrainingActionCard1,TrainingActionCard2,TrainingActionCard3,StatChangeIndicator,ModeSelector,MatchmakingStatus,AIOfferModal,RateLimitBanner,PetCanvas_L,PetCanvas_P,BattleAnimation,BattleResultCard,StatComparison,LeaderboardTable,OwnerRankBanner,ClaimEmailForm,ClaimCodeForm,URLReveal compClass
+    class Game,BootScene,IdlePetScene,BattleScene,ResultScene,PetSprite_I,PetSprite_A,PetSprite_B,BgTilemap,FxManager phaserClass
+    class AssetMgr,AudioMgr,EventBus,ApiClientShared sharedClass</pre></div>
+<h2>元件樹深度</h2>
+<ul><li><strong>React tree</strong>：max depth 5（App → Router → PetPage → StatsPanel → StatBar）</li><li><strong>Phaser tree</strong>：max depth 4（Game → SceneManager → BattleScene → PetSprite）</li><li><strong>Total components</strong>：≥30 React FCs + 6 Phaser scenes + 4 shared services</li></ul>
+<h2>Active 條件清單</h2>
+<table>
+<tr><th>Component</th><th>Active 條件</th></tr>
+<tr><td>LandingPage</td><td>訪客（無 token）</td></tr>
+<tr><td>ClaimPage / ClaimEmailForm</td><td>認領流程 + step=&#x27;email&#x27;</td></tr>
+<tr><td>PetPage / PetCanvas_P</td><td>已認領玩家 + 在 /pet/:id</td></tr>
+<tr><td>TrainingPage</td><td>已認領 + 在 /pet/:id/train</td></tr>
+<tr><td>ArenaPage</td><td>已認領 + 在 /arena</td></tr>
+<tr><td>BattleResultPage</td><td>已認領 + 在 /arena/result/:id</td></tr>
+<tr><td>NeglectedState</td><td>days_since_train ≥ 3</td></tr>
+<tr><td>MatchmakingStatus</td><td>30s long-poll 進行中</td></tr>
+<tr><td>AIOfferModal</td><td>30s timeout 已觸發</td></tr>
+<tr><td>OwnerRankBanner</td><td>已認領 + 在 /leaderboard</td></tr>
+<tr><td>BattleScene</td><td>BattleResultPage 動畫期間</td></tr>
+<tr><td>ResultScene</td><td>BattleScene 結束後彩蛋階段</td></tr>
+</table>
+<h2>React ↔ Phaser Bridge 模式</h2>
+<p><code>PetCanvas</code>、<code>BattleAnimation</code> 是「bridge component」：</p>
+<ul><li>用 <code>useRef&lt;HTMLDivElement&gt;</code> 取得 DOM container</li><li>在 <code>useEffect</code> mount 時 <code>new Phaser.Game(config)</code> 並注入 container</li><li>在 <code>useEffect</code> cleanup（unmount）時 <code>engine.destroy()</code> 釋放 GPU 資源</li></ul>
+<h2>Notes</h2>
+<ul><li>所有 lazy-loaded route 都用 React.lazy + Suspense（FRONTEND.md §6.4 code splitting）</li><li>Atlas 資源以 rarity 分包，常用 rarity 預載（FRONTEND.md §4.1）</li><li>EventBus 用 <code>window.dispatchEvent</code> 派送 cross-component 事件（避免 prop drilling）</li></ul></main>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({startOnLoad:true,theme:'default',
+      flowchart:{curve:'basis',nodeSpacing:60,rankSpacing:80},
+      er:{layoutDirection:'TD',minEntityWidth:100,fontSize:12},
+      sequence:{actorMargin:60,messageMargin:30}});
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
