@@ -1,19 +1,24 @@
 <!--
-  DOC-ID:  README-PIXEL-PET-ARENA-20260505
-  Version: v1.1
-  Status:  DRAFT
+  DOC-ID:  README-PIXEL-PET-ARENA-20260509
+  Version: v1.2
+  Status:  IN_REVIEW
   Author:  AI Generated (gendoc readme)
-  Date:    2026-05-05
+  Date:    2026-05-09
   Upstream docs:
-    - BRD: docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)
-    - PRD: docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503)
-    - PDD: docs/PDD.md   (PDD-PIXEL-PET-ARENA-20260503)
-    - EDD: docs/EDD.md   (EDD-PIXEL-PET-ARENA-20260503)
-    - ARCH: docs/ARCH.md (ARCH-PIXEL-PET-ARENA-20260503)
-    - API: docs/API.md   (API-PIXEL-PET-ARENA-20260503)
+    - BRD:   docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)
+    - PRD:   docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503, v1.5)
+    - PDD:   docs/PDD.md   (PDD-PIXEL-PET-ARENA-20260503)
+    - EDD:   docs/EDD.md   (EDD-PIXEL-PET-ARENA-20260503)
+    - ARCH:  docs/ARCH.md  (ARCH-PIXEL-PET-ARENA-20260503)
+    - API:   docs/API.md   (API-PIXEL-PET-ARENA-20260503)
+    - SCHEMA: docs/SCHEMA.md
+    - LOCAL_DEPLOY: docs/LOCAL_DEPLOY.md
   Change log:
-    v1.0  2026-05-05  AI Generated (gendoc readme)  Initial generated draft
-    v1.1  2026-05-05  AI Generated (gendoc readme)  Fix GitHub repo URLs to ibalasite/pet
+    v1.0  2026-05-05  AI Generated  Initial generated draft
+    v1.1  2026-05-05  AI Generated  Fix GitHub repo URLs to ibalasite/pet
+    v1.2  2026-05-09  AI Generated  Refresh from upstream — switch npm→pnpm (per LOCAL_DEPLOY),
+                                     update API endpoint paths to match docs/API.md, sync features
+                                     list with features/*.feature, post-HTML pipeline state
 -->
 
 # pixel-pet-arena
@@ -24,6 +29,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20%20LTS-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-9.x-orange.svg)](https://pnpm.io/)
 
 ---
 
@@ -53,7 +59,7 @@
 
 **pixel-pet-arena** is a zero-account-barrier HTML5 browser game where players discover and claim procedurally-generated pixel pets using only their email address — no account registration, no password to remember.
 
-It was built to solve the mutual exclusivity between "no account barrier" and "persistent data" that has prevented casual players from truly owning virtual pets on the web. The core innovation is **email as a lightweight identity layer**: a 6-digit OTP produces a 32-byte cryptographic URL token. Players bookmark their unique URL — that URL is their identity.
+It was built to solve the mutual exclusivity between "no account barrier" and "persistent data" that has prevented casual players from truly owning virtual pets on the web. The core innovation is **email as a lightweight identity layer**: a 6-digit OTP issues a 32-byte cryptographic URL token. Players bookmark their unique URL — that URL is their identity, accessible from any device, forever.
 
 The project is governed by the upstream documents below; every design decision maps to a tracked requirement:
 
@@ -63,6 +69,7 @@ The project is governed by the upstream documents below; every design decision m
 | [PRD](docs/PRD.md) | User stories, acceptance criteria, priority tiers |
 | [PDD](docs/PDD.md) | UX flows, interaction specs, design tokens |
 | [EDD](docs/EDD.md) | Architecture decisions, technology choices, data models |
+| [ARCH](docs/ARCH.md) | C4 diagrams, component architecture, ADRs |
 
 See [System Architecture](#system-architecture) below for a visual overview, and [Documentation](#documentation) for the full HTML reference site.
 
@@ -73,20 +80,20 @@ See [System Architecture](#system-architecture) below for a visual overview, and
 **P0 — Must ship for v1.0:**
 
 - **Random Pixel Pet Generation** — Each pet is procedurally generated across 6 attribute dimensions (body, head, color_palette, accessory, rarity_trait, pattern) guaranteeing ≥ 1 billion unique combinations. 32×32 px sprite rendered on HTML5 Canvas via Phaser.js 3.
-- **Email Claim Flow** — Guests interact immediately with no login wall. Entering an email sends a 6-digit OTP + permanent unique URL. The pet is accessible from any device via that bookmarked URL forever.
-- **Pet Training & Feeding System** — 3 training actions per day (reset UTC 00:00). Special food items grant stat buffs to Speed, Strength, or Stamina (max 100 each). Pets visually degrade after 3 days of neglect.
-- **Arena Combat** — Race mode (Speed-weighted) and Sumo mode (Strength-weighted) with ±15% seeded random modifier. Real-time matchmaking with 30-second AI fallback. Rate-limited to 10 battles/hour per pet.
+- **Email Claim Flow** — Guests interact immediately with no login wall. Entering an email sends a 6-digit OTP plus a permanent unique URL. The pet is accessible from any device via that bookmarked URL forever.
+- **Pet Training & Feeding System** — 3 training actions per day (reset UTC 00:00). Special food items grant temporary or permanent stat buffs to Speed, Strength, or Stamina (max 100 each). Pets visually degrade after 3 days of neglect.
+- **Arena Combat** — Race mode (Speed-weighted) and Sumo mode (Strength-weighted) with ±15% seeded random modifier. Real-time matchmaking with 30-second AI fallback. Default rate-limit 10 battles/hour per pet (admin-tunable).
 - **Global Leaderboard** — Top 100 pets by win rate, updated within 30 seconds via Redis sorted set. Filterable by rarity tier (Common / Rare / Epic / Legendary).
 - **Battle Records Page** — Shareable URL displaying the last 20 battles per pet with outcomes, stat snapshots, and opponent info.
+- **Admin Portal** — Vue 3 + Element Plus admin SPA for moderation, GDPR processing, runtime parameter tuning, suspicious-pet detection, and game economy configuration.
 
 **P1 — Roadmap:**
 
-- Rarity scoring system (Common 60% / Rare 25% / Epic 12% / Legendary 3%) with visual badges.
-- Sumo arena mode (Strength-weighted) as additional arena variant.
+- Rarity scoring system (Common 60% / Rare 25% / Epic 12% / Legendary 3%) with visual badges and dedicated rarity-distribution tracking.
 
-**P2 — Future:**
+**P2 — Future (feature-flagged):**
 
-- Pet trading marketplace (5% platform fee), tournament system, seasonal competitions.
+- Pet trading marketplace (`FF_MARKETPLACE`, 5% platform fee), tournament system, seasonal competitions.
 
 ---
 
@@ -101,12 +108,12 @@ flowchart TB
 
     subgraph API["API Layer — Railway (autoscale HPA 70% CPU)"]
         GA["Game API\nFastify 4 / Node.js 20 LTS\n≥ 2 replicas"]
-        AA["Admin API\nFastify 4 / Node.js 20 LTS\n1 replica"]
+        AA["Admin API\nFastify 4 / Node.js 20 LTS\n1 replica (mounted at /admin)"]
     end
 
     subgraph Data["Data Tier"]
         PG[("PostgreSQL 15+\nSupabase managed\nDaily S3 backup")]
-        RD[("Redis 7+\nUpstash serverless\nLeaderboard · Rate-limits · Sessions")]
+        RD[("Redis 7+\nUpstash serverless\nLeaderboard · Rate-limits · Sessions · Matchmaking")]
     end
 
     subgraph Email["Email Services"]
@@ -127,6 +134,7 @@ flowchart TB
 > For component-level detail, data flow diagrams, and ADR records see:
 > - [EDD — Engineering Design Document](docs/EDD.md) (architecture + implementation)
 > - [ARCH — System Architecture](docs/ARCH.md) (C4 diagrams + ADRs)
+> - [docs/diagrams/](docs/diagrams/) (Mermaid UML — 9 server + 16 frontend + 5 CI/CD + 2 modulith)
 
 ---
 
@@ -136,19 +144,23 @@ flowchart TB
 |-------|-----------|-------|
 | **Frontend (Player)** | React 18 + Phaser.js 3 + Vite 5 + TypeScript 5 | Canvas rendering for pixel pets; TanStack Query v5, Zustand, React Hook Form + Zod |
 | **Frontend (Admin)** | Vue 3 + Element Plus + Vite 5 + TypeScript 5 | Data-dense admin portal; separate Vite build deployed independently |
-| **Backend** | Node.js 20 LTS + Fastify 4 | Game API + Admin API as two Fastify plugins in one monorepo |
+| **Backend** | Node.js 20 LTS + Fastify 4 | Game API + Admin API as two Fastify plugins in one Node process; admin mounted at `/admin` |
+| **Package Manager** | pnpm 9.x (workspaces) | Monorepo via `pnpm-workspace.yaml`; cross-app linking via `workspace:*` |
 | **Database** | PostgreSQL 15+ (Supabase managed) | Primary writer + 1 read replica; auto-failover 60s; daily S3 backup |
 | **Cache / Queue** | Redis 7+ (Upstash serverless) | Leaderboard sorted set, rate-limit counters, admin sessions, matchmaking queue |
 | **Infrastructure** | Vercel (frontend CDN) + Railway (API, autoscale) | HPA triggers at 70% CPU; ≥ 2 API replicas for game server |
-| **CI / CD** | GitHub Actions | Lint → Test → Build → Deploy pipeline; coverage gate ≥ 80% |
+| **CI / CD** | GitHub Actions | Lint → Test → Build → Deploy pipeline; coverage gate ≥ 80%; see `docs/CICD.md` |
 | **Email** | SendGrid v3 (primary) + Nodemailer SMTP (fallback) | Failover after 3 consecutive SendGrid failures; SPF + DKIM configured |
 | **Testing** | Vitest (unit) + Supertest (integration) + Playwright (E2E) + Cucumber (BDD) | 80% coverage enforced as CI gate |
+| **Observability** | Pino (structured JSON logs) + OpenTelemetry + Prometheus | Traces exported via OTel collector |
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
+
+All three installation paths share these requirements:
 
 - [Git](https://git-scm.com/) 2.40+
 - An `.env` file — copy from `.env.example` (see [Environment Variables](#environment-variables))
@@ -168,9 +180,9 @@ cd pet
 # Configure environment
 cp .env.example .env
 # Edit .env — at minimum confirm POSTGRES_PASSWORD and generate EMAIL_ENCRYPTION_KEY:
-# openssl rand -hex 32
+#   openssl rand -hex 32
 
-# Start all services (app + postgres + redis + mailhog)
+# Start all services (api + postgres + redis + mailhog)
 docker compose up -d
 
 # Confirm everything is healthy
@@ -196,35 +208,43 @@ MailHog web UI (captured claim emails): **http://localhost:8025**
 **Prerequisites:**
 
 - Node.js 20 LTS ([install guide](https://nodejs.org/en/download/))
-- PostgreSQL 15+ (local) or a remote Supabase connection string
-- Redis 7+ (local) or a remote Upstash connection string
+- pnpm 9.x — `npm install -g pnpm@latest`
+- PostgreSQL 15+ (local or Supabase CLI) and Redis 7+ (local or Upstash)
+- See [docs/LOCAL_DEPLOY.md](docs/LOCAL_DEPLOY.md) for the full local setup including Supabase CLI and TOTP admin bootstrap.
 
 ```bash
 git clone https://github.com/ibalasite/pet.git
 cd pet
 
-# Install all workspace dependencies
-npm install
+# Install all workspace dependencies (resolves the pnpm workspace tree)
+pnpm install
 
-# Configure environment
+# Configure environment for each app (api, player-app, admin-app)
 cp .env.example .env
 # Edit .env with your local database, Redis, and email credentials
 
 # Run database migrations
-npm run db:migrate
+pnpm db:migrate
+
+# Seed the database (creates a default admin account; SAVE THE PRINTED CREDENTIALS)
+pnpm db:seed
 
 # Start the development servers (API + player app + admin portal concurrently)
-npm run dev
+pnpm dev
+# or per-app:
+#   pnpm --filter api dev
+#   pnpm --filter player-app dev
+#   pnpm --filter admin-app dev
 ```
 
 Expected output:
 
 ```
-[game-api]  Listening on http://localhost:3000
-[game-api]  Database: connected (postgres://localhost:5432/pixel_pet_arena)
-[game-api]  Redis: connected (redis://localhost:6379)
-[player-app] VITE v5.x.x  ready in 800 ms  →  http://localhost:5173/
-[admin-app]  VITE v5.x.x  ready in 900 ms  →  http://localhost:5174/
+[api]         Listening on http://localhost:3000
+[api]         Database: connected (postgres://localhost:5432/pixel_pet_arena)
+[api]         Redis: connected (redis://localhost:6379)
+[player-app]  VITE v5.x.x  ready in  800 ms  →  http://localhost:5173/
+[admin-app]   VITE v5.x.x  ready in  900 ms  →  http://localhost:5174/
 ```
 
 ---
@@ -233,24 +253,24 @@ Expected output:
 
 > **Recommendation:** Use [WSL 2](https://learn.microsoft.com/windows/wsl/install) + Docker Desktop for the smoothest experience. The commands below work in PowerShell 7+ natively.
 
-**Prerequisites:** Node.js 20 LTS, PostgreSQL 15+, Redis 7+ (all installable via [winget](https://learn.microsoft.com/windows/package-manager/)).
+**Prerequisites:** Node.js 20 LTS, pnpm 9.x, PostgreSQL 15+, Redis 7+ (all installable via [winget](https://learn.microsoft.com/windows/package-manager/)).
 
 ```powershell
 git clone https://github.com/ibalasite/pet.git
 Set-Location pet
 
 # Install all workspace dependencies
-npm install
+pnpm install
 
 # Configure environment
 Copy-Item .env.example .env
 # Open .env in your editor and fill in database / Redis / email credentials
 
 # Run database migrations
-npm run db:migrate
+pnpm db:migrate
 
 # Start the development servers
-npm run dev
+pnpm dev
 ```
 
 Verify the server started:
@@ -263,44 +283,51 @@ Invoke-RestMethod http://localhost:3000/health
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` before starting. The app validates all required variables at startup and exits with a clear error if any are missing.
+Copy `.env.example` to `.env` before starting. The app validates all required variables at startup and exits with a clear error if any are missing. Each app in the monorepo (`api`, `player-app`, `admin-app`) has its own `.env.example` — see [docs/LOCAL_DEPLOY.md §Environment Setup](docs/LOCAL_DEPLOY.md) for the full per-app matrix.
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
 | `POSTGRES_DB` | PostgreSQL database name | Yes | — | `pixel_pet_arena` |
 | `POSTGRES_USER` | PostgreSQL username | Yes | — | `postgres` |
 | `POSTGRES_PASSWORD` | PostgreSQL password | Yes | — | `changeme_local` |
+| `DATABASE_URL` | Full PostgreSQL connection string (overrides `POSTGRES_*` if set) | No | built from `POSTGRES_*` | `postgresql://user:pass@localhost:5432/pixel_pet_arena` |
+| `REDIS_URL` | Redis connection string (Upstash or local) | No | `redis://localhost:6379` | `rediss://user:pass@host:6380` |
 | `SENDGRID_API_KEY` | SendGrid v3 API key for transactional email | Yes (prod) | — | `SG.xxxxx` |
 | `EMAIL_ENCRYPTION_KEY` | AES-256-GCM key for GDPR email storage (hex 32 bytes) | Yes | — | `openssl rand -hex 32` |
-| `REDIS_URL` | Redis connection string (Upstash or local) | No | `redis://localhost:6379` | `rediss://user:pass@host:6380` |
-| `DATABASE_URL` | Full PostgreSQL connection string (overrides POSTGRES_* vars) | No | built from POSTGRES_* | `postgresql://user:pass@localhost:5432/pixel_pet_arena` |
+| `JWT_SECRET` | HMAC secret for short-lived signed tokens (admin TOTP setup, etc.) | Yes | — | `openssl rand -hex 32` |
 | `APP_PORT` | HTTP port the Game API listens on | No | `3000` | `8080` |
 | `LOG_LEVEL` | Minimum log level (`debug`, `info`, `warn`, `error`) | No | `info` | `debug` |
-| `ADMIN_TOTP_SECRET` | TOTP secret for admin 2FA (base32) | Yes (prod) | — | `JBSWY3DPEHPK3PXP` |
+| `ADMIN_TOTP_ISSUER` | TOTP issuer label shown in authenticator apps | No | `pixel-pet-arena` | `Pixel Pet Arena (Staging)` |
+| `FF_MARKETPLACE` | Feature flag — pet trading marketplace (Phase 3) | No | `false` | `true` |
+| `FF_BATTLE_RECORDS` | Feature flag — Battle Records page (P0/ON, kill-switch) | No | `true` | `false` |
 
-See `.env.example` for the full annotated list and optional tuning parameters.
+See `.env.example` for the full annotated list and optional tuning parameters (rate-limit overrides, food-buff multiplier ranges, etc.).
 
 ---
 
 ## API Quick Reference
 
-All player-facing endpoints use `/api/v1/` prefix. All admin endpoints use `/admin/api/` prefix. Authentication: pet endpoints use `Authorization: Bearer <pet_access_token>`; admin endpoints use httpOnly session cookie + TOTP.
+All player-facing endpoints use the `/api/v1/` prefix. All admin endpoints use the `/admin/api/` prefix and are served by the same Node.js/Fastify process. Authentication: pet endpoints use `Authorization: Bearer <pet_access_token>`; admin endpoints use httpOnly session cookie + TOTP.
 
 | Method + Path | Auth | Description |
 |---------------|------|-------------|
-| `POST /api/v1/claim/initiate` | None | Send 6-digit OTP to email address to begin claim |
+| `POST /api/v1/claim` | None | Send 6-digit OTP to email address to begin claim |
 | `POST /api/v1/claim/verify` | None | Verify OTP code → receive permanent pet access token + URL |
+| `POST /api/v1/claim/recover` | None | Recover access for a lost bookmarked URL (issues fresh token, invalidates old) |
+| `GET /api/v1/pets/random` | None | Generate and preview a fresh procedural pet (pre-claim) |
 | `GET /api/v1/pets/:petId` | None | Retrieve public pet profile (stats, appearance, rarity) |
 | `POST /api/v1/pets/:petId/train` | Pet token | Perform 1 training action (max 3/day, reset UTC 00:00) |
+| `POST /api/v1/pets/:petId/feed` | Pet token | Apply a food buff (temporary or permanent stat boost) |
+| `POST /api/v1/arena/enter` | Pet token | Enter arena queue (race or sumo mode); rate-limited 10/hr default |
 | `GET /api/v1/leaderboard` | None | Top 100 pets by win rate; filterable by rarity |
-| `GET /api/v1/arena/battles/:petId` | None | Last 20 battle records for a pet (shareable URL) |
-| `POST /api/v1/arena/enter` | Pet token | Enter arena queue (race or sumo mode); rate-limited 10/hr |
 | `GET /health` | None | Service health check with version and uptime |
 
 For full request/response schemas, error codes, rate limits, and admin endpoints see:
 
 - Markdown source: [docs/API.md](docs/API.md)
 - HTML online: [docs/pages/api.html](docs/pages/api.html)
+- Mock server: [docs/blueprint/mock/](docs/blueprint/mock/) (FastAPI-based stub for frontend development)
+- OpenAPI 3.1 contract: [docs/blueprint/contracts/openapi.yaml](docs/blueprint/contracts/openapi.yaml)
 
 ---
 
@@ -313,27 +340,21 @@ pixel-pet-arena/
 │       ├── ci.yml              # Lint, test, build on every PR
 │       └── deploy.yml          # Deploy to Railway + Vercel
 ├── apps/
-│   ├── game-api/               # Fastify 4 Game API (Node.js 20 LTS)
-│   │   ├── src/
-│   │   │   ├── claim/          # OTP generation, email dispatch, token issuance
-│   │   │   ├── pets/           # Pet CRUD, training, feeding
-│   │   │   ├── arena/          # Matchmaking, battle engine, result recording
-│   │   │   ├── leaderboard/    # Redis sorted set reads + PostgreSQL fallback
-│   │   │   └── shared/         # Config, logger, Zod schemas, DB client
-│   │   └── package.json
-│   ├── admin-api/              # Fastify 4 Admin API (Node.js 20 LTS)
+│   ├── api/                    # Fastify 4 unified API process (Game + Admin plugins)
 │   │   └── src/
-│   │       ├── auth/           # TOTP login, session management
-│   │       ├── pets/           # Admin pet management, ban, override
-│   │       ├── gdpr/           # GDPR queue processing
-│   │       └── config/         # Runtime parameter tuning
+│   │       ├── claim/          # OTP generation, email dispatch, token issuance
+│   │       ├── pets/           # Pet CRUD, training, feeding
+│   │       ├── arena/          # Matchmaking, battle engine, result recording
+│   │       ├── leaderboard/    # Redis sorted set reads + PostgreSQL fallback
+│   │       ├── admin/          # Admin plugin (mounted at /admin/api)
+│   │       └── shared/         # Config, logger, Zod schemas, DB client
 │   ├── player-app/             # React 18 + Phaser.js 3 player SPA
 │   │   └── src/
 │   │       ├── game/           # Phaser.js canvas engine, sprite generator
 │   │       ├── claim/          # Claim flow (3-step compound component)
 │   │       ├── arena/          # Arena lobby, match UI
 │   │       └── leaderboard/    # Leaderboard page
-│   └── admin-portal/           # Vue 3 + Element Plus admin SPA
+│   └── admin-app/              # Vue 3 + Element Plus admin SPA
 ├── packages/
 │   ├── shared-types/           # Shared TypeScript types across all apps
 │   └── constants/              # Shared game constants from constants.json
@@ -345,17 +366,39 @@ pixel-pet-arena/
 │   ├── ARCH.md                 # System Architecture + ADRs
 │   ├── API.md                  # REST API reference
 │   ├── SCHEMA.md               # Database schema reference
+│   ├── CICD.md                 # CI/CD pipeline design
+│   ├── LOCAL_DEPLOY.md         # Local development deployment guide
 │   ├── test-plan.md            # Test Plan + RTM
+│   ├── diagrams/               # Generated UML (9 server + 16 frontend + 5 CI/CD + 2 modulith)
+│   ├── blueprint/              # Generated contracts (OpenAPI, JSON Schema, Pact, IaC, mock server)
 │   └── pages/                  # Generated HTML documentation site
-├── features/                   # Cucumber/Gherkin BDD feature files (server)
+├── features/                   # Cucumber/Gherkin BDD feature files (server-side)
 │   ├── claim-flow.feature
 │   ├── arena-battle.feature
+│   ├── battle-records.feature
 │   ├── leaderboard.feature
+│   ├── training-food.feature
+│   ├── trading-system.feature
+│   ├── rarity-distribution.feature
+│   ├── economy-config.feature
+│   ├── admin-moderation.feature
+│   ├── admin-search-performance.feature
+│   ├── suspicious-detection.feature
+│   ├── gdpr-erasure.feature
 │   └── client/                 # Playwright E2E feature files
-├── docs/pages/prototype/       # Interactive HTML/CSS/JS prototype
+│       ├── claim-flow-ui.feature
+│       ├── pet-display.feature
+│       ├── training-ui.feature
+│       ├── food-system.feature
+│       ├── arena-ui.feature
+│       ├── battle-records.feature
+│       ├── leaderboard-ui.feature
+│       ├── admin-portal.feature
+│       └── settings.feature
 ├── .env.example                # Annotated environment variable template
 ├── docker-compose.yml          # Local multi-service development stack
-└── package.json                # Monorepo root (npm workspaces)
+├── pnpm-workspace.yaml         # pnpm workspace definition
+└── package.json                # Monorepo root
 ```
 
 ---
@@ -373,9 +416,12 @@ The full documentation suite is generated into a static HTML site in `docs/pages
 | ARCH | [docs/ARCH.md](docs/ARCH.md) | [arch.html](docs/pages/arch.html) | C4 diagrams, component architecture, ADRs |
 | API | [docs/API.md](docs/API.md) | [api.html](docs/pages/api.html) | REST API endpoints, schemas, error codes |
 | SCHEMA | [docs/SCHEMA.md](docs/SCHEMA.md) | [schema.html](docs/pages/schema.html) | Database table definitions and ERD |
-| BDD | [features/](features/) | [bdd-server.html](docs/pages/bdd-server.html) | Gherkin server feature files |
-| E2E BDD | [features/client/](features/client/) | [bdd-client.html](docs/pages/bdd-client.html) | Playwright E2E feature files |
+| CICD | [docs/CICD.md](docs/CICD.md) | [cicd.html](docs/pages/cicd.html) | CI/CD pipeline, secrets flow, infra topology |
+| LOCAL_DEPLOY | [docs/LOCAL_DEPLOY.md](docs/LOCAL_DEPLOY.md) | [local-deploy.html](docs/pages/local-deploy.html) | Local development setup walkthrough |
+| BDD (server) | [features/](features/) | [bdd-server.html](docs/pages/bdd-server.html) | Gherkin server feature files |
+| BDD (client / E2E) | [features/client/](features/client/) | [bdd-client.html](docs/pages/bdd-client.html) | Playwright E2E feature files |
 | Test Plan | [docs/test-plan.md](docs/test-plan.md) | [test-plan.html](docs/pages/test-plan.html) | Test strategy, coverage matrix, RTM |
+| Prototype | (interactive) | [prototype/index.html](docs/pages/prototype/index.html) | Clickable HTML prototype + animations |
 
 Regenerate the HTML site:
 
@@ -391,13 +437,13 @@ python3 ~/.claude/skills/gendoc/tools/bin/gen_html.py
 ### Run All Tests
 
 ```bash
-npm test
+pnpm test
 ```
 
 ### Generate Coverage Report
 
 ```bash
-npm run test:coverage
+pnpm test:coverage
 # Report written to coverage/lcov-report/index.html
 ```
 
@@ -407,16 +453,16 @@ Coverage target: **80% lines, branches, functions.** The CI pipeline fails if co
 
 ```bash
 # Unit tests only (Vitest)
-npm run test:unit
+pnpm test:unit
 
 # Integration tests (requires DATABASE_URL and REDIS_URL)
-npm run test:integration
+pnpm test:integration
 
 # BDD / Cucumber feature tests (server)
-npm run test:bdd
+pnpm test:bdd
 
 # End-to-end tests (Playwright, requires a running app instance)
-npm run test:e2e
+pnpm test:e2e
 ```
 
 ### Performance Targets
@@ -428,30 +474,51 @@ npm run test:e2e
 | LCP (player app) | < 2.5 s |
 | FCP (player app) | < 1.5 s |
 | CLS | < 0.1 |
+| Leaderboard update lag | ≤ 30 s (Redis sorted set vs. PostgreSQL `battle_records`) |
 
 ---
 
 ## Known Limitations
 
-1. **Email pre-scan (Gmail/Outlook)**: Email clients may auto-click URLs in emails. Mitigated by using a 6-digit numeric code + separate URL (not a magic-link), requiring manual code entry.
+1. **Email pre-scan (Gmail/Outlook)**: Email clients may auto-click URLs in emails. Mitigated by using a 6-digit numeric code + a separate URL (not a magic-link), requiring manual code entry.
 2. **Token enumeration surface**: Pet access tokens are 32-byte cryptographically random — brute-force infeasible — but long-lived. Pets with no owner interaction for `PET_RESERVATION_TTL_HOURS` (24h) are cleaned up.
 3. **Arena matchmaking at low CCU**: With < ~50 online players, AI-controlled opponents fill matchmaking after the 30-second timeout. AI fallback stats are seeded from the global average.
 4. **Leaderboard eventual consistency**: Redis sorted set may lag up to 30 seconds behind the authoritative PostgreSQL `battle_records` table during peak load. Displayed with a "last updated" timestamp.
 5. **Marketplace (P2) not yet implemented**: Pet trading feature (`FF_MARKETPLACE`) is behind a feature flag and not available in v1.0.
+6. **Admin runtime config cache**: Admin parameter changes (`PUT /admin/api/config/runtime`) take effect within 5 minutes due to `config_cache_refresh_time_minutes = 5`.
 
 ---
 
 ## Changelog
 
-See [GitHub Releases](https://github.com/ibalasite/pet/releases) for versioned release notes.
+See [GitHub Releases](https://github.com/ibalasite/pet/releases) for versioned release notes. Changes to design docs are tracked in each `docs/*.md` file's Change Log section.
 
 ---
 
 ## Development Guide
 
-> This README is auto-generated from `docs/BRD.md`, `docs/PRD.md`, `docs/EDD.md`, `docs/ARCH.md`, and related upstream documents via the `gendoc` pipeline. To regenerate: `/gendoc readme`.
+> This README is auto-generated from `docs/BRD.md`, `docs/PRD.md`, `docs/EDD.md`, `docs/ARCH.md`, `docs/API.md`, and related upstream documents via the `gendoc` pipeline. To regenerate: `/gendoc readme` or `/gendoc-gen-html`.
 
 See [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) for the full onboarding guide including branch strategy, commit message format, PR checklist, local environment tips, and release process.
+
+### Branch Strategy
+
+| Branch | Purpose | Direct Push |
+|--------|---------|-------------|
+| `main` | Production-ready code, tagged releases | No — PR only |
+| `develop` | Integration branch; staging deploys from here | No — PR only |
+| `feature/<ticket-id>-short-description` | New features | Yes (author) |
+| `fix/<ticket-id>-short-description` | Bug fixes | Yes (author) |
+
+### Commit Message Format
+
+Follows [Conventional Commits](https://www.conventionalcommits.org/): `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `perf`, `ci`.
+
+```
+feat(arena): add per-pet rate-limit override for admin tuning
+fix(claim): reject expired OTP codes with 410 instead of 400
+docs(readme): refresh from upstream after ALIGN-FIX
+```
 
 ---
 
@@ -475,7 +542,7 @@ See [LICENSE](LICENSE) for the full text.
 
 ### Responsible Disclosure
 
-If you discover a security vulnerability, **do not open a public GitHub Issue**. Instead, email **security@pixel-pet-arena.com** with:
+If you discover a security vulnerability, **do not open a public GitHub Issue**. Instead, email **security@pixel-pet-arena.com** (or use [GitHub Security Advisories](https://github.com/ibalasite/pet/security/advisories/new)) with:
 
 1. A description of the vulnerability and its potential impact
 2. Steps to reproduce
@@ -496,11 +563,12 @@ We credit responsible disclosures in release notes. See [SECURITY.md](SECURITY.m
 ## Architecture Quick Reference
 
 | Key Decision | Choice | Document |
-|-------------|--------|---------|
-| API paradigm | REST (`/api/v1/`, `/admin/api/`) | [docs/ARCH.md §ADR](docs/ARCH.md#adr) |
+|-------------|--------|----------|
+| API paradigm | REST (`/api/v1/`, `/admin/api/`) — URI path versioning | [docs/ARCH.md](docs/ARCH.md) |
 | Database | PostgreSQL 15+ (Supabase managed) + Redis 7+ (Upstash) | [docs/SCHEMA.md](docs/SCHEMA.md) |
-| Authentication | Email OTP → 32-byte cryptographic URL token (no sessions for players); TOTP for admin | [docs/ARCH.md §5 Security](docs/ARCH.md#5-security-architecture) |
-| Frontend separation | Player app (React + Phaser.js) and Admin portal (Vue 3) as separate Vite builds | [docs/EDD.md §1](docs/EDD.md) |
+| Authentication | Email OTP → 32-byte cryptographic URL token (no sessions for players); httpOnly session + TOTP for admin | [docs/ARCH.md §5 Security](docs/ARCH.md) |
+| Frontend separation | Player app (React + Phaser.js) and Admin portal (Vue 3 + Element Plus) as separate Vite builds | [docs/EDD.md](docs/EDD.md) |
+| Multi-tenancy strategy | Single-tenant (one game instance per deployment); per-pet isolation via token-bound rows | [docs/SCHEMA.md](docs/SCHEMA.md) |
 | Deployment platform | Vercel (frontend CDN) + Railway (API, autoscale HPA 70% CPU) | [docs/LOCAL_DEPLOY.md](docs/LOCAL_DEPLOY.md) |
 
 Main ADRs: [docs/ARCH.md — Architecture Decision Records](docs/ARCH.md#14-architecture-decision-records)
