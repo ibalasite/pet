@@ -2,7 +2,7 @@
   "index.html": {
     "url": "index.html",
     "title": "pet 文件中心",
-    "excerpt": "&lt;!--\nDOC-ID:  README-PIXEL-PET-ARENA-20260505\nVersion: v1.1\nStatus:  DRAFT\nAuthor:  AI Generated (gendoc readme)\nDate:    2026-05-05\nUpstream docs:"
+    "excerpt": "&lt;!--\nDOC-ID:  README-PIXEL-PET-ARENA-20260509\nVersion: v1.2\nStatus:  IN_REVIEW\nAuthor:  AI Generated (gendoc readme)\nDate:    2026-05-09\nUpstream d"
   },
   "idea.html": {
     "url": "idea.html",
@@ -217,12 +217,12 @@
   "diag-communication.html": {
     "url": "diag-communication.html",
     "title": "協作圖",
-    "excerpt": "Communication Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §1.2 System Context, EDD §5 API Design\nflowchart LR\n    PlayerApp[&quot;Pl"
+    "excerpt": "Communication Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §1.2 System Context, EDD §5 API Design\nflowchart TD\n    PlayerApp[&quot;Pl"
   },
   "diag-component.html": {
     "url": "diag-component.html",
     "title": "元件圖",
-    "excerpt": "Component Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §2 Component Architecture, EDD §3.3–3.7 Technology Stack\nflowchart LR\n    subg"
+    "excerpt": "Component Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §2 Component Architecture, EDD §3.3–3.7 Technology Stack\nflowchart TD\n    subg"
   },
   "diag-deployment.html": {
     "url": "diag-deployment.html",
