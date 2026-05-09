@@ -1246,7 +1246,7 @@ export async function logAudit(input: {
 
 ### 6.3 GDPR / 個資保護
 
-**PII 欄位清單**（敏感資料總表見 §14）：
+**PII 欄位清單**（敏感資料總表見 §16）：
 
 | Table | Field | PII Class | Protection | Retention |
 |-------|-------|----------|-----------|-----------|
@@ -1445,7 +1445,7 @@ export const dbReplica = new Pool({ connectionString: process.env.DATABASE_URL_R
 - snake_case description；動詞優先（`create_`, `add_`, `drop_`, `rename_`, `alter_`）
 - 每個 migration 一件邏輯事
 - 同時撰寫 UP 與 DOWN（`*.down.sql`）
-- migration 不可直接 `DROP TABLE`，必須走 §17.6 安全刪除流程
+- migration 不可直接 `DROP TABLE`，必須走 §13.1 安全刪除流程
 
 ### 8.2 零停機 Migration 模式（Expand-Contract Pattern）
 
@@ -1510,12 +1510,12 @@ SELECT COUNT(*) FROM arena_matches WHERE region IS NULL;  -- 應為 0
 ### 8.5 Migration 測試檢查清單
 
 - [ ] UP migration 在乾淨 DB 執行成功
-- [ ] DOWN migration 能完整還原（除 §17.6 標示為 irreversible 的）
+- [ ] DOWN migration 能完整還原（除 §13.1 標示為 irreversible 的）
 - [ ] 在含有 staging 資料量的環境測試過執行時間
 - [ ] 確認不持有超過 3 秒的 table lock（`pg_locks` 監控）
 - [ ] EXPLAIN ANALYZE 新增 / 修改的高頻查詢，確認使用正確索引
 - [ ] FK 約束未被破壞（cross-BC 為刻意移除，需有對應 application layer 驗證 commit）
-- [ ] CI lint：無 `DROP TABLE`（除走 §17.6 流程）、無 `ALTER COLUMN ... TYPE`（除 expand-contract pattern）
+- [ ] CI lint：無 `DROP TABLE`（除走 §13.1 流程）、無 `ALTER COLUMN ... TYPE`（除 expand-contract pattern）
 
 ---
 
@@ -1825,6 +1825,26 @@ PITR 流程：
 | `config:runtime` | 300 s rolling TTL | `config_cache_refresh_time_minutes = 5` |
 
 > **GDPR Right to Erasure 實作細節**：見 §6.3。
+
+### 13.1 Schema 刪除安全模式（Schema Deletion Safety）
+
+**禁止**：直接 `DROP TABLE` 任何曾儲存 PII / 業務資料 / FK 被引用的表。所有 schema 刪除遵循三步驟流程：
+
+```sql
+-- Step 1: 標記廢棄（不影響服務）— 加 COMMENT + RENAME 保留資料
+COMMENT ON TABLE old_feature_table IS 'DEPRECATED: 2026-05-10 — will be dropped 2026-11-10 (6 months observation)';
+ALTER TABLE old_feature_table RENAME TO _deprecated_old_feature_table_20260510;
+
+-- Step 2: 觀察期 6 個月 — 監控 pg_stat_user_tables 確認無 last_seq_scan / last_idx_scan 流量
+SELECT relname, last_seq_scan, last_idx_scan, seq_scan, idx_scan
+FROM pg_stat_user_tables
+WHERE relname = '_deprecated_old_feature_table_20260510';
+
+-- Step 3: 確認觀察期結束且無流量 → 才執行硬刪
+DROP TABLE _deprecated_old_feature_table_20260510;
+```
+
+**Migration CI lint**（§8.5）強制：禁止裸 `DROP TABLE`；只允許 `_deprecated_*` 前綴的表執行 DROP。
 
 ---
 
@@ -2170,9 +2190,147 @@ erDiagram
 
 ---
 
+## 20. Database Observability & Health Monitoring
+
+> 對齊 template §18。所有監控指標匯入 Datadog（EDD §3.6 Observability stack）；告警分 warning / critical 兩級。
+
+### 20.1 關鍵監控查詢
+
+```sql
+-- 連線數監控（含 wait event 分布；偵測連線池壓力與鎖等待）
+SELECT count(*), state, wait_event_type, wait_event
+FROM pg_stat_activity
+WHERE datname = current_database()
+GROUP BY state, wait_event_type, wait_event
+ORDER BY count(*) DESC;
+
+-- 慢查詢識別（需啟用 pg_stat_statements；Supabase Pro 預設啟用）
+SELECT
+    query,
+    calls,
+    ROUND(mean_exec_time::numeric, 2) AS mean_ms,
+    ROUND(stddev_exec_time::numeric, 2) AS stddev_ms,
+    rows
+FROM pg_stat_statements
+WHERE mean_exec_time > 100  -- 超過 100ms
+ORDER BY mean_exec_time DESC
+LIMIT 20;
+
+-- 表格膨脹（Dead Tuple Ratio）— 觸發 VACUUM / autovacuum 調校
+SELECT
+    schemaname,
+    relname AS tablename,
+    pg_size_pretty(pg_total_relation_size(schemaname||'.'||relname)) AS total_size,
+    n_dead_tup,
+    n_live_tup,
+    ROUND(100.0 * n_dead_tup / NULLIF(n_live_tup + n_dead_tup, 0), 2) AS dead_ratio_percent
+FROM pg_stat_user_tables
+ORDER BY n_dead_tup DESC
+LIMIT 20;
+
+-- 索引使用率（找出未使用的索引；候選刪除以降寫入成本）
+SELECT
+    indexrelname AS index_name,
+    relname AS table_name,
+    idx_scan,
+    idx_tup_read,
+    idx_tup_fetch,
+    pg_size_pretty(pg_relation_size(indexrelid)) AS size
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0
+ORDER BY pg_relation_size(indexrelid) DESC;
+
+-- Replication lag（Primary 視角；Supabase 提供 read replica）
+SELECT
+    application_name,
+    client_addr,
+    state,
+    sync_state,
+    EXTRACT(EPOCH FROM write_lag)  AS write_lag_seconds,
+    EXTRACT(EPOCH FROM flush_lag)  AS flush_lag_seconds,
+    EXTRACT(EPOCH FROM replay_lag) AS replay_lag_seconds
+FROM pg_stat_replication;
+
+-- 長事務（可能造成鎖等待 / VACUUM 阻塞）
+SELECT
+    pid,
+    usename,
+    state,
+    NOW() - xact_start AS xact_duration,
+    NOW() - query_start AS query_duration,
+    query
+FROM pg_stat_activity
+WHERE state != 'idle'
+  AND xact_start IS NOT NULL
+  AND NOW() - xact_start > INTERVAL '60 seconds'
+ORDER BY xact_start ASC;
+```
+
+### 20.2 Alerting Thresholds
+
+| 指標 | Warning | Critical | 說明 / 降級策略 |
+|------|---------|---------|-----------------|
+| 連線數使用率 | > 70% of `db_connection_pool_max_connections` (50) | > 90% | 警告：擴 pool；嚴重：增加 API replica 或加大 pool（注意 Supabase max_connections=200）|
+| Replication Lag (replay_lag) | > 1 s | > 30 s | Warning：監控；Critical：read 路徑切回 Primary（§7.4） |
+| Table Dead Tuple Ratio | > 10% | > 30% | 觸發 manual `VACUUM ANALYZE`；調 autovacuum 參數 |
+| Long Running Transaction | > 60 s | > 300 s | 偵測 hung transaction；殺除避免鎖等待累積 |
+| Lock Wait | > 5 s | > 30 s | 鎖競爭問題；分析 `pg_locks` |
+| Disk Usage | > 70% | > 85% | Supabase 自動擴容；超過 critical 觸發 pager |
+| Slow Query Mean | > 100 ms | > 500 ms | 觸發 EXPLAIN ANALYZE review；可能 missing index |
+| Cache Hit Ratio | < 95% | < 90% | shared_buffers 過小或 working set 過大 |
+| Failed Connections / min | > 5 | > 50 | 認證失敗或客戶端 misconfiguration |
+
+### 20.3 Replica Lag 監控與降級
+
+如 §7.4，Replica lag 預算 ≤ 1 秒。觸發降級條件：
+
+```typescript
+// db-router.ts (pseudocode)
+async function getReplicaConnection(): Promise<Pool> {
+  const lag = await dbPrimary.query<{ replay_lag_seconds: number }>(
+    `SELECT EXTRACT(EPOCH FROM replay_lag) AS replay_lag_seconds
+     FROM pg_stat_replication
+     WHERE application_name = 'supabase_replica_1'`
+  );
+  if (lag.rows[0]?.replay_lag_seconds > 30) {
+    // Critical lag — fallback to primary for read traffic
+    metrics.increment('db.replica.fallback_to_primary');
+    return dbPrimary;
+  }
+  return dbReplica;
+}
+```
+
+### 20.4 Health Check 端點
+
+`GET /health` 端點（API.md §10）內含 DB health check：
+
+```typescript
+async function checkDbHealth(): Promise<{ status: 'ok' | 'degraded' | 'down'; latency_ms: number }> {
+  const start = Date.now();
+  try {
+    await dbPrimary.query('SELECT 1');
+    return { status: 'ok', latency_ms: Date.now() - start };
+  } catch (err) {
+    return { status: 'down', latency_ms: Date.now() - start };
+  }
+}
+```
+
+### 20.5 Datadog Dashboard 配置
+
+- **Dashboard**：`pixel-pet-arena / Database Health`
+- **核心 widget**：connections / slow queries top 20 / replication lag / dead tuple ratio / disk usage
+- **告警通道**：
+  - Warning → Slack `#oncall-pet-arena`
+  - Critical → PagerDuty + Slack `#sev1`
+- **SLO Burn Rate**：API P95 latency 由 §7.1 的 query SLO 推導；burn rate > 2x → ticket；> 10x → page
+
+---
+
 GEN_RESULT:
   step_id: SCHEMA
   type: SCHEMA
   files_generated: docs/SCHEMA.md
-  sections_completed: 19
+  sections_completed: 20
   self_check_passed: true
