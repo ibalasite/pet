@@ -1334,9 +1334,9 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TB
-    Start([User on landing page]) --> View[View random pet]
+    Start((User on landing page)) --> View[View random pet]
     View --> Decide{Wants to keep?}
-    Decide -->|No| Exit([Leave])
+    Decide -->|No| Exit((Leave))
     Decide -->|Yes| Form[Enter email + age13 checkbox]
     Form --> Validate{Form valid?}
     Validate -->|No| Form
@@ -1346,20 +1346,20 @@ flowchart TB
     GenOTP --> SendEmail[Send email via SendGrid]
     SendEmail --> Wait[User waits, enters OTP]
     Wait --> Verify{OTP valid?}
-    Verify -->|No| RetryCount{Attempts < 10?}
+    Verify -->|No| RetryCount{Attempts &lt; 10?}
     RetryCount -->|Yes| Wait
     RetryCount -->|No| Err429
     Verify -->|Yes| TX[BEGIN: UPSERT identity + UPDATE pet token + mark code used]
     TX --> Commit[COMMIT]
     Commit --> Reveal[Show pet URL]
-    Reveal --> End([User bookmarks URL])
+    Reveal --> End((User bookmarks URL))
 ```
 
 ##### Arena Battle (Activity)
 
 ```mermaid
 flowchart TB
-    Start([Owner on arena page]) --> Mode[Select mode RACE/SUMO]
+    Start((Owner on arena page)) --> Mode[Select mode RACE/SUMO]
     Mode --> Rate{Rate limit ≤ 10/hr?}
     Rate -->|No| Err429[HTTP 429 Retry-After]
     Rate -->|Yes| Enqueue[ZADD matchmaking:queue]
@@ -1372,16 +1372,16 @@ flowchart TB
     Persist --> ZADD[ZADD leaderboard:global]
     ZADD --> Animate[Play 5-15s animation client-side]
     Animate --> Result[Show win/loss + share button]
-    Result --> End([User can share or rebattle])
+    Result --> End((User can share or rebattle))
 ```
 
 ##### GDPR Erasure (Activity)
 
 ```mermaid
 flowchart TB
-    Start([Owner submits erasure]) --> API[POST /api/v1/gdpr/request type=erasure]
+    Start((Owner submits erasure)) --> API[POST /api/v1/gdpr/request type=erasure]
     API --> Insert[INSERT gdpr_requests status=pending]
-    Insert --> Queue([HTTP 202 jobId])
+    Insert --> Queue((HTTP 202 jobId))
     Queue --> Cron[Cron worker every 5min]
     Cron --> Lock[Redis SETNX gdpr_lock]
     Lock --> Fetch[SELECT pending erasure ≤ 10]
@@ -1396,7 +1396,7 @@ flowchart TB
     NextPet -->|No| Mark[UPDATE gdpr_requests status=completed]
     Mark --> Audit[INSERT audit_logs]
     Audit --> Notify[Send confirmation email]
-    Notify --> End([Done within 7 days])
+    Notify --> End((Done within 7 days))
 ```
 
 #### §4.5.8 Component Diagram
@@ -2280,7 +2280,7 @@ flowchart LR
     Staging --> Smoke[Smoke Tests]
     Smoke --> Approve{Manual Approval}
     Approve -->|Yes| Prod[Deploy Production]
-    Approve -->|No| End([Block])
+    Approve -->|No| End((Block))
     Prod --> SmokeProd[Smoke Tests Prod]
     SmokeProd --> Notify[Slack notification]
 ```

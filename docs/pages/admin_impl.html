@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,60 +334,14 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>ADMIN_IMPL — Admin Portal Implementation Specification</h1>
+    <main class="doc-content"><h1 id="admin_impl--admin-portal-implementation-specification">ADMIN_IMPL — Admin Portal Implementation Specification</h1>
 <p>&lt;!-- SDLC Layer 4: Implementation Engineering --&gt;</p>
 <p>&lt;!-- Upstream: EDD.md (tech stack §3.7) + FRONTEND.md §3 (admin portal design) + API.md §6 (/admin/api/* endpoints) + SCHEMA.md (admin_accounts + admin_audit_log tables) + constants.json --&gt;</p>
 <p>&lt;!-- Scope: Admin Portal (Vue 3 + Element Plus + TypeScript + Vite). Player App (React 18 + Phaser 3) is excluded — see CLIENT_IMPL.md. --&gt;</p>
 <hr>
-<h2>Document Control</h2>
+<h2 id="document-control">Document Control</h2>
 <table>
 <tr><th>Field</th><th>Content</th></tr>
 <tr><td><strong>DOC-ID</strong></td><td>ADMIN_IMPL-PIXEL-PET-ARENA-20260503</td></tr>
@@ -278,28 +351,28 @@
 <tr><td><strong>Status</strong></td><td>DRAFT</td></tr>
 <tr><td><strong>Author</strong></td><td>AI Generated (gendoc ADMIN_IMPL)</td></tr>
 <tr><td><strong>Date</strong></td><td>2026-05-03</td></tr>
-<tr><td><strong>Upstream EDD</strong></td><td><a href="EDD.md" target="_blank" rel="noopener">EDD.md</a> §3.3 + §5.5-A</td></tr>
-<tr><td><strong>Upstream API</strong></td><td><a href="API.md" target="_blank" rel="noopener">API.md</a> §6 — <code>/admin/api/*</code> endpoints</td></tr>
-<tr><td><strong>Upstream SCHEMA</strong></td><td><a href="SCHEMA.md" target="_blank" rel="noopener">SCHEMA.md</a> — <code>admin_accounts</code> + <code>admin_audit_log</code> tables</td></tr>
-<tr><td><strong>Upstream ARCH</strong></td><td><a href="ARCH.md" target="_blank" rel="noopener">ARCH.md</a> — Admin Portal container (deployment + tech stack)</td></tr>
+<tr><td><strong>Upstream EDD</strong></td><td><a href="edd.html" target="_blank" rel="noopener">EDD.md</a> §3.3 + §5.5-A</td></tr>
+<tr><td><strong>Upstream API</strong></td><td><a href="api.html" target="_blank" rel="noopener">API.md</a> §6 — <code>/admin/api/*</code> endpoints</td></tr>
+<tr><td><strong>Upstream SCHEMA</strong></td><td><a href="schema.html" target="_blank" rel="noopener">SCHEMA.md</a> — <code>admin_accounts</code> + <code>admin_audit_log</code> tables</td></tr>
+<tr><td><strong>Upstream ARCH</strong></td><td><a href="arch.html" target="_blank" rel="noopener">ARCH.md</a> — Admin Portal container (deployment + tech stack)</td></tr>
 <tr><td><strong>Upstream CONSTANTS</strong></td><td><a href="constants.json" target="_blank" rel="noopener">constants.json</a> — session TTLs, page sizes, rate limits</td></tr>
 </table>
 <hr>
-<h2>Change Log</h2>
+<h2 id="change-log">Change Log</h2>
 <table>
 <tr><th>Version</th><th>Date</th><th>Author</th><th>Change Summary</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (gendoc ADMIN_IMPL)</td><td>Initial draft</td></tr>
 </table>
 <hr>
-<h2>§1 Admin Portal Overview</h2>
-<h3>§1.1 System Purpose</h3>
+<h2 id="1-admin-portal-overview">§1 Admin Portal Overview</h2>
+<h3 id="11-system-purpose">§1.1 System Purpose</h3>
 <p>The pixel-pet-arena Admin Portal is an internal operations platform used exclusively by platform staff. Primary user groups:</p>
 <ul><li><strong>Super Admin</strong>: Full access — account management, GDPR compliance, system configuration, audit log review</li><li><strong>Moderator</strong>: Pet management (ban/unban), suspicious activity review, battle record inspection, leaderboard view</li><li><strong>Read Only</strong>: Monitoring dashboard, leaderboard and analytics read access, no write permissions</li></ul>
 <p>Core operations problems the portal solves:</p>
 <ol><li><strong>Pet ban/unban</strong> — Processes automated bot detection results (threshold: &gt; 50 battles/hr rolling window; <code>bot_detection_battles_threshold = 50</code>)</li><li><strong>Leaderboard management</strong> — Admins view Top 500; public shows only Top 100 (<code>leaderboard_admin_view = 500</code>, <code>leaderboard_top_display = 100</code>)</li><li><strong>GDPR compliance queue</strong> — Handles erasure / data_access / restrict_processing / object_leaderboard / rectification requests across 5 request types</li><li><strong>System configuration</strong> — Runtime parameters (arena rate limit, rarity weights) and economy parameters (food buff multiplier) cached in Redis (TTL: <code>config_cache_refresh_time_minutes = 5</code>)</li><li><strong>Audit log</strong> — All CUD operations recorded, retained 2 years (<code>admin_audit_log_retention_years = 2</code>)</li></ol>
-<h3>§1.2 Design Principles</h3>
+<h3 id="12-design-principles">§1.2 Design Principles</h3>
 <ul><li><strong>Security-first</strong>: RBAC minimum privilege; httpOnly + SameSite=Strict session cookie; every operation produces an audit log entry</li><li><strong>Operational efficiency</strong>: Bulk operations + smart search (pet ID / email hash)</li><li><strong>Data consistency</strong>: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s)</li><li><strong>Auditability</strong>: All CUD operations write to <code>admin_audit_log</code>, retained 2 years (<code>admin_audit_log_retention_years = 2</code>)</li></ul>
-<h3>§1.3 User Roles (from EDD §3.7 + ARCH §5.1)</h3>
+<h3 id="13-user-roles-from-edd-37--arch-51">§1.3 User Roles (from EDD §3.7 + ARCH §5.1)</h3>
 <table>
 <tr><th>Role</th><th>Display Name</th><th>Accessible Features</th></tr>
 <tr><td><code>super_admin</code></td><td>Super Admin</td><td>All: GDPR, config, roles, audit log + all moderator features</td></tr>
@@ -307,8 +380,8 @@
 <tr><td><code>read_only</code></td><td>Read Only</td><td>GET-only: dashboard, pet list, leaderboard, battle records, email monitor, analytics</td></tr>
 </table>
 <hr>
-<h2>§2 Technology Stack Decisions</h2>
-<h3>§2.1 Framework Selection</h3>
+<h2 id="2-technology-stack-decisions">§2 Technology Stack Decisions</h2>
+<h3 id="21-framework-selection">§2.1 Framework Selection</h3>
 <table>
 <tr><th>Technology</th><th>Choice</th><th>Rationale</th></tr>
 <tr><td>Frontend Framework</td><td>Vue 3.4+ (Composition API)</td><td><code>&lt;script setup&gt;</code> syntax + Composition API fully compatible with Element Plus 2.x; Vue 3 reactivity system well-suited for form-heavy admin CRUD interfaces</td></tr>
@@ -320,7 +393,7 @@
 <tr><td>Charts</td><td>ECharts 5.x (via vue-echarts 6.x)</td><td>Analytics dashboard line chart requirements; tree-shakeable on-demand imports control bundle size</td></tr>
 <tr><td>i18n</td><td>None (single-language — English only)</td><td>Admin is an internal tool; English-only interface is sufficient</td></tr>
 </table>
-<h3>§2.2 Dependency Version Manifest</h3>
+<h3 id="22-dependency-version-manifest">§2.2 Dependency Version Manifest</h3>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;vue&quot;: &quot;^3.4.0&quot;,
@@ -345,97 +418,121 @@
   }
 }</code></pre>
 <hr>
-<h2>§3 Directory Structure</h2>
-<pre><code class="">packages/admin-app/                   ← Admin Portal root (pnpm workspace)
-├── src/
-│   ├── api/                          ← API call wrappers (maps to API.md /admin/api/* routes)
-│   │   ├── http.ts                   ← Axios instance + interceptors (session handling)
-│   │   ├── auth.ts                   ← login / logout / totp/setup / totp/verify
-│   │   ├── pets.ts                   ← GET /pets, GET /pets/:id, ban, unban
-│   │   ├── battles.ts                ← GET /battles, GET /suspicious, flag, unflag
-│   │   ├── leaderboard.ts            ← GET /leaderboard, DELETE /leaderboard/:petId
-│   │   ├── config.ts                 ← GET/PUT /config/runtime, /economy, /flags
-│   │   ├── gdpr.ts                   ← GET /gdpr, POST /gdpr/delete, PATCH /gdpr/:id
-│   │   ├── audit.ts                  ← GET /admin/api/audit
-│   │   ├── roles.ts                  ← GET/POST /roles, DELETE /roles/:id, TOTP reset
-│   │   ├── analytics.ts              ← GET /analytics, GET /dashboard, GET /email/monitor
-│   │   └── types.ts                  ← API response types (synchronized with packages/shared)
-│   ├── components/
-│   │   ├── common/                   ← Shared components
-│   │   │   ├── SearchableTable.vue   ← Table + Pagination + Search bar composite component
-│   │   │   ├── ConfirmDialog.vue     ← ElMessageBox wrapper (dangerous action confirmation)
-│   │   │   ├── AuditLogDetail.vue    ← Audit log detail Drawer
-│   │   │   └── StatusBadge.vue       ← Status badge (banned / active / pending)
-│   │   └── business/                 ← Domain-specific components
-│   │       ├── PetBanForm.vue        ← Ban/unban Dialog (reason field, max 500 chars)
-│   │       ├── BattleFlagForm.vue    ← Flag battle Dialog
-│   │       └── GdprStatusForm.vue    ← GDPR status update Dialog
-│   ├── composables/                  ← Reusable logic (Vue Composition API)
-│   │   ├── usePermission.ts          ← hasPermission() + v-permission directive
-│   │   ├── usePagination.ts          ← Pagination state management
-│   │   ├── useTable.ts               ← Table loading / error / data three-state pattern
-│   │   └── useSessionTimer.ts        ← 4h inactivity + 8h absolute expiry monitoring
-│   ├── layouts/
-│   │   └── AdminLayout.vue           ← HeaderBar + SidebarMenu + Content main layout
-│   ├── router/
-│   │   ├── index.ts                  ← Route definitions + createRouter
-│   │   ├── guards.ts                 ← beforeEach route guards (session + role validation)
-│   │   └── routes.ts                 ← Route list (includes meta.permission)
-│   ├── stores/                       ← Pinia stores
-│   │   ├── auth.ts                   ← session + adminUser + login/logout
-│   │   ├── permission.ts             ← role + hasPermission() + menuTree
-│   │   └── config.ts                 ← runtime config + economy config frontend cache
-│   ├── types/                        ← TypeScript type definitions
-│   │   ├── admin.ts                  ← AdminUser, AuditLogEntry, GdprRequest
-│   │   ├── pet.ts                    ← Pet, BanStatus, ModerationReason
-│   │   ├── config.ts                 ← RuntimeConfig, EconomyConfig, FeatureFlag
-│   │   └── api.ts                    ← ApiEnvelope, PagedResponse, Meta
-│   ├── utils/                        ← Utility functions
-│   │   ├── format.ts                 ← Date format, email mask, reason truncate
-│   │   └── session.ts                ← Session expiry calculation utilities
-│   ├── styles/                       ← Styles
-│   │   ├── variables.css             ← CSS Custom Properties (color / spacing tokens)
-│   │   └── global.css                ← Reset + Element Plus theme overrides
-│   └── views/
-│       ├── auth/
-│       │   ├── LoginView.vue         ← Login form (username + password + TOTP)
-│       │   └── TotpSetupView.vue     ← First-login TOTP setup page
-│       ├── dashboard/
-│       │   └── DashboardView.vue     ← KPI cards + system status
-│       ├── pets/
-│       │   ├── PetListView.vue       ← Pet list (search / filter / ban actions)
-│       │   └── PetDetailView.vue     ← Pet detail (ban history + stats + battles)
-│       ├── battles/
-│       │   ├── BattleListView.vue    ← Battle records list (flag/unflag)
-│       │   └── SuspiciousView.vue    ← Suspicious activity list
-│       ├── leaderboard/
-│       │   └── LeaderboardView.vue   ← Top 500 admin view (suspicious flags)
-│       ├── analytics/
-│       │   ├── AnalyticsView.vue     ← Time-series charts (DAU / claims / battles)
-│       │   └── EmailMonitorView.vue  ← Email delivery rate monitoring
-│       ├── config/
-│       │   ├── RuntimeConfigView.vue ← Arena rate limit / rarity weights
-│       │   ├── EconomyConfigView.vue ← Food buff multiplier / arena entry cost
-│       │   └── FeatureFlagsView.vue  ← Feature flag management (FF_MARKETPLACE, etc.)
-│       ├── gdpr/
-│       │   └── GdprQueueView.vue     ← GDPR request queue (status filter / update)
-│       ├── roles/
-│       │   └── RoleManagementView.vue ← Admin account list (create / deactivate / TOTP reset)
-│       ├── audit/
-│       │   └── AuditLogView.vue      ← Audit log (actor / action / time range filter)
-│       └── errors/
-│           ├── 403View.vue           ← Forbidden page
-│           └── 404View.vue           ← Not found page
-├── public/
-│   └── favicon.ico
-├── .env.development
-├── .env.production
-├── vite.config.ts
-├── tsconfig.json
-└── package.json</code></pre>
+<h2 id="3-directory-structure">§3 Directory Structure</h2>
+<pre class="mermaid">graph TD
+  N0[&quot;packages/admin-app/                    Admin Portal root (pnpm workspace)&quot;]
+  N1[&quot;src/&quot;]
+  N2[&quot;api/                           API call wrappers (maps to API.md /admin/api/* routes)&quot;]
+  N3[&quot;http.ts                    Axios instance + interceptors (session handling)&quot;]
+  N4[&quot;auth.ts                    login / logout / totp/setup / totp/verify&quot;]
+  N5[&quot;pets.ts                    GET /pets, GET /pets/:id, ban, unban&quot;]
+  N6[&quot;battles.ts                 GET /battles, GET /suspicious, flag, unflag&quot;]
+  N7[&quot;leaderboard.ts             GET /leaderboard, DELETE /leaderboard/:petId&quot;]
+  N8[&quot;config.ts                  GET/PUT /config/runtime, /economy, /flags&quot;]
+  N9[&quot;gdpr.ts                    GET /gdpr, POST /gdpr/delete, PATCH /gdpr/:id&quot;]
+  N10[&quot;audit.ts                   GET /admin/api/audit&quot;]
+  N11[&quot;roles.ts                   GET/POST /roles, DELETE /roles/:id, TOTP reset&quot;]
+  N12[&quot;analytics.ts               GET /analytics, GET /dashboard, GET /email/monitor&quot;]
+  N13[&quot;types.ts                   API response types (synchronized with packages/shared)&quot;]
+  N14[&quot;components/&quot;]
+  N15[&quot;common/                    Shared components&quot;]
+  N16[&quot;SearchableTable.vue    Table + Pagination + Search bar composite component&quot;]
+  N17[&quot;ConfirmDialog.vue      ElMessageBox wrapper (dangerous action confirmation)&quot;]
+  N18[&quot;AuditLogDetail.vue     Audit log detail Drawer&quot;]
+  N19[&quot;StatusBadge.vue        Status badge (banned / active / pending)&quot;]
+  N20[&quot;business/                  Domain-specific components&quot;]
+  N21[&quot;PetBanForm.vue         Ban/unban Dialog (reason field, max 500 chars)&quot;]
+  N22[&quot;BattleFlagForm.vue     Flag battle Dialog&quot;]
+  N23[&quot;GdprStatusForm.vue     GDPR status update Dialog&quot;]
+  N24[&quot;composables/                   Reusable logic (Vue Composition API)&quot;]
+  N25[&quot;usePermission.ts           hasPermission() + v-permission directive&quot;]
+  N26[&quot;usePagination.ts           Pagination state management&quot;]
+  N27[&quot;useTable.ts                Table loading / error / data three-state pattern&quot;]
+  N28[&quot;useSessionTimer.ts         4h inactivity + 8h absolute expiry monitoring&quot;]
+  N29[&quot;layouts/&quot;]
+  N30[&quot;AdminLayout.vue            HeaderBar + SidebarMenu + Content main layout&quot;]
+  N31[&quot;router/&quot;]
+  N32[&quot;index.ts                   Route definitions + createRouter&quot;]
+  N33[&quot;guards.ts                  beforeEach route guards (session + role validation)&quot;]
+  N34[&quot;routes.ts                  Route list (includes meta.permission)&quot;]
+  N35[&quot;stores/                        Pinia stores&quot;]
+  N36[&quot;auth.ts                    session + adminUser + login/logout&quot;]
+  N37[&quot;permission.ts              role + hasPermission() + menuTree&quot;]
+  N38[&quot;config.ts                  runtime config + economy config frontend cache&quot;]
+  N39[&quot;types/                         TypeScript type definitions&quot;]
+  N40[&quot;admin.ts                   AdminUser, AuditLogEntry, GdprRequest&quot;]
+  N41[&quot;pet.ts                     Pet, BanStatus, ModerationReason&quot;]
+  N42[&quot;config.ts                  RuntimeConfig, EconomyConfig, FeatureFlag&quot;]
+  N43[&quot;api.ts                     ApiEnvelope, PagedResponse, Meta&quot;]
+  N44[&quot;utils/                         Utility functions&quot;]
+  N45[&quot;format.ts                  Date format, email mask, reason truncate&quot;]
+  N46[&quot;session.ts                 Session expiry calculation utilities&quot;]
+  N47[&quot;styles/                        Styles&quot;]
+  N48[&quot;variables.css              CSS Custom Properties (color / spacing tokens)&quot;]
+  N49[&quot;global.css                 Reset + Element Plus theme overrides&quot;]
+  N50[&quot;views/&quot;]
+  N51[&quot;auth/&quot;]
+  N52[&quot;LoginView.vue          Login form (username + password + TOTP)&quot;]
+  N53[&quot;TotpSetupView.vue      First-login TOTP setup page&quot;]
+  N54[&quot;dashboard/&quot;]
+  N55[&quot;DashboardView.vue      KPI cards + system status&quot;]
+  N56[&quot;pets/&quot;]
+  N57[&quot;PetListView.vue        Pet list (search / filter / ban actions)&quot;]
+  N58[&quot;PetDetailView.vue      Pet detail (ban history + stats + battles)&quot;]
+  N59[&quot;battles/&quot;]
+  N60[&quot;BattleListView.vue     Battle records list (flag/unflag)&quot;]
+  N61[&quot;SuspiciousView.vue     Suspicious activity list&quot;]
+  N62[&quot;leaderboard/&quot;]
+  N63[&quot;LeaderboardView.vue    Top 500 admin view (suspicious flags)&quot;]
+  N64[&quot;analytics/&quot;]
+  N65[&quot;AnalyticsView.vue      Time-series charts (DAU / claims / battles)&quot;]
+  N66[&quot;EmailMonitorView.vue   Email delivery rate monitoring&quot;]
+  N67[&quot;config/&quot;]
+  N68[&quot;RuntimeConfigView.vue  Arena rate limit / rarity weights&quot;]
+  N69[&quot;EconomyConfigView.vue  Food buff multiplier / arena entry cost&quot;]
+  N70[&quot;FeatureFlagsView.vue   Feature flag management (FF_MARKETPLACE, etc.)&quot;]
+  N71[&quot;gdpr/&quot;]
+  N72[&quot;GdprQueueView.vue      GDPR request queue (status filter / update)&quot;]
+  N73[&quot;roles/&quot;]
+  N74[&quot;RoleManagementView.vue  Admin account list (create / deactivate / TOTP reset)&quot;]
+  N75[&quot;audit/&quot;]
+  N76[&quot;AuditLogView.vue       Audit log (actor / action / time range filter)&quot;]
+  N77[&quot;errors/&quot;]
+  N78[&quot;403View.vue            Forbidden page&quot;]
+  N79[&quot;404View.vue            Not found page&quot;]
+  N80[&quot;public/&quot;]
+  N81[&quot;favicon.ico&quot;]
+  N82[&quot;.env.development&quot;]
+  N83[&quot;.env.production&quot;]
+  N84[&quot;vite.config.ts&quot;]
+  N85[&quot;tsconfig.json&quot;]
+  N86[&quot;package.json&quot;]
+  N0 --&gt; N1
+  N0 --&gt; N14
+  N0 --&gt; N29
+  N0 --&gt; N31
+  N0 --&gt; N50
+  N0 --&gt; N51
+  N0 --&gt; N54
+  N0 --&gt; N56
+  N0 --&gt; N59
+  N0 --&gt; N62
+  N0 --&gt; N64
+  N0 --&gt; N67
+  N0 --&gt; N71
+  N0 --&gt; N73
+  N0 --&gt; N75
+  N0 --&gt; N77
+  N0 --&gt; N80
+  N0 --&gt; N81
+  N0 --&gt; N82
+  N0 --&gt; N83
+  N0 --&gt; N84
+  N0 --&gt; N85
+  N0 --&gt; N86</pre>
 <hr>
-<h2>§4 Routing Design</h2>
-<h3>§4.1 Route Table</h3>
+<h2 id="4-routing-design">§4 Routing Design</h2>
+<h3 id="41-route-table">§4.1 Route Table</h3>
 <table>
 <tr><th>Path</th><th>Component</th><th>Required Permission</th><th>Description</th></tr>
 <tr><td><code>/admin/login</code></td><td><code>LoginView</code></td><td>Public</td><td>Admin login page (username + password + TOTP)</td></tr>
@@ -457,7 +554,7 @@
 <tr><td><code>/admin/403</code></td><td><code>403View</code></td><td>Public</td><td>Forbidden error page</td></tr>
 <tr><td><code>/admin/:pathMatch(.*)</code></td><td><code>404View</code></td><td>Public</td><td>404 error page</td></tr>
 </table>
-<h3>§4.2 Route Guards</h3>
+<h3 id="42-route-guards">§4.2 Route Guards</h3>
 <pre><code class="language-typescript">// router/guards.ts
 import { useAuthStore } from &#x27;@/stores/auth&#x27;
 import { usePermissionStore } from &#x27;@/stores/permission&#x27;
@@ -485,12 +582,12 @@ export function setupRouterGuards(router: Router) {
     next()
   })
 }</code></pre>
-<h3>§4.3 Dynamic Sidebar Generation Strategy</h3>
+<h3 id="43-dynamic-sidebar-generation-strategy">§4.3 Dynamic Sidebar Generation Strategy</h3>
 <p>The portal uses a <strong>client-filtered</strong> strategy: roles are fixed at deploy time (<code>super_admin</code> / <code>moderator</code> / <code>read_only</code>); the frontend filters a static menu config based on the current user&#x27;s role. Menu items without permission are removed entirely (not just disabled) to prevent information leakage.</p>
 <p>Rationale: EDD §3.7 and ARCH §5.1 define three admin roles that are fixed for EDD Phase 1 — no need for server-side dynamic menu delivery.</p>
 <hr>
-<h2>§5 RBAC Implementation</h2>
-<h3>§5.1 Role Definitions (from EDD §3.7 + ARCH §5.1 + SCHEMA admin_role_enum)</h3>
+<h2 id="5-rbac-implementation">§5 RBAC Implementation</h2>
+<h3 id="51-role-definitions-from-edd-37--arch-51--schema-admin_role_enum">§5.1 Role Definitions (from EDD §3.7 + ARCH §5.1 + SCHEMA admin_role_enum)</h3>
 <table>
 <tr><th>Role Key</th><th>Display Name</th><th>System Role</th><th>Permission Level</th></tr>
 <tr><td><code>super_admin</code></td><td>Super Admin</td><td>Yes</td><td>All (config / GDPR / roles / audit log)</td></tr>
@@ -517,7 +614,7 @@ export function setupRouterGuards(router: Router) {
 <tr><td>roles</td><td>view / manage</td><td>super_admin</td></tr>
 <tr><td>audit</td><td>view</td><td>super_admin</td></tr>
 </table>
-<h3>§5.2 Permission Guard Implementation</h3>
+<h3 id="52-permission-guard-implementation">§5.2 Permission Guard Implementation</h3>
 <pre><code class="language-typescript">// composables/usePermission.ts
 import { usePermissionStore } from &#x27;@/stores/permission&#x27;
 import type { DirectiveBinding } from &#x27;vue&#x27;
@@ -554,10 +651,10 @@ export const permissionDirective = {
     Ban Pet
   &lt;/el-button&gt;
 &lt;/template&gt;</code></pre>
-<h3>§5.3 Dynamic Menu Strategy</h3>
+<h3 id="53-dynamic-menu-strategy">§5.3 Dynamic Menu Strategy</h3>
 <p>Choice: <strong>client-filtered</strong></p>
 <p>Implementation: Each route in <code>router/routes.ts</code> carries <code>meta.permission</code>. <code>SidebarMenu</code> in <code>AdminLayout.vue</code> iterates the route config and applies <code>usePermission().hasPermission(route.meta.permission)</code> to filter out inaccessible menu items. Items without access are removed from the DOM entirely — not just visually hidden.</p>
-<h3>§5.4 Session Management</h3>
+<h3 id="54-session-management">§5.4 Session Management</h3>
 <table>
 <tr><th>Item</th><th>Specification</th></tr>
 <tr><td>Session storage location</td><td>HttpOnly Cookie (<code>session=&lt;session_id&gt;; HttpOnly; SameSite=Strict; Secure; Path=/admin</code>)</td></tr>
@@ -568,15 +665,29 @@ export const permissionDirective = {
 <tr><td>CSRF protection</td><td>SameSite=Strict cookie policy prevents cross-site request forgery; no additional token required (FRONTEND.md §3.6)</td></tr>
 </table>
 <hr>
-<h2>§6 Layout System</h2>
-<h3>§6.1 Main Layout Structure</h3>
-<div class="umock umock__page"><div class="umock__navbar"><span class="umock__logo">HeaderBar (Logo + Admin Username + Role Badge + Logout)</span></div><div class="umock__sidenav"><div class="umock__item">│  SidebarMenu</div><div class="umock__item">│  (260px)</div><div class="umock__item">│  Dashboard</div><div class="umock__item">│  Pet Mgmt</div><div class="umock__item">│  Battles</div><div class="umock__item">│  Leaderboard</div><div class="umock__item">│  Analytics</div><div class="umock__item">│  Config ▾</div><div class="umock__item">│  GDPR</div><div class="umock__item">│  Roles</div><div class="umock__item">│  Audit Log</div></div><div class="umock__info">Content Area ┌──────────────────────────────────────┐ │  BreadCrumb (auto-generated by route)</div><div class="umock__info">│  Page Content │  (max-width: 1400px; padding: 24px)</div><div class="umock__info">└──────────────────────────────────────┘</div></div>
+<h2 id="6-layout-system">§6 Layout System</h2>
+<h3 id="61-main-layout-structure">§6.1 Main Layout Structure</h3>
+<pre><code class="">┌───────────────────────────────────────────────────────────┐
+│  HeaderBar (Logo + Admin Username + Role Badge + Logout)   │
+├──────────────┬────────────────────────────────────────────┤
+│  SidebarMenu │  Content Area                              │
+│  (260px)     │  ┌──────────────────────────────────────┐  │
+│  Dashboard   │  │  BreadCrumb (auto-generated by route) │  │
+│  Pet Mgmt    │  ├──────────────────────────────────────┤  │
+│  Battles     │  │  Page Content                        │  │
+│  Leaderboard │  │  (max-width: 1400px; padding: 24px)  │  │
+│  Analytics   │  │                                      │  │
+│  Config ▾    │  └──────────────────────────────────────┘  │
+│  GDPR        │                                            │
+│  Roles       │                                            │
+│  Audit Log   │                                            │
+└──────────────┴────────────────────────────────────────────┘</code></pre>
 <p><strong>Layout sub-components:</strong></p>
 <ul><li><strong>HeaderBar</strong>: Left side shows pixel-pet-arena logo (text) + &quot;Admin Portal&quot; label; right side shows the logged-in admin&#x27;s username + role badge (<code>el-tag</code>) + session inactivity countdown + logout button. Logout calls <code>POST /admin/api/auth/logout</code> and clears auth state.</li></ul>
 <ul><li><strong>SidebarMenu</strong>: Uses Element Plus <code>el-menu</code>. Expanded width: 260px / collapsed width: 64px (icon-only + tooltip). Menu items are dynamically filtered by current user role (client-filtered; items without access are never rendered). Active route is highlighted with a left-border accent color (<code>--el-color-primary</code>) + light background. Config is a nested group (Runtime / Economy / Feature Flags).</li></ul>
 <ul><li><strong>BreadCrumb</strong>: Placed at the top of the Content Area using <code>el-breadcrumb</code>, auto-generated from <code>route.matched</code> hierarchy (e.g. &quot;Pet Management &gt; Pet Detail&quot;).</li></ul>
 <ul><li><strong>Content Area</strong>: <code>max-width: 1400px</code>; <code>padding: 24px</code>; renders page content via <code>&lt;RouterView /&gt;</code>. Scroll occurs only in the Content Area — Sidebar and Header are fixed.</li></ul>
-<h3>§6.2 Sidebar Specification</h3>
+<h3 id="62-sidebar-specification">§6.2 Sidebar Specification</h3>
 <table>
 <tr><th>Property</th><th>Value</th></tr>
 <tr><td>Expanded width</td><td>260px</td></tr>
@@ -585,15 +696,15 @@ export const permissionDirective = {
 <tr><td>Active item style</td><td>3px solid left border <code>var(--el-color-primary)</code> + background <code>var(--el-color-primary-light-9)</code></td></tr>
 </table>
 <hr>
-<h2>§7 Page Specifications</h2>
-<h3>§7.1 Login Page (<code>/admin/login</code>)</h3>
+<h2 id="7-page-specifications">§7 Page Specifications</h2>
+<h3 id="71-login-page-adminlogin">§7.1 Login Page (<code>/admin/login</code>)</h3>
 <p><strong>Purpose</strong>: Admin authentication (username + password + 6-digit TOTP code)</p>
 <p><strong>Form fields</strong>:</p>
 <ul><li><code>username</code>: string, required (not email — avoids exposing user existence)</li><li><code>password</code>: string, required, type=&quot;password&quot;</li><li><code>totpCode</code>: string, optional on first login (server returns <code>TOTP_SETUP_REQUIRED</code> and redirects to setup page)</li></ul>
 <p><strong>Interaction rules</strong>:</p>
 <ul><li>Pre-submit <code>formRef.validate()</code> call</li><li>Success → store adminId + role in <code>authStore</code>, redirect to <code>redirect</code> query param or default <code>/admin/dashboard</code></li><li>10 consecutive failures → account locked (admin_login_lockout_threshold = 10; admin_login_lockout_duration_minutes = 30), display <code>unlockedAt</code> remaining time</li><li>IP-level pre-auth rate limit: 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10; admin_login_ip_rate_limit_window_seconds = 900)</li><li><code>TOTP_SETUP_REQUIRED</code> response → extract <code>error.details.setupToken</code>, navigate to <code>/admin/totp-setup</code></li></ul>
 <p><strong>APIs required</strong>: <code>POST /admin/api/auth/login</code></p>
-<h3>§7.2 Dashboard (<code>/admin/dashboard</code>)</h3>
+<h3 id="72-dashboard-admindashboard">§7.2 Dashboard (<code>/admin/dashboard</code>)</h3>
 <p><strong>Purpose</strong>: Platform health at a glance; page load target ≤ 3 seconds (admin_page_load_time_seconds = 3)</p>
 <p><strong>KPI Cards</strong>:</p>
 <table>
@@ -610,7 +721,7 @@ export const permissionDirective = {
 <p><strong>Charts</strong>: Dashboard KPI data comes from the <code>GET /admin/api/dashboard</code> aggregated endpoint. Time-series charts are on <code>/admin/analytics</code> only — no ECharts instances on the Dashboard page.</p>
 <p><strong>Required API</strong>: <code>GET /admin/api/dashboard</code></p>
 <p><strong>Required permission</strong>: All authenticated roles (<code>read_only+</code>)</p>
-<h3>§7.3 Pet Management — List (<code>/admin/pets</code>)</h3>
+<h3 id="73-pet-management--list-adminpets">§7.3 Pet Management — List (<code>/admin/pets</code>)</h3>
 <p><strong>Purpose</strong>: Search, filter, and manage all platform pets; supports ≤ 2 s search across 1 million records (admin_search_response_time_seconds = 2)</p>
 <p><strong>Table columns</strong>: Pet ID (truncated), Owner Email (masked: <code>p<em>*</em>@example.com</code>), Rarity, Level, Win Rate, Battles Played, Ban Status, Created At</p>
 <p><strong>Search / filter</strong>:</p>
@@ -619,13 +730,13 @@ export const permissionDirective = {
 <ul><li>Ban (<code>v-permission=&quot;&#x27;moderator&#x27;&quot;</code>) → opens <code>PetBanForm.vue</code> dialog</li><li>Unban (<code>v-permission=&quot;&#x27;moderator&#x27;&quot;</code>, shown only for banned pets) → opens <code>PetBanForm.vue</code> dialog (reason required)</li><li>View Detail → navigates to <code>/admin/pets/:petId</code></li></ul>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/pets</code>, <code>POST /admin/api/pets/:petId/ban</code>, <code>POST /admin/api/pets/:petId/unban</code></p>
 <p><strong>Required permission</strong>: <code>read_only+</code> (GET) / <code>moderator+</code> (ban/unban)</p>
-<h3>§7.4 Pet Management — Detail (<code>/admin/pets/:petId</code>)</h3>
+<h3 id="74-pet-management--detail-adminpetspetid">§7.4 Pet Management — Detail (<code>/admin/pets/:petId</code>)</h3>
 <p><strong>Purpose</strong>: View a single pet&#x27;s full information including ban history and battle records</p>
 <p><strong>Displayed information</strong>:</p>
 <ul><li>Basic info: ID, Pet Name, Seed, Rarity, Level, Generation Meta (6 dimensions)</li><li>Stats: speed / strength / stamina, Total Training Actions, Last Trained At, isNeglected</li><li>Owner: Owner Email (masked), Claimed At</li><li>Ban status: isBanned, Banned Reason (max 500 chars), Banned At</li><li>Last 20 arena battle records (arena_battle_records_display_count = 20)</li></ul>
 <p><strong>Actions</strong>: Ban / Unban (<code>moderator+</code>), Edit Pet Name (<code>super_admin</code>, <code>PUT /admin/api/pets/:petId</code>)</p>
 <p><strong>Required API</strong>: <code>GET /admin/api/pets/:petId</code></p>
-<h3>§7.5 Battle Records (<code>/admin/battles</code>)</h3>
+<h3 id="75-battle-records-adminbattles">§7.5 Battle Records (<code>/admin/battles</code>)</h3>
 <p><strong>Purpose</strong>: Review all arena battle records; supports flag/unflag operations</p>
 <p><strong>Table columns</strong>: Match ID, Pet A, Pet B (null if AI), Winner (<code>winnerId</code>), Duration, Flagged (<code>isFlagged</code>), Completed At</p>
 <p><strong>Filters</strong>: Date range (from/to) / Pet ID / Flagged (All / Flagged Only)</p>
@@ -633,14 +744,14 @@ export const permissionDirective = {
 <ul><li>Flag Battle (<code>moderator+</code>) → <code>POST /admin/api/battles/:matchId/flag</code> (reason required, max 500 chars)</li><li>Unflag Battle (<code>moderator+</code>) → <code>DELETE /admin/api/battles/:matchId/flag</code> (reason required)</li></ul>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/battles</code>, <code>POST /admin/api/battles/:matchId/flag</code>, <code>DELETE /admin/api/battles/:matchId/flag</code></p>
 <p><strong>Required permission</strong>: <code>read_only+</code> (GET) / <code>moderator+</code> (flag/unflag)</p>
-<h3>§7.6 Suspicious Activity (<code>/admin/suspicious</code>)</h3>
+<h3 id="76-suspicious-activity-adminsuspicious">§7.6 Suspicious Activity (<code>/admin/suspicious</code>)</h3>
 <p><strong>Purpose</strong>: List pets automatically flagged by the bot detection system (&gt; 50 battles/hr rolling window)</p>
 <p><strong>Table columns</strong>: Pet ID, Battles Last Hour, Win Rate, Flag Count, Last Flagged At</p>
 <p><strong>Actions</strong>: Navigate to Pet Detail (ban actions performed on the detail page)</p>
 <p><strong>Threshold</strong>: bot_detection_battles_threshold = 50 / bot_detection_window_minutes = 60</p>
 <p><strong>Required API</strong>: <code>GET /admin/api/suspicious</code></p>
 <p><strong>Required permission</strong>: <code>moderator+</code></p>
-<h3>§7.7 Leaderboard Management (<code>/admin/leaderboard</code>)</h3>
+<h3 id="77-leaderboard-management-adminleaderboard">§7.7 Leaderboard Management (<code>/admin/leaderboard</code>)</h3>
 <p><strong>Purpose</strong>: View Top 500 leaderboard (public version shows only Top 100); suspicious pets display a warning badge</p>
 <p><strong>Table columns</strong>: Rank, Pet Name, Rarity, Level, Score, Win Rate, Battles Last Hour, Suspicious (warning icon when <code>isSuspicious</code>), Banned</p>
 <p><strong>Hard cap</strong>: 500 entries (leaderboard_admin_view = 500), single response, no pagination</p>
@@ -648,7 +759,7 @@ export const permissionDirective = {
 <ul><li>Remove from Leaderboard (<code>moderator+</code>) → <code>DELETE /admin/api/leaderboard/:petId</code></li><li>View Pet Detail → navigate to <code>/admin/pets/:petId</code></li></ul>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/leaderboard</code>, <code>DELETE /admin/api/leaderboard/:petId</code></p>
 <p><strong>Required permission</strong>: <code>read_only+</code> (GET) / <code>moderator+</code> (DELETE)</p>
-<h3>§7.8 Analytics (<code>/admin/analytics</code>)</h3>
+<h3 id="78-analytics-adminanalytics">§7.8 Analytics (<code>/admin/analytics</code>)</h3>
 <p><strong>Purpose</strong>: Platform time-series analysis charts</p>
 <p><strong>Charts</strong>:</p>
 <table>
@@ -661,30 +772,30 @@ export const permissionDirective = {
 <p><strong>Controls</strong>: Date range picker (from / to, required), manual refresh button</p>
 <p><strong>Required API</strong>: <code>GET /admin/api/analytics</code></p>
 <p><strong>Required permission</strong>: <code>read_only+</code></p>
-<h3>§7.9 Email Monitor (<code>/admin/email</code>)</h3>
+<h3 id="79-email-monitor-adminemail">§7.9 Email Monitor (<code>/admin/email</code>)</h3>
 <p><strong>Purpose</strong>: Monitor SendGrid delivery health</p>
 <p><strong>Displayed info</strong>: Emails Sent (24h), Delivery Success Rate (target ≥ 98%; claim_email_delivery_rate_target_percent = 98), Bounce Rate, Spam Complaint Rate (target &lt; 0.1%; spam_complaint_rate_max_percent = 0.1), Failover Active (boolean)</p>
 <p><strong>Required API</strong>: <code>GET /admin/api/email/monitor</code></p>
 <p><strong>Required permission</strong>: <code>read_only+</code></p>
-<h3>§7.10 Runtime Config (<code>/admin/config/runtime</code>)</h3>
+<h3 id="710-runtime-config-adminconfigruntime">§7.10 Runtime Config (<code>/admin/config/runtime</code>)</h3>
 <p><strong>Purpose</strong>: Runtime parameter adjustment; config changes take effect within 5 minutes (config_cache_refresh_time_minutes = 5)</p>
 <p><strong>Form fields</strong>:</p>
 <ul><li><code>arenaRateLimitBattlesPerHour</code>: integer, range <code>[1, 50]</code> (arena_rate_limit_admin_min = 1, arena_rate_limit_admin_max = 50)</li><li><code>arenaMatchmakingTimeoutSeconds</code>: integer, recommended range 5–120</li><li><code>rarityWeights.common</code>: integer</li><li><code>rarityWeights.rare</code>: integer</li><li><code>rarityWeights.epic</code>: integer</li><li><code>rarityWeights.legendary</code>: integer (all four must sum to 100%)</li></ul>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/config/runtime</code>, <code>PUT /admin/api/config/runtime</code></p>
 <p><strong>Required permission</strong>: <code>super_admin</code></p>
-<h3>§7.11 Economy Config (<code>/admin/config/economy</code>)</h3>
+<h3 id="711-economy-config-adminconfigeconomy">§7.11 Economy Config (<code>/admin/config/economy</code>)</h3>
 <p><strong>Purpose</strong>: Food buff multiplier and arena entry cost configuration</p>
 <p><strong>Form fields</strong>:</p>
 <ul><li><code>foodBuffMultiplierMin</code>: 0.5–5.0 (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0)</li><li><code>foodBuffMultiplierMax</code>: 0.5–5.0</li><li><code>arenaEntryCostFoodCreditsDefault</code>: 0–10 (arena_entry_cost_food_credits_default = 0, arena_entry_cost_food_credits_admin_max = 10)</li><li><code>arenaEntryCooldownMaxMinutes</code>: 0–60 (arena_entry_cooldown_admin_min_minutes = 0, arena_entry_cooldown_admin_max_minutes = 60)</li></ul>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/config/economy</code>, <code>PUT /admin/api/config/economy</code></p>
 <p><strong>Required permission</strong>: <code>super_admin</code></p>
-<h3>§7.12 Feature Flags (<code>/admin/config/flags</code>)</h3>
+<h3 id="712-feature-flags-adminconfigflags">§7.12 Feature Flags (<code>/admin/config/flags</code>)</h3>
 <p><strong>Purpose</strong>: Control feature switches such as <code>FF_MARKETPLACE</code></p>
 <p><strong>Table columns</strong>: Flag Name, Enabled (<code>el-switch</code>), Description</p>
 <p><strong>Actions</strong>: Toggle → <code>PUT /admin/api/config/flags/:flag</code> (secondary confirmation required for high-impact flags such as <code>FF_MARKETPLACE</code>)</p>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/config/flags</code>, <code>PUT /admin/api/config/flags/:flag</code></p>
 <p><strong>Required permission</strong>: <code>super_admin</code></p>
-<h3>§7.13 GDPR Queue (<code>/admin/gdpr</code>)</h3>
+<h3 id="713-gdpr-queue-admingdpr">§7.13 GDPR Queue (<code>/admin/gdpr</code>)</h3>
 <p><strong>Purpose</strong>: Process 5 types of GDPR requests (erasure / data_access / restrict_processing / object_leaderboard / rectification)</p>
 <p><strong>Table columns</strong>: Request ID, Request Type, Status, Submitted At, Completed At, Admin Notes</p>
 <p><strong>Filters</strong>: Status / Type</p>
@@ -694,7 +805,7 @@ export const permissionDirective = {
 <ul><li>erasure: 7 days (gdpr_email_deletion_window_days = 7)</li><li>data_access: 30 days (gdpr_data_access_response_days = 30)</li><li>restrict_processing: 24 h (gdpr_restrict_processing_response_hours = 24)</li><li>object_leaderboard: 5 business days (gdpr_object_leaderboard_response_business_days = 5)</li><li>rectification: 24 h (gdpr_email_rectification_response_hours = 24)</li></ul>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/gdpr</code>, <code>PATCH /admin/api/gdpr/:requestId</code>, <code>POST /admin/api/gdpr/delete</code></p>
 <p><strong>Required permission</strong>: <code>super_admin</code></p>
-<h3>§7.14 Role Management (<code>/admin/roles</code>)</h3>
+<h3 id="714-role-management-adminroles">§7.14 Role Management (<code>/admin/roles</code>)</h3>
 <p><strong>Purpose</strong>: Manage admin accounts (create / deactivate / reset TOTP)</p>
 <p><strong>Table columns</strong>: Admin ID, Username, Role, Last Login At, Status (Active / Deactivated)</p>
 <p><strong>Actions</strong>:</p>
@@ -702,7 +813,7 @@ export const permissionDirective = {
 <p><strong>Constraint</strong>: Admin accounts are soft-deleted only (<code>deactivated_at</code> set); hard deletion is not permitted</p>
 <p><strong>Required APIs</strong>: <code>GET /admin/api/roles</code>, <code>POST /admin/api/roles</code>, <code>DELETE /admin/api/roles/:adminId</code>, <code>POST /admin/api/roles/:adminId/totp/reset</code></p>
 <p><strong>Required permission</strong>: <code>super_admin</code></p>
-<h3>§7.15 Audit Log (<code>/admin/audit</code>)</h3>
+<h3 id="715-audit-log-adminaudit">§7.15 Audit Log (<code>/admin/audit</code>)</h3>
 <p><strong>Purpose</strong>: Review all admin CUD operation records; any 12-month window search ≤ 3 s (admin_audit_log_search_response_time_seconds = 3)</p>
 <p><strong>Table columns</strong>: Log ID, Admin Username, Action, Target Type, Target ID, Detail (JSONB summary), Created At</p>
 <p><strong>Filters</strong>: Actor (actorId UUID) / Action Type (e.g. <code>pet.ban</code>) / Date Range (from / to)</p>
@@ -711,8 +822,8 @@ export const permissionDirective = {
 <p><strong>Required API</strong>: <code>GET /admin/api/audit</code></p>
 <p><strong>Required permission</strong>: <code>super_admin</code></p>
 <hr>
-<h2>§8 API Integration</h2>
-<h3>§8.1 Axios Configuration</h3>
+<h2 id="8-api-integration">§8 API Integration</h2>
+<h3 id="81-axios-configuration">§8.1 Axios Configuration</h3>
 <pre><code class="language-typescript">// api/http.ts
 import axios from &#x27;axios&#x27;
 import { useAuthStore } from &#x27;@/stores/auth&#x27;
@@ -747,12 +858,12 @@ http.interceptors.response.use(
 )
 
 export default http</code></pre>
-<h3>§8.2 CSRF Protection</h3>
+<h3 id="82-csrf-protection">§8.2 CSRF Protection</h3>
 <p>Admin API CSRF protection relies on the <code>SameSite=Strict</code> attribute on the session cookie (API.md §2.2). Because the cookie is <code>SameSite=Strict</code>, browsers will not attach it to cross-origin requests, making cross-site request forgery impossible without additional token mechanisms. No <code>X-CSRF-Token</code> header is required (FRONTEND.md §3.6). If the deployment is ever extended to cross-origin scenarios, an <code>X-CSRF-Token</code> double-submit pattern must be added at that time.</p>
-<h3>§8.3 Admin Session Handling</h3>
+<h3 id="83-admin-session-handling">§8.3 Admin Session Handling</h3>
 <p>Admin sessions use server-side Redis sessions (<code>session:admin:{session_id}</code>):</p>
 <ul><li><strong>Inactivity TTL</strong>: 14400 s (admin_session_inactivity_expiry_hours = 4) — automatically renewed by the server on each request</li><li><strong>Absolute expiry</strong>: 28800 s (admin_session_absolute_expiry_hours = 8) — server enforces via <code>absExpiry</code> field in the session JSON</li><li><strong>Frontend monitoring</strong>: <code>useSessionTimer.ts</code> composable starts a timer at login; shows a toast 5 minutes before inactivity expiry; forces redirect to login at absolute expiry</li></ul>
-<h3>§8.4 API Endpoint Mapping (all <code>/admin/api/*</code> routes from API.md §6)</h3>
+<h3 id="84-api-endpoint-mapping-all-adminapi-routes-from-apimd-6">§8.4 API Endpoint Mapping (all <code>/admin/api/*</code> routes from API.md §6)</h3>
 <table>
 <tr><th>Feature</th><th>Method</th><th>Path</th><th>Required Permission</th><th>Page</th></tr>
 <tr><td>Admin login</td><td>POST</td><td><code>/admin/api/auth/login</code></td><td>Public</td><td><code>/admin/login</code></td></tr>
@@ -789,15 +900,15 @@ export default http</code></pre>
 <tr><td>Email monitor</td><td>GET</td><td><code>/admin/api/email/monitor</code></td><td>read_only+</td><td><code>/admin/email</code></td></tr>
 </table>
 <hr>
-<h2>§9 Pinia Store Architecture</h2>
-<h3>§9.1 Store Summary</h3>
+<h2 id="9-pinia-store-architecture">§9 Pinia Store Architecture</h2>
+<h3 id="91-store-summary">§9.1 Store Summary</h3>
 <table>
 <tr><th>Store</th><th>Responsibility</th><th>Primary State</th></tr>
 <tr><td><code>authStore</code></td><td>Authentication state / session management</td><td><code>adminId</code>, <code>role</code>, <code>username</code>, <code>sessionExpiresAt</code>, <code>isAuthenticated</code></td></tr>
 <tr><td><code>permissionStore</code></td><td>Current user role + permission queries</td><td><code>role</code>, <code>hasPermission()</code></td></tr>
 <tr><td><code>configStore</code></td><td>Frontend cache for runtime config, economy config, and feature flags</td><td><code>runtimeConfig</code>, <code>economyConfig</code>, <code>featureFlags</code></td></tr>
 </table>
-<h3>§9.2 authStore — Key Logic</h3>
+<h3 id="92-authstore--key-logic">§9.2 authStore — Key Logic</h3>
 <p>This project uses an <strong>HttpOnly Cookie</strong> session mechanism. <code>authStore</code> stores no token string. <code>isAuthenticated</code> is derived from whether <code>adminUser</code> is non-null. After page refresh, if the session is still valid, Axios automatically carries the cookie — the first authenticated API call returning 200 maintains the logged-in state; a 401 redirects to login.</p>
 <pre><code class="language-typescript">// stores/auth.ts
 import { defineStore } from &#x27;pinia&#x27;
@@ -851,7 +962,7 @@ export const useAuthStore = defineStore(&#x27;auth&#x27;, () =&gt; {
 
   return { adminUser, isAuthenticated, loginAt, login, logout, clearSession }
 })</code></pre>
-<h3>§9.3 permissionStore — Key Logic</h3>
+<h3 id="93-permissionstore--key-logic">§9.3 permissionStore — Key Logic</h3>
 <pre><code class="language-typescript">// stores/permission.ts
 import { defineStore } from &#x27;pinia&#x27;
 import { ref } from &#x27;vue&#x27;
@@ -892,7 +1003,7 @@ export const usePermissionStore = defineStore(&#x27;permission&#x27;, () =&gt; {
 
   return { role, setRole, clearRole, hasPermission, accessibleMenuKeys }
 })</code></pre>
-<h3>§9.4 configStore — Key Logic</h3>
+<h3 id="94-configstore--key-logic">§9.4 configStore — Key Logic</h3>
 <pre><code class="language-typescript">// stores/config.ts
 import { defineStore } from &#x27;pinia&#x27;
 import { ref } from &#x27;vue&#x27;
@@ -973,8 +1084,8 @@ export const useConfigStore = defineStore(&#x27;config&#x27;, () =&gt; {
   }
 })</code></pre>
 <hr>
-<h2>§10 Element Plus Component Standards</h2>
-<h3>§10.1 Table Component Standard (Universal)</h3>
+<h2 id="10-element-plus-component-standards">§10 Element Plus Component Standards</h2>
+<h3 id="101-table-component-standard-universal">§10.1 Table Component Standard (Universal)</h3>
 <p>All admin tables must implement three states:</p>
 <pre><code class="language-vue">&lt;template&gt;
   &lt;div&gt;
@@ -1012,7 +1123,7 @@ export const useConfigStore = defineStore(&#x27;config&#x27;, () =&gt; {
     /&gt;
   &lt;/div&gt;
 &lt;/template&gt;</code></pre>
-<h3>§10.2 Form Component Standard</h3>
+<h3 id="102-form-component-standard">§10.2 Form Component Standard</h3>
 <pre><code class="language-vue">&lt;template&gt;
   &lt;el-form ref=&quot;formRef&quot; :model=&quot;form&quot; :rules=&quot;rules&quot; label-width=&quot;160px&quot;&gt;
     &lt;el-form-item label=&quot;Reason&quot; prop=&quot;reason&quot;&gt;
@@ -1064,7 +1175,7 @@ async function handleSubmit() {
   }
 }
 &lt;/script&gt;</code></pre>
-<h3>§10.3 Dangerous Action Confirmation (ElMessageBox)</h3>
+<h3 id="103-dangerous-action-confirmation-elmessagebox">§10.3 Dangerous Action Confirmation (ElMessageBox)</h3>
 <p>All ban / deactivate / delete / feature flag toggle operations must confirm before executing:</p>
 <pre><code class="language-typescript">import { ElMessageBox, ElMessage } from &#x27;element-plus&#x27;
 
@@ -1083,7 +1194,7 @@ async function handleBanPet(petId: string) {
   await petsApi.ban(petId, { reason: moderationReason.value })
   ElMessage.success(&#x27;Pet banned successfully. Leaderboard removal in progress.&#x27;)
 }</code></pre>
-<h3>§10.4 Global Message Notification Standards</h3>
+<h3 id="104-global-message-notification-standards">§10.4 Global Message Notification Standards</h3>
 <pre><code class="language-typescript">// Operation success
 ElMessage({ type: &#x27;success&#x27;, message: &#x27;Changes saved&#x27;, duration: 3000 })
 
@@ -1093,8 +1204,8 @@ ElMessage({ type: &#x27;error&#x27;, message: `Error: ${err.response?.data?.erro
 // Warning (e.g. GDPR SLA approaching deadline)
 ElNotification({ type: &#x27;warning&#x27;, title: &#x27;GDPR SLA Alert&#x27;, message: &#x27;Request #xxx expires in 2 hours&#x27;, duration: 0 })</code></pre>
 <hr>
-<h2>§11 Shared Component Specifications</h2>
-<h3>§11.1 SearchableTable Component</h3>
+<h2 id="11-shared-component-specifications">§11 Shared Component Specifications</h2>
+<h3 id="111-searchabletable-component">§11.1 SearchableTable Component</h3>
 <pre><code class="language-typescript">// Type definitions
 interface TableColumn {
   prop: string
@@ -1140,7 +1251,7 @@ interface SearchableTableProps {
     &lt;/el-button&gt;
   &lt;/template&gt;
 &lt;/SearchableTable&gt;</code></pre>
-<h3>§11.2 AuditLogDetail Component</h3>
+<h3 id="112-auditlogdetail-component">§11.2 AuditLogDetail Component</h3>
 <p>Renders the <code>admin_audit_log.detail</code> JSONB column with formatted key-value display; highlights <code>reason</code>, <code>previous_value</code>, <code>new_value</code>, and similar fields.</p>
 <pre><code class="language-typescript">interface AuditLogDetailProps {
   id: string | number           // audit_log id (BIGSERIAL) — matches API.md §6.8 response field `id`
@@ -1159,7 +1270,7 @@ interface SearchableTableProps {
   @close=&quot;drawerVisible = false&quot;
 /&gt;</code></pre>
 <hr>
-<h2>§12 Chart Integration</h2>
+<h2 id="12-chart-integration">§12 Chart Integration</h2>
 <p>The admin analytics page uses ECharts 5.x (via vue-echarts 6.x) for time-series data visualization.</p>
 <table>
 <tr><th>Chart</th><th>Type</th><th>Update Strategy</th></tr>
@@ -1180,11 +1291,11 @@ use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, Legen
 <p><strong>Responsive sizing</strong>: Use the <code>autoresize</code> prop on <code>v-chart</code> to automatically adapt to container width:</p>
 <pre><code class="language-vue">&lt;v-chart :option=&quot;chartOption&quot; autoresize style=&quot;height: 320px&quot; /&gt;</code></pre>
 <hr>
-<h2>§13 Internationalization (i18n)</h2>
+<h2 id="13-internationalization-i18n">§13 Internationalization (i18n)</h2>
 <p>The Admin Portal is single-language (English). No multi-locale configuration is required. Element Plus locale uses the default <code>en</code> locale.</p>
 <hr>
-<h2>§14 Performance</h2>
-<h3>§14.1 Route-Level Lazy Loading</h3>
+<h2 id="14-performance">§14 Performance</h2>
+<h3 id="141-route-level-lazy-loading">§14.1 Route-Level Lazy Loading</h3>
 <pre><code class="language-typescript">// router/routes.ts
 // Note: createRouter uses createWebHistory(&#x27;/admin&#x27;) base — all paths below are
 // relative to that base (FRONTEND.md §3.5). The browser URL for path &#x27;/login&#x27; is
@@ -1281,11 +1392,11 @@ const routes = [
     meta: { public: true },
   },
 ]</code></pre>
-<h3>§14.2 Bundle Analysis</h3>
+<h3 id="142-bundle-analysis">§14.2 Bundle Analysis</h3>
 <pre><code class="language-bash"># Run bundle analysis
 npx vite-bundle-visualizer</code></pre>
 <p>Target: Element Plus uses automatic on-demand import (unplugin-auto-import + unplugin-vue-components). Main bundle target: <strong>&lt; 150 KB gzipped</strong> (total_js_bundle_gzipped_kb = 300 for full stack reference).</p>
-<h3>§14.3 Performance Targets</h3>
+<h3 id="143-performance-targets">§14.3 Performance Targets</h3>
 <table>
 <tr><th>Metric</th><th>Target</th><th>Source</th></tr>
 <tr><td>Admin page load (including data)</td><td>&lt; 3000 ms</td><td>admin_page_load_time_seconds = 3</td></tr>
@@ -1293,7 +1404,7 @@ npx vite-bundle-visualizer</code></pre>
 <tr><td>Audit log search (any 12-month window)</td><td>&lt; 3000 ms</td><td>admin_audit_log_search_response_time_seconds = 3</td></tr>
 <tr><td>FCP (First Contentful Paint)</td><td>&lt; 2000 ms</td><td>Derived from admin page load target</td></tr>
 </table>
-<h3>§14.4 Element Plus On-Demand Import Configuration</h3>
+<h3 id="144-element-plus-on-demand-import-configuration">§14.4 Element Plus On-Demand Import Configuration</h3>
 <pre><code class="language-typescript">// vite.config.ts (unplugin configuration)
 import AutoImport from &#x27;unplugin-auto-import/vite&#x27;
 import Components from &#x27;unplugin-vue-components/vite&#x27;
@@ -1304,8 +1415,8 @@ plugins: [
   Components({ resolvers: [ElementPlusResolver()] }),
 ]</code></pre>
 <hr>
-<h2>§15 Deployment Configuration</h2>
-<h3>§15.1 Vite Configuration (Build + Dev Proxy)</h3>
+<h2 id="15-deployment-configuration">§15 Deployment Configuration</h2>
+<h3 id="151-vite-configuration-build--dev-proxy">§15.1 Vite Configuration (Build + Dev Proxy)</h3>
 <pre><code class="language-typescript">// vite.config.ts
 import { defineConfig } from &#x27;vite&#x27;
 import vue from &#x27;@vitejs/plugin-vue&#x27;
@@ -1348,7 +1459,7 @@ export default defineConfig({
     },
   },
 })</code></pre>
-<h3>§15.2 Environment Variables</h3>
+<h3 id="152-environment-variables">§15.2 Environment Variables</h3>
 <table>
 <tr><th>Variable</th><th>Development</th><th>Production</th></tr>
 <tr><td><code>VITE_API_BASE_URL</code></td><td><code>http://localhost:3000</code></td><td><code>https://api.pixel-pet-arena.com</code> (via Nginx proxy)</td></tr>
@@ -1360,7 +1471,7 @@ VITE_ADMIN_PATH=/admin</code></pre>
 <p><code>.env.production</code>:</p>
 <pre><code class="">VITE_API_BASE_URL=https://api.pixel-pet-arena.com
 VITE_ADMIN_PATH=/admin</code></pre>
-<h3>§15.3 Nginx Routing Configuration</h3>
+<h3 id="153-nginx-routing-configuration">§15.3 Nginx Routing Configuration</h3>
 <pre><code class="language-nginx"># Admin Portal SPA routing
 location /admin/ {
     root /usr/share/nginx/html;
@@ -1386,8 +1497,8 @@ location /admin/api/ {
   ]
 }</code></pre>
 <hr>
-<h2>§16 Security Hardening</h2>
-<h3>§16.1 Authentication Security</h3>
+<h2 id="16-security-hardening">§16 Security Hardening</h2>
+<h3 id="161-authentication-security">§16.1 Authentication Security</h3>
 <table>
 <tr><th>Control</th><th>Implementation</th></tr>
 <tr><td>TOTP enforcement</td><td>Every admin login requires TOTP after enrollment; <code>TOTP_SETUP_REQUIRED</code> returned on first login</td></tr>
@@ -1397,7 +1508,7 @@ location /admin/api/ {
 <tr><td>TOTP secret storage</td><td>AES-256-GCM encrypted in <code>admin_accounts.totp_secret_encrypted</code></td></tr>
 <tr><td>Backup codes</td><td>10 single-use codes; SHA-256 hashes stored in <code>totp_backup_codes_hash</code> array</td></tr>
 </table>
-<h3>§16.2 Session Security</h3>
+<h3 id="162-session-security">§16.2 Session Security</h3>
 <table>
 <tr><th>Control</th><th>Value</th></tr>
 <tr><td>Cookie flags</td><td><code>HttpOnly; SameSite=Strict; Secure; Path=/admin</code></td></tr>
@@ -1406,13 +1517,13 @@ location /admin/api/ {
 <tr><td>CSRF protection</td><td><code>SameSite=Strict</code> cookie attribute — cross-site submissions are blocked by the browser; no additional token required</td></tr>
 <tr><td>Session store</td><td>Redis server-side (<code>session:admin:{session_id}</code>)</td></tr>
 </table>
-<h3>§16.3 RBAC Security</h3>
+<h3 id="163-rbac-security">§16.3 RBAC Security</h3>
 <ul><li>Every route in Vue Router carries a <code>meta.permission</code> value</li><li>The <code>beforeEach</code> guard validates session and role on every navigation</li><li>The <code>v-permission</code> directive removes unauthorized DOM elements entirely</li><li>Sidebar menu items for unauthorized routes are never rendered</li><li>Server-side authorization is always authoritative; frontend guards are defense-in-depth only</li></ul>
-<h3>§16.4 Audit Trail</h3>
+<h3 id="164-audit-trail">§16.4 Audit Trail</h3>
 <p>All CUD operations write to <code>admin_audit_log</code>:</p>
 <ul><li>Actor (<code>admin_id</code>), action, target type, target ID, detail (JSONB), IP hash, created at</li><li>Retained 2 years (admin_audit_log_retention_years = 2)</li><li>IP addresses nulled after 90 days (ip_address_log_retention_days = 90)</li><li>Immutable — no delete or update operations are permitted</li></ul>
 <hr>
-<h2>§17 Pre-Delivery Checklist</h2>
+<h2 id="17-pre-delivery-checklist">§17 Pre-Delivery Checklist</h2>
 <table>
 <tr><th>#</th><th>Check Item</th><th>Status</th></tr>
 <tr><td>1</td><td>§3 directory structure complete — views / stores / router / api / composables / components all present</td><td>✅</td></tr>

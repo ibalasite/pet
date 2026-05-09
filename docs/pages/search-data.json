@@ -32,7 +32,7 @@
   "edd.html": {
     "url": "edd.html",
     "title": "工程設計文件 (EDD)",
-    "excerpt": "EDD — Engineering Design Document\n\nDocument Control\n\n欄位內容\nDOC-IDEDD-PIXEL-PET-ARENA-20260503\n產品名稱Pixel Pet Arena\n文件版本v1.0\n狀態DRAFT\n作者AI Generated (gend"
+    "excerpt": "EDD — Engineering Design Document\n&lt;!-- SDLC Layer 4 — Engineering Design / Architecture --&gt;\n&lt;!-- Upstream: PRD-PIXEL-PET-ARENA-20260503, PDD-"
   },
   "arch.html": {
     "url": "arch.html",
@@ -47,7 +47,7 @@
   "schema.html": {
     "url": "schema.html",
     "title": "Schema 文件",
-    "excerpt": "Database Schema — pixel-pet-arena\nDOC-ID: SCHEMA-PIXEL-PET-ARENA-20260503\nStatus: DRAFT\nUpstream: EDD-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20"
+    "excerpt": "SCHEMA — Database Schema Design Document\nDocument Control\n\n欄位值\nDocument IDSCHEMA-PIXEL-PET-ARENA-20260510\nVersion2.0\nStatusDraft\nClassificationInterna"
   },
   "frontend.html": {
     "url": "frontend.html",
@@ -169,243 +169,238 @@
     "title": "原始素材 (req/)",
     "excerpt": "📎 原始素材 (req/)專案原始素材與需求附件，點擊下載。📎 附件與素材 (req/)共 1 個附件，點擊下載📎 idea-input.md (600 B)"
   },
-  "diag-activity-arena-battle.html": {
-    "url": "diag-activity-arena-battle.html",
+  "diagrams/activity-arena-battle.html": {
+    "url": "diagrams/activity-arena-battle.html",
     "title": "Activity Arena Battle",
-    "excerpt": "Activity Diagram — Arena Battle System Processing — pixel-pet-arena\n來源：PRD §6.3 Arena Battle Flow, EDD §5.3 Arena Endpoints, EDD §4.4 ArenaMatch\nflowc"
+    "excerpt": "Activity Diagram — Arena Battle\n進入競技場活動：選擇模式 → rate limit → ZADD 排隊 → 30 秒內配對（真人 / AI / timeout 三分支）→ 寫入 arena_match 與 leaderboard → 客戶端動畫展示 → 顯示結果。\nf"
   },
-  "diag-activity-claim-and-train.html": {
-    "url": "diag-activity-claim-and-train.html",
+  "diagrams/activity-claim-and-train.html": {
+    "url": "diagrams/activity-claim-and-train.html",
     "title": "Activity Claim And Train",
     "excerpt": "Activity Diagram — Claim Pet &amp; Training Flow — pixel-pet-arena\n來源：PRD §6 US-AUTH-001, US-AUTH-002, US-TRAIN-001, EDD §5.1–5.2\nflowchart TD\n    A(("
   },
-  "diag-activity-gdpr-erasure.html": {
-    "url": "diag-activity-gdpr-erasure.html",
-    "title": "Activity Gdpr Erasure",
-    "excerpt": "Activity Diagram — GDPR Erasure &amp; Recovery Flow — pixel-pet-arena\n來源：PRD §7.8 GDPR Data Handling, EDD §6.5 GDPR/Data Handling Summary, EDD §5.6 GD"
+  "diagrams/activity-claim-flow.html": {
+    "url": "diagrams/activity-claim-flow.html",
+    "title": "Activity Claim Flow",
+    "excerpt": "Activity Diagram — Claim Flow\n完整領養活動：使用者瀏覽寵物 → 決定領養 → 表單驗證 → rate limit 檢查 → OTP 寄送 → OTP 驗證（含重試上限）→ DB transaction → 顯示 Pet URL。\nflowchart TB\n    Sta"
   },
-  "diag-cicd-pipeline-sequence.html": {
-    "url": "diag-cicd-pipeline-sequence.html",
+  "diagrams/activity-gdpr-erasure.html": {
+    "url": "diagrams/activity-gdpr-erasure.html",
+    "title": "Activity Gdpr Erasure",
+    "excerpt": "Activity Diagram — GDPR Erasure\nGDPR 抹除背景作業：API 收 request 後 INSERT pending → 5 分鐘 cron worker 取鎖 → 逐筆處理：清空 email_encrypted、移除 leaderboard 分數、清空 owner_"
+  },
+  "diagrams/cicd-pipeline-sequence.html": {
+    "url": "diagrams/cicd-pipeline-sequence.html",
     "title": "Cicd Pipeline Sequence",
     "excerpt": "CI Pipeline Sequence Diagram — pixel-pet-arena\n來源：docs/CICD.md §2 GitHub Actions Workflows + §3 PR Gate + §4 ArgoCD GitOps\n描述從 git push / Pull Request"
   },
-  "diag-cicd-pr-gate-activity.html": {
-    "url": "diag-cicd-pr-gate-activity.html",
+  "diagrams/cicd-pr-gate-activity.html": {
+    "url": "diagrams/cicd-pr-gate-activity.html",
     "title": "Cicd Pr Gate Activity",
     "excerpt": "PR Gate Activity Diagram — pixel-pet-arena\n來源：docs/CICD.md §3 PR Gate Requirements + §2 GitHub Actions Workflows\n描述 Pull Request 從建立到滿足合併條件的完整 Gate 檢查"
   },
-  "diag-cicd-secret-flow.html": {
-    "url": "diag-cicd-secret-flow.html",
+  "diagrams/cicd-secret-flow.html": {
+    "url": "diagrams/cicd-secret-flow.html",
     "title": "Cicd Secret Flow",
     "excerpt": "CI/CD Secret Flow Diagram — pixel-pet-arena\n來源：docs/CICD.md §6 Secrets Management + §3.2 detect-secrets + docs/LOCAL_DEPLOY.md §5\n描述 CI/CD pipeline 中 "
   },
-  "diag-class-application.html": {
-    "url": "diag-class-application.html",
+  "diagrams/class-application.html": {
+    "url": "diagrams/class-application.html",
     "title": "Class Application",
-    "excerpt": "Class Diagram — Application Layer（pixel-pet-arena）\n來源：EDD §5 API 設計 + API.md §5 / §6 端點清單\n本圖收錄應用層 UseCase（每個 PRD AC 對應一個）、ApplicationService（跨 UseCase"
+    "excerpt": "Class Diagram — Application Layer\nApplication 層由 6 個 UseCase（Claim / VerifyClaim / Train / EnterArena / BanPet / ProcessGdprErasure）以及 ClaimCodeServic"
   },
-  "diag-class-domain.html": {
-    "url": "diag-class-domain.html",
+  "diagrams/class-domain.html": {
+    "url": "diagrams/class-domain.html",
     "title": "類別圖：領域模型",
-    "excerpt": "Class Diagram — Domain Layer（pixel-pet-arena）\n來源：EDD §3.8 / §4，SCHEMA.md §2，ARCH.md §3\n本圖收錄領域層核心 Aggregate Root、Entity、Value Object、Domain Event 與 Rep"
+    "excerpt": "Class Diagram — Domain Layer\nDomain 層包含 6 個 Aggregate Root（Pet / ClaimIdentity / ClaimCode / ArenaMatch / TrainingLog / FoodBuff）、5 個 ValueObject、2 個 "
   },
-  "diag-class-infra-presentation.html": {
-    "url": "diag-class-infra-presentation.html",
+  "diagrams/class-infra-presentation.html": {
+    "url": "diagrams/class-infra-presentation.html",
     "title": "Class Infra Presentation",
-    "excerpt": "Class Diagram — Infrastructure + Presentation Layer（pixel-pet-arena）\n來源：EDD §3 技術棧 + §5 API 設計 + ARCH.md §3 元件架構\n本圖收錄基礎設施層（Repository 實作、外部服務 Adapter）"
+    "excerpt": "Class Diagram — Infrastructure / Presentation Layer\nInfrastructure 層提供 Postgres / Redis Repository 實作與 SendGrid / SMTP Email Adapter（含 Circuit Breaker"
   },
-  "diag-communication.html": {
-    "url": "diag-communication.html",
+  "diagrams/communication.html": {
+    "url": "diagrams/communication.html",
     "title": "協作圖",
-    "excerpt": "Communication Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §1.2 System Context, EDD §5 API Design\nflowchart TD\n    PlayerApp[&quot;Pl"
+    "excerpt": "Communication Diagram — Claim Pet Flow\n以 Communication Diagram 形式呈現 Claim Pet UseCase 的物件協作與訊息順序（編號 1–7、5.1–5.3）。Player 透過 ClaimController 觸發 ClaimPet"
   },
-  "diag-component.html": {
-    "url": "diag-component.html",
+  "diagrams/component.html": {
+    "url": "diagrams/component.html",
     "title": "元件圖",
-    "excerpt": "Component Diagram — pixel-pet-arena\n來源：EDD §3.8 Component Diagram, ARCH §2 Component Architecture, EDD §3.3–3.7 Technology Stack\nflowchart TD\n    subg"
+    "excerpt": "Component Diagram\n系統由五大區塊組成：Client（Player React + Phaser、Admin Vue、Vite 構建）、API Server（Fastify Auth/RateLimit 中介、Routes 與 UseCase 集成）、Worker（GDPR / cl"
   },
-  "diag-deployment.html": {
-    "url": "diag-deployment.html",
+  "diagrams/deployment.html": {
+    "url": "diagrams/deployment.html",
     "title": "部署圖",
-    "excerpt": "Deployment Diagram — pixel-pet-arena\n來源：EDD §3.8 Deployment Diagram, ARCH §7 Deployment Architecture, EDD §3.6 Hosting/Infrastructure\nflowchart TD\n   "
+    "excerpt": "Deployment Diagram\n雲端部署拓撲：Vercel Edge（Player + Admin 靜態 SPA）→ Railway Compute us-east（LB + 2× api pod + 2× worker pod）→ Supabase（PG Primary + Standby）"
   },
-  "diag-developer-workflow-activity.html": {
-    "url": "diag-developer-workflow-activity.html",
+  "diagrams/developer-workflow-activity.html": {
+    "url": "diagrams/developer-workflow-activity.html",
     "title": "Developer Workflow Activity",
     "excerpt": "Developer Daily Workflow Activity Diagram — pixel-pet-arena\n來源：docs/DEVELOPER_GUIDE.md §1 Local Development + docs/CICD.md §3.3 Pre-PR Checklist\n描述開發者"
   },
-  "diag-er-diagram.html": {
-    "url": "diag-er-diagram.html",
+  "diagrams/er-diagram.html": {
+    "url": "diagrams/er-diagram.html",
     "title": "ER 關聯圖",
-    "excerpt": "Entity-Relationship Diagram — pixel-pet-arena\nOverview\nThis ER diagram covers all 12 PostgreSQL tables defined in SCHEMA.md §2, plus the Redis key-spa"
+    "excerpt": "Entity-Relationship Diagram\n下圖呈現所有 12 張 PostgreSQL 表與其 FK / cross-BC ID 引用關係。雙線箭頭 ||--o{ = 同 BC FK（DB-level 強制）；虛線箭頭 ||..o{ = cross-BC ID-only（v2.1 後移"
   },
-  "diag-infra-local-topology.html": {
-    "url": "diag-infra-local-topology.html",
+  "diagrams/infra-local-topology.html": {
+    "url": "diagrams/infra-local-topology.html",
     "title": "Infra Local Topology",
     "excerpt": "Local Infrastructure Topology — pixel-pet-arena\n來源：docs/CICD.md §4 ArgoCD + §6 Secrets Management + docs/LOCAL_DEPLOY.md namespaces\n描述 Rancher Desktop"
   },
-  "diag-object-snapshot.html": {
-    "url": "diag-object-snapshot.html",
+  "diagrams/object-snapshot.html": {
+    "url": "diagrams/object-snapshot.html",
     "title": "物件圖：快照",
-    "excerpt": "Object Diagram — pixel-pet-arena\n來源：EDD §4.1 Pet, §4.2 User, §4.3 ClaimCode, §4.4 ArenaMatch\nSnapshot 1 — Claimed Pet (IDLE state, Level 7)\nclassDiagr"
+    "excerpt": "Object Diagram — Runtime Snapshot\n下圖呈現一個典型運行期物件配置：玩家 Alex 領養了 LEGENDARY 等級寵物 pet_alex_001，在某次 Race 比賽中（arena_match_77）獲勝，且 claim_code_42 為其領養所用 OTP 紀錄"
   },
-  "diag-sequence-arena-battle.html": {
-    "url": "diag-sequence-arena-battle.html",
+  "diagrams/sequence-arena-battle.html": {
+    "url": "diagrams/sequence-arena-battle.html",
     "title": "Sequence Arena Battle",
-    "excerpt": "Sequence Diagram — Arena Battle Matchmaking\n來源：docs/EDD.md §3.8 Sequence Diagrams + docs/API.md §5.3 Arena Endpoints\nOverview\nThe arena battle flow ha"
+    "excerpt": "Sequence Diagram — Arena Battle\nPlayer 進入 RACE/SUMO 競技場：API 透過 Redis ZADD 排隊，最多 30 秒內配對到對手；若 acceptAI=true 且超時則由 AI 對手結算；勝負與排行榜分數同步寫入 PG 與 Redis。\nsequ"
   },
-  "diag-sequence-arena-enter-error.html": {
-    "url": "diag-sequence-arena-enter-error.html",
+  "diagrams/sequence-arena-enter-error.html": {
+    "url": "diagrams/sequence-arena-enter-error.html",
     "title": "Sequence Arena Enter Error",
     "excerpt": "Sequence Diagram — Arena Enter Error Paths\n來源：docs/API.md §5.3 Arena Endpoints + §4 Error Code Reference\n聚焦 POST /api/v1/arena/enter 的 4 條 Error Path："
   },
-  "diag-sequence-claim-flow-error.html": {
-    "url": "diag-sequence-claim-flow-error.html",
+  "diagrams/sequence-claim-flow-error.html": {
+    "url": "diagrams/sequence-claim-flow-error.html",
     "title": "Sequence Claim Flow Error",
     "excerpt": "Sequence Diagram — Claim Flow Error Paths\n來源：docs/API.md §5.1 Claim Endpoints + §4 Error Code Reference\n聚焦 Claim Flow 的 4 條獨立 Error Path：(1) Email sch"
   },
-  "diag-sequence-claim-flow.html": {
-    "url": "diag-sequence-claim-flow.html",
+  "diagrams/sequence-claim-flow.html": {
+    "url": "diagrams/sequence-claim-flow.html",
     "title": "Sequence Claim Flow",
-    "excerpt": "Sequence Diagram — Pet Claim Email OTP Flow\n來源：docs/EDD.md §3.8 Sequence + docs/API.md §5.1 Claim Flow Endpoints\nOverview\nThe claim flow is the identi"
+    "excerpt": "Sequence Diagram — Claim Flow\n完整領養流程：Player 提交 email + 寵物 ID → API 進行 rate limit 檢查 → 產生 6-digit OTP 並發送至 SendGrid → Player 收信回填 OTP → API 驗證雜湊與過期時間 →"
   },
-  "diag-sequence-training.html": {
-    "url": "diag-sequence-training.html",
+  "diagrams/sequence-gdpr-erasure.html": {
+    "url": "diagrams/sequence-gdpr-erasure.html",
+    "title": "Sequence Gdpr Erasure",
+    "excerpt": "Sequence Diagram — GDPR Erasure\nOwner 提交抹除申請後，API 寫入 gdpr_requests 為 pending；GDPR Worker 每 5 分鐘輪詢，將 claim_identities.email_encrypted 設為 NULL、移除排行榜分數、寫"
+  },
+  "diagrams/sequence-training.html": {
+    "url": "diagrams/sequence-training.html",
     "title": "Sequence Training",
     "excerpt": "Sequence Diagram — Pet Training\n來源：docs/EDD.md §3.8 Sequence + docs/API.md §5.2 Pet Endpoints\nOverview\nTraining is the core progression loop: a pet ow"
   },
-  "diag-state-machine-arena-match.html": {
-    "url": "diag-state-machine-arena-match.html",
+  "diagrams/state-machine-arena-match.html": {
+    "url": "diagrams/state-machine-arena-match.html",
     "title": "State Machine Arena Match",
-    "excerpt": "State Machine — Arena Match\n來源：docs/EDD.md §3.8 Battle Match State Machine + §4.4 ArenaMatch entity\nOverview\nAn arena match progresses through a well-"
+    "excerpt": "State Machine Diagram — Arena Match\nArenaMatch entity 從 CREATED → FINDING_OPPONENT（最多 30 秒）→ READY → IN_PROGRESS → RESOLVED → ARCHIVED；超時無 AI fallback"
   },
-  "diag-state-machine-pet-lifecycle.html": {
-    "url": "diag-state-machine-pet-lifecycle.html",
+  "diagrams/state-machine-pet-lifecycle.html": {
+    "url": "diagrams/state-machine-pet-lifecycle.html",
     "title": "State Machine Pet Lifecycle",
-    "excerpt": "State Machine — Pet Lifecycle\n來源：docs/EDD.md §3.8 Pet State Machine + §4.1 Pet entity\nOverview\nA pet in pixel-pet-arena moves through a defined lifecy"
+    "excerpt": "State Machine Diagram — Pet Lifecycle\n寵物從生成到刪除的完整生命週期：GENERATED → UNCLAIMED → CLAIMED（IDLE / TRAINING / BATTLING / RESTING 四個子狀態） → DELETED。CLAIMED 與 "
   },
-  "diag-use-case.html": {
-    "url": "diag-use-case.html",
+  "diagrams/use-case.html": {
+    "url": "diagrams/use-case.html",
     "title": "用例圖 (Use Case)",
-    "excerpt": "Use Case Diagram — pixel-pet-arena\n來源：EDD §3.8 Use Case Diagram, PRD §4 Scope, PRD §3.2 Persona Cards\nflowchart TD\n    GuestPlayer[&quot;GuestPlayer\\n"
+    "excerpt": "Use Case Diagram\n本圖呈現 Pet Battle Arena 系統四類 actor（Guest / Owner / Admin / System Job）與 15 個主要使用案例之間的互動。Guest 可瀏覽寵物與排行榜並啟動領養流程；Owner 可訓練、餵食、進入競技場、查看戰績、"
   },
-  "diag-frontend-activity-gameplay.html": {
-    "url": "diag-frontend-activity-gameplay.html",
+  "diagrams/frontend-activity-gameplay.html": {
+    "url": "diagrams/frontend-activity-gameplay.html",
     "title": "前端活動圖：遊戲主流程",
     "excerpt": "Frontend Activity Diagram — Main Gameplay Flow\n來源：docs/FRONTEND.md §5 Key UI Flows + docs/PRD.md §3 User Stories + docs/PDD.md\n描述玩家進入網站後的主要遊戲循環：從進站、認領"
   },
-  "diag-frontend-activity-init.html": {
-    "url": "diag-frontend-activity-init.html",
+  "diagrams/frontend-activity-init.html": {
+    "url": "diagrams/frontend-activity-init.html",
     "title": "前端活動圖：初始化",
     "excerpt": "Frontend Activity Diagram — Client Initialization\n來源：docs/FRONTEND.md §1 Overview + §6 Performance Budget + §8.1 Token Storage\n描述客戶端從首次載入到完成初始化的完整序列，包"
   },
-  "diag-frontend-activity-ui.html": {
-    "url": "diag-frontend-activity-ui.html",
+  "diagrams/frontend-activity-ui.html": {
+    "url": "diagrams/frontend-activity-ui.html",
     "title": "前端活動圖：UI 互動",
     "excerpt": "Frontend Activity Diagram — UI Interaction Flow（Training Action）\n來源：docs/FRONTEND.md §5.3 Training Interaction + docs/PDD.md §UI flows\n描述「點擊訓練按鈕」這個關鍵 "
   },
-  "diag-frontend-class-component.html": {
-    "url": "diag-frontend-class-component.html",
+  "diagrams/frontend-class-component.html": {
+    "url": "diagrams/frontend-class-component.html",
     "title": "前端類別圖：元件",
     "excerpt": "Frontend Class Diagram — UI Component Layer\n來源：docs/FRONTEND.md §2.2 React Component Tree + docs/VDD.md §UI Components\n描述 React 18 + TypeScript Player"
   },
-  "diag-frontend-class-scene.html": {
-    "url": "diag-frontend-class-scene.html",
+  "diagrams/frontend-class-scene.html": {
+    "url": "diagrams/frontend-class-scene.html",
     "title": "前端類別圖：場景控制器",
     "excerpt": "Frontend Class Diagram — Scene Controller Layer\n來源：docs/FRONTEND.md §2.5 Routing + §2.3 Phaser Integration + VDD.md §Scene Transitions\n描述 Player App 的"
   },
-  "diag-frontend-class-services.html": {
-    "url": "diag-frontend-class-services.html",
+  "diagrams/frontend-class-services.html": {
+    "url": "diagrams/frontend-class-services.html",
     "title": "前端類別圖：Client 服務",
     "excerpt": "Frontend Class Diagram — Client Service Layer\n來源：docs/FRONTEND.md §2.6 API Client + §2.4 State Management + docs/API.md\n描述 Player App 的網路通訊層、狀態管理層與資料模"
   },
-  "diag-frontend-communication.html": {
-    "url": "diag-frontend-communication.html",
+  "diagrams/frontend-communication.html": {
+    "url": "diagrams/frontend-communication.html",
     "title": "前端協作圖：WS 協議",
     "excerpt": "Frontend Communication Diagram — Client/Server Message Flow\n來源：docs/FRONTEND.md §2.6 API Client + docs/API.md §5 Endpoints\n描述 Player App、Admin SPA 與後端"
   },
-  "diag-frontend-component.html": {
-    "url": "diag-frontend-component.html",
+  "diagrams/frontend-component.html": {
+    "url": "diagrams/frontend-component.html",
     "title": "前端元件圖：Cocos 節點樹",
     "excerpt": "Frontend Component Diagram — React + Phaser Node Tree\n來源：docs/FRONTEND.md §2.2 React Component Tree + §2.3 Phaser Integration Pattern\n描述 Player App 的完"
   },
-  "diag-frontend-deployment.html": {
-    "url": "diag-frontend-deployment.html",
+  "diagrams/frontend-deployment.html": {
+    "url": "diagrams/frontend-deployment.html",
     "title": "前端部署圖：建構管線",
     "excerpt": "Frontend Deployment Diagram — Build &amp; Distribution Pipeline\n來源：docs/FRONTEND.md §1.3 Build Tooling + docs/ARCH.md §7.1 Infrastructure Overview + d"
   },
-  "diag-frontend-object-snapshot.html": {
-    "url": "diag-frontend-object-snapshot.html",
+  "diagrams/frontend-object-snapshot.html": {
+    "url": "diagrams/frontend-object-snapshot.html",
     "title": "前端物件圖：UI 快照",
     "excerpt": "Frontend Object Diagram — Runtime Snapshot\n來源：docs/FRONTEND.md §2.4 State Management + docs/VDD.md §UI States\n描述「玩家剛贏完一場 RACE 對戰，正在 BattleResultPage 上"
   },
-  "diag-frontend-sequence-scene.html": {
-    "url": "diag-frontend-sequence-scene.html",
+  "diagrams/frontend-sequence-scene.html": {
+    "url": "diagrams/frontend-sequence-scene.html",
     "title": "前端循序圖：場景切換",
     "excerpt": "Frontend Sequence — Scene Transition (PetPage → ArenaPage → BattleResultPage)\n來源：docs/FRONTEND.md §2.5 React Router v6 + §2.3 Phaser Integration\n描述玩家從"
   },
-  "diag-frontend-sequence-shoot.html": {
-    "url": "diag-frontend-sequence-shoot.html",
+  "diagrams/frontend-sequence-shoot.html": {
+    "url": "diagrams/frontend-sequence-shoot.html",
     "title": "前端循序圖：射擊流程",
     "excerpt": "Frontend Sequence — Main Game Interaction (Train + Enter Arena + Battle Result)\n來源：docs/FRONTEND.md §5.3 Training Interaction + §5.5 Arena Battle Flow"
   },
-  "diag-frontend-sequence-ws.html": {
-    "url": "diag-frontend-sequence-ws.html",
+  "diagrams/frontend-sequence-ws.html": {
+    "url": "diagrams/frontend-sequence-ws.html",
     "title": "前端循序圖：WS 協議",
     "excerpt": "Frontend Sequence — HTTP Long-Polling Protocol\n來源：docs/FRONTEND.md §2.6 API Client + docs/API.md §5.3 Arena Endpoints\n注意：本系統採 HTTP Long-Polling 取代 Web"
   },
-  "diag-frontend-state-scene.html": {
-    "url": "diag-frontend-state-scene.html",
+  "diagrams/frontend-state-scene.html": {
+    "url": "diagrams/frontend-state-scene.html",
     "title": "前端狀態機：場景",
     "excerpt": "Frontend State Machine — Scene Lifecycle\n來源：docs/FRONTEND.md §2.5 React Router v6 + §5 Key UI Flows\n描述 Player App 客戶端的「scene 狀態機」：從首頁到認領、養成、競技、結算、登出 /"
   },
-  "diag-frontend-state-ui.html": {
-    "url": "diag-frontend-state-ui.html",
+  "diagrams/frontend-state-ui.html": {
+    "url": "diagrams/frontend-state-ui.html",
     "title": "前端狀態機：UI",
     "excerpt": "Frontend State Machine — TrainingActionCard UI\n來源：docs/FRONTEND.md §5.3 Training Interaction + docs/VDD.md §UI States\n描述「TrainingActionCard」這個關鍵互動 UI "
   },
-  "diag-frontend-use-case.html": {
-    "url": "diag-frontend-use-case.html",
+  "diagrams/frontend-use-case.html": {
+    "url": "diagrams/frontend-use-case.html",
     "title": "前端用例圖",
     "excerpt": "Frontend Use Case Diagram — pixel-pet-arena Player App\n來源：docs/FRONTEND.md §2 Player App + docs/PDD.md §UI flows + docs/PRD.md §3 User Stories\n涵蓋玩家在 R"
   },
-  "blueprint__mock-mock_server_guide.html": {
-    "url": "blueprint__mock-mock_server_guide.html",
+  "blueprint/mock/mock_server_guide.html": {
+    "url": "blueprint/mock/mock_server_guide.html",
     "title": "Mock Server Guide",
     "excerpt": "pixel-pet-arena - Mock Server 使用手冊\n適用版本： FastAPI Mock Server v1.0\n上游規格： docs/API.md (53 endpoints) + docs/SCHEMA.md (12 entities)\n最後更新： 2026-05-08\n本 M"
   },
-  "contracts__api-admin-contract.html": {
-    "url": "contracts__api-admin-contract.html",
+  "contracts/api-admin-contract.html": {
+    "url": "contracts/api-admin-contract.html",
     "title": "Api Admin Contract",
     "excerpt": "API–Admin Portal Contract\nThis document defines the stable interface contract between the Fastify 4 API backend (apps/api) and the Vue 3 + Element Plu"
   },
-  "contracts__api-player-contract.html": {
-    "url": "contracts__api-player-contract.html",
+  "contracts/api-player-contract.html": {
+    "url": "contracts/api-player-contract.html",
     "title": "Api Player Contract",
     "excerpt": "API–Player Frontend Contract\nThis document defines the stable interface contract between the Fastify 4 API backend (apps/api) and the React 18 + Phase"
   },
-  "contracts__event-schema-contract.html": {
-    "url": "contracts__event-schema-contract.html",
+  "contracts/event-schema-contract.html": {
+    "url": "contracts/event-schema-contract.html",
     "title": "Event Schema Contract",
     "excerpt": "Internal Event Schema Contract\nThis document defines the schema contracts for all Redis pub/sub messages and job queue events used internally by the p"
   },
-  "prototype__admin-moderation-prototype.html": {
-    "url": "prototype__admin-moderation-prototype.html",
-    "title": "Admin Moderation Prototype",
-    "excerpt": "Admin Moderation Prototype Specification\nOverview\nThe Admin Moderation screens live in the Vue 3 + Element Plus admin portal running on port 5174. The"
-  },
-  "prototype__arena-battle-prototype.html": {
-    "url": "prototype__arena-battle-prototype.html",
-    "title": "Arena Battle Prototype",
-    "excerpt": "Arena Battle Prototype Specification\nOverview\nThe Arena Battle flow covers three sequential screens: opponent selection, live battle animation, and po"
-  },
-  "prototype__pet-display-prototype.html": {
-    "url": "prototype__pet-display-prototype.html",
-    "title": "Pet Display Prototype",
-    "excerpt": "Pet Display Prototype Specification\nOverview\nThe Pet Display page is the primary screen players see after login. It centers the player&#x27;s active p"
-  },
-  "req__idea-input.html": {
-    "url": "req__idea-input.html",
+  "req/idea-input.html": {
+    "url": "req/idea-input.html",
     "title": "Idea Input",
     "excerpt": "原始需求輸入\n一個HTML5的寵物網站，使用者不用登入，可以隨機跟一個寵物互動，覺得想養要給email，會寄一封密碼信給你，以及畫面有領取的URL，下次可依此URL回來跟寵物互動，養大的寵物可以跟其他寵物競賽，可以去競技場比賽跑，可以比相撲擂台等，若要讓寵物好，要訓練，給特殊食物，也可以把寵物交易，"
   },
@@ -417,17 +412,17 @@
   "puml--diagrams-puml-component-diagram.html": {
     "url": "puml--diagrams-puml-component-diagram.html",
     "title": "Component Diagram",
-    "excerpt": "Component Diagram@startuml pixel-pet-arena-components\n\n!define FRONTEND #E8F4F8\n!define BACKEND #F5F5F5\n!define DATA #E8F5E9\n!define EXTERNAL #FFF5E6\n"
+    "excerpt": "Component DiagramClient LayerAPI LayerData LayerExternal ServicesPlayer AppReact + Phaser.jsAdmin PortalVue 3 + Element PlusVite BuildAPI ServerNode.j"
   },
   "puml--diagrams-puml-dataflow-diagram.html": {
     "url": "puml--diagrams-puml-dataflow-diagram.html",
     "title": "Dataflow Diagram",
-    "excerpt": "Dataflow Diagram@startuml pixel-pet-arena-dataflow\n\n!define PROCESS #F5F5F5\n!define DATASTORE #E8F5E9\n!define EXTERNAL #FFF5E6\n!define ACTOR #E8F4F8\n\n"
+    "excerpt": "Dataflow DiagramPlayerAdminClaim FlowTrainingSystemArenaMatchmakingBattleCalculationLeaderboardUpdateGDPRErasure JobAdminModerationPostgreSQLPrimaryPo"
   },
   "puml--diagrams-puml-deployment.html": {
     "url": "puml--diagrams-puml-deployment.html",
     "title": "Deployment",
-    "excerpt": "Deployment@startuml pixel-pet-arena-deployment\n\n!define EDGE #E3F2FD\n!define COMPUTE #F5F5F5\n!define STORAGE #E8F5E9\n!define EXTERNAL #FFF5E6\n\nskinpar"
+    "excerpt": "DeploymentVercel EdgeRailway ComputeData LayerExternal ServicesGlobal CDNNext.js / ViteStatic AssetsAPI ServerReplica 1API ServerReplica 2HorizontalAu"
   },
   "puml--diagrams-puml-sequence-auth.html": {
     "url": "puml--diagrams-puml-sequence-auth.html",
@@ -437,7 +432,7 @@
   "puml--diagrams-puml-sequence-battle.html": {
     "url": "puml--diagrams-puml-sequence-battle.html",
     "title": "Sequence Battle",
-    "excerpt": "Sequence Battle@startuml pixel-pet-arena-sequence-battle\n\n!define PLAYER #E8F4F8\n!define SERVER #F5F5F5\n!define CACHE #FCE4EC\n!define DB #E8F5E9\n\npart"
+    "excerpt": "Sequence BattleAPI ServerAPI ServerAPI ServerRedisRedisRedisRedisPostgreSQLPostgreSQLPostgreSQLPlayer AppAPI ServerRedisPostgreSQLPlayer AppPlayer App"
   },
   "puml--diagrams-puml-state-battle.html": {
     "url": "puml--diagrams-puml-state-battle.html",

@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,60 +334,14 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>✅ 對齐修復執行完成報告</h1>
+    <main class="doc-content"><h1 id="對齐修復執行完成報告">✅ 對齐修復執行完成報告</h1>
 <p><strong>項目:</strong> pixel-pet-arena</p>
 <p><strong>日期:</strong> 2026-05-04</p>
 <p><strong>狀態:</strong> 🟢 <strong>所有可執行修復已完成 (23/30)</strong> | ⏳ <strong>4 項已阻塞，3 項超出範圍</strong></p>
 <hr>
-<h2>📈 最終統計</h2>
+<h2 id="最終統計">📈 最終統計</h2>
 <table>
 <tr><th>維度</th><th>問題數</th><th>已修復</th><th>阻塞</th><th>超出範圍</th><th>完成度</th></tr>
 <tr><td><strong>Dim 0</strong></td><td>1</td><td>1 ✅</td><td>—</td><td>—</td><td>100%</td></tr>
@@ -281,29 +354,29 @@
 </table>
 <ul><li><strong>✅ 已修復 (23)：</strong> 文件對齐、BDD 場景、架構圖表</li><li><strong>🔴 已阻塞 (4)：</strong> 需要外部代碼倉庫（Dim 2, 3）</li><li><strong>⏳ 超出範圍 (3)：</strong> 用戶決定暫不實施的低優先級項目</li></ul>
 <hr>
-<h2>📊 按維度統計</h2>
-<h3>✅ Dimension 0：文件存在性 (1/1 = 100%)</h3>
+<h2 id="按維度統計">📊 按維度統計</h2>
+<h3 id="dimension-0文件存在性-11--100">✅ Dimension 0：文件存在性 (1/1 = 100%)</h3>
 <p><strong>[FIXED]</strong> README.md 缺失</p>
 <ul><li>創建完整的項目 README (225 行)</li><li>包含技術棧、開發指南、文件約定</li><li>✅ <strong>COMPLETE</strong></li></ul>
 <hr>
-<h3>✅ Dimension 1：文件對齐 (9/11 = 82%)</h3>
+<h3 id="dimension-1文件對齐-911--82">✅ Dimension 1：文件對齐 (9/11 = 82%)</h3>
 <p><strong>[FIXED]</strong> 9 項 HIGH 和 MEDIUM 優先級問題</p>
 <ol><li>✅ <strong>BDD-server.md + BDD-client.md</strong> — 創建 BDD 策略文件</li><li>✅ <strong>FF_MARKETPLACE 澄清</strong> — SCHEMA.md 補充特性標誌說明</li><li>✅ <strong>background-jobs.md</strong> — 創建背景任務規格文件</li><li>✅ <strong>FRONTEND 令牌恢復流程</strong> — 補充 §5.2</li><li>✅ <strong>API OG 端點澄清</strong> — 明確社交分享數據源</li><li>✅ <strong>Admin 會話 TTL</strong> — FRONTEND §3.5 補充 4h 超時</li><li>✅ <strong>EDD AC 交叉引用</strong> — 所有約束添加 PRD AC 註釋</li><li>✅ <strong>Admin 路由配置</strong> — FRONTEND §3.5 補充環境變量說明</li><li>✅ <strong>CONSTANTS 鏈接</strong> — EDD §0 添加超鏈接</li></ol>
 <p><strong>[PENDING]</strong> 2 項 LOW 優先級項目（用戶決定暫不實施）</p>
 <ul><li>ARCH vs EDD 冗餘（可接受的多層次清晰度）</li><li>其他低優先級改進</li></ul>
 <hr>
-<h3>🔴 Dimension 2：文件↔代碼 (0/1 = 0%)</h3>
+<h3 id="dimension-2文件代碼-01--0">🔴 Dimension 2：文件↔代碼 (0/1 = 0%)</h3>
 <p><strong>[BLOCKED]</strong> 純規範倉庫 — 無 src/ 代碼</p>
 <p><strong>1 個 CRITICAL 問題：</strong> 文件和代碼無法對齐</p>
 <ul><li>原因：本倉庫為純規範項目（BDD + 設計文件）</li><li><strong>解決時間：</strong> 當後端代碼倉庫創建後</li><li><strong>依賴：</strong> Node.js/Fastify API 實現倉庫</li></ul>
 <hr>
-<h3>🔴 Dimension 3：代碼↔測試 (0/3 = 0%)</h3>
+<h3 id="dimension-3代碼測試-03--0">🔴 Dimension 3：代碼↔測試 (0/3 = 0%)</h3>
 <p><strong>[BLOCKED]</strong> 無測試實現 — 23 個 BDD 特性文件無可執行測試</p>
 <p><strong>3 個 HIGH 問題：</strong> 測試實現缺失</p>
 <ol><li>❌ 無 Cucumber 步驟定義（后端）</li><li>❌ 無 Playwright E2E 實現（前端）</li><li>❌ 無 CI/CD 測試管道</li></ol>
 <ul><li>原因：本倉庫為規範專案，測試實現需要單獨倉庫</li><li><strong>解決時間：</strong> 當測試倉庫創建後 (2-3 週)</li><li><strong>依賴：</strong> 測試框架倉庫 (Cucumber.js + Playwright)</li></ul>
 <hr>
-<h3>✅ Dimension 4：文件↔測試 (8/9 = 89%)</h3>
+<h3 id="dimension-4文件測試-89--89">✅ Dimension 4：文件↔測試 (8/9 = 89%)</h3>
 <p><strong>[FIXED]</strong> 8 項 HIGH + MEDIUM + CRITICAL 決策執行</p>
 <p>用戶決策：</p>
 <ol><li>✅ <strong>A — 合併根目錄</strong> → 8 個根特性文件重新組織到 server/client</li><li>✅ <strong>是 — HTTP 429 場景</strong> → arena-battle.feature 添加速率限制驗證</li><li>✅ <strong>是 — 稀有度演算法</strong> → 創建 rarity-distribution.feature (5 場景)</li><li>✅ <strong>是 — 戰鬥記錄分頁</strong> → battle-records.feature (7+3 服務器+客戶端場景)</li><li>✅ <strong>是 — 郵件防暴露計時</strong> → claim-flow.feature 添加 ±50ms 時間斷言</li><li>✅ <strong>是 — 前端映射表</strong> → FRONTEND.md §10 添加完整功能映射</li><li>✅ <strong>是 — GDPR SLA 澄清</strong> → gdpr-erasure.feature 區分 24h 內部 vs 7d 外部</li><li>✅ <strong>是 — Admin 搜索性能</strong> → admin-search-performance.feature (6 場景)</li></ol>
@@ -312,12 +385,12 @@
 <p><strong>新增統計：</strong></p>
 <ul><li>3 個新特性文件創建</li><li>7 個現有文件增強</li><li>35+ 個新 BDD 場景</li><li>1 個文檔映射表 (§10)</li></ul>
 <hr>
-<h3>✅ Dimension 5：UML/RTM 品質 (5/5 = 100%)</h3>
+<h3 id="dimension-5umlrtm-品質-55--100">✅ Dimension 5：UML/RTM 品質 (5/5 = 100%)</h3>
 <p><strong>[FIXED]</strong> 所有 5 個 HIGH + MEDIUM 問題</p>
 <ol><li>✅ <strong>EDD 類圖</strong> → §3.8 添加 8 個域實體 + 關係圖</li><li>✅ <strong>RTM BDD 映射</strong> → RTM.md 補充特性文件清單 (23 個文件，131 場景)</li><li>✅ <strong>PlantUML 源文件</strong> → docs/diagrams/puml/ (9 個 .puml 文件)</li><li>✅ <strong>9 大 UML 圖</strong> → EDD.md §3.8 (336 行，全部嵌入)</li><li>✅ <strong>RTM.csv</strong> → 機器可讀追蹤矩陣 (91 個 AC 映射)</li></ol>
 <hr>
-<h2>📁 修改統計</h2>
-<h3>創建的新文件 (18)</h3>
+<h2 id="修改統計">📁 修改統計</h2>
+<h3 id="創建的新文件-18">創建的新文件 (18)</h3>
 <p><strong>文檔 (3)：</strong></p>
 <ul><li><code>docs/BDD-server.md</code> (180 行) — 後端 BDD 策略</li><li><code>docs/BDD-client.md</code> (220 行) — 前端 BDD 策略</li><li><code>docs/background-jobs.md</code> (120 行) — 背景任務規格</li></ul>
 <p><strong>特性文件 (5)：</strong></p>
@@ -326,17 +399,17 @@
 <ul><li><code>docs/diagrams/puml/class-diagram.puml</code></li><li><code>docs/diagrams/puml/sequence-auth.puml</code></li><li><code>docs/diagrams/puml/sequence-battle.puml</code></li><li><code>docs/diagrams/puml/state-pet.puml</code></li><li><code>docs/diagrams/puml/state-battle.puml</code></li><li><code>docs/diagrams/puml/component-diagram.puml</code></li><li><code>docs/diagrams/puml/deployment.puml</code></li><li><code>docs/diagrams/puml/usecase-diagram.puml</code></li><li><code>docs/diagrams/puml/dataflow-diagram.puml</code></li></ul>
 <p><strong>其他 (1)：</strong></p>
 <ul><li><code>docs/RTM.csv</code> (92 行，91 個 AC 映射)</li></ul>
-<h3>修改的現有文件 (12)</h3>
+<h3 id="修改的現有文件-12">修改的現有文件 (12)</h3>
 <p><strong>核心文檔 (5)：</strong></p>
 <ul><li><code>docs/EDD.md</code> (+336 行) — 9 個 UML 圖，AC 引用</li><li><code>docs/SCHEMA.md</code> (+15 行) — FF_MARKETPLACE 澄清</li><li><code>docs/FRONTEND.md</code> (+95 行) — 令牌恢復、會話 TTL、§10 映射表</li><li><code>docs/API.md</code> (+8 行) — OG 端點澄清</li><li><code>docs/RTM.md</code> (+75 行) — BDD 特性清單</li></ul>
 <p><strong>特性文件 (7)：</strong></p>
 <ul><li><code>features/server/claim-flow.feature</code> (+9 場景)</li><li><code>features/server/arena-battle.feature</code> (+5 場景)</li><li><code>features/server/leaderboard.feature</code> (+6 場景)</li><li><code>features/server/gdpr-erasure.feature</code> (+8 場景)</li><li><code>features/client/pet-display.feature</code> (+4 場景)</li><li><code>features/client/training-ui.feature</code> (+4 場景)</li><li><code>features/client/battle-records.feature</code> (+3 場景)</li></ul>
-<h3>重新組織的特性文件 (8)</h3>
+<h3 id="重新組織的特性文件-8">重新組織的特性文件 (8)</h3>
 <p>根目錄 → server/client：</p>
 <ul><li><code>auth-login.feature</code> → <code>server/claim-flow.feature</code></li><li><code>arena-combat.feature</code> → <code>server/arena-battle.feature</code></li><li><code>pet-management.feature</code> → <code>client/pet-display.feature</code></li><li><code>pet-training.feature</code> → <code>client/training-ui.feature</code></li><li><code>arena-leaderboard.feature</code> → <code>server/leaderboard.feature</code></li><li><code>trading-system.feature</code> → <code>server/trading-system.feature</code></li><li><code>admin-moderation.feature</code> → <code>server/admin-moderation.feature</code></li><li><code>admin-gdpr.feature</code> → <code>server/gdpr-erasure.feature</code></li></ul>
 <p>舊文件備份至：<code>docs/legacy-features/</code></p>
 <hr>
-<h2>📊 內容統計</h2>
+<h2 id="內容統計">📊 內容統計</h2>
 <table>
 <tr><th>類型</th><th>數量</th></tr>
 <tr><td>新增文檔行數</td><td>1,950+</td></tr>
@@ -348,7 +421,7 @@
 <tr><td><strong>總變更行數</strong></td><td><strong>2,600+</strong></td></tr>
 </table>
 <hr>
-<h2>🚀 Git 提交歷史</h2>
+<h2 id="git-提交歷史">🚀 Git 提交歷史</h2>
 <pre><code class="">fdeecea feat(gendoc)[align-fix]: Dimension 4 — 8 BDD scenarios executed
 88082fb docs(gendoc)[align-fix]: Final summary — 15/30 fixes complete
 5279bc3 docs(gendoc)[align-fix]: Dimension 5 — UML/RTM quality fixes (5/5)
@@ -356,27 +429,27 @@
 052b600 docs(gendoc)[align-fix]: Dimension 0 — Create project README.md</code></pre>
 <p><strong>總計：</strong> 5 個提交，23 個問題已解決</p>
 <hr>
-<h2>⚠️ 阻塞項目 &amp; 後續工作</h2>
-<h3>立即行動（本週）</h3>
+<h2 id="阻塞項目--後續工作">⚠️ 阻塞項目 &amp; 後續工作</h2>
+<h3 id="立即行動本週">立即行動（本週）</h3>
 <ol><li><strong>Dimension 2 &amp; 3 解除阻塞：</strong> 創建外部代碼倉庫</li></ol>
 <ul><li style="margin-left:1.5rem">後端：Node.js/Fastify API 實現倉庫</li><li style="margin-left:1.5rem">測試：Cucumber.js + Playwright 倉庫</li><li style="margin-left:1.5rem">估計工作量：各 2-3 週</li></ul>
 <ol><li><strong>Dimension 4 最後 1 項：</strong> GDPR 邊界條件驗證</li></ol>
 <ul><li style="margin-left:1.5rem">決策：是否實施？</li><li style="margin-left:1.5rem">估計工作量：1-2 天</li></ul>
-<h3>下個月</h3>
+<h3 id="下個月">下個月</h3>
 <ol><li><strong>Re-run alignment check：</strong> 當外部倉庫創建後</li></ol>
 <pre><code class="language-bash">   /gendoc-align-check  # 重新審查所有維度</code></pre>
 <ol><li><strong>實現 BDD 步驟定義</strong> (50+ 個)</li></ol>
 <ul><li style="margin-left:1.5rem">服務器後端：Cucumber.js</li><li style="margin-left:1.5rem">前端 E2E：Playwright</li></ul>
 <hr>
-<h2>📋 建議下一步</h2>
-<h3>優先級 1（Blocking）</h3>
+<h2 id="建議下一步">📋 建議下一步</h2>
+<h3 id="優先級-1blocking">優先級 1（Blocking）</h3>
 <ul><li style="list-style:none"><input type="checkbox" disabled> 決定是否將 Dimension 4 剩餘 1 個 MEDIUM 項目實施</li><li style="list-style:none"><input type="checkbox" disabled> 啟動後端實現倉庫（Node.js/Fastify API）</li><li style="list-style:none"><input type="checkbox" disabled> 啟動測試倉庫（Cucumber + Playwright）</li></ul>
-<h3>優先級 2（High）</h3>
+<h3 id="優先級-2high">優先級 2（High）</h3>
 <ul><li style="list-style:none"><input type="checkbox" disabled> 與工程團隊共享更新後的 BDD 場景 (35+ 新場景)</li><li style="list-style:none"><input type="checkbox" disabled> 驗證特性文件重新組織 (root → server/client) 無誤</li><li style="list-style:none"><input type="checkbox" disabled> 測試新增的 ArenaMatch 搜索性能場景設置</li></ul>
-<h3>優先級 3（Medium）</h3>
+<h3 id="優先級-3medium">優先級 3（Medium）</h3>
 <ul><li style="list-style:none"><input type="checkbox" disabled> 檔案舊特性文件 (<code>docs/legacy-features/</code>)</li><li style="list-style:none"><input type="checkbox" disabled> 更新項目維基或開發指南，引用新的 BDD 文件</li><li style="list-style:none"><input type="checkbox" disabled> 評估 UML 圖表的清晰度（Dim 5）</li></ul>
 <hr>
-<h2>📝 最終統計儀表板</h2>
+<h2 id="最終統計儀表板">📝 最終統計儀表板</h2>
 <pre><code class="">對齐修復進度
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -406,7 +479,7 @@
 阻塞項目：4 個（需外部資源）
 超出範圍：3 個（用戶暫不實施）</code></pre>
 <hr>
-<h2>✅ 工作完成確認</h2>
+<h2 id="工作完成確認">✅ 工作完成確認</h2>
 <ul><li>✅ 所有決定已收集（8 個用戶決策）</li><li>✅ 所有可執行修復已完成 (23 個)</li><li>✅ 所有修改已提交 (5 個 git commits)</li><li>✅ 新增 BDD 場景已驗證 (35+ 場景)</li><li>✅ 文檔和圖表已更新 (2,600+ 行)</li><li>✅ 新的特性文件已備份到 legacy (8 個)</li></ul>
 <hr>
 <p><strong>下一步指令：</strong></p>

@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details open>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,147 +334,9 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>Sequence Battle</h1><pre><code class="language-plantuml">@startuml pixel-pet-arena-sequence-battle
-
-!define PLAYER #E8F4F8
-!define SERVER #F5F5F5
-!define CACHE #FCE4EC
-!define DB #E8F5E9
-
-participant &quot;Player App&quot; as player #E8F4F8
-participant &quot;API Server&quot; as server #F5F5F5
-participant &quot;Redis&quot; as cache #FCE4EC
-participant &quot;PostgreSQL&quot; as db #E8F5E9
-
-player -&gt; server: POST /api/v1/arena/enter (pet_id, mode, token)
-activate server
-
-server -&gt; server: Verify access token
-server -&gt; cache: INCR rl:battles:{pet_id}
-activate cache
-cache -&gt; cache: TTL 3600s (1 hour)
-cache --&gt; server: count
-deactivate cache
-
-alt Rate limit exceeded (&gt;10 per hour)
-  server --&gt; player: HTTP 429 {Retry-After: seconds}
-  deactivate server
-else Limit OK
-  server -&gt; cache: LPUSH matchmaking:{mode} {pet_id}
-  activate cache
-  cache --&gt; server: queue position
-  deactivate cache
-
-  server --&gt; player: HTTP 202 {match_id, status: &quot;FINDING_OPPONENT&quot;}
-  deactivate server
-
-  note over player, server: Client polls GET /api/v1/arena/match/{match_id}
-end
-
-par Opponent Matching
-  server -&gt; cache: BLPOP matchmaking:{mode} (timeout 30s)
-  activate cache
-  cache --&gt; server: opponent_pet_id
-  deactivate cache
-
-  alt Opponent found
-    server -&gt; db: SELECT * FROM pets WHERE id IN (pet_a_id, pet_b_id)
-    activate db
-    db --&gt; server: [pet_a, pet_b]
-    deactivate db
-  else Timeout (AI fallback)
-    server -&gt; server: Generate AI opponent
-  end
-and
-  player -&gt; server: GET /api/v1/arena/match/{match_id}
-  activate server
-  alt Match not started
-    server --&gt; player: HTTP 200 {status: &quot;FINDING_OPPONENT&quot;, time_elapsed}
-  else Match ready
-    server -&gt; db: SELECT * FROM arena_matches WHERE id = ?
-    activate db
-    db --&gt; server: match record
-    deactivate db
-    server --&gt; player: HTTP 200 {status: &quot;READY&quot;, pet_a, pet_b}
-  end
-  deactivate server
-end
-
-player -&gt; server: POST /api/v1/arena/match/{match_id}/start
-activate server
-
-server -&gt; server: Generate seeded random (±15% modifier)
-server -&gt; server: Calculate outcome based on stats + random
-server -&gt; server: Simulate 5-15s battle animation log
-
-server -&gt; db: BEGIN TRANSACTION
-activate db
-server -&gt; db: INSERT INTO arena_matches (pet_a_id, pet_b_id, winner_pet_id, battle_log, ...)
-server -&gt; db: UPDATE pets SET stat_* (if buffed) WHERE id IN (winner, loser)
-db --&gt; server: OK
-deactivate db
-
-server -&gt; cache: ZADD leaderboard:{mode} {winner_score} {winner_pet_id}
-activate cache
-cache --&gt; server: OK
-deactivate cache
-
-server --&gt; player: HTTP 200 {match_result, winner_pet_id, loser_pet_id, battle_log}
-deactivate server
-
-player -&gt; player: Display battle animation replay
-player -&gt; player: Show result card + XP/rank changes
-
-@enduml
-</code></pre><p style="color:var(--text-muted)">⚠️ PlantUML 圖表無法生成（請確認本機已安裝 plantuml 或網路可連至 plantuml.com）</p></main>
+    <main class="doc-content"><h1>Sequence Battle</h1><div class="diagram-container diagram-container--puml"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" data-diagram-type="SEQUENCE" preserveAspectRatio="none" style="background:#FFFFFF" version="1.1" viewBox="0 0 1194 1335" zoomAndPan="magnify"><?plantuml 1.2026.4beta2?><defs/><g><g><title>API Server</title><rect fill="#FFFFFF" height="195.7969" style="stroke:#181818;stroke-width:1;" width="10" x="523.7793" y="67.4297"/></g><g><title>API Server</title><rect fill="#FFFFFF" height="170.4688" style="stroke:#181818;stroke-width:1;" width="10" x="523.7793" y="667.4297"/></g><g><title>API Server</title><rect fill="#FFFFFF" height="330.3281" style="stroke:#181818;stroke-width:1;" width="10" x="523.7793" y="866.0313"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="71.2656" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="138.6953"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="307.1641"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="460.8281"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="1138.0938"/></g><g><title>PostgreSQL</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="1106.4365" y="543.2266"/></g><g><title>PostgreSQL</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="1106.4365" y="764.6328"/></g><g><title>PostgreSQL</title><rect fill="#FFFFFF" height="87.3984" style="stroke:#181818;stroke-width:1;" width="10" x="1106.4365" y="1021.5625"/></g><rect fill="none" height="183.6016" style="stroke:#000000;stroke-width:1.5;" width="970.0723" x="20" y="224.9609"/><rect fill="none" height="415.3359" style="stroke:#000000;stroke-width:1.5;" width="1168.813" x="10" y="422.5625"/><rect fill="none" height="132.3359" style="stroke:#000000;stroke-width:1.5;" width="693.2881" x="475.5249" y="504.9609"/><rect fill="none" height="148.4688" style="stroke:#000000;stroke-width:1.5;" width="1148.813" x="20" y="682.4297"/><g class="participant-lifeline" data-entity-uid="part1" data-qualified-name="player" data-source-line="6" id="part1-lifeline"><g><title>Player App</title><rect fill="#000000" fill-opacity="0.00000" height="1262.3281" width="8" x="70.6831" y="36.2969"/><line style="stroke:#181818;stroke-width:0.5;stroke-dasharray:5,5;" x1="74" x2="74" y1="36.2969" y2="1298.625"/></g></g><g class="participant-lifeline" data-entity-uid="part2" data-qualified-name="server" data-source-line="7" id="part2-lifeline"><g><title>API Server</title><rect fill="#000000" fill-opacity="0.00000" height="1262.3281" width="8" x="524.7793" y="36.2969"/><line style="stroke:#181818;stroke-width:0.5;stroke-dasharray:5,5;" x1="528.5249" x2="528.5249" y1="36.2969" y2="1298.625"/></g></g><g class="participant-lifeline" data-entity-uid="part3" data-qualified-name="cache" data-source-line="8" id="part3-lifeline"><g><title>Redis</title><rect fill="#000000" fill-opacity="0.00000" height="1262.3281" width="8" x="949.8667" y="36.2969"/><line style="stroke:#181818;stroke-width:0.5;stroke-dasharray:5,5;" x1="953.6611" x2="953.6611" y1="36.2969" y2="1298.625"/></g></g><g class="participant-lifeline" data-entity-uid="part4" data-qualified-name="db" data-source-line="9" id="part4-lifeline"><g><title>PostgreSQL</title><rect fill="#000000" fill-opacity="0.00000" height="1262.3281" width="8" x="1107.4365" y="36.2969"/><line style="stroke:#181818;stroke-width:0.5;stroke-dasharray:5,5;" x1="1111.0601" x2="1111.0601" y1="36.2969" y2="1298.625"/></g></g><g class="participant participant-head" data-entity-uid="part1" data-qualified-name="player" data-source-line="6" id="part1-head"><rect fill="#E8F4F8" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="89.3662" x="30" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="75.3662" x="37" y="24.9951">Player App</text></g><g class="participant participant-tail" data-entity-uid="part1" data-qualified-name="player" data-source-line="6" id="part1-tail"><rect fill="#E8F4F8" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="89.3662" x="30" y="1297.625"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="75.3662" x="37" y="1317.6201">Player App</text></g><g class="participant participant-head" data-entity-uid="part2" data-qualified-name="server" data-source-line="7" id="part2-head"><rect fill="#F5F5F5" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="86.5088" x="485.5249" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="72.5088" x="492.5249" y="24.9951">API Server</text></g><g class="participant participant-tail" data-entity-uid="part2" data-qualified-name="server" data-source-line="7" id="part2-tail"><rect fill="#F5F5F5" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="86.5088" x="485.5249" y="1297.625"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="72.5088" x="492.5249" y="1317.6201">API Server</text></g><g class="participant participant-head" data-entity-uid="part3" data-qualified-name="cache" data-source-line="8" id="part3-head"><rect fill="#FCE4EC" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="52.4111" x="927.6611" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="38.4111" x="934.6611" y="24.9951">Redis</text></g><g class="participant participant-tail" data-entity-uid="part3" data-qualified-name="cache" data-source-line="8" id="part3-tail"><rect fill="#FCE4EC" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="52.4111" x="927.6611" y="1297.625"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="38.4111" x="934.6611" y="1317.6201">Redis</text></g><g class="participant participant-head" data-entity-uid="part4" data-qualified-name="db" data-source-line="9" id="part4-head"><rect fill="#E8F5E9" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="94.7529" x="1064.0601" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="80.7529" x="1071.0601" y="24.9951">PostgreSQL</text></g><g class="participant participant-tail" data-entity-uid="part4" data-qualified-name="db" data-source-line="9" id="part4-tail"><rect fill="#E8F5E9" height="30.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="94.7529" x="1064.0601" y="1297.625"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="80.7529" x="1071.0601" y="1317.6201">PostgreSQL</text></g><g><title>API Server</title><rect fill="#FFFFFF" height="195.7969" style="stroke:#181818;stroke-width:1;" width="10" x="523.7793" y="67.4297"/></g><g><title>API Server</title><rect fill="#FFFFFF" height="170.4688" style="stroke:#181818;stroke-width:1;" width="10" x="523.7793" y="667.4297"/></g><g><title>API Server</title><rect fill="#FFFFFF" height="330.3281" style="stroke:#181818;stroke-width:1;" width="10" x="523.7793" y="866.0313"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="71.2656" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="138.6953"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="307.1641"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="460.8281"/></g><g><title>Redis</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="948.8667" y="1138.0938"/></g><g><title>PostgreSQL</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="1106.4365" y="543.2266"/></g><g><title>PostgreSQL</title><rect fill="#FFFFFF" height="29.1328" style="stroke:#181818;stroke-width:1;" width="10" x="1106.4365" y="764.6328"/></g><g><title>PostgreSQL</title><rect fill="#FFFFFF" height="87.3984" style="stroke:#181818;stroke-width:1;" width="10" x="1106.4365" y="1021.5625"/></g><g class="message" data-entity-1="part1" data-entity-2="part2" data-source-line="11" id="msg1"><polygon fill="#181818" points="511.7793,63.4297,521.7793,67.4297,511.7793,71.4297,515.7793,67.4297" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="74.6831" x2="517.7793" y1="67.4297" y2="67.4297"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="308.1025" x="81.6831" y="62.3638">POST /api/v1/arena/enter (pet_id, mode, token)</text></g><g class="message" data-entity-1="part2" data-entity-2="part2" data-source-line="14" id="msg2"><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="575.7793" y1="96.5625" y2="96.5625"/><line style="stroke:#181818;stroke-width:1;" x1="575.7793" x2="575.7793" y1="96.5625" y2="109.5625"/><line style="stroke:#181818;stroke-width:1;" x1="534.7793" x2="575.7793" y1="109.5625" y2="109.5625"/><polygon fill="#181818" points="544.7793,105.5625,534.7793,109.5625,544.7793,113.5625,540.7793,109.5625" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="127.0039" x="540.7793" y="91.4966">Verify access token</text></g><g class="message" data-entity-1="part2" data-entity-2="part3" data-source-line="15" id="msg3"><polygon fill="#181818" points="936.8667,134.6953,946.8667,138.6953,936.8667,142.6953,940.8667,138.6953" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="942.8667" y1="138.6953" y2="138.6953"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="154.5654" x="540.7793" y="133.6294">INCR rl:battles:{pet_id}</text></g><g class="message" data-entity-1="part3" data-entity-2="part3" data-source-line="17" id="msg4"><line style="stroke:#181818;stroke-width:1;" x1="958.8667" x2="1000.8667" y1="167.8281" y2="167.8281"/><line style="stroke:#181818;stroke-width:1;" x1="1000.8667" x2="1000.8667" y1="167.8281" y2="180.8281"/><line style="stroke:#181818;stroke-width:1;" x1="959.8667" x2="1000.8667" y1="180.8281" y2="180.8281"/><polygon fill="#181818" points="969.8667,176.8281,959.8667,180.8281,969.8667,184.8281,965.8667,180.8281" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="123.5698" x="965.8667" y="162.7622">TTL 3600s (1 hour)</text></g><g class="message" data-entity-1="part3" data-entity-2="part2" data-source-line="18" id="msg5"><polygon fill="#181818" points="544.7793,205.9609,534.7793,209.9609,544.7793,213.9609,540.7793,209.9609" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="538.7793" x2="952.8667" y1="209.9609" y2="209.9609"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="36.6768" x="550.7793" y="204.895">count</text></g><path d="M20,224.9609 L84.4429,224.9609 L84.4429,232.0938 L74.4429,242.0938 L20,242.0938 L20,224.9609" fill="#EEEEEE" style="stroke:#000000;stroke-width:1.5;"/><rect fill="none" height="183.6016" style="stroke:#000000;stroke-width:1.5;" width="970.0723" x="20" y="224.9609"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="700" lengthAdjust="spacing" textLength="19.4429" x="35" y="238.0278">alt</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="700" lengthAdjust="spacing" textLength="229.0342" x="99.4429" y="237.1714">[Rate limit exceeded (&gt;10 per hour)]</text><g class="message" data-entity-1="part2" data-entity-2="part1" data-source-line="22" id="msg6"><polygon fill="#181818" points="85.6831,259.2266,75.6831,263.2266,85.6831,267.2266,81.6831,263.2266" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="79.6831" x2="527.7793" y1="263.2266" y2="263.2266"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="216.5313" x="91.6831" y="258.1606">HTTP 429 {Retry-After: seconds}</text></g><line style="stroke:#000000;stroke-width:1;stroke-dasharray:2,2;" x1="20" x2="990.0723" y1="272.2266" y2="272.2266"/><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="700" lengthAdjust="spacing" textLength="63.0298" x="25" y="282.437">[Limit OK]</text><g class="message" data-entity-1="part2" data-entity-2="part3" data-source-line="25" id="msg7"><polygon fill="#181818" points="936.8667,303.1641,946.8667,307.1641,936.8667,311.1641,940.8667,307.1641" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="528.7793" x2="942.8667" y1="307.1641" y2="307.1641"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="254.3062" x="535.7793" y="302.0981">LPUSH matchmaking:{mode} {pet_id}</text></g><g class="message" data-entity-1="part3" data-entity-2="part2" data-source-line="27" id="msg8"><polygon fill="#181818" points="539.7793,332.2969,529.7793,336.2969,539.7793,340.2969,535.7793,336.2969" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="533.7793" x2="952.8667" y1="336.2969" y2="336.2969"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="96.3511" x="545.7793" y="331.231">queue position</text></g><g class="message" data-entity-1="part2" data-entity-2="part1" data-source-line="30" id="msg9"><polygon fill="#181818" points="85.6831,361.4297,75.6831,365.4297,85.6831,369.4297,81.6831,365.4297" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="79.6831" x2="527.7793" y1="365.4297" y2="365.4297"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="344.2017" x="91.6831" y="360.3638">HTTP 202 {match_id, status: "FINDING_OPPONENT"}</text></g><path d="M33,378.4297 L33,403.4297 L570,403.4297 L570,388.4297 L560,378.4297 L33,378.4297" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M560,378.4297 L560,388.4297 L570,388.4297 L560,378.4297" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="318.8047" x="137.6145" y="395.4966">Client polls GET /api/v1/arena/match/{match_id}</text><path d="M10,422.5625 L79.4893,422.5625 L79.4893,429.6953 L69.4893,439.6953 L10,439.6953 L10,422.5625" fill="#EEEEEE" style="stroke:#000000;stroke-width:1.5;"/><rect fill="none" height="415.3359" style="stroke:#000000;stroke-width:1.5;" width="1168.813" x="10" y="422.5625"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="700" lengthAdjust="spacing" textLength="24.4893" x="25" y="435.6294">par</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="700" lengthAdjust="spacing" textLength="132.376" x="94.4893" y="434.7729">[Opponent Matching]</text><g class="message" data-entity-1="part2" data-entity-2="part3" data-source-line="37" id="msg10"><polygon fill="#181818" points="936.8667,456.8281,946.8667,460.8281,936.8667,464.8281,940.8667,460.8281" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="528.7793" x2="942.8667" y1="460.8281" y2="460.8281"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="285.7524" x="535.7793" y="455.7622">BLPOP matchmaking:{mode} (timeout 30s)</text></g><g class="message" data-entity-1="part3" data-entity-2="part2" data-source-line="39" id="msg11"><polygon fill="#181818" points="539.7793,485.9609,529.7793,489.9609,539.7793,493.9609,535.7793,489.9609" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="533.7793" x2="952.8667" y1="489.9609" y2="489.9609"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="108.1958" x="545.7793" y="484.895">opponent_pet_id</text></g><path d="M475.5249,504.9609 L539.9678,504.9609 L539.9678,512.0938 L529.9678,522.0938 L475.5249,522.0938 L475.5249,504.9609" fill="#EEEEEE" style="stroke:#000000;stroke-width:1.5;"/><rect fill="none" height="132.3359" style="stroke:#000000;stroke-width:1.5;" width="693.2881" x="475.5249" y="504.9609"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="700" lengthAdjust="spacing" textLength="19.4429" x="490.5249" y="518.0278">alt</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="700" lengthAdjust="spacing" textLength="110.8003" x="554.9678" y="517.1714">[Opponent found]</text><g class="message" data-entity-1="part2" data-entity-2="part4" data-source-line="43" id="msg12"><polygon fill="#181818" points="1094.4365,539.2266,1104.4365,543.2266,1094.4365,547.2266,1098.4365,543.2266" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="528.7793" x2="1100.4365" y1="543.2266" y2="543.2266"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="351.0063" x="535.7793" y="538.1606">SELECT * FROM pets WHERE id IN (pet_a_id, pet_b_id)</text></g><g class="message" data-entity-1="part4" data-entity-2="part2" data-source-line="45" id="msg13"><polygon fill="#181818" points="539.7793,568.3594,529.7793,572.3594,539.7793,576.3594,535.7793,572.3594" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="533.7793" x2="1110.4365" y1="572.3594" y2="572.3594"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="90.3208" x="545.7793" y="567.2935">[pet_a, pet_b]</text></g><line style="stroke:#000000;stroke-width:1;stroke-dasharray:2,2;" x1="475.5249" x2="1168.813" y1="581.3594" y2="581.3594"/><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="700" lengthAdjust="spacing" textLength="140.0996" x="480.5249" y="591.5698">[Timeout (AI fallback)]</text><g class="message" data-entity-1="part2" data-entity-2="part2" data-source-line="48" id="msg14"><line style="stroke:#181818;stroke-width:1;" x1="528.7793" x2="570.7793" y1="616.2969" y2="616.2969"/><line style="stroke:#181818;stroke-width:1;" x1="570.7793" x2="570.7793" y1="616.2969" y2="629.2969"/><line style="stroke:#181818;stroke-width:1;" x1="529.7793" x2="570.7793" y1="629.2969" y2="629.2969"/><polygon fill="#181818" points="539.7793,625.2969,529.7793,629.2969,539.7793,633.2969,535.7793,629.2969" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="143.6919" x="535.7793" y="611.231">Generate AI opponent</text></g><line style="stroke:#000000;stroke-width:1;stroke-dasharray:2,2;" x1="10" x2="1178.813" y1="645.2969" y2="645.2969"/><g class="message" data-entity-1="part1" data-entity-2="part2" data-source-line="51" id="msg15"><polygon fill="#181818" points="511.7793,663.4297,521.7793,667.4297,511.7793,671.4297,515.7793,667.4297" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="74.6831" x2="517.7793" y1="667.4297" y2="667.4297"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="242.7026" x="81.6831" y="662.3638">GET /api/v1/arena/match/{match_id}</text></g><path d="M20,682.4297 L84.4429,682.4297 L84.4429,689.5625 L74.4429,699.5625 L20,699.5625 L20,682.4297" fill="#EEEEEE" style="stroke:#000000;stroke-width:1.5;"/><rect fill="none" height="148.4688" style="stroke:#000000;stroke-width:1.5;" width="1148.813" x="20" y="682.4297"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="700" lengthAdjust="spacing" textLength="19.4429" x="35" y="695.4966">alt</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="700" lengthAdjust="spacing" textLength="121.5854" x="99.4429" y="694.6401">[Match not started]</text><g class="message" data-entity-1="part2" data-entity-2="part1" data-source-line="54" id="msg16"><polygon fill="#181818" points="85.6831,716.6953,75.6831,720.6953,85.6831,724.6953,81.6831,720.6953" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="79.6831" x2="522.7793" y1="720.6953" y2="720.6953"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="371.4458" x="91.6831" y="715.6294">HTTP 200 {status: "FINDING_OPPONENT", time_elapsed}</text></g><line style="stroke:#000000;stroke-width:1;stroke-dasharray:2,2;" x1="20" x2="1168.813" y1="729.6953" y2="729.6953"/><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="700" lengthAdjust="spacing" textLength="87.2158" x="25" y="739.9058">[Match ready]</text><g class="message" data-entity-1="part2" data-entity-2="part4" data-source-line="56" id="msg17"><polygon fill="#181818" points="1094.4365,760.6328,1104.4365,764.6328,1094.4365,768.6328,1098.4365,764.6328" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="1100.4365" y1="764.6328" y2="764.6328"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="299.9712" x="540.7793" y="759.5669">SELECT * FROM arena_matches WHERE id = ?</text></g><g class="message" data-entity-1="part4" data-entity-2="part2" data-source-line="58" id="msg18"><polygon fill="#181818" points="544.7793,789.7656,534.7793,793.7656,544.7793,797.7656,540.7793,793.7656" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="538.7793" x2="1110.4365" y1="793.7656" y2="793.7656"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="87.2866" x="550.7793" y="788.6997">match record</text></g><g class="message" data-entity-1="part2" data-entity-2="part1" data-source-line="60" id="msg19"><polygon fill="#181818" points="85.6831,818.8984,75.6831,822.8984,85.6831,826.8984,81.6831,822.8984" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="79.6831" x2="522.7793" y1="822.8984" y2="822.8984"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="276.0659" x="91.6831" y="817.8325">HTTP 200 {status: "READY", pet_a, pet_b}</text></g><g class="message" data-entity-1="part1" data-entity-2="part2" data-source-line="65" id="msg20"><polygon fill="#181818" points="511.7793,862.0313,521.7793,866.0313,511.7793,870.0313,515.7793,866.0313" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="74.6831" x2="517.7793" y1="866.0313" y2="866.0313"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="285.397" x="81.6831" y="860.9653">POST /api/v1/arena/match/{match_id}/start</text></g><g class="message" data-entity-1="part2" data-entity-2="part2" data-source-line="68" id="msg21"><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="575.7793" y1="895.1641" y2="895.1641"/><line style="stroke:#181818;stroke-width:1;" x1="575.7793" x2="575.7793" y1="895.1641" y2="908.1641"/><line style="stroke:#181818;stroke-width:1;" x1="534.7793" x2="575.7793" y1="908.1641" y2="908.1641"/><polygon fill="#181818" points="544.7793,904.1641,534.7793,908.1641,544.7793,912.1641,540.7793,908.1641" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="278.8779" x="540.7793" y="890.0981">Generate seeded random (&#177;15% modifier)</text></g><g class="message" data-entity-1="part2" data-entity-2="part2" data-source-line="69" id="msg22"><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="575.7793" y1="937.2969" y2="937.2969"/><line style="stroke:#181818;stroke-width:1;" x1="575.7793" x2="575.7793" y1="937.2969" y2="950.2969"/><line style="stroke:#181818;stroke-width:1;" x1="534.7793" x2="575.7793" y1="950.2969" y2="950.2969"/><polygon fill="#181818" points="544.7793,946.2969,534.7793,950.2969,544.7793,954.2969,540.7793,950.2969" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="291.0146" x="540.7793" y="932.231">Calculate outcome based on stats + random</text></g><g class="message" data-entity-1="part2" data-entity-2="part2" data-source-line="70" id="msg23"><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="575.7793" y1="979.4297" y2="979.4297"/><line style="stroke:#181818;stroke-width:1;" x1="575.7793" x2="575.7793" y1="979.4297" y2="992.4297"/><line style="stroke:#181818;stroke-width:1;" x1="534.7793" x2="575.7793" y1="992.4297" y2="992.4297"/><polygon fill="#181818" points="544.7793,988.4297,534.7793,992.4297,544.7793,996.4297,540.7793,992.4297" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="233.4351" x="540.7793" y="974.3638">Simulate 5-15s battle animation log</text></g><g class="message" data-entity-1="part2" data-entity-2="part4" data-source-line="72" id="msg24"><polygon fill="#181818" points="1094.4365,1017.5625,1104.4365,1021.5625,1094.4365,1025.5625,1098.4365,1021.5625" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="1100.4365" y1="1021.5625" y2="1021.5625"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="138.4424" x="540.7793" y="1016.4966">BEGIN TRANSACTION</text></g><g class="message" data-entity-1="part2" data-entity-2="part4" data-source-line="74" id="msg25"><polygon fill="#181818" points="1094.4365,1046.6953,1104.4365,1050.6953,1094.4365,1054.6953,1098.4365,1050.6953" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="1100.4365" y1="1050.6953" y2="1050.6953"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="509.8818" x="540.7793" y="1045.6294">INSERT INTO arena_matches (pet_a_id, pet_b_id, winner_pet_id, battle_log, ...)</text></g><g class="message" data-entity-1="part2" data-entity-2="part4" data-source-line="75" id="msg26"><polygon fill="#181818" points="1094.4365,1075.8281,1104.4365,1079.8281,1094.4365,1083.8281,1098.4365,1079.8281" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="1100.4365" y1="1079.8281" y2="1079.8281"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="407.9575" x="540.7793" y="1074.7622">UPDATE pets SET stat_* (if buffed) WHERE id IN (winner, loser)</text></g><g class="message" data-entity-1="part4" data-entity-2="part2" data-source-line="76" id="msg27"><polygon fill="#181818" points="544.7793,1104.9609,534.7793,1108.9609,544.7793,1112.9609,540.7793,1108.9609" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="538.7793" x2="1110.4365" y1="1108.9609" y2="1108.9609"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="18.7573" x="550.7793" y="1103.895">OK</text></g><g class="message" data-entity-1="part2" data-entity-2="part3" data-source-line="79" id="msg28"><polygon fill="#181818" points="936.8667,1134.0938,946.8667,1138.0938,936.8667,1142.0938,940.8667,1138.0938" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;" x1="533.7793" x2="942.8667" y1="1138.0938" y2="1138.0938"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="396.0874" x="540.7793" y="1133.0278">ZADD leaderboard:{mode} {winner_score} {winner_pet_id}</text></g><g class="message" data-entity-1="part3" data-entity-2="part2" data-source-line="81" id="msg29"><polygon fill="#181818" points="544.7793,1163.2266,534.7793,1167.2266,544.7793,1171.2266,540.7793,1167.2266" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="538.7793" x2="952.8667" y1="1167.2266" y2="1167.2266"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="18.7573" x="550.7793" y="1162.1606">OK</text></g><g class="message" data-entity-1="part2" data-entity-2="part1" data-source-line="84" id="msg30"><polygon fill="#181818" points="85.6831,1192.3594,75.6831,1196.3594,85.6831,1200.3594,81.6831,1196.3594" style="stroke:#181818;stroke-width:1;"/><line style="stroke:#181818;stroke-width:1;stroke-dasharray:2,2;" x1="79.6831" x2="527.7793" y1="1196.3594" y2="1196.3594"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="425.0962" x="91.6831" y="1191.2935">HTTP 200 {match_result, winner_pet_id, loser_pet_id, battle_log}</text></g><g class="message" data-entity-1="part1" data-entity-2="part1" data-source-line="87" id="msg31"><line style="stroke:#181818;stroke-width:1;" x1="74.6831" x2="116.6831" y1="1225.4922" y2="1225.4922"/><line style="stroke:#181818;stroke-width:1;" x1="116.6831" x2="116.6831" y1="1225.4922" y2="1238.4922"/><line style="stroke:#181818;stroke-width:1;" x1="75.6831" x2="116.6831" y1="1238.4922" y2="1238.4922"/><polygon fill="#181818" points="85.6831,1234.4922,75.6831,1238.4922,85.6831,1242.4922,81.6831,1238.4922" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="204.5532" x="81.6831" y="1220.4263">Display battle animation replay</text></g><g class="message" data-entity-1="part1" data-entity-2="part1" data-source-line="88" id="msg32"><line style="stroke:#181818;stroke-width:1;" x1="74.6831" x2="116.6831" y1="1267.625" y2="1267.625"/><line style="stroke:#181818;stroke-width:1;" x1="116.6831" x2="116.6831" y1="1267.625" y2="1280.625"/><line style="stroke:#181818;stroke-width:1;" x1="75.6831" x2="116.6831" y1="1280.625" y2="1280.625"/><polygon fill="#181818" points="85.6831,1276.625,75.6831,1280.625,85.6831,1284.625,81.6831,1280.625" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="237.2246" x="81.6831" y="1262.5591">Show result card + XP/rank changes</text></g><?plantuml-src ZLNjRk965FtlfxXBLGcs940sLBj8tSe1aw2ou1hljjkgGeDz2QCOZtTco3P2F5HVeK_M-J2E0MUByWFFv7wSU-wPUr_5kAGfWZzsFti1VEUz7LuFtpglykkP5tpIryEk_Ykk-sx_pbEtVU_QwnUtWnlZt_NUEKv6kAGHpKWgeUOdv0avk5bM0o8WiyTzhWDJrn_13FaZScCgp6UH_y0qm9WAOnMHQ8K5dCFKJCXxZhDVnyOoNfGWMXWNx_CiFV2din1Q9AEjnqwBS4n92rEfREePoZcDcx1cCJP1iWTC6mw997qa4dD_nydHbY9-GawNJq2Y28MmVYKhWxi7eqa_09xq5aJA14LlQxFjdXCOGyUM-UmNXcDuysExBQ3UWHNRyCRUf8GWOfjKEZ4UnN988Y7GvuIkgGJyEqACCORw-quRCeNF1eHz2tHCorWFxiBGX-khTx0DKFAd2tSfzRN0YAMns2cdKhwS74m4mjZaclvI2bjKC_O_pkvWJMIqMfC7cjxtjfhj7HHq01mL0N1QxvSDRX0o9gYaB3s4afV-SarNxIlO6WYcsq8IkH4zg0r7ay5eSZkV-lvquat2MdMDwZ9bwiXqS1kuMG3h9rI9II5B4W6tth7GJDPMaNpdO1gRPmJJB6EfTlsW_wU8gMBlPknF_IhswfAkaMqal6cBndaKiZpXt1B_0eTQG0MqfLAPDYmZYnSzDJ_6NZ-4rp0CfX-KhAI0t-wym0CQAzdRTqKCr_fheRuQ9agHBbwOitgtPOH_6h_SwIzhWOS-HczXNdlT7S6I9Cc2H0-D8vZxcBUO8jVkodRFW8wZwjAnrEVfm3YZZQLQSfLOwampjLoqohZ4G_PEXTc6xSjoL2D9LJh7X6G2JL9Jlit1aSHF_ziR0tzkS6EfIJ_1p-SqP9rdYXYFAzjnRcc1vmu-rsndzmtUvMse72lcbPmpoOyxqpAydpF42sK8Eo8vIMEsXlg__tIwt-kLG9SKrQmyzUoJ9DeasbMfC69hX0LH3GAMcjaYu8SyM8NlZAwjQ_UYqnLWbmEGbAeAr6I3XDsNmUgEtdYtwb65WJkPkVrmD9quvIOSseucQhU7wYUS7lM-ub4suIjD5Gdp_HwqQEOAGnCkBoyRHy4_-WCtzEnxdwateekTluOwNS9YirnYt3WS0pPwKzKaD957ubBxub1Efolq3tSmW4G97Vc24HuNkoF7BPGmIyTlBzWNK-UpxvjAjlhYA3Q9FA7Dr5T1uiwfM2RFgjvd6L2XFq-rm57VLtZCLkmhM30AFO-Lu7xtMqfp3n2jI7gFuZy0?></g></svg></div></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
