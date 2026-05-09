@@ -1,5 +1,8 @@
 # EDD — Engineering Design Document
 
+<!-- SDLC Layer 4 — Engineering Design / Architecture -->
+<!-- Upstream: PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503 -->
+
 ---
 
 ## Document Control
@@ -8,11 +11,15 @@
 |------|------|
 | **DOC-ID** | EDD-PIXEL-PET-ARENA-20260503 |
 | **產品名稱** | Pixel Pet Arena |
-| **文件版本** | v1.0 |
+| **文件版本** | v2.0 |
 | **狀態** | DRAFT |
 | **作者** | AI Generated (gendoc edd) |
 | **建立日期** | 2026-05-03 |
+| **最後更新** | 2026-05-10 |
 | **上游文件** | PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503 |
+| **下游文件** | SCHEMA.md, API.md, ARCH.md, BDD.md, test-plan.md, runbook.md |
+| **client_type** | web (HTML5 browser, no installation) |
+| **has_admin_backend** | true |
 
 ---
 
@@ -21,26 +28,27 @@
 | 版本 | 日期 | 作者 | 變更摘要 |
 |------|------|------|---------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc edd) | 初稿：從 PRD / PDD / VDD / CONSTANTS 生成完整工程設計文件 |
+| v2.0 | 2026-05-10 | AI Generated (gendoc edd review-r6) | 完整重寫：新增 §1.2 設計原則、§1.3 PRD 追溯表、§3.1 架構模式（Modular Monolith）、§3.1b Clean Architecture & SOLID、§3.2 ADR-001~004、§3.4 BC Schema Ownership Table、§3.6 HA/SPOF/SCALE/BCP、§3.7 Min-HA 架構圖、§4.3 跨模組 DAG 驗證、§4.5 UML 9 大圖（全 Mermaid）、§4.6 Domain Events、§8 Resilience（Bulkhead/Circuit Breaker）、§9 STRIDE+OWASP A01-A10、§9.6 RBAC、§10 Observability（SLO/SLI/Audit/Synthetic）、§11.2 Capacity Planning、§13 Deployment Strategy + DR + Runbook、§16 Implementation Plan + 依賴排序、§20 5 種 Feature Flag 類型、§21 三支柱可觀測性實作。所有 ASCII 圖改為 Mermaid，所有 PUML 改為 Mermaid。 |
 
 ---
 
 ## §0. Business Constants (Key Values from CONSTANTS.md / constants.json)
 
-The following constants are extracted directly from [CONSTANTS.md](CONSTANTS.md) (CONSTANTS-PIXEL-PET-ARENA-20260503) and govern all engineering decisions in this document. See [CONSTANTS.md](CONSTANTS.md) for the authoritative source definitions and rationale for each constant.
+The following constants are extracted directly from [CONSTANTS.md](CONSTANTS.md) (CONSTANTS-PIXEL-PET-ARENA-20260503) and govern all engineering decisions in this document. See [CONSTANTS.md](CONSTANTS.md) for the authoritative source definitions and rationale.
 
 | Constant | Value | Unit | Notes |
 |---|---|---|---|
 | PET_GENERATION_COMBINATIONS_MIN | 1,000,000,000 | combinations | Minimum unique pet generation combinations |
-| PET_GENERATION_DIMENSIONS | 6 | dimensions | Attribute vector dimensions: body, head, color_palette, accessory, rarity_trait, pattern |
+| PET_GENERATION_DIMENSIONS | 6 | dimensions | body, head, color_palette, accessory, rarity_trait, pattern |
 | PET_STAT_DEFAULT | 10 | points | Default stat value for speed, strength, stamina |
 | PET_STAT_MIN | 1 | points | Minimum stat value |
 | PET_STAT_MAX | 100 | points | Maximum stat value |
 | PET_LEVEL_DEFAULT | 1 | level | Starting level |
 | PET_LEVEL_MAX | 100 | level | Max level cap; FLOOR(training_actions / PET_LEVEL_FORMULA_DIVISOR) |
-| PET_LEVEL_FORMULA_DIVISOR | 10 | — | Divisor in FLOOR(total_training_actions / PET_LEVEL_FORMULA_DIVISOR) level formula |
+| PET_LEVEL_FORMULA_DIVISOR | 10 | — | Divisor for level formula |
 | TRAINING_ACTIONS_PER_DAY | 3 | actions/day | Reset UTC 00:00 |
 | TRAINING_NEGLECT_THRESHOLD_DAYS | 3 | days | Triggers visual neglect state |
-| ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT | 10 | battles/hr (default) | Admin-tunable; ARENA_RATE_LIMIT_ADMIN_MIN = 1; ARENA_RATE_LIMIT_ADMIN_MAX = 50 |
+| ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT | 10 | battles/hr | Admin-tunable; 1–50 range |
 | ARENA_MATCHMAKING_TIMEOUT_SECONDS | 30 | seconds | AI fallback offered |
 | ARENA_MATCH_DURATION_MIN_SECONDS | 5 | seconds | Animation window minimum |
 | ARENA_MATCH_DURATION_MAX_SECONDS | 15 | seconds | Animation window maximum |
@@ -52,1757 +60,2293 @@ The following constants are extracted directly from [CONSTANTS.md](CONSTANTS.md)
 | CLAIM_CODE_EXPIRY_MINUTES | 15 | minutes | After generation |
 | CLAIM_TOKEN_CLEANUP_TTL_HOURS | 72 | hours | After creation or first use |
 | PET_ACCESS_TOKEN_MIN_BYTES | 32 | bytes | URL-safe base64 random |
-| CLAIM_TOKEN_MIN_ENTROPY_BYTES | 32 | bytes | Cryptographically random |
 | AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR | 5 | attempts/hr | Per email address |
 | AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION | 10 | attempts/session | Per session |
 | ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS | 4 | hours | Inactivity timeout |
 | ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS | 8 | hours | Regardless of activity |
 | ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE | 100 | req/min | Per admin account |
 | ADMIN_AUDIT_LOG_RETENTION_YEARS | 2 | years | GDPR Art. 30 compliance |
-| BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window (arena bot-detection system); BOT_DETECTION_WINDOW_MINUTES = 60 |
-| LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR | 50 | battles/hr | Admin leaderboard UI suspicious-flag indicator (distinct purpose from bot detection) |
+| BOT_DETECTION_BATTLES_THRESHOLD | 50 | battles | Per 60-min rolling window |
 | HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT | 70 | percent | HPA scale-out trigger |
 | DB_AUTOFAILOVER_TIME_SECONDS | 60 | seconds | PostgreSQL automated failover |
 | SENDGRID_FAILOVER_CONSECUTIVE_FAILURES | 3 | failures | Switch to Nodemailer SMTP |
-| CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT | 98 | percent | Minimum email delivery success rate target |
-| SENDGRID_DELIVERY_RATE_ASSUMPTION_PERCENT | 98 | percent | Capacity planning assumption for SendGrid delivery rate |
+| CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT | 98 | percent | Minimum email delivery success |
 | NORMAL_OPERATION_RPS | 100 | RPS | Sustained |
-| NORMAL_OPERATION_DAU_MIN | 2,000 | DAU | Expected minimum DAU at normal operation |
-| NORMAL_OPERATION_DAU_MAX | 5,000 | DAU | Expected maximum DAU at normal operation |
+| NORMAL_OPERATION_DAU_MIN | 2,000 | DAU | Minimum normal DAU |
+| NORMAL_OPERATION_DAU_MAX | 5,000 | DAU | Maximum normal DAU |
 | PEAK_OPERATION_RPS | 500 | RPS | Viral peak |
 | PEAK_CONCURRENT_USERS | 2,000 | PCU | Arena events |
 | DB_CONNECTION_POOL_MIN_CONNECTIONS | 20 | connections | PostgreSQL pool floor |
+| DB_CONNECTION_POOL_MAX_CONNECTIONS | 50 | connections | PostgreSQL pool burst |
 | CODE_MODULE_MAX_LINES | 800 | lines | Hard limit per module |
 | CODE_FUNCTION_MAX_LINES | 50 | lines | Hard limit per function |
-| AVAILABILITY_MONTHLY_PERCENT | 99.9% | monthly | ≤43.8 min downtime/month (AVAILABILITY_MAX_DOWNTIME_MINUTES_PER_MONTH = 43.8) |
-| P99_API_LATENCY_READ_MS_AT_100_RPS | <200 | ms at 100 RPS | All read endpoints |
-| P99_API_LATENCY_WRITE_MS_AT_100_RPS | <500 | ms at 100 RPS | Training, arena write endpoints |
+| AVAILABILITY_MONTHLY_PERCENT | 99.9% | monthly | ≤43.8 min downtime/month |
+| P99_API_LATENCY_READ_MS_AT_100_RPS | <200 | ms | All read endpoints |
+| P99_API_LATENCY_WRITE_MS_AT_100_RPS | <500 | ms | Write endpoints |
 | GDPR_EMAIL_DELETION_WINDOW_DAYS | 7 | days | Email → SHA-256 hash |
-| GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS | 24 | hours | Internal SLA for email hash completion |
-| RARITY_COMMON_PERCENT | 60 | percent | Default rarity drop weight; admin-tunable; all four must sum to 100% |
-| RARITY_RARE_PERCENT | 25 | percent | Default rarity drop weight |
-| RARITY_EPIC_PERCENT | 12 | percent | Default rarity drop weight |
-| RARITY_LEGENDARY_PERCENT | 3 | percent | Default rarity drop weight |
-| RARITY_MULTIPLIER_COMMON | 1 | × | Applied in trade min-price formula: (pet_level × 100) + (rarity_multiplier × 500) |
-| RARITY_MULTIPLIER_RARE | 2 | × | Applied in trade min-price formula |
-| RARITY_MULTIPLIER_EPIC | 4 | × | Applied in trade min-price formula |
-| RARITY_MULTIPLIER_LEGENDARY | 8 | × | Applied in trade min-price formula |
-| TRADE_TRANSACTION_FEE_PERCENT | 5 | percent | Platform fee on trades; within BRD-defined range of 5–10% (TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5, TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10) |
-| FOOD_BUFF_RECORD_RETENTION_DAYS | 30 | days | After expiry/consumption |
+| GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS | 24 | hours | Internal SLA for hashing |
+| RARITY_COMMON_PERCENT | 60 | percent | Default rarity drop weight |
+| RARITY_RARE_PERCENT | 25 | percent | — |
+| RARITY_EPIC_PERCENT | 12 | percent | — |
+| RARITY_LEGENDARY_PERCENT | 3 | percent | — |
+| TRADE_TRANSACTION_FEE_PERCENT | 5 | percent | Platform trade fee |
 | MVP_BUDGET_USD | 40,000 | USD | Hard constraint |
-| PET_RESERVATION_TTL_HOURS | 24 | hours | Guest preview reservation window before unclaimed pet cleanup |
-| SPRITE_RESOLUTION_PX | 32 | px | Sprite frame size; provisional Phase 1 resolution (see §14 OQ-E01) |
-| ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS | 10 | attempts | Pre-auth IP rate limit for admin login endpoint |
-| ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS | 900 | seconds | Rolling window for admin login IP rate limit (15 min) |
-| ADMIN_LOGIN_LOCKOUT_THRESHOLD | 10 | consecutive failures | Account lockout trigger after N failed attempts |
-| ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES | 30 | minutes | Duration of admin account lockout |
+| PET_RESERVATION_TTL_HOURS | 24 | hours | Guest preview reservation |
+| SPRITE_RESOLUTION_PX | 32 | px | Phase 1 sprite resolution |
+| ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS | 10 | attempts | Pre-auth IP rate limit |
+| ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS | 900 | seconds | 15-min rolling window |
+| ADMIN_LOGIN_LOCKOUT_THRESHOLD | 10 | failures | Account lockout trigger |
+| ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES | 30 | minutes | Lockout duration |
 
 ---
 
 ## §1. Executive Summary
 
-**System Purpose**: pixel-pet-arena is an HTML5 browser-native SaaS platform where users discover, claim, train, and battle procedurally-generated pixel-art pets without creating a traditional account. The identity layer is a 6-digit OTP email claim that produces a 32-byte cryptographic URL token — users return via a bookmarked URL. A multi-mode arena, global leaderboard, and (post-MVP) marketplace complete the competitive loop.
+### §1.1 技術摘要
 
-**Tech Stack Decision**: The backend is Node.js with Fastify, chosen for its excellent TypeScript integration, schema-based validation via JSON Schema / Zod, and a plugin ecosystem well-suited to real-time concerns (WebSocket support, Redis adapters). Go (Fiber) was considered for the arena service due to higher concurrent goroutines, but at the projected peak of 500 RPS and 2,000 PCU the event loop model of Node.js with async/await is sufficient, and a single-language codebase reduces operational overhead within the MVP budget of $40,000. The frontend uses React + Vite + TypeScript. The admin portal uses Vue 3 + Element Plus + Vite — a deliberate stack separation that keeps the data-dense admin UI from coupling to the pixel-art game design system.
+**System Purpose**: pixel-pet-arena 是一個 HTML5 browser-native SaaS 平台，玩家可在無傳統帳號註冊的前提下發現、認領、訓練並對戰程序化生成的像素藝術寵物。Identity layer 是 6-digit OTP email claim 產生 32-byte cryptographic URL token，玩家透過 URL 收藏返回。多模式競技場（Race / Sumo）、全球排行榜、（post-MVP）市集構成完整競爭循環。
+
+**Tech Stack Decision**: 後端採用 **Node.js 20 LTS + Fastify 4 + TypeScript 5**，因其優秀的 TypeScript 整合、JSON Schema / Zod 驗證、real-time 友善 plugin 生態（WebSocket、Redis adapter）。Go (Fiber) 曾被考慮用於 arena service，但於 500 RPS / 2,000 PCU 投影負載下，Node.js event loop 配合 async/await 已足夠，且單語言降低 MVP $40,000 預算範圍內的營運開銷。前端為 **React 18 + Phaser 3 + Vite**（Player App）+ **Vue 3 + Element Plus**（Admin Portal）— 雙棧分離避免像素藝術設計系統污染資料密集的 admin UI。
 
 **Key Constraints**:
-- Budget hard cap: $40,000 MVP (CONSTANTS MVP_BUDGET_USD)
-- No traditional user accounts — all identity through email OTP + URL token
-- Phaser.js for game canvas rendering; React for UI chrome
-- Availability SLO 99.9% monthly; peak 500 RPS; 2,000 PCU
-- GDPR compliance required (email deletion within 7 days of request)
-- COPPA: age-13 confirmation required; no marketing email without consent
-- All numeric values sourced from CONSTANTS-PIXEL-PET-ARENA-20260503
+- Budget hard cap: $40,000 MVP（CONSTANTS MVP_BUDGET_USD）
+- 無傳統用戶帳戶 — 所有 identity 透過 email OTP + URL token
+- Phaser 3 用於 game canvas；React 提供 UI chrome；Vue 3 提供 Admin
+- Availability SLO 99.9% monthly；peak 500 RPS；2,000 PCU
+- GDPR 合規（email 刪除請求 7 日內生效）
+- COPPA：年齡 13 歲確認 checkbox 必填；無 marketing email 預設
+- 所有數值來自 CONSTANTS-PIXEL-PET-ARENA-20260503
+
+### §1.2 設計原則
+
+本系統設計依循下列十條工程原則，與 PRD §7 NFR 對齊：
+
+1. **Single Source of Truth on CONSTANTS** — 所有量化值（RPS、TTL、閾值、費率）強制讀取 `CONSTANTS.md` 與 `constants.json`；CI gate 驗證程式碼中無硬編碼魔術數字。
+2. **Stateless API** — API server replicas 不持有 session 狀態；Player 用 SHA-256 hashed token 驗證；Admin session 集中於 Redis。任意 replica 可服務任意請求 → HA 與水平擴展前提。
+3. **Idempotent Workers** — 所有背景工作（GDPR erasure、claim_codes cleanup、leaderboard snapshot、food_buffs 清理）透過 unique key + processed_at 確保重複執行安全。
+4. **Event-Driven for Async** — 跨 BC 通訊透過 Domain Event（Pet, Arena, Leaderboard, Marketplace, Admin）；§4.6 列出完整 event schema 與 consumer。
+5. **SOLID** — 嚴格遵守單一職責、開放封閉、Liskov 替換、介面隔離、依賴反轉；§3.1b 提供具體實作對照表。
+6. **Defense in Depth** — 安全控制分層：CDN/WAF → API gateway rate limit → Auth middleware → schema validation → Repository constraint check → DB CHECK + unique constraint。
+7. **Observability First** — 三支柱（Logs / Metrics / Traces）於每個 endpoint 注入；新功能 PR 必須附 SLI 與 alert 規則才能 merge。
+8. **HA-First** — 任何 replica 數量 < 2 的元件即為 SPOF；本系統強制 API/Worker ≥ 2 replicas（§3.6.1）；本地開發環境亦遵守此約束。
+9. **Fail-Closed for Auth, Fail-Open for Read** — Redis 不可用時 rate limit 退化但不阻斷讀取；Auth middleware 在 token 驗證錯誤時 fail-closed（拒絕請求）。
+10. **Minimum Viable Architecture** — 不過度抽象；MVP 階段拒絕 Microservices 拆分；保留 BC 邊界供未來必要時拆分（§3.4 Context Map）。
+
+### §1.3 PRD 需求追溯表
+
+完整對應 PRD 所有 P0 User Story 至本 EDD 章節。Status 顯示工程設計階段的覆蓋狀態。
+
+| Epic | User Story ID | 對應 EDD 章節 | Status |
+|------|---------------|---------------|--------|
+| EPIC-PET | US-PET-001 (Random Pet Display Guest) | §4.1 Pet Module、§5.2 GET /api/v1/pets/random、§8.3 Pixel Art Rendering、§4.5.7 Activity (Claim Flow) | Designed |
+| EPIC-PET | US-PET-002 (Procedural Pixel Pet Generation) | §4.1 Pet Module、§4.4 Domain Glossary（PetGenerationService）、§6.1 ERD pets/generation_meta | Designed |
+| EPIC-AUTH | US-AUTH-001 (Email Claim Flow) | §5.1 Auth Endpoints、§9.1 Pet Access Token Model、§9.2 Claim Code Flow、§4.5.4 Sequence (Claim Flow) | Designed |
+| EPIC-AUTH | US-AUTH-002 (Returning Pet Owner Access) | §5.1 POST /api/v1/claim/recover、§9.1 Token recovery、§4.5.6 State (Pet) | Designed |
+| EPIC-TRAINING | US-TRAIN-001 (Pet Training System) | §4.1 Pet/Training Modules、§5.2 POST /api/v1/pets/:petId/train、§6.1 ERD training_logs | Designed |
+| EPIC-TRAINING | US-FOOD-001 (Special Food System) | §5.2 POST /api/v1/pets/:petId/feed、§6.1 ERD food_buffs | Designed |
+| EPIC-ARENA | US-ARENA-001 (Arena Racing Competition) | §4.1 Arena Module、§5.3 POST /api/v1/arena/enter、§4.5.4 Sequence (Arena Battle)、§4.5.6 State (Arena Match) | Designed |
+| EPIC-ARENA | US-ARENA-002 (Sumo Arena Mode P1) | §5.3 mode='SUMO'、§7 Sequence flows | Designed |
+| EPIC-RANKING | US-BOARD-001 (Global Leaderboard) | §4.1 Leaderboard Module、§5.4 GET /api/v1/leaderboard、§6.1 ERD leaderboard_snapshots、Redis sorted set | Designed |
+| EPIC-RANKING | US-RECORD-001 (Battle Records Page P0) | §5.3 GET /api/v1/arena/history/:petId、§4.5.7 Activity (Battle) | Designed |
+| EPIC-RANKING | US-RARITY-001 (Rarity Scoring) | §4.1 Pet Module rarity ENUM、§6.1 ERD pets.rarity | Designed |
+| EPIC-ADMIN | US-ADMIN-001 (Admin Pet Management) | §5.5 GET /admin/api/pets、§9.6 RBAC | Designed |
+| EPIC-ADMIN | US-ADMIN-002 (Admin Leaderboard View) | §5.5 GET /admin/api/leaderboard | Designed |
+| EPIC-ADMIN | US-ADMIN-003 (Runtime Parameter Tuning) | §5.5 PUT /admin/api/config/runtime、§3.4 BC Admin | Designed |
+| EPIC-ADMIN | US-ADMIN-004 (GDPR Erasure) | §5.5 POST /admin/api/gdpr/delete、§4.5.7 Activity (GDPR Erasure)、§9.5 GDPR Summary | Designed |
+| EPIC-ADMIN | US-ADMIN-005 (Suspicious Pet Flag) | §5.5 GET /admin/api/suspicious、§4.6 Event suspicious_pet_flagged | Designed |
+| EPIC-ADMIN | US-ADMIN-006 (Game Economy Configuration) | §5.5 PUT /admin/api/config/economy | Designed |
 
 ---
 
 ## §2. System Architecture Overview
 
-### §2.1 Component Diagram (ASCII)
+### §2.1 系統上下文圖（C4 Level 1）
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│  Client Layer (Browser)                                                         │
-│                                                                                 │
-│  ┌──────────────────────────────────┐   ┌─────────────────────────────────────┐│
-│  │  Player App (React + Phaser.js)  │   │  Admin Portal (Vue 3 + Element Plus)││
-│  │  Vite build / CDN (Vercel)        │   │  Vite build / CDN (Vercel)          ││
-│  └─────────────┬────────────────────┘   └──────────────┬──────────────────────┘│
-└────────────────┼──────────────────────────────────────┼─────────────────────────┘
-                 │ HTTPS / REST                          │ HTTPS / REST (/admin)
-                 ▼                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│  API Gateway / Load Balancer (Nginx or Vercel Edge)                             │
-│  TLS termination, rate-limit headers forwarded, X-Real-IP passthrough           │
-└───────────────────┬──────────────────────────────────────────────────────────────┘
-                    │
-        ┌───────────┴────────────┐
-        ▼                        ▼
-┌────────────────────┐  ┌────────────────────────┐
-│  Game API Server   │  │  Admin API Server       │
-│  Node.js / Fastify │  │  Node.js / Fastify      │
-│  (≥2 replicas)     │  │  (1 replica, /admin ns) │
-└────────┬───────────┘  └───────────┬─────────────┘
-         │                          │
-         │  (shared connections)    │
-         ▼                          ▼
-┌────────────────────────────────────────────────┐
-│  Data Layer                                    │
-│                                                │
-│  ┌─────────────────────┐  ┌──────────────────┐ │
-│  │  PostgreSQL 15+     │  │  Redis 7+         │ │
-│  │  Primary (writer)   │  │  (Upstash/Railway)│ │
-│  │  Read Replica       │  │  Leaderboard sets │ │
-│  │  (Supabase/Railway) │  │  Rate limit ctrs  │ │
-│  │  Auto-failover 60s  │  │  Session tokens   │ │
-│  └─────────────────────┘  │  Matchmaking queue│ │
-│                            └──────────────────┘ │
-└────────────────────────────────────────────────┘
-         │
-         ▼
-┌────────────────────────────┐
-│  External Services         │
-│  SendGrid (email primary)  │
-│  Nodemailer SMTP (fallback)│
-│  S3-compatible (DB backups)│
-└────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Actors
+        Guest["Guest Player<br/>(no account)"]
+        Owner["Pet Owner<br/>(email-claimed)"]
+        Comp["Competitor<br/>(arena player)"]
+        Admin["Admin Operator<br/>(super_admin / moderator / read_only)"]
+        Job["System Scheduled Jobs<br/>(cron / cleanup)"]
+    end
+
+    subgraph "Pixel Pet Arena Platform"
+        PPA["pixel-pet-arena<br/>HTML5 browser game + REST API + Admin Portal"]
+    end
+
+    subgraph "External Systems"
+        SG["SendGrid<br/>(transactional email)"]
+        SMTP["Nodemailer SMTP<br/>(email fallback)"]
+        SB["Supabase<br/>(PostgreSQL 15 managed)"]
+        UP["Upstash Redis<br/>(serverless cache)"]
+        VC["Vercel CDN<br/>(static assets)"]
+        S3["S3-compatible Storage<br/>(DB backups)"]
+        DD["Datadog / Grafana Cloud<br/>(observability)"]
+    end
+
+    Guest -->|"HTTPS / browse"| PPA
+    Owner -->|"HTTPS / pet URL token"| PPA
+    Comp -->|"HTTPS / arena interactions"| PPA
+    Admin -->|"HTTPS / admin session"| PPA
+    Job -->|"cron triggers"| PPA
+
+    PPA -->|"send claim email"| SG
+    PPA -->|"fallback after 3 failures"| SMTP
+    PPA -->|"persist data"| SB
+    PPA -->|"cache + leaderboard + rate-limit"| UP
+    PPA -->|"static assets"| VC
+    SB -->|"daily backup"| S3
+    PPA -->|"logs / metrics / traces"| DD
 ```
 
-### §2.2 Deployment Model
+### §2.2 Container 圖（C4 Level 2）
 
-- **Player App**: Static assets built by Vite and served via Vercel CDN (global edge). No SSR required; purely client-side SPA with REST API calls.
-- **Admin Portal**: Same Vercel project, separate route prefix or subdomain (`admin.pixel-pet-arena.com`). Deployed as a separate Vite application.
-- **API Server**: Containerized Node.js / Fastify on Railway (initial) or Fly.io. Minimum 2 replicas for HA. Horizontal autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70%).
-- **PostgreSQL**: Supabase managed PostgreSQL 15+. Primary writer + 1 read replica. Automated failover target 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60s). Daily backups to S3-compatible storage.
-- **Redis**: Upstash Redis (serverless, pay-per-request) or Railway Redis. Used for leaderboard sorted sets, rate-limit counters, claim token blacklist, and matchmaking queue.
-- **Email**: SendGrid v3 API primary. Nodemailer SMTP fallback activates on 3 consecutive SendGrid failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3).
+```mermaid
+graph TB
+    Browser["Player Browser<br/>(React + Phaser 3)"]
+    AdminBrowser["Admin Browser<br/>(Vue 3 + Element Plus)"]
+
+    subgraph "Edge / CDN Layer"
+        CDN["Vercel Global CDN<br/>(static SPA bundles)"]
+        LB["Nginx LB / Vercel Edge<br/>(TLS, X-Real-IP, rate-limit headers)"]
+    end
+
+    subgraph "Application Tier (Railway)"
+        API1["API Replica 1<br/>(Fastify 4 / Node 20)"]
+        API2["API Replica 2<br/>(Fastify 4 / Node 20)"]
+        W1["Worker Replica 1<br/>(GDPR erasure / leaderboard snapshot / cleanup)"]
+        W2["Worker Replica 2<br/>(idempotent backup)"]
+    end
+
+    subgraph "Data Tier"
+        PG_P["PostgreSQL Primary<br/>(Supabase managed)"]
+        PG_R["PostgreSQL Read Replica<br/>(leaderboard / public reads)"]
+        REDIS_P["Redis Primary<br/>(Upstash)"]
+        REDIS_S["Redis Replica<br/>(Upstash Sentinel)"]
+    end
+
+    subgraph "External Services"
+        SG["SendGrid v3 API"]
+        SMTP["SMTP fallback"]
+        S3["S3 backups"]
+    end
+
+    Browser --> CDN
+    AdminBrowser --> CDN
+    CDN --> LB
+    LB --> API1
+    LB --> API2
+    API1 --> PG_P
+    API2 --> PG_P
+    API1 --> PG_R
+    API2 --> PG_R
+    API1 --> REDIS_P
+    API2 --> REDIS_P
+    REDIS_P --> REDIS_S
+    PG_P --> PG_R
+    PG_P --> S3
+    W1 --> PG_P
+    W2 --> PG_P
+    API1 --> SG
+    SG -.->|"3 consecutive failures"| SMTP
+    W1 --> SMTP
+```
 
 ---
 
-## §3. Technology Stack
+## §3. Technology Stack & Architecture Decisions
 
-### §3.1 Backend Language & Framework
+### §3.1 架構模式（Architecture Pattern）
 
-語言/框架（lang_stack）: Node.js 20 LTS + Fastify 4
+**選擇**：Modular Monolith + Layered Hexagonal Hybrid。
 
-Rationale: Fastify provides JSON Schema-based route validation out of the box (eliminating a middleware dependency), achieves ~30% lower overhead than Express at equivalent concurrency, has a mature plugin ecosystem for Redis, JWT, rate-limiting, and CORS, and shares TypeScript types cleanly with frontend domain models. At the projected load of 500 RPS peak and 2,000 PCU, Node.js async I/O is sufficient without the operational complexity of a Go microservice split. Both API server and admin server are Node.js / Fastify instances — separate processes sharing database credentials via environment variables.
+**為何選擇 Modular Monolith**：
+- MVP 預算 $40,000 與 1–2 工程師時程下，Microservices 的維運成本（service mesh、跨服務 trace、分散式事務、多 CI pipeline）遠超 MVP 階段所需，會直接擠壓功能交付時間。
+- 單一可部署單元加速 CI/CD pipeline、簡化 local development、降低跨服務契約測試負擔。
+- Modular Monolith 強制 BC 邊界（§3.4），即使單一 process 內也保留未來拆分能力。
 
-### §3.2 Frontend Framework
+**為何拒絕 Microservices**：
+- 預期負載峰值 500 RPS 屬中等量級，單 process Node.js 已可達標（5–10 ms P99 處理時間 × 500 RPS = 2.5–5 vCPU 即足）。
+- 缺乏多團隊組織壓力（Conway's Law 不成立）。
+- Microservices 引入 eventual consistency 與分散式事務複雜度，與 BRD 對 Day-1 retention 的 SLO 不符（資料一致性是用戶體驗的一部分）。
 
-**Player App**: React 18 + TypeScript 5 + Vite 5
-- Phaser.js 3 for HTML5 Canvas game rendering (sprite animation, interaction physics)
-- TanStack Query v5 for server state (cache, deduplication, optimistic updates)
-- Zustand for ephemeral UI state (arena mode selection, claim flow step, toast queue)
-- React Hook Form for claim form (email input, code entry)
-- URLSearchParams for leaderboard filter/page state
-- `image-rendering: pixelated` on all canvas and sprite elements
+**保留 BC 邊界供未來拆分**：每個 Bounded Context 對應獨立 Fastify plugin、獨立 schema namespace、跨 BC 通訊透過 Domain Event Bus（內部 EventEmitter，可未來替換為 NATS/Kafka）。詳見 §3.4。
 
-### §3.3 Database
+### §3.1b Clean Architecture & SOLID
 
-**Primary**: PostgreSQL 15+ (Supabase managed)
-- Stores all durable data: pets, claim tokens, training logs, arena matches, leaderboard snapshots, food buffs, trade records, admin users, audit log
-- Read replica for leaderboard and public pet page queries (NFR-SCALE-03)
-- Connection pool minimum 20 connections (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20)
-- Automated failover target 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60s)
-- JSONB for extensible pet generation metadata (sprite seed attributes)
+#### Dependency Rule
 
-### §3.4 Cache / Session
+依賴方向（從外向內）：Presentation → Application → Domain；Infrastructure 透過 interface 反轉依賴注入 Application。
 
-**Redis 7+** (Upstash or Railway)
-- Leaderboard sorted sets (ZRANGEBYSCORE, ZADD operations); authoritative source, PostgreSQL is durable backup
-- Rate-limit counters: arena battles per pet per hour (TTL = 1 hour); email claim attempts per email per hour
-- Pet access token blacklist (replaced pet access tokens — e.g. after recovery flow; TTL = 72 hours per CLAIM_TOKEN_CLEANUP_TTL_HOURS)
-- Arena matchmaking queue (Redis Sorted Set; score = enqueue epoch — see §4.8)
-- Config cache: runtime parameter values refreshed every 5 minutes (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 min)
-- Fallback: if Redis unavailable, leaderboard falls back to direct PostgreSQL read (degraded, not outage — NFR-AVAIL-05)
-- Admin sessions stored server-side in Redis with 4h inactivity / 8h absolute expiry
+```mermaid
+graph LR
+    Presentation["Presentation Layer<br/>(Fastify routes / Vue / React)"]
+    Application["Application Layer<br/>(Use Cases / Services)"]
+    Domain["Domain Layer<br/>(Entities / Value Objects / Domain Services)"]
+    Infrastructure["Infrastructure Layer<br/>(Postgres Repo / Redis / SendGrid Adapter)"]
 
-### §3.5 Email Service
+    Presentation --> Application
+    Application --> Domain
+    Infrastructure -.->|"implements port"| Application
+    Infrastructure -.->|"implements port"| Domain
+```
 
-**Primary**: SendGrid API v3
-- Transactional email only: claim password delivery, access-link recovery
-- SPF + DKIM configured; spam complaint rate target <0.1% (SPAM_COMPLAINT_RATE_MAX_PERCENT = 0.1%)
-- Delivery target ≥98% (CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98%); capacity planning assumption 98% (SENDGRID_DELIVERY_RATE_ASSUMPTION_PERCENT = 98%)
-- Delivery SLO P90 ≤60 seconds (NFR-PERF-10)
-- Retry queue: 3 retries over 15 minutes on delivery failure (EMAIL_DELIVERY_FAILURE_RETRIES = 3; EMAIL_DELIVERY_RETRY_WINDOW_MINUTES = 15)
-- Plan ceiling: 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000); upgrade trigger if projected monthly volume approaches this cap
+#### SOLID 對照表
 
-**Fallback**: Nodemailer + SMTP
-- Activates automatically after 3 consecutive SendGrid failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3)
-- Pre-configured SMTP credentials stored in environment variables
-- Vendor migration window: 14 days (VENDOR_MIGRATION_PLAN_DAYS = 14)
+| 原則 | 本系統具體實作 |
+|------|----------------|
+| **Single Responsibility** | 每個 Use Case class 只處理單一業務動作（例：`ClaimPetUseCase`, `EnterArenaUseCase`, `ApplyFoodBuffUseCase`）；Repository 只負責持久化；Service 只負責 domain logic。 |
+| **Open/Closed** | Rarity weight 透過 `RarityWeightStrategy` interface 注入；新增稀有度層級（如 Mythic）只需新增 strategy，不修改 `PetGenerationService`。Battle outcome 計算透過 `ArenaModeStrategy`，新增 mode（Sumo, future Tag-Team）擴展不修改既有 mode。 |
+| **Liskov Substitution** | `EmailDeliveryPort` 有 `SendGridAdapter` 與 `SmtpAdapter` 兩個實作；caller 不關心實際提供者；fallback 切換不破壞契約。`LeaderboardRepository` 有 `RedisLeaderboardRepo` 與 `PostgresLeaderboardRepo`，前者主、後者退化備援。 |
+| **Interface Segregation** | `PetReadRepository` vs `PetWriteRepository` 分離；read-only admin endpoints 注入 read repo，避免暴露 mutation 能力。`AdminAuthService` 不繼承 `PlayerAuthService`，兩種 identity 模型分開。 |
+| **Dependency Inversion** | Application Layer 定義 `ClaimCodeRepository`、`PetRepository`、`EmailDeliveryPort` 等抽象 port；Infrastructure Layer 提供 `PostgresClaimCodeRepository`、`SendGridEmailAdapter` 等具體實作；DI container 在 server boot 時組裝。Domain Layer 完全不依賴任何 framework。 |
 
-### §3.6 Hosting / Infrastructure
+### §3.2 Architecture Decision Records (ADR)
 
-| Component | Service | Notes |
-|---|---|---|
-| Frontend (Player + Admin) | Vercel | Global CDN, automatic deploys from main branch |
-| API servers | Railway | Containerized Node.js; autoscale at 70% CPU |
-| PostgreSQL | Supabase | Managed PostgreSQL 15+, read replica, S3 backup |
-| Redis | Upstash | Serverless Redis, pay-per-request, low-latency |
-| CI/CD | GitHub Actions | Test → build → deploy pipeline |
-| Container registry | GitHub Container Registry (ghcr.io) | Docker images for API servers |
+#### ADR-001 — Backend Stack
 
-Monthly cost at DAU ≤5,000: $50–$200 (SERVER_COST_DAU5K_MONTHLY_MIN_USD = 50; SERVER_COST_DAU5K_MONTHLY_MAX_USD = 200). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000).
+**背景**：需要選擇 backend 語言/框架支援 500 RPS、2,000 PCU、real-time matchmaking、共享 TypeScript 型別。
 
-### §3.7 Admin Portal Stack
+**選項比較**：
 
-**Frontend**: Vue 3 (Composition API) + Element Plus component library + Vite 5 + TypeScript 5
+| 選項 | 優勢 | 劣勢 |
+|------|------|------|
+| Node.js 20 + Fastify 4 | TypeScript-first；JSON Schema 內建驗證；與前端共享型別；plugin 生態 | 單一 event loop 在 CPU-bound 任務下退化 |
+| Go 1.22 + Fiber | goroutine 並發；低記憶體佔用；高吞吐 | 需另一套型別語言；TypeScript 共享需要額外 codegen；招聘池較小 |
+| Python 3.12 + FastAPI | Async 支援；schema 驗證（Pydantic） | I/O 並發弱於 Node.js；GIL 限制 |
 
-Rationale for Vue 3 + Element Plus: The admin portal is data-dense (tables, forms, pagination, modals) — Element Plus provides a mature, production-grade data table with built-in sorting, filtering, and pagination that would require significant custom code in React. Vue 3's reactivity system is well-suited to form-heavy admin CRUD interfaces. Keeping the admin portal on a separate stack prevents the pixel-art CSS design system from bleeding into admin UI and enables independent deployment.
+**決策**：採用 **Node.js 20 LTS + Fastify 4 + TypeScript 5**。
 
-**Backend**: Same Node.js / Fastify API server, but requests arrive at `/admin/*` prefix with admin session authentication middleware applied. Admin-specific endpoints are defined in a separate Fastify plugin registered under the `/admin` prefix.
+**後果**：
+- ✅ 單語言全棧降低營運複雜度；型別在前後端共享（domain models in `@app/shared`）。
+- ✅ Fastify 比 Express 約低 30% overhead；JSON Schema 序列化路徑優化。
+- ⚠️ 需於 CPU-bound 任務（pet generation、battle calc）使用 worker_threads 避免 event-loop 阻塞；本 EDD §11 規範。
 
----
+#### ADR-002 — Database
 
-### §3.8 Environment & Service Port Matrix
+**背景**：需要持久化關聯式資料、JSONB 元資料、支援 read replica、自動 failover、daily backup。
 
-This subsection is the canonical contract for service ports across all environments. `docs/LOCAL_DEPLOY.md`, `docker-compose.yml`, k8s manifests, and CI/CD workflows must reference these values; downstream documents inherit from this table.
+**選項比較**：
 
-| Service | Local (host) | Local container | Staging | Production | k8s service port | Source of truth |
-|---|---|---|---|---|---|---|
-| Player frontend (Vite dev server) | 5173 | — (built static assets only) | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
-| Admin frontend (Vite dev server) | 5174 | — (built static assets only) | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
+| 選項 | 優勢 | 劣勢 |
+|------|------|------|
+| PostgreSQL 15 (Supabase managed) | 成熟、JSONB、CHECK、SERIALIZABLE；managed backup + failover；RLS 內建 | 廠商鎖定；Free tier 1GB 限制 |
+| MySQL 8 | 廣泛使用；管理工具豐富 | JSONB 支援弱於 PG；CHECK 較晚加入；無原生 generated column 性能優勢 |
+| DynamoDB | Serverless；無限擴展 | 無 JOIN；複雜 query 需 Global Secondary Index；學習曲線高；不適合排行榜聚合 |
+
+**決策**：採用 **PostgreSQL 15 + Supabase managed**。
+
+**後果**：
+- ✅ JSONB 支援 pet `generation_meta` 6-dimension 向量。
+- ✅ Daily backup + S3 + auto-failover ≤ 60 秒（DB_AUTOFAILOVER_TIME_SECONDS）滿足 SLO。
+- ⚠️ 廠商鎖定風險：制定 14 天遷移計畫至 AWS RDS（VENDOR_MIGRATION_PLAN_DAYS = 14）。
+
+#### ADR-003 — Real-Time Matchmaking
+
+**背景**：Arena enter → matchmaking → battle 流程中，玩家需在 30 秒內收到對手回應。
+
+**選項比較**：
+
+| 選項 | 優勢 | 劣勢 |
+|------|------|------|
+| HTTP Long-Poll（30 秒 timeout） | 簡單；無需 websocket plugin；防火牆/CDN 友善 | 連線數隨 PCU 線性增加；連線狀態需處理 |
+| WebSocket（Fastify ws plugin） | 低延遲；雙向通訊；future-proof | Vercel CDN 不支援 ws；需另一條架構路徑；mobile 連線不穩 |
+
+**決策**：MVP 採用 **HTTP Long-Poll**；保留切換 WebSocket 的擴展點。
+
+**後果**：
+- ✅ 與 Vercel CDN 100% 相容；無需另闢 ws gateway。
+- ✅ 簡化部署。
+- ⚠️ PCU = 2,000 時連線數可達 2,000，需驗證 Fastify keep-alive 設定；§11.2 capacity planning 已涵蓋。
+- 後續若需即時動畫雙向回饋，再評估 WebSocket（OQ-E02）。
+
+#### ADR-004 — Frontend Stack Split
+
+**背景**：Player App 為像素藝術 + Phaser canvas 為主；Admin Portal 為資料密集 CRUD。
+
+**選項比較**：
+
+| 選項 | 優勢 | 劣勢 |
+|------|------|------|
+| 單一 React stack（共用 component lib） | 統一棧；單一 build pipeline | shadcn / Material UI 與 pixel art 風格衝突；data table 自製成本高 |
+| 分離：Player React + Admin Vue 3（Element Plus） | Element Plus 提供生產級 data table；Pinia 適合 admin form-heavy；CSS 設計系統不污染 | 兩套棧；team learning curve |
+| 分離：Player React + Admin React Admin/Refine | 同 React 棧；Refine 開箱即用 admin | Refine 學習曲線陡；自訂層仍需 React component lib |
+
+**決策**：採用 **Player React 18 + Admin Vue 3 + Element Plus** 雙棧分離。
+
+**後果**：
+- ✅ Admin 開發加速：Element Plus 內建分頁/排序/過濾 data table 與 form。
+- ✅ 設計系統隔離：pixel-art tokens 不外洩到 admin。
+- ⚠️ 需維護兩個 build pipeline；統一 by Vite。
+
+### §3.3 技術棧總覽表
+
+| Layer | Technology | Version | 用途 |
+|-------|-----------|---------|------|
+| **客戶端引擎** | Phaser 3 over HTML5 Canvas | 3.70+ | Pet sprite 動畫、互動、Arena battle scene |
+| **Player 框架** | React + Vite + TypeScript | React 18 / Vite 5 / TS 5 | UI chrome、claim flow、leaderboard |
+| **Admin 框架** | Vue 3 + Element Plus + Pinia | Vue 3.4 / Element Plus 2.x / Pinia 2.x | Admin Portal CRUD UI |
+| **State (Player)** | TanStack Query + Zustand | 5.x / 4.x | Server state / ephemeral UI |
+| **Form (Player)** | React Hook Form + Zod | 7.x / 3.x | Email claim、code entry |
+| **Backend** | Node.js 20 LTS + Fastify 4 + TypeScript 5 | LTS | API server + Worker |
+| **Domain Validation** | Zod | 3.x | Shared schema between FE/BE |
+| **DB** | PostgreSQL 15 + Redis 7 | 15.x / 7.x | 持久化 + 排行榜/cache/rate-limit |
+| **Email** | SendGrid v3 + Nodemailer SMTP fallback | latest | Transactional email |
+| **Hosting** | Vercel + Railway + Supabase + Upstash | managed | Frontend / API / DB / Redis |
+| **CI/CD** | GitHub Actions + ghcr.io | — | test → build → deploy |
+| **Test** | Vitest + Playwright + axe-core | 1.x / 1.x | Unit / Integration / E2E + a11y |
+| **Observability** | Pino + OpenTelemetry + Datadog/Grafana Cloud | latest | Logs + traces + metrics |
+| **Container** | Docker + multi-stage build | latest | API + Worker images |
+
+### §3.4 Bounded Context & Context Map（DDD）
+
+#### Schema Ownership Table（HC-1 隔離）
+
+每個 BC 唯一擁有一組 table。跨 BC 不直接 SELECT 對方的 table，需透過 Domain Event 或 Application Service 取得只讀 ViewModel。
+
+| BC | 擁有 Table（依 SCHEMA.md） | 擁有 Redis Key Pattern | 主要 Domain Event |
+|----|---------------------------|------------------------|------------------|
+| **Identity** | `claim_identities`, `claim_codes`, `gdpr_requests` | `rl:claim:*`, `rl:code_entry:*` | `IdentityClaimed`, `GdprErasureRequested`, `GdprErasureCompleted` |
+| **Pet** | `pets`, `training_logs`, `food_buffs` | `rl:training:*` | `PetGenerated`, `PetClaimed`, `PetTrained`, `PetFoodConsumed`, `PetBanned` |
+| **Arena** | `arena_matches` | `matchmaking:queue:*`, `rl:arena:*` | `ArenaMatchStarted`, `ArenaMatchCompleted` |
+| **Leaderboard** | `leaderboard_snapshots` | `leaderboard:global` (Redis sorted set 為主) | `LeaderboardUpdated`, `LeaderboardEntryRemoved` |
+| **Marketplace** *(P2 / FF_MARKETPLACE)* | `marketplace_listings`, `marketplace_transactions` | — | `ListingCreated`, `ListingCancelled`, `TradeCompleted` |
+| **Admin** | `admin_users`, `audit_logs` | `session:admin:*`, `rl:admin:*`, `rl:admin_login:*` | `AdminUserCreated`, `AdminActionLogged`, `SuspiciousPetFlagged` |
+
+#### Context Map
+
+```mermaid
+graph TB
+    Identity["Identity BC<br/>(email OTP, claim, GDPR)"]
+    Pet["Pet BC<br/>(generation, training, food)"]
+    Arena["Arena BC<br/>(matchmaking, battle, mode logic)"]
+    Leaderboard["Leaderboard BC<br/>(score aggregation, snapshots)"]
+    Marketplace["Marketplace BC<br/>(listings, trades)<br/>FF_MARKETPLACE"]
+    Admin["Admin BC<br/>(moderation, config, audit)"]
+
+    Identity -->|"Customer/Supplier:<br/>identity_id provides ownership"| Pet
+    Pet -->|"Customer/Supplier:<br/>pet stats feed battle calc"| Arena
+    Arena -->|"Published Language:<br/>ArenaMatchCompleted event"| Leaderboard
+    Pet -->|"Published Language:<br/>PetClaimed event"| Leaderboard
+    Pet -->|"Customer/Supplier:<br/>pet ownership for trading"| Marketplace
+    Arena -->|"ACL:<br/>battle records read-only"| Marketplace
+    Admin -->|"Conformist:<br/>reads from all BCs (read-only ViewModel)"| Pet
+    Admin -->|"Conformist:<br/>moderation events"| Arena
+    Admin -->|"Conformist:<br/>config push"| Leaderboard
+    Identity -->|"Published Language:<br/>GdprErasureRequested"| Admin
+```
+
+關係說明：
+- **Customer / Supplier**：上游 BC 變更可能影響下游；使用 contract test 鎖定。
+- **Published Language**：透過 Domain Event 廣播；versioned schema（`event_schema_version`）。
+- **ACL (Anti-Corruption Layer)**：Marketplace 讀 Arena history 時透過 read-only ViewModel adapter，避免外部 schema 污染內部。
+- **Conformist**：Admin 直接遵循各 BC 暴露的 read model；Admin 不擁有 source of truth。
+
+### §3.5 部署環境規格
+
+#### §3.5 Environment Matrix
+
+| Environment | Purpose | DB | Redis | Domain | Auto-deploy |
+|-------------|---------|----|----|--------|-------------|
+| `development` | Local dev | PostgreSQL Docker (port 54322) | Redis Docker (port 6379) | `localhost` | n/a |
+| `staging` | Pre-prod 驗證 | Supabase staging | Upstash staging | `staging.pixel-pet-arena.com` | Yes (push to main) |
+| `production` | Live 服務 | Supabase production (HA) | Upstash production (HA) | `pixel-pet-arena.com` | Manual approval |
+
+#### §3.5b Service Port Matrix
+
+| Service | Local (host) | Local container | Staging | Production | k8s service port | 真相來源 |
+|---------|-------------|----------------|---------|-----------|------------------|---------|
+| Player frontend (Vite dev) | 5173 | — | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
+| Admin frontend (Vite dev) | 5174 | — | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
 | API server (Fastify) | 3000 | 3000 | 8080 | 8080 | 8080 | EDD §10.1 |
+| Worker (Fastify side process) | 3001 | 3001 | 8081 | 8081 | 8081 | EDD §10.1 |
 | PostgreSQL (Supabase local) | 54322 | 5432 | n/a (managed) | n/a (managed) | 5432 | LOCAL_DEPLOY §6 |
 | Supabase API gateway | 54321 | 8000 | managed | managed | n/a | LOCAL_DEPLOY §6 |
 | Supabase Studio | 54323 | 3000 | managed | managed | n/a | LOCAL_DEPLOY §6 |
-| Inbucket (local email inbox) | 54324 | 9000 | n/a | n/a | n/a | LOCAL_DEPLOY §6 |
-| Redis (Upstash / local docker) | 6379 | 6379 | n/a (Upstash REST) | n/a (Upstash REST) | 6379 | LOCAL_DEPLOY §3 |
+| Inbucket (local email) | 54324 | 9000 | n/a | n/a | n/a | LOCAL_DEPLOY §6 |
+| Redis | 6379 | 6379 | n/a (Upstash REST) | n/a (Upstash REST) | 6379 | LOCAL_DEPLOY §3 |
 
-**Notes**:
-- Local-host columns are the values bound on `localhost` and used in `.env.local` (`API_PORT=3000`, `VITE_API_BASE_URL=http://localhost:3000`, `REDIS_URL=redis://localhost:6379`, `SUPABASE_URL=http://localhost:54321`).
-- Container columns are the in-network ports used by docker-compose service-to-service traffic.
-- Staging and Production use managed providers (Vercel, Railway, Supabase, Upstash) where the visible "port" is abstracted by the provider; the API server still binds 8080 inside the container for k8s readiness probes.
-- Any change to this matrix MUST be mirrored in LOCAL_DEPLOY.md, `docker-compose.yml`, the helm chart `values.yaml`, and the CI/CD environment files in the same commit.
+任何 port 變動必須同步更新 `docs/LOCAL_DEPLOY.md`、`docker-compose.yml`、helm chart `values.yaml`、CI/CD env 檔。
+
+### §3.6 HA / SPOF / SCALE / BCP Architecture Specification
+
+#### §3.6.1 SPOF 分析表（Min Replicas ≥ 2）
+
+| 元件 | 風險 | 消除方式 | Min Replicas (Local) | Min Replicas (Prod) |
+|------|------|---------|---------------------|---------------------|
+| API Server (Fastify) | Crash / OOM / deploy 中斷 | 雙 replica + Nginx LB；HPA 70% CPU 觸發 scale-out | **≥ 2** | ≥ 2（peak 至 6） |
+| Worker | Job 卡死導致 GDPR / cleanup 延遲 | 雙 replica + Redis distributed lock（SETNX）防止重複處理；idempotent job design | **≥ 2** | ≥ 2 |
+| DB Primary (PostgreSQL) | 單機故障 | Supabase managed primary + standby read replica；自動 failover ≤ 60 秒 | 1（dev）；2（test 模擬 failover） | 1 primary + 1 standby（managed HA） |
+| Redis | 主節點當機 | Upstash 內建 replica + Sentinel；fallback：Redis 不可用時 leaderboard 直連 PostgreSQL（degraded） | 1（dev） | 1 primary + 1 replica（Upstash HA） |
+| Email Service | SendGrid 服務中斷 | SendGrid 主 + Nodemailer SMTP fallback；3 連續失敗自動切換 | n/a（dev 用 Inbucket） | SendGrid + SMTP fallback |
+| CDN | 邊緣節點故障 | Vercel 全球邊緣冗餘；多 region 失敗時 fallback 至 origin | n/a | 內建多 region |
+| LB / Edge | 入口故障 | Vercel Edge multi-region + 健康檢查 | Nginx 1（dev） | Vercel Edge HA |
+
+#### §3.6.2 HA 設計原則
+
+1. **Stateless API**：API server 不保留請求間狀態；session 與 rate-limit counter 全部於 Redis；任意 replica 可服務任意請求。
+2. **Idempotent Worker**：所有 background job 使用 `(job_type, target_id, day)` 為 idempotency key；重複觸發為 no-op。
+3. **Graceful Shutdown**：SIGTERM 觸發 30 秒排空（drain）視窗，停止接收新請求、完成 in-flight、關閉 DB / Redis 連線。
+4. **Circuit Breaker**：對外部依賴（SendGrid、Supabase REST、Upstash）使用 circuit breaker（opossum library），半開狀態探測。
+5. **Idempotent Operations**：所有 mutation API（POST/PUT/DELETE）支援 `Idempotency-Key` header；伺服器於 24 小時內保證重複請求回傳相同結果。
+6. **Distributed Lock via Redis SETNX**：跨 worker replica 互斥的工作（leaderboard snapshot、daily counter reset）使用 `SET key value NX EX 60` 競標；超時自動釋放。
+
+#### §3.6.3 SLO / RTO / RPO 表
+
+| 指標 | 值 | 說明 |
+|------|----|----|
+| Availability | 99.9% monthly | ≤ 43.8 分鐘 / 月 |
+| RTO（API server failover） | ≤ 30 秒 | LB 健康檢查 + replica 切換 |
+| RTO（DB primary failover） | ≤ 60 秒 | Supabase 自動 failover（DB_AUTOFAILOVER_TIME_SECONDS） |
+| RTO（Redis primary failover） | ≤ 30 秒 | Upstash Sentinel |
+| RPO（DB） | 0 秒 | Synchronous standby replication |
+| RPO（Redis leaderboard） | ≤ 5 秒 | AOF every-second + replica |
+| MTTR（partial outage） | ≤ 5 分鐘 | Runbook 自動化 |
+| MTBF（業務指標） | ≥ 720 小時 | 月度評估 |
+
+#### §3.6.4 BCP（業務連續性計畫）場景表
+
+| 場景 | 偵測方式 | 復原動作 | RTO |
+|------|---------|---------|-----|
+| **API Pod 崩潰**（OOM / unhandled exception） | k8s readiness probe failure；Datadog uptime monitor | LB 自動移除失敗 pod；HPA 拉新 pod；尖峰時保留 ≥ 2 健康 replica | ≤ 30 秒 |
+| **DB Primary 故障** | Supabase 健康檢查；連線錯誤率突增 alert | Supabase 自動 failover 至 standby；應用層 connection pool retry（2 次）；Pino log 記錄 failover 事件 | ≤ 60 秒 |
+| **Redis 主節點故障** | Upstash 健康檢查；leaderboard 寫入錯誤 alert | Sentinel 自動切換 replica；應用層退化路徑：直接從 PostgreSQL 讀取最新 snapshot 提供降級 leaderboard（≤ 30 秒外的舊資料） | ≤ 30 秒 |
+| **SendGrid 全球中斷** | 連續 3 次 send 失敗（SENDGRID_FAILOVER_CONSECUTIVE_FAILURES） | 自動切換 Nodemailer SMTP；Slack alert；退避 5 分鐘後嘗試恢復主路徑 | ≤ 5 分鐘（用戶感知 email 仍寄達） |
+| **Vercel CDN 中斷** | UptimeRobot 告警 | 啟用 origin direct fallback DNS（pre-staged TTL 60 秒） | ≤ 5 分鐘 |
+| **單區域整體故障**（Railway region down） | Datadog APM 告警 | 啟動災難演練手冊：重新部署至備用 region；DNS 切換 | ≤ 30 分鐘 |
+
+#### §3.6.5 Graceful Shutdown 流程
+
+5 步驟：(1) 收到 SIGTERM；(2) `server.close()` 停止接受新連線；(3) 完成 in-flight requests（≤ 30 秒）；(4) 釋放 DB / Redis 連線池；(5) `process.exit(0)`。
+
+```typescript
+// pseudocode — Node.js / Fastify graceful shutdown
+const SHUTDOWN_TIMEOUT_MS = 30_000;
+
+function setupGracefulShutdown(server, deps) {
+  const shutdown = async (signal) => {
+    logger.info({ signal }, 'graceful shutdown initiated');
+    // step 1: stop accepting new connections
+    await server.close();
+    // step 2: drain in-flight (server.close already waits)
+    // step 3: drain workers
+    await deps.workerPool.drain();
+    // step 4: close pools
+    await Promise.all([deps.pgPool.end(), deps.redis.quit()]);
+    logger.info('graceful shutdown complete');
+    process.exit(0);
+  };
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT', shutdown);
+  setTimeout(() => {
+    logger.error('forced shutdown after timeout');
+    process.exit(1);
+  }, SHUTDOWN_TIMEOUT_MS).unref();
+}
+```
+
+### §3.7 最小完整度架構圖（Minimum Viable HA Architecture）
+
+#### §3.7.1 Figure A — 生產環境 HA 部署
+
+```mermaid
+graph TB
+    subgraph Internet
+        User["End Users"]
+    end
+
+    subgraph "Global Edge (Vercel multi-region)"
+        EdgeUS["Vercel Edge (us-east)"]
+        EdgeEU["Vercel Edge (eu-west)"]
+        DNS["Route 53 / Vercel DNS<br/>(GeoDNS + health-check)"]
+    end
+
+    User --> DNS
+    DNS --> EdgeUS
+    DNS --> EdgeEU
+
+    subgraph "Region us-east (primary)"
+        LB1["Railway LB"]
+        API_US_1["API Replica us-1"]
+        API_US_2["API Replica us-2"]
+        W_US_1["Worker us-1"]
+        W_US_2["Worker us-2"]
+    end
+
+    subgraph "Region eu-west (secondary, on-demand)"
+        LB2["Railway LB"]
+        API_EU_1["API Replica eu-1"]
+        API_EU_2["API Replica eu-2"]
+    end
+
+    subgraph "Data Tier (managed HA)"
+        PG_P["PostgreSQL Primary<br/>(Supabase, region-locked)"]
+        PG_S["PostgreSQL Standby<br/>(sync replication, RPO=0)"]
+        REDIS_P["Redis Primary (Upstash)"]
+        REDIS_R["Redis Replica (Sentinel)"]
+    end
+
+    EdgeUS --> LB1
+    EdgeEU --> LB2
+    LB1 --> API_US_1
+    LB1 --> API_US_2
+    LB2 --> API_EU_1
+    LB2 --> API_EU_2
+    API_US_1 --> PG_P
+    API_US_2 --> PG_P
+    API_EU_1 --> PG_P
+    API_EU_2 --> PG_P
+    API_US_1 --> REDIS_P
+    API_US_2 --> REDIS_P
+    API_EU_1 --> REDIS_P
+    API_EU_2 --> REDIS_P
+    PG_P -. "sync replication" .-> PG_S
+    REDIS_P -. "Sentinel failover" .-> REDIS_R
+    W_US_1 --> PG_P
+    W_US_2 --> PG_P
+```
+
+#### §3.7.2 Figure B — 本地開發環境最小 HA 架構
+
+```mermaid
+graph TB
+    Dev["Developer Browser<br/>(localhost)"]
+
+    subgraph "Local Nginx (port 80)"
+        Nginx["Nginx LB<br/>(health-check / round-robin)"]
+    end
+
+    subgraph "Local Application Tier (Docker Compose)"
+        API1["api-1<br/>(:3000 internal)"]
+        API2["api-2<br/>(:3000 internal)"]
+        W1["worker-1"]
+        W2["worker-2"]
+    end
+
+    subgraph "Local Data Tier"
+        PG["PostgreSQL Docker (single instance allowed in dev)<br/>port 54322"]
+        REDIS["Redis Docker (single instance allowed in dev)<br/>port 6379"]
+        INB["Inbucket (email mock)<br/>port 54324"]
+    end
+
+    Dev --> Nginx
+    Nginx --> API1
+    Nginx --> API2
+    API1 --> PG
+    API2 --> PG
+    API1 --> REDIS
+    API2 --> REDIS
+    API1 --> INB
+    W1 --> PG
+    W2 --> PG
+```
+
+#### §3.7.3 最小 Replica 表格
+
+| 元件 | Min Replicas (Local) | Min Replicas (Staging) | Min Replicas (Prod) |
+|------|---------------------|----------------------|--------------------|
+| API Server | **≥ 2**（HC-1 強制；不能為 1） | ≥ 2 | ≥ 2（autoscale 至 6） |
+| Worker | **≥ 2**（HC-1 強制） | ≥ 2 | ≥ 2 |
+| DB | 1（managed by Supabase Local） | 1 primary + 1 read replica | 1 primary + 1 standby（HA） |
+| Redis | 1（dev mode allowed） | 1（dev mode allowed） | 1 primary + 1 replica（Sentinel） |
+| MQ / Event Bus | n/a（in-process EventEmitter） | n/a | n/a |
+
+> **重要**：Local 環境 API Server / Worker Min Replicas = **≥ 2** 是 HC-1 硬約束。設為 1 視為 SPOF 違規，CI 不可通過。DB / Redis 在 Local 允許單 instance 是因為 Local 不需驗證 failover（Staging+ 才驗證）。
 
 ---
 
-## §3.9 UML Diagrams & Architecture Visualizations
+## §4. Module / Component Design
 
-> **Cross-reference**: The full UML 9-set is maintained as standalone files under `docs/diagrams/`. The inline diagrams in this section preserve historical EDD context; for the canonical, regenerated diagrams (including Object, Activity, Communication, and the rebuilt Class diagrams with full inheritance / composition / aggregation / realization / association / dependency relationships) consult the cross-reference table at the end of this section.
+### §4.1 模組（按 BC）
 
-This section provides comprehensive UML and architecture diagrams documenting the system design, data flows, state transitions, and component interactions. All diagrams are authored in PlantUML; source files are maintained in `docs/diagrams/puml/`.
+#### Identity Module
+- 職責：email hash + encryption、claim code 簽發/驗證、GDPR request 排隊
+- 主要 class：`ClaimCodeService`, `IdentityRepository`, `GdprRequestService`
+- 依賴：PostgreSQL（claim_identities, claim_codes, gdpr_requests）、Redis（rate limit）、SendGrid
 
-### Class Diagram — Domain Entities & Relationships
+#### Pet Module
+- 職責：Pet 程序化生成、訓練、餵食、neglect 偵測、ban 處理
+- 主要 class：`PetGenerationService`, `PetRepository`, `TrainingService`, `FoodBuffService`, `RarityWeightStrategy`
+- 依賴：PostgreSQL（pets, training_logs, food_buffs）、Redis（rate limit）
 
-The class diagram below illustrates the core domain entities (Pet, ClaimIdentity, ClaimCode, ArenaMatch, etc.) and their relationships. Each class maps directly to a PostgreSQL table defined in §4. Entity stem names align with SCHEMA tables (singular CamelCase ↔ snake_case plural is the standard ORM convention): `ClaimIdentity ↔ claim_identities`, `Pet ↔ pets`, `ClaimCode ↔ claim_codes`, `ArenaMatch ↔ arena_matches`, `TrainingLog ↔ training_logs`, `LeaderboardSnapshot ↔ leaderboard_snapshots`. The canonical class diagrams in `docs/diagrams/class-domain.md` use the same names with full UML relationship semantics (composition, aggregation, inheritance, realization, association, dependency).
+#### Arena Module
+- 職責：Matchmaking、battle outcome 計算、battle log 記錄
+- 主要 class：`MatchmakingService`, `BattleCalculator`, `ArenaModeStrategy` (Race / Sumo)
+- 依賴：PostgreSQL（arena_matches）、Redis（matchmaking queue, rate limit）、Pet Module（read pet stats）
 
-``` puml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+#### Leaderboard Module
+- 職責：分數聚合、排名查詢、snapshot 寫入
+- 主要 class：`LeaderboardService`, `LeaderboardRepository` (Redis primary, Postgres backup)
+- 依賴：Redis（leaderboard:global sorted set）、PostgreSQL（leaderboard_snapshots）
 
-class ClaimIdentity {
-  id: UUID
-  email_hash: VARCHAR(64)
-  email_encrypted: BYTEA
-  deletion_requested_at: TIMESTAMPTZ
-  --
-  +getClaimedPets()
-  +requestGDPRDeletion()
+#### Marketplace Module *(P2，FF_MARKETPLACE)*
+- 職責：上架、購買、抽手續費、anti-flip 檢查
+- 主要 class：`ListingService`, `TradeService`, `MarketplaceRepository`
+- 依賴：PostgreSQL（marketplace_listings, marketplace_transactions）、Pet Module
+
+#### Admin Module
+- 職責：認證、RBAC、審計、配置推送
+- 主要 class：`AdminAuthService`, `AuditLogger`, `RuntimeConfigService`, `EconomyConfigService`
+- 依賴：PostgreSQL（admin_users, audit_logs）、Redis（admin session）
+
+### §4.2 模組對應 PRD User Story
+
+詳見 §1.3 PRD 需求追溯表。
+
+### §4.3 跨模組依賴 DAG 驗證（HC-5）
+
+```mermaid
+graph TB
+    Identity --> Pet
+    Pet --> Arena
+    Arena --> Leaderboard
+    Pet --> Leaderboard
+    Pet --> Marketplace
+    Arena -. "ACL read-only" .-> Marketplace
+    Identity --> Admin
+    Pet -. "Admin reads" .-> Admin
+    Arena -. "Admin reads" .-> Admin
+    Leaderboard -. "Admin reads" .-> Admin
+```
+
+**宣告**：BC 之間**無循環依賴**。Admin 為 conformist 單向 inbound；Marketplace 透過 ACL 只讀 Arena history，不反向依賴。
+
+**驗證 skeleton**（Node.js / TypeScript，使用 `eslint-plugin-boundaries` + 自製 cycle detection）：
+
+```typescript
+// scripts/verify-bc-boundaries.ts
+import { graphlib, alg } from 'graphlib';
+
+// BC dependency graph (declared in src/bcs/manifest.ts)
+const deps = {
+  identity: [],
+  pet: ['identity'],
+  arena: ['pet'],
+  leaderboard: ['arena', 'pet'],
+  marketplace: ['pet', 'arena'],  // ACL into arena = read-only adapter only
+  admin: ['identity', 'pet', 'arena', 'leaderboard'],  // conformist; inbound only
+};
+
+const g = new graphlib.Graph({ directed: true });
+Object.entries(deps).forEach(([bc, ds]) => {
+  g.setNode(bc);
+  ds.forEach((d) => g.setEdge(bc, d));
+});
+
+const cycles = alg.findCycles(g);
+if (cycles.length > 0) {
+  console.error('BC cycle detected:', cycles);
+  process.exit(1);
 }
-
-class Pet {
-  id: UUID
-  seed: BIGINT
-  rarity: ENUM (COMMON|RARE|EPIC|LEGENDARY)
-  stat_speed/strength/stamina: [1..100]
-  level: [1..100]
-  is_banned: BOOLEAN
-  --
-  +train(type): void
-  +compete(opponent): BattleResult
-}
-
-class ClaimCode {
-  id: UUID
-  code_hash: VARCHAR(64)
-  expires_at: TIMESTAMPTZ
-  used_at: TIMESTAMPTZ
-  --
-  +verify(code): boolean
-}
-
-class ArenaMatch {
-  id: UUID
-  pet_a_id, pet_b_id: UUID
-  mode: ENUM (RACE|SUMO)
-  winner_pet_id: UUID
-  battle_log: JSONB
-  --
-  +calculateOutcome(): UUID
-}
-
-class TrainingLog {
-  id: UUID
-  training_type: ENUM
-  stat_delta: [1..3]
-}
-
-class LeaderboardSnapshot {
-  id: UUID
-  snapshot_time: TIMESTAMPTZ
-  entries: JSONB [top 500]
-  --
-  +getTopPets(limit): Pet[]
-}
-
-ClaimIdentity "1" -- "*" Pet : claims
-Pet "1" -- "*" ArenaMatch : participates
-Pet "1" -- "*" TrainingLog : records
-ClaimCode "1" -- "1" Pet : unlocks
-LeaderboardSnapshot "1" -- "*" Pet : ranks
+console.log('BC dependency DAG is acyclic.');
 ```
 
-**See also**: `docs/diagrams/puml/class-diagram.puml` (source file)
+CI 整合：每次 PR 執行 `pnpm run verify:bc-boundaries`；失敗則 block merge。
 
-### Sequence Diagrams
+### §4.4 Domain Glossary
 
-#### Claim Flow (Email OTP → Pet Access)
+| Term | Definition | Source BC |
+|------|-----------|-----------|
+| **ClaimIdentity** | 一個 email 對應的身份實體；只儲存 hash + encrypted email | Identity |
+| **ClaimCode** | 6 位數一次性 OTP；存 hash；15 分鐘過期 | Identity |
+| **GdprRequest** | GDPR 請求紀錄（erasure / data_access / restrict / object / rectification） | Identity |
+| **Pet** | 程序化生成像素寵物實體；包含 seed、stats、level、rarity | Pet |
+| **PetSeed** | 32-bit pet 唯一 seed；驅動所有 sprite 生成 determinism | Pet |
+| **TrainingLog** | 單次訓練動作紀錄；feed level 公式 | Pet |
+| **FoodBuff** | 食物 buff 記錄；temp（含 expires_at）或 permanent | Pet |
+| **ArenaMatch** | 一場戰鬥紀錄；append-only；is_flagged 可變 | Arena |
+| **MatchOutcome** | 戰鬥結果計算結果（含 winner, stat delta, random seed） | Arena |
+| **LeaderboardEntry** | Redis sorted set member（pet_id → score） | Leaderboard |
+| **LeaderboardSnapshot** | PostgreSQL 中的 top 500 快照；durable backup | Leaderboard |
+| **Listing** | 市集上架記錄 | Marketplace |
+| **Trade** | 完成的交易記錄；包含 5% 手續費 | Marketplace |
+| **AdminUser** | 系統管理員帳戶；含 role / TOTP | Admin |
+| **AuditLog** | 不可變的管理員操作審計紀錄；保留 2 年 | Admin |
+| **PetAccessToken** | 32-byte URL-safe base64；只存 hash；URL 內傳遞 | Identity / Pet |
 
-The claim flow sequence illustrates the complete lifecycle from email entry through OTP verification to pet access token generation:
+### §4.5 UML 9 大圖（全部 Mermaid）
 
-``` puml
-participant "Player App" as player
-participant "API Server" as server
-participant "SendGrid" as email
-participant "PostgreSQL" as db
+#### §4.5.1 Use Case Diagram
 
-player -> server: POST /api/v1/claim (email)
-activate server
-server -> db: INSERT claim_code (otp_hash, expiry=15m)
-server -> email: send email (otp_plain)
-server --> player: HTTP 200 {claim_id}
-deactivate server
+```mermaid
+graph LR
+    Guest["Guest Player"]
+    Owner["Pet Owner"]
+    Admin["Admin"]
+    Job["System Job"]
 
-email --> player: Email: "Your code: 123456"
+    UC1((View Random Pet))
+    UC2((Claim Pet via Email OTP))
+    UC3((Train Pet))
+    UC4((Feed Pet))
+    UC5((Enter Arena))
+    UC6((View Battle Records))
+    UC7((View Leaderboard))
+    UC8((Request GDPR Erasure))
+    UC9((Ban Pet))
+    UC10((Tune Runtime Config))
+    UC11((Configure Economy))
+    UC12((View Audit Log))
+    UC13((Cleanup Expired Claim Codes))
+    UC14((Snapshot Leaderboard))
+    UC15((Process GDPR Erasure Job))
 
-player -> server: POST /api/v1/claim/{id}/verify (code)
-activate server
-server -> server: Hash code, compare with DB
-alt valid
-  server -> db: INSERT claim_identity + UPDATE pet
-  server --> player: HTTP 200 {access_token}
-else invalid
-  server --> player: HTTP 400 {error}
-end
-deactivate server
+    Guest --> UC1
+    Guest --> UC7
+    Guest --> UC2
+    Owner --> UC3
+    Owner --> UC4
+    Owner --> UC5
+    Owner --> UC6
+    Owner --> UC8
+    Admin --> UC9
+    Admin --> UC10
+    Admin --> UC11
+    Admin --> UC12
+    Job --> UC13
+    Job --> UC14
+    Job --> UC15
 ```
 
-**See also**: `docs/diagrams/puml/sequence-auth.puml`
+#### §4.5.2 Class Diagrams (3 layers)
 
-#### Battle Flow (Matchmaking → Result)
+##### Domain Layer
 
-The arena battle sequence shows opponent matchmaking, battle execution, and result persistence:
+```mermaid
+classDiagram
+    class Pet {
+        <<Entity>>
+        +UUID id
+        +long seed
+        +Rarity rarity
+        +PetStats stats
+        +int level
+        +bool isBanned
+        +train(type) PetStats
+        +applyBuff(buff) PetStats
+        +ban(reason)
+    }
+    class PetStats {
+        <<ValueObject>>
+        +int speed
+        +int strength
+        +int stamina
+        +int level
+    }
+    class Rarity {
+        <<ValueObject>>
+        <<enumeration>>
+        COMMON
+        RARE
+        EPIC
+        LEGENDARY
+    }
+    class ClaimIdentity {
+        <<Entity>>
+        +UUID id
+        +string emailHash
+        +bytes emailEncrypted
+        +DateTime deletionRequestedAt
+        +requestErasure()
+    }
+    class ClaimCode {
+        <<Entity>>
+        +UUID id
+        +UUID petId
+        +string codeHash
+        +DateTime expiresAt
+        +bool verify(plaintext) bool
+    }
+    class ArenaMatch {
+        <<Entity>>
+        +UUID id
+        +UUID petAId
+        +UUID petBId
+        +ArenaMode mode
+        +UUID winnerPetId
+        +long randomSeed
+        +calculateOutcome() OutcomeResult
+    }
+    class ArenaMode {
+        <<ValueObject>>
+        <<enumeration>>
+        RACE
+        SUMO
+    }
+    class TrainingLog {
+        <<Entity>>
+        +UUID id
+        +UUID petId
+        +TrainingType type
+        +int statDelta
+    }
+    class FoodBuff {
+        <<Entity>>
+        +UUID id
+        +UUID petId
+        +BuffStat stat
+        +int magnitude
+        +bool isPermanent
+        +DateTime expiresAt
+    }
+    class LeaderboardEntry {
+        <<ValueObject>>
+        +UUID petId
+        +double score
+        +int rank
+    }
+    class PetGenerationService {
+        <<DomainService>>
+        +generate(seed) Pet
+        +rollRarity(weights) Rarity
+    }
+    class BattleCalculator {
+        <<DomainService>>
+        +calculate(petA, petB, mode, seed) OutcomeResult
+    }
+    class OutcomeResult {
+        <<ValueObject>>
+        +UUID winnerId
+        +int statDeltaA
+        +int statDeltaB
+    }
 
-``` puml
-participant "Player" as player
-participant "API" as server
-participant "Redis" as cache
-
-player -> server: POST /api/v1/arena/enter
-activate server
-server -> cache: INCR battle_counter (1h window)
-alt rate limit exceeded
-  server --> player: HTTP 429 {Retry-After}
-else ok
-  server -> cache: LPUSH matchmaking_queue
-  server --> player: HTTP 202 {match_id: "FINDING"}
-end
-
-par polling
-  player -> server: GET /api/v1/arena/match/{id}
-  server --> player: {status: "READY"} when opponent found
-and matching
-  server -> cache: BLPOP (timeout 30s)
-  alt found
-    server -> server: opponent assigned
-  else timeout
-    server -> server: AI fallback
-  end
-end
-
-player -> server: POST /api/v1/arena/match/{id}/start
-activate server
-server -> server: Seeded random ±15% modifier
-server -> server: Calculate outcome based on stats
-server -> db: INSERT arena_match, UPDATE leaderboard
-server --> player: HTTP 200 {winner, battle_log}
-deactivate server
+    Pet "1" *-- "1" PetStats : composition
+    Pet "1" --> "1" Rarity : association
+    Pet "1" o-- "*" TrainingLog : aggregation
+    Pet "1" o-- "*" FoodBuff : aggregation
+    ClaimIdentity "1" o-- "*" Pet : aggregation
+    ClaimCode "1" --> "1" Pet : association
+    ArenaMatch "1" --> "1" ArenaMode : association
+    ArenaMatch "*" --> "*" Pet : association
+    PetGenerationService ..> Pet : dependency
+    BattleCalculator ..> Pet : dependency
+    BattleCalculator ..> OutcomeResult : dependency
 ```
 
-**See also**: `docs/diagrams/puml/sequence-battle.puml`
+##### Application Layer
 
-### State Machines
+```mermaid
+classDiagram
+    class ClaimPetUseCase {
+        <<ApplicationService>>
+        -ClaimCodeService claimCodeSvc
+        -PetRepository petRepo
+        -EmailDeliveryPort email
+        +execute(input) ClaimResult
+    }
+    class VerifyClaimCodeUseCase {
+        <<ApplicationService>>
+        -ClaimCodeService claimCodeSvc
+        -PetRepository petRepo
+        -TokenIssuer tokenIssuer
+        +execute(input) PetTokenResult
+    }
+    class TrainPetUseCase {
+        <<ApplicationService>>
+        -PetRepository petRepo
+        -RateLimiter rateLimit
+        +execute(petId, type) TrainResult
+    }
+    class EnterArenaUseCase {
+        <<ApplicationService>>
+        -MatchmakingService matchSvc
+        -BattleCalculator battleCalc
+        -LeaderboardService leaderboardSvc
+        +execute(input) MatchResult
+    }
+    class BanPetUseCase {
+        <<ApplicationService>>
+        -PetRepository petRepo
+        -AuditLogger audit
+        -LeaderboardService leaderboard
+        +execute(petId, reason) BanResult
+    }
+    class ProcessGdprErasureUseCase {
+        <<ApplicationService>>
+        -GdprRequestRepository gdprRepo
+        -IdentityRepository idRepo
+        +execute(requestId) ErasureResult
+    }
+    class IClaimCodeService {
+        <<interface>>
+        +issue(email, petId) ClaimCode
+        +verify(claimId, plaintext) bool
+    }
+    class ClaimCodeService {
+        <<DomainService>>
+        +issue(email, petId) ClaimCode
+        +verify(claimId, plaintext) bool
+    }
 
-#### Pet State Machine
-
-Pets transition through multiple states across their lifecycle:
-
-``` puml
-[*] --> GENERATED
-GENERATED --> UNCLAIMED: created (guest preview)
-UNCLAIMED --> CLAIMED: claim_code_verified
-CLAIMED --> IDLE
-IDLE --> TRAINING: train()
-IDLE --> BATTLING: enter_arena()
-IDLE --> RESTING: 3+ days no training (visual neglect)
-TRAINING --> IDLE
-BATTLING --> IDLE
-RESTING --> IDLE: reset daily
-CLAIMED --> BANNED: admin_ban()
-CLAIMED --> DELETED: gdpr_erasure()
-UNCLAIMED --> DELETED: cleanup job (24h+ unreserved)
+    ClaimPetUseCase ..> IClaimCodeService : dependency
+    VerifyClaimCodeUseCase ..> IClaimCodeService : dependency
+    ClaimCodeService <|.. IClaimCodeService : realization
+    EnterArenaUseCase ..> BanPetUseCase : dependency (via event)
+    BanPetUseCase --> ProcessGdprErasureUseCase : association
 ```
 
-**See also**: `docs/diagrams/puml/state-pet.puml`
+##### Infrastructure / Presentation Layer
 
-#### Battle Match State Machine
+```mermaid
+classDiagram
+    class IPetRepository {
+        <<interface>>
+        +findById(id) Pet
+        +save(pet)
+    }
+    class PostgresPetRepository {
+        <<Repository>>
+        -Pool pgPool
+        +findById(id) Pet
+        +save(pet)
+    }
+    class ICacheRepository {
+        <<interface>>
+        +get(key) string
+        +set(key, val, ttl)
+    }
+    class RedisCacheRepository {
+        <<Repository>>
+        -RedisClient redis
+        +get(key) string
+        +set(key, val, ttl)
+    }
+    class IEmailDeliveryPort {
+        <<interface>>
+        +send(to, subject, body) DeliveryResult
+    }
+    class SendGridEmailAdapter {
+        <<Adapter>>
+        +send(to, subject, body) DeliveryResult
+    }
+    class SmtpEmailAdapter {
+        <<Adapter>>
+        +send(to, subject, body) DeliveryResult
+    }
+    class EmailDeliveryWithFallback {
+        <<Adapter>>
+        -SendGridEmailAdapter primary
+        -SmtpEmailAdapter fallback
+        -CircuitBreaker breaker
+        +send(to, subject, body) DeliveryResult
+    }
+    class ClaimController {
+        <<Controller>>
+        -ClaimPetUseCase claimUC
+        -VerifyClaimCodeUseCase verifyUC
+        +postClaim(req, reply)
+        +postVerify(req, reply)
+    }
+    class ArenaController {
+        <<Controller>>
+        -EnterArenaUseCase enterUC
+        +postEnter(req, reply)
+        +getMatch(req, reply)
+    }
+    class AdminController {
+        <<Controller>>
+        -BanPetUseCase banUC
+        -RuntimeConfigService cfg
+        +postBan(req, reply)
+        +putConfig(req, reply)
+    }
 
-Arena matches progress through a series of states from creation to resolution:
-
-``` puml
-[*] --> CREATED
-CREATED --> FINDING_OPPONENT: (matchmaking queue)
-FINDING_OPPONENT --> READY: opponent_found OR timeout (30s AI)
-READY --> IN_PROGRESS: start_match()
-IN_PROGRESS --> RESOLVED: duration_complete (5-15s)
-RESOLVED --> ARCHIVED: completed_at set
-ARCHIVED --> [*]
+    PostgresPetRepository ..|> IPetRepository : realization
+    RedisCacheRepository ..|> ICacheRepository : realization
+    SendGridEmailAdapter ..|> IEmailDeliveryPort : realization
+    SmtpEmailAdapter ..|> IEmailDeliveryPort : realization
+    EmailDeliveryWithFallback ..|> IEmailDeliveryPort : realization
+    EmailDeliveryWithFallback *-- SendGridEmailAdapter : composition
+    EmailDeliveryWithFallback *-- SmtpEmailAdapter : composition
+    ClaimController --> ClaimPetUseCase : association
+    ArenaController --> EnterArenaUseCase : association
+    AdminController --> BanPetUseCase : association
 ```
 
-**Key transitions**:
-- `FINDING_OPPONENT → READY`: One pet waits for opponent; if timeout (30s), AI opponent assigned
-- `IN_PROGRESS`: Battle duration 5-15 seconds (mode-dependent); seeded random ±15% applied to base stat
-- `RESOLVED → ARCHIVED`: Match immutable; battle_log stored for replay
+#### §4.5.3 Object Diagram (Snapshot)
 
-**See also**: `docs/diagrams/puml/state-battle.puml`
-
-### Component Diagram
-
-The component diagram illustrates the modular architecture: Client Layer (React + Vue), API Layer (Fastify + middlewares), Data Layer (PostgreSQL + Redis), and external services:
-
-``` puml
-package "Client" {
-  [Player App: React + Phaser]
-  [Admin Portal: Vue3 + Element]
-  [Vite Build]
-}
-
-package "API" {
-  [Fastify Server]
-  [Game Routes]
-  [Admin Routes]
-}
-
-package "Data" {
-  [PostgreSQL: primary + replica]
-  [Redis: leaderboard + cache]
-}
-
-package "External" {
-  [SendGrid]
-  [CDN / Vercel]
-}
-
-[Player App] --> [Vite Build]
-[Admin Portal] --> [Vite Build]
-[Vite Build] --> [CDN / Vercel]
-[CDN / Vercel] --> [Fastify Server]
-[Fastify Server] --> [PostgreSQL: primary + replica]
-[Fastify Server] --> [Redis: leaderboard + cache]
-[Fastify Server] --> [SendGrid]
+```mermaid
+classDiagram
+    class pet_alex_001 {
+        id = "uuid-pet-001"
+        seed = 42
+        rarity = LEGENDARY
+        speed = 78
+        strength = 65
+        stamina = 70
+        level = 14
+    }
+    class identity_alex {
+        id = "uuid-id-007"
+        emailHash = "sha256(alex@example.com)"
+    }
+    class claim_code_42 {
+        id = "uuid-cc-042"
+        codeHash = "sha256(123456)"
+        expiresAt = "2026-05-10T14:15:00Z"
+    }
+    class arena_match_77 {
+        id = "uuid-match-077"
+        petAId = "uuid-pet-001"
+        petBId = "uuid-pet-019"
+        winnerPetId = "uuid-pet-001"
+        mode = RACE
+    }
+    pet_alex_001 --> identity_alex : claimed_by
+    claim_code_42 --> pet_alex_001 : unlocks
+    arena_match_77 --> pet_alex_001 : pet_a
 ```
 
-**See also**: `docs/diagrams/puml/component-diagram.puml`
+#### §4.5.4 Sequence Diagrams
 
-### Deployment Diagram
+##### Claim Flow
 
-The deployment architecture shows runtime topology: Vercel CDN (frontend), Railway containers (API + autoscale), managed databases (Supabase PostgreSQL + Upstash Redis), and external services:
+```mermaid
+sequenceDiagram
+    participant P as Player Browser
+    participant API as API Server (Fastify)
+    participant DB as PostgreSQL
+    participant R as Redis
+    participant SG as SendGrid
 
-``` puml
-node "Vercel Edge" {
-  component [Global CDN]
-  component [Static Assets (Vite)]
-}
+    P->>API: POST /api/v1/claim {email, petId, ageConfirmed}
+    API->>R: INCR rl:claim:{email_hash} (TTL 3600)
+    alt rate limit > 5
+        R-->>API: counter > 5
+        API-->>P: HTTP 429 Retry-After
+    else within limit
+        API->>API: generate 6-digit OTP
+        API->>DB: INSERT claim_codes(pet_id, email_hash, code_hash, expires_at)
+        API->>SG: send email with OTP
+        SG-->>API: 202 Accepted
+        API-->>P: HTTP 200 {claimId, expiresAt}
+    end
 
-node "Railway Compute" {
-  component [API Replica 1]
-  component [API Replica 2]
-  component [Nginx LB]
-  component [HPA (70% CPU trigger)]
-}
+    Note over P,SG: User receives email, enters code in browser
 
-node "Data Layer" {
-  component [PostgreSQL Primary]
-  component [PostgreSQL Replica]
-  component [Upstash Redis]
-}
-
-node "External" {
-  component [SendGrid API]
-  component [S3 Backups]
-}
-
-[Vercel Edge] --> [Railway Compute]
-[API Replica 1] --> [PostgreSQL Primary]
-[API Replica 2] --> [PostgreSQL Primary]
-[PostgreSQL Primary] --> [PostgreSQL Replica]
-[Railway Compute] --> [Upstash Redis]
-[Railway Compute] --> [SendGrid API]
+    P->>API: POST /api/v1/claim/verify {claimId, code}
+    API->>R: INCR rl:code_entry:{session_id}
+    API->>DB: SELECT claim_codes WHERE id=$1 AND expires_at > NOW() AND used_at IS NULL
+    API->>API: SHA-256(code) compare with code_hash
+    alt valid
+        API->>DB: BEGIN; UPSERT claim_identities; UPDATE pets SET owner_token_hash=$1, claimed_at=NOW(); UPDATE claim_codes SET used_at=NOW(); COMMIT
+        API->>R: SET token:blacklist (no-op for first claim)
+        API-->>P: HTTP 200 {petToken, petUrl}
+    else invalid / expired
+        API-->>P: HTTP 400 {INVALID_CODE | CODE_EXPIRED}
+    end
 ```
 
-**See also**: `docs/diagrams/puml/deployment.puml`
+##### Arena Battle
 
-### Use Case Diagram
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant API as API Server
+    participant R as Redis
+    participant DB as PostgreSQL
 
-Actors and their interactions with the system:
-
-``` puml
-actor "Guest Player"
-actor "Pet Owner"
-actor "Collector"
-actor "Competitor"
-actor "Admin"
-actor "System Job"
-
-usecase "View Random Pet (Guest)"
-usecase "Claim Pet (Email + OTP)"
-usecase "Train Pet (Daily Actions)"
-usecase "Enter Arena (Race/Sumo)"
-usecase "View Global Leaderboard"
-usecase "View Battle Records (Public)"
-usecase "Request GDPR Erasure"
-usecase "Ban Pet (Moderation)"
-usecase "Tune Rate Limits"
-usecase "Configure Game Economy"
-usecase "Cleanup Expired Claims"
-usecase "Update Leaderboard Snapshots"
+    P->>API: POST /api/v1/arena/enter {petId, mode, acceptAI}
+    API->>R: INCR rl:arena:{pet_id} (TTL 3600)
+    alt rate limit > 10
+        API-->>P: HTTP 429 Retry-After
+    else
+        API->>R: ZADD matchmaking:queue:{mode} score=enqueue_epoch member="{petId}:{epoch_ms}"
+        loop poll up to 30s
+            API->>R: ZRANGEBYSCORE oldest opponent (excluding self)
+            alt opponent found
+                API->>R: ZREM both pets
+                API->>DB: SELECT both pet stats
+                API->>API: BattleCalculator.calculate(stats, mode, seed)
+                API->>DB: INSERT arena_matches; UPDATE leaderboard score
+                API->>R: ZADD leaderboard:global score=newScore member=petId
+                API-->>P: HTTP 200 {matchId, result, opponentPetId}
+            else timeout 30s and acceptAI=true
+                API->>API: AI opponent battle calculation
+                API->>DB: INSERT arena_matches (is_ai_opponent=TRUE)
+                API-->>P: HTTP 200 {matchId, result, isAiOpponent: true}
+            else timeout 30s and acceptAI=false
+                API-->>P: HTTP 408 MATCHMAKING_TIMEOUT
+            end
+        end
+    end
 ```
 
-**See also**: `docs/diagrams/puml/usecase-diagram.puml`
+##### GDPR Erasure
 
-### Data Flow Diagram
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant API as API Server
+    participant DB as PostgreSQL
+    participant R as Redis
+    participant W as GDPR Worker
 
-Event flows and data transformations:
+    P->>API: POST /api/v1/gdpr/request {type=erasure} (Bearer pet token)
+    API->>DB: INSERT gdpr_requests(claim_identity_id, type=erasure, status=pending)
+    API-->>P: HTTP 202 {jobId}
 
-``` puml
-[Player] -->|email + OTP| (Claim Flow)
-(Claim Flow) -->|INSERT| [PostgreSQL]
-(Claim Flow) -->|send email| [SendGrid]
+    loop every 5 min cron
+        W->>DB: SELECT gdpr_requests WHERE status=pending AND type=erasure LIMIT 10
+        W->>DB: BEGIN
+        W->>DB: UPDATE claim_identities SET email_encrypted=NULL, deletion_requested_at=NOW() WHERE id=$1
+        W->>DB: SELECT pets WHERE claim_identity_id=$1
+        loop for each pet
+            W->>R: ZREM leaderboard:global pet_id
+            W->>DB: UPDATE pets SET owner_token_hash=NULL, claimed_at=NULL
+        end
+        W->>DB: UPDATE gdpr_requests SET status=completed, completed_at=NOW()
+        W->>DB: COMMIT
+    end
 
-[Player] -->|training action| (Training System)
-(Training System) -->|check limit| [Redis Rate Limit]
-(Training System) -->|INSERT log| [PostgreSQL]
-
-[Player] -->|arena entry| (Arena Matchmaking)
-(Arena Matchmaking) -->|LPUSH queue| [Redis Matchmaking]
-(Arena Matchmaking) -->|opponent found| (Battle Calculation)
-(Battle Calculation) -->|seeded random| (Battle Calculation)
-(Battle Calculation) -->|INSERT match| [PostgreSQL]
-(Battle Calculation) -->|ZADD| [Redis Leaderboard]
-
-(Leaderboard Update) -->|query top 500| [PostgreSQL]
-(Leaderboard Update) -->|ZADD| [Redis Leaderboard]
-
-[Admin] -->|moderation| (Admin Moderation)
-(Admin Moderation) -->|UPDATE pets| [PostgreSQL]
-
-(GDPR Erasure Job) -->|daily| (Cleanup)
-(Cleanup) -->|query deletion| [PostgreSQL]
-(Cleanup) -->|hash email| (Cleanup)
+    P->>API: GET /api/v1/gdpr/request/status?jobId=...
+    API-->>P: HTTP 200 {status: completed, completedAt}
 ```
 
-**See also**: `docs/diagrams/puml/dataflow-diagram.puml`
+#### §4.5.5 Communication Diagram
 
-### §3.9.1 Canonical UML 9-set — Cross-reference Table
+```mermaid
+graph LR
+    P["Player"]
+    CC["ClaimController"]
+    CUC["ClaimPetUseCase"]
+    CCS["ClaimCodeService"]
+    EDP["EmailDeliveryPort"]
+    PR["PostgresClaimCodeRepo"]
+    SG["SendGridAdapter"]
 
-The standalone UML files under `docs/diagrams/` are the **canonical** source for the standard UML 9-set required by reviewers. The inline diagrams above are kept for historical readability inside this document, but downstream tools (RTM, code-gen scaffold, ARCH review) consume the standalone files.
-
-| # | UML 9-set diagram | Canonical file | Inline reference (this section) |
-|---|---|---|---|
-| 1 | Use Case | `docs/diagrams/use-case.md` | "Use Case Diagram" subsection above |
-| 2 | Class — Domain | `docs/diagrams/class-domain.md` | "Class Diagram" subsection above (legacy 6-class view) |
-| 3 | Class — Application | `docs/diagrams/class-application.md` | (not inlined; see canonical) |
-| 4 | Class — Infrastructure / Presentation | `docs/diagrams/class-infra-presentation.md` | (not inlined; see canonical) |
-| 5 | Object Diagram (snapshot) | `docs/diagrams/object-snapshot.md` | (not inlined; see canonical) |
-| 6 | Sequence (5 flows) | `docs/diagrams/sequence-claim-flow.md`, `sequence-claim-flow-error.md`, `sequence-arena-battle.md`, `sequence-arena-enter-error.md`, `sequence-training.md` | "Sequence Diagrams" subsection above (Claim + Battle) |
-| 7 | State Machine | `docs/diagrams/state-machine-pet-lifecycle.md`, `docs/diagrams/state-machine-arena-match.md` | "State Machines" subsection above |
-| 8 | Activity | `docs/diagrams/activity-claim-and-train.md`, `activity-arena-battle.md`, `activity-gdpr-erasure.md` | (not inlined; see canonical) |
-| 9 | Communication | `docs/diagrams/communication.md` | (not inlined; see canonical) |
-| + | Component | `docs/diagrams/component.md` | "Component Diagram" subsection above |
-| + | Deployment | `docs/diagrams/deployment.md` | "Deployment Diagram" subsection above |
-| + | Entity-Relationship | `docs/diagrams/er-diagram.md` | (SCHEMA §1 ER overview also covers this) |
-
-The canonical class diagrams (`class-domain.md`, `class-application.md`, `class-infra-presentation.md`) include the full set of UML class relationships: **inheritance (`<|--`)**, **realization (`<|..`)**, **composition (`*--`)**, **aggregation (`o--`)**, **association (`-->`)**, and **dependency (`..>`)** — closing the prior gap flagged in earlier reviews where the inline domain diagram only used association.
-
-**CI/CD UML and Spring Modulith UML**: Five CI/CD diagrams (`cicd-*.md`, `infra-local-topology.md`, `developer-workflow-activity.md`) and two Modulith diagrams (`modulith/`) are also generated and live alongside the 9-set.
-
-**Frontend UML 16-set**: All `frontend-*.md` files cover the client-side counterpart (Use Case, 3 Class, Object, 3 Sequence, 2 State, 3 Activity, Component, Deployment, Communication). Listed in `docs/MANIFEST.md`.
-
----
-
-## §4. Data Models
-
-All models are PostgreSQL tables unless noted. Field types use PostgreSQL notation.
-
-### §4.1 Pet
-
-```
-Table: pets
-──────────────────────────────────────────────────────
-id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-seed             BIGINT       NOT NULL UNIQUE  -- procedural generation seed; globally unique
-rarity           VARCHAR(10)  NOT NULL  CHECK (rarity IN ('COMMON','RARE','EPIC','LEGENDARY'))  -- Rarity assignment enforced by PRD AC-002-5 (distribution weights: 60% COMMON, 25% RARE, 12% EPIC, 3% LEGENDARY)
-pet_name         VARCHAR(64)  NOT NULL  -- Auto-generated from species + color combination at row creation time (seed-derived)
-stat_speed       SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_speed BETWEEN 1 AND 100)  -- Range enforced by PRD AC-005-6 (pet_stat_min = 1, pet_stat_max = 100)
-stat_strength    SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_strength BETWEEN 1 AND 100)  -- Range enforced by PRD AC-005-6
-stat_stamina     SMALLINT     NOT NULL DEFAULT 10  CHECK (stat_stamina BETWEEN 1 AND 100)  -- Range enforced by PRD AC-005-6
-level            SMALLINT     NOT NULL DEFAULT 1   CHECK (level BETWEEN 1 AND 100)  -- Range enforced by PRD AC-006-2 (pet_level_min = 1, pet_level_max = 100)
-total_training_actions  INTEGER NOT NULL DEFAULT 0
-last_trained_at  TIMESTAMPTZ  NULL      -- Updated on every training action; NULL if never trained; used for neglect detection
-owner_token_hash VARCHAR(64)  NULL      -- SHA-256 hash of the pet access token; NULL = unclaimed
-claimed_at       TIMESTAMPTZ  NULL
-is_banned        BOOLEAN      NOT NULL DEFAULT FALSE  -- Set to TRUE when admin bans a pet; enforces PRD AC-005-8 and AC-013-3 (moderation)
-banned_reason    TEXT         NULL      CHECK (char_length(banned_reason) <= 500)  -- Max length enforced by PRD AC-013-3 (admin_moderation_reason_max_chars = 500)
-banned_at        TIMESTAMPTZ  NULL
-created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-generation_meta  JSONB        NOT NULL DEFAULT '{}'  -- {body, head, color_palette, accessory, rarity_trait, pattern}
-claim_identity_id UUID        NULL REFERENCES claim_identities(id) ON DELETE SET NULL -- Set at claim time; enables GDPR erasure lookup after claim_codes purge
-reserved_until    TIMESTAMPTZ NULL      -- Set to NOW()+24h when pet is generated for guest preview; NULL for claimed pets; used by cleanup job
-──────────────────────────────────────────────────────
-INDEXES:
-  idx_pets_rarity           ON pets(rarity)
-  idx_pets_claimed_at       ON pets(claimed_at) WHERE claimed_at IS NOT NULL
-  idx_pets_is_banned        ON pets(is_banned) WHERE is_banned = TRUE
-  idx_pets_owner_token_hash ON pets(owner_token_hash) WHERE owner_token_hash IS NOT NULL
-  idx_pets_last_trained_at  ON pets(last_trained_at) WHERE last_trained_at IS NOT NULL
-  idx_pets_seed             ON pets(seed) -- unique, supports uniqueness check on generation
-  idx_pets_claim_identity   ON pets(claim_identity_id) WHERE claim_identity_id IS NOT NULL
-  idx_pets_reserved_until   ON pets(reserved_until) WHERE reserved_until IS NOT NULL  -- cleanup job target
+    P -->|"1: POST /claim"| CC
+    CC -->|"2: execute(input)"| CUC
+    CUC -->|"3: issue(email, petId)"| CCS
+    CCS -->|"4: insertCode"| PR
+    CUC -->|"5: send(email, otp)"| EDP
+    EDP -->|"5.1: deliver"| SG
+    SG -->|"5.2: 202 OK"| EDP
+    EDP -->|"5.3: success"| CUC
+    CUC -->|"6: result"| CC
+    CC -->|"7: HTTP 200"| P
 ```
 
-Notes:
-- The raw pet access token (32-byte base64 string) is NEVER stored; only the SHA-256 hash is stored. The token is transmitted once at claim time via URL.
-- `level` is derived from `FLOOR(total_training_actions / PET_LEVEL_FORMULA_DIVISOR)` capped at 100; the column is updated on each training action commit.
-- Seed collision on generation: application retries up to 3 times (PET_SEED_COLLISION_MAX_RETRIES = 3) before returning an error.
-- **Unclaimed pet cleanup**: A background job (scheduled every 6 hours) deletes pets where `reserved_until < NOW() AND owner_token_hash IS NULL`. The 24-hour reservation window is defined by `PET_RESERVATION_TTL_HOURS = 24` (CONSTANTS core). On claim, `reserved_until` is set to NULL.
+#### §4.5.6 State Machines
 
-### §4.2 User / Email (ClaimIdentity)
+##### Pet Lifecycle
 
-```
-Table: claim_identities
-──────────────────────────────────────────────────────
-id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-email_hash       VARCHAR(64)  NOT NULL  -- SHA-256 of lowercased email; PII minimization
-email_encrypted  BYTEA        NULL      -- AES-256-GCM encrypted email; set to NULL 7 days after deletion request
-deletion_requested_at TIMESTAMPTZ NULL
-created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-──────────────────────────────────────────────────────
-INDEXES:
-  idx_claim_identities_email_hash  ON claim_identities(email_hash) UNIQUE
-```
-
-Notes:
-- Raw email is only held in memory during the claim transaction and in SendGrid delivery. The database stores only the encrypted form and the hash for lookup.
-- On GDPR deletion request: `email_encrypted` is set to NULL, `deletion_requested_at` recorded. Background job replaces with hash-only record within 7 days (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days; system completes within 24 hours per GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS).
-- IP addresses are never stored raw; hashed IP retained 90 days for abuse monitoring (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
-
-### §4.3 ClaimCode (OTP Token)
-
-```
-Table: claim_codes
-──────────────────────────────────────────────────────
-id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-pet_id           UUID         NOT NULL REFERENCES pets(id) ON DELETE CASCADE
-email_hash       VARCHAR(64)  NOT NULL
-code_hash        VARCHAR(64)  NOT NULL  -- SHA-256 of 6-digit OTP; never stored plaintext
-expires_at       TIMESTAMPTZ  NOT NULL  -- NOW() + 15 minutes (CLAIM_CODE_EXPIRY_MINUTES)
-used_at          TIMESTAMPTZ  NULL
-attempts         SMALLINT     NOT NULL DEFAULT 0
-created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-──────────────────────────────────────────────────────
-INDEXES:
-  idx_claim_codes_pet_id       ON claim_codes(pet_id)
-  idx_claim_codes_email_hash   ON claim_codes(email_hash)
-  idx_claim_codes_expires_at   ON claim_codes(expires_at)  -- for cleanup job
+```mermaid
+stateDiagram-v2
+    [*] --> GENERATED
+    GENERATED --> UNCLAIMED : reservedUntil set
+    UNCLAIMED --> CLAIMED : claim_code_verified
+    UNCLAIMED --> DELETED : reservation expired (24h)
+    CLAIMED --> IDLE : default
+    IDLE --> TRAINING : train action
+    IDLE --> BATTLING : enter arena
+    IDLE --> RESTING : 3+ days no training
+    TRAINING --> IDLE : action complete
+    BATTLING --> IDLE : match complete
+    RESTING --> IDLE : daily reset
+    CLAIMED --> BANNED : admin ban
+    BANNED --> CLAIMED : admin unban
+    CLAIMED --> DELETED : gdpr erasure
+    DELETED --> [*]
 ```
 
-Notes:
-- Code is a 6-digit numeric OTP (CLAIM_CODE_DIGITS = 6) generated with `crypto.randomInt(100000, 1000000)`. Only the hash is stored.
-- Claim records are deleted by a background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours).
-- **Attempt tracking**: Redis key `rl:code_entry:{session_id}` (TTL 900s) is the authoritative rate-limit enforcer (10 attempts per session). The DB `attempts` column is informational only — incremented on each verify call for audit purposes but NOT used for enforcement. On Redis unavailability, code entry is blocked (fail-closed) to prevent bypass.
+##### Arena Match
 
-### §4.4 ArenaMatch
-
-```
-Table: arena_matches
-──────────────────────────────────────────────────────
-id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-pet_a_id         UUID         NOT NULL REFERENCES pets(id) ON DELETE RESTRICT  -- challenger; pet row retained for audit integrity
-pet_b_id         UUID         NULL REFERENCES pets(id) ON DELETE SET NULL  -- NULL if AI opponent or if pet row removed
-is_ai_opponent   BOOLEAN      NOT NULL DEFAULT FALSE
-mode             VARCHAR(10)  NOT NULL CHECK (mode IN ('RACE','SUMO'))
-winner_pet_id    UUID         NULL REFERENCES pets(id) ON DELETE SET NULL  -- NULL if draw (tie-break prevents this) or pet removed
-random_seed      BIGINT       NOT NULL  -- seeded random for ±15% modifier reproducibility
-stat_delta_a     SMALLINT     NOT NULL DEFAULT 0  -- net stat value used for pet_a after buff
-stat_delta_b     SMALLINT     NOT NULL DEFAULT 0
-duration_seconds SMALLINT     NOT NULL CHECK (duration_seconds BETWEEN 5 AND 15), -- CONSTANTS: arena_match_duration_min/max_seconds
-battle_log       JSONB        NOT NULL DEFAULT '[]'  -- structured event sequence for replay
-completed_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-──────────────────────────────────────────────────────
-INDEXES:
-  idx_arena_matches_pet_a_id      ON arena_matches(pet_a_id)
-  idx_arena_matches_pet_b_id      ON arena_matches(pet_b_id)
-  idx_arena_matches_completed_at  ON arena_matches(completed_at)
-  idx_arena_matches_winner        ON arena_matches(winner_pet_id)
-  idx_arena_matches_pet_a_history ON arena_matches(pet_a_id, completed_at DESC)
-  idx_arena_matches_pet_b_history ON arena_matches(pet_b_id, completed_at DESC)
+```mermaid
+stateDiagram-v2
+    [*] --> CREATED
+    CREATED --> FINDING_OPPONENT : enqueue
+    FINDING_OPPONENT --> READY : opponent found
+    FINDING_OPPONENT --> READY : 30s timeout AI fallback
+    FINDING_OPPONENT --> CANCELLED : timeout no AI
+    READY --> IN_PROGRESS : start_match
+    IN_PROGRESS --> RESOLVED : duration complete
+    RESOLVED --> ARCHIVED : completed_at set
+    ARCHIVED --> FLAGGED : admin flag
+    FLAGGED --> ARCHIVED : admin unflag
+    ARCHIVED --> [*]
+    CANCELLED --> [*]
 ```
 
-Notes:
-- Battle outcome uses a seeded random modifier ±15% (ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT = 15%). The `random_seed` field enables deterministic replay.
-- The last 20 battles per pet are shown publicly (ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20); query uses `ORDER BY completed_at DESC LIMIT 20`.
+#### §4.5.7 Activity Diagrams
 
-### §4.5 TrainingLog
+##### Claim Flow (Activity)
 
-```
-Table: training_logs
-──────────────────────────────────────────────────────
-id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-pet_id           UUID         NOT NULL REFERENCES pets(id) ON DELETE CASCADE
-training_type    VARCHAR(10)  NOT NULL CHECK (training_type IN ('RUN','STRENGTH','STAMINA'))  -- Training types enforced by PRD AC-006-1 (US-TRAIN-001)
-stat_delta       SMALLINT     NOT NULL CHECK (stat_delta BETWEEN 1 AND 3)  -- Stat delta range enforced by PRD AC-006-1 (training_stat_points_min = 1, training_stat_points_max = 3)
-stat_after       SMALLINT     NOT NULL
-completed_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-──────────────────────────────────────────────────────
-INDEXES:
-  idx_training_logs_pet_id        ON training_logs(pet_id)
-  idx_training_logs_completed_at  ON training_logs(pet_id, completed_at DESC)
-```
-
-Notes:
-- 3 training actions per day per pet (TRAINING_ACTIONS_PER_DAY = 3, enforced by PRD AC-006-5); the count of today's actions (UTC) is computed as `COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`.
-- The stat delta per action is a uniformly random integer in [1, 3] points (TRAINING_STAT_POINTS_MIN = 1, TRAINING_STAT_POINTS_MAX = 3, enforced by PRD AC-006-1); no formula linking delta to pet level exists in CONSTANTS.
-
-### §4.6 LeaderboardSnapshot
-
-```
-Table: leaderboard_snapshots
-──────────────────────────────────────────────────────
-id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-snapshot_time    TIMESTAMPTZ  NOT NULL
-entries          JSONB        NOT NULL  -- array of top 500 entries: [{rank, pet_id, pet_name, score, win_rate, rarity, level}]
-──────────────────────────────────────────────────────
-INDEXES:
-  idx_leaderboard_snapshots_time  ON leaderboard_snapshots(snapshot_time DESC)
+```mermaid
+flowchart TB
+    Start([User on landing page]) --> View[View random pet]
+    View --> Decide{Wants to keep?}
+    Decide -->|No| Exit([Leave])
+    Decide -->|Yes| Form[Enter email + age13 checkbox]
+    Form --> Validate{Form valid?}
+    Validate -->|No| Form
+    Validate -->|Yes| RateCheck{Rate limit OK?}
+    RateCheck -->|No| Err429[Show 429 cooldown]
+    RateCheck -->|Yes| GenOTP[Generate OTP, INSERT claim_codes]
+    GenOTP --> SendEmail[Send email via SendGrid]
+    SendEmail --> Wait[User waits, enters OTP]
+    Wait --> Verify{OTP valid?}
+    Verify -->|No| RetryCount{Attempts < 10?}
+    RetryCount -->|Yes| Wait
+    RetryCount -->|No| Err429
+    Verify -->|Yes| TX[BEGIN: UPSERT identity + UPDATE pet token + mark code used]
+    TX --> Commit[COMMIT]
+    Commit --> Reveal[Show pet URL]
+    Reveal --> End([User bookmarks URL])
 ```
 
-Notes:
-- Snapshot stores top 500 pets (LEADERBOARD_SNAPSHOT_RETENTION_TOP_N = 500). Retention is rolling 12 months (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12 months).
-- Live leaderboard is authoritative from Redis sorted set. Snapshots are the durable backup used for historical reporting.
-- Score formula: `win_rate × battles_played × level_multiplier` (ARENA_SCORE_FORMULA from CONSTANTS).
+##### Arena Battle (Activity)
 
-### §4.7 FoodBuff
-
-```
-Table: food_buffs
-──────────────────────────────────────────────────────
-id               UUID         PRIMARY KEY DEFAULT gen_random_uuid()
-pet_id           UUID         NOT NULL REFERENCES pets(id) ON DELETE CASCADE
-food_type        VARCHAR(50)  NOT NULL
-buff_stat        VARCHAR(10)  NOT NULL CHECK (buff_stat IN ('speed','strength','stamina'))
-magnitude        SMALLINT     NOT NULL CHECK (magnitude > 0)
-is_permanent     BOOLEAN      NOT NULL DEFAULT FALSE
-expires_at       TIMESTAMPTZ  NULL      -- NULL for permanent buffs
-consumed_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-record_expires_at TIMESTAMPTZ NOT NULL  -- consumed_at + 30 days (FOOD_BUFF_RECORD_RETENTION_DAYS)
-──────────────────────────────────────────────────────
-INDEXES:
-  idx_food_buffs_pet_id         ON food_buffs(pet_id)
-  idx_food_buffs_record_expires ON food_buffs(record_expires_at)  -- for cleanup job
+```mermaid
+flowchart TB
+    Start([Owner on arena page]) --> Mode[Select mode RACE/SUMO]
+    Mode --> Rate{Rate limit ≤ 10/hr?}
+    Rate -->|No| Err429[HTTP 429 Retry-After]
+    Rate -->|Yes| Enqueue[ZADD matchmaking:queue]
+    Enqueue --> Poll{Opponent found?}
+    Poll -->|< 30s yes| Calc[BattleCalculator]
+    Poll -->|30s timeout AI accepted| AI[AI opponent calc]
+    Poll -->|30s timeout no AI| Err408[HTTP 408]
+    Calc --> Persist[INSERT arena_match]
+    AI --> Persist
+    Persist --> ZADD[ZADD leaderboard:global]
+    ZADD --> Animate[Play 5-15s animation client-side]
+    Animate --> Result[Show win/loss + share button]
+    Result --> End([User can share or rebattle])
 ```
 
-**Illustrative buff magnitudes** (from CONSTANTS multipliers section, for UI/doc purposes):
-- Temporary buff example: +5 stat points for 24 hours (FOOD_BUFF_EXAMPLE_TEMP_AMOUNT_STAT_POINTS = 5; FOOD_BUFF_EXAMPLE_TEMP_DURATION_HOURS = 24)
-- Permanent buff example: +3 stat points permanently (FOOD_BUFF_EXAMPLE_PERM_AMOUNT_STAT_POINTS = 3)
-These are illustrative defaults — actual magnitudes are configurable via POST /api/v1/pets/:petId/feed request body.
+##### GDPR Erasure (Activity)
 
-### §4.8 Redis Key Patterns
-
-The following are Redis key patterns (not PostgreSQL tables):
-
+```mermaid
+flowchart TB
+    Start([Owner submits erasure]) --> API[POST /api/v1/gdpr/request type=erasure]
+    API --> Insert[INSERT gdpr_requests status=pending]
+    Insert --> Queue([HTTP 202 jobId])
+    Queue --> Cron[Cron worker every 5min]
+    Cron --> Lock[Redis SETNX gdpr_lock]
+    Lock --> Fetch[SELECT pending erasure ≤ 10]
+    Fetch --> ForEach{For each request}
+    ForEach --> NullEmail[UPDATE claim_identities SET email_encrypted=NULL]
+    NullEmail --> Pets[SELECT pets WHERE claim_identity_id]
+    Pets --> ForPet{For each pet}
+    ForPet --> ZREM[ZREM leaderboard:global pet_id]
+    ZREM --> NullToken[UPDATE pets SET owner_token_hash=NULL]
+    NullToken --> NextPet{More pets?}
+    NextPet -->|Yes| ForPet
+    NextPet -->|No| Mark[UPDATE gdpr_requests status=completed]
+    Mark --> Audit[INSERT audit_logs]
+    Audit --> Notify[Send confirmation email]
+    Notify --> End([Done within 7 days])
 ```
-redis_key: rl:claim:{email_hash}         TTL: 3600s   Value: attempt count (≤5); enforces AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5
-redis_key: rl:claim:cooldown:{email_hash} TTL: 60s    Value: "1"; set when MAX_ATTEMPTS_REACHED (count = AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5); CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60; HTTP 429 with Retry-After: 60 while key exists
-redis_key: rl:arena:{pet_id}             TTL: 3600s   Value: battle count (≤10 default); TTL = ARENA_RATE_LIMIT_COUNTER_WINDOW_HOURS × 3600 = 3600s (ARENA_RATE_LIMIT_COUNTER_WINDOW_HOURS = 1)
-redis_key: rl:code_entry:{session_id}    TTL: 900s    Value: attempt count (≤10)
-redis_key: rl:code_entry:cooldown:{session_id} TTL: 60s  Value: "1"; set when MAX_ATTEMPTS_REACHED (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10); HTTP 429 with Retry-After: 60 while key exists
-redis_key: config:runtime                TTL: 300s    Value: JSON blob of current runtime config
-redis_key: leaderboard:global            NO TTL       Sorted set; score = arena_score; member = pet_id
-redis_key: matchmaking:queue:{mode}      NO TTL       Redis Sorted Set (ZADD score=enqueue_epoch; ZRANGEBYSCORE for stale entry cleanup); entries older than ARENA_MATCHMAKING_TIMEOUT_SECONDS+15s (≈45s) are considered stale and skipped by the consumer. Entry format: `"{petId}:{enqueue_epoch_ms}"`. Consumer validates entry age before pairing and discards stale entries silently.
-redis_key: rl:admin_login:{ip_hash}      TTL: 900s    Value: attempt count; enforces pre-auth IP rate limit (10 attempts per 15 min — §6.3)
-redis_key: rl:admin:{admin_id}           TTL: 60s     Value: request count; enforces ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100 per authenticated admin account
-redis_key: session:admin:{session_id}    TTL: 14400s  Value: JSON { adminId, role, createdAt (ISO), absExpiry: createdAt+28800s }; TTL=14400s enforces inactivity; absExpiry field validated on each request for 8h absolute cap
-redis_key: token:blacklist:{token_hash}  TTL: 259200s Value: "1"; used to invalidate replaced pet access tokens; TTL = 72h (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h)
+
+#### §4.5.8 Component Diagram
+
+```mermaid
+graph TB
+    subgraph "Client"
+        PR["Player React App<br/>(Phaser canvas)"]
+        AV["Admin Vue App"]
+        Vite["Vite Build"]
+    end
+
+    subgraph "API Server (Fastify)"
+        Auth["AuthMiddleware"]
+        RateMW["RateLimitMiddleware"]
+        Routes["Game Routes"]
+        AdminRoutes["Admin Routes"]
+        UCs["Use Cases (Application)"]
+        Domain["Domain Services"]
+    end
+
+    subgraph "Worker"
+        WJobs["Background Jobs<br/>(GDPR / cleanup / snapshot)"]
+    end
+
+    subgraph "Data Tier"
+        PG["PostgreSQL"]
+        Redis["Redis"]
+    end
+
+    subgraph "External"
+        SG["SendGrid"]
+        CDN["Vercel CDN"]
+    end
+
+    PR --> Vite
+    AV --> Vite
+    Vite --> CDN
+    CDN --> Auth
+    Auth --> RateMW
+    RateMW --> Routes
+    RateMW --> AdminRoutes
+    Routes --> UCs
+    AdminRoutes --> UCs
+    UCs --> Domain
+    UCs --> PG
+    UCs --> Redis
+    UCs --> SG
+    WJobs --> PG
+    WJobs --> Redis
+    WJobs --> SG
 ```
 
-### §4.9 AdminUser
+#### §4.5.9 Deployment Diagram
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | UUID | PK DEFAULT gen_random_uuid() | |
-| username | VARCHAR(64) | NOT NULL UNIQUE | Display name for audit log |
-| password_hash | TEXT | NOT NULL | bcrypt, min 12 rounds |
-| totp_secret_encrypted | TEXT | NULL | Encrypted TOTP secret (set via POST /admin/api/auth/totp/setup before first authenticated login) |
-| totp_backup_codes_hash | JSONB | NULL | Array of SHA-256 hashes of the 10 single-use backup codes; entry removed on use; NULL until TOTP enrollment |
-| role | VARCHAR(32) | NOT NULL DEFAULT 'moderator' | 'super_admin' \| 'moderator' \| 'read_only' |
-| last_login_at | TIMESTAMPTZ | NULL | |
-| failed_attempts | SMALLINT | NOT NULL DEFAULT 0 | Reset on success |
-| locked_until | TIMESTAMPTZ | NULL | Lockout expiry timestamp; non-NULL and in future means account is temporarily locked after repeated failed_attempts |
-| deactivated_at | TIMESTAMPTZ | NULL | Soft-delete timestamp; non-NULL means account is permanently deactivated and login is blocked |
-| created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+```mermaid
+graph TB
+    subgraph "Vercel Edge"
+        CDN["Global CDN"]
+        Static["Player + Admin Static SPA"]
+    end
 
-**Indexes**: idx_admin_users_username ON admin_users(username)
-**Note**: Admin accounts are never hard-deleted (audit log FK requires the row to remain). "Deletion" is a soft deactivation: set `deactivated_at = NOW()`. The `DELETE /admin/api/roles/:adminId` endpoint performs a soft deactivate, not a SQL DELETE.
+    subgraph "Railway Compute (us-east)"
+        LB["LB / HPA 70% CPU"]
+        API1["api-pod-1 :8080"]
+        API2["api-pod-2 :8080"]
+        W1["worker-pod-1"]
+        W2["worker-pod-2"]
+    end
 
-### §4.10 AuditLogs
+    subgraph "Supabase"
+        PGP["PG Primary"]
+        PGS["PG Standby"]
+    end
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | BIGSERIAL | PK | Sequential for log ordering |
-| admin_id | UUID | NULL REFERENCES admin_users(id) ON DELETE RESTRICT | Actor; NULL for failed logins with unknown username |
-| action | VARCHAR(128) | NOT NULL | e.g., 'pet.ban', 'config.arena_rate_limit' |
-| target_type | VARCHAR(64) | NULL | 'pet' \| 'arena_match' \| 'leaderboard_entry' \| 'config_runtime' \| 'config_economy' \| 'gdpr_request' \| 'admin_user' |
-| target_id | TEXT | NULL | UUID or key of affected entity |
-| detail | JSONB | NULL | Action-specific payload |
-| ip_address_hash | VARCHAR(64) | NULL | SHA-256 hash of raw IP; raw IP never stored per §4.2/§6.5; retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90) |
-| created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+    subgraph "Upstash"
+        RP["Redis Primary"]
+        RR["Redis Replica"]
+    end
 
-**Retention**: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years.
-**Indexes**: idx_audit_logs_created_at ON audit_logs(created_at DESC); idx_audit_logs_admin_id ON audit_logs(admin_id, created_at DESC)
+    subgraph "External"
+        SG["SendGrid API"]
+        S3["S3 Backups"]
+    end
 
-### §4.11 MarketplaceTransaction (Phase 3 — FF_MARKETPLACE)
+    CDN --> LB
+    LB --> API1
+    LB --> API2
+    API1 --> PGP
+    API2 --> PGP
+    API1 --> RP
+    API2 --> RP
+    PGP --> PGS
+    RP --> RR
+    PGP --> S3
+    W1 --> PGP
+    W2 --> PGP
+    API1 --> SG
+    W1 --> SG
+```
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | UUID | PK DEFAULT gen_random_uuid() | |
-| listing_id | UUID | NOT NULL REFERENCES marketplace_listings(id) ON DELETE RESTRICT | Originating listing; immutable audit trail — listing row must be retained |
-| pet_id | UUID | NOT NULL REFERENCES pets(id) ON DELETE RESTRICT | Pet traded (denormalised from listing for fast anti-flip queries) |
-| seller_token_hash | TEXT | NOT NULL | Hashed access token of seller |
-| buyer_token_hash | TEXT | NOT NULL | Hashed access token of buyer |
-| price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Food credits |
-| fee_credits | INTEGER | NOT NULL CHECK (fee_credits >= 0) | 5% platform fee: floor(price_credits * 0.05); may be 0 for price_credits < 20 |
-| listed_at | TIMESTAMPTZ | NOT NULL | |
-| completed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
+#### §4.5.10 UML 完整性門檻（Quality Gate）
 
-**Indexes**: idx_marketplace_transactions_completed ON marketplace_transactions(completed_at DESC); idx_marketplace_transactions_pet_completed ON marketplace_transactions(pet_id, completed_at DESC) (the listing_id FK is covered by the implicit index from the uq_marketplace_transactions_listing UNIQUE constraint)
+| Gate | Criterion |
+|------|-----------|
+| QG-UML-01 | 9 大圖類型全部交付（Use Case / Class×3 / Object / Sequence×3 / Communication / State×2 / Activity×3 / Component / Deployment） |
+| QG-UML-02 | Class diagram 6 種 UML 關聯（`<\|--`、`<\|..`、`*--`、`o--`、`-->`、`..>`）各至少 1 次 |
+| QG-UML-03 | 所有圖表使用 Mermaid（無 ASCII art、無 PUML） |
+| QG-UML-04 | State machine transition label 不含 `<br/>`（避免 Safari/Firefox 破圖） |
+| QG-UML-05 | 每張圖跟隨 1–3 句說明文字 |
+| QG-UML-06 | Class → table 命名 1:1 對齊（CamelCase ↔ snake_case 標準慣例） |
+| QG-UML-07 | Use Case actor ≥ 4（Guest, Owner, Admin, System Job） |
 
-### §4.12 MarketplaceListing (Phase 3 — FF_MARKETPLACE)
+#### §4.5.11 Class → Implementation → Test 追溯表
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | UUID | PK DEFAULT gen_random_uuid() | Used as listingId in API |
-| pet_id | UUID | NOT NULL REFERENCES pets(id) ON DELETE RESTRICT | Pet being listed; a listed pet cannot be deleted while an active listing exists |
-| seller_token_hash | TEXT | NOT NULL | Hashed seller access token (ownership verification) |
-| price_credits | INTEGER | NOT NULL CHECK (price_credits > 0) | Asking price in food credits |
-| status | VARCHAR(16) | NOT NULL DEFAULT 'active' | 'active' \| 'cancelled' \| 'sold' |
-| listed_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | When the listing was created |
-| expires_at | TIMESTAMPTZ | NULL | Optional expiry; NULL = no expiry |
-| completed_at | TIMESTAMPTZ | NULL | Set when status transitions to 'sold' or 'cancelled' |
+完整對應表維護於 `docs/diagrams/class-inventory.md`（由 `gendoc-gen-diagrams` 產生），包含每個 Class 對應的程式檔路徑與測試檔路徑。本 EDD 提供章節索引，避免重複維護：
 
-**Indexes**: idx_marketplace_listings_status ON marketplace_listings(status) WHERE status = 'active'; idx_marketplace_listings_pet ON marketplace_listings(pet_id); idx_marketplace_listings_listed_at ON marketplace_listings(listed_at DESC); `CREATE UNIQUE INDEX idx_marketplace_listings_active_pet ON marketplace_listings(pet_id) WHERE status = 'active'` — prevents duplicate concurrent active listings per pet at DB level
+- Domain: `src/domain/{bc}/*.ts` ↔ `tests/unit/domain/{bc}/*.test.ts`
+- Application: `src/application/{bc}/use-cases/*.ts` ↔ `tests/unit/application/{bc}/*.test.ts`
+- Infrastructure: `src/infrastructure/{bc}/*.ts` ↔ `tests/integration/{bc}/*.test.ts`
 
-**Note**: Anti-flip rule (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) is enforced by checking `completed_at > NOW() - INTERVAL '7 days'` on the pet's most recent completed trade in marketplace_transactions before accepting a new listing. `completed_at` (purchase timestamp) is used — not `listed_at` — because the protection window begins when the buyer takes ownership.
+### §4.6 Domain Events
 
-**Min-price formula**: `price_credits ≥ (pet_level × TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF) + (rarity_multiplier × TRADE_MIN_PRICE_FORMULA_RARITY_COEFF)` where TRADE_MIN_PRICE_FORMULA_LEVEL_COEFF = 100, TRADE_MIN_PRICE_FORMULA_RARITY_COEFF = 500, and rarity_multiplier values are: Common = 1 (RARITY_MULTIPLIER_COMMON), Rare = 2 (RARITY_MULTIPLIER_RARE), Epic = 4 (RARITY_MULTIPLIER_EPIC), Legendary = 8 (RARITY_MULTIPLIER_LEGENDARY).
+#### §4.6.1 Domain Events 完整清單（Cross-BC 消費關係）
 
-### §4.13 GdprRequest
+| event_name | source_bc | topic_name | event_schema_version | consumer_bc(s) | payload schema |
+|------------|-----------|-----------|---------------------|----------------|----------------|
+| PetGenerated | Pet | `pet.lifecycle.generated` | v1 | Leaderboard, Admin | `{petId, seed, rarity, generatedAt}` |
+| PetClaimed | Pet | `pet.lifecycle.claimed` | v1 | Identity, Leaderboard, Admin | `{petId, claimIdentityId, claimedAt}` |
+| PetTrained | Pet | `pet.training.completed` | v1 | Leaderboard, Admin | `{petId, type, statDelta, levelAfter, completedAt}` |
+| PetFoodConsumed | Pet | `pet.food.consumed` | v1 | Admin | `{petId, foodType, magnitude, isPermanent, expiresAt}` |
+| PetBanned | Pet | `pet.lifecycle.banned` | v1 | Leaderboard, Admin | `{petId, adminId, reason, bannedAt}` |
+| ArenaMatchStarted | Arena | `arena.match.started` | v1 | Admin | `{matchId, petAId, petBId, mode, isAiOpponent, startedAt}` |
+| ArenaMatchCompleted | Arena | `arena.match.completed` | v1 | Leaderboard, Marketplace, Admin | `{matchId, winnerPetId, statDeltaA, statDeltaB, completedAt}` |
+| LeaderboardUpdated | Leaderboard | `leaderboard.entry.updated` | v1 | Admin | `{petId, score, rank, updatedAt}` |
+| LeaderboardEntryRemoved | Leaderboard | `leaderboard.entry.removed` | v1 | Admin | `{petId, reason, removedAt}` |
+| GdprErasureRequested | Identity | `gdpr.request.created` | v1 | Admin, Pet, Leaderboard | `{requestId, claimIdentityId, type, submittedAt}` |
+| GdprErasureCompleted | Identity | `gdpr.request.completed` | v1 | Admin | `{requestId, claimIdentityId, completedAt}` |
+| AdminUserCreated | Admin | `admin.user.created` | v1 | (audit-only) | `{adminId, role, createdBy, createdAt}` |
+| AdminActionLogged | Admin | `admin.action.logged` | v1 | (audit-only) | `{auditLogId, adminId, action, targetType, targetId, at}` |
+| SuspiciousPetFlagged | Admin | `admin.suspicious.flagged` | v1 | Pet, Leaderboard | `{petId, battlesLastHour, flaggedAt}` |
+| ListingCreated | Marketplace | `marketplace.listing.created` | v1 | Pet, Admin | `{listingId, petId, priceCredits, listedAt}` |
+| TradeCompleted | Marketplace | `marketplace.trade.completed` | v1 | Pet, Admin | `{tradeId, listingId, petId, priceCredits, feeCredits, completedAt}` |
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | UUID | PK DEFAULT gen_random_uuid() | Returned as jobId in API response |
-| claim_identity_id | UUID | NOT NULL REFERENCES claim_identities(id) ON DELETE RESTRICT | Data subject (email identity); a single erasure covers all pets under this identity; RESTRICT prevents identity deletion before all GDPR requests are resolved |
-| initiating_pet_id | UUID | NULL REFERENCES pets(id) ON DELETE SET NULL | Pet whose token authenticated the self-service submission; NULL for admin-initiated requests |
-| request_type | VARCHAR(32) | NOT NULL | 'erasure' \| 'data_access' \| 'restrict_processing' \| 'object_leaderboard' \| 'rectification' — CHECK (request_type IN ('erasure','data_access','restrict_processing','object_leaderboard','rectification')) |
-| status | VARCHAR(32) | NOT NULL DEFAULT 'pending' | 'pending' \| 'processing' \| 'completed' \| 'failed' |
-| submitted_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
-| completed_at | TIMESTAMPTZ | NULL | |
-| admin_notes | TEXT | NULL | Filled by admin on completion |
-
-**Indexes**: idx_gdpr_requests_identity ON gdpr_requests(claim_identity_id, submitted_at DESC); idx_gdpr_requests_status ON gdpr_requests(status, submitted_at)
+事件 transport：MVP 使用 in-process Node.js EventEmitter（同 process 跨 module）+ at-most-once；GA 階段如需跨 process 可替換為 NATS / Kafka，事件 schema 維持不變（versioned）。
 
 ---
 
 ## §5. API Design
 
-All player-facing API routes use `/api/v1/` prefix. Backward compatibility maintained for at least 1 major version (API_BACKWARD_COMPAT_VERSIONS = 1) per PRD NFR-MAINT-06. Deprecated API versions receive 90-day advance notice before removal (API_DEPRECATION_NOTICE_DAYS = 90). Admin routes are prefixed `/admin/api`. All responses use the envelope format:
+完整 endpoint 規格：詳見 `docs/API.md`。本節提供工程設計層必要摘要。
+
+所有 player 路由 `/api/v1/`；Admin 路由 `/admin/api`。回應 envelope：
 
 ```json
 {
   "success": true | false,
   "data": { ... } | null,
-  "error": null | { "code": "ERROR_CODE", "message": "Human-readable message" },
-  "meta": { "total": number, "page": number, "limit": number }  // pagination only
+  "error": null | { "code": "...", "message": "..." },
+  "meta": { "total": number, "page": number, "limit": number }
 }
 ```
 
-HTTP status codes: 200 (success), 201 (created), 202 (async job accepted, returns jobId), 400 (bad request), 401 (unauthenticated), 403 (forbidden), 404 (not found), 408 (request timeout — matchmaking), 409 (conflict), 429 (rate limited), 500 (server error).
+HTTP 狀態碼：200, 201, 202, 400, 401, 403, 404, 408, 409, 429, 500。
 
-**Global error defaults (applies to ALL endpoints unless overridden)**: All authenticated endpoints return HTTP 401 `UNAUTHORIZED` for missing/invalid tokens. All write endpoints return HTTP 404 `NOT_FOUND` for unknown resource IDs. All endpoints return HTTP 400 `VALIDATION_ERROR` for schema violations. Admin mutation endpoints return HTTP 403 `FORBIDDEN` for insufficient role. Admin config write endpoints return HTTP 400 `OUT_OF_RANGE` when a parameter exceeds the CONSTANTS-defined admin-tunable range. `POST /admin/api/roles` returns HTTP 409 `CONFLICT` on duplicate username. Admin login returns HTTP 403 `ACCOUNT_LOCKED` when `locked_until > NOW()`.
+### §5.1 Auth / Claim
 
-**Player-facing endpoints — additional error defaults**: `POST /api/v1/claim` returns HTTP 404 `PET_NOT_FOUND` for unknown petId and HTTP 400 `AGE_CONFIRMATION_REQUIRED` if `ageConfirmed` is false. `POST /api/v1/pets/:petId/train` returns HTTP 403 `NOT_OWNER` for non-owner token. `POST /api/v1/arena/enter` returns HTTP 403 `PET_BANNED` for banned pets.
+| Method | Path | Auth | 用途 |
+|--------|------|------|------|
+| POST | /api/v1/claim | None | 寄送 OTP（rate-limit 5/hr/email） |
+| POST | /api/v1/claim/verify | None | 驗證 OTP，回傳 pet token |
+| POST | /api/v1/claim/recover | None | 重發已認領寵物存取連結 |
 
-### §5.1 Auth / Claim Flow Endpoints
+### §5.2 Pet
 
-#### POST /api/v1/claim
-Auth: None (rate-limited by email)
-Description: Initiate the claim flow — sends 6-digit code to email.
-Request: `{ email: string, petId: string, ageConfirmed: boolean }`
-Response: `{ claimId: string, expiresAt: ISO8601 }`
-Rate limit: 5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5). On breach: HTTP 429 with `Retry-After: 60` (CLAIM_EMAIL_RETRY_COOLDOWN_SECONDS = 60); Redis key `rl:claim:cooldown:{email_hash}` TTL 60s blocks further attempts during cooldown window.
-Error: `{ code: "ALREADY_CLAIMED" }` if pet is already owned.
+| Method | Path | Auth | 用途 |
+|--------|------|------|------|
+| GET | /api/v1/pets/random | None | 為訪客生成新隨機寵物 |
+| GET | /api/v1/pets/:petId | Optional pet token | 讀取 pet 完整資料 |
+| POST | /api/v1/pets/:petId/train | Pet token | 執行訓練動作 |
+| POST | /api/v1/pets/:petId/feed | Pet token | 餵食食物 buff |
 
-#### POST /api/v1/claim/verify
-Auth: None (rate-limited by session)
-Description: Verify 6-digit OTP and return the pet access token.
-Request: `{ claimId: string, code: string }`
-Response: `{ petToken: string, petId: string, petUrl: string }`
-Rate limit: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10). HTTP 429 after breach; 60-second cooldown.
-Error codes: `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`.
+### §5.3 Arena
 
-#### POST /api/v1/claim/recover
-Auth: None
-Description: Send a recovery 6-digit code to a previously claimed pet's email address. On successful code verification via POST /api/v1/claim/verify (recovery path), the following atomic transaction executes: (i) generate new 32-byte `owner_token_hash`; (ii) write old hash to Redis `token:blacklist:{old_token_hash}` TTL=259200s (72h); (iii) replace `pets.owner_token_hash` with new hash; (iv) mark claim code `used_at`. The blacklist write ensures in-flight requests using the old token are rejected even if they arrive at the auth middleware concurrently.
-Request: `{ email: string, petId: string }`
-Response: `{ claimId: string, expiresAt: ISO8601 }` — always returned regardless of whether email/petId combination is found (prevents enumeration); the claimId is functional only when the email matches a claimed pet.
-HTTP Response: 200 (always, including no-match case for anti-enumeration)
-Errors: HTTP 400 `VALIDATION_ERROR` for malformed `email` or `petId` UUID.
-Rate limit: Inherits AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5 per email.
+| Method | Path | Auth | 用途 |
+|--------|------|------|------|
+| POST | /api/v1/arena/enter | Pet token | 進入 matchmaking（rate-limit 10/hr/pet） |
+| GET | /api/v1/arena/match/:matchId | None | 公開戰鬥記錄 |
+| GET | /api/v1/arena/history/:petId | None | 寵物戰鬥歷史（最後 20） |
 
-### §5.2 Pet Endpoints
+### §5.4 Leaderboard
 
-#### GET /api/v1/pets/random
-Auth: None
-Description: Generate a new unclaimed random pet for guest display. Public endpoint — no authentication required; generates a guest-preview pet for display.
-Request: `{}` (no body)
-Response: `{ petId, seed, rarity, petName, stats: {speed, strength, stamina, level}, generationMeta, reservedUntil: ISO8601 }`
-Notes: Does not persist a ClaimCode; pet is reserved in DB but ownership is unset. `reservedUntil` = `NOW() + 24h` (PET_RESERVATION_TTL_HOURS = 24) — client should display countdown to encourage timely claiming.
+| Method | Path | Auth | 用途 |
+|--------|------|------|------|
+| GET | /api/v1/leaderboard | None | Top 100，可依稀有度過濾 |
+| GET | /api/v1/leaderboard/rank/:petId | None | 單一 pet 排名查詢 |
 
-#### GET /api/v1/pets/:petId
-Auth: Optional (pet token in `Authorization: Bearer <token>` or `?token=` query param — used to verify ownership for write-access pages)
-Description: Fetch pet data including stats, rarity, and level.
-Response: `{ id, seed, rarity, petName, stats: {speed, strength, stamina, level}, isOwner: boolean, claimedAt, isNeglected: boolean }`
-Notes: `isNeglected` is true if `pets.last_trained_at IS NULL OR NOW() - pets.last_trained_at > INTERVAL '3 days'` (TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days). Computed from the denormalized `last_trained_at` column on the pets row (no JOIN required).
+### §5.5 Admin
 
-#### POST /api/v1/pets/:petId/train
-Auth: Required (pet owner token)
-Request: `{ trainingType: 'RUN' | 'STRENGTH' | 'STAMINA' }`
-Response: `{ updatedStats: {speed, strength, stamina, level}, statDelta: number, actionsRemainingToday: number }`
-Errors: HTTP 400 if 3 actions already used today; HTTP 400 with `STAT_AT_MAXIMUM` if target stat = 100 (PET_STAT_MAX = 100).
+完整 admin endpoints（POST /admin/api/auth/login、CRUD pets / battles / config / GDPR / audit / roles 等）見 API.md §3。RBAC 對照表見 §9.6。
 
-#### POST /api/v1/pets/:petId/feed
-Auth: Required (pet owner token)
-Request: `{ buffType: string, stat: 'speed' | 'strength' | 'stamina', magnitude: number, isPermanent?: boolean }`
-Response: `{ updatedStats: {speed, strength, stamina}, buffApplied: { stat, magnitude, isPermanent, expiresAt } }`
-Errors: HTTP 400 if stat already at maximum; HTTP 400 VALIDATION_ERROR if magnitude or buffType fails validation against admin-configured ranges.
+### §5.6 GDPR Self-Service
 
-### §5.3 Arena Endpoints
+| Method | Path | Auth | 用途 |
+|--------|------|------|------|
+| POST | /api/v1/gdpr/request | Pet token | 提交 erasure / data_access / restrict / object / rectification |
+| GET | /api/v1/gdpr/request/status | Pet token | 查詢 jobId 狀態 |
 
-#### POST /api/v1/arena/enter
-Auth: Required (pet owner token)
-Request: `{ petId: string, mode: 'RACE' | 'SUMO', acceptAI?: boolean }`
-Description: Enqueues pet in matchmaking queue (Redis). Waits up to 30 seconds (ARENA_MATCHMAKING_TIMEOUT_SECONDS) for an opponent. Returns battle result synchronously (HTTP long-poll) or AI result if no opponent found and `acceptAI: true`.
-Response: `{ matchId: string, result: 'WIN' | 'LOSS', opponentPetId: string | null, isAiOpponent: boolean, statDelta: number, newLeaderboardScore?: number }`
-Tie-breaking: If both pets have equal effective stats after the ±15% modifier, the challenger (pet with the earlier enqueue timestamp in the sorted set) wins. This is deterministic and derived from the enqueue epoch score.
-Timeout (no opponent, `acceptAI: false` or omitted): HTTP 408 `{ code: "MATCHMAKING_TIMEOUT", message: "No opponent found within 30 seconds. Try again or enable AI opponent." }`. Pet's rate-limit counter is NOT incremented on timeout.
-Rate limit: 10 battles/hour per pet by default (ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT = 10); HTTP 429 + `Retry-After` header on breach.
+### §5.7 Marketplace（FF_MARKETPLACE）
 
-#### GET /api/v1/arena/match/:matchId
-Auth: None (public battle record)
-Response: `{ matchId, mode, petA: PetSummary, petB: PetSummary, winnerId, battleLog, completedAt }`
-Note: `winnerId` maps to `arena_matches.winner_pet_id`; null when no winner (should not occur after tie-break rule is applied).
-
-#### GET /api/v1/arena/history/:petId
-Auth: None (public — last 20 battles per pet are shown publicly per CONSTANTS ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
-Description: Last 20 battles for a pet.
-Response: `{ petId, battles: [{matchId, mode, opponentId, result, completedAt}], summary: {wins, losses, winRate} }`
-
-### §5.4 Leaderboard Endpoints
-
-#### GET /api/v1/leaderboard
-Auth: None
-Query params: `?rarity=COMMON|RARE|EPIC|LEGENDARY&page=1&limit=100`
-Response: `{ entries: [{rank, petId, petName, rarity, level, score, winRate}], lastUpdated: ISO8601, total: number }`
-Notes: Top 100 for public (LEADERBOARD_TOP_DISPLAY = 100). Update lag ≤30 seconds (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30s). Source: Redis sorted set.
-
-#### GET /api/v1/leaderboard/rank/:petId
-Auth: None
-Response: `{ petId, rank: number | null, score: number }`
-Notes: Null rank if pet is not on the leaderboard (banned or insufficient battles).
-
-### §5.5 Admin Endpoints
-
-All admin endpoints require admin session cookie (httpOnly, SameSite=Strict). Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100). All mutations write to the audit log.
-
-**Role access summary**: `super_admin` has full access to all endpoints. `moderator` has access to all `Moderator+` endpoints (pet management, leaderboard, battles, suspicious activity, email monitor, analytics, dashboard). `read_only` has read-only (GET) access to dashboard, pet list, leaderboard, battle records, email monitor, and analytics — no mutations, no config changes, no GDPR actions, no role management.
-
-#### POST /admin/api/auth/login
-Auth: None (TOTP + password)
-Request: `{ username: string, password: string, totpCode?: string }`
-Response: Sets session cookie (4h inactivity / 8h absolute — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS / ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS)
-
-#### POST /admin/api/auth/totp/setup
-Auth: Setup token (see enrollment flow below)
-Request: `{ setupToken: string, password: string }` (password re-confirmation required)
-Response: `{ otpAuthUrl: string, backupCodes: string[] }` — otpAuthUrl is a `otpauth://totp/...` URI for QR scan
-Description: **First-login TOTP enrollment flow**: (1) Client POSTs credentials without `totpCode`; server detects `totp_secret_encrypted IS NULL`, returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED", setupToken: "<signed-short-lived-JWT>" }`. (2) Client calls this endpoint with `setupToken` + password confirmation — no admin session exists yet. (3) Server validates setupToken signature and password, generates TOTP secret, stores encrypted in `admin_users.totp_secret_encrypted`, returns provisioning URI + 10 backup codes (hashes stored in `totp_backup_codes_hash`). (4) Admin scans QR, then performs a standard login with `totpCode` to establish a session. The `setupToken` is a signed JWT (short-lived, 15 minutes, HS256 with server secret) containing the adminId — it is not a session and grants only access to this setup endpoint.
-
-#### POST /admin/api/auth/logout
-Auth: Admin session
-Description: Invalidate admin session; writes logout event to audit log
-
-#### GET /admin/api/roles
-Auth: Admin session (Super Admin)
-Description: List admin users and roles
-
-#### POST /admin/api/roles
-Auth: Admin session (Super Admin)
-Description: Create admin user (username, role, temp password)
-
-#### DELETE /admin/api/roles/:adminId
-Auth: Admin session (Super Admin)
-Description: Soft-deactivate admin account — sets `deactivated_at = NOW()` (no SQL DELETE; audit log FK requires row retention). Login is immediately blocked for the target account.
-Response: `{ success: true, auditLogId: string }`
-
-#### POST /admin/api/roles/:adminId/totp/reset
-Auth: Admin session (Super Admin)
-Description: Reset TOTP for an admin account — clears `totp_secret_encrypted` and `totp_backup_codes_hash`, forcing the target admin through the TOTP enrollment flow on next login. Writes a `admin_user` audit record. Used when an admin loses their authenticator device.
-Response: `{ success: true, auditLogId: string }`
-
-#### GET /admin/api/pets
-Auth: Admin session (Moderator+ or Read Only)
-Query: `?page=1&limit=20&search=<petId|emailHash>&rarity=&isBanned=`
-Response: `{ pets: [{id, ownerEmailMasked, rarity, level, battlesPlayed, winRate, isBanned, createdAt}], total, page, limit }`
-Notes: Search by pet ID or exact SHA-256 email hash (fragment search is not possible — emails are stored as AES-256-GCM ciphertext; only hash-indexed lookup is supported). Returns up to 1 million records in ≤2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2s).
-
-#### POST /admin/api/pets/:petId/ban
-Auth: Admin session (Moderator+)
-Request: `{ reason: string (max 500 chars) }`
-Response: `{ success: true, auditLogId: string }`
-Notes: Pet removed from leaderboard within 5 minutes of ban (LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5 min).
-
-#### POST /admin/api/pets/:petId/unban
-Auth: Admin session (Moderator+)
-Request: `{ reason: string }`
-Response: `{ success: true, auditLogId: string }`
-
-#### GET /admin/api/leaderboard
-Auth: Admin session (Moderator+ or Read Only)
-Response: Top 500 pets (LEADERBOARD_ADMIN_VIEW = 500) with suspicious flags for pets exceeding the leaderboard suspicious-flag threshold (LEADERBOARD_ADMIN_SUSPICIOUS_FLAG_BATTLES_PER_HOUR = 50 battles/hr).
-
-#### GET /admin/api/config/runtime
-Auth: Admin session (Super Admin)
-Response: `{ arenaRateLimit, rarityWeights: {common, rare, epic, legendary}, arenaMatchmakingTimeout, ... }`
-
-#### PUT /admin/api/config/runtime
-Auth: Admin session (Super Admin)
-Request: Runtime parameter updates (validated against admin-tunable ranges from CONSTANTS)
-Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 min).
-
-#### GET /admin/api/config/economy
-Auth: Admin session (Super Admin)
-Response: `{ foodBuffMultiplierMin, foodBuffMultiplierMax, arenaEntryCostDefault, arenaEntryCostMax, arenaEntryCooldownMin, arenaEntryCooldownMax }` — current economy configuration values.
-
-#### PUT /admin/api/config/economy
-Auth: Admin session (Super Admin)
-Request: Economy parameter updates (food buff multiplier range 0.5×–5.0× — FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5; FOOD_BUFF_MULTIPLIER_ADMIN_MAX = 5.0; arena entry cost 0–10 credits — ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT = 0; ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX = 10; arena entry cooldown 0–60 min — ARENA_ENTRY_COOLDOWN_ADMIN_MIN_MINUTES = 0; ARENA_ENTRY_COOLDOWN_ADMIN_MAX_MINUTES = 60)
-Response: `{ success: true }` — takes effect within 5 minutes (CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 min).
-
-#### GET /admin/api/dashboard
-Auth: Admin session (Moderator+ or Read Only)
-Response: `{ claimedPetsToday, activeBattlesToday, pendingGdprRequests, dailyActiveUsers, errorRateLast5Min, emailDeliveryRate, systemStatus: "healthy"|"degraded"|"down" }`
-Description: Real-time dashboard summary — all values from Redis counters and PostgreSQL aggregates.
-
-#### GET /admin/api/battles
-Auth: Admin session (Moderator+ or Read Only)
-Query: `?page=1&limit=20&from=ISO8601&to=ISO8601&petId=&flagged=true|false`
-Response: `{ battles: [{matchId, petAId, petBId, winnerId, outcome, duration, completedAt, isFlagged}], total, page, limit }`
-Description: Battle Records list view — paginated; last ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20 shown by default.
-
-#### GET /admin/api/suspicious
-Auth: Admin session (Moderator+)
-Response: `{ suspiciousPets: [{petId, battlesLastHour, winRate, flagCount, lastFlaggedAt}] }`
-Description: Pets exceeding BOT_DETECTION_BATTLES_THRESHOLD = 50 battles per 60-minute window.
-
-#### GET /admin/api/email/monitor
-Auth: Admin session (Moderator+ or Read Only)
-Response: `{ emailsSentLast24h, deliverySuccessRate, bounceRate, spamComplaintRate, failoverActive: boolean }`
-Description: Email delivery health monitor — delivery rate, bounce/spam stats from SendGrid webhook logs.
-
-#### GET /admin/api/analytics
-Auth: Admin session (Moderator+ or Read Only)
-Query: `?from=ISO8601&to=ISO8601&metric=dau|claims|arena_battles|leaderboard_uvs`
-Response: `{ metric, dataPoints: [{date, value}], summary: { total, average, peak } }`
-Description: Product analytics — DAU, claim funnel, arena engagement, leaderboard unique visitors.
-
-#### GET /admin/api/gdpr
-Auth: Admin session (Super Admin)
-Query: `?page=1&limit=20&status=pending|processing|completed|failed&type=erasure|data_access|restrict_processing|object_leaderboard|rectification`
-Response: `{ requests: [{id, requestType, status, submittedAt, completedAt, adminNotes}], total, page, limit }`
-Description: List all GDPR requests in the gdpr_requests table for the admin GDPR Queue module.
-
-#### POST /admin/api/gdpr/delete
-Auth: Admin session (Super Admin)
-Request: `{ emailHash: string, reason: string (max 500 chars — ADMIN_MODERATION_REASON_MAX_CHARS) }`
-Response: `{ jobId: string, estimatedCompletion: ISO8601 }`
-Notes: Email → SHA-256 hash within 24 hours (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS); reported compliant within 7 days (GDPR_EMAIL_DELETION_WINDOW_DAYS). `reason` is stored in `gdpr_requests.admin_notes` on row creation.
-
-#### PATCH /admin/api/gdpr/:requestId
-Auth: Admin session (Super Admin)
-Description: Update the status of a non-erasure GDPR request (data_access, restrict_processing, object_leaderboard, rectification). Used by the admin GDPR Queue module to transition requests through their lifecycle. For rectification, admin fulfills by updating the subject's claim_identities.email_encrypted field, then marks status completed.
-Request: `{ status: "processing" | "completed" | "failed", adminNotes?: string (max 500 chars) }`
-Response: `{ success: true, requestId: string, status: string, updatedAt: ISO8601 }`
-Notes: `admin_notes` is written to `gdpr_requests.admin_notes`. Audit log entry created on each transition. Erasure requests are processed via POST /admin/api/gdpr/delete, not this endpoint. Error: HTTP 400 `WRONG_REQUEST_TYPE` if the target `request_type = 'erasure'`.
-
-#### POST /admin/api/battles/:matchId/flag
-Auth: Admin session (Moderator+)
-Request: `{ reason: string (max 500 chars) }`
-Description: Flag a battle as suspicious; writes to audit log; increments bot_detection counter
-
-#### DELETE /admin/api/battles/:matchId/flag
-Auth: Admin session (Moderator+)
-Request: `{ reason: string (max 500 chars) }`
-Description: Remove a flag from a battle; reason recorded in audit log
-
-#### GET /admin/api/audit
-Auth: Admin session (Super Admin)
-Query: `?page=1&limit=50&from=ISO8601&to=ISO8601&actorId=&action=`
-Response: Audit log entries; search any 12-month window in ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3s).
-
-### §5.6 GDPR Self-Service Endpoints
-
-No persistent accounts exist — players identify via pet token. GDPR requests are submitted via the pet token endpoint.
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/api/v1/gdpr/request` | Pet token | Submit a GDPR request (erasure / data-access / restrict-processing / object-leaderboard / rectification) |
-| `GET` | `/api/v1/gdpr/request/status?jobId=<uuid>` | Pet token | Check status of a specific GDPR request by jobId |
-
-**Request body** (`POST /api/v1/gdpr/request`):
-```json
-{ "type": "erasure" | "data_access" | "restrict_processing" | "object_leaderboard" | "rectification" }
-```
-Auth: `Authorization: Bearer <petToken>` header (same pattern as all other authenticated player endpoints). The server resolves the token hash to the `pets` row, then reads `pets.claim_identity_id` to identify the GDPR data subject and create a `gdpr_requests` row scoped to that `claim_identities` record.
-
-**Response** (`POST /api/v1/gdpr/request`): HTTP 202 `{ jobId: string, message: string }`
-
-**Response** (`GET /api/v1/gdpr/request/status?jobId=<uuid>`): HTTP 200 `{ jobId, requestType, status, submittedAt, completedAt | null }`. The server validates that the authenticating pet token's `claim_identity_id` matches the `gdpr_requests.claim_identity_id` for the given jobId before returning the status (prevents cross-identity status polling).
-
-**SLAs** (from CONSTANTS):
-- Erasure: `GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days`
-- Data access/portability: `GDPR_DATA_ACCESS_RESPONSE_DAYS = 30`
-- Restrict processing: `GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24`
-- Object leaderboard: `GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5` — the subject's pet entries are removed from the public leaderboard within 5 business days of request (admin-reviewed; the leaderboard objection right is not absolute under GDPR Art. 21 but is resolved in 5 business days as policy)
-- Rectification: `GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24` — email encrypted field updated within 24 hours of request; applies when the user needs to correct stored email data
-
-Requests are queued and processed by the admin portal GDPR module. Confirmation sent to the email on file (if not yet erased).
-
-### §5.7 Marketplace Endpoints (Phase 3 — FF_MARKETPLACE required)
-
-Write endpoints require pet access token auth. `GET /listings` is public (unauthenticated browsing). Active only when `FF_MARKETPLACE=true`.
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/v1/marketplace/listings` | Public | Browse active listings (paginated, sort by price/rarity/level) |
-| `POST` | `/api/v1/marketplace/listings` | Pet token | Create listing (min price enforced: level × 100 + rarity_multiplier × 500; 7-day anti-flip check on last completed trade — MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7) |
-| `DELETE` | `/api/v1/marketplace/listings/:listingId` | Pet token (owner only) | Cancel own listing |
-| `POST` | `/api/v1/marketplace/listings/:listingId/buy` | Pet token | Purchase listing; 5% fee deducted from seller proceeds |
-| `GET` | `/api/v1/marketplace/history/:petId` | Pet token | Trade history for a pet (private — trade prices are commercial-in-confidence; intentionally differs from public arena battle history) |
-
-**Fee**: TRADE_TRANSACTION_FEE_PERCENT = 5% deducted from seller, credited to platform. This rate is within the BRD-defined acceptable range: TRADE_FEE_RANGE_BRD_MIN_PERCENT = 5% to TRADE_FEE_RANGE_BRD_MAX_PERCENT = 10%. Future fee adjustments must remain within this range.
-**Anti-flip**: MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days between purchase and re-listing.
-**Rate limit**: Inherits arena/pet rate limits; no separate marketplace rate limit in CONSTANTS.
+| Method | Path | Auth | 用途 |
+|--------|------|------|------|
+| GET | /api/v1/marketplace/listings | None | 公開瀏覽 |
+| POST | /api/v1/marketplace/listings | Pet token | 上架（含 anti-flip 檢查） |
+| DELETE | /api/v1/marketplace/listings/:id | Pet token (owner) | 取消 |
+| POST | /api/v1/marketplace/listings/:id/buy | Pet token | 購買（5% 手續費） |
 
 ---
 
-## §6. Security Design
+## §6. Data Model
 
-### §6.1 Pet Access Token Model
+### §6.1 ERD
 
-The pet access token is a 32-byte cryptographically random value encoded as URL-safe base64 (minimum entropy: 32 bytes — PET_ACCESS_TOKEN_MIN_BYTES = 32). It is:
-- Generated once at successful claim completion using `crypto.randomBytes(32)`
-- Transmitted exactly once in the URL reveal screen at `/claim` completion
-- Never stored in plaintext in the database — only its SHA-256 hash is stored in `pets.owner_token_hash`
-- Passed on subsequent requests via `Authorization: Bearer <token>` header or `?token=` query parameter
-- Verified by hashing the received value and comparing to `owner_token_hash`
-- Revocable by admin: setting `owner_token_hash = NULL` immediately invalidates access
+```mermaid
+erDiagram
+    CLAIM_IDENTITIES ||--o{ PETS : "claims"
+    CLAIM_IDENTITIES ||--o{ GDPR_REQUESTS : "submits"
+    PETS ||--o{ CLAIM_CODES : "unlocks"
+    PETS ||--o{ TRAINING_LOGS : "records"
+    PETS ||--o{ FOOD_BUFFS : "consumes"
+    PETS ||--o{ ARENA_MATCHES : "petA"
+    PETS }o--o{ ARENA_MATCHES : "petB"
+    PETS ||--o{ MARKETPLACE_LISTINGS : "listed_as"
+    MARKETPLACE_LISTINGS ||--|| MARKETPLACE_TRANSACTIONS : "settled_to"
+    ADMIN_USERS ||--o{ AUDIT_LOGS : "performs"
+    LEADERBOARD_SNAPSHOTS }|..|{ PETS : "captures"
 
-Token recovery: Users who lose their URL may request a new access link via POST `/api/v1/claim/recover`. A new 6-digit claim code is sent; on verification, a new 32-byte token is issued and the old hash is replaced atomically.
+    CLAIM_IDENTITIES {
+        uuid id PK
+        varchar email_hash UK
+        bytea email_encrypted
+        timestamptz deletion_requested_at
+        timestamptz created_at
+    }
+    PETS {
+        uuid id PK
+        bigint seed UK
+        rarity_enum rarity
+        varchar pet_name
+        smallint stat_speed
+        smallint stat_strength
+        smallint stat_stamina
+        smallint level
+        int total_training_actions
+        timestamptz last_trained_at
+        varchar owner_token_hash
+        timestamptz claimed_at
+        uuid claim_identity_id FK
+        timestamptz reserved_until
+        bool is_banned
+        text banned_reason
+        timestamptz banned_at
+        jsonb generation_meta
+    }
+    CLAIM_CODES {
+        uuid id PK
+        uuid pet_id FK
+        varchar email_hash
+        varchar code_hash
+        timestamptz expires_at
+        timestamptz used_at
+        smallint attempts
+    }
+    ARENA_MATCHES {
+        uuid id PK
+        uuid pet_a_id FK
+        uuid pet_b_id FK
+        bool is_ai_opponent
+        arena_mode_enum mode
+        uuid winner_pet_id FK
+        bigint random_seed
+        smallint stat_delta_a
+        smallint stat_delta_b
+        smallint duration_seconds
+        jsonb battle_log
+        bool is_flagged
+        timestamptz completed_at
+    }
+    TRAINING_LOGS {
+        uuid id PK
+        uuid pet_id FK
+        training_type_enum training_type
+        smallint stat_delta
+        smallint stat_after
+        timestamptz completed_at
+    }
+    FOOD_BUFFS {
+        uuid id PK
+        uuid pet_id FK
+        varchar food_type
+        buff_stat_enum buff_stat
+        smallint magnitude
+        bool is_permanent
+        timestamptz expires_at
+        timestamptz consumed_at
+        timestamptz record_expires_at
+    }
+    LEADERBOARD_SNAPSHOTS {
+        uuid id PK
+        timestamptz snapshot_time
+        jsonb entries
+    }
+    MARKETPLACE_LISTINGS {
+        uuid id PK
+        uuid pet_id FK
+        varchar status
+        int price_credits
+        timestamptz listed_at
+    }
+    MARKETPLACE_TRANSACTIONS {
+        uuid id PK
+        uuid listing_id FK
+        uuid pet_id FK
+        int price_credits
+        int fee_credits
+        timestamptz completed_at
+    }
+    ADMIN_USERS {
+        uuid id PK
+        varchar username UK
+        text password_hash
+        text totp_secret_encrypted
+        varchar role
+        timestamptz locked_until
+        timestamptz deactivated_at
+    }
+    AUDIT_LOGS {
+        bigserial id PK
+        uuid admin_id FK
+        varchar action
+        varchar target_type
+        text target_id
+        jsonb detail
+        varchar ip_address_hash
+        timestamptz created_at
+    }
+    GDPR_REQUESTS {
+        uuid id PK
+        uuid claim_identity_id FK
+        uuid initiating_pet_id FK
+        varchar request_type
+        varchar status
+        timestamptz submitted_at
+        timestamptz completed_at
+    }
+```
 
-### §6.2 Claim Code Flow
+### §6.2 Indexing Strategy
 
-1. User submits email and pet ID to `POST /api/v1/claim`
-2. System checks rate limit: ≤5 attempts/hour per email (AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR = 5)
-3. 6-digit numeric OTP generated with `crypto.randomInt(100000, 1000000)`
-4. OTP hash (SHA-256) stored in `claim_codes` with `expires_at = NOW() + 15min` (CLAIM_CODE_EXPIRY_MINUTES = 15 min)
-5. Email dispatched via SendGrid containing ONLY the 6-digit code — no clickable URLs (mitigates email client pre-scanning attacks documented in IDEA.md §8.1 R1)
-6. User manually enters code in browser; verified against hash
-7. On valid entry: atomic DB transaction — (a) upsert `claim_identities` row for the email_hash (creating if first claim, matching if re-claiming same email), (b) set `pets.claim_identity_id = claim_identities.id`, (c) generate 32-byte pet access token, store SHA-256 hash in `pets.owner_token_hash`, (d) set `pets.claimed_at = NOW()`, (e) mark claim code `used_at`, (f) set `pets.reserved_until = NULL`
-8. Claim code records deleted by background job 72 hours after creation or first use, whichever is later (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours)
-9. Rate limit on code entry: 10 attempts per session (AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10); 60-second cooldown on breach
+| Table | Index | Rationale |
+|-------|-------|-----------|
+| pets | `idx_pets_owner_token_hash WHERE owner_token_hash IS NOT NULL` | 認證快速查詢 |
+| pets | `idx_pets_claimed_at WHERE claimed_at IS NOT NULL` | claim funnel analytics |
+| pets | `idx_pets_reserved_until WHERE reserved_until IS NOT NULL` | 24h cleanup job |
+| claim_codes | `idx_claim_codes_email_hash` | OTP 查詢 |
+| claim_codes | `idx_claim_codes_created_at` | 72h cleanup |
+| arena_matches | `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` | 戰鬥歷史頁查詢 |
+| arena_matches | `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` | 同上 |
+| training_logs | `idx_training_logs_completed_at (pet_id, completed_at DESC)` | 每日次數計算 |
+| food_buffs | `idx_food_buffs_record_expires` | 30 day cleanup |
+| audit_logs | `idx_audit_logs_created_at DESC` | 12-month window 搜尋 ≤ 3 秒 |
 
-### §6.3 Admin Authentication
+完整 DDL（先 markdown table，再 SQL）見 SCHEMA.md。本 EDD 範例：
 
-- Credentials: username + bcrypt password hash (work factor ≥12) + TOTP (RFC 6238, 6-digit, 30-second window)
-- Session: server-side Redis session with httpOnly + SameSite=Strict cookie
-- Inactivity expiry: 4 hours (ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4h)
-- Absolute expiry: 8 hours regardless of activity (ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8h)
-- Rate limit: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100) — applies to authenticated sessions only
-- **Pre-authentication rate limit**: `POST /admin/api/auth/login` is rate-limited by IP address: 10 attempts per 15 minutes (ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS = 10; ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS = 900); HTTP 429 on breach. Redis key: `rl:admin_login:{ip_hash}` TTL 900s.
-- **Account lockout**: After 10 consecutive `failed_attempts` on a valid username (ADMIN_LOGIN_LOCKOUT_THRESHOLD = 10), the account is locked for 30 minutes (ADMIN_LOGIN_LOCKOUT_DURATION_MINUTES = 30) (`deactivated_at` is NOT used for lockout — a separate `locked_until TIMESTAMPTZ NULL` column is set). Login returns HTTP 403 `{ code: "ACCOUNT_LOCKED", unlockedAt: ISO8601 }`. Lockout resets on successful login.
-- All admin auth events (login, logout, failed attempt) written to audit log
-- **First-login TOTP enrollment**: New admin accounts have `totp_secret_encrypted = NULL`. On first login attempt (correct username+password but no TOTP secret), the login endpoint returns HTTP 403 `{ code: "TOTP_SETUP_REQUIRED", setupToken: "<signed-short-lived-JWT>" }`. The admin client uses this `setupToken` to call `POST /admin/api/auth/totp/setup` (no session exists yet — setup token is the auth mechanism). After TOTP setup, the admin performs a standard login with `totpCode` to establish a session. All subsequent logins require a valid `totpCode`. There is no path to an authenticated session without completing TOTP enrollment.
+#### Pet table（範例）
 
-### §6.4 Rate Limiting Summary
+| Column | Type | Constraint | Notes |
+|--------|------|-----------|-------|
+| id | UUID | PK | gen_random_uuid() |
+| seed | BIGINT | UK NOT NULL | procedural seed |
+| rarity | rarity_enum | NOT NULL | COMMON/RARE/EPIC/LEGENDARY |
+| stat_speed/strength/stamina | SMALLINT | DEFAULT 10 CHECK 1..100 | — |
+| level | SMALLINT | DEFAULT 1 CHECK 1..100 | derived |
+| owner_token_hash | VARCHAR(64) | NULL | SHA-256 of pet token |
+| claim_identity_id | UUID | FK | enables GDPR lookup |
 
-| Endpoint / Feature | Limit | Window | Storage | HTTP Response |
-|---|---|---|---|---|
-| Email claim initiation | 5 | per hour per email | Redis TTL 3600s | HTTP 429 + Retry-After |
-| Claim code entry | 10 | per session | Redis TTL 900s | HTTP 429 + 60s cooldown |
-| Arena battles per pet | 10 (default; 1–50 admin) | per hour per pet | Redis TTL 3600s | HTTP 429 + Retry-After |
-| Admin login (pre-auth, per IP) | 10 (ADMIN_LOGIN_IP_RATE_LIMIT_ATTEMPTS) | per 15 minutes per IP (ADMIN_LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS = 900) | Redis TTL 900s | HTTP 429 |
-| Admin portal requests | 100 | per minute per admin | Redis TTL 60s | HTTP 429 |
-| Health endpoint | No limit | — | N/A | 200 always |
+```sql
+-- See SCHEMA.md §2.2 for the canonical DDL with all CHECK constraints.
+CREATE TABLE pets (
+  id UUID NOT NULL DEFAULT gen_random_uuid(),
+  seed BIGINT NOT NULL,
+  rarity rarity_enum NOT NULL,
+  stat_speed SMALLINT NOT NULL DEFAULT 10,
+  stat_strength SMALLINT NOT NULL DEFAULT 10,
+  stat_stamina SMALLINT NOT NULL DEFAULT 10,
+  level SMALLINT NOT NULL DEFAULT 1,
+  owner_token_hash VARCHAR(64) NULL,
+  claim_identity_id UUID NULL,
+  CONSTRAINT pk_pets PRIMARY KEY (id),
+  CONSTRAINT uq_pets_seed UNIQUE (seed),
+  CONSTRAINT chk_pet_stat_speed_range CHECK (stat_speed BETWEEN 1 AND 100)
+);
+```
 
-All rate limit keys are stored in Redis. The Redis counter TTL equals the window duration. On TTL expiry the counter resets automatically. If Redis is unavailable, rate limiting degrades gracefully (counters not enforced — logged as an alert).
+### §6.3 資料生命週期
 
-**constants.json rate_limits section aliases**: The `rate_limits` section defines canonical names for the same values used above: ARENA_BATTLES_PER_PET_PER_HOUR_DEFAULT = 10 (alias for ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT), ARENA_BATTLES_PER_PET_PER_HOUR_ADMIN_MIN = 1, ARENA_BATTLES_PER_PET_PER_HOUR_ADMIN_MAX = 50, EMAIL_CLAIM_ATTEMPTS_PER_HOUR_PER_EMAIL = 5, CLAIM_CODE_ENTRY_ATTEMPTS_PER_SESSION = 10, ADMIN_PORTAL_REQUESTS_PER_MINUTE_PER_ACCOUNT = 100.
-
-### §6.5 GDPR / Data Handling Summary
-
-- **Data minimization**: Only email hash + encrypted email stored. Raw email never written to database or logs.
-- **Right to erasure**: Email encrypted field nulled within 24 hours of request; SHA-256 hash retained for anti-re-registration. All pets belonging to the erased identity are removed from the `leaderboard:global` Redis sorted set (`ZREM leaderboard:global <pet_id>` for each pet) as part of the erasure job. Full compliance SLA: 7 days (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days).
-- **Right of access / portability**: JSON export of pet data, battle records, training logs delivered within 30 days (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 / GDPR_DATA_PORTABILITY_RESPONSE_DAYS = 30).
-- **Right to restrict processing**: Applied within 24 hours (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24).
-- **Right to object (leaderboard)**: Pet entries removed from public leaderboard within 5 business days of request (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5). On fulfillment, `ZREM leaderboard:global <pet_id>` executed for each pet belonging to the identity. Admin-reviewed; objection is not absolute under GDPR Art. 21 but resolved as policy.
-- **Right to rectification (Art. 16)**: Email encrypted field updated within 24 hours of request (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24). Applies when data subject needs to correct stored email data.
-- **IP addresses**: Hashed on ingress; raw IP never written. Retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90 days).
-- **COPPA**: Age-13 confirmation checkbox required on claim form (COPPA_MINIMUM_AGE_YEARS = 13); label text: "I confirm I am at least 13 years old" (PRD §5 US-AUTH-001 AC-003-8). Minors not targeted.
-- **Audit log**: All admin actions logged for 2 years (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years).
-- **CAN-SPAM**: All emails are transactional; no marketing email without separate opt-in consent.
-- **GDPR FK lookup**: The `pets.claim_identity_id` FK enables the GDPR self-service endpoint to locate the `claim_identities` row for a given pet token without depending on the ephemeral `claim_codes` table (purged after CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h).
+| 資料 | 保留策略 | Cleanup Job |
+|------|---------|------------|
+| Unclaimed pet (reserved_until 過期) | 24 小時後刪除 | `cleanup-unclaimed-pets`（每 6 小時） |
+| Claim codes | 72 小時（建立或首次使用後較晚者） | `cleanup-claim-codes`（每小時） |
+| Food buffs (record_expires_at) | 30 天 | `cleanup-food-buffs`（每日） |
+| Leaderboard snapshots | 12 個月 rolling | `cleanup-leaderboard-snapshots`（每日） |
+| Training logs | 永久（行為分析） | — |
+| Arena matches | 永久（公開記錄） | — |
+| Audit logs | 2 年 | `cleanup-audit-logs`（每月） |
+| Email encrypted | erasure 後 24 小時內 NULL；hash 永久 | GDPR worker（每 5 分鐘） |
+| IP hash | 90 天 | 清除 job |
+| Analytics events | 90 天 hot；2 年 cold archive | tiered archive job |
 
 ---
 
-## §7. Non-Functional Requirements Implementation
+## §7. Key Sequence Flows
 
-### §7.1 SLO Targets
+### §7.1 Claim Flow
 
-| Metric | Target | Source |
-|---|---|---|
-| Availability | 99.9% monthly (≤43.8 min downtime) | AVAILABILITY_MONTHLY_PERCENT; AVAILABILITY_MAX_DOWNTIME_MINUTES_PER_MONTH = 43.8 |
-| P99 API Latency (read) | <200 ms at 100 RPS | P99_API_LATENCY_READ_MS_AT_100_RPS |
-| P99 API Latency (write) | <500 ms at 100 RPS | P99_API_LATENCY_WRITE_MS_AT_100_RPS |
-| FCP | <1.5 seconds | FCP_SECONDS |
-| LCP | <2.5 seconds | LCP_SECONDS |
-| CLS | <0.1 | CLS_SCORE |
-| INP | <200 ms | INP_MS |
-| Pet animation frame rate | ≥30 FPS sustained | PET_ANIMATION_FPS_MIN |
-| Pet canvas render on load | ≤2 seconds | PET_RENDER_ON_LOAD_SECONDS |
-| Pet interaction response | ≤200 ms | PET_INTERACTION_RESPONSE_MS |
-| Arena battle result E2E | <2 seconds | ARENA_BATTLE_E2E_SECONDS |
-| Leaderboard update lag | ≤30 seconds | LEADERBOARD_UPDATE_LAG_SECONDS |
-| Email delivery P90 | ≤60 seconds | EMAIL_DELIVERY_P90_SECONDS |
-| Error rate | <1% per 5-minute window | ERROR_RATE_MAX_PERCENT |
-| Email delivery failure rate | <2% | EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT |
-| Spam complaint rate | <0.1% | SPAM_COMPLAINT_RATE_MAX_PERCENT |
+詳見 §4.5.4 Claim Flow Sequence Diagram。
 
-### §7.2 Performance Strategy
+### §7.2 Arena Battle
 
-**API layer**:
-- Fastify's JSON serialization via `fast-json-stringify` for schema-defined responses
-- TanStack Query client-side caching (30-second stale time globally)
-- Leaderboard served from Redis sorted set (O(log N) ZRANGEBYSCORE operations)
-- Public pet pages use read replica for SELECT queries (NFR-SCALE-03)
-- Connection pool min 20 connections (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20); pool managed by `pg` with `max: 50`
+詳見 §4.5.4 Arena Battle Sequence Diagram。
 
-**CDN / Frontend**:
-- Vite code splitting: Phaser.js dynamically imported to avoid blocking the claim flow bundle
-- JS bundle budget: <300 KB gzipped (TOTAL_JS_BUNDLE_GZIPPED_KB = 300)
-- CSS bundle budget: <50 KB gzipped (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50)
-- `font-display: swap` for both fonts (Press Start 2P + Inter)
-- Preload only Press Start 2P (above-fold); Inter loads async
-- `image-rendering: pixelated` on sprite canvas; no oversized source images
-- AVIF/WebP for any raster assets with fallbacks
+### §7.3 GDPR Erasure
 
-**Database**:
-- All high-frequency read paths (leaderboard, public pet) use read replica
-- Composite indexes on `(pet_id, completed_at DESC)` for training log and battle history queries
-- `EXPLAIN ANALYZE` gate in CI for any new query touching tables >10k rows
+詳見 §4.5.4 GDPR Erasure Sequence Diagram。
 
-### §7.3 Scalability
+### §7.4 Leaderboard Update Flow
 
-- **Horizontal scaling**: API server replicas autoscale at 70% CPU (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70%). Railway autoscaling or Kubernetes HPA.
-- **Normal operation**: 2,000–5,000 DAU (NORMAL_OPERATION_DAU_MIN = 2,000; NORMAL_OPERATION_DAU_MAX = 5,000); 100 RPS sustained (NORMAL_OPERATION_RPS = 100).
-- **Peak load**: 500 RPS sustained, 2,000 PCU arena events (PEAK_OPERATION_RPS / PEAK_CONCURRENT_USERS from CONSTANTS).
-- **Arena matchmaking**: Redis Sorted Set queue (score = enqueue epoch); consumer uses ZRANGEBYSCORE to pop the oldest eligible entry. Stale entries (>45s old = ARENA_MATCHMAKING_TIMEOUT_SECONDS + 15s buffer) are discarded before pairing to prevent ghost matches from abandoned connections. Supports 100 concurrent match entries without degradation (ARENA_MATCHMAKING_CONCURRENT_ENTRIES = 100).
-- **Leaderboard**: Redis sorted set as authoritative real-time source; PostgreSQL snapshot as durable backup. Update lag ≤30 seconds.
-- **Pet generation concurrency**: 1,000 concurrent pet generations complete within 10 seconds (PET_GENERATION_CONCURRENT_BATCH = 1,000; PET_GENERATION_CONCURRENT_BATCH_TIME_SECONDS = 10s).
-- **Database**: Primary writer handles all mutations. Read replica handles leaderboard, public pet pages, and admin list views. Connection pool allows burst to 50 connections.
+```mermaid
+sequenceDiagram
+    participant API as API Server
+    participant R as Redis
+    participant DB as PostgreSQL
+    participant W as Snapshot Worker
+
+    Note over API,DB: After ArenaMatchCompleted event
+    API->>R: ZADD leaderboard:global score=newScore member=petId
+    API->>API: ArenaMatchCompleted event published
+
+    loop every 5 min cron
+        W->>R: ZRANGEBYSCORE leaderboard:global 0 -1 WITHSCORES LIMIT 0 500
+        W->>DB: INSERT leaderboard_snapshots (entries=top500JSON, snapshot_time=NOW())
+    end
+```
 
 ---
 
-## §8. Frontend Architecture
+## §8. Error Handling & Resilience
 
-### §8.1 Component Hierarchy
+### §8.1 錯誤分類
 
+| Class | Examples | HTTP | Action |
+|-------|---------|------|--------|
+| Validation | bad email format, missing field | 400 | 回傳 detailed validation error |
+| Auth | missing/invalid pet token | 401 | 拒絕 |
+| Forbidden | non-owner training | 403 | 拒絕 |
+| Not found | unknown petId | 404 | 拒絕 |
+| Conflict | already claimed, duplicate listing | 409 | 拒絕 |
+| Rate limit | too many requests | 429 | Retry-After header |
+| Timeout | matchmaking timeout | 408 | 提示 user |
+| Server | unexpected exception | 500 | 記錄 + 通用訊息 |
+
+### §8.2 Retry Strategy
+
+| Operation | Retry Policy |
+|-----------|-------------|
+| SendGrid send | 3 retries over 15 min；指數退避（1s, 5s, 15s） |
+| DB transient error | 2 retries（100ms, 500ms） |
+| Redis read | 1 retry（50ms）；失敗則 fallback 至 PostgreSQL |
+| External API | Circuit breaker（半開狀態探測） |
+
+### §8.3 Circuit Breaker
+
+採用 `opossum` library。設定：
+- failureThreshold: 50%（10 次內 5 次失敗）
+- timeout: 5000 ms
+- resetTimeout: 30000 ms
+- halfOpenAfter: 30 秒
+- 適用對象：SendGrid API、Supabase REST、Upstash REST
+
+### §8.4 Idempotency
+
+所有 mutation API 支援 `Idempotency-Key` header（client UUID）：
+- 伺服器於 24 小時內保證重複相同 key 回傳相同結果
+- 儲存於 Redis：`idempotency:{key}` TTL 86400s
+- value: 序列化的 response body + status code
+
+### §8.5 Graceful Degradation Strategy
+
+#### 依賴服務降級矩陣
+
+| 依賴 | 完全失敗時行為 | 部分失敗時行為 |
+|------|---------------|---------------|
+| Redis | leaderboard 直連 PostgreSQL（slow path）；rate limit 暫停（log alert） | 命中率下降，自動 retry |
+| SendGrid | 切換 Nodemailer SMTP fallback；alert | 個別失敗 retry 3 次 |
+| PostgreSQL Standby | 讀流量轉回 Primary（DB 過載風險）；alert | failover 自動執行 |
+| Vercel CDN | DNS fallback 至 origin（TTL 60 秒） | 邊緣節點自動切換 |
+
+#### Bulkhead Pattern
+
+API server 內部用 connection pool 隔離不同類型工作：
+- `pgPoolPlayer` (max 30 connections) — 玩家 API
+- `pgPoolAdmin` (max 10 connections) — Admin API
+- `pgPoolWorker` (max 10 connections) — Worker
+
+Player burst 不會耗盡 Admin / Worker 的連線資源。
+
+#### Circuit Breaker 配置範例
+
+```typescript
+import CircuitBreaker from 'opossum';
+
+const sendGridBreaker = new CircuitBreaker(sendGridClient.send, {
+  timeout: 5000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000,
+});
+sendGridBreaker.fallback((to, subject, body) => smtpClient.send(to, subject, body));
+sendGridBreaker.on('open', () => logger.warn('sendgrid circuit open'));
+sendGridBreaker.on('halfOpen', () => logger.info('sendgrid circuit half-open'));
 ```
-App
-├── Layout
-│   ├── NavBar (hasPetToken prop drives "My Pet" visibility)
-│   └── Router (React Router v6)
-│       ├── LandingPage (/)
-│       │   ├── PetCanvas (Phaser.js instance — isolated in PetCanvasEngine)
-│       │   ├── RarityHint
-│       │   ├── ClaimCTA
-│       │   └── SocialProofCounter
-│       ├── ClaimPage (/claim)
-│       │   └── ClaimFlow (compound, max 3 steps — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
-│       │       ├── ClaimEmailForm (React Hook Form)
-│       │       ├── ClaimCodeForm (React Hook Form)
-│       │       └── URLReveal
-│       ├── PetPage (/pet/:petId)
-│       │   ├── PetCanvas
-│       │   ├── RarityBadge
-│       │   ├── StatsPanel → StatBar ×3
-│       │   ├── TrainingEntry
-│       │   ├── FoodInventory → FoodItem ×N
-│       │   ├── ArenaEntry
-│       │   └── NeglectedState (conditional)
-│       ├── TrainingPage (/pet/:petId/train)
-│       │   ├── TrainingActions → TrainingActionCard ×3
-│       │   ├── StatChangeIndicator (visible for 2 seconds after training action — TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2)
-│       │   ├── DailyResetTimer
-│       │   └── TrainingStreak
-│       ├── BattleRecordsPage (/pet/:petId/records)
-│       │   ├── PetSummaryCard
-│       │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
-│       ├── ArenaPage (/arena)
-│       │   ├── ModeSelector (RACE / SUMO)
-│       │   ├── MatchmakingQueue
-│       │   └── BattleAnimation (Phaser.js scene)
-│       ├── BattleResultPage (/arena/result/:battleId)
-│       │   └── BattleResultCard (WIN / LOSS variants)
-│       ├── LeaderboardPage (/leaderboard)
-│       │   ├── RarityFilter
-│       │   ├── LeaderboardTable → LeaderboardRow ×100
-│       │   └── OwnerRankBanner (if pet token present)
-│       └── MarketplacePage (/marketplace — FF_MARKETPLACE only)
-```
-
-### §8.2 State Management Approach
-
-Per PDD §13.4, the frontend uses four tiers:
-
-| Tier | Library | Scope | Examples |
-|---|---|---|---|
-| Server state | TanStack Query v5 | Remote API data; `staleTime: 30_000` | Pet stats, leaderboard, battle history |
-| Client state | Zustand | Ephemeral UI; single store with slices | Arena mode, claim flow step, toast queue |
-| URL state | URLSearchParams / route segments | Shareable / bookmarkable state | Leaderboard rarity filter, page number |
-| Form state | React Hook Form | Controlled inputs with Zod validation | ClaimEmailForm, ClaimCodeForm |
-
-Cache invalidation rules:
-- `usePet` cache invalidated on successful `submitTraining` or `useFood` mutation
-- `useLeaderboard` refetches every 30 seconds via TanStack Query `refetchInterval`
-- Admin portal (Vue 3) uses Pinia for state management — see §9.1; no cache is shared between player app and admin portal
-
-### §8.3 Pixel Art Rendering
-
-- **Engine**: Phaser.js 3 embedded as a React component via `PetCanvasEngine` class
-- **Canvas API**: `image-rendering: pixelated` + `image-rendering: crisp-edges` CSS applied to the canvas element
-- **Sprite sheets**: 32×32px per frame (provisional — see §14 OQ-E01 for resolution; implementation passes `SPRITE_RESOLUTION_PX` as a config constant to avoid hard-coding), PNG format with transparency.
-- **Animation loop**: `requestAnimationFrame` via Phaser's internal scene update; target ≥30 FPS sustained on mid-range devices (NFR-PERF-07)
-- **Procedural generation**: Pet seed → 6-dimension attribute vector (body, head, color_palette, accessory, rarity_trait, pattern) → sprite sheet frame selection. Seed is stored in `pets.seed`; rendering is deterministic from seed. Combination space ≥1,000,000,000 (PET_GENERATION_COMBINATIONS_MIN). Rarity is assigned via weighted random at generation time: Common 60%, Rare 25%, Epic 12%, Legendary 3% (RARITY_COMMON/RARE/EPIC/LEGENDARY_PERCENT); weights are admin-tunable via runtime config but must always sum to 100%.
-- **Reduced motion**: `prefers-reduced-motion: reduce` detection — static sprite replaces animation loop; no particle effects.
-- **Fallback**: If WebGL unavailable, Canvas 2D fallback rendering with static sprite image.
-- **Phaser.js isolation**: Only `PetCanvasEngine` imports Phaser. No other component or hook may import Phaser directly.
-
-### §8.4 Accessibility Requirements
-
-WCAG 2.1 AA compliance enforced in the player app:
-
-| Requirement | Target | Constant |
-|---|---|---|
-| Focus indicator contrast | ≥3:1 | A11Y_FOCUS_CONTRAST_RATIO = 3:1 |
-| Normal text contrast | ≥4.5:1 | A11Y_TEXT_CONTRAST_NORMAL = 4.5:1 |
-| Large text contrast (≥18pt or bold ≥14pt) | ≥3:1 | A11Y_TEXT_CONTRAST_LARGE = 3:1 |
-| OTP countdown warning | Display when ≤2 minutes remain | A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES = 2 |
-
-The claim flow displays a visible warning with sufficient contrast when the 6-digit OTP has ≤2 minutes remaining (A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES). Reduced-motion media query respected in §8.3. All interactive elements have ARIA labels.
-
-### §8.5 Build Toolchain
-
-| Tool | Version | Role |
-|---|---|---|
-| Vite | 5.x | Build tool, HMR, code splitting |
-| TypeScript | 5.x | Type safety across player app |
-| React | 18.x | UI framework |
-| Phaser.js | 3.x | Game canvas engine (dynamically imported) |
-| TanStack Query | 5.x | Server state management |
-| Zustand | 4.x | Client state management |
-| React Hook Form | 7.x | Form state |
-| Zod | 3.x | Runtime schema validation (shared with backend) |
-| Playwright | 1.x | E2E tests, visual regression at 320/768/1024/1440px |
-| Vitest | 1.x | Unit and integration tests |
 
 ---
 
-## §9. Admin Portal Architecture
+## §9. Security Design
 
-### §9.1 Tech Stack
+### §9.1 認證授權
 
-| Layer | Technology | Notes |
-|---|---|---|
-| Frontend framework | Vue 3 (Composition API) | Deliberate separation from player app |
-| UI component library | Element Plus | Data tables, forms, pagination, modals |
-| Build tool | Vite 5 + TypeScript 5 | Same version parity as player app |
-| HTTP client | Axios | With request/response interceptors for session expiry |
-| State management | Pinia | Vue-native, Composition API compatible |
-| Charts (analytics) | ECharts (via vue-echarts) | Battle trends, claim funnel, DAP metrics |
+#### Pet Access Token Model
+- 32 byte cryptographically random（PET_ACCESS_TOKEN_MIN_BYTES）；URL-safe base64
+- 由 `crypto.randomBytes(32)` 產生
+- 只存 SHA-256 hash 於 `pets.owner_token_hash`
+- 透過 `Authorization: Bearer <token>` 或 `?token=` query
+- Admin 設 `owner_token_hash = NULL` 立即作廢
+- Recovery 流程透過 POST /api/v1/claim/recover
 
-The admin portal is deployed as a separate Vite application. It shares backend API infrastructure with the player app but connects only to `/admin/api/*` endpoints. Admin sessions are Redis-backed server-side sessions with httpOnly cookies — no JWT tokens used for admin auth to reduce token exposure risk.
+#### Admin Authentication
+- bcrypt password (work factor ≥ 12) + TOTP (RFC 6238, 30s window)
+- Server-side Redis session (httpOnly + SameSite=Strict cookie)
+- 4h inactivity / 8h absolute expiry
+- Pre-auth IP rate limit: 10/15min per IP
+- Account lockout: 10 連續失敗 → 30 分鐘鎖定
+- First-login TOTP enrollment：HTTP 403 `TOTP_SETUP_REQUIRED` + setupToken（短效 JWT）
 
-### §9.2 Key Admin Features
+### §9.2 輸入驗證
 
-| Module | Route | Key Functionality | Role Required |
-|---|---|---|---|
-| Dashboard | /admin/dashboard | Real-time DAP, battles/hour, claim funnel, GDPR queue | Moderator+ / Read Only |
-| Pet Management | /admin/pets | Paginated list, search by ID/email, ban/unban with reason | Moderator+ / Read Only (GET only) |
-| Leaderboard | /admin/leaderboard | Top 500 view, suspicious flag indicators, remove/restore | Moderator+ / Read Only (GET only) |
-| Battle Records | /admin/battles | Flag suspicious matches, view battle logs | Moderator+ / Read Only (GET only) |
-| Suspicious Activity | /admin/suspicious | Auto-flagged pets (>50 battles/60min), triage queue | Moderator+ |
-| GDPR Queue | /admin/gdpr | Process all GDPR requests (erasure, data access, restrict processing, object leaderboard, rectification), audit trail | Super Admin |
-| Runtime Config | /admin/config/runtime | Arena rate limits, rarity weights, matchmaking timeout | Super Admin |
-| Economy Config | /admin/config/economy | Food buff multipliers (0.5×–5.0×), arena entry cost/cooldown | Super Admin |
-| Email Monitor | /admin/email | SendGrid delivery status, bounce rates, spam complaints | Moderator+ / Read Only |
-| Analytics | /admin/analytics | DAP trend, claim conversion, retention cohorts | Moderator+ / Read Only |
-| Audit Log | /admin/audit | Full immutable audit trail, 2-year retention | Super Admin |
-| Roles | /admin/roles | Admin account management, TOTP reset | Super Admin |
+- 所有 endpoint 使用 Zod schema 驗證 body / query / params
+- Fastify JSON Schema 直接掛載 route 定義
+- 共享 schema 於 `@app/shared/schemas/` 同時為 FE/BE 使用
+- 拒絕 unknown fields（strict mode）
 
-### §9.3 Admin-Specific Security
+### §9.3 Secrets 管理
 
-- **Rate limit**: 100 requests/minute per admin account (ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE = 100), separately tracked from player API
-- **Session security**: Redis server-side session; httpOnly + SameSite=Strict cookies; 4h inactivity / 8h absolute expiry
-- **Audit log**: Every create/update/delete/moderation action generates an audit record with actor ID, action type, target entity, reason, and timestamp. Retention: 2 years (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years). Search response for any 12-month window: ≤3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3s).
-- **Moderation reason field**: Max 500 characters, required for all ban/unban/flag actions (ADMIN_MODERATION_REASON_MAX_CHARS = 500)
-- **TOTP**: RFC 6238 required for admin login; 6-digit, 30-second window; backup codes generated on setup
-- **IP allowlist**: Admin portal optionally restricted to operator IP ranges via environment variable configuration
-- **Performance**: Pages load in ≤3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3s); single moderator can handle 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100)
+- 所有 secret（DB URL、SendGrid key、admin JWT secret、AES-256-GCM email key）透過 Vercel/Railway env vars
+- 啟動時 validate 必要 env，缺失立即 `process.exit(1)`
+- 90 天輪換週期（runbook §5）
+- 不在 source / docker image / log 中
 
----
+### §9.4 敏感資料處理
 
-## §10. Infrastructure & Deployment
+| Data | Storage | Transmission | Logs |
+|------|---------|-------------|------|
+| Email plaintext | 不存（只在 in-memory + SendGrid send） | TLS only | NEVER |
+| Email hash (SHA-256) | indexed in claim_identities | — | OK |
+| Email encrypted (AES-256-GCM) | claim_identities.email_encrypted | — | NEVER |
+| Pet access token | not stored；只存 hash | URL / Authorization header (TLS) | NEVER |
+| IP address | hash only；90 day retention | TLS | hashed |
+| Admin password | bcrypt hash | TLS POST | NEVER |
+| TOTP secret | AES-256-GCM encrypted | TLS during enrollment | NEVER |
 
-### §10.1 Environment Strategy
+### §9.5 STRIDE 威脅模型 + OWASP Top 10
 
-| Environment | Purpose | Database | Redis | Notes |
-|---|---|---|---|---|
-| `development` | Local development | PostgreSQL (Docker Compose) | Redis (Docker Compose) | `.env.local`; hot reload via Vite |
-| `staging` | Pre-production validation | Supabase staging project | Upstash staging | Auto-deployed on `main` branch merge |
-| `production` | Live serving | Supabase production | Upstash production | Manual promotion from staging |
+#### STRIDE
 
-Environment variables managed via Vercel environment settings and Railway secret management. No secrets in source code or Docker images.
+| 威脅 | 場景 | 對策 |
+|------|------|------|
+| **Spoofing** | 偽造 pet token / admin session | SHA-256 hash + 32-byte entropy；Redis session；TOTP |
+| **Tampering** | 修改戰鬥結果 / 排行榜 | 服務端權威計算；Redis ZADD only by API；audit log |
+| **Repudiation** | Admin 否認操作 | audit_logs 不可變；2 年保留 |
+| **Information Disclosure** | Email 列舉 / DB 洩漏 | Same response for valid/invalid email；email encrypted at rest |
+| **Denial of Service** | Bot 灌排行榜 / 洪水 | Rate limit + bot detection + 50 battles/60min flag |
+| **Elevation of Privilege** | Player 取得 admin token | RBAC + admin session 隔離 + IP allowlist optional |
 
-### §10.2 Docker / Container Approach
+#### OWASP Top 10 對策
 
-```dockerfile
-# API Server Dockerfile (simplified)
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+| OWASP | 對策 |
+|-------|------|
+| **A01 Broken Access Control** | RBAC 三層（super_admin / moderator / read_only）+ token-based pet ownership 驗證 + 每個 mutation 檢查 ownership |
+| **A02 Cryptographic Failures** | TLS 1.2+ everywhere；AES-256-GCM email at rest；SHA-256 token hashing；bcrypt(≥12) password；HTTPS HSTS 1 year |
+| **A03 Injection** | Parameterized queries（pg `$1`）；Zod schema validation；no string concat SQL；no eval |
+| **A04 Insecure Design** | Threat model（本節 STRIDE）；anti-enumeration response shape；one-time OTP；token-not-link |
+| **A05 Security Misconfiguration** | CSP nonce-based；secure headers（HSTS/X-Frame-Options/X-Content-Type-Options/Referrer-Policy）；無 default credentials |
+| **A06 Vulnerable Components** | `pnpm audit` in CI gate；Dependabot；renovate weekly；Snyk monthly |
+| **A07 Identification & Auth** | TOTP MFA；rate-limit on login；account lockout 10/30min；session 4h/8h；IP allowlist |
+| **A08 Software & Data Integrity** | SRI for any CDN scripts；signed releases；commit signing optional；ghcr.io image digest pinning |
+| **A09 Logging & Monitoring** | 三支柱觀測；audit_logs；alert on anomalies（>1% error / >1000ms p99） |
+| **A10 SSRF** | No user-controlled outbound URLs；SendGrid / Upstash / Supabase 均為 fixed allowlist；DNS rebinding 防護 |
 
-FROM node:20-alpine AS runtime
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 3000
-USER node
-CMD ["node", "dist/server.js"]
-```
+### §9.6 RBAC 資料模型
 
-- Multi-stage build to minimize image size (<150 MB target)
-- Non-root user in runtime stage
-- Health check endpoint: `GET /health` must respond in ≤500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500ms)
-- Container registry: GitHub Container Registry (ghcr.io)
-- Resource limits: 512 MB RAM, 0.5 CPU per replica baseline; autoscale up to 2 GB / 2 CPU
+`has_admin_backend = true`。`admin_users.role` 三值：
 
-### §10.3 CI/CD Overview
+| Role | 可存取 endpoint | 不可存取 |
+|------|----------------|---------|
+| **super_admin** | 所有 GET/POST/PUT/DELETE/PATCH endpoints | — |
+| **moderator** | `/admin/api/dashboard` GET、`/admin/api/pets` GET/POST(ban/unban)、`/admin/api/leaderboard` GET、`/admin/api/battles` GET/POST(flag)、`/admin/api/suspicious` GET、`/admin/api/email/monitor` GET、`/admin/api/analytics` GET | `/admin/api/config/*`、`/admin/api/gdpr/*`、`/admin/api/roles*`、`/admin/api/audit` |
+| **read_only** | 所有 GET endpoints（dashboard / pets / leaderboard / battles / email monitor / analytics） | 任何 mutation；`/admin/api/audit`、`/admin/api/roles`、`/admin/api/gdpr/*` |
 
-```
-GitHub Actions Pipeline:
-  on: push to main / pull_request
+具體 endpoints x permission 對照（節錄）：
 
-  jobs:
-    test:
-      - pnpm install
-      - pnpm run type-check
-      - pnpm run lint
-      - pnpm run test:unit (Vitest)
-      - pnpm run test:integration (Vitest + test DB)
-
-    build:
-      needs: test
-      - pnpm run build (Vite)
-      - docker build + push to ghcr.io
-
-    deploy-staging:
-      needs: build
-      on: push to main
-      - Deploy API to Railway (staging)
-      - pnpm run db:migrate --env staging (node-pg-migrate; idempotent; runs pending migrations only)
-      - Deploy frontend to Vercel (staging)
-      - Run smoke tests (Playwright)
-
-    deploy-production:
-      needs: deploy-staging
-      on: manual approval (GitHub Environments)
-      - Deploy to production
-      - pnpm run db:migrate --env production
-      - Run smoke tests
-      - Notify Slack channel
-```
-
-### §10.4 Database Backup & Failover
-
-- **Automated failover**: PostgreSQL failover to read replica within 60 seconds (DB_AUTOFAILOVER_TIME_SECONDS = 60s)
-- **Maintenance windows**: Maximum 2 hours/month (DB_MAINTENANCE_WINDOW_MAX_HOURS_PER_MONTH = 2 hours); 48-hour advance notice required (DB_MAINTENANCE_NOTICE_HOURS = 48 hours)
-- **Backup schedule**: Daily full backup to S3-compatible storage (Supabase automated); point-in-time recovery enabled
-- **Redis persistence**: Upstash provides built-in persistence; leaderboard sorted sets are reconstructed from PostgreSQL snapshots on full Redis flush (fallback path tested in staging)
-- **Vendor migration plan**: Documented 14-day migration plan for PostgreSQL hosting (to AWS RDS) and email provider (to AWS SES / Mailgun) per VENDOR_MIGRATION_PLAN_DAYS = 14
+| Endpoint | super_admin | moderator | read_only |
+|----------|:-:|:-:|:-:|
+| GET /admin/api/dashboard | ✅ | ✅ | ✅ |
+| GET /admin/api/pets | ✅ | ✅ | ✅ |
+| POST /admin/api/pets/:id/ban | ✅ | ✅ | ❌ |
+| GET /admin/api/leaderboard | ✅ | ✅ | ✅ |
+| POST /admin/api/battles/:id/flag | ✅ | ✅ | ❌ |
+| PUT /admin/api/config/runtime | ✅ | ❌ | ❌ |
+| PUT /admin/api/config/economy | ✅ | ❌ | ❌ |
+| POST /admin/api/gdpr/delete | ✅ | ❌ | ❌ |
+| POST /admin/api/roles | ✅ | ❌ | ❌ |
+| DELETE /admin/api/roles/:id | ✅ | ❌ | ❌ |
+| GET /admin/api/audit | ✅ | ❌ | ❌ |
 
 ---
 
-## §11. Error Handling & Observability
+## §10. Observability Design
 
-### §11.1 Error Response Format
+### §10.1 Logging
 
-All API errors follow the envelope format:
+- Pino structured JSON
+- Levels: ERROR / WARN / INFO / DEBUG（prod = INFO）
+- 必要欄位：`timestamp`, `level`, `service`, `trace_id`, `span_id`, `bc`, `event`, `duration_ms`
+- `X-Request-Id` header 透過所有 service boundary
+- PII：email plaintext / IP plaintext NEVER；只記 hash
+- Production HTTP 500 stripping：`stack`, internal path 不外洩
 
-```json
-{
-  "success": false,
-  "data": null,
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Arena rate limit reached. You can enter again in 23 minutes.",
-    "retryAfter": 1380
-  }
-}
-```
+### §10.2 Metrics
 
-Standard error codes: `VALIDATION_ERROR`, `NOT_FOUND`, `ALREADY_CLAIMED`, `INVALID_CODE`, `CODE_EXPIRED`, `MAX_ATTEMPTS_REACHED`, `STAT_AT_MAXIMUM`, `RATE_LIMIT_EXCEEDED`, `UNAUTHORIZED`, `FORBIDDEN`, `INTERNAL_SERVER_ERROR`.
+採用 Prometheus exporter + Datadog/Grafana Cloud。關鍵指標：
 
-Error messages follow the PDD §10.1 tone of voice — specific and actionable, never generic.
+| Metric | Type | Labels |
+|--------|------|-------|
+| `http_request_duration_seconds` | histogram | method, route, status |
+| `http_requests_total` | counter | method, route, status |
+| `arena_matches_total` | counter | mode, outcome |
+| `pet_claims_total` | counter | rarity |
+| `gdpr_request_processing_duration_seconds` | histogram | type |
+| `leaderboard_update_lag_seconds` | gauge | — |
+| `redis_memory_usage_percent` | gauge | — |
+| `db_connection_pool_utilization` | gauge | pool_name |
+| `email_delivery_success_rate` | gauge | provider |
+| `sendgrid_failover_active` | gauge | — |
 
-**Production error sanitization**: In production (`NODE_ENV=production`), the Fastify error handler must strip `stack`, `code` (internal), and any internal path/detail fields from HTTP 500 responses before serialization. Only `code` (public error code), `message` (user-safe), and optional `retryAfter` are returned.
+### §10.3 Distributed Tracing
 
-### §11.2 Logging Strategy
+OpenTelemetry SDK 注入 Fastify、Postgres `pg`、Redis `ioredis`、SendGrid axios。`trace_id` 由 edge 注入並沿 `X-Trace-ID` 傳遞。Datadog APM 接收。
 
-- **Structured logging**: All logs emitted as JSON via `pino` (Fastify's native logger)
-- **Log levels**: ERROR (unhandled exceptions), WARN (rate limit breaches, Redis unavailable), INFO (request lifecycle, claim events), DEBUG (disabled in production)
-- **Correlation ID**: `X-Request-Id` header generated at API gateway; threaded through all log entries for a request
-- **PII in logs**: Email addresses NEVER written to logs; only email_hash may appear. IP addresses written as hashed values only.
-- **Log shipping**: Structured JSON logs → Railway log drain → external log aggregator (Datadog or equivalent)
-- **Log retention**: Hot storage 90 days; cold archive 2 years for audit trail (IP_ADDRESS_LOG_RETENTION_DAYS = 90 for IP log data; ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years for audit log data)
-- **Analytics event retention**: Analytics events hot tier: 90 days (ANALYTICS_EVENT_HOT_RETENTION_DAYS = 90); cold archive: 2 years (ANALYTICS_EVENT_COLD_ARCHIVE_YEARS = 2). Analytics events are distinct from operational logs — they capture product behavioral data for the GET /admin/api/analytics dashboard.
-- **PII email retention after deletion**: After a GDPR erasure request, email encrypted field is nulled within 24 hours; SHA-256 hash retained for anti-re-registration (PII_EMAIL_RETENTION_POST_DELETE_DAYS = 7 aligns with GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 — these two constants represent the same policy, with the latter being the primary reference)
-
-### §11.3 Alert Thresholds
+### §10.4 Alerting
 
 | Alert | Threshold | Window | Channel | Source |
-|---|---|---|---|---|
-| API error rate | >1% of requests | 5 minutes | PagerDuty + Slack | CONSTANTS OBSERVABILITY_ERROR_RATE_ALERT_WINDOW_MINUTES |
-| P99 latency breach | >1,000 ms any endpoint | 5 minutes | Slack | CONSTANTS OBSERVABILITY_LATENCY_ALERT_THRESHOLD_MS (= OBSERVABILITY_P99_ALERT_MS = 1,000ms; both constants are equivalent aliases) |
-| Email delivery failure | >2% SendGrid failure | 30 minutes | PagerDuty | OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES (window); EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT (2% threshold) |
-| Leaderboard update lag | >60 seconds | — | Slack | CONSTANTS OBSERVABILITY_LEADERBOARD_LAG_ALERT_SECONDS (note: constant value is 60s; SLO target is 30s — alert fires after 2× SLO breach; recommend aligning constant to 30s in a future CONSTANTS revision) |
-| Pet claim rate drop | <5 claims/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD_PER_HOUR |
-| Arena battle rate drop | <10 battles/hour for 2h | 2 hours | Slack | CONSTANTS OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD_PER_HOUR |
-| Redis memory usage | >80% | — | Slack | CONSTANTS INFRA_REDIS_ALERT_THRESHOLD_PERCENT |
-| DB connection pool | >80% utilized | — | Slack | CONSTANTS INFRA_DB_POOL_ALERT_THRESHOLD_PERCENT |
+|-------|-----------|--------|---------|--------|
+| API error rate | >1% | 5 min | PagerDuty + Slack | OBSERVABILITY_ERROR_RATE_ALERT_WINDOW |
+| P99 latency | >1000 ms | 5 min | Slack | OBSERVABILITY_LATENCY_ALERT_THRESHOLD |
+| Email delivery failure | >2% | 30 min | PagerDuty | EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT |
+| Leaderboard lag | >60 s | — | Slack | OBSERVABILITY_LEADERBOARD_LAG_ALERT |
+| Pet claim drop | <5/hr for 2h | 2 hr | Slack | OBSERVABILITY_PET_CLAIMS_DROP_THRESHOLD |
+| Arena battle drop | <10/hr for 2h | 2 hr | Slack | OBSERVABILITY_ARENA_BATTLES_DROP_THRESHOLD |
+| Redis memory | >80% | — | Slack | INFRA_REDIS_ALERT_THRESHOLD |
+| DB pool utilization | >80% | — | Slack | INFRA_DB_POOL_ALERT_THRESHOLD |
+| GDPR queue backlog | >50 pending | 1 hr | PagerDuty | (custom) |
+| Bot flag spike | >20 flagged/hr | 1 hr | Slack | BOT_DETECTION_BATTLES_THRESHOLD |
 
-Metrics collected via Prometheus exporters on API servers and Redis. Dashboard in Grafana.
+### §10.5 SLO / SLI / Error Budget
+
+| Metric | SLO | SLI | Error Budget |
+|--------|-----|-----|-------------|
+| Availability | 99.9% / month | uptime_minutes / 43200 | 43.8 min / month |
+| P99 read latency | < 200 ms | http_request_duration_seconds{type="read"} p99 | 5% of requests |
+| P99 write latency | < 500 ms | http_request_duration_seconds{type="write"} p99 | 5% of requests |
+| Email delivery success | ≥ 98% | email_delivery_success_rate | 2% / 30 min |
+| Leaderboard update lag | ≤ 30 s | leaderboard_update_lag_seconds p95 | 5% breach budget |
+| Spam complaint rate | < 0.1% | sendgrid_spam_complaints / sent | — |
+
+Error budget consumption tracking 月度報告；超過 50% budget 觸發 feature freeze（先修穩定性）。
+
+### §10.6 Audit Log Design
+
+- table: `audit_logs`（已於 §6 定義）
+- 不可變（無 UPDATE / DELETE 路徑）
+- BIGSERIAL 提供順序保證
+- 2 年保留
+- `idx_audit_logs_created_at DESC` 確保 12-month window 搜尋 ≤ 3 秒
+- 關鍵 action types：`pet.ban`, `pet.unban`, `match.flag`, `match.unflag`, `config.runtime.update`, `config.economy.update`, `gdpr.erasure.create`, `gdpr.erasure.complete`, `admin.user.create`, `admin.user.deactivate`, `admin.totp.reset`, `admin.login.success`, `admin.login.failed`, `admin.lockout`
+
+### §10.7 Synthetic Monitoring & Health Check
+
+- `GET /health`：≤ 500 ms 回應；含 DB / Redis / SendGrid 連線狀態
+- `GET /health/live`：純 process alive
+- `GET /health/ready`：依賴就緒（k8s readiness probe）
+- Datadog Synthetic：每 1 分鐘 ping 6 個關鍵 endpoint（landing, claim, pet, leaderboard, arena, admin login）
+- Pingdom 多區域監控
+
+---
+
+## §11. Performance Design
+
+### §11.1 容量規劃（基於 CONSTANTS）
+
+| Parameter | Value | Source |
+|-----------|-------|--------|
+| Normal RPS | 100 | NORMAL_OPERATION_RPS |
+| Peak RPS | 500 | PEAK_OPERATION_RPS |
+| Normal DAU | 2,000–5,000 | NORMAL_OPERATION_DAU_MIN/MAX |
+| Peak Concurrent | 2,000 | PEAK_CONCURRENT_USERS |
+| DB connections (min/max) | 20 / 50 | DB_CONNECTION_POOL_MIN/MAX_CONNECTIONS |
+| Pet generation batch | 1,000 within 10 s | PET_GENERATION_CONCURRENT_BATCH |
+| Matchmaking concurrent | 100 | ARENA_MATCHMAKING_CONCURRENT_ENTRIES |
+
+### §11.2 Capacity Planning
+
+#### 負載預測模型
+
+假設 DAU = 2,000，平均每用戶 5 次互動 / 日：
+- daily requests ≈ 10,000
+- 平均 RPS（24h 攤平）= 10,000 / 86,400 ≈ 0.12 RPS
+- 但峰值集中於 prime time（晚 7-11 點 4 小時）= 10,000 / 14,400 ≈ 0.7 RPS
+- 病毒事件（10× spike）= 7 RPS sustained，瞬間突發可達 100 RPS
+
+→ MVP NORMAL_OPERATION_RPS = 100 RPS 預留 14× 安全邊際；PEAK = 500 RPS 預留 70× 邊際。
+
+#### 資源規模計算
+
+```
+api_replicas = ceil(peak_rps / rps_per_replica × safety_factor)
+             = ceil(500 / 200 × 1.5) = 4 replicas (peak)
+api_min_replicas = 2 (HA floor; HC-1)
+hpa_target_cpu = 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT)
+
+worker_replicas = 2 (HA floor, idempotent design)
+
+db_pool_size = peak_concurrent_writes × avg_query_time / max_acceptable_latency
+            ≈ 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS) — current setting headroom OK
+
+redis_memory = leaderboard(2k pets × 50B) + rate_limit_keys + sessions
+            ≈ 5 MB baseline；growth to 50 MB at DAU 100k → Upstash ample
+```
+
+#### 成本估算（DAU ≤ 5,000）
+
+| Component | Monthly Cost (USD) | Source |
+|-----------|-------------------|--------|
+| Vercel Pro | $20 | static hosting |
+| Railway Pro | $20–80 | API + worker |
+| Supabase Pro | $25 | DB + 8GB |
+| Upstash Pay-as-go | $0–20 | Redis |
+| SendGrid Essentials | $20 | 50k emails/月 |
+| Datadog Free + Pro tier | $0–30 | observability |
+| **Total** | **$85–195** | within SERVER_COST_DAU5K_MONTHLY_MAX = 200 |
+
+#### 擴展觸發條件
+
+| Trigger | Action |
+|---------|--------|
+| API CPU > 70% sustained 5 min | HPA scale-out（max 6） |
+| DB pool > 80% | alert；考慮升級到 Pro+ |
+| Redis memory > 80% | alert；考慮升級 |
+| SendGrid >9k/month | upgrade to Pro tier |
+| DAU > 5k sustained 2 weeks | re-run 容量規劃 |
+
+### §11.3 快取策略
+
+| Tier | Tool | TTL | Invalidation |
+|------|------|-----|-------------|
+| Browser cache | Cache-Control | static 1 year, API 0 | hash filename |
+| CDN edge | Vercel | static aggressive | redeploy |
+| TanStack Query | client | 30 s stale | mutation invalidation |
+| Redis leaderboard | sorted set | no TTL | event-driven update |
+| Redis config cache | hash | 5 min（CONFIG_CACHE_REFRESH_TIME） | admin push invalidation |
+| DB query cache | pg `pg-mem` no | n/a | n/a |
+
+### §11.4 資料庫優化
+
+- 所有 hot path 使用 read replica
+- Composite index `(pet_id, completed_at DESC)` for arena/training history
+- `EXPLAIN ANALYZE` CI gate for queries on >10k rows tables
+- VACUUM / ANALYZE auto by Supabase；weekly 監控 bloat
+- Connection pool 透過 `pg` driver；min 20, max 50
 
 ---
 
 ## §12. Testing Strategy
 
-### §12.1 Unit Test Targets
+### §12.1 Unit Tests
 
-- Minimum coverage: 80% of all business logic modules (UNIT_TEST_COVERAGE_MIN_PERCENT = 80%)
-- Test framework: Vitest (shared between player app and API server)
-- No module exceeds 800 lines (CODE_MODULE_MAX_LINES = 800); no function exceeds 50 lines (CODE_FUNCTION_MAX_LINES = 50) — enforced via ESLint `max-lines` and `max-lines-per-function` rules
-- Priority modules for unit testing: pet generation algorithm (seed → attributes), battle outcome calculation (seeded ±15% modifier), claim code OTP generation/verification, rate-limit logic, GDPR email hashing workflow
+- Vitest；80% coverage 業務模組（UNIT_TEST_COVERAGE_MIN_PERCENT）
+- `max-lines: 800`、`max-lines-per-function: 50` ESLint enforcement
+- 優先模組：pet generation、battle calc、claim code OTP、rate-limit、GDPR worker
 
-### §12.2 Integration Test Plan
+### §12.2 Integration Tests
 
-| Test Area | Approach | Tools |
-|---|---|---|
-| API route handlers | Fastify `inject()` for in-process HTTP testing against test PostgreSQL instance | Vitest + `@fastify/inject` |
-| Claim flow end-to-end | POST /api/v1/claim → verify email send → POST /api/v1/claim/verify → assert token | Vitest + Nodemailer test inbox |
-| Arena battle calculation | Submit two pets to `/api/v1/arena/enter`; assert winner determinism for same seeds | Vitest |
-| Rate limiting | Exceed limit, assert HTTP 429 + Retry-After; assert counter resets after TTL | Vitest + Redis test instance |
-| GDPR deletion (admin) | Trigger deletion via POST /admin/api/gdpr/delete, run background job, assert email_encrypted = NULL | Vitest + test PostgreSQL |
-| GDPR self-service request | POST /api/v1/gdpr/request with valid pet token: assert 202 + jobId; with invalid token: assert 401; assert request queued in GDPR processing table | Vitest + test PostgreSQL |
-| Leaderboard consistency | Update pet stats, run arena, assert leaderboard rank updated within 30s | Vitest + Redis test instance |
+| Area | Tool |
+|------|------|
+| API routes | Fastify `inject()` + Vitest |
+| Claim flow E2E | Vitest + Nodemailer test inbox |
+| Arena battle determinism | Vitest（fixed seed） |
+| Rate limit | Vitest + Redis ephemeral |
+| GDPR erasure worker | Vitest + test PG |
+| Leaderboard sync | Vitest + Redis + PG |
 
-### §12.3 E2E Test Plan
+### §12.3 E2E Tests
 
-- Framework: Playwright
-- Breakpoints tested: 320, 768, 1024, 1440px (per testing.md visual regression rules)
-- Both dark mode (primary) and light mode (secondary variant) tested
+- Playwright；breakpoints 320/768/1024/1440
+- Full flows：guest interaction、claim end-to-end、train、arena rate limit、leaderboard filter
+- a11y：axe-core integration；無 critical violations
+- Visual regression：screenshots vs baseline
 
-| Test Scenario | Assertions | Breakpoints |
-|---|---|---|
-| Guest lands on homepage, interacts with pet | Pet canvas visible; claim CTA appears; FCP <1.5s | 320, 768, 1440 |
-| Full claim flow: email → code → URL reveal | No axe-core critical violations; claim code input accessible | 375, 1024 |
-| Pet owner trains pet | Stat increments; "+X Speed" indicator visible; training count decrements | 768, 1440 |
-| Arena entry with rate limit | Rate limit banner shows with countdown; button re-enables on timer expiry | 1024 |
-| Leaderboard filter by rarity | URL params update; table rows filtered; owner rank highlighted | 1440 |
-| Visual regression | Screenshots at all breakpoints vs. baseline | 320, 768, 1024, 1440 |
-| Keyboard navigation | Tab order through all P0 flows; no focus traps | 1440 |
-| Reduced motion | `prefers-reduced-motion: reduce` — static sprites, no particles | 1024 |
+### §12.4 Load / Stress
+
+- k6 scripts：500 RPS sustained 5 min；2,000 PCU spike 30 s
+- gating staging deploy
 
 ---
 
-## §13. Implementation Phases
+## §13. Deployment & Operations
 
-### §13.1 Phase 1 — Core (Claim, Pet Generation, Basic Display)
+### §13.1 部署架構
 
-**Goal**: Validate the email claim → unique URL token → persistent pet access loop. Corresponds to Alpha milestone.
+詳見 §3.7.1（生產 HA 圖）+ §3.5（Environment Matrix）+ §3.5b（Service Port Matrix）。
 
-**Scope**:
-- Pet generation service: seed → 6-dimension attribute vector → sprite selection; uniqueness guarantee via DB seed check (max 3 retries — PET_SEED_COLLISION_MAX_RETRIES = 3)
-- PostgreSQL schema: `pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_logs`, `gdpr_requests` tables (GDPR compliance is a legal obligation from Phase 1, not a GA feature)
-- API endpoints: `GET /api/v1/pets/random`, `POST /api/v1/claim`, `POST /api/v1/claim/verify`, `POST /api/v1/claim/recover`, `GET /api/v1/pets/:petId`, `GET /api/v1/leaderboard` (Phase 1 implementation: direct PostgreSQL query on pets/arena_matches; Redis sorted set deferred to Phase 2)
-- Email delivery: SendGrid integration + Nodemailer SMTP fallback
-- Frontend: Landing page (PetCanvas + ClaimCTA), Claim page (ClaimFlow compound component), Pet page (PetCanvas + StatsPanel + RarityBadge)
-- Rate limiting: Redis-backed claim attempts (5/hr) and code entry (10/session)
-- Basic leaderboard: PostgreSQL-only (Redis sorted set deferred to Phase 2)
-- Admin portal: Login + basic pet list view (Moderator role only)
+### §13.2 Deployment Strategy
 
-**Exit criteria**:
-- 20 invited alpha testers successfully claim and access their pets (ALPHA_BETA_TESTERS = 20). Claim conversion rate ≥7% go (CLAIM_CONVERSION_ALPHA_GO_PERCENT = 7%); <3% triggers pivot (CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3%). Day-1 return rate ≥50% (DAY_1_RETURN_RATE_TARGET_PERCENT = 50%). Day-3 retention ≥30% to proceed (DAY_3_RETENTION_ALPHA_GO_PERCENT = 30%); <10% is no-go (DAY_3_RETENTION_NOGO_PERCENT = 10%). Claim form error rate ≤2% (CLAIM_FORM_ERROR_RATE_MAX_PERCENT = 2%). Claimed pets within 6 weeks: ≥500 (CLAIMED_PETS_6_WEEK_TARGET = 500).
-- Core pet display: PetCanvas renders claimed pet with correct sprite, stats, and level.
-- Basic leaderboard: Top 100 leaderboard returns correct data from seeded test data (no live battles required in Phase 1 — arena is Phase 2 scope).
+| Strategy | 適用場景 | 優劣 |
+|----------|---------|------|
+| **Rolling Update**（預設） | 一般 backwards-compatible 變更 | 低成本；無停機；窗口期較長 |
+| **Blue-Green** | 重大架構變更或 DB schema migration | 即時 rollback；雙環境成本 |
+| **Canary**（5% → 25% → 100%） | 高風險功能（rate-limit / matchmaking 演算法） | 漸進；可中斷；需 feature flag |
 
-> **Note**: Basic arena is Phase 2 scope — Phase 1 validates claim flow, pet display, and leaderboard data pipeline only.
+預設 rolling；每個 GA 主要功能評估是否需 blue-green / canary。
 
-### §13.2 Phase 2 — Arena + Leaderboard (Beta)
+### §13.3 Migration
 
-**Goal**: Validate competitive engagement loop. Corresponds to Beta milestone.
+- Tool: `node-pg-migrate`（idempotent；only pending migrations）
+- Step：deploy backwards-compatible code → migrate schema → deploy code 使用新 schema → drop old fields（separate release）
+- Down migration 必須手寫；CI 驗證 up + down round-trip
+- Migration 時間 SLA：≤ 30 秒（不阻塞請求）；長操作（如 reindex）使用 `CONCURRENTLY`
 
-**Scope**:
-- PostgreSQL schema: `training_logs`, `arena_matches`, `food_buffs`, `leaderboard_snapshots` tables
-- Training system: `POST /api/v1/pets/:petId/train`; 3 actions/day limit; stat increment 1–3 points; neglect state detection (3-day threshold — TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)
-- Food buff system: FoodBuff table; `/api/v1/pets/:petId/feed`
-- Arena matchmaking: Redis queue; 30-second timeout; AI fallback; battle calculation with seeded ±15% modifier
-- Arena API: `POST /api/v1/arena/enter`, `GET /api/v1/arena/match/:id`, `GET /api/v1/arena/history/:petId`
-- Leaderboard: Redis sorted set (authoritative) + PostgreSQL snapshots; `GET /api/v1/leaderboard`; ≤30s update lag
-- Arena rate limiting: Redis counter 10 battles/hr per pet (ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT = 10)
-- Bot detection: Auto-flag pets >50 battles/60-min rolling window (BOT_DETECTION_BATTLES_THRESHOLD = 50)
-- Frontend: Arena page, Battle result page, Leaderboard page, Battle records page, Training page
-- Admin portal: Leaderboard management, suspicious activity dashboard, runtime config tuning
+### §13.4 Rollback
 
-**Exit criteria**: ≥50 daily arena battles go (ARENA_BATTLES_BETA_GA_MIN_PER_DAY = 50 battles/day); <20 battles/day is no-go (ARENA_BATTLES_BETA_GA_NOGO_PER_DAY = 20). Day-7 retention ≥25% go (DAY_7_RETENTION_TARGET_PERCENT = 25%); <10% is no-go (DAY_7_RETENTION_BETA_NOGO_PERCENT = 10%). 500 beta users via itch.io + Discord rollout (BETA_AUDIENCE_APPROX = 500).
+- API：deploy 前一版本 docker tag；< 5 分鐘回退
+- DB：down migration（如可），否則 PITR（point-in-time recovery）至 deploy 前 5 分鐘
+- Frontend：Vercel rollback 一鍵
+- Feature flag emergency kill：env var 改值 → cache 5 分鐘清除（CONFIG_CACHE_REFRESH_TIME）
 
-### §13.3 Phase 3 — Marketplace + Admin Full Feature (GA)
+### §13.5 Disaster Recovery (DR)
 
-**Goal**: Enable P2P pet trading and complete admin portal. Corresponds to General Availability milestone.
+- DB daily backup → S3 (RPO 24 hr worst case；synchronous replica RPO=0)
+- DR drill：每季演練從 backup 還原至 staging
+- Region failover：us-east → eu-west 30 分鐘 RTO（手動觸發 + DNS TTL 60 秒）
+- Runbook §8 DR procedure
 
-**Scope**:
-- PostgreSQL schema: `marketplace_transactions`, `marketplace_listings` tables
-- Marketplace: Feature flag `FF_MARKETPLACE` enabled when DAU sustains >1,000 for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000)
-- Trade system: Pet listing, offer submission, acceptance; 5% platform fee (TRADE_TRANSACTION_FEE_PERCENT = 5%); min price formula: `(pet_level × 100) + (rarity_multiplier × 500)`; anti-flip 7-day cooldown (MARKETPLACE_TRADE_ANTIFLIP_PROTECTION_DAYS = 7 days)
-- Admin portal: Full GDPR deletion workflow, game economy configuration (food buff multipliers 0.5×–5.0×, arena entry cost/cooldown), email delivery monitor, analytics dashboard, audit log, role management
-- Performance hardening: Lighthouse CI gate (LCP <2.5s, FCP <1.5s, CLS <0.1); load testing at 500 RPS
-- Security hardening: CSP header with nonce-based script policy; full OWASP Top 10 review
+### §13.6 CI/CD Pipeline
 
-**Exit criteria**: DAU ≥2,000 sustained (DAU_12_MONTH_TARGET = 2,000). ≥100 daily arena battles (ARENA_BATTLES_GA_SUCCESS_PER_DAY = 100). Day-30 retention ≥15% (DAY_30_RETENTION_TARGET_PERCENT = 15%). Arena social share rate ≥5% (ARENA_SOCIAL_SHARE_RATE_TARGET_PERCENT = 5%). Organic traffic ≥30% of sessions (ORGANIC_TRAFFIC_TARGET_PERCENT = 30%). Marketplace monthly GMV ≥$10,000 (MONTHLY_GMV_TARGET_USD = 10,000). Marketplace monthly fee revenue ≥$500 (MONTHLY_FEE_REVENUE_TARGET_USD = 500). All admin GDPR workflows operational.
+```mermaid
+flowchart LR
+    PR[Pull Request] --> Lint[Lint + Type-check]
+    Lint --> Unit[Unit Tests]
+    Unit --> Int[Integration Tests]
+    Int --> Build[Build + Docker]
+    Build --> Push[Push ghcr.io]
+    Push --> Staging[Deploy Staging]
+    Staging --> Smoke[Smoke Tests]
+    Smoke --> Approve{Manual Approval}
+    Approve -->|Yes| Prod[Deploy Production]
+    Approve -->|No| End([Block])
+    Prod --> SmokeProd[Smoke Tests Prod]
+    SmokeProd --> Notify[Slack notification]
+```
 
-### §13.4 Product KPI Targets (Cross-Phase)
+- GitHub Actions
+- Concurrency control：每 branch 一條 pipeline
+- Required checks：lint / type-check / unit / integration / build
 
-The following KPI targets from CONSTANTS apply across all phases:
+### §13.7 Runbook Framework
 
-| Metric | Target | Constant | Phase |
-|---|---|---|---|
-| MAAPO Month 1 | 50 | MAAPO_TARGET_MONTH_1 | Phase 1 |
-| MAAPO Month 3 | 200 | MAAPO_TARGET_MONTH_3 | Phase 2 |
-| MAAPO Month 6 | 500 | MAAPO_TARGET_MONTH_6 | Phase 3 |
-| MAAPO Month 12 | 1,000 | MAAPO_TARGET_MONTH_12 | GA |
-| DAP Week 4 | 100 | DAP_TARGET_WEEK_4 | Phase 1 |
-| DAP Month 3 | 500 | DAP_TARGET_MONTH_3 | Phase 2 |
-| DAP Month 6 | 1,000 | DAP_TARGET_MONTH_6 | Phase 3 |
-| DAP Month 12 | 2,000 | DAP_TARGET_MONTH_12 | GA |
-| Day-1 return rate | ≥50% | DAY_1_RETURN_RATE_TARGET_PERCENT | Phase 1+ |
-| Arena fair-play rate | ≥95% | ARENA_FAIR_PLAY_RATE_TARGET_PERCENT | Phase 2+ |
-| Claim form error rate | ≤2% | CLAIM_FORM_ERROR_RATE_MAX_PERCENT | Phase 1+ |
-| Leaderboard UV/DAU ratio | ≥20% | LEADERBOARD_UV_DAU_RATIO_TARGET_PERCENT | Phase 2+ |
-| Claim conversion (steady-state) | ≥10% | CLAIM_CONVERSION_TARGET_PERCENT | Phase 2+ |
-
-### §13.5 A/B Testing Parameters
-
-For claim flow optimization (tests 001–002) and arena engagement tests (003–004):
-- Sample size: 1,000 visitors per arm for claim tests (AB_TEST_SAMPLE_SIZE_001_002_VISITORS_PER_ARM = 1,000)
-- Sample size: 500 per arm for engagement tests (AB_TEST_SAMPLE_SIZE_003_004_PER_ARM = 500)
-- Test duration: 2 weeks per experiment (AB_TEST_DURATION_WEEKS = 2)
+`docs/runbook.md` 章節：
+1. 服務啟停
+2. 部署 / Rollback
+3. DB failover 應變
+4. Redis failover 應變
+5. Secret rotation（90 天）
+6. GDPR 手動處理
+7. Bot 大量湧入應變
+8. DR 還原 procedure
+9. Audit log 匯出
 
 ---
 
-## §14. Open Questions / TBD Items
-
-| # | Question | Impact | Owner | Status |
-|---|---|---|---|---|
-| OQ-E01 | Sprite resolution: 16×16px (NES-era, simpler generation) vs 32×32px (more expressive)? Affects PetCanvasEngine, sprite sheet production, and canvas scaling logic. **Provisional resolution**: Proceed with 32×32px sprites for Phase 1. Revisit at Phase 2 design review with UX/art team input. Implementation MUST use `SPRITE_RESOLUTION_PX = 32` config constant throughout (no hard-coded values). This closes the immediate Phase 1 blocker while preserving the ability to scale to 64×64 without code changes. | Architecture (PDD OQ-D01) | Engineering + Design | PROVISIONALLY RESOLVED (Phase 2 review) |
-| OQ-E02 | Arena matchmaking: HTTP long-poll (simpler, works everywhere) vs WebSocket (lower latency, higher complexity)? The 30-second matchmaking timeout fits HTTP long-poll; WebSocket may be needed if real-time battle animations require bidirectional events. | API complexity, infrastructure | Engineering | OPEN |
-| OQ-E03 | Admin portal deployment: Same Vercel project with route-based separation (`/admin`) vs. separate subdomain (`admin.pixel-pet-arena.com`)? Subdomain offers stricter cookie isolation and CSP separation. | Security, deployment | Engineering | OPEN |
-| OQ-E04 | Pet ownership transfer mechanism: If a user deletes their email account, can they transfer pet ownership to a new email? Current design requires the pet to become unclaimed (GDPR erasure). Is an ownership-transfer endpoint needed pre-GDPR-deletion? | Data model, GDPR flow | Engineering + Legal | OPEN |
-| OQ-E05 | Battle result Open Graph card generation: Static HTML page as OG preview (simpler) vs. server-rendered image (requires Puppeteer/Cloudflare browser, better social preview)? (PDD OQ-D06) | Infrastructure, performance | Engineering + Design | OPEN |
-| OQ-E06 | Redis persistence strategy: Upstash provides durability by default. If leaderboard Redis is flushed, full rebuild from PostgreSQL snapshots could take >30 seconds during peak load. Define an explicit rebuild SLA and test it. | Availability | Engineering | OPEN |
-| OQ-E07 | Feature flag implementation: Simple environment-variable-based flags sufficient for MVP (`FF_MARKETPLACE`, `FF_ARENA_SUMO`, `FF_ADMIN_PORTAL`)? Or invest in a LaunchDarkly/Flagsmith integration for runtime toggles? | Operations | Engineering + PM | OPEN |
-| OQ-E08 | Sumo arena mode battle calculation: The CONSTANTS define `ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT` as covering both Race (Speed-based) and Sumo (Strength-based). Confirm the stat selection logic: Race uses Speed, Sumo uses Strength, modifier ±15% applied to selected stat. Document edge cases when both stats are equal. | Domain logic | Engineering | OPEN |
-
----
-
-*This EDD is the authoritative engineering specification for pixel-pet-arena. All implementation decisions, schema designs, and API contracts must reference and comply with this document. Numeric values are sourced exclusively from CONSTANTS-PIXEL-PET-ARENA-20260503. Conflicts between this EDD and upstream PDD/VDD/PRD shall be resolved by filing an ECR (Engineering Change Request) against the relevant upstream document.*
-
----
-
-## §15. Risk Assessment
+## §14. Risk Assessment
 
 | # | Risk | Probability | Impact | Mitigation |
-|---|------|-------------|--------|------------|
-| R-01 | Supabase free tier limits hit before DAU target (5k DAU) | Medium | High | Monitor connection pool utilization; upgrade to Pro at 60% threshold |
-| R-02 | Phaser 3 Canvas performance on low-end mobile devices (< 30 FPS) | Medium | Medium | Progressive enhancement: fall back to CSS sprite animation; test on Galaxy A13 |
-| R-03 | SendGrid deliverability below 98% SLA (CONSTANTS: CLAIM_EMAIL_DELIVERY_RATE_TARGET) | Low | High | SPF/DKIM configured; Nodemailer SMTP fallback after 3 consecutive failures |
-| R-04 | Redis eviction during leaderboard peak causes stale data > 30s (CONSTANTS: LEADERBOARD_UPDATE_LAG_MAX) | Low | Medium | Upstash durability + explicit TTL; fallback to PostgreSQL read on cache miss |
-| R-05 | GDPR erasure timeline (7 days) missed due to async queue backlog | Low | High | Dead letter queue + alerting; manual override by admin within 24h |
-| R-06 | MVP budget overrun (CONSTANTS: MVP_BUDGET = $40k) from infrastructure scaling events | Low | High | Infrastructure cost ceiling alerts at $200/month (CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX) |
+|---|------|-------------|--------|-----------|
+| R-01 | Supabase free tier 觸頂 | Medium | High | Pool 監控；60% 升級 |
+| R-02 | Phaser 3 低端 mobile FPS < 30 | Medium | Medium | CSS sprite fallback；Galaxy A13 測試 |
+| R-03 | SendGrid 投遞率 < 98% | Low | High | SPF/DKIM；SMTP fallback |
+| R-04 | Redis eviction 排行榜過時 | Low | Medium | Upstash durability；PostgreSQL fallback |
+| R-05 | GDPR 7 天 SLA 漏 | Low | High | DLQ + 24h 人工 override |
+| R-06 | MVP 預算超支 | Low | High | Cost ceiling alert $200/月 |
+| R-07 | Bot 攻擊排行榜 | Medium | Medium | Bot detection + 50 battles/60min flag + admin tools |
+| R-08 | Email enumeration | Low | Medium | Same response shape；rate limit |
 
 ---
 
-## §16. Technical Debt & Known Compromises
+## §15. Technical Debt & Known Compromises
 
-| # | Item | Compromise | Accepted Reason | Target Resolution |
-|---|------|------------|-----------------|------------------|
-| TD-01 | Pet ownership transfer not implemented | Pets become unclaimed on GDPR erasure (OQ-E04) | MVP scope reduction | Post-v1 if user demand confirmed |
-| TD-02 | Feature flags are ENV-variable based (no runtime toggle) | Cannot toggle FF_MARKETPLACE without redeploy | LaunchDarkly integration deferred to beta+ | Post-beta if A/B toggle required |
-| TD-03 | Admin portal on same Vercel project (`/admin` route) | Shared CSP; slightly weaker isolation | Simpler deployment for MVP | Post-GA if security audit requires subdomain isolation |
-| TD-04 | Server-side OG image generation deferred (Puppeteer) | Static HTML fallback for battle share cards | Puppeteer infra complexity too high for MVP | Post-beta: Cloudflare Browser Rendering |
-| TD-05 | Sumo arena mode battle logic shares same random modifier formula as Race mode | Stat selection (Speed vs Strength) confirmed, but edge cases when stats equal are not fully spec'd (OQ-E08) | CONSTANTS lock at ±15% covers both modes | Resolve before arena public launch |
+| # | Item | Compromise | Reason | Target Resolution |
+|---|------|-----------|--------|------------------|
+| TD-01 | Pet ownership transfer 未實作 | Pets 變 unclaimed (OQ-E04) | MVP 範圍縮減 | Post-v1 用戶確認 |
+| TD-02 | Feature flag 為 ENV-based | 不可 runtime toggle | LaunchDarkly 延後 beta+ | Post-beta 如需 A/B |
+| TD-03 | Admin portal 共享 Vercel project | 共享 CSP | MVP 簡化 | Post-GA 如安全審計需要 |
+| TD-04 | OG image 動態生成延後 | Static HTML fallback | Puppeteer 過重 | Post-beta Cloudflare Browser |
+| TD-05 | Sumo edge case 未完整規格 | CONSTANTS ±15% 涵蓋 race + sumo | 主流程穩定後規範 | Arena 公開前 |
+| TD-06 | Worker in-process EventEmitter | Cross-process 無事件 bus | MVP 量級 | GA 階段 NATS / Kafka 評估 |
+
+---
+
+## §16. Implementation Plan
+
+### §16.1 里程碑
+
+#### Phase 1 — Core (Alpha)
+
+- 範圍：Pet generation / claim flow / pet display / 基礎 leaderboard / admin pet list
+- Schema：`pets`, `claim_identities`, `claim_codes`, `admin_users`, `audit_logs`, `gdpr_requests`
+- API：claim、verify、recover、pet random、pet read、leaderboard（PG-only，Redis 待 Phase 2）
+- Email：SendGrid + SMTP fallback
+- Frontend：landing、claim、pet pages
+- Rate limit：Redis claim/code-entry
+- Exit criteria：20 alpha testers；claim conversion ≥ 7%；Day-3 retention ≥ 30%；6-week claimed pets ≥ 500
+
+#### Phase 2 — Arena + Leaderboard (Beta)
+
+- 範圍：training / food / arena / live leaderboard / records / suspicious pets
+- Schema：`training_logs`, `arena_matches`, `food_buffs`, `leaderboard_snapshots`
+- API：train、feed、arena enter、match read、history、leaderboard（Redis sorted set）
+- Bot detection：50 battles/60min auto-flag
+- Frontend：arena、battle result、leaderboard、records、training
+- Admin：leaderboard 管理、suspicious dashboard、runtime config
+- Exit criteria：≥ 50 daily battles；Day-7 retention ≥ 25%；500 beta users via itch.io + Discord
+
+#### Phase 3 — Marketplace + Admin Full (GA)
+
+- 範圍：marketplace（FF_MARKETPLACE）、GDPR full、game economy config、analytics、audit
+- Schema：`marketplace_listings`, `marketplace_transactions`
+- Performance hardening：Lighthouse CI、500 RPS load test
+- Security：CSP nonce、OWASP Top 10 全面審查
+- Exit criteria：DAU ≥ 2,000；arena 100/day；Day-30 retention ≥ 15%；GMV ≥ $10k；fee revenue ≥ $500
+
+### §16.2 實作順序依賴
+
+```mermaid
+flowchart TB
+    A[1. DB schema + migrations] --> B[2. Auth + Pet generation core]
+    B --> C[3. Claim flow + Email integration]
+    C --> D[4. Player UI: landing/claim/pet]
+    D --> E[5. Rate limit + monitoring baseline]
+    E --> Phase1Done[Phase 1 complete]
+    Phase1Done --> F[6. Training + Food domain]
+    F --> G[7. Arena matchmaking + battle calc]
+    G --> H[8. Leaderboard Redis + snapshot worker]
+    H --> I[9. Records page + admin moderation]
+    I --> Phase2Done[Phase 2 complete]
+    Phase2Done --> J[10. Marketplace domain + FF gate]
+    J --> K[11. GDPR full + audit + analytics]
+    K --> L[12. Performance + security hardening]
+    L --> Phase3Done[Phase 3 / GA complete]
+```
+
+關鍵依賴：
+- 認證/Pet generation 是所有後續功能基礎
+- Arena 必依賴 Pet stats + training（產出對戰素質）
+- Leaderboard 依賴 Arena 的事件流
+- Marketplace 依賴 Pet ownership + Arena history
+
+---
+
+## §17. Open Questions
+
+| # | Question | Impact | Owner | Status |
+|---|---------|--------|-------|--------|
+| OQ-E01 | 16×16 vs 32×32 sprite | Sprite engine, scaling | Eng + Design | PROVISIONAL: 32×32 Phase 1 |
+| OQ-E02 | HTTP long-poll vs WebSocket arena | Latency, infra | Eng | OPEN |
+| OQ-E03 | Admin subdomain vs route | Security, deploy | Eng | OPEN |
+| OQ-E04 | Pet ownership transfer | Data model, GDPR | Eng + Legal | OPEN |
+| OQ-E05 | OG image static vs server-render | Infra | Eng + Design | OPEN |
+| OQ-E06 | Redis rebuild SLA | Availability | Eng | OPEN |
+| OQ-E07 | ENV vs LaunchDarkly FF | Operations | Eng + PM | OPEN |
+| OQ-E08 | Sumo battle edge cases | Domain logic | Eng | OPEN |
 
 ---
 
@@ -1810,28 +2354,32 @@ For claim flow optimization (tests 001–002) and arena engagement tests (003–
 
 | 文件 | 路徑 | 說明 |
 |------|------|------|
-| PRD | `docs/PRD.md` | 功能需求、NFR、驗收條件 |
+| PRD | `docs/PRD.md` | 功能需求、NFR、AC |
 | PDD | `docs/PDD.md` | UI/UX 設計規格 |
-| VDD | `docs/VDD.md` | 視覺設計與 Design Token |
-| CONSTANTS | `docs/CONSTANTS.md` | 所有量化常數唯一真相來源 |
-| SCHEMA | `docs/SCHEMA.md` | 資料庫 schema 詳細定義 |
+| VDD | `docs/VDD.md` | 視覺設計與 token |
+| CONSTANTS | `docs/CONSTANTS.md` | 量化常數真相來源 |
+| SCHEMA | `docs/SCHEMA.md` | DB schema 詳定義 |
 | API | `docs/API.md` | REST API 端點規格 |
 | ARCH | `docs/ARCH.md` | 系統架構概覽 |
-| Supabase Docs | https://supabase.com/docs | PostgreSQL + Auth 平台文件 |
+| Diagrams | `docs/diagrams/` | UML / class inventory |
+| Supabase | https://supabase.com/docs | PG + Auth |
 | Phaser 3 | https://phaser.io/phaser3 | 遊戲框架 |
-| Railway | https://railway.app/docs | Node.js backend 部署 |
+| Railway | https://railway.app/docs | Backend |
 | Upstash | https://upstash.com/docs/redis | Serverless Redis |
+| OpenTelemetry | https://opentelemetry.io | Observability |
+| OWASP Top 10 | https://owasp.org/Top10/ | Security baseline |
 
 ---
 
 ## §19. Approval Sign-off
 
 | 角色 | 負責人 | 審核日期 | 簽核狀態 |
-|------|--------|---------|---------|
+|------|--------|----------|---------|
 | Engineering Lead | TBD | — | Pending |
 | Product Manager | TBD | — | Pending |
 | Security Reviewer | TBD | — | Pending |
 | Architecture Reviewer | TBD | — | Pending |
+| SRE Lead | TBD | — | Pending |
 
 > APPROVED 版本的任何架構變更需走 ECR（Engineering Change Request）流程。
 
@@ -1839,39 +2387,94 @@ For claim flow optimization (tests 001–002) and arena engagement tests (003–
 
 ## §20. Feature Flag Engineering
 
-Pixel Pet Arena uses environment-variable-based feature flags for MVP (no runtime toggle service). All flags are defined in `.env` / Vercel project environment variables.
+### §20.1 五種類型評估表
 
-| Flag | Default | Description | Activation Trigger (from CONSTANTS) |
-|------|---------|-------------|-------------------------------------|
-| `FF_MARKETPLACE` | `false` | Enable pet trading marketplace | DAU ≥ 1000 sustained 2 weeks (CONSTANTS: DAU_MARKETPLACE_TRIGGER) |
-| `FF_ARENA_SUMO` | `false` | Enable sumo battle mode | Post-alpha, after Race mode stability confirmed |
-| `FF_ADMIN_PORTAL` | `true` | Enable `/admin` routes | Always-on (has_admin_backend=true) |
+| 類型 | 範例 Flag | 用途 | 生命週期 |
+|------|----------|------|---------|
+| **Release** | `FF_MARKETPLACE`, `FF_ARENA_SUMO` | 控制功能上線；漸進釋出 | GA 後 30 天清理 |
+| **Experiment** | `FF_CLAIM_CTA_VARIANT_A` | A/B 測試文案、UI、流程 | 實驗結束（2 週）後立即清理 |
+| **Ops** | `FF_LEADERBOARD_REDIS_PRIMARY`（true=Redis 主，false=PG 主） | 緊急切換主要資料來源；rollback | 永久（運維工具） |
+| **Permission** | `FF_ADMIN_PORTAL`, `FF_ADVANCED_ANALYTICS` | 控制特定 role / tier 可見功能 | 永久（與 RBAC 同生命） |
+| **Subscription** | （MVP 不適用） | 控制付費層用戶可用功能 | post-revenue 階段 |
 
-### Flag 生命週期檢查清單
+### §20.2 Flag 清單
 
-- [ ] Flag 在 `.env.example` 中宣告並附說明
-- [ ] Flag 預設值為 `false`（除 FF_ADMIN_PORTAL）
-- [ ] Flag 啟用條件已在 CONSTANTS.md 或 PRD 中量化定義
-- [ ] Flag 移除計畫：功能 GA 後 30 天內清理舊 flag 分支
-- [ ] 後端 guard：`if (!FF_MARKETPLACE) return 404`（不暴露未完成功能）
-- [ ] 前端 guard：路由層 redirect + UI 元素隱藏
+| Flag | Default | 類型 | 說明 | 啟用條件 |
+|------|---------|------|------|---------|
+| `FF_MARKETPLACE` | `false` | Release | 啟用 marketplace | DAU ≥ 1000 sustain 2 週（DAU_MARKETPLACE_TRIGGER） |
+| `FF_ARENA_SUMO` | `false` | Release | 啟用 sumo mode | Race mode 穩定後 |
+| `FF_ADMIN_PORTAL` | `true` | Permission | `/admin` 路由 | 永遠 on |
+| `FF_LEADERBOARD_REDIS_PRIMARY` | `true` | Ops | Redis 主或 PG 主 | 緊急切換 |
+| `FF_BATTLE_RECORDS` | `true` | Release | Battle records page (kill-switch) | 永遠 on（P0） |
+| `FF_GUEST_PET_DISPLAY` | `true` | Release | Random pet display | 永遠 on（P0） |
+| `FF_EMAIL_CLAIM` | `true` | Release | Claim flow | 永遠 on（P0） |
+
+### §20.3 Flag 生命週期清單
+
+- [ ] Flag 在 `.env.example` 宣告 + 說明
+- [ ] Flag 預設值為 `false`（Permission/Ops 例外）
+- [ ] 啟用條件量化於 CONSTANTS / PRD
+- [ ] 移除計畫：Release flag GA 後 30 天清理；Experiment 立即清理
+- [ ] 後端 guard：`if (!flag) return 404`（不暴露未完成）
+- [ ] 前端 guard：路由 redirect + UI 隱藏
+- [ ] 監控：每月審計未清理的舊 flag
+
+### §20.4 緊急回滾程序
+
+1. 偵測：alert / 用戶投訴
+2. 評估：是否單一 flag 可解決
+3. 修改 env var：Vercel/Railway dashboard 改 `false`
+4. 等待 cache invalidate：CONFIG_CACHE_REFRESH_TIME = 5 分鐘
+5. 驗證：smoke test、用戶反饋
+6. 通報：Slack 公告
+7. RCA：48 小時內事故報告
 
 ---
 
 ## §21. Cross-Cutting Concerns
 
-### §21.1 Logging 標準
+### §21.1 可觀測性三支柱實作
 
-All services emit structured JSON logs with fields: `timestamp`, `level`, `service`, `trace_id`, `user_id` (hashed), `event`, `duration_ms`. Raw IP and email never logged.
+| 支柱 | Tool | 採集方式 | 存儲 | 分析 |
+|------|------|---------|------|------|
+| **Logs** | Pino structured JSON | Fastify lifecycle hooks | Datadog Log Drain | grep / Datadog Logs UI |
+| **Metrics** | OpenTelemetry SDK + Prometheus exporter | metric instrument | Datadog / Grafana Cloud | dashboard / alert |
+| **Traces** | OpenTelemetry SDK auto-instrument | trace span propagation | Datadog APM | flame graph |
 
-### §21.2 Distributed Tracing
+關聯方式：`trace_id` 注入所有 log entry 與 metric label，UI 點 trace 可跳到 logs / metrics / spans 三方比對。
 
-`trace_id` propagated via `X-Trace-ID` header across all service boundaries (Next.js → Railway backend → Supabase → Upstash). Used for debugging arena battle latency > 2s (CONSTANTS: `Arena Battle Result E2E`).
+### §21.2 分散式追蹤
+
+`trace_id` propagated via `X-Trace-ID` 跨 Vercel Edge → Railway API → Supabase REST → SendGrid。Span 標準命名：
+
+```
+http.server.request → fastify.route → use_case.execute → repository.query
+                                    → external.sendgrid.send
+```
+
+用於除錯：arena 戰鬥延遲 > 2 秒（CONSTANTS Arena Battle E2E）、claim 流程慢、跨服務串接問題。
 
 ### §21.3 Configuration Management
 
-All environment-specific config (DB URLs, API keys, feature flags) via Vercel/Railway project env vars. No config hardcoded. Required vars validated at startup; missing required var causes immediate `process.exit(1)` with clear error message.
+- 所有 env-specific 值（DB URLs、API keys、feature flags、CORS allowlist）透過 Vercel/Railway env vars
+- 啟動 validate（Zod schema for env）；缺失立即 `process.exit(1)`
+- 12-factor app principle
+- 開發者本地：`.env.local`（gitignored）；範本 `.env.example`
+- 動態調整：admin runtime config（rate limit / rarity weights）via `/admin/api/config/runtime`，cache 5 min refresh
 
 ### §21.4 Secrets Rotation
 
-SendGrid API key, Supabase service role key, and admin JWT secret rotated every 90 days or immediately on exposure. Rotation procedure documented in `docs/runbook.md §5 Secret Rotation`.
+| Secret | 輪換週期 | 流程 |
+|--------|---------|------|
+| SendGrid API key | 90 天 | 雙 key 並行 → 切換 → 廢舊 key |
+| Supabase service role key | 90 天 | 同上 |
+| Admin JWT secret | 90 天 | 雙 secret 並行 → 切換；舊 session expire 後廢舊 secret |
+| AES-256-GCM email encryption key | 180 天（重新加密 batch） | 雙 key 並行 → re-encrypt batch → 廢舊 key |
+| Redis URL | 緊急時 | 雙 cluster 並行寫 → 讀切換 → 廢舊 |
+| TOTP backup codes | 180 天 / 主動觸發 | admin 主動 reset |
+
+詳細程序記錄於 `docs/runbook.md §5 Secret Rotation`。所有輪換寫入 audit log。
+
+---
+
+*本 EDD 為 pixel-pet-arena 的權威工程設計規格。所有實作決策、schema 設計、API 契約必須引用並遵守本文件。數值來自 CONSTANTS-PIXEL-PET-ARENA-20260503。本 EDD 與上游 PDD/VDD/PRD 衝突時，需透過 ECR 解決。*
