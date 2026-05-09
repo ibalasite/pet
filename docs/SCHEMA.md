@@ -1772,11 +1772,55 @@ PITR 流程：
 | `rl:admin_login:{ip_hash}` | 900 s | Integer attempt count | Admin 登入 IP rate limit。10 attempts / 15 min。 |
 | `rl:admin:{admin_id}` | 60 s | Integer request count | 每認證 admin。100/min (`admin_portal_requests_per_minute_per_account = 100`)。 |
 
+**Redis CLI 命令範例**（rate limit counter pattern — INCR 後設 TTL）：
+
+```redis
+# 領取流程：每次請求 INCR + 確保 TTL（首次設定）
+INCR rl:claim:abc123def456
+EXPIRE rl:claim:abc123def456 3600 NX     # NX = 只在尚無 TTL 時才設
+
+# 觸發 limit → 設 cooldown key
+SET rl:claim:cooldown:abc123def456 "1" EX 60
+
+# Arena 戰鬥計數（同 pattern）
+INCR rl:arena:550e8400-e29b-41d4-a716-446655440000
+EXPIRE rl:arena:550e8400-e29b-41d4-a716-446655440000 3600 NX
+
+# 讀取目前計數（決策是否拒絕）
+GET rl:claim:abc123def456                # → "5"
+
+# 偵錯：列出所有 admin login rate limit keys（避免在 prod 用 KEYS）
+SCAN 0 MATCH "rl:admin_login:*" COUNT 100
+
+# 提早清空（admin reset rate limit）
+DEL rl:arena:550e8400-e29b-41d4-a716-446655440000
+```
+
 ### 12.2 Arena Matchmaking Queue
 
 | Key Pattern | TTL | Type | Notes |
 |-------------|-----|------|-------|
 | `matchmaking:queue:{mode}` | None | Sorted Set | Score = enqueue epoch (ms)。Member format: `"{petId}:{enqueue_epoch_ms}"`。`ZPOPMIN` atomic dequeue。Stale entries（> `arena_matchmaking_timeout_seconds = 30` s + grace）silently discarded。 |
+
+**Redis CLI 命令範例**：
+
+```redis
+# Enqueue 配對請求（score = current epoch ms，member 含 petId 確保 unique）
+ZADD matchmaking:queue:RACE 1715335825123 "550e8400-e29b-41d4-a716-446655440000:1715335825123"
+
+# Atomic dequeue 最早的請求（用於配對 worker）
+ZPOPMIN matchmaking:queue:RACE 1
+
+# 觀察 queue depth（運維監控）
+ZCARD matchmaking:queue:RACE                # → 47
+ZCARD matchmaking:queue:SUMO                # → 12
+
+# 列出最早 5 個（不移除）— 偵錯用
+ZRANGE matchmaking:queue:RACE 0 4 WITHSCORES
+
+# 清掉 stale entries（score < NOW - 30s）— 由 cleanup job 執行
+ZREMRANGEBYSCORE matchmaking:queue:RACE -inf 1715335795123
+```
 
 ### 12.3 Session Storage
 
@@ -1785,17 +1829,81 @@ PITR 流程：
 | `session:admin:{session_id}` | 14400 s (4h) | JSON `{ adminId, role, createdAt, absExpiry }` | Inactivity TTL = `admin_session_inactivity_expiry_hours = 4`。`absExpiry = createdAt + 28800 s` (`admin_session_absolute_expiry_hours = 8`) 由應用層強制檢查。 |
 | `token:blacklist:{token_hash}` | 259200 s (72h) | `"1"` | Recovery flow 後使無效 pet token；TTL = `claim_token_cleanup_ttl_hours = 72`。 |
 
+**Redis CLI 命令範例**：
+
+```redis
+# 建立 admin session（4h inactivity TTL）
+SET session:admin:550e8400-e29b-41d4-a716-446655440000 \
+    '{"adminId":"a1b2c3","role":"moderator","createdAt":1715335825,"absExpiry":1715364625}' \
+    EX 14400
+
+# 讀取 session（每次請求驗證）
+GET session:admin:550e8400-e29b-41d4-a716-446655440000
+
+# 滑動 TTL（每次有效請求延長 4h）
+EXPIRE session:admin:550e8400-e29b-41d4-a716-446655440000 14400
+
+# 登出 / admin 強制下線
+DEL session:admin:550e8400-e29b-41d4-a716-446655440000
+
+# 黑名單 pet token（72h；recovery flow 觸發）
+SET token:blacklist:fa3c2b1e7d8a9c4b6e5f0a1b2c3d4e5f "1" EX 259200
+
+# 驗證 token 是否在黑名單（auth 熱路徑）
+EXISTS token:blacklist:fa3c2b1e7d8a9c4b6e5f0a1b2c3d4e5f         # → 1 = blacklisted, 0 = ok
+```
+
 ### 12.4 Leaderboard Sorted Set
 
 | Key | TTL | Type | Notes |
 |-----|-----|------|-------|
 | `leaderboard:global` | None | Sorted Set | Score = arena score (`win_rate × battles_played × level_multiplier`)。Member = `pet_id`。即時 source of truth；PostgreSQL `leaderboard_snapshots` 為 durable backup。Update lag SLO ≤ 30 s (`leaderboard_update_lag_max_seconds = 30`)。Banned pets 立即 `ZREM`（5 min 內反映 — `leaderboard_ban_reflection_time_minutes = 5`）。GDPR erasure 同步 `ZREM`。 |
 
+**Redis CLI 命令範例**：
+
+```redis
+# 寫入 / 更新 pet score（每場戰鬥完成後計算 + 寫入）
+ZADD leaderboard:global 8520.42 "550e8400-e29b-41d4-a716-446655440000"
+
+# 取得 top 100（GET /api/v1/leaderboard 熱路徑）
+ZREVRANGE leaderboard:global 0 99 WITHSCORES
+
+# 取得分頁（rank 100-199）
+ZREVRANGE leaderboard:global 100 199 WITHSCORES
+
+# 查詢特定 pet 的排名（O(log N)）
+ZREVRANK leaderboard:global "550e8400-e29b-41d4-a716-446655440000"        # → 7 (8th place)
+
+# 查詢 score
+ZSCORE leaderboard:global "550e8400-e29b-41d4-a716-446655440000"          # → "8520.42"
+
+# Ban 或 GDPR erasure：移除 pet（5 min 內反映）
+ZREM leaderboard:global "550e8400-e29b-41d4-a716-446655440000"
+
+# 計算總玩家數
+ZCARD leaderboard:global                                                    # → 12453
+```
+
 ### 12.5 Config Cache
 
 | Key | TTL | Value | Notes |
 |-----|-----|-------|-------|
 | `config:runtime` | 300 s | JSON blob | Runtime 配置（arena rate limit、rarity weights 等）；refresh 每 5 min (`config_cache_refresh_time_minutes = 5`)。Mutations via `PUT /admin/api/config/{runtime,economy}` 在此 window 內生效。 |
+
+**Redis CLI 命令範例**：
+
+```redis
+# 寫入 runtime config（admin 修改後 + 載入時 cache）
+SET config:runtime \
+    '{"arena_battles_per_pet_per_hour":10,"rarity_weights":{"COMMON":60,"RARE":25,"EPIC":12,"LEGENDARY":3}}' \
+    EX 300
+
+# 讀取 config（每個 API 請求 hot path）
+GET config:runtime
+
+# 強制 invalidation（admin 變更後立即生效）
+DEL config:runtime
+```
 
 ---
 
