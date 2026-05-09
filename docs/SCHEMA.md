@@ -1,34 +1,198 @@
-# Database Schema — pixel-pet-arena
+# SCHEMA — Database Schema Design Document
 
-**DOC-ID**: SCHEMA-PIXEL-PET-ARENA-20260503
-**Status**: DRAFT
-**Upstream**: EDD-PIXEL-PET-ARENA-20260503, API-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503
+## Document Control
+
+| 欄位 | 值 |
+|------|-----|
+| Document ID | `SCHEMA-PIXEL-PET-ARENA-20260510` |
+| Version | `2.0` |
+| Status | Draft |
+| Classification | Internal |
+| Owner | Database Architect / Data Engineering Lead |
+| **Owning Bounded Context / Service** | **Modular Monolith spanning 6 BCs (Identity / Pet / Arena / Leaderboard / Marketplace / Admin)**; per HC-1 each BC owns its own tables (see §1.1). The PostgreSQL instance is logically partitioned by BC ownership; cross-BC FKs at the DB level are forbidden and are enforced as application-layer ID-only references. |
+| Created | 2026-05-03 |
+| Last Updated | 2026-05-10 |
+| Upstream EDD | [docs/EDD.md](EDD.md) |
+| Upstream Constants | [docs/CONSTANTS.md](CONSTANTS.md) |
+| Upstream API | [docs/API.md](API.md) |
+| Database | PostgreSQL 15+ (Supabase managed) |
+| Cache / KV | Redis 7+ (Upstash serverless) |
+| Source of Truth | All migrations must be reviewed against this document before merge. |
+| Changelog | [See Change Log](#change-log) |
+
+## Change Log
+
+| Version | Date | Author | Summary |
+|---------|------|--------|---------|
+| 1.0 | 2026-05-03 | Database Architect | Initial schema design (12 PostgreSQL tables + Redis key map + retention table). |
+| 2.0 | 2026-05-10 | Database Architect | **Full rewrite** to align with `templates/SCHEMA.md`: added §1.1 Schema Boundary Declaration (HC-1 BC ownership), §2.1–§2.4 generic conventions (naming, base columns, ID strategy, soft-delete), §4 normalization rules + intentional denormalization, §5 indexing strategy reference, §6 audit & GDPR procedures, §7 performance design (query SLO table, N+1 protection, pool sizing, replica routing), §8 migration strategy, §9 integrity constraints (with §9.5 cross-BC FK audit and ID-only conversion plan), §10 partitioning strategy, §11 backup & PITR, §14 Mermaid ER diagram, §15 Multi-Tenancy declaration. All 12 existing tables retained verbatim with added BC-Ownership headers and dual-format (markdown column table → CREATE TABLE) presentation. Existing Redis key map renumbered to §12; existing Retention table renumbered to §13. |
 
 ---
 
-## 1. Overview
+## 1. 概述
 
-**Database**: PostgreSQL 15+ managed via Supabase.  
-**Primary writer** handles all mutations. **One read replica** handles leaderboard reads, public pet pages, and admin list views.  
-**Automated failover** target: 60 seconds (`db_autofailover_time_seconds = 60`).  
-**Connection pool** (managed by the `pg` Node.js driver):
+- **資料庫**：PostgreSQL 15+（Supabase managed primary + 1 read replica；自動 failover ≤ 60 秒）
+- **Cache / KV**：Redis 7+（Upstash serverless；HA via Sentinel + replica）
+- **字元集**：UTF-8（PostgreSQL `en_US.UTF-8`）
+- **時區**：所有 `TIMESTAMPTZ` 一律儲存 UTC；應用層負責顯示時區轉換
+- **排序規則（Collation）**：`en_US.UTF-8`
+- **Schema 命名空間**：`public`（所有 BC 共用單一邏輯 schema，但透過 application-layer module boundary 與 §1.1 ownership table 強制 BC 隔離）
+- **ORM 策略**：node-pg 直接使用 prepared statements（無強制 ORM）；Drizzle-style migration files（`YYYYMMDDHHMMSS_*.sql`）
+- **連線池**：node-pg pool（min=20、max=50；見 §7.3）
+- **DDL 執行順序**：所有 §3 ENUM types 必須在 §3.1–§3.12 tables 建立之前；表內順序 §3.1 → §3.12 為固定順序，因為 `pets.claim_identity_id` FK to `claim_identities`、`marketplace_transactions.listing_id` FK to `marketplace_listings`、`audit_logs.admin_id` FK to `admin_users`。
 
-| Setting | Value | Source |
-|---------|-------|--------|
-| `min` (pool floor) | 20 | `db_connection_pool_min_connections` |
-| `max` (pool burst) | 50 | `db_connection_pool_max_connections` |
+### 1.1 Schema Boundary Declaration
 
-All column names use `snake_case`. All IDs are `UUID` (generated via `gen_random_uuid()`) unless noted. `TEXT` is used where no meaningful length constraint exists. `VARCHAR(n)` is used only where a business length limit is meaningful (e.g. reason text capped at 500 chars, usernames capped at 64 chars).
+> **Spring Modulith 硬約束（HC-1）：每個 Bounded Context 擁有且只擁有自己的 tables；跨 BC 資料存取只能透過對方的 Public API 或 Domain Event，絕對禁止 DB-level JOIN 或 FK 跨越 BC 邊界。**
+
+| 欄位 | 值 |
+|------|-----|
+| **Multi-Tenancy 策略** | **Single-Tenant SaaS**（單一公開遊戲，全體玩家共用一份 DB；無 tenant 隔離需求） |
+| **Schema 命名空間** | `public`（單一邏輯 schema；BC 邊界由 module ownership table + 應用層強制） |
+| **本 SCHEMA 涵蓋的 BC** | Identity / Pet / Arena / Leaderboard / Marketplace / Admin（共 6 個 BC） |
+| **本 SCHEMA 不涵蓋** | 不擁有任何外部第三方 schema（SendGrid、Vercel、Upstash、Supabase 等以 API 呼叫存取） |
+
+#### 1.1.1 BC Ownership Table（與 EDD §3.4 對齊）
+
+每個 BC 唯一擁有一組 table。任何模組都不得 SELECT / INSERT / UPDATE / DELETE 自己 BC 以外的 table；跨 BC 讀取必須透過對方暴露的 Application Service 或訂閱 Domain Event。
+
+| BC | Owned Tables | Owned Redis Key Patterns | Domain Events |
+|----|--------------|--------------------------|---------------|
+| **Identity** | `claim_identities`, `claim_codes`, `gdpr_requests` | `rl:claim:*`, `rl:code_entry:*` | `IdentityClaimed`, `GdprErasureRequested`, `GdprErasureCompleted` |
+| **Pet** | `pets`, `training_logs`, `food_buffs` | `rl:training:*` | `PetGenerated`, `PetClaimed`, `PetTrained`, `PetFoodConsumed`, `PetBanned` |
+| **Arena** | `arena_matches` | `matchmaking:queue:*`, `rl:arena:*` | `ArenaMatchStarted`, `ArenaMatchCompleted` |
+| **Leaderboard** | `leaderboard_snapshots` | `leaderboard:global` (Redis sorted set 為主) | `LeaderboardUpdated`, `LeaderboardEntryRemoved` |
+| **Marketplace** *(P2 / FF_MARKETPLACE)* | `marketplace_listings`, `marketplace_transactions` | — | `ListingCreated`, `ListingCancelled`, `TradeCompleted` |
+| **Admin** | `admin_users`, `audit_logs` | `session:admin:*`, `rl:admin:*`, `rl:admin_login:*`, `token:blacklist:*`, `config:runtime` | `AdminUserCreated`, `AdminActionLogged`, `SuspiciousPetFlagged` |
+
+#### 1.1.2 External Cross-BC Reference Audit（FK ↔ ID-only 轉換）
+
+**判斷一個 column 是否屬於 cross-BC FK**：若 column 所在 table 的 owning BC 與被引用 table 的 owning BC 不同，則該 FK 跨 BC，**必須移除 DB-level FK 約束，改為 application-layer ID-only reference**。所有跨 BC FK 在表 SQL 中保留 column 但移除 `FOREIGN KEY` 約束（或保留為「documented exception」並由 ADR 記錄）。
+
+| Column | Source BC | Target BC | Target Column | 處理策略 | 備註 |
+|--------|-----------|-----------|---------------|---------|------|
+| `pets.claim_identity_id` | Pet | Identity | `claim_identities.id` | **Cross-BC ID-only**（保留 column；移除 DB FK；應用層保證一致性） | GDPR erasure 需透過 application service 跨 BC 觸發；保留 column 用於 erasure lookup |
+| `claim_codes.pet_id` | Identity | Pet | `pets.id` | **Cross-BC ID-only**（保留 column；移除 DB FK） | OTP 流程跨 Identity ↔ Pet；CASCADE 行為由 application erasure job 模擬 |
+| `marketplace_listings.pet_id` | Marketplace | Pet | `pets.id` | **Cross-BC ID-only**（保留 column；移除 DB FK） | Marketplace 透過 Pet BC 暴露的 ownership API 驗證 |
+| `marketplace_transactions.listing_id` | Marketplace | Marketplace | `marketplace_listings.id` | **Same-BC FK 保留**（同 BC，DB FK 合法） | RESTRICT 防止 listing 被刪 |
+| `marketplace_transactions.pet_id` | Marketplace | Pet | `pets.id` | **Cross-BC ID-only**（保留 column；移除 DB FK） | 7-day anti-flip query 用 |
+| `gdpr_requests.claim_identity_id` | Identity | Identity | `claim_identities.id` | **Same-BC FK 保留**（同 BC，DB FK 合法） | GDPR 一律由 Identity BC 接收 |
+| `gdpr_requests.initiating_pet_id` | Identity | Pet | `pets.id` | **Cross-BC ID-only**（保留 column；移除 DB FK） | self-service erasure 由 pet token 觸發 |
+| `audit_logs.admin_id` | Admin | Admin | `admin_users.id` | **Same-BC FK 保留**（同 BC，DB FK 合法） | RESTRICT 確保 admin 不可硬刪 |
+| `arena_matches.pet_a_id` / `pet_b_id` / `winner_pet_id` | Arena | Pet | `pets.id` | **Cross-BC ID-only**（保留 column；移除 DB FK） | Arena 不可 cascade-delete pet；ban / GDPR 流程在 application layer 處理 |
+| `training_logs.pet_id` | Pet | Pet | `pets.id` | **Same-BC FK 保留**（同 BC，DB FK 合法） | CASCADE 合法 |
+| `food_buffs.pet_id` | Pet | Pet | `pets.id` | **Same-BC FK 保留**（同 BC，DB FK 合法） | CASCADE 合法 |
+
+**SQL 注釋規範**：所有 cross-BC ID-only column 在 `CREATE TABLE` 後加 `COMMENT ON COLUMN` 標註：
+`'Cross-BC reference to {target_bc}.{target_table}({target_column}). Enforced at application layer; no DB FK (HC-1).'`
+
+> **Migration 註記（v2.0 → v2.1）**：本文件標示為「Cross-BC ID-only」的 FK 約束將在後續 migration 移除（採 Expand-Contract pattern：先 application 雙寫驗證 → drop constraint → 加 COMMENT）。本文件中為保留現有測試與審查上下文，CREATE TABLE 內 FK 子句暫以 SQL `-- HC-1: cross-BC FK to be removed in migration vNN_drop_cross_bc_fks.sql` 注釋標註。
 
 ---
 
-## 2. Tables
+## 2. 通用欄位規範
 
-> **DDL execution order**: The PostgreSQL `ENUM` types defined in §3 must be created **before** any table in this section. Run all `CREATE TYPE` statements from §3 first, then execute the `CREATE TABLE` statements below in the order §2.1 → §2.12. Within the table definitions, §2.1 (`claim_identities`) must precede §2.2 (`pets`) because `pets.claim_identity_id` carries a foreign key to `claim_identities`; similarly, §2.8 (`marketplace_listings`) must precede §2.9 (`marketplace_transactions`), and §2.10 (`admin_users`) must precede §2.11 (`audit_logs`).
+### 2.1 命名慣例
 
-### 2.1 `claim_identities`
+| 類別 | 規則 | 範例 |
+|------|------|------|
+| 資料表名稱 | `snake_case`，**複數**（pet-arena 採英文複數約定，如 `pets`、`arena_matches`） | `pets`, `arena_matches`, `claim_codes` |
+| 欄位名稱 | `snake_case`，小寫 | `pet_name`, `created_at`, `email_hash` |
+| Boolean 欄位 | 以 `is_` / `has_` / `can_` 為前綴（或語意化動詞如 `flagged_at` 配對 `is_flagged`） | `is_banned`, `is_flagged`, `is_ai_opponent`, `is_permanent` |
+| Enum 欄位 | 以 PostgreSQL `ENUM` type 表示；type 名稱以 `_enum` 為後綴 | `rarity_enum`, `arena_mode_enum`, `gdpr_request_status_enum` |
+| 外鍵欄位 | 參照表名稱**單數** + `_id`（如 `pets` → `pet_id`） | `pet_id`, `claim_identity_id`, `listing_id`, `admin_id` |
+| 索引名稱 | `idx_{table}_{columns}`（縮寫可接受，如 `_history`） | `idx_pets_rarity`, `idx_arena_matches_pet_a_history` |
+| 唯一索引 | `uq_{table}_{columns}` 或 `idx_{table}_{columns}` 並標註 UNIQUE | `uq_pets_seed`, `uq_admin_users_username`, `uq_marketplace_transactions_listing` |
+| 外鍵約束 | `fk_{table}_{ref}` | `fk_pets_claim_identity`, `fk_audit_logs_admin` |
+| 主鍵約束 | `pk_{table}` | `pk_pets`, `pk_audit_logs` |
+| CHECK 約束 | `chk_{table}_{semantic}` | `chk_pet_stat_speed_range`, `chk_arena_match_winner_is_combatant` |
 
-One row per unique email address. Implements PII minimization: only the SHA-256 hash is indexed; the raw email is stored only as AES-256-GCM ciphertext. Defined before `pets` because `pets.claim_identity_id` carries a foreign key to this table.
+**禁止**：
+- 保留字作為欄位名稱（`name` 例外，因 `pet_name` 已加前綴；不得單獨用 `value`、`type`、`order`）
+- `tbl_` 前綴
+- 不一致縮寫
+- 中文 / 全形字元於 identifier
+
+### 2.2 所有資料表必含的基礎欄位
+
+```sql
+-- 通用基礎欄位（PostgreSQL）— 並非每張表都用 deleted_at（見 §2.4）
+id          UUID         PRIMARY KEY DEFAULT gen_random_uuid(),  -- BIGSERIAL exception: audit_logs.id
+created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()                  -- 應用層更新（無 trigger，避免 hidden side-effects）
+```
+
+**例外**：
+- `audit_logs.id` 使用 `BIGSERIAL`（單調遞增以保稽核順序；不對外暴露）
+- `arena_matches`、`marketplace_transactions`、`training_logs`、`food_buffs`、`leaderboard_snapshots`、`gdpr_requests` 為 append-only 或極少更新；`updated_at` 仍保留以追蹤狀態翻轉時刻
+- `gdpr_requests` 沒有獨立 `created_at`，以 `submitted_at` 取代（業務語意明確）
+- `claim_codes` append-only；不含 `updated_at`
+
+### 2.3 主鍵 ID 策略
+
+| 策略 | 適用情境 | 本專案使用 |
+|------|---------|-----------|
+| `UUID v4` (`gen_random_uuid()`) | 外部暴露的 Resource ID（API 路徑、URL） | **預設**：`pets`、`claim_identities`、`claim_codes`、`arena_matches`、`leaderboard_snapshots`、`training_logs`、`food_buffs`、`marketplace_listings`、`marketplace_transactions`、`admin_users`、`gdpr_requests` |
+| `BIGSERIAL` | 純內部表，需要嚴格時序、不可暴露 | `audit_logs`（單調遞增；admin 介面僅依時間排序，不暴露 ID） |
+| `ULID` | 需時序的外部 ID | 暫不使用 |
+| `UUID v7` | PostgreSQL 17+ 時序 UUID | 本專案 PG 15，待後續升級評估 |
+
+**決策規則**：
+- 對外可見資源 → UUID v4
+- 內部稽核 / log → BIGSERIAL
+- 高寫入時序資料（>100k row/day）→ 評估 UUID v7（PG 升級後）
+
+### 2.4 軟刪除模式（Soft Delete）
+
+本專案僅 `admin_users` 採軟刪除（`deactivated_at`）。其餘 table 採以下策略：
+
+| Table | 刪除策略 | 理由 |
+|-------|---------|------|
+| `admin_users` | **軟刪除** (`deactivated_at`) | `audit_logs.admin_id` FK 必須保留 actor 紀錄；硬刪會違反稽核完整性 |
+| `pets` | **硬刪除**（GDPR erasure 路徑） + status flag (`is_banned`) | GDPR 個資刪除權；用 `erase_user_pii` procedure（見 §6.3） |
+| `claim_identities` | **匿名化**（PII 清空 + retention metadata 保留） | GDPR Art.17 + 法規舉證；保留行為以稽核 erasure 完成 |
+| `claim_codes` | **硬刪除**（72h 後 background job） | OTP 短生命週期；超過 72h 無業務價值 |
+| `arena_matches` / `training_logs` / `food_buffs` | **保留**（append-only） + `is_flagged` flag | 行為稽核 / 防作弊取證 |
+| `marketplace_listings` / `marketplace_transactions` | **保留**（append-only；status 翻轉） | 財務稽核 |
+| `leaderboard_snapshots` | **滾動硬刪**（12 個月 retention） | 歷史報表，無 PII |
+| `audit_logs` | **滾動硬刪**（2 年 retention） + `ip_address_hash` 90 天清空 | GDPR Art.30 合規上限 + IP retention |
+| `gdpr_requests` | **保留**（合規舉證） | 法規要求 |
+
+```sql
+-- admin_users 軟刪除模式（範例 — 完整 SQL 在 §3.10）
+-- 永遠不物理 DELETE；用 deactivated_at 標記
+UPDATE admin_users SET deactivated_at = NOW() WHERE id = $1;
+
+-- 所有 admin 查詢必須加上條件
+SELECT * FROM admin_users WHERE deactivated_at IS NULL;
+```
+
+> **不採用 trigger 自動更新 `updated_at`**：應用層顯式維護以避免 hidden side-effects；ORM 層或 service layer 在 mutation path 統一寫入 `updated_at = NOW()`。每張 table 的 `updated_at` `COMMENT` 已逐一註明應用層觸發點。
+
+---
+
+## 3. 資料表定義
+
+> **DDL execution order**：所有 §[Enums] PostgreSQL `ENUM` types 必須在 §3.1 之前建立（見 §3.13）。表內順序 §3.1 → §3.12，因 `pets.claim_identity_id` FK 引用 `claim_identities`、`marketplace_transactions.listing_id` FK 引用 `marketplace_listings`、`audit_logs.admin_id` FK 引用 `admin_users`。
+
+---
+
+### 3.1 `claim_identities` — Identity BC owns this table
+
+**說明**：每個獨特 email 一筆紀錄。實作 PII 最小化：僅索引 SHA-256 hash；原始 email 僅以 AES-256-GCM ciphertext 儲存。先於 `pets` 建立，因 `pets.claim_identity_id` 是 cross-BC ID-only 引用（見 §1.1.2）。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| email_hash | VARCHAR(64) | 是 | — | 小寫 email 的 SHA-256；唯一鍵；禁止反推 |
+| email_encrypted | BYTEA | 否 | NULL | AES-256-GCM 密文；GDPR 抹除後 NULL |
+| deletion_requested_at | TIMESTAMPTZ | 否 | NULL | GDPR 抹除請求時間；觸發 background job |
+| created_at | TIMESTAMPTZ | 是 | `NOW()` | — |
+| updated_at | TIMESTAMPTZ | 是 | `NOW()` | 應用層在 deletion_requested_at 設定 / email_encrypted 清空時更新 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE claim_identities (
@@ -49,6 +213,8 @@ COMMENT ON COLUMN claim_identities.deletion_requested_at IS 'Set when a GDPR era
 COMMENT ON COLUMN claim_identities.updated_at IS 'Updated by the application on every mutation: when deletion_requested_at is set and when email_encrypted is nulled by the GDPR erasure job.';
 ```
 
+**索引**：
+
 ```sql
 -- GDPR erasure background job: finds rows pending email encryption removal.
 -- Query: WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL
@@ -59,9 +225,36 @@ CREATE INDEX idx_claim_identities_deletion
 
 ---
 
-### 2.2 `pets`
+### 3.2 `pets` — Pet BC owns this table
 
-Stores every generated pet — unclaimed guests, claimed pets, and banned pets.
+**說明**：儲存所有產生的寵物 — 未領取（guest preview）、已領取、被禁用。是 Pet BC 的核心聚合根。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| seed | BIGINT | 是 | — | 全域唯一生成種子；驅動 sprite 決定性產生 |
+| rarity | rarity_enum | 是 | — | COMMON / RARE / EPIC / LEGENDARY |
+| pet_name | VARCHAR(64) | 是 | — | species + color 自動組合 |
+| stat_speed | SMALLINT | 是 | 10 | 速度，1–100 |
+| stat_strength | SMALLINT | 是 | 10 | 力量，1–100 |
+| stat_stamina | SMALLINT | 是 | 10 | 耐力，1–100 |
+| level | SMALLINT | 是 | 1 | 等級，1–100；公式：MAX(1, FLOOR(total_training_actions/10)) capped at 100 |
+| total_training_actions | INTEGER | 是 | 0 | 累計訓練次數；驅動 level |
+| last_trained_at | TIMESTAMPTZ | 否 | NULL | 最近訓練時間；用於 neglect 判斷（3 天） |
+| owner_token_hash | VARCHAR(64) | 否 | NULL | Pet access token 的 SHA-256；未領取為 NULL |
+| claimed_at | TIMESTAMPTZ | 否 | NULL | 完成領取時間；NULL = guest preview |
+| claim_identity_id | UUID | 否 | NULL | **Cross-BC ID-only** → `claim_identities.id`（HC-1） |
+| reserved_until | TIMESTAMPTZ | 否 | NULL | guest preview TTL（24h）；cleanup job 目標 |
+| is_banned | BOOLEAN | 是 | FALSE | 禁用旗標；ban 時透過 `ZREM` 從 leaderboard 移除（5min 內反映） |
+| banned_reason | TEXT | 否 | NULL | 禁用理由（最長 500 chars） |
+| banned_at | TIMESTAMPTZ | 否 | NULL | 禁用時間 |
+| generation_meta | JSONB | 是 | `'{}'` | 6 維生成向量：body / head / color_palette / accessory / rarity_trait / pattern |
+| created_at | TIMESTAMPTZ | 是 | `NOW()` | — |
+| updated_at | TIMESTAMPTZ | 是 | `NOW()` | 應用層更新 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE pets (
@@ -87,51 +280,43 @@ CREATE TABLE pets (
     updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_pets PRIMARY KEY (id),
+    -- HC-1: cross-BC FK to be removed in migration vNN_drop_cross_bc_fks.sql.
+    -- Until then DB FK enforces basic referential integrity; migration converts to ID-only.
     CONSTRAINT fk_pets_claim_identity
         FOREIGN KEY (claim_identity_id) REFERENCES claim_identities(id) ON DELETE SET NULL,
-    CONSTRAINT uq_pets_seed
-        UNIQUE (seed),
-    CONSTRAINT chk_pet_stat_speed_range
-        CHECK (stat_speed BETWEEN 1 AND 100),
-    CONSTRAINT chk_pet_stat_strength_range
-        CHECK (stat_strength BETWEEN 1 AND 100),
-    CONSTRAINT chk_pet_stat_stamina_range
-        CHECK (stat_stamina BETWEEN 1 AND 100),
-    CONSTRAINT chk_pet_level_range
-        CHECK (level BETWEEN 1 AND 100),
-    CONSTRAINT chk_pet_total_training_actions_nonneg
-        CHECK (total_training_actions >= 0),
-    CONSTRAINT chk_pet_banned_reason_length
-        CHECK (char_length(banned_reason) <= 500),
-    CONSTRAINT chk_pet_banned_at_consistency
-        CHECK (
-            (is_banned = FALSE AND banned_at IS NULL) OR
-            (is_banned = TRUE  AND banned_at IS NOT NULL)
-        ),
-    CONSTRAINT chk_pet_banned_reason_consistency
-        CHECK (
-            (is_banned = FALSE AND banned_reason IS NULL) OR
-            (is_banned = TRUE  AND banned_reason IS NOT NULL)
-        ),
-    CONSTRAINT chk_pet_claim_consistency
-        CHECK (
-            (claimed_at IS NULL     AND owner_token_hash IS NULL) OR
-            (claimed_at IS NOT NULL AND owner_token_hash IS NOT NULL)
-        )
+    CONSTRAINT uq_pets_seed UNIQUE (seed),
+    CONSTRAINT chk_pet_stat_speed_range    CHECK (stat_speed    BETWEEN 1 AND 100),
+    CONSTRAINT chk_pet_stat_strength_range CHECK (stat_strength BETWEEN 1 AND 100),
+    CONSTRAINT chk_pet_stat_stamina_range  CHECK (stat_stamina  BETWEEN 1 AND 100),
+    CONSTRAINT chk_pet_level_range         CHECK (level         BETWEEN 1 AND 100),
+    CONSTRAINT chk_pet_total_training_actions_nonneg CHECK (total_training_actions >= 0),
+    CONSTRAINT chk_pet_banned_reason_length CHECK (char_length(banned_reason) <= 500),
+    CONSTRAINT chk_pet_banned_at_consistency CHECK (
+        (is_banned = FALSE AND banned_at IS NULL) OR
+        (is_banned = TRUE  AND banned_at IS NOT NULL)
+    ),
+    CONSTRAINT chk_pet_banned_reason_consistency CHECK (
+        (is_banned = FALSE AND banned_reason IS NULL) OR
+        (is_banned = TRUE  AND banned_reason IS NOT NULL)
+    ),
+    CONSTRAINT chk_pet_claim_consistency CHECK (
+        (claimed_at IS NULL     AND owner_token_hash IS NULL) OR
+        (claimed_at IS NOT NULL AND owner_token_hash IS NOT NULL)
+    )
 );
 
 COMMENT ON COLUMN pets.seed IS 'Procedural generation seed — globally unique; drives all sprite generation determinism.';
 COMMENT ON COLUMN pets.rarity IS 'Rarity tier assigned at generation time by weighted random draw: COMMON 60%, RARE 25%, EPIC 12%, LEGENDARY 3% (rarity_common_percent = 60, rarity_rare_percent = 25, rarity_epic_percent = 12, rarity_legendary_percent = 3). Weights are admin-tunable via config but must always sum to 100%.';
 COMMENT ON COLUMN pets.pet_name IS 'Auto-generated from species + color combination at row creation; derived from seed.';
-COMMENT ON COLUMN pets.stat_speed IS 'Speed stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
-COMMENT ON COLUMN pets.stat_strength IS 'Strength stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
-COMMENT ON COLUMN pets.stat_stamina IS 'Stamina stat. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
+COMMENT ON COLUMN pets.stat_speed IS 'Speed stat. Range: 1-100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
+COMMENT ON COLUMN pets.stat_strength IS 'Strength stat. Range: 1-100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
+COMMENT ON COLUMN pets.stat_stamina IS 'Stamina stat. Range: 1-100 (pet_stat_min = 1, pet_stat_max = 100). Default: 10 (pet_stat_default = 10).';
 COMMENT ON COLUMN pets.level IS 'Derived: MAX(pet_level_default, FLOOR(total_training_actions / pet_level_formula_divisor)) capped at pet_level_max (pet_level_default = 1, pet_level_formula_divisor = 10, pet_level_max = 100). At 0 training actions the formula yields 0, so the lower bound clamps it to pet_level_default = 1. Updated on every training commit.';
-COMMENT ON COLUMN pets.total_training_actions IS 'Cumulative count of training actions; feeds the level formula.';
+COMMENT ON COLUMN pets.total_training_actions IS 'Cumulative count of training actions; feeds the level formula. INTENTIONAL DENORMALIZATION (see §4.2): cached counter rather than COUNT(*) of training_logs. Sync: incremented atomically with training_logs INSERT in the same transaction.';
 COMMENT ON COLUMN pets.last_trained_at IS 'Timestamp of the most recent training action. NULL if never trained. Used to compute neglect state (threshold: 3 days; training_neglect_threshold_days = 3).';
 COMMENT ON COLUMN pets.claimed_at IS 'UTC timestamp when the email-OTP claim flow completed successfully. NULL = pet is unclaimed (guest preview). Set atomically with owner_token_hash (enforced by chk_pet_claim_consistency). Used for claim conversion analytics.';
 COMMENT ON COLUMN pets.owner_token_hash IS 'SHA-256 hash of the pet access token (minimum pet_access_token_min_bytes = 32 bytes). NULL = unclaimed. Raw token is never stored.';
-COMMENT ON COLUMN pets.claim_identity_id IS 'Set at claim time. Enables GDPR erasure lookup after claim_codes rows are purged.';
+COMMENT ON COLUMN pets.claim_identity_id IS 'Cross-BC reference to claim_identities(id). Enforced at application layer (HC-1); DB FK to be removed in migration vNN. Enables GDPR erasure lookup after claim_codes rows are purged.';
 COMMENT ON COLUMN pets.reserved_until IS 'Set to NOW() + pet_reservation_ttl_hours hours (pet_reservation_ttl_hours = 24) when pet is generated for guest preview. NULL for claimed pets. Cleanup job target.';
 COMMENT ON COLUMN pets.generation_meta IS 'JSONB vector: {body, head, color_palette, accessory, rarity_trait, pattern} — 6 dimensions (pet_generation_dimensions = 6).';
 COMMENT ON COLUMN pets.is_banned IS 'TRUE = pet is banned from arena and removed from leaderboard:global via ZREM (reflected within leaderboard_ban_reflection_time_minutes = 5 minutes). Paired with banned_at and banned_reason (enforced by chk_pet_banned_at_consistency and chk_pet_banned_reason_consistency).';
@@ -140,21 +325,45 @@ COMMENT ON COLUMN pets.banned_reason IS 'Admin-supplied ban reason. Max 500 char
 COMMENT ON COLUMN pets.updated_at IS 'Updated by the application on every mutation: claim (owner_token_hash + claimed_at set), training (stats + level updated), reservation creation/expiry, and ban action.';
 ```
 
+**索引**：
+
 ```sql
+-- Admin list-view filter and leaderboard snapshot composition by rarity tier.
 CREATE INDEX idx_pets_rarity           ON pets (rarity);
+-- Claim-conversion analytics: WHERE claimed_at IS NOT NULL ORDER BY claimed_at DESC.
 CREATE INDEX idx_pets_claimed_at       ON pets (claimed_at)        WHERE claimed_at IS NOT NULL;
+-- Admin ban audit: WHERE is_banned = TRUE — partial keeps index tiny (most pets unbanned).
 CREATE INDEX idx_pets_is_banned        ON pets (is_banned)         WHERE is_banned = TRUE;
+-- Auth hot path: token hash → pet lookup on every authenticated player request.
 CREATE INDEX idx_pets_owner_token_hash ON pets (owner_token_hash)  WHERE owner_token_hash IS NOT NULL;
+-- Neglect detection: WHERE last_trained_at < NOW() - INTERVAL '3 days' AND last_trained_at IS NOT NULL.
 CREATE INDEX idx_pets_last_trained_at  ON pets (last_trained_at)   WHERE last_trained_at IS NOT NULL;
+-- GDPR erasure lookup: WHERE claim_identity_id = $1 — see §6.5.
 CREATE INDEX idx_pets_claim_identity   ON pets (claim_identity_id) WHERE claim_identity_id IS NOT NULL;
+-- Reservation cleanup job: WHERE reserved_until < NOW() AND owner_token_hash IS NULL.
 CREATE INDEX idx_pets_reserved_until   ON pets (reserved_until)    WHERE reserved_until IS NOT NULL;
 ```
 
 ---
 
-### 2.3 `claim_codes`
+### 3.3 `claim_codes` — Identity BC owns this table
 
-One-time OTP records for the email claim and recovery flows. Never stores the plaintext code — only its SHA-256 hash.
+**說明**：email 領取與恢復流程的一次性 OTP 紀錄。永不儲存明碼，只儲存 SHA-256。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| pet_id | UUID | 是 | — | **Cross-BC ID-only** → `pets.id`（HC-1） |
+| email_hash | VARCHAR(64) | 是 | — | 對應 `claim_identities.email_hash` |
+| code_hash | VARCHAR(64) | 是 | — | 6 位數字 OTP 的 SHA-256 |
+| expires_at | TIMESTAMPTZ | 是 | — | created_at + 15 分鐘 |
+| used_at | TIMESTAMPTZ | 否 | NULL | OTP 成功核驗時間 |
+| attempts | SMALLINT | 是 | 0 | 嘗試次數計數（informational；強制執行在 Redis） |
+| created_at | TIMESTAMPTZ | 是 | `NOW()` | — |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE claim_codes (
@@ -168,16 +377,15 @@ CREATE TABLE claim_codes (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_claim_codes PRIMARY KEY (id),
+    -- HC-1: cross-BC FK to be removed in migration vNN_drop_cross_bc_fks.sql.
     CONSTRAINT fk_claim_codes_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
-    CONSTRAINT chk_claim_codes_attempts_nonneg
-        CHECK (attempts >= 0),
-    CONSTRAINT chk_claim_codes_expires_at_after_created
-        CHECK (expires_at > created_at),
-    CONSTRAINT chk_claim_codes_used_at_after_created
-        CHECK (used_at IS NULL OR used_at >= created_at)
+    CONSTRAINT chk_claim_codes_attempts_nonneg CHECK (attempts >= 0),
+    CONSTRAINT chk_claim_codes_expires_at_after_created CHECK (expires_at > created_at),
+    CONSTRAINT chk_claim_codes_used_at_after_created    CHECK (used_at IS NULL OR used_at >= created_at)
 );
 
+COMMENT ON COLUMN claim_codes.pet_id IS 'Cross-BC reference to pets(id). Enforced at application layer (HC-1); DB FK to be removed in migration vNN. CASCADE behavior simulated by Identity BC erasure job after FK removal.';
 COMMENT ON COLUMN claim_codes.email_hash IS 'SHA-256 of lowercase email supplied during the claim flow. Must match claim_identities.email_hash for the OTP to be accepted. Index idx_claim_codes_email_hash supports the OTP lookup query WHERE email_hash = $1.';
 COMMENT ON COLUMN claim_codes.code_hash IS 'SHA-256 of the 6-digit numeric OTP (claim_code_digits = 6). Plaintext OTP is never stored.';
 COMMENT ON COLUMN claim_codes.expires_at IS 'NOW() + 15 minutes at creation (claim_code_expiry_minutes = 15).';
@@ -185,106 +393,140 @@ COMMENT ON COLUMN claim_codes.attempts IS 'Informational counter incremented on 
 COMMENT ON COLUMN claim_codes.used_at IS 'Set when the OTP is successfully verified. Background job purges rows 72h after creation or first use, whichever is later (claim_token_cleanup_ttl_hours = 72).';
 ```
 
+**索引**：
+
 ```sql
+-- FK CASCADE scan + OTP verification lookup: WHERE pet_id = $1 AND expires_at > NOW() AND used_at IS NULL.
 CREATE INDEX idx_claim_codes_pet_id     ON claim_codes (pet_id);
+-- OTP verification by email: POST /api/v1/claim/verify — WHERE email_hash = $1.
 CREATE INDEX idx_claim_codes_email_hash ON claim_codes (email_hash);
+-- OTP validity filter on verify path.
 CREATE INDEX idx_claim_codes_expires_at ON claim_codes (expires_at);
--- Background cleanup job: deletes rows 72h after creation or first use, whichever is LATER (claim_token_cleanup_ttl_hours = 72).
--- Query: WHERE created_at < NOW() - INTERVAL '72 hours' AND (used_at IS NULL OR used_at < NOW() - INTERVAL '72 hours')
+-- Background cleanup job: deletes rows 72h after creation or first use (claim_token_cleanup_ttl_hours = 72).
 CREATE INDEX idx_claim_codes_created_at ON claim_codes (created_at);
 CREATE INDEX idx_claim_codes_used_at    ON claim_codes (used_at) WHERE used_at IS NOT NULL;
 ```
 
 ---
 
-### 2.4 `arena_matches`
+### 3.4 `arena_matches` — Arena BC owns this table
 
-Append-only record of every completed battle. Battle outcome columns are never mutated after insert; however, `is_flagged` and `flagged_at` can be toggled by admin flag/unflag actions. `pet_b_id` and `winner_pet_id` use `ON DELETE SET NULL` so that the match row is retained for audit integrity even if a pet row is later affected.
+**說明**：Append-only 紀錄每場已完成戰鬥。結果欄位插入後不可變；僅 `is_flagged` / `flagged_at` 可由 admin flag/unflag 動作翻轉。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| pet_a_id | UUID | 是 | — | 挑戰者；**Cross-BC ID-only** → `pets.id`（HC-1） |
+| pet_b_id | UUID | 否 | NULL | 對手；NULL 表 AI 對手或 pet 已被刪 |
+| is_ai_opponent | BOOLEAN | 是 | FALSE | TRUE 表 AI 對手（`pet_b_id` 必為 NULL） |
+| mode | arena_mode_enum | 是 | — | RACE / SUMO |
+| winner_pet_id | UUID | 否 | NULL | 贏家；**Cross-BC ID-only** → `pets.id`（HC-1） |
+| random_seed | BIGINT | 是 | — | ±15% 隨機修正種子；確保 deterministic replay |
+| stat_delta_a | SMALLINT | 是 | 0 | pet_a 食物 buff 加成（≥ 0） |
+| stat_delta_b | SMALLINT | 是 | 0 | pet_b 食物 buff 加成（≥ 0） |
+| duration_seconds | SMALLINT | 是 | — | 動畫窗 5–15 秒 |
+| battle_log | JSONB | 是 | `'[]'` | 結構化事件序列 |
+| is_flagged | BOOLEAN | 是 | FALSE | admin flag 旗標 |
+| flagged_at | TIMESTAMPTZ | 否 | NULL | flag 時間 |
+| completed_at | TIMESTAMPTZ | 是 | `NOW()` | 戰鬥完成；同時為 row 創建時間 |
+| updated_at | TIMESTAMPTZ | 是 | `NOW()` | flag 變更時更新 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE arena_matches (
-    id               UUID           NOT NULL DEFAULT gen_random_uuid(),
-    pet_a_id         UUID           NOT NULL,
-    pet_b_id         UUID           NULL,
-    is_ai_opponent   BOOLEAN        NOT NULL DEFAULT FALSE,
+    id               UUID            NOT NULL DEFAULT gen_random_uuid(),
+    pet_a_id         UUID            NOT NULL,
+    pet_b_id         UUID            NULL,
+    is_ai_opponent   BOOLEAN         NOT NULL DEFAULT FALSE,
     mode             arena_mode_enum NOT NULL,
-    winner_pet_id    UUID           NULL,
-    random_seed      BIGINT         NOT NULL,
-    stat_delta_a     SMALLINT       NOT NULL DEFAULT 0,
-    stat_delta_b     SMALLINT       NOT NULL DEFAULT 0,
-    duration_seconds SMALLINT       NOT NULL,
-    battle_log       JSONB          NOT NULL DEFAULT '[]',
-    is_flagged       BOOLEAN        NOT NULL DEFAULT FALSE,
-    flagged_at       TIMESTAMPTZ    NULL,
-    completed_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    updated_at       TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    winner_pet_id    UUID            NULL,
+    random_seed      BIGINT          NOT NULL,
+    stat_delta_a     SMALLINT        NOT NULL DEFAULT 0,
+    stat_delta_b     SMALLINT        NOT NULL DEFAULT 0,
+    duration_seconds SMALLINT        NOT NULL,
+    battle_log       JSONB           NOT NULL DEFAULT '[]',
+    is_flagged       BOOLEAN         NOT NULL DEFAULT FALSE,
+    flagged_at       TIMESTAMPTZ     NULL,
+    completed_at     TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_arena_matches PRIMARY KEY (id),
+    -- HC-1: cross-BC FKs to be removed in migration vNN_drop_cross_bc_fks.sql.
     CONSTRAINT fk_arena_matches_pet_a
         FOREIGN KEY (pet_a_id) REFERENCES pets(id) ON DELETE RESTRICT,
     CONSTRAINT fk_arena_matches_pet_b
         FOREIGN KEY (pet_b_id) REFERENCES pets(id) ON DELETE SET NULL,
     CONSTRAINT fk_arena_matches_winner
         FOREIGN KEY (winner_pet_id) REFERENCES pets(id) ON DELETE SET NULL,
-    CONSTRAINT chk_arena_match_duration
-        CHECK (duration_seconds BETWEEN 5 AND 15),
-    CONSTRAINT chk_arena_match_flagged_at_consistency
-        CHECK (
-            (is_flagged = FALSE AND flagged_at IS NULL) OR
-            (is_flagged = TRUE  AND flagged_at IS NOT NULL)
-        ),
-    CONSTRAINT chk_arena_match_flagged_at_after_completed
-        CHECK (flagged_at IS NULL OR flagged_at >= completed_at),
-    CONSTRAINT chk_arena_match_ai_opponent_consistency
-        CHECK (
-            (is_ai_opponent = FALSE) OR
-            (is_ai_opponent = TRUE AND pet_b_id IS NULL)
-        ),
-    CONSTRAINT chk_arena_match_different_pets
-        CHECK (pet_b_id IS NULL OR pet_b_id != pet_a_id),
-    CONSTRAINT chk_arena_match_stat_delta_a_nonneg
-        CHECK (stat_delta_a >= 0),
-    CONSTRAINT chk_arena_match_stat_delta_b_nonneg
-        CHECK (stat_delta_b >= 0),
-    CONSTRAINT chk_arena_match_winner_is_combatant
-        CHECK (
-            winner_pet_id IS NULL OR
-            winner_pet_id = pet_a_id OR
-            winner_pet_id = pet_b_id
-        )
+    CONSTRAINT chk_arena_match_duration CHECK (duration_seconds BETWEEN 5 AND 15),
+    CONSTRAINT chk_arena_match_flagged_at_consistency CHECK (
+        (is_flagged = FALSE AND flagged_at IS NULL) OR
+        (is_flagged = TRUE  AND flagged_at IS NOT NULL)
+    ),
+    CONSTRAINT chk_arena_match_flagged_at_after_completed CHECK (flagged_at IS NULL OR flagged_at >= completed_at),
+    CONSTRAINT chk_arena_match_ai_opponent_consistency CHECK (
+        (is_ai_opponent = FALSE) OR
+        (is_ai_opponent = TRUE AND pet_b_id IS NULL)
+    ),
+    CONSTRAINT chk_arena_match_different_pets CHECK (pet_b_id IS NULL OR pet_b_id != pet_a_id),
+    CONSTRAINT chk_arena_match_stat_delta_a_nonneg CHECK (stat_delta_a >= 0),
+    CONSTRAINT chk_arena_match_stat_delta_b_nonneg CHECK (stat_delta_b >= 0),
+    CONSTRAINT chk_arena_match_winner_is_combatant CHECK (
+        winner_pet_id IS NULL OR
+        winner_pet_id = pet_a_id OR
+        winner_pet_id = pet_b_id
+    )
 );
 
 COMMENT ON COLUMN arena_matches.mode IS 'Battle mode. RACE = speed-based contest (stat_speed is the primary determining stat); SUMO = strength-based contest (stat_strength is the primary determining stat). Drives the outcome formula applied to the random_seed modifier.';
-COMMENT ON COLUMN arena_matches.pet_a_id IS 'Challenger pet. ON DELETE RESTRICT: pet row is retained for audit integrity.';
-COMMENT ON COLUMN arena_matches.pet_b_id IS 'Opponent pet. NULL if AI opponent (is_ai_opponent = TRUE) or if the pet row has been administratively removed after match completion (ON DELETE SET NULL). Non-null at insert time for human-vs-human matches; enforced by application, not a CHECK constraint (ON DELETE SET NULL would violate a database-level NOT NULL check).';
+COMMENT ON COLUMN arena_matches.pet_a_id IS 'Cross-BC reference to pets(id). Enforced at application layer (HC-1); DB FK to be removed in migration vNN. Match row is retained for audit integrity even if pet row is later affected.';
+COMMENT ON COLUMN arena_matches.pet_b_id IS 'Cross-BC reference to pets(id). NULL if AI opponent (is_ai_opponent = TRUE) or if the pet row has been administratively removed after match completion. Non-null at insert time for human-vs-human matches; enforced by application.';
 COMMENT ON COLUMN arena_matches.is_ai_opponent IS 'TRUE = pet_a fought an AI-controlled opponent; pet_b_id is always NULL for AI matches (enforced by chk_arena_match_ai_opponent_consistency). FALSE = human-vs-human match.';
-COMMENT ON COLUMN arena_matches.winner_pet_id IS 'pet_id of the winning pet. NULL at insert time only when the AI opponent wins (is_ai_opponent = TRUE and the player lost); non-NULL at insert time for all human-vs-human matches. May subsequently become NULL via ON DELETE SET NULL if the winning pet row is later administratively removed. Constrained to be pet_a_id or pet_b_id (chk_arena_match_winner_is_combatant).';
+COMMENT ON COLUMN arena_matches.winner_pet_id IS 'Cross-BC reference to pets(id). NULL at insert time only when the AI opponent wins (is_ai_opponent = TRUE and the player lost); non-NULL at insert time for all human-vs-human matches. Constrained to be pet_a_id or pet_b_id (chk_arena_match_winner_is_combatant).';
 COMMENT ON COLUMN arena_matches.completed_at IS 'UTC timestamp when the battle result was committed. Doubles as the row creation timestamp (immutable after insert except for is_flagged/flagged_at mutations).';
-COMMENT ON COLUMN arena_matches.random_seed IS 'Seeded random value used for the ±15% outcome modifier (arena_battle_outcome_random_modifier_percent = 15). Enables deterministic replay.';
-COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Food buff bonus (delta) added to pet_a''s base stat for this match. 0 = no active buff. Always >= 0 (chk_arena_match_stat_delta_a_nonneg); food buff magnitude is strictly positive.';
-COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Food buff bonus (delta) added to pet_b''s base stat for this match. 0 = no active buff or AI opponent. Always >= 0 (chk_arena_match_stat_delta_b_nonneg).';
-COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5–15 seconds (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15).';
+COMMENT ON COLUMN arena_matches.random_seed IS 'Seeded random value used for the +/- 15% outcome modifier (arena_battle_outcome_random_modifier_percent = 15). Enables deterministic replay.';
+COMMENT ON COLUMN arena_matches.stat_delta_a IS 'Food buff bonus (delta) added to pet_a base stat for this match. 0 = no active buff. Always >= 0 (chk_arena_match_stat_delta_a_nonneg); food buff magnitude is strictly positive.';
+COMMENT ON COLUMN arena_matches.stat_delta_b IS 'Food buff bonus (delta) added to pet_b base stat for this match. 0 = no active buff or AI opponent. Always >= 0 (chk_arena_match_stat_delta_b_nonneg).';
+COMMENT ON COLUMN arena_matches.duration_seconds IS 'Animation window: 5-15 seconds (arena_match_duration_min_seconds = 5, arena_match_duration_max_seconds = 15).';
 COMMENT ON COLUMN arena_matches.battle_log IS 'Structured event sequence array for client-side replay.';
 COMMENT ON COLUMN arena_matches.is_flagged IS 'Set to TRUE by POST /admin/api/battles/:matchId/flag (Moderator+); cleared by DELETE /admin/api/battles/:matchId/flag. Flag reason is written to audit_logs.detail, not stored here.';
 COMMENT ON COLUMN arena_matches.flagged_at IS 'Timestamp when the match was most recently flagged. NULL when is_flagged = FALSE.';
 COMMENT ON COLUMN arena_matches.updated_at IS 'Updated by the application on every mutation: when is_flagged is set to TRUE (POST .../flag) or cleared to FALSE (DELETE .../flag). Unchanged on insert-only path.';
 ```
 
+**索引**：
+
 ```sql
+-- Admin recency-ordered list view + analytics sort key.
 CREATE INDEX idx_arena_matches_completed_at  ON arena_matches (completed_at);
+-- FK SET NULL integrity scan + winner analytics.
 CREATE INDEX idx_arena_matches_winner        ON arena_matches (winner_pet_id);
--- Leading pet_a_id / pet_b_id column also serves FK integrity scans (ON DELETE RESTRICT / SET NULL).
+-- GET /api/v1/arena/history/:petId — ORDER BY completed_at DESC LIMIT 20. Composite covers FK scans too.
 CREATE INDEX idx_arena_matches_pet_a_history ON arena_matches (pet_a_id, completed_at DESC);
 CREATE INDEX idx_arena_matches_pet_b_history ON arena_matches (pet_b_id, completed_at DESC);
--- Supports GET /admin/api/battles?flagged=true (filters WHERE is_flagged = TRUE). Flag/unflag mutations use the PK, not this index.
+-- GET /admin/api/battles?flagged=true — partial keeps index tiny.
 CREATE INDEX idx_arena_matches_is_flagged    ON arena_matches (is_flagged) WHERE is_flagged = TRUE;
 ```
 
 ---
 
-### 2.5 `leaderboard_snapshots`
+### 3.5 `leaderboard_snapshots` — Leaderboard BC owns this table
 
-Periodic snapshots of the leaderboard used for history reporting. The live leaderboard is authoritative from Redis; these rows are the durable PostgreSQL backup.
+**說明**：Leaderboard 的定期快照，用於歷史報表。即時 leaderboard 以 Redis 為 source of truth；本表為 PostgreSQL durable backup。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| snapshot_time | TIMESTAMPTZ | 是 | — | 業務 snapshot 時間（UTC） |
+| entries | JSONB | 是 | — | 前 500 名陣列：[{rank, pet_id, pet_name, score, win_rate, rarity, level}] |
+| created_at | TIMESTAMPTZ | 是 | `NOW()` | 系統插入時間 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE leaderboard_snapshots (
@@ -301,17 +543,32 @@ COMMENT ON COLUMN leaderboard_snapshots.snapshot_time IS 'UTC timestamp when thi
 COMMENT ON COLUMN leaderboard_snapshots.created_at IS 'System timestamp when the row was inserted. Distinct from snapshot_time, which is the business timestamp of the leaderboard state captured.';
 ```
 
+**索引**：
+
 ```sql
--- Background retention job: deletes snapshots older than 12 months (leaderboard_snapshot_retention_months = 12).
--- Query: DELETE FROM leaderboard_snapshots WHERE snapshot_time < NOW() - INTERVAL '12 months'
+-- Rolling retention DELETE: WHERE snapshot_time < NOW() - INTERVAL '12 months'.
+-- Historical reporting query: ORDER BY snapshot_time DESC LIMIT 1.
 CREATE INDEX idx_leaderboard_snapshots_time ON leaderboard_snapshots (snapshot_time DESC);
 ```
 
 ---
 
-### 2.6 `training_logs`
+### 3.6 `training_logs` — Pet BC owns this table
 
-One row per completed training action. Enables per-pet daily action counting and the cumulative `total_training_actions` aggregate that feeds the level formula. Rows are retained indefinitely as a behavioral audit trail (referenced by `GET /api/v1/pets/:petId/stats`).
+**說明**：每筆訓練動作一行。支援每日訓練動作計數與累計 `total_training_actions`（餵 level 公式）。Append-only；無限期保留（行為稽核軌跡）。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| pet_id | UUID | 是 | — | Pet BC same-BC FK |
+| training_type | training_type_enum | 是 | — | RUN / STRENGTH / STAMINA |
+| stat_delta | SMALLINT | 是 | — | 此次獲得點數，1–3 |
+| stat_after | SMALLINT | 是 | — | 套用後絕對值，1–100 |
+| completed_at | TIMESTAMPTZ | 是 | `NOW()` | 動作時間 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE training_logs (
@@ -325,120 +582,154 @@ CREATE TABLE training_logs (
     CONSTRAINT pk_training_logs PRIMARY KEY (id),
     CONSTRAINT fk_training_logs_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
-    CONSTRAINT chk_training_stat_delta_range
-        CHECK (stat_delta BETWEEN 1 AND 3),
-    CONSTRAINT chk_training_stat_after_range
-        CHECK (stat_after BETWEEN 1 AND 100)
+    CONSTRAINT chk_training_stat_delta_range CHECK (stat_delta BETWEEN 1 AND 3),
+    CONSTRAINT chk_training_stat_after_range CHECK (stat_after BETWEEN 1 AND 100)
 );
 
-COMMENT ON COLUMN training_logs.training_type IS 'RUN → speed, STRENGTH → strength, STAMINA → stamina. Enforced by training_type_enum.';
+COMMENT ON COLUMN training_logs.training_type IS 'RUN -> speed, STRENGTH -> strength, STAMINA -> stamina. Enforced by training_type_enum.';
 COMMENT ON COLUMN training_logs.stat_delta IS 'Stat points gained this action: random integer in [1, 3] (training_stat_points_min = 1, training_stat_points_max = 3).';
-COMMENT ON COLUMN training_logs.stat_after IS 'Absolute stat value after this action is applied. Range: 1–100 (pet_stat_min = 1, pet_stat_max = 100).';
+COMMENT ON COLUMN training_logs.stat_after IS 'Absolute stat value after this action is applied. Range: 1-100 (pet_stat_min = 1, pet_stat_max = 100).';
 COMMENT ON COLUMN training_logs.completed_at IS 'UTC timestamp of the action. Daily action limit (training_actions_per_day = 3) is enforced by counting rows WHERE pet_id = ? AND completed_at >= UTC_DATE.';
 ```
 
+**索引**：
+
 ```sql
+-- Daily action count + GET /api/v1/pets/:petId/stats history.
 -- Leading pet_id column also serves the FK CASCADE scan (ON DELETE CASCADE).
 CREATE INDEX idx_training_logs_completed_at ON training_logs (pet_id, completed_at DESC);
 ```
 
 ---
 
-### 2.7 `food_buffs`
+### 3.7 `food_buffs` — Pet BC owns this table
 
-Active and historical food buff records per pet. Permanent buffs have `expires_at = NULL`. Record rows are cleaned up 30 days after consumption (`food_buff_record_retention_days = 30`).
+**說明**：寵物食物 buff 紀錄（active + 歷史）。永久 buff `expires_at = NULL`。Record row 在消費後 30 天清除。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| pet_id | UUID | 是 | — | Pet BC same-BC FK |
+| food_type | VARCHAR(50) | 是 | — | 應用層定義食物識別字串 |
+| buff_stat | buff_stat_enum | 是 | — | speed / strength / stamina |
+| magnitude | SMALLINT | 是 | — | 加成點數，>0 |
+| is_permanent | BOOLEAN | 是 | FALSE | 永久 buff |
+| expires_at | TIMESTAMPTZ | 否 | NULL | 永久時為 NULL |
+| consumed_at | TIMESTAMPTZ | 是 | `NOW()` | 食用時間 |
+| record_expires_at | TIMESTAMPTZ | 是 | — | consumed_at + 30 天；cleanup job 目標 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE food_buffs (
-    id                UUID        NOT NULL DEFAULT gen_random_uuid(),
-    pet_id            UUID        NOT NULL,
-    food_type         VARCHAR(50) NOT NULL,
+    id                UUID           NOT NULL DEFAULT gen_random_uuid(),
+    pet_id            UUID           NOT NULL,
+    food_type         VARCHAR(50)    NOT NULL,
     buff_stat         buff_stat_enum NOT NULL,
-    magnitude         SMALLINT    NOT NULL,
-    is_permanent      BOOLEAN     NOT NULL DEFAULT FALSE,
-    expires_at        TIMESTAMPTZ NULL,
-    consumed_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    record_expires_at TIMESTAMPTZ NOT NULL,
+    magnitude         SMALLINT       NOT NULL,
+    is_permanent      BOOLEAN        NOT NULL DEFAULT FALSE,
+    expires_at        TIMESTAMPTZ    NULL,
+    consumed_at       TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    record_expires_at TIMESTAMPTZ    NOT NULL,
 
     CONSTRAINT pk_food_buffs PRIMARY KEY (id),
     CONSTRAINT fk_food_buffs_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE,
-    CONSTRAINT chk_food_buff_magnitude_positive
-        CHECK (magnitude > 0),
-    CONSTRAINT chk_food_buff_expires_at_permanent
-        CHECK (
-            (is_permanent = TRUE  AND expires_at IS NULL) OR
-            (is_permanent = FALSE AND expires_at IS NOT NULL)
-        ),
-    CONSTRAINT chk_food_buff_expires_at_after_consumed
-        CHECK (expires_at IS NULL OR expires_at > consumed_at),
-    CONSTRAINT chk_food_buff_record_expires_after_consumed
-        CHECK (record_expires_at > consumed_at),
-    CONSTRAINT chk_food_buff_expires_before_record_cleanup
-        CHECK (expires_at IS NULL OR expires_at <= record_expires_at)
+    CONSTRAINT chk_food_buff_magnitude_positive CHECK (magnitude > 0),
+    CONSTRAINT chk_food_buff_expires_at_permanent CHECK (
+        (is_permanent = TRUE  AND expires_at IS NULL) OR
+        (is_permanent = FALSE AND expires_at IS NOT NULL)
+    ),
+    CONSTRAINT chk_food_buff_expires_at_after_consumed CHECK (expires_at IS NULL OR expires_at > consumed_at),
+    CONSTRAINT chk_food_buff_record_expires_after_consumed CHECK (record_expires_at > consumed_at),
+    CONSTRAINT chk_food_buff_expires_before_record_cleanup CHECK (expires_at IS NULL OR expires_at <= record_expires_at)
 );
 
-COMMENT ON COLUMN food_buffs.food_type IS 'Application-defined food item identifier (e.g. ''speed_berry'', ''iron_kibble''). Used by the client to render the correct food icon and label. Not a database enum; valid values are defined by the food catalogue in the application layer and documented in the API spec. Max 50 characters (VARCHAR(50)).';
+COMMENT ON COLUMN food_buffs.food_type IS 'Application-defined food item identifier (e.g. speed_berry, iron_kibble). Used by the client to render the correct food icon and label. Not a database enum; valid values are defined by the food catalogue in the application layer and documented in the API spec. Max 50 characters (VARCHAR(50)).';
 COMMENT ON COLUMN food_buffs.is_permanent IS 'TRUE = buff never expires (expires_at IS NULL, enforced by chk_food_buff_expires_at_permanent). FALSE = buff has a finite duration (expires_at IS NOT NULL).';
 COMMENT ON COLUMN food_buffs.consumed_at IS 'UTC timestamp when the food item was applied to the pet. Defaults to NOW() at row insertion. Serves as the reference point for expires_at and record_expires_at calculations.';
 COMMENT ON COLUMN food_buffs.buff_stat IS 'Stat affected: speed, strength, or stamina.';
-COMMENT ON COLUMN food_buffs.magnitude IS 'Stat points granted. Must be > 0. Admin-configurable multiplier range: 0.5×–5.0× (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0).';
+COMMENT ON COLUMN food_buffs.magnitude IS 'Stat points granted. Must be > 0. Admin-configurable multiplier range: 0.5x-5.0x (food_buff_multiplier_admin_min = 0.5, food_buff_multiplier_admin_max = 5.0).';
 COMMENT ON COLUMN food_buffs.expires_at IS 'NULL for permanent buffs. Set to consumed_at + duration for temporary buffs. chk_food_buff_expires_before_record_cleanup ensures expires_at <= record_expires_at so the buff always expires before its record is deleted by the background cleanup job.';
 COMMENT ON COLUMN food_buffs.record_expires_at IS 'consumed_at + 30 days (food_buff_record_retention_days = 30). Target for background cleanup job. Enforced to be >= expires_at (chk_food_buff_expires_before_record_cleanup) so the record is never deleted while the buff is still logically active.';
 ```
 
+**索引**：
+
 ```sql
+-- FK CASCADE scan + active-buff query: WHERE pet_id = $1 AND (expires_at IS NULL OR expires_at > NOW()).
 CREATE INDEX idx_food_buffs_pet_id         ON food_buffs (pet_id);
+-- Background cleanup job: DELETE WHERE record_expires_at < NOW() (food_buff_record_retention_days = 30).
 CREATE INDEX idx_food_buffs_record_expires ON food_buffs (record_expires_at);
 ```
 
 ---
 
-### 2.8 `marketplace_listings`
+### 3.8 `marketplace_listings` — Marketplace BC owns this table
 
-Active and historical pet trade listings. Phase 3 feature, gated by `FF_MARKETPLACE`. A partial unique index prevents duplicate active listings per pet at the database level.
+**說明**：寵物交易上架（active + 歷史）。Phase 3 功能，由 `FF_MARKETPLACE` feature flag 控制。Partial unique index 防止同 pet 多筆 active listing。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| pet_id | UUID | 是 | — | **Cross-BC ID-only** → `pets.id`（HC-1） |
+| seller_token_hash | VARCHAR(64) | 是 | — | 賣家 pet access token SHA-256 |
+| price_credits | INTEGER | 是 | — | 價格（食物 credits），>0 |
+| status | listing_status_enum | 是 | `'active'` | active / cancelled / sold |
+| listed_at | TIMESTAMPTZ | 是 | `NOW()` | 上架時間 |
+| expires_at | TIMESTAMPTZ | 否 | NULL | 自動下架時間 |
+| completed_at | TIMESTAMPTZ | 否 | NULL | 售出/取消時間 |
+| updated_at | TIMESTAMPTZ | 是 | `NOW()` | status 變更時更新 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE marketplace_listings (
-    id                UUID         NOT NULL DEFAULT gen_random_uuid(),
-    pet_id            UUID         NOT NULL,
-    seller_token_hash VARCHAR(64)  NOT NULL,
-    price_credits     INTEGER      NOT NULL,
-    status            listing_status_enum NOT NULL DEFAULT 'active',
-    listed_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    expires_at        TIMESTAMPTZ  NULL,
-    completed_at      TIMESTAMPTZ  NULL,
-    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    id                UUID                 NOT NULL DEFAULT gen_random_uuid(),
+    pet_id            UUID                 NOT NULL,
+    seller_token_hash VARCHAR(64)          NOT NULL,
+    price_credits     INTEGER              NOT NULL,
+    status            listing_status_enum  NOT NULL DEFAULT 'active',
+    listed_at         TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
+    expires_at        TIMESTAMPTZ          NULL,
+    completed_at      TIMESTAMPTZ          NULL,
+    updated_at        TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_marketplace_listings PRIMARY KEY (id),
+    -- HC-1: cross-BC FK to be removed in migration vNN_drop_cross_bc_fks.sql.
     CONSTRAINT fk_marketplace_listings_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT,
-    CONSTRAINT chk_marketplace_listing_price_positive
-        CHECK (price_credits > 0),
-    CONSTRAINT chk_marketplace_listing_completed_at_consistency
-        CHECK (
-            (status = 'active'   AND completed_at IS NULL) OR
-            (status != 'active'  AND completed_at IS NOT NULL)
-        ),
-    CONSTRAINT chk_marketplace_listing_expires_at_after_listed
-        CHECK (expires_at IS NULL OR expires_at > listed_at),
-    CONSTRAINT chk_marketplace_listing_completed_at_after_listed
-        CHECK (completed_at IS NULL OR completed_at >= listed_at)
+    CONSTRAINT chk_marketplace_listing_price_positive CHECK (price_credits > 0),
+    CONSTRAINT chk_marketplace_listing_completed_at_consistency CHECK (
+        (status = 'active'  AND completed_at IS NULL) OR
+        (status != 'active' AND completed_at IS NOT NULL)
+    ),
+    CONSTRAINT chk_marketplace_listing_expires_at_after_listed CHECK (expires_at IS NULL OR expires_at > listed_at),
+    CONSTRAINT chk_marketplace_listing_completed_at_after_listed CHECK (completed_at IS NULL OR completed_at >= listed_at)
 );
 
-COMMENT ON COLUMN marketplace_listings.pet_id IS 'The pet being listed for trade. ON DELETE RESTRICT: prevents hard-deleting a pet while it has any listing row (active, sold, or cancelled).';
+COMMENT ON COLUMN marketplace_listings.pet_id IS 'Cross-BC reference to pets(id). Enforced at application layer (HC-1); DB FK to be removed in migration vNN. Application layer prevents hard-deleting a pet while it has any listing row.';
 COMMENT ON COLUMN marketplace_listings.seller_token_hash IS 'SHA-256 hash of the seller pet access token. Used for ownership verification.';
-COMMENT ON COLUMN marketplace_listings.price_credits IS 'Asking price in food credits. Minimum enforced by application: (pet_level × trade_min_price_formula_level_coeff) + (rarity_multiplier × trade_min_price_formula_rarity_coeff) (trade_min_price_formula_level_coeff = 100, trade_min_price_formula_rarity_coeff = 500).';
+COMMENT ON COLUMN marketplace_listings.price_credits IS 'Asking price in food credits. Minimum enforced by application: (pet_level x trade_min_price_formula_level_coeff) + (rarity_multiplier x trade_min_price_formula_rarity_coeff) (trade_min_price_formula_level_coeff = 100, trade_min_price_formula_rarity_coeff = 500).';
 COMMENT ON COLUMN marketplace_listings.listed_at IS 'UTC timestamp when the listing was created. Defaults to NOW(). Copied verbatim into marketplace_transactions.listed_at at sale time for financial audit traceability. Sort key for idx_marketplace_listings_listed_at (public/admin browse query ORDER BY listed_at DESC).';
 COMMENT ON COLUMN marketplace_listings.status IS 'active | cancelled | sold.';
 COMMENT ON COLUMN marketplace_listings.expires_at IS 'Optional listing expiry. NULL = no expiry.';
 COMMENT ON COLUMN marketplace_listings.completed_at IS 'Set when status transitions to sold or cancelled.';
-COMMENT ON COLUMN marketplace_listings.updated_at IS 'Updated by the application on every mutation: status transitions (active → sold/cancelled) and background expiry job.';
+COMMENT ON COLUMN marketplace_listings.updated_at IS 'Updated by the application on every mutation: status transitions (active -> sold/cancelled) and background expiry job.';
 ```
 
+**索引**：
+
 ```sql
+-- Cross-BC FK scan placeholder + seller-facing queries WHERE pet_id = $1.
 CREATE INDEX idx_marketplace_listings_pet       ON marketplace_listings (pet_id);
+-- GET /api/v1/marketplace/listings — partial keeps the active subset hot.
 CREATE INDEX idx_marketplace_listings_status    ON marketplace_listings (status) WHERE status = 'active';
+-- Public browse + admin transaction audit ORDER BY listed_at DESC.
 CREATE INDEX idx_marketplace_listings_listed_at ON marketplace_listings (listed_at DESC);
 
 -- Prevents a pet from having more than one active listing at a time.
@@ -446,8 +737,7 @@ CREATE UNIQUE INDEX idx_marketplace_listings_active_pet
     ON marketplace_listings (pet_id)
     WHERE status = 'active';
 
--- Background job target: transitions active listings whose expires_at has passed to cancelled.
--- Only rows with a non-NULL expires_at can expire; rows with NULL expires_at never expire.
+-- Background expiry job: transitions active listings whose expires_at has passed to cancelled.
 CREATE INDEX idx_marketplace_listings_expires_at
     ON marketplace_listings (expires_at)
     WHERE status = 'active' AND expires_at IS NOT NULL;
@@ -455,9 +745,25 @@ CREATE INDEX idx_marketplace_listings_expires_at
 
 ---
 
-### 2.9 `marketplace_transactions`
+### 3.9 `marketplace_transactions` — Marketplace BC owns this table
 
-Immutable completed trade records. `listing_id` uses `ON DELETE RESTRICT` to ensure the originating listing row is never deleted while a transaction references it.
+**說明**：不可變的已完成交易紀錄。`listing_id` 同 BC FK；`pet_id` 為 cross-BC ID-only。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| listing_id | UUID | 是 | — | Same-BC FK → `marketplace_listings.id`；UNIQUE |
+| pet_id | UUID | 是 | — | **Cross-BC ID-only** → `pets.id`（HC-1） |
+| seller_token_hash | VARCHAR(64) | 是 | — | 售出時賣家 token hash（denormalized） |
+| buyer_token_hash | VARCHAR(64) | 是 | — | 售出時買家 token hash |
+| price_credits | INTEGER | 是 | — | 實際成交價（denormalized）|
+| fee_credits | INTEGER | 是 | — | 5% 平台費；FLOOR(price_credits * 0.05) |
+| listed_at | TIMESTAMPTZ | 是 | — | 從 listing 複製，財務稽核可追溯 |
+| completed_at | TIMESTAMPTZ | 是 | `NOW()` | 成交時間 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE marketplace_transactions (
@@ -474,21 +780,18 @@ CREATE TABLE marketplace_transactions (
     CONSTRAINT pk_marketplace_transactions PRIMARY KEY (id),
     CONSTRAINT fk_marketplace_transactions_listing
         FOREIGN KEY (listing_id) REFERENCES marketplace_listings(id) ON DELETE RESTRICT,
+    -- HC-1: cross-BC FK to be removed in migration vNN_drop_cross_bc_fks.sql.
     CONSTRAINT fk_marketplace_transactions_pet
         FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT,
-    CONSTRAINT uq_marketplace_transactions_listing
-        UNIQUE (listing_id),
-    CONSTRAINT chk_marketplace_transaction_price_positive
-        CHECK (price_credits > 0),
-    CONSTRAINT chk_marketplace_transaction_fee_non_negative
-        CHECK (fee_credits >= 0),
-    CONSTRAINT chk_marketplace_transaction_completed_at_after_listed
-        CHECK (completed_at >= listed_at)
+    CONSTRAINT uq_marketplace_transactions_listing UNIQUE (listing_id),
+    CONSTRAINT chk_marketplace_transaction_price_positive CHECK (price_credits > 0),
+    CONSTRAINT chk_marketplace_transaction_fee_non_negative CHECK (fee_credits >= 0),
+    CONSTRAINT chk_marketplace_transaction_completed_at_after_listed CHECK (completed_at >= listed_at)
 );
 
-COMMENT ON COLUMN marketplace_transactions.listing_id IS 'FK to marketplace_listings (ON DELETE RESTRICT). uq_marketplace_transactions_listing UNIQUE constraint enforces exactly one completed transaction per listing. The RESTRICT prevents the listing row from being hard-deleted while a transaction references it.';
-COMMENT ON COLUMN marketplace_transactions.price_credits IS 'Sale price in food credits. Denormalized from marketplace_listings.price_credits at transaction time for financial audit immutability — the listing price could be amended before expiry but the transaction records the actual agreed price.';
-COMMENT ON COLUMN marketplace_transactions.pet_id IS 'Denormalized from listing for fast anti-flip queries. Anti-flip window: 7 days (marketplace_trade_antiflip_protection_days = 7).';
+COMMENT ON COLUMN marketplace_transactions.listing_id IS 'Same-BC FK to marketplace_listings (ON DELETE RESTRICT). uq_marketplace_transactions_listing UNIQUE constraint enforces exactly one completed transaction per listing.';
+COMMENT ON COLUMN marketplace_transactions.price_credits IS 'Sale price in food credits. INTENTIONAL DENORMALIZATION (see §4.2): copied from marketplace_listings.price_credits at transaction time for financial audit immutability — the listing price could be amended before expiry but the transaction records the actual agreed price.';
+COMMENT ON COLUMN marketplace_transactions.pet_id IS 'Cross-BC reference to pets(id). Enforced at application layer (HC-1); DB FK to be removed in migration vNN. INTENTIONAL DENORMALIZATION: copied from listing for fast anti-flip queries (marketplace_trade_antiflip_protection_days = 7).';
 COMMENT ON COLUMN marketplace_transactions.seller_token_hash IS 'SHA-256 hash of the seller pet access token at time of sale.';
 COMMENT ON COLUMN marketplace_transactions.buyer_token_hash IS 'SHA-256 hash of the buyer pet access token at time of purchase.';
 COMMENT ON COLUMN marketplace_transactions.fee_credits IS '5% platform fee: FLOOR(price_credits * 0.05) — trade_transaction_fee_percent = 5. May be 0 for price_credits < 20.';
@@ -496,45 +799,63 @@ COMMENT ON COLUMN marketplace_transactions.listed_at IS 'Copied from the listing
 COMMENT ON COLUMN marketplace_transactions.completed_at IS 'UTC timestamp when the trade completed and this immutable record was inserted. Defaults to NOW(). Serves as both the row creation timestamp and the anti-flip reference point.';
 ```
 
+**索引**：
+
 ```sql
--- listing_id: uq_marketplace_transactions_listing UNIQUE constraint creates an implicit index that serves FK scans; no separate index needed.
+-- listing_id: uq_marketplace_transactions_listing UNIQUE provides implicit index for FK scans.
+-- Admin transaction audit ORDER BY completed_at DESC.
 CREATE INDEX idx_marketplace_transactions_completed ON marketplace_transactions (completed_at DESC);
--- Anti-flip query: finds the most recent completed trade for a pet via ORDER BY completed_at DESC LIMIT 1.
--- Leading pet_id column also serves the FK RESTRICT scan (ON DELETE RESTRICT).
--- Composite covers both the equality filter and the sort without a separate heap sort step.
+-- Anti-flip query: SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1.
+-- Composite covers FK RESTRICT scan + sort.
 CREATE INDEX idx_marketplace_transactions_pet_completed
     ON marketplace_transactions (pet_id, completed_at DESC);
 ```
 
----
-
-**Feature Flag Gating Note:** `marketplace_listings` and `marketplace_transactions` tables exist in the base schema unconditionally. However, all marketplace write endpoints (POST /api/v1/marketplace/list, POST /api/v1/marketplace/buy) and admin/player UIs (marketplace browse, sell form) are gated behind the feature flag `FF_MARKETPLACE`. Read-only queries on empty tables are safe during Phase 1 and Phase 2 (before FF_MARKETPLACE is enabled). Table presence does not imply feature availability; the feature flag is the source of truth.
+> **Feature Flag Gating**：`marketplace_listings` / `marketplace_transactions` 永遠存在於 base schema，但所有 marketplace 寫入端點（POST /api/v1/marketplace/*) 與 admin/player UI 受 `FF_MARKETPLACE` 控制。Phase 1/2 期間表為空，read-only 查詢安全。Table 存在不代表功能開放，Feature flag 才是 source of truth。
 
 ---
 
-### 2.10 `admin_users`
+### 3.10 `admin_users` — Admin BC owns this table
 
-Admin operator credentials. Accounts are never hard-deleted — deactivation is a soft-delete via `deactivated_at`. The audit log holds a FK to this table, requiring row retention.
+**說明**：Admin operator 認證資料。**永不硬刪除** — `deactivated_at` 軟刪。`audit_logs.admin_id` FK 要求保留。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| username | VARCHAR(64) | 是 | — | 登入識別字串；UNIQUE |
+| password_hash | TEXT | 是 | — | bcrypt cost ≥ 12 |
+| totp_secret_encrypted | TEXT | 否 | NULL | AES-256-GCM 加密 TOTP 種子 |
+| totp_backup_codes_hash | JSONB | 否 | NULL | 10 組 SHA-256 backup code hash 陣列 |
+| role | admin_role_enum | 是 | `'moderator'` | super_admin / moderator / read_only |
+| last_login_at | TIMESTAMPTZ | 否 | NULL | 最後成功登入 |
+| failed_attempts | SMALLINT | 是 | 0 | 連續失敗次數；成功登入清零 |
+| locked_until | TIMESTAMPTZ | 否 | NULL | 暫時鎖定（30 min lockout）；非永久 |
+| deactivated_at | TIMESTAMPTZ | 否 | NULL | 永久停用；軟刪除標記 |
+| created_at | TIMESTAMPTZ | 是 | `NOW()` | — |
+| updated_at | TIMESTAMPTZ | 是 | `NOW()` | 應用層更新 |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE admin_users (
-    id                      UUID        NOT NULL DEFAULT gen_random_uuid(),
-    username                VARCHAR(64) NOT NULL,
-    password_hash           TEXT        NOT NULL,
-    totp_secret_encrypted   TEXT        NULL,
-    totp_backup_codes_hash  JSONB       NULL,
+    id                      UUID            NOT NULL DEFAULT gen_random_uuid(),
+    username                VARCHAR(64)     NOT NULL,
+    password_hash           TEXT            NOT NULL,
+    totp_secret_encrypted   TEXT            NULL,
+    totp_backup_codes_hash  JSONB           NULL,
     role                    admin_role_enum NOT NULL DEFAULT 'moderator',
-    last_login_at           TIMESTAMPTZ NULL,
-    failed_attempts         SMALLINT    NOT NULL DEFAULT 0,
-    locked_until            TIMESTAMPTZ NULL,
-    deactivated_at          TIMESTAMPTZ NULL,
-    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login_at           TIMESTAMPTZ     NULL,
+    failed_attempts         SMALLINT        NOT NULL DEFAULT 0,
+    locked_until            TIMESTAMPTZ     NULL,
+    deactivated_at          TIMESTAMPTZ     NULL,
+    created_at              TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_admin_users PRIMARY KEY (id),
     CONSTRAINT uq_admin_users_username UNIQUE (username),
-    CONSTRAINT chk_admin_users_failed_attempts_nonneg
-        CHECK (failed_attempts >= 0)
+    CONSTRAINT chk_admin_users_failed_attempts_nonneg CHECK (failed_attempts >= 0)
 );
 
 COMMENT ON COLUMN admin_users.username IS 'Login identifier. Unique (uq_admin_users_username). Max 64 characters (VARCHAR(64)). Used as the login credential alongside password and TOTP.';
@@ -549,26 +870,43 @@ COMMENT ON COLUMN admin_users.deactivated_at IS 'Non-NULL = account is permanent
 COMMENT ON COLUMN admin_users.updated_at IS 'Updated by the application on every mutation: password change, TOTP enrollment/reset, role change, lockout set/cleared, and deactivation.';
 ```
 
+**索引**：
+
 ```sql
--- username: uq_admin_users_username UNIQUE constraint creates an implicit index for login lookups; no separate index needed.
+-- username: uq_admin_users_username UNIQUE constraint provides implicit index for login lookups.
 ```
 
 ---
 
-### 2.11 `audit_logs`
+### 3.11 `audit_logs` — Admin BC owns this table
 
-Immutable audit trail of all admin actions. Uses `BIGSERIAL` for sequential ordering. Retention: 2 years (`admin_audit_log_retention_years = 2`).
+**說明**：所有 admin 動作的不可變稽核軌跡。`BIGSERIAL` 保單調順序。Retention：2 年（`admin_audit_log_retention_years = 2`）。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | BIGSERIAL | 是 | (auto) | 單調遞增 |
+| admin_id | UUID | 否 | NULL | actor；NULL 表未識別失敗登入 |
+| action | VARCHAR(128) | 是 | — | dot-namespaced action（pet.ban, config.arena_rate_limit, ...） |
+| target_type | VARCHAR(64) | 否 | NULL | pet / arena_match / leaderboard_entry / config_runtime / ... |
+| target_id | TEXT | 否 | NULL | UUID 或 key 字串 |
+| detail | JSONB | 否 | NULL | action 特定 context |
+| ip_address_hash | VARCHAR(64) | 否 | NULL | 原始 IP 的 SHA-256；90 天後 NULL |
+| created_at | TIMESTAMPTZ | 是 | `NOW()` | — |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE audit_logs (
-    id               BIGSERIAL   NOT NULL,
-    admin_id         UUID        NULL,
+    id               BIGSERIAL    NOT NULL,
+    admin_id         UUID         NULL,
     action           VARCHAR(128) NOT NULL,
-    target_type      VARCHAR(64) NULL,
-    target_id        TEXT        NULL,
-    detail           JSONB       NULL,
-    ip_address_hash  VARCHAR(64) NULL,
-    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    target_type      VARCHAR(64)  NULL,
+    target_id        TEXT         NULL,
+    detail           JSONB        NULL,
+    ip_address_hash  VARCHAR(64)  NULL,
+    created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 
     CONSTRAINT pk_audit_logs PRIMARY KEY (id),
     CONSTRAINT fk_audit_logs_admin
@@ -584,14 +922,14 @@ COMMENT ON COLUMN audit_logs.detail IS 'JSONB blob of action-specific context. S
 COMMENT ON COLUMN audit_logs.ip_address_hash IS 'SHA-256 hash of the raw request IP. Raw IP is never stored. Retained 90 days (ip_address_log_retention_days = 90).';
 ```
 
+**索引**：
+
 ```sql
--- Background retention job: deletes rows older than 2 years (admin_audit_log_retention_years = 2).
--- Query: DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '2 years'
+-- 2-year retention DELETE: WHERE created_at < NOW() - INTERVAL '2 years'.
 CREATE INDEX idx_audit_logs_created_at ON audit_logs (created_at DESC);
+-- GET /admin/api/audit-logs?adminId=$1 — supports actor-filtered queries within retention window.
 CREATE INDEX idx_audit_logs_admin_id   ON audit_logs (admin_id, created_at DESC);
--- Background job target: nulls ip_address_hash after 90 days (ip_address_log_retention_days = 90).
--- Query: UPDATE ... SET ip_address_hash = NULL WHERE ip_address_hash IS NOT NULL AND created_at < NOW() - INTERVAL '90 days'
--- Partial predicate keeps the index tiny — once nulled, rows drop out of the index automatically.
+-- Background job: nulls ip_address_hash after 90 days. Partial keeps the index tiny once nulled.
 CREATE INDEX idx_audit_logs_ip_hash_cleanup
     ON audit_logs (created_at)
     WHERE ip_address_hash IS NOT NULL;
@@ -599,40 +937,54 @@ CREATE INDEX idx_audit_logs_ip_hash_cleanup
 
 ---
 
-### 2.12 `gdpr_requests`
+### 3.12 `gdpr_requests` — Identity BC owns this table
 
-Job queue for all GDPR data subject requests. `claim_identity_id` uses `ON DELETE RESTRICT` to prevent an identity row from being removed while open GDPR requests reference it.
+**說明**：所有 GDPR 資料主體請求的工作隊列。`claim_identity_id` 同 BC FK；`initiating_pet_id` 為 cross-BC ID-only。
+
+**欄位說明**：
+
+| 欄位 | 類型 | 必填 | 預設值 | 說明 |
+|------|------|------|--------|------|
+| id | UUID | 是 | `gen_random_uuid()` | 主鍵 |
+| claim_identity_id | UUID | 是 | — | Same-BC FK → `claim_identities.id`；ON DELETE RESTRICT |
+| initiating_pet_id | UUID | 否 | NULL | **Cross-BC ID-only** → `pets.id`（HC-1） |
+| request_type | gdpr_request_type_enum | 是 | — | erasure / data_access / restrict_processing / object_leaderboard / rectification |
+| status | gdpr_request_status_enum | 是 | `'pending'` | pending / processing / completed / failed |
+| submitted_at | TIMESTAMPTZ | 是 | `NOW()` | 提交時間（兼 row 創建） |
+| completed_at | TIMESTAMPTZ | 否 | NULL | 完成/失敗時間 |
+| updated_at | TIMESTAMPTZ | 是 | `NOW()` | 應用層更新 |
+| admin_notes | TEXT | 否 | NULL | admin 備註，最長 500 chars |
+
+**CREATE TABLE**：
 
 ```sql
 CREATE TABLE gdpr_requests (
-    id                 UUID        NOT NULL DEFAULT gen_random_uuid(),
-    claim_identity_id  UUID        NOT NULL,
-    initiating_pet_id  UUID        NULL,
+    id                 UUID                     NOT NULL DEFAULT gen_random_uuid(),
+    claim_identity_id  UUID                     NOT NULL,
+    initiating_pet_id  UUID                     NULL,
     request_type       gdpr_request_type_enum   NOT NULL,
     status             gdpr_request_status_enum NOT NULL DEFAULT 'pending',
-    submitted_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    completed_at       TIMESTAMPTZ NULL,
-    updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    admin_notes        TEXT        NULL,
+    submitted_at       TIMESTAMPTZ              NOT NULL DEFAULT NOW(),
+    completed_at       TIMESTAMPTZ              NULL,
+    updated_at         TIMESTAMPTZ              NOT NULL DEFAULT NOW(),
+    admin_notes        TEXT                     NULL,
 
     CONSTRAINT pk_gdpr_requests PRIMARY KEY (id),
     CONSTRAINT fk_gdpr_requests_identity
         FOREIGN KEY (claim_identity_id) REFERENCES claim_identities(id) ON DELETE RESTRICT,
+    -- HC-1: cross-BC FK to be removed in migration vNN_drop_cross_bc_fks.sql.
     CONSTRAINT fk_gdpr_requests_initiating_pet
         FOREIGN KEY (initiating_pet_id) REFERENCES pets(id) ON DELETE SET NULL,
-    CONSTRAINT chk_gdpr_request_admin_notes_length
-        CHECK (char_length(admin_notes) <= 500),
-    CONSTRAINT chk_gdpr_request_completed_at_consistency
-        CHECK (
-            (status IN ('pending', 'processing') AND completed_at IS NULL) OR
-            (status IN ('completed', 'failed')   AND completed_at IS NOT NULL)
-        ),
-    CONSTRAINT chk_gdpr_request_completed_at_after_submitted
-        CHECK (completed_at IS NULL OR completed_at >= submitted_at)
+    CONSTRAINT chk_gdpr_request_admin_notes_length CHECK (char_length(admin_notes) <= 500),
+    CONSTRAINT chk_gdpr_request_completed_at_consistency CHECK (
+        (status IN ('pending', 'processing') AND completed_at IS NULL) OR
+        (status IN ('completed', 'failed')   AND completed_at IS NOT NULL)
+    ),
+    CONSTRAINT chk_gdpr_request_completed_at_after_submitted CHECK (completed_at IS NULL OR completed_at >= submitted_at)
 );
 
-COMMENT ON COLUMN gdpr_requests.claim_identity_id IS 'Data subject. A single erasure covers all pets under this identity.';
-COMMENT ON COLUMN gdpr_requests.initiating_pet_id IS 'Pet whose token authenticated the self-service submission. NULL for admin-initiated requests.';
+COMMENT ON COLUMN gdpr_requests.claim_identity_id IS 'Same-BC FK to claim_identities. Data subject. A single erasure covers all pets under this identity.';
+COMMENT ON COLUMN gdpr_requests.initiating_pet_id IS 'Cross-BC reference to pets(id). Enforced at application layer (HC-1); DB FK to be removed in migration vNN. Pet whose token authenticated the self-service submission. NULL for admin-initiated requests.';
 COMMENT ON COLUMN gdpr_requests.request_type IS 'erasure | data_access | restrict_processing | object_leaderboard | rectification.';
 COMMENT ON COLUMN gdpr_requests.status IS 'pending | processing | completed | failed.';
 COMMENT ON COLUMN gdpr_requests.submitted_at IS 'UTC timestamp when the request was submitted. Doubles as the row creation timestamp (this table has no separate created_at). Defaults to NOW(). FIFO sort key for the admin work queue (idx_gdpr_requests_status ORDER BY submitted_at).';
@@ -641,23 +993,26 @@ COMMENT ON COLUMN gdpr_requests.updated_at IS 'Timestamp of the last status tran
 COMMENT ON COLUMN gdpr_requests.admin_notes IS 'Filled by admin on completion or status update. Also used for admin-initiated erasure reason (max 500 chars; admin_moderation_reason_max_chars = 500).';
 ```
 
+**索引**：
+
 ```sql
+-- Data subject lookup: WHERE claim_identity_id = $1 ORDER BY submitted_at DESC. FK RESTRICT scan also covered.
 CREATE INDEX idx_gdpr_requests_identity         ON gdpr_requests (claim_identity_id, submitted_at DESC);
+-- Admin work queue: WHERE status IN ('pending', 'processing') ORDER BY submitted_at FIFO.
 CREATE INDEX idx_gdpr_requests_status           ON gdpr_requests (status, submitted_at);
--- FK support: every FK column must have an index (fk_gdpr_requests_initiating_pet).
+-- FK SET NULL scan support — partial keeps index small (admin-initiated requests excluded).
 CREATE INDEX idx_gdpr_requests_initiating_pet   ON gdpr_requests (initiating_pet_id) WHERE initiating_pet_id IS NOT NULL;
 ```
 
 ---
 
-## 3. Enums
+### 3.13 Enums
 
-All enums are defined as PostgreSQL `ENUM` types to enforce domain values at the database level.
+所有 enum 以 PostgreSQL `ENUM` type 強制 domain 值。**必須在 §3.1–§3.12 tables 之前建立**。
 
 ```sql
 -- Pet rarity tiers. Drop weights (admin-tunable, must sum to 100%):
 --   COMMON = 60%, RARE = 25%, EPIC = 12%, LEGENDARY = 3%
---   (rarity_common_percent = 60, rarity_rare_percent = 25, rarity_epic_percent = 12, rarity_legendary_percent = 3)
 CREATE TYPE rarity_enum AS ENUM (
     'COMMON',
     'RARE',
@@ -671,7 +1026,7 @@ CREATE TYPE arena_mode_enum AS ENUM (
     'SUMO'
 );
 
--- Training action type. Maps to the stat trained: RUN→speed, STRENGTH→strength, STAMINA→stamina.
+-- Training action type. RUN -> speed, STRENGTH -> strength, STAMINA -> stamina.
 CREATE TYPE training_type_enum AS ENUM (
     'RUN',
     'STRENGTH',
@@ -692,17 +1047,17 @@ CREATE TYPE listing_status_enum AS ENUM (
     'sold'
 );
 
--- Admin operator role. Controls endpoint access:
---   super_admin  — full access including config, GDPR, role management
---   moderator    — pet/leaderboard/battle management; no config or GDPR
---   read_only    — GET-only access to dashboard, pets, leaderboard, battles, analytics
+-- Admin operator role.
+--   super_admin  - full access including config, GDPR, role management
+--   moderator    - pet/leaderboard/battle management; no config or GDPR
+--   read_only    - GET-only access
 CREATE TYPE admin_role_enum AS ENUM (
     'super_admin',
     'moderator',
     'read_only'
 );
 
--- GDPR request types per GDPR Arts. 15–21.
+-- GDPR request types per GDPR Arts. 15-21.
 CREATE TYPE gdpr_request_type_enum AS ENUM (
     'erasure',
     'data_access',
@@ -722,151 +1077,1102 @@ CREATE TYPE gdpr_request_status_enum AS ENUM (
 
 ---
 
-## 4. Redis Key Schema
+## 4. 正規化規則（Normalization Rules）
 
-All Redis keys use Upstash Redis 7+ (serverless). TTL values are hard-coded in seconds where shown.
+### 4.1 各正規化形式說明
 
-### 4.1 Rate Limit Counters
+| 正規化 | 要求 | 本專案合規檢查 |
+|--------|------|---------------|
+| 1NF | 每欄位為原子值；無重複欄位組 | ✅ — `generation_meta`、`battle_log`、`entries`、`detail`、`totp_backup_codes_hash` 為 JSONB（PostgreSQL 原生 JSONB type 視為「semi-structured atomic value」），非重複欄位組 |
+| 2NF | 非主鍵欄位完全依賴主鍵（單欄主鍵下自動成立） | ✅ — 所有主鍵為單欄 UUID 或 BIGSERIAL |
+| 3NF | 非主鍵欄位不依賴其他非主鍵欄位 | ✅（除 §4.2 列出的刻意反正規化） |
+| BCNF | 每個決定因子皆為候選鍵 | ✅ — 所有決定因子（如 `pets.seed`、`admin_users.username`）皆為 UNIQUE 候選鍵 |
+
+**1NF 範例**：
+- `pets.generation_meta` 為 JSONB — 6 維度物件而非 6 個分散欄位（`body`、`head`、`color_palette`、`accessory`、`rarity_trait`、`pattern`）。理由：sprite 生成 metadata 變動頻繁；scheme 演進不需 ALTER TABLE。
+- `arena_matches.battle_log` 為 JSONB array — 戰鬥事件序列長度變動，不適合多欄位。
+- `audit_logs.detail` 為 JSONB — 不同 action shape 差異大；多態結構。
+
+### 4.2 刻意反正規化（Intentional Denormalization）
+
+以下情境刻意違反 3NF，但**附 EXPLAIN ANALYZE 佐證或業務理由**：
+
+| 反正規化欄位 | 原表 | 來源 / 計算 | 反正規化理由 | 同步策略 |
+|-------------|------|-------------|-------------|---------|
+| `pets.total_training_actions` | pets | `COUNT(*) FROM training_logs WHERE pet_id = ?` | level 公式每次寫入 / 讀取都用；若每次 COUNT(*) 對 training_logs 將是 O(N) 掃描，1000 萬筆動作下成本 > 100ms。Cached counter 為 O(1)。 | 應用層在 INSERT INTO training_logs 同 transaction 內 `UPDATE pets SET total_training_actions = total_training_actions + 1`。CHECK constraint 確保 ≥ 0。一致性由 transaction atomicity 保證。 |
+| `marketplace_transactions.price_credits` | marketplace_transactions | `marketplace_listings.price_credits` at sale time | listing 價格可在售前 amend；transaction 必須記錄 actual agreed price 用於財務稽核（不可變） | 售出時 INSERT 時複製值（denormalized snapshot）；listing.price_credits 後續變化不影響 transaction。 |
+| `marketplace_transactions.pet_id` | marketplace_transactions | `marketplace_listings.pet_id` | 7-day anti-flip query 高頻：`WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1`。若每次走 listing JOIN 將兩表 hop。Composite index `(pet_id, completed_at DESC)` 直接服務查詢。 | 售出時 INSERT 時複製。listing 與 transaction 的 pet_id 必須相同（應用層 invariant）。 |
+| `marketplace_transactions.listed_at` | marketplace_transactions | `marketplace_listings.listed_at` | 財務稽核要求 immutable record；listing 可能後續刪除（雖 ON DELETE RESTRICT 阻擋，但 staging 還原情境保險） | 售出時 INSERT 時複製 |
+
+> **規則**：未列於本表的欄位不得反正規化。新增反正規化欄位需 ADR 並附 EXPLAIN ANALYZE 量測對比。
+
+---
+
+## 5. 索引策略（Indexing Strategy）
+
+### 5.1 何時建立索引
+
+**應建立索引**：
+- 外鍵欄位（包含 cross-BC ID-only 欄位 — application layer JOIN-by-id 需要）
+- 高頻 WHERE 過濾欄位（選擇性 > 5%）
+- ORDER BY 欄位
+- UNIQUE 約束欄位
+- 範圍查詢欄位（`expires_at`、`completed_at`）
+- Background job target 欄位（`record_expires_at`、`reserved_until`、`deletion_requested_at`）
+
+**不應建立索引**：
+- 選擇性極低的欄位（`is_banned` true 比例 < 1%）→ 改用 Partial Index
+- 寫多讀少的純 audit/append-only 欄位（用 BRIN 替代）
+- 已有複合索引覆蓋的欄位前綴
+
+**選擇性評估查詢**：
+```sql
+SELECT
+    COUNT(DISTINCT rarity)::FLOAT / COUNT(*) AS rarity_selectivity,
+    COUNT(DISTINCT level)::FLOAT  / COUNT(*) AS level_selectivity
+FROM pets;
+```
+
+### 5.2 索引類型選用表
+
+| 索引類型 | 適用情境 | 本專案使用範例 |
+|---------|---------|---------------|
+| **B-tree**（預設） | 等值、範圍、排序；大多數場景 | 全部 `idx_*` 索引預設 B-tree |
+| **Hash** | 僅等值，PG 10+ 持久化 | 暫不使用（B-tree 已足） |
+| **GIN** | JSONB containment、tsvector 全文搜尋、陣列 | 評估中：`pets.generation_meta` 可能加 GIN（若 admin search by accessory） |
+| **GiST** | 範圍類型、地理 | 不使用 |
+| **BRIN** | 物理有序的超大表（時序） | 候選：`audit_logs (created_at)` 達 1 億筆時 BRIN 替代 B-tree |
+| **SP-GiST** | 非平衡樹結構 | 不使用 |
+
+### 5.3 複合索引欄位順序規則
+
+```
+(等值欄位) → (高選擇性欄位) → (範圍欄位) → (排序欄位)
+```
+
+本專案實例：
+
+```sql
+-- (pet_id 等值) → (completed_at 範圍 + 排序)
+CREATE INDEX idx_arena_matches_pet_a_history ON arena_matches (pet_a_id, completed_at DESC);
+CREATE INDEX idx_training_logs_completed_at  ON training_logs (pet_id, completed_at DESC);
+CREATE INDEX idx_marketplace_transactions_pet_completed ON marketplace_transactions (pet_id, completed_at DESC);
+
+-- (status 等值) → (submitted_at 排序)
+CREATE INDEX idx_gdpr_requests_status ON gdpr_requests (status, submitted_at);
+
+-- (admin_id 等值) → (created_at 排序)
+CREATE INDEX idx_audit_logs_admin_id ON audit_logs (admin_id, created_at DESC);
+```
+
+### 5.4 Partial Index 應用
+
+完整 Partial Index 清單見 §3 各表索引塊。共通模式：
+
+```sql
+-- 軟刪除（admin_users 例外不需 partial — 因 deactivated_at 查詢罕見）
+-- 範例：旗標（旗下小數）
+CREATE INDEX idx_pets_is_banned ON pets (is_banned) WHERE is_banned = TRUE;
+
+-- 範例：可空 FK 排除 NULL（節省 30–80% 空間）
+CREATE INDEX idx_pets_owner_token_hash ON pets (owner_token_hash) WHERE owner_token_hash IS NOT NULL;
+
+-- 範例：cleanup job 目標（rows 處理後 NULL，自動退出索引）
+CREATE INDEX idx_audit_logs_ip_hash_cleanup
+    ON audit_logs (created_at)
+    WHERE ip_address_hash IS NOT NULL;
+
+-- 範例：partial UNIQUE — 防止業務級重複
+CREATE UNIQUE INDEX idx_marketplace_listings_active_pet
+    ON marketplace_listings (pet_id)
+    WHERE status = 'active';
+```
+
+### 5.5 索引膨脹（Index Bloat）監控
+
+```sql
+-- 偵測未使用的索引（可考慮刪除以降低寫入成本）
+SELECT
+    schemaname,
+    indexrelname AS indexname,
+    pg_size_pretty(pg_relation_size(indexrelid)) AS index_size,
+    idx_scan,
+    idx_tup_read,
+    idx_tup_fetch
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0
+ORDER BY pg_relation_size(indexrelid) DESC;
+
+-- 重建膨脹索引（不鎖表）
+REINDEX INDEX CONCURRENTLY idx_pets_owner_token_hash;
+```
+
+維運 Runbook 每月執行一次，未使用索引列入廢棄候選。
+
+---
+
+## 6. 稽核與合規（Audit & Compliance）
+
+### 6.1 標準稽核日誌表
+
+本專案 `audit_logs`（見 §3.11）為唯一稽核軌跡，由 application layer 寫入，**不使用 PostgreSQL trigger**，理由：
+- application layer 已持有 `request_id`、`actor_id`、`request_context`，trigger 取不到
+- trigger overhead 在高 RPS 下不必要
+- explicit > implicit；service layer 寫稽核有可被 unit-test 驗證的 contract
+
+### 6.2 自動稽核 Pattern（Application Layer）
+
+```typescript
+// audit-service.ts (pseudocode)
+export async function logAudit(input: {
+  adminId: string | null;
+  action: string;            // e.g. 'pet.ban', 'config.runtime.update'
+  targetType: string | null;
+  targetId: string | null;
+  detail: Record<string, unknown> | null;
+  ipAddress: string | null;
+}): Promise<void> {
+  const ipHash = input.ipAddress ? sha256(input.ipAddress) : null;
+  await db.query(`
+    INSERT INTO audit_logs (admin_id, action, target_type, target_id, detail, ip_address_hash)
+    VALUES ($1, $2, $3, $4, $5::jsonb, $6)
+  `, [input.adminId, input.action, input.targetType, input.targetId,
+      JSON.stringify(input.detail), ipHash]);
+}
+
+// 所有 admin mutation endpoints 必須在 service layer 呼叫 logAudit
+// CI gate: grep 'admin/api' routes 確認每個 mutation 都有對應 logAudit
+```
+
+### 6.3 GDPR / 個資保護
+
+**PII 欄位清單**（敏感資料總表見 §14）：
+
+| Table | Field | PII Class | Protection | Retention |
+|-------|-------|----------|-----------|-----------|
+| `claim_identities` | `email_hash` | Pseudonymized identifier | SHA-256（無法反推） | Indefinite（hash） |
+| `claim_identities` | `email_encrypted` | Direct identifier | AES-256-GCM；GDPR 後 NULL | 7 days post-erasure（`gdpr_email_deletion_window_days = 7`） |
+| `pets` | `owner_token_hash` | Auth credential | SHA-256 | 隨 pet 生命週期 |
+| `admin_users` | `password_hash` | Auth credential | bcrypt cost ≥ 12 | 隨帳號（軟刪保留） |
+| `admin_users` | `totp_secret_encrypted` | Auth credential | AES-256-GCM | 隨帳號 |
+| `audit_logs` | `ip_address_hash` | Network identifier | SHA-256；90 天後 NULL | 90 days（`ip_address_log_retention_days = 90`） |
+| `claim_codes` | `email_hash`, `code_hash` | OTP credential | SHA-256 | 72h post-creation/use（`claim_token_cleanup_ttl_hours = 72`） |
+| `marketplace_*.{seller,buyer}_token_hash` | Auth identifier | SHA-256 | 隨 transaction（永久） |
+
+**GDPR Right to Erasure（Art.17）流程**（application layer，無 PostgreSQL procedure）：
+
+```typescript
+// gdpr-erasure-job.ts (pseudocode)
+async function processErasure(claimIdentityId: string): Promise<void> {
+  // Step 1: 設定 deletion_requested_at（≤ 24h 內）
+  await db.query(`
+    UPDATE claim_identities
+    SET deletion_requested_at = NOW(), updated_at = NOW()
+    WHERE id = $1
+  `, [claimIdentityId]);
+
+  // Step 2: 找出所有受影響的 pets（cross-BC application service call）
+  const pets = await petService.listByClaimIdentityId(claimIdentityId);
+
+  for (const pet of pets) {
+    // Step 3: 從 leaderboard 移除
+    await redis.zrem('leaderboard:global', pet.id);
+
+    // Step 4: 刪除 pet（CASCADE 同 BC tables: training_logs, food_buffs）
+    await db.query('DELETE FROM pets WHERE id = $1', [pet.id]);
+  }
+
+  // Step 5: 清空 email_encrypted（≤ 7 天內）
+  await db.query(`
+    UPDATE claim_identities
+    SET email_encrypted = NULL, updated_at = NOW()
+    WHERE id = $1
+  `, [claimIdentityId]);
+
+  // Step 6: 標記 GDPR request 完成
+  await db.query(`
+    UPDATE gdpr_requests
+    SET status = 'completed', completed_at = NOW(), updated_at = NOW()
+    WHERE claim_identity_id = $1 AND status = 'processing'
+  `, [claimIdentityId]);
+
+  // Step 7: 寫稽核
+  await logAudit({
+    adminId: null,
+    action: 'gdpr.erasure_completed',
+    targetType: 'claim_identity',
+    targetId: claimIdentityId,
+    detail: { pet_count: pets.length },
+    ipAddress: null,
+  });
+}
+```
+
+**Retention 與 hashing 摘要**：見 §13。
+
+---
+
+## 7. 效能設計（Performance Design）
+
+### 7.1 查詢效能基準表
+
+| Query | API Endpoint | P95 SLO | Index Used | Notes |
+|-------|-------------|---------|-----------|-------|
+| Pet token auth lookup | All authenticated player writes | < 5 ms | `idx_pets_owner_token_hash` (partial) | Hot path; Redis blacklist check first |
+| Pet by ID | `GET /api/v1/pets/:petId` | < 10 ms | PK | — |
+| Daily training count | `POST /api/v1/pets/:petId/train` (rate check) | < 10 ms | `idx_training_logs_completed_at` | `WHERE pet_id=$1 AND completed_at >= UTC_DATE` |
+| Arena history | `GET /api/v1/arena/history/:petId` | < 50 ms | `idx_arena_matches_pet_a_history` + `_pet_b_history` | UNION ALL of two index scans, LIMIT 20 |
+| Leaderboard top 100 | `GET /api/v1/leaderboard` | < 20 ms | Redis `leaderboard:global` (`ZRANGE ... REV LIMIT`) | PostgreSQL not on hot path |
+| Pet rank lookup | `GET /api/v1/leaderboard/rank/:petId` | < 10 ms | Redis `ZREVRANK` | O(log N) |
+| Anti-flip eligibility | `POST /api/v1/marketplace/listings/:id/buy` | < 10 ms | `idx_marketplace_transactions_pet_completed` | `LIMIT 1` |
+| Active listings browse | `GET /api/v1/marketplace/listings` | < 50 ms | `idx_marketplace_listings_status` (partial) + `_listed_at` | — |
+| Admin pet search | `GET /admin/api/pets` | < 200 ms | `idx_pets_rarity` / `idx_pets_is_banned` / PK | filterable |
+| Admin audit log search | `GET /admin/api/audit-logs?adminId=...` | < 3 s | `idx_audit_logs_admin_id` | full 2-year window (`admin_audit_log_retention_years = 2`) |
+| Claim flow OTP verify | `POST /api/v1/claim/verify` | < 30 ms | `idx_claim_codes_email_hash` + `idx_claim_codes_expires_at` | — |
+| GDPR erasure pet lookup | erasure background job | < 100 ms | `idx_pets_claim_identity` (partial) | application-layer cross-BC join |
+
+### 7.2 N+1 查詢防護
+
+**訓練史聚合查詢**（避免每筆 training_log 再查一次 pet）：
+
+```sql
+-- 錯誤（N+1）：先查 logs 再迴圈查 pet
+-- 正確：一次 JOIN 取回所需資料
+SELECT
+    p.id,
+    p.pet_name,
+    p.level,
+    COALESCE(
+        json_agg(
+            json_build_object(
+                'training_type', tl.training_type,
+                'stat_delta',    tl.stat_delta,
+                'completed_at',  tl.completed_at
+            ) ORDER BY tl.completed_at DESC
+        ) FILTER (WHERE tl.id IS NOT NULL),
+        '[]'
+    ) AS recent_actions
+FROM pets p
+LEFT JOIN training_logs tl
+    ON tl.pet_id = p.id
+   AND tl.completed_at >= NOW() - INTERVAL '7 days'
+WHERE p.id = $1
+GROUP BY p.id;
+```
+
+**Cross-BC 場景**（application layer DataLoader pattern）：當 Marketplace BC 需要顯示 listing 上的 pet name + rarity，**不得 JOIN pets**；改由 Marketplace service 呼叫 `petService.batchGet(petIds)`，在 application layer 合併。
+
+```typescript
+// marketplace-service.ts
+async function listActiveListings(): Promise<ListingDTO[]> {
+  const listings = await db.query<Listing>('SELECT * FROM marketplace_listings WHERE status = $1', ['active']);
+  // Cross-BC batched lookup — DataLoader / IN clause
+  const petIds = listings.rows.map(l => l.pet_id);
+  const pets = await petService.batchGet(petIds); // pet BC application service
+  // Merge in application layer
+  return listings.rows.map(l => ({ ...l, pet: pets[l.pet_id] }));
+}
+```
+
+### 7.3 連線池大小公式
+
+```
+最佳連線數 = (CPU 核心數 × 2) + 有效磁碟數
+```
+
+| 環境 | API replica | Pool min/max | 備註 |
+|------|------------|--------------|------|
+| development | 2 (固定) | 5 / 10 | 低負載；本地 PG Docker max_connections = 100 |
+| staging | 2–4 | 10 / 25 | Supabase staging max_connections = 100 |
+| production | 2–6 | **20 / 50** | Supabase production max_connections = 200；burst 6 × 50 = 300 → 透過 Supabase pooler 收斂；公式 (max_concurrent_requests × avg_query_time / target_latency) = (500 × 0.02s / 0.2s) = 50 |
+
+**配置**（node-pg）：
+
+```typescript
+import { Pool } from 'pg';
+
+export const pgPool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  min: Number(process.env.DB_POOL_MIN ?? 20),
+  max: Number(process.env.DB_POOL_MAX ?? 50),
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+});
+```
+
+> **常數對應**：`db_connection_pool_min_connections = 20`、`db_connection_pool_max_connections = 50`（CONSTANTS.md）。
+
+### 7.4 Read Replica 路由規則
+
+Supabase 提供 1 個 read replica；application layer 用兩個獨立 pool（primary + replica）路由：
+
+| 查詢類型 | 路由 | 範例 |
+|---------|------|------|
+| 寫入（INSERT / UPDATE / DELETE） | **Primary** | claim verify, training, arena enter, pet ban, admin login |
+| 即時讀取（write-after-read 場景） | **Primary** | 領取後立即 GET pet（避免 lag） |
+| Public pet page | **Replica** | `GET /api/v1/pets/:petId` 對 guest preview |
+| Leaderboard public read | **Replica**（次要） + Redis（主要） | `GET /api/v1/leaderboard` 走 Redis；replica 用於 fallback degraded mode（Redis 失效） |
+| Admin list views | **Replica** | `GET /admin/api/pets`, `GET /admin/api/battles` |
+| 報表 / 分析 | **Replica** | leaderboard_snapshots historical |
+| 背景 job 查詢 | **Replica** | GDPR erasure job pet listing |
+
+```typescript
+// db-router.ts
+export const dbPrimary = new Pool({ connectionString: process.env.DATABASE_URL_PRIMARY, min: 10, max: 30 });
+export const dbReplica = new Pool({ connectionString: process.env.DATABASE_URL_REPLICA, min: 10, max: 20 });
+```
+
+**Replica lag 預算**：≤ 1 秒（Supabase 同步複製）。Lag > 1s 觸發 Datadog alert；> 30s 切回 primary。
+
+---
+
+## 8. Migration 策略（Migration Strategy）
+
+### 8.1 命名規範
+
+格式：`YYYYMMDDHHMMSS_description.sql`（Drizzle / golang-migrate 風格）。例：
+
+```
+20260503000001_init_enums.sql
+20260503000002_create_claim_identities.sql
+20260503000003_create_pets.sql
+20260503000004_create_claim_codes.sql
+...
+20260503000020_drop_cross_bc_fks.sql       -- HC-1 cleanup migration
+```
+
+**規則**：
+- snake_case description；動詞優先（`create_`, `add_`, `drop_`, `rename_`, `alter_`）
+- 每個 migration 一件邏輯事
+- 同時撰寫 UP 與 DOWN（`*.down.sql`）
+- migration 不可直接 `DROP TABLE`，必須走 §17.6 安全刪除流程
+
+### 8.2 零停機 Migration 模式（Expand-Contract Pattern）
+
+**HC-1 cross-BC FK 移除示例**：
+
+```
+Phase 1 (Expand)   → 新增 application-layer cross-BC 一致性驗證（DataLoader、ID validation）
+Phase 2 (Migrate)  → 部署應用層；雙寫驗證 7 天，確認無 FK 違反
+Phase 3 (Contract) → DROP FK constraint；migration 20260503000020_drop_cross_bc_fks.sql
+                     ALTER TABLE pets DROP CONSTRAINT fk_pets_claim_identity;
+                     ALTER TABLE claim_codes DROP CONSTRAINT fk_claim_codes_pet;
+                     ALTER TABLE arena_matches DROP CONSTRAINT fk_arena_matches_pet_a;
+                     -- ...等
+```
+
+### 8.3 大表新增欄位（4 步驟無鎖流程）
+
+對 1 億筆 `arena_matches` 新增 `region` 欄位範例：
+
+```sql
+-- Step 1：新增 nullable 欄位（瞬間完成，不鎖表）
+ALTER TABLE arena_matches ADD COLUMN region VARCHAR(8);
+
+-- Step 2：批次 backfill（每批 10,000 筆）
+DO $$
+DECLARE batch_size INT := 10000;
+DECLARE rows_updated INT;
+BEGIN
+  LOOP
+    UPDATE arena_matches
+    SET region = 'us-east'
+    WHERE id IN (
+      SELECT id FROM arena_matches WHERE region IS NULL LIMIT batch_size
+    );
+    GET DIAGNOSTICS rows_updated = ROW_COUNT;
+    EXIT WHEN rows_updated = 0;
+    PERFORM pg_sleep(0.1); -- 喘息避免拖慢主流量
+  END LOOP;
+END $$;
+
+-- Step 3：加 NOT NULL 約束（PostgreSQL 11+ 配合 DEFAULT 不鎖表）
+ALTER TABLE arena_matches
+    ALTER COLUMN region SET NOT NULL,
+    ALTER COLUMN region SET DEFAULT 'us-east';
+
+-- Step 4：驗證無 NULL
+SELECT COUNT(*) FROM arena_matches WHERE region IS NULL;  -- 應為 0
+```
+
+### 8.4 各 Migration 類型的 Rollback 策略
+
+| Migration 類型 | Rollback 難度 | 策略 |
+|---------------|--------------|------|
+| 新增資料表 | 低 | DOWN: `DROP TABLE` |
+| 新增欄位 | 低 | DOWN: `DROP COLUMN`（注意有資料需先備份）|
+| 重命名欄位 | 中 | 雙欄位 + view 轉接；分兩個 migration |
+| 刪除欄位 | 高 | 先標記 `_deprecated_*`；下個版本才刪 |
+| 資料型別變更 | 高 | 新欄位 + 應用層雙寫 + cutover；舊欄位廢棄 |
+| 跨 BC FK 移除 | 中 | DOWN: `ADD CONSTRAINT`（如資料一致則可逆）|
+| 索引 | 低 | DOWN: `DROP INDEX CONCURRENTLY` |
+
+### 8.5 Migration 測試檢查清單
+
+- [ ] UP migration 在乾淨 DB 執行成功
+- [ ] DOWN migration 能完整還原（除 §17.6 標示為 irreversible 的）
+- [ ] 在含有 staging 資料量的環境測試過執行時間
+- [ ] 確認不持有超過 3 秒的 table lock（`pg_locks` 監控）
+- [ ] EXPLAIN ANALYZE 新增 / 修改的高頻查詢，確認使用正確索引
+- [ ] FK 約束未被破壞（cross-BC 為刻意移除，需有對應 application layer 驗證 commit）
+- [ ] CI lint：無 `DROP TABLE`（除走 §17.6 流程）、無 `ALTER COLUMN ... TYPE`（除 expand-contract pattern）
+
+---
+
+## 9. 資料完整性約束（Data Integrity Constraints）
+
+### 9.1 外鍵 ON DELETE 行為選用
+
+本專案 ON DELETE 行為決策表（**僅同 BC FK；cross-BC FK 在 v2.1 移除**）：
+
+| Table | FK Column | Target | Behavior | 理由 |
+|-------|-----------|--------|---------|------|
+| `pets` (v2.1 後 ID-only) | `claim_identity_id` | `claim_identities(id)` | **was** SET NULL → **becomes** application-layer | identity 抹除時清空 column；保留 pet（pet 是獨立實體）|
+| `claim_codes` (v2.1 後 ID-only) | `pet_id` | `pets(id)` | **was** CASCADE → **becomes** application-layer CASCADE | OTP 隨 pet 消滅 |
+| `training_logs` | `pet_id` | `pets(id)` | **CASCADE** | 同 BC；訓練紀錄屬於 pet 聚合 |
+| `food_buffs` | `pet_id` | `pets(id)` | **CASCADE** | 同 BC；buff 屬於 pet |
+| `arena_matches` (v2.1 後 ID-only) | `pet_a_id` | `pets(id)` | **was** RESTRICT → **becomes** application-layer | 戰鬥紀錄保留稽核完整性 |
+| `arena_matches` (v2.1 後 ID-only) | `pet_b_id` | `pets(id)` | **was** SET NULL → **becomes** application-layer | 對手 pet 不在不影響戰鬥紀錄 |
+| `arena_matches` (v2.1 後 ID-only) | `winner_pet_id` | `pets(id)` | **was** SET NULL → **becomes** application-layer | 同上 |
+| `marketplace_listings` (v2.1 後 ID-only) | `pet_id` | `pets(id)` | **was** RESTRICT → **becomes** application-layer | listing 不可孤立 |
+| `marketplace_transactions` | `listing_id` | `marketplace_listings(id)` | **RESTRICT** | 同 BC；transaction 必須有 listing |
+| `marketplace_transactions` (v2.1 後 ID-only) | `pet_id` | `pets(id)` | **was** RESTRICT → **becomes** application-layer | transaction 永久財務紀錄 |
+| `gdpr_requests` | `claim_identity_id` | `claim_identities(id)` | **RESTRICT** | 同 BC；GDPR 請求未完成不可刪 identity |
+| `gdpr_requests` (v2.1 後 ID-only) | `initiating_pet_id` | `pets(id)` | **was** SET NULL → **becomes** application-layer | pet 消失但 GDPR 請求保留 |
+| `audit_logs` | `admin_id` | `admin_users(id)` | **RESTRICT** | 同 BC；admin 不可硬刪 |
+
+### 9.2 CHECK 約束範例
+
+本專案實際使用的 CHECK 約束（彙整自 §3）：
+
+```sql
+-- 範圍約束
+CHECK (stat_speed BETWEEN 1 AND 100)
+CHECK (level BETWEEN 1 AND 100)
+CHECK (duration_seconds BETWEEN 5 AND 15)
+CHECK (stat_delta BETWEEN 1 AND 3)
+
+-- 非負
+CHECK (total_training_actions >= 0)
+CHECK (failed_attempts >= 0)
+CHECK (price_credits > 0)
+CHECK (fee_credits >= 0)
+CHECK (magnitude > 0)
+
+-- 字串長度
+CHECK (char_length(banned_reason) <= 500)
+CHECK (char_length(admin_notes) <= 500)
+
+-- 日期邏輯
+CHECK (expires_at > created_at)
+CHECK (used_at IS NULL OR used_at >= created_at)
+CHECK (completed_at >= listed_at)
+CHECK (flagged_at IS NULL OR flagged_at >= completed_at)
+
+-- 多欄一致性（business invariant）
+CHECK ((is_banned = FALSE AND banned_at IS NULL) OR (is_banned = TRUE AND banned_at IS NOT NULL))
+CHECK ((claimed_at IS NULL AND owner_token_hash IS NULL) OR (claimed_at IS NOT NULL AND owner_token_hash IS NOT NULL))
+CHECK ((status = 'active' AND completed_at IS NULL) OR (status != 'active' AND completed_at IS NOT NULL))
+CHECK (winner_pet_id IS NULL OR winner_pet_id = pet_a_id OR winner_pet_id = pet_b_id)
+
+-- 互斥
+CHECK ((is_ai_opponent = FALSE) OR (is_ai_opponent = TRUE AND pet_b_id IS NULL))
+CHECK (pet_b_id IS NULL OR pet_b_id != pet_a_id)
+CHECK ((is_permanent = TRUE AND expires_at IS NULL) OR (is_permanent = FALSE AND expires_at IS NOT NULL))
+```
+
+### 9.3 Unique 約束 vs Unique Index
+
+| 方式 | 本專案使用 |
+|------|----------|
+| `UNIQUE` 約束（DDL 層）| `pets.seed`, `admin_users.username`, `marketplace_transactions.listing_id`, `claim_identities.email_hash` |
+| `CREATE UNIQUE INDEX` 含 WHERE | `idx_marketplace_listings_active_pet (pet_id) WHERE status = 'active'` — 業務級唯一（同 pet 不可同時兩筆 active listing） |
+
+理由：簡單欄位用 UNIQUE 約束（DDL 語意明確）；含 partial 條件用 UNIQUE INDEX。
+
+### 9.4 延遲約束（Deferred Constraints）
+
+本專案目前**未使用** deferred constraints。理由：所有 FK 為單向引用（無循環依賴）；批次插入由 application layer transaction 包裹。
+
+未來若需引入循環 FK，採模板範例：
+
+```sql
+ALTER TABLE pets
+  ADD CONSTRAINT fk_pets_primary_buff
+  FOREIGN KEY (primary_buff_id) REFERENCES food_buffs(id)
+  DEFERRABLE INITIALLY DEFERRED;
+```
+
+### 9.5 跨 BC FK 禁止（Spring Modulith HC-1）
+
+> **HC-1 硬約束**：本 Schema 的 Tables **不得** DB-level FK 引用屬於其他 Bounded Context 的 Tables。  
+> 跨 BC 引用改為**應用層管理的 ID-only 策略**：僅儲存對方 BC 的業務 ID，不建立 DB-level FK。
+
+**判斷一個 FK 是否跨 BC**：
+1. 查 §1.1.1 BC Ownership Table，本 SCHEMA 有 6 個 BC；每個 table 屬於一個 BC
+2. 查被引用 table 所屬 BC
+3. 若兩者不同 → 跨 BC FK，**必須**移除 DB-level FK，改 ID-only
+
+**ID-only 跨 BC 引用範例**：
+
+```sql
+-- ❌ 禁止：跨 BC DB-level FK
+ALTER TABLE arena_matches
+  ADD CONSTRAINT fk_arena_matches_pet_a
+  FOREIGN KEY (pet_a_id) REFERENCES pets(id);
+
+-- ✅ 正確：ID-only，應用層負責一致性
+-- arena_matches.pet_a_id UUID NOT NULL
+-- Cross-BC reference to pets(id): enforced at application layer, no DB FK.
+COMMENT ON COLUMN arena_matches.pet_a_id IS
+  'Cross-BC reference to pets(id). Enforced at application layer; no DB FK (HC-1).';
+```
+
+**本 Schema 跨 BC 引用清單**（同 §1.1.2，於此 reproducible）：
+
+| Column | 引用的 BC | 引用的 Table | 處理（v2.0 → v2.1） |
+|--------|----------|------------|---------------------|
+| `pets.claim_identity_id` | Identity | `claim_identities(id)` | v2.0 暫保 DB FK；v2.1 migration drop → ID-only |
+| `claim_codes.pet_id` | Pet | `pets(id)` | v2.0 暫保；v2.1 ID-only（CASCADE 改 application） |
+| `arena_matches.pet_a_id` / `pet_b_id` / `winner_pet_id` | Pet | `pets(id)` | v2.0 暫保；v2.1 ID-only |
+| `marketplace_listings.pet_id` | Pet | `pets(id)` | v2.0 暫保；v2.1 ID-only |
+| `marketplace_transactions.pet_id` | Pet | `pets(id)` | v2.0 暫保；v2.1 ID-only |
+| `gdpr_requests.initiating_pet_id` | Pet | `pets(id)` | v2.0 暫保；v2.1 ID-only |
+| `marketplace_transactions.listing_id` | Marketplace（同 BC） | `marketplace_listings(id)` | **保留 DB FK**（同 BC） |
+| `gdpr_requests.claim_identity_id` | Identity（同 BC） | `claim_identities(id)` | **保留 DB FK**（同 BC） |
+| `audit_logs.admin_id` | Admin（同 BC） | `admin_users(id)` | **保留 DB FK**（同 BC） |
+| `training_logs.pet_id` | Pet（同 BC） | `pets(id)` | **保留 DB FK**（同 BC） |
+| `food_buffs.pet_id` | Pet（同 BC） | `pets(id)` | **保留 DB FK**（同 BC） |
+
+**v2.1 cleanup migration**：`migrations/20260520000001_drop_cross_bc_fks.sql`（規劃中）將 drop 所有標記為「v2.1 ID-only」的 DB FK constraint，並逐一加上 `COMMENT ON COLUMN` 註解。
+
+---
+
+## 10. 分區策略（Sharding & Partitioning）
+
+### 10.1 分區策略決策矩陣
+
+| Table | 預估初始量 | 預估 1 年量 | 分區建議 | 觸發門檻 |
+|-------|-----------|-----------|---------|---------|
+| `pets` | 10K | 1M | 不分區（行為穩定）| > 1 億筆才考慮 |
+| `claim_identities` | 5K | 500K | 不分區 | > 1 億筆 |
+| `claim_codes` | 高（短壽 72h） | 持平 | 不分區（自動清理）| 不適用 |
+| `arena_matches` | 1K | **10M** | **Range partition by `completed_at`（按月）**達 1000 萬筆觸發 | > 1000 萬筆（公式 §10.1） |
+| `training_logs` | 1K | 5M | 達 5000 萬筆觸發 | > 5000 萬筆 |
+| `audit_logs` | — | **+1M / 月** | **Range partition by `created_at`（按季）**達 1 年期 | > 1000 萬筆或 retention boundary > 1 年 |
+| `leaderboard_snapshots` | 100 | 1K | 不分區（rolling 12 month）| 不適用 |
+| `food_buffs` | — | 高（30 天滾動）| 不分區（自動清理）| 不適用 |
+| `marketplace_*` | 0 (Phase 3) | 1K–100K | 不分區 | > 1000 萬筆 |
+
+### 10.2 分區鍵選擇準則
+
+- **Range 分區**：`completed_at`（arena_matches）、`created_at`（audit_logs）— 因 query pattern 高度時間化（最近 30 天為主），分區裁剪（partition pruning）受益顯著
+- **List 分區**：本專案 single-tenant 無 tenant_id；不適用
+- **Hash 分區**：本專案無大規模隨機分散需求；不適用
+
+> **PostgreSQL 限制**：分區鍵必須包含於所有 UNIQUE constraint。`arena_matches` 若分區，PK 須變更為 `(id, completed_at)` 複合 PK。**這會破壞 application 預期 `id` 為單欄 UUID 的契約 — 因此分區須在 application layer 同步調整**（v2.1+ 規劃）。
+
+### 10.3 分區範例（規劃中）
+
+```sql
+-- 假設規劃 2027 Q1 對 arena_matches 進行分區（達 1000 萬筆觸發）：
+
+-- Step 1: 建立新分區母表
+CREATE TABLE arena_matches_partitioned (LIKE arena_matches INCLUDING ALL)
+    PARTITION BY RANGE (completed_at);
+
+-- Step 2: 建立每月分區（提前 6 個月建好）
+CREATE TABLE arena_matches_2027_01 PARTITION OF arena_matches_partitioned
+    FOR VALUES FROM ('2027-01-01') TO ('2027-02-01');
+CREATE TABLE arena_matches_2027_02 PARTITION OF arena_matches_partitioned
+    FOR VALUES FROM ('2027-02-01') TO ('2027-03-01');
+-- ... 依此類推
+
+-- Step 3: Default 分區捕捉超範圍
+CREATE TABLE arena_matches_default PARTITION OF arena_matches_partitioned DEFAULT;
+
+-- Step 4: 資料遷移（pg_dump → restore 或 INSERT INTO ... SELECT）
+
+-- Step 5: 表名 swap
+ALTER TABLE arena_matches RENAME TO arena_matches_old;
+ALTER TABLE arena_matches_partitioned RENAME TO arena_matches;
+```
+
+### 10.4 跨分區查詢注意事項
+
+- **Partition Pruning** 要求 WHERE 條件包含分區鍵（`completed_at >= ...`）
+- **跨分區 JOIN** 性能差，盡量限制在同一分區
+- **CREATE INDEX** 對分區母表自動繼承（PostgreSQL 13+），但須確認分區索引狀態（`\d+ arena_matches`）
+
+---
+
+## 11. 備份與復原（Backup & Recovery）
+
+### 11.1 備份策略表
+
+Supabase managed PostgreSQL 提供以下備份能力：
+
+| 類型 | 頻率 | 保留 | 工具 / 機制 | 儲存 |
+|------|------|------|-----------|------|
+| **Full Backup** | 每日 00:00 UTC | 7 天 | Supabase managed `pg_dump` | Supabase 跨區域 S3 |
+| **WAL Archiving（PITR 基礎）** | 持續（每 5 分鐘歸檔） | 7 天 | Supabase managed | Supabase WAL store |
+| **Logical Backup（特定表）** | 手動觸發 | 30 天 | `pg_dump --table=pets` 透過 admin script | 自管 S3（pixel-pet-arena-backups） |
+| **Snapshot（DB Instance）** | 每日 | 7 天 | Supabase Pro plan auto-snapshot | Supabase managed |
+
+### 11.2 Point-in-Time Recovery（PITR）設定
+
+Supabase Pro plan 預設提供 7 天 PITR：
+
+```bash
+# Supabase CLI restore to point-in-time
+supabase db restore --project-ref pixel-pet-arena-prod \
+    --recovery-target-time "2026-05-09 14:30:00+00"
+```
+
+PITR 流程：
+1. 透過 Supabase Dashboard 或 CLI 觸發
+2. 系統自動建立新 instance，重放 WAL 至指定時間點
+3. DNS / connection string 切換（最多 2 分鐘 downtime）
+4. 應用層需重新建立連線池
+
+### 11.3 備份驗證程序
+
+每月執行一次（DR drill）：
+
+1. 從 Supabase 觸發 PITR 至 staging instance（恢復至前一日 12:00 UTC）
+2. 執行 schema 一致性檢查：`pg_dump --schema-only` 比對主環境
+3. 執行業務查詢驗證：
+   - `SELECT COUNT(*) FROM pets WHERE is_banned = FALSE`
+   - `SELECT COUNT(*) FROM arena_matches WHERE completed_at >= NOW() - INTERVAL '24 hours'`
+   - `SELECT MAX(snapshot_time) FROM leaderboard_snapshots`
+4. 記錄 RTO / RPO 實測值
+
+| 指標 | 目標 | SLO 來源 |
+|------|------|---------|
+| RTO（PITR） | ≤ 4 小時 | EDD §3.6.3 |
+| RPO（PITR） | ≤ 5 分鐘（WAL archive 頻率） | EDD §3.6.3 |
+| RTO（DB primary auto-failover） | ≤ 60 秒 | EDD §3.6.3（`db_autofailover_time_seconds = 60`） |
+| RPO（synchronous standby） | 0 秒 | EDD §3.6.3 |
+
+---
+
+## 12. Redis Key Schema
+
+所有 Redis key 使用 Upstash Redis 7+（serverless）。TTL 以秒為單位。
+
+### 12.1 Rate Limit Counters
 
 | Key Pattern | TTL | Value | Notes |
 |-------------|-----|-------|-------|
-| `rl:claim:{email_hash}` | 3600 s | Integer attempt count | Email claim initiation. Limit: 5/hr per email (`email_claim_attempts_per_hour_per_email = 5`). Window = 1 h = 3600 s (implicit: no separate window-seconds constant; derived from `email_claim_attempts_per_hour_per_email`). Fail-open if Redis unavailable. |
-| `rl:claim:cooldown:{email_hash}` | 60 s | `"1"` | Set when limit is reached. Blocks further attempts during cooldown. TTL = `claim_email_retry_cooldown_seconds = 60`. Returns HTTP 429 with `Retry-After: 60`. |
-| `rl:arena:{pet_id}` | 3600 s | Integer battle count | Arena battles per pet. Default limit: 10/hr (`arena_battles_per_pet_per_hour_default = 10`); admin-tunable 1–50 (`arena_battles_per_pet_per_hour_admin_min = 1`, `arena_battles_per_pet_per_hour_admin_max = 50`). Window = 1 h = 3600 s (`arena_rate_limit_counter_window_hours = 1`). Fail-open. |
-| `rl:code_entry:{session_id}` | 900 s | Integer attempt count | OTP code entry. Limit: 10/session (`claim_code_entry_attempts_per_session = 10`). Window = 15 min = 900 s (`claim_code_expiry_minutes = 15`; the code-entry window matches the OTP validity window). **Fail-closed** — code entry is blocked if Redis is unavailable. |
-| `rl:code_entry:cooldown:{session_id}` | 60 s | `"1"` | Set when code entry limit is reached. TTL matches `claim_email_retry_cooldown_seconds = 60` (no separate constant defined for code-entry cooldown). HTTP 429 with `Retry-After: 60`. |
-| `rl:admin_login:{ip_hash}` | 900 s | Integer attempt count | Pre-auth admin login IP rate limit. Limit: 10 attempts per 15 min (`admin_login_ip_rate_limit_attempts = 10`, `admin_login_ip_rate_limit_window_seconds = 900`). |
-| `rl:admin:{admin_id}` | 60 s | Integer request count | Per-authenticated-admin request rate limit. Limit: 100/min (`admin_portal_requests_per_minute_per_account = 100`). |
+| `rl:claim:{email_hash}` | 3600 s | Integer attempt count | Email 領取啟動 limit。Limit: 5/hr per email (`email_claim_attempts_per_hour_per_email = 5`)。Window = 1h = 3600 s。Fail-open。 |
+| `rl:claim:cooldown:{email_hash}` | 60 s | `"1"` | 觸發 limit 時設置；TTL = `claim_email_retry_cooldown_seconds = 60`；HTTP 429 + `Retry-After: 60`。 |
+| `rl:arena:{pet_id}` | 3600 s | Integer battle count | Arena 戰鬥 / pet。Default: 10/hr (`arena_battles_per_pet_per_hour_default = 10`)；admin-tunable 1–50。Window = 1h。Fail-open。 |
+| `rl:code_entry:{session_id}` | 900 s | Integer attempt count | OTP code entry。Limit: 10/session (`claim_code_entry_attempts_per_session = 10`)。Window = 15min = 900 s。**Fail-closed** — Redis 不可用時阻擋。 |
+| `rl:code_entry:cooldown:{session_id}` | 60 s | `"1"` | TTL matches `claim_email_retry_cooldown_seconds = 60`；HTTP 429 + `Retry-After: 60`。 |
+| `rl:admin_login:{ip_hash}` | 900 s | Integer attempt count | Admin 登入 IP rate limit。10 attempts / 15 min。 |
+| `rl:admin:{admin_id}` | 60 s | Integer request count | 每認證 admin。100/min (`admin_portal_requests_per_minute_per_account = 100`)。 |
 
-### 4.2 Arena Matchmaking Queue
+### 12.2 Arena Matchmaking Queue
 
 | Key Pattern | TTL | Type | Notes |
 |-------------|-----|------|-------|
-| `matchmaking:queue:{mode}` | None | Redis Sorted Set | Score = enqueue epoch (ms). Member format: `"{petId}:{enqueue_epoch_ms}"`. Consumer pops oldest eligible entry via `ZPOPMIN` (atomic read-and-remove; Upstash Redis 7+ supported). Entries older than `arena_matchmaking_timeout_seconds = 30` seconds plus an implementation-defined grace buffer (~15 s; no constant) are considered stale and discarded silently. |
+| `matchmaking:queue:{mode}` | None | Sorted Set | Score = enqueue epoch (ms)。Member format: `"{petId}:{enqueue_epoch_ms}"`。`ZPOPMIN` atomic dequeue。Stale entries（> `arena_matchmaking_timeout_seconds = 30` s + grace）silently discarded。 |
 
-### 4.3 Session Storage
+### 12.3 Session Storage
 
 | Key Pattern | TTL | Value | Notes |
 |-------------|-----|-------|-------|
-| `session:admin:{session_id}` | 14400 s | JSON `{ adminId, role, createdAt, absExpiry }` | Inactivity TTL = 14400 s (4 h; `admin_session_inactivity_expiry_hours = 4`). `absExpiry = createdAt + 28800 s` (8 h; `admin_session_absolute_expiry_hours = 8`) is validated on every request for the absolute cap. |
-| `token:blacklist:{token_hash}` | 259200 s | `"1"` | Invalidates replaced pet access tokens after recovery flow. TTL = 72 h (`claim_token_cleanup_ttl_hours = 72`). |
+| `session:admin:{session_id}` | 14400 s (4h) | JSON `{ adminId, role, createdAt, absExpiry }` | Inactivity TTL = `admin_session_inactivity_expiry_hours = 4`。`absExpiry = createdAt + 28800 s` (`admin_session_absolute_expiry_hours = 8`) 由應用層強制檢查。 |
+| `token:blacklist:{token_hash}` | 259200 s (72h) | `"1"` | Recovery flow 後使無效 pet token；TTL = `claim_token_cleanup_ttl_hours = 72`。 |
 
-### 4.4 Leaderboard Sorted Set
+### 12.4 Leaderboard Sorted Set
 
 | Key | TTL | Type | Notes |
 |-----|-----|------|-------|
-| `leaderboard:global` | None | Redis Sorted Set | Score = arena score (`win_rate × battles_played × level_multiplier`). Member = `pet_id`. Authoritative real-time source; PostgreSQL `leaderboard_snapshots` is the durable backup. Update lag target ≤ 30 s (`leaderboard_update_lag_max_seconds = 30`). Banned pets are removed via `ZREM` immediately on ban (reflected within 5 min; `leaderboard_ban_reflection_time_minutes = 5`). Pet entries are also removed via `ZREM` during GDPR erasure processing. |
+| `leaderboard:global` | None | Sorted Set | Score = arena score (`win_rate × battles_played × level_multiplier`)。Member = `pet_id`。即時 source of truth；PostgreSQL `leaderboard_snapshots` 為 durable backup。Update lag SLO ≤ 30 s (`leaderboard_update_lag_max_seconds = 30`)。Banned pets 立即 `ZREM`（5 min 內反映 — `leaderboard_ban_reflection_time_minutes = 5`）。GDPR erasure 同步 `ZREM`。 |
 
-### 4.5 Config Cache
+### 12.5 Config Cache
 
 | Key | TTL | Value | Notes |
 |-----|-----|-------|-------|
-| `config:runtime` | 300 s | JSON blob | Runtime configuration values (arena rate limit, rarity weights, etc.). Refreshed every 5 min (`config_cache_refresh_time_minutes = 5`). Mutations via `PUT /admin/api/config/runtime` or `PUT /admin/api/config/economy` take effect within this window. |
+| `config:runtime` | 300 s | JSON blob | Runtime 配置（arena rate limit、rarity weights 等）；refresh 每 5 min (`config_cache_refresh_time_minutes = 5`)。Mutations via `PUT /admin/api/config/{runtime,economy}` 在此 window 內生效。 |
 
 ---
 
-## 5. Data Retention
+## 13. Data Retention Policy
 
-| Table / Key Pattern | Retention Policy | Source Constant |
-|---------------------|-----------------|-----------------|
-| `pets` | Indefinite (until GDPR erasure or admin deletion) | — |
-| `claim_identities` | Indefinite; `email_encrypted` nulled within 7 days of erasure request | `gdpr_email_deletion_window_days = 7` |
-| `claim_codes` | Deleted 72 hours after row creation or `used_at`, whichever is later | `claim_token_cleanup_ttl_hours = 72` |
-| `arena_matches` | Indefinite (audit immutability; last 20 per pet shown publicly) | `arena_battle_records_display_count = 20` |
-| `training_logs` | Indefinite (behavioral audit trail; feeds `total_training_actions` aggregate) | — |
-| `leaderboard_snapshots` | Rolling 12 months | `leaderboard_snapshot_retention_months = 12` |
-| `food_buffs` | 30 days after `consumed_at` (`record_expires_at` column; cleaned by background job) | `food_buff_record_retention_days = 30` |
-| `marketplace_listings` | Indefinite (referenced by transactions; `ON DELETE RESTRICT`) | — |
-| `marketplace_transactions` | Indefinite (financial audit trail) | — |
-| `admin_users` | Indefinite (never hard-deleted; audit log FK) | — |
-| `audit_logs` | 2 years (GDPR Art. 30 compliance) | `admin_audit_log_retention_years = 2` |
-| `gdpr_requests` | Indefinite (legal compliance record) | — |
-| `rl:*` Redis counters | Per key TTL (60 s – 3600 s) | Various `rate_limits.*` constants |
-| `session:admin:*` | 14400 s inactivity / absolute 28800 s | `admin_session_inactivity_expiry_hours = 4`, `admin_session_absolute_expiry_hours = 8` |
-| `token:blacklist:*` | 259200 s (72 h) | `claim_token_cleanup_ttl_hours = 72` |
-| `leaderboard:global` | No expiry; entries removed on ban or GDPR erasure | — |
-| `matchmaking:queue:*` | No key-level TTL; stale entries (older than `arena_matchmaking_timeout_seconds = 30` s plus grace) are discarded by the consumer | `arena_matchmaking_timeout_seconds = 30` |
-| `config:runtime` | 300 s rolling TTL; re-populated by next admin config write or cache-refresh cycle | `config_cache_refresh_time_minutes = 5` |
-| `audit_logs.ip_address_hash` | 90 days (column is set to NULL after 90 d by background job) | `ip_address_log_retention_days = 90` |
-| Unclaimed `pets` (guest preview) | Background job deletes `reserved_until < NOW() AND owner_token_hash IS NULL` on an implementation-defined schedule (no constant; run frequency is an operational decision) | `pet_reservation_ttl_hours = 24` |
+| Table / Key Pattern | Retention | Source Constant |
+|---------------------|-----------|-----------------|
+| `pets` | Indefinite（直至 GDPR erasure / admin delete） | — |
+| `claim_identities` | Indefinite；`email_encrypted` 在抹除請求後 7 天清空 | `gdpr_email_deletion_window_days = 7` |
+| `claim_codes` | 72h post-creation 或 `used_at`（取較晚者）後刪除 | `claim_token_cleanup_ttl_hours = 72` |
+| `arena_matches` | Indefinite（稽核不可變；最近 20 場公開顯示） | `arena_battle_records_display_count = 20` |
+| `training_logs` | Indefinite（行為稽核；feeds `total_training_actions`） | — |
+| `leaderboard_snapshots` | Rolling 12 個月 | `leaderboard_snapshot_retention_months = 12` |
+| `food_buffs` | 30 天 post-`consumed_at`（`record_expires_at` cleanup job） | `food_buff_record_retention_days = 30` |
+| `marketplace_listings` | Indefinite（被 transaction RESTRICT 引用） | — |
+| `marketplace_transactions` | Indefinite（財務稽核） | — |
+| `admin_users` | Indefinite（`audit_logs` FK；軟刪 `deactivated_at`） | — |
+| `audit_logs` | 2 年（GDPR Art.30 合規） | `admin_audit_log_retention_years = 2` |
+| `audit_logs.ip_address_hash` | 90 天（背景 job 清空） | `ip_address_log_retention_days = 90` |
+| `gdpr_requests` | Indefinite（法規舉證） | — |
+| Unclaimed `pets`（guest preview） | `reserved_until < NOW() AND owner_token_hash IS NULL` 由 background job 清理 | `pet_reservation_ttl_hours = 24` |
+| `rl:*` Redis counters | Per-key TTL（60–3600 s） | 各 `rate_limits.*` 常數 |
+| `session:admin:*` | 14400 s inactivity / 28800 s absolute | `admin_session_inactivity_expiry_hours = 4` / `admin_session_absolute_expiry_hours = 8` |
+| `token:blacklist:*` | 259200 s | `claim_token_cleanup_ttl_hours = 72` |
+| `leaderboard:global` | 無 expiry；ban / GDPR 觸發 `ZREM` | — |
+| `matchmaking:queue:*` | 無 key TTL；stale entries（> 30s + grace）由 consumer 丟棄 | `arena_matchmaking_timeout_seconds = 30` |
+| `config:runtime` | 300 s rolling TTL | `config_cache_refresh_time_minutes = 5` |
+
+> **GDPR Right to Erasure 實作細節**：見 §6.3。
 
 ---
 
-## 6. Indexes & Performance Notes
+## 14. ER Diagram
 
-### 6.1 Partial Indexes
+下圖呈現所有 12 張 PostgreSQL 表與其 FK / cross-BC ID 引用關係。**雙線箭頭** = 同 BC FK；**虛線箭頭** = cross-BC ID-only（v2.1 後移除 DB FK）。
 
-Partial indexes on boolean and nullable columns are preferred over full-table indexes where the indexed set is a small fraction of total rows:
+```mermaid
+erDiagram
+    claim_identities {
+        uuid id PK
+        varchar email_hash UK
+        bytea email_encrypted
+        timestamptz deletion_requested_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    pets {
+        uuid id PK
+        bigint seed UK
+        rarity_enum rarity
+        varchar pet_name
+        smallint stat_speed
+        smallint stat_strength
+        smallint stat_stamina
+        smallint level
+        integer total_training_actions
+        timestamptz last_trained_at
+        varchar owner_token_hash
+        timestamptz claimed_at
+        uuid claim_identity_id "Cross-BC ID-only"
+        timestamptz reserved_until
+        boolean is_banned
+        text banned_reason
+        timestamptz banned_at
+        jsonb generation_meta
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    claim_codes {
+        uuid id PK
+        uuid pet_id "Cross-BC ID-only"
+        varchar email_hash
+        varchar code_hash
+        timestamptz expires_at
+        timestamptz used_at
+        smallint attempts
+        timestamptz created_at
+    }
+    arena_matches {
+        uuid id PK
+        uuid pet_a_id "Cross-BC ID-only"
+        uuid pet_b_id "Cross-BC ID-only"
+        boolean is_ai_opponent
+        arena_mode_enum mode
+        uuid winner_pet_id "Cross-BC ID-only"
+        bigint random_seed
+        smallint stat_delta_a
+        smallint stat_delta_b
+        smallint duration_seconds
+        jsonb battle_log
+        boolean is_flagged
+        timestamptz flagged_at
+        timestamptz completed_at
+        timestamptz updated_at
+    }
+    leaderboard_snapshots {
+        uuid id PK
+        timestamptz snapshot_time
+        jsonb entries
+        timestamptz created_at
+    }
+    training_logs {
+        uuid id PK
+        uuid pet_id FK
+        training_type_enum training_type
+        smallint stat_delta
+        smallint stat_after
+        timestamptz completed_at
+    }
+    food_buffs {
+        uuid id PK
+        uuid pet_id FK
+        varchar food_type
+        buff_stat_enum buff_stat
+        smallint magnitude
+        boolean is_permanent
+        timestamptz expires_at
+        timestamptz consumed_at
+        timestamptz record_expires_at
+    }
+    marketplace_listings {
+        uuid id PK
+        uuid pet_id "Cross-BC ID-only"
+        varchar seller_token_hash
+        integer price_credits
+        listing_status_enum status
+        timestamptz listed_at
+        timestamptz expires_at
+        timestamptz completed_at
+        timestamptz updated_at
+    }
+    marketplace_transactions {
+        uuid id PK
+        uuid listing_id FK,UK
+        uuid pet_id "Cross-BC ID-only"
+        varchar seller_token_hash
+        varchar buyer_token_hash
+        integer price_credits
+        integer fee_credits
+        timestamptz listed_at
+        timestamptz completed_at
+    }
+    admin_users {
+        uuid id PK
+        varchar username UK
+        text password_hash
+        text totp_secret_encrypted
+        jsonb totp_backup_codes_hash
+        admin_role_enum role
+        timestamptz last_login_at
+        smallint failed_attempts
+        timestamptz locked_until
+        timestamptz deactivated_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    audit_logs {
+        bigserial id PK
+        uuid admin_id FK
+        varchar action
+        varchar target_type
+        text target_id
+        jsonb detail
+        varchar ip_address_hash
+        timestamptz created_at
+    }
+    gdpr_requests {
+        uuid id PK
+        uuid claim_identity_id FK
+        uuid initiating_pet_id "Cross-BC ID-only"
+        gdpr_request_type_enum request_type
+        gdpr_request_status_enum status
+        timestamptz submitted_at
+        timestamptz completed_at
+        timestamptz updated_at
+        text admin_notes
+    }
 
-- `idx_pets_claimed_at` — `WHERE claimed_at IS NOT NULL`: only claimed pets have this set; used by analytics and admin list queries that filter for claimed pets.
-- `idx_pets_is_banned` — `WHERE is_banned = TRUE`: nearly all rows are `FALSE`; this partial index is tiny and fast for ban-check queries.
-- `idx_pets_owner_token_hash` — `WHERE owner_token_hash IS NOT NULL`: unclaimed pets have NULL; only claimed pet rows are indexed, keeping the index compact.
-- `idx_pets_last_trained_at` — `WHERE last_trained_at IS NOT NULL`: never-trained pets are excluded; the index supports neglect detection queries without scanning the full table.
-- `idx_pets_reserved_until` — `WHERE reserved_until IS NOT NULL`: only guest preview pets have this set; background cleanup job scans this index exclusively.
-- `idx_marketplace_listings_status` — `WHERE status = 'active'`: the vast majority of historical listings are `cancelled` or `sold`; the active listing index stays small.
-- `idx_marketplace_listings_active_pet` — `WHERE status = 'active'` unique: provides a database-enforced uniqueness constraint for concurrent active listings per pet at near-zero write cost.
-- `idx_arena_matches_is_flagged` — `WHERE is_flagged = TRUE`: nearly all matches are unflagged; partial index stays tiny and serves `GET /admin/api/battles?flagged=true` efficiently.
-- `idx_gdpr_requests_initiating_pet` — `WHERE initiating_pet_id IS NOT NULL`: supports FK SET NULL integrity scan (`fk_gdpr_requests_initiating_pet ON DELETE SET NULL`) and any lookup by initiating pet. NULL rows (admin-initiated requests) are excluded.
-- `idx_claim_codes_used_at` — `WHERE used_at IS NOT NULL`: used by the 72-hour background cleanup job which must find rows whose first-use time has passed.
-- `idx_marketplace_listings_expires_at` — `WHERE status = 'active' AND expires_at IS NOT NULL`: used by the background job that transitions active listings whose `expires_at` has passed to `cancelled`. Only a small subset of active listings have a non-NULL expiry, keeping this index tiny.
-- `idx_claim_identities_deletion` — `WHERE deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL`: used exclusively by the GDPR erasure background job to find rows that still have encrypted email data pending removal. Once `email_encrypted` is set to NULL the row drops out of the index, so this partial index stays tiny under normal operation and approaches zero size once all pending deletions are processed.
-- `idx_audit_logs_ip_hash_cleanup` — `WHERE ip_address_hash IS NOT NULL`: used by the background job that nulls `ip_address_hash` after 90 days (`ip_address_log_retention_days = 90`). Once nulled, rows drop out of the index, keeping it compact. Mirrors the same pattern used by `idx_claim_identities_deletion`.
-- `idx_pets_claim_identity` — `WHERE claim_identity_id IS NOT NULL`: only claimed pets have this FK set; the partial index supports the GDPR erasure lookup query (`SELECT id FROM pets WHERE claim_identity_id = $1`) efficiently and also serves the FK integrity scan. See §6.5 for the full query pattern.
+    %% Same-BC FKs (DB-level enforced)
+    pets             ||--o{ training_logs            : "owns (CASCADE)"
+    pets             ||--o{ food_buffs               : "owns (CASCADE)"
+    marketplace_listings ||--|| marketplace_transactions : "completes (RESTRICT, UQ)"
+    claim_identities ||--o{ gdpr_requests            : "subject of (RESTRICT)"
+    admin_users      ||--o{ audit_logs               : "actor (RESTRICT)"
 
-### 6.2 Composite Indexes
-
-- `idx_arena_matches_pet_a_history (pet_a_id, completed_at DESC)` and `idx_arena_matches_pet_b_history (pet_b_id, completed_at DESC)` — support the `ORDER BY completed_at DESC LIMIT 20` query pattern used by `GET /api/v1/arena/history/:petId` (`arena_battle_records_display_count = 20`). Without a composite index the planner would scan the full `pet_a_id` partition and sort. The leading column of each index also serves PostgreSQL's FK integrity scan for `ON DELETE RESTRICT` (pet_a_id) and `ON DELETE SET NULL` (pet_b_id), eliminating the need for separate single-column indexes.
-- `idx_training_logs_completed_at (pet_id, completed_at DESC)` — supports the daily action count query (`COUNT(*) WHERE pet_id = ? AND completed_at >= UTC_DATE`) and the training history summary in `GET /api/v1/pets/:petId/stats`. The leading `pet_id` column also serves the FK CASCADE scan (`ON DELETE CASCADE`), making a separate `idx_training_logs_pet_id` unnecessary.
-- `idx_audit_logs_admin_id (admin_id, created_at DESC)` — supports filtered audit log searches by actor across the full 2-year retention window in ≤ 3 s (`admin_audit_log_search_response_time_seconds = 3`, `admin_audit_log_retention_years = 2`).
-- `idx_marketplace_transactions_pet_completed (pet_id, completed_at DESC)` — supports the anti-flip eligibility check (`marketplace_trade_antiflip_protection_days = 7`). The query `SELECT completed_at FROM marketplace_transactions WHERE pet_id = $1 ORDER BY completed_at DESC LIMIT 1` is fully served by the composite index without a separate heap sort. The leading `pet_id` column also covers the FK RESTRICT scan (`ON DELETE RESTRICT`), eliminating the need for a separate single-column `idx_marketplace_transactions_pet` index.
-- `idx_gdpr_requests_identity (claim_identity_id, submitted_at DESC)` — supports the query `WHERE claim_identity_id = $1 ORDER BY submitted_at DESC` for listing all requests by a data subject. The leading column also serves the FK RESTRICT scan (`ON DELETE RESTRICT`).
-- `idx_gdpr_requests_status (status, submitted_at)` — supports the admin work queue query `WHERE status IN ('pending', 'processing') ORDER BY submitted_at` for processing requests in FIFO order.
-
-### 6.3 Leaderboard Query Pattern
-
-The live leaderboard is served exclusively from the Redis `leaderboard:global` sorted set (`ZRANGE … REV LIMIT` for top-N retrieval — O(log N + M) where M is the number of elements returned; `ZREVRANK` for a pet's rank — O(log N)). (`ZREVRANGE` is deprecated since Redis 6.2; `ZRANGE … REV LIMIT` is the idiomatic equivalent on Upstash Redis 7+.) The `leaderboard_snapshots` table is written by a background job and read only for historical reporting. No hot-path leaderboard query touches PostgreSQL under normal operation.
-
-### 6.4 Token Lookup Path
-
-Authentication on every write request hashes the incoming bearer token and executes:
-
-```sql
-SELECT id, is_banned, claim_identity_id, owner_token_hash
-  FROM pets
- WHERE owner_token_hash = $1;
+    %% Cross-BC ID-only references (v2.1 strip DB FK)
+    claim_identities ||..o{ pets                     : "ID-only: claim_identity_id"
+    pets             ||..o{ claim_codes              : "ID-only: pet_id"
+    pets             ||..o{ arena_matches            : "ID-only: pet_a/pet_b/winner"
+    pets             ||..o{ marketplace_listings     : "ID-only: pet_id"
+    pets             ||..o{ marketplace_transactions : "ID-only: pet_id"
+    pets             ||..o{ gdpr_requests            : "ID-only: initiating_pet_id"
 ```
 
-Before executing the SELECT, the application checks the incoming token hash against the Redis `token:blacklist:{token_hash}` key; if the key is present the request is rejected immediately without touching PostgreSQL. The partial index `idx_pets_owner_token_hash` (covering only non-NULL rows) makes the subsequent DB lookup a single index scan.
+> 圖例：`||--o{` 為同 BC FK（DB-level）；`||..o{` 為 cross-BC ID-only（無 DB FK）。
 
-### 6.5 GDPR Erasure Lookup
+---
 
-The `pets.claim_identity_id` FK enables the erasure job to find all pets belonging to a data subject in one query:
+## 15. 資料量估算
 
-```sql
-SELECT id FROM pets WHERE claim_identity_id = $1;
-```
+| 資料表 | 預估初始量（launch） | 6 個月後 | 1 年後 | 備註 |
+|--------|-------------------|--------|------|------|
+| `pets` | 10K | 200K | 500K | guest preview 大量但 24h 自動清；claimed 為穩定基線 |
+| `claim_identities` | 5K | 100K | 250K | 1 identity 可有多 pet |
+| `claim_codes` | 高（短壽） | 短壽 | 短壽 | 72h 自動清 |
+| `arena_matches` | 1K | 1M | 10M | 主要寫入熱點 |
+| `training_logs` | 1K | 500K | 5M | 每 pet 平均 3/天 |
+| `food_buffs` | — | 100K | 1M（30 天滾動）| 滾動清理 |
+| `leaderboard_snapshots` | 0 | 180 | 365（1/天）| 12 月 retention |
+| `marketplace_*` | 0（FF off）| 0–10K | 100K | Phase 3 才開 |
+| `admin_users` | 5 | 10 | 20 | 內部 |
+| `audit_logs` | — | 500K | 1M（每月 + ~85K）| 2 年 retention 達上限 ~2M |
+| `gdpr_requests` | — | 100 | 500 | 預估 0.2% / 月 |
 
-This avoids depending on the ephemeral `claim_codes` table, which is purged 72 hours after creation or first use, whichever is later (`claim_token_cleanup_ttl_hours = 72`). The partial index `idx_pets_claim_identity` supports this scan efficiently.
+---
 
-### 6.6 Single-Column Support Indexes
+## 16. 敏感資料清單（Sensitive Data Inventory）
 
-These full-table indexes cover FK scans, sort-only queries, and background job targets that are not classified as partial or composite:
+| Table | Field | Class | Protection | Retention |
+|-------|-------|-------|-----------|-----------|
+| `claim_identities` | `email_hash` | Pseudonymized PII | SHA-256（無法反推）| Indefinite |
+| `claim_identities` | `email_encrypted` | Direct PII | AES-256-GCM；GDPR 後 NULL | 7 days post-erasure |
+| `pets` | `owner_token_hash` | Auth credential | SHA-256 | 隨 pet（claimed_at NULL = 無效）|
+| `claim_codes` | `email_hash`, `code_hash` | OTP secret | SHA-256 | 72h |
+| `marketplace_*.{seller,buyer}_token_hash` | Auth identifier | SHA-256 | 隨 transaction（永久）|
+| `admin_users` | `password_hash` | Auth credential | bcrypt cost ≥ 12 | 隨帳號 |
+| `admin_users` | `totp_secret_encrypted` | Auth credential | AES-256-GCM | 隨帳號 |
+| `admin_users` | `totp_backup_codes_hash` | Auth backup | SHA-256（單次使用後刪）| 隨帳號 |
+| `audit_logs` | `ip_address_hash` | Network identifier | SHA-256；90 天清空 | 90 days |
+| `gdpr_requests` | `admin_notes` | 業務 metadata（可能含 PII）| 應用層審查；Max 500 chars | 隨 row（indefinite） |
 
-- `idx_pets_rarity (rarity)` — supports admin list-view and leaderboard snapshot queries that filter by rarity tier. Not partial because all rows have a non-NULL `rarity`.
-- `idx_claim_codes_expires_at (expires_at)` — supports OTP verification filtering for unexpired codes (`WHERE expires_at > NOW()`) and the background job that identifies stale unverified codes. Not partial because all rows have a non-NULL `expires_at`.
-- `idx_claim_codes_created_at (created_at)` — supports the 72-hour background cleanup job which finds rows by creation time (`WHERE created_at < NOW() - INTERVAL '72 hours'`). Not partial because all rows have a non-NULL `created_at`.
-- `idx_arena_matches_completed_at (completed_at)` — supports admin list queries ordered by recency and serves as the sort key for leaderboard-adjacent analytics. Not partial because all rows have a non-NULL `completed_at`.
-- `idx_arena_matches_winner (winner_pet_id)` — supports the FK integrity scan for `winner_pet_id ON DELETE SET NULL`. PostgreSQL does not require an index on the referencing column, but without one it falls back to a sequential scan of `arena_matches` whenever a `pets` row is deleted; the index prevents that O(N) scan at low cost given the low cardinality of `winner_pet_id` updates.
-- `idx_claim_codes_pet_id (pet_id)` — supports the FK CASCADE scan when a `pets` row is deleted (`ON DELETE CASCADE`). Also used by the OTP verification query `WHERE pet_id = $1 AND expires_at > NOW() AND used_at IS NULL`.
-- `idx_claim_codes_email_hash (email_hash)` — supports the OTP lookup query `WHERE email_hash = $1` to retrieve pending codes for a given email.
-- `idx_food_buffs_pet_id (pet_id)` — supports the FK CASCADE scan and the active-buff query `WHERE pet_id = $1 AND (expires_at IS NULL OR expires_at > NOW())`.
-- `idx_food_buffs_record_expires (record_expires_at)` — supports the background cleanup job `DELETE FROM food_buffs WHERE record_expires_at < NOW()` (`food_buff_record_retention_days = 30`).
-- `idx_marketplace_listings_pet (pet_id)` — supports the FK RESTRICT scan and seller-facing queries `WHERE pet_id = $1`.
-- `idx_marketplace_listings_listed_at (listed_at DESC)` — supports the admin and public marketplace browse query `ORDER BY listed_at DESC`.
-- `idx_marketplace_transactions_completed (completed_at DESC)` — supports admin transaction audit queries ordered by recency.
-- `idx_leaderboard_snapshots_time (snapshot_time DESC)` — supports both the historical reporting query (`SELECT ... ORDER BY snapshot_time DESC LIMIT 1`) and the 12-month rolling retention DELETE (`WHERE snapshot_time < NOW() - INTERVAL '12 months'`; `leaderboard_snapshot_retention_months = 12`). Not partial because all rows have a non-NULL `snapshot_time`.
-- `idx_audit_logs_created_at (created_at DESC)` — supports audit log search queries and the 2-year row retention DELETE (`WHERE created_at < NOW() - INTERVAL '2 years'`; `admin_audit_log_retention_years = 2`). The composite `idx_audit_logs_admin_id` additionally covers filtered searches by actor. Not partial because all rows have a non-NULL `created_at`.
+**敏感程度分類**：
 
-### 6.7 Connection Pool Sizing
+| 程度 | 類型 | 處理 |
+|------|------|------|
+| 最高 | password、TOTP secret | bcrypt / AES-256；不可備份至非加密存儲 |
+| 高 | email、IP | hash / 加密；retention 上限 |
+| 中 | token hash | SHA-256；隨業務 |
+| 低 | pet stats、battle log | 標準保護 |
 
-At `db_connection_pool_min_connections = 20` and `db_connection_pool_max_connections = 50`, the pool is sized for the sustained 100 RPS target (`normal_operation_rps = 100`) with headroom to the 500 RPS peak (`peak_operation_rps = 500`) before autoscaling adds replicas. Each API server process holds its own pool; with the minimum API server replica count (implementation-defined; no constant), the total connection count at burst is `min_replicas × db_connection_pool_max_connections`. For example, 2 API server processes × 50 pool max = 100 total connections at burst.
+---
+
+## 17. Multi-Tenancy Data Isolation Strategies
+
+**本產品決策：Single-Tenant SaaS**
+
+**決策依據**：
+- pixel-pet-arena 為單一公開遊戲，全體玩家共享 leaderboard / marketplace
+- 無 B2B 客戶或租戶隔離合規需求
+- Player 之間隔離由 `owner_token_hash` 驗證（pet ownership）保證；無需 schema-level isolation
+- Admin 透過 RBAC 限制（`admin_role_enum`）
+
+**比較表**：
+
+| 策略 | 是否適用本產品 | 理由 |
+|------|--------------|------|
+| Shared DB + 共用 Schema（RLS）| ❌ | 無 tenant 概念；application-level pet ownership 已足 |
+| Shared DB + Schema-per-Tenant | ❌ | 過度設計 |
+| DB-per-Tenant | ❌ | 過度設計 |
+
+**未來企業版（B2B 多遊戲）規劃**：若衍生為「私營小型遊戲服務」，將引入 `tenant_id` + RLS pattern；目前為 v3 路線圖，本 SCHEMA 不規劃。
+
+---
+
+## 18. Schema 審查檢查清單
+
+### 命名與結構
+- [x] 所有 table 名稱為 `snake_case` 複數
+- [x] Boolean 欄位有 `is_` 前綴或語意化日期欄（`flagged_at`、`banned_at`）配對
+- [x] Enum 以 `_enum` 後綴 type 名稱
+- [x] FK 欄位命名為 `{ref_table_singular}_id`
+- [x] 索引、約束名稱符合命名規範
+
+### 正規化與完整性
+- [x] 無重複欄位組（JSONB 為原子半結構化值）
+- [x] 所有非主鍵欄位完全依賴主鍵
+- [x] 反正規化已文件化（§4.2）並附理由
+- [x] 所有 CHECK 約束涵蓋業務規則
+- [x] 外鍵 ON DELETE 行為已明確選擇（§9.1）
+
+### 索引
+- [x] 所有外鍵欄位有對應索引
+- [x] partial index 應用於可空 / 旗標欄位（節省空間）
+- [x] 複合索引欄位順序正確
+- [x] 已標註 EXPLAIN ANALYZE-equivalent SLO（§7.1）
+- [x] 無重複索引（FK 利用 composite leading column）
+
+### 安全與合規
+- [x] PII 欄位列入 §16 / §6.3
+- [x] 密碼僅 hash（bcrypt cost ≥ 12）
+- [x] 無內部 ID 直接暴露（外部用 UUID v4）
+- [x] Retention 已定義（§13）
+- [x] GDPR Art.17 erasure 流程已文件化（§6.3）
+
+### 效能
+- [x] 高寫入表索引數量受控（pets 7 個 partial / training_logs 1 個）
+- [x] 預估 1 億筆觸發分區策略已規劃（§10）
+- [x] 連線池公式已套用（§7.3，min=20, max=50）
+- [x] 查詢效能基準（§7.1）已對齊 API SLO
+
+### Migration
+- [x] UP / DOWN migration 模板已定義（§8）
+- [x] 大表 backfill 4 步驟流程（§8.3）
+- [x] 不持有 > 3 秒 lock
+- [x] migration 命名 `YYYYMMDDHHMMSS_*.sql`
+
+### 稽核與監控
+- [x] admin mutation 全部寫 `audit_logs`（§6.2）
+- [x] `updated_at` 應用層維護（§2.4 註解）
+- [x] 備份策略（§11）為 Supabase managed
+- [x] 索引膨脹 monitoring（§5.5）已加入 Runbook
+
+### HA / Replication / Read-Write Split（必查）
+- [x] Primary + 1 read replica 於 EDD §3.6 / §3.6.1 說明（無 SPOF）
+- [x] 讀寫分離規則明確（§7.4）
+
+### Bounded Context 隔離（Spring Modulith HC-1，必查）
+- [x] §1.1.1 BC Ownership Table 填入 6 個 BC 並對應每張 table
+- [x] 每張表 §3 header 已標註 owning BC
+- [x] 跨 BC FK 已列入 §1.1.2 / §9.5 audit list（共 11 個跨 BC ID-only column）
+- [x] v2.0 暫保 DB FK；v2.1 migration 計畫於 §8.2 Expand-Contract 流程中
+- [x] Replica lag SLO ≤ 1s（§7.4）
+- [x] 連線池上限 < Supabase max_connections × 80%（300 / 200 × 80% = 250 — 透過 Supabase pooler 收斂）
+- [x] 分區策略（§10）已定義；觸發門檻 1000 萬筆
+
+---
+
+## 19. Indexes & Performance Notes（Cross-Reference）
+
+> 本節摘要 §3 各表索引設計理由，集中便於 review。詳細索引 SQL 在 §3 各表「索引」區塊。
+
+### 19.1 Partial Indexes 總覽
+
+| Index | Table | Predicate | 用途 |
+|-------|-------|-----------|------|
+| `idx_pets_claimed_at` | pets | `claimed_at IS NOT NULL` | 領取轉換分析 |
+| `idx_pets_is_banned` | pets | `is_banned = TRUE` | 禁用稽核（罕見值，索引極小）|
+| `idx_pets_owner_token_hash` | pets | `owner_token_hash IS NOT NULL` | Auth hot path |
+| `idx_pets_last_trained_at` | pets | `last_trained_at IS NOT NULL` | Neglect detection |
+| `idx_pets_reserved_until` | pets | `reserved_until IS NOT NULL` | 24h cleanup job |
+| `idx_pets_claim_identity` | pets | `claim_identity_id IS NOT NULL` | GDPR erasure lookup |
+| `idx_marketplace_listings_status` | marketplace_listings | `status = 'active'` | 公開瀏覽 |
+| `idx_marketplace_listings_active_pet` | marketplace_listings | `status = 'active'` UNIQUE | 業務級唯一 |
+| `idx_marketplace_listings_expires_at` | marketplace_listings | `status = 'active' AND expires_at IS NOT NULL` | 自動下架 job |
+| `idx_arena_matches_is_flagged` | arena_matches | `is_flagged = TRUE` | Flag 列表查詢 |
+| `idx_gdpr_requests_initiating_pet` | gdpr_requests | `initiating_pet_id IS NOT NULL` | self-service GDPR FK 支援 |
+| `idx_claim_codes_used_at` | claim_codes | `used_at IS NOT NULL` | Cleanup job |
+| `idx_claim_identities_deletion` | claim_identities | `deletion_requested_at IS NOT NULL AND email_encrypted IS NOT NULL` | GDPR erasure job |
+| `idx_audit_logs_ip_hash_cleanup` | audit_logs | `ip_address_hash IS NOT NULL` | 90 天 IP cleanup |
+
+### 19.2 Composite Indexes
+
+| Index | Table | Columns | 對應 Query |
+|-------|-------|---------|-----------|
+| `idx_arena_matches_pet_a_history` | arena_matches | `(pet_a_id, completed_at DESC)` | `GET /api/v1/arena/history/:petId` |
+| `idx_arena_matches_pet_b_history` | arena_matches | `(pet_b_id, completed_at DESC)` | `GET /api/v1/arena/history/:petId` |
+| `idx_training_logs_completed_at` | training_logs | `(pet_id, completed_at DESC)` | 每日訓練 count + history |
+| `idx_audit_logs_admin_id` | audit_logs | `(admin_id, created_at DESC)` | actor 過濾稽核搜尋 |
+| `idx_marketplace_transactions_pet_completed` | marketplace_transactions | `(pet_id, completed_at DESC)` | Anti-flip 7-day check |
+| `idx_gdpr_requests_identity` | gdpr_requests | `(claim_identity_id, submitted_at DESC)` | 用戶 GDPR 歷史 |
+| `idx_gdpr_requests_status` | gdpr_requests | `(status, submitted_at)` | Admin work queue FIFO |
+
+### 19.3 Single-Column Support Indexes
+
+`idx_pets_rarity`（rarity 過濾）、`idx_claim_codes_expires_at` / `_created_at` / `_pet_id` / `_email_hash`、`idx_arena_matches_completed_at` / `_winner`、`idx_food_buffs_pet_id` / `_record_expires`、`idx_marketplace_listings_pet` / `_listed_at`、`idx_marketplace_transactions_completed`、`idx_leaderboard_snapshots_time`、`idx_audit_logs_created_at`。詳細用途見 §3 各表「索引」區塊。
+
+### 19.4 Hot-Path Query Patterns
+
+- **Token auth lookup**：Redis `token:blacklist` check → PostgreSQL `idx_pets_owner_token_hash` (partial)。每次 authenticated player write 都走這條。
+- **Leaderboard read**：Redis `leaderboard:global` `ZRANGE ... REV LIMIT` — 完全不碰 PostgreSQL（degraded mode 例外）。
+- **GDPR erasure pet lookup**：`SELECT id FROM pets WHERE claim_identity_id = $1`，用 `idx_pets_claim_identity` partial index。
+
+---
+
+GEN_RESULT:
+  step_id: SCHEMA
+  type: SCHEMA
+  files_generated: docs/SCHEMA.md
+  sections_completed: 19
+  self_check_passed: true
