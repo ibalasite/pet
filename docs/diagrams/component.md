@@ -1,55 +1,61 @@
 ---
 diagram: component
-uml-type: Component Diagram
-source: EDD §3.8, ARCH §2, EDD §3.3
-generated: 2026-05-05T00:00:00Z
+uml-type: 元件圖（Component Diagram）
+source: docs/EDD.md §4.5.8
+generated: 2026-05-10T00:50:00Z
 ---
 
-# Component Diagram — pixel-pet-arena
+# Component Diagram
 
-> 來源：EDD §3.8 Component Diagram, ARCH §2 Component Architecture, EDD §3.3–3.7 Technology Stack
+系統由五大區塊組成：Client（Player React + Phaser、Admin Vue、Vite 構建）、API Server（Fastify Auth/RateLimit 中介、Routes 與 UseCase 集成）、Worker（GDPR / cleanup / snapshot 背景作業）、Data Tier（PostgreSQL / Redis）以及 External（SendGrid、Vercel CDN）。
 
 ```mermaid
-flowchart LR
-    subgraph External["External Services (Third-party)"]
-        SendGridSvc["SendGrid v3\nEmail API\nHTTPS:443"]
-        NodemailerSvc["Nodemailer SMTP\nFallback Email\nSMTP:587"]
-        S3Storage["S3-compatible\nDB Backup\nHTTPS:443"]
-        GitHubActions["GitHub Actions\nCI/CD Runner\nHTTPS:443"]
+graph TB
+    subgraph "Client"
+        PR["Player React App (Phaser canvas)"]
+        AV["Admin Vue App"]
+        Vite["Vite Build"]
     end
 
-    subgraph Edge["Edge / CDN Layer (Vercel)"]
-        VercelCDN["VercelCDN\nStatic Asset Hosting\nHTTPS:443"]
-        PlayerAppBundle["PlayerApp\nReact 18 + Phaser.js 3\nVite 5 / TypeScript 5"]
-        AdminPortalBundle["AdminPortal\nVue 3 + Element Plus\nVite 5 / TypeScript 5"]
+    subgraph "API Server (Fastify)"
+        Auth["AuthMiddleware"]
+        RateMW["RateLimitMiddleware"]
+        Routes["Game Routes"]
+        AdminRoutes["Admin Routes"]
+        UCs["Use Cases (Application)"]
+        Domain["Domain Services"]
     end
 
-    subgraph API["API Layer (Railway — autoscale HPA at 70% CPU)"]
-        GameAPIServer["GameAPIServer\nNode.js 20 LTS / Fastify 4\nPort:3000 / Replicas: 2-10"]
-        AdminAPIServer["AdminAPIServer\nNode.js 20 LTS / Fastify 4\nPort:3001 / Replicas: 1"]
-        NginxLB["Nginx\nLoad Balancer\nPort:80/443"]
+    subgraph "Worker"
+        WJobs["Background Jobs (GDPR / cleanup / snapshot)"]
     end
 
-    subgraph Data["Data Layer"]
-        PostgresPrimary["PostgreSQL Primary\nSupabase managed 15+\nPort:5432"]
-        PostgresReplica["PostgreSQL Replica\nRead-only / failover 60s\nPort:5432"]
-        RedisUpstash["Redis\nUpstash serverless 7+\nPort:6379"]
+    subgraph "Data Tier"
+        PG["PostgreSQL"]
+        Redis["Redis"]
     end
 
-    VercelCDN --> PlayerAppBundle
-    VercelCDN --> AdminPortalBundle
-    PlayerAppBundle -->|"REST /api/v1/*\nHTTPS:443"| NginxLB
-    AdminPortalBundle -->|"REST /admin/api/*\nHTTPS:443"| NginxLB
-    NginxLB -->|"REST /api/v1/*\nHTTPS:3000"| GameAPIServer
-    NginxLB -->|"REST /admin/api/*\nHTTPS:3001"| AdminAPIServer
-    GameAPIServer -->|"TCP:5432\nPostgreSQL Wire Protocol"| PostgresPrimary
-    AdminAPIServer -->|"TCP:5432\nPostgreSQL Wire Protocol"| PostgresPrimary
-    PostgresPrimary -->|"streaming replication\nTCP:5432"| PostgresReplica
-    GameAPIServer -.->|"TCP:6379\nRedis Protocol [async]"| RedisUpstash
-    AdminAPIServer -.->|"TCP:6379\nRedis Protocol [async]"| RedisUpstash
-    GameAPIServer -->|"POST /v3/mail/send\nHTTPS:443"| SendGridSvc
-    SendGridSvc -.->|"fallback after 3 failures\nSMTP:587"| NodemailerSvc
-    PostgresPrimary -.->|"pg_dump daily\nHTTPS:443 [async]"| S3Storage
-    GitHubActions -->|"deploy on push\nHTTPS:443"| VercelCDN
-    GitHubActions -->|"deploy on push\nHTTPS:443"| NginxLB
+    subgraph "External"
+        SG["SendGrid"]
+        CDN["Vercel CDN"]
+    end
+
+    PR --> Vite
+    AV --> Vite
+    Vite --> CDN
+    CDN --> Auth
+    Auth --> RateMW
+    RateMW --> Routes
+    RateMW --> AdminRoutes
+    Routes --> UCs
+    AdminRoutes --> UCs
+    UCs --> Domain
+    UCs --> PG
+    UCs --> Redis
+    UCs --> SG
+    WJobs --> PG
+    WJobs --> Redis
+    WJobs --> SG
 ```
+
+> 兩 Frontend SPA 共用 Vite 建構並由 Vercel CDN 分發；API 與 Worker 分離部署，Worker 不暴露 HTTP，僅消費 DB / Redis / 外部服務。

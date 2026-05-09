@@ -1,71 +1,58 @@
 ---
 diagram: deployment
-uml-type: Deployment Diagram
-source: EDD §3.8, ARCH §7, EDD §3.6
-generated: 2026-05-05T00:00:00Z
+uml-type: 部署圖（Deployment Diagram）
+source: docs/EDD.md §4.5.9
+generated: 2026-05-10T00:50:00Z
 ---
 
-# Deployment Diagram — pixel-pet-arena
+# Deployment Diagram
 
-> 來源：EDD §3.8 Deployment Diagram, ARCH §7 Deployment Architecture, EDD §3.6 Hosting/Infrastructure
+雲端部署拓撲：Vercel Edge（Player + Admin 靜態 SPA）→ Railway Compute us-east（LB + 2× api pod + 2× worker pod）→ Supabase（PG Primary + Standby）+ Upstash（Redis Primary + Replica）→ External（SendGrid、S3 backup）。
 
 ```mermaid
-flowchart TD
-    subgraph Internet["Internet"]
-        GuestPlayer["GuestPlayer\n瀏覽器 / Desktop"]
-        PetOwner["PetOwner\n瀏覽器 / Mobile"]
-        AdminOperator["AdminOperator\n瀏覽器 / Desktop"]
+graph TB
+    subgraph "Vercel Edge"
+        CDN["Global CDN"]
+        Static["Player + Admin Static SPA"]
     end
 
-    subgraph DMZ["DMZ / Edge Layer (Vercel)"]
-        VercelEdge["VercelEdge\nImage: vercel-static:latest\nGlobal CDN / HTTPS:443\nTLS 1.3"]
-        PlayerApp["PlayerApp\nImage: player-app:1.0.0\nCPU: 0 / Mem: CDN-served\nReplicas: CDN Global"]
-        AdminPortal["AdminPortal\nImage: admin-portal:1.0.0\nCPU: 0 / Mem: CDN-served\nReplicas: CDN Global"]
+    subgraph "Railway Compute (us-east)"
+        LB["LB / HPA 70% CPU"]
+        API1["api-pod-1 :8080"]
+        API2["api-pod-2 :8080"]
+        W1["worker-pod-1"]
+        W2["worker-pod-2"]
     end
 
-    subgraph AppZone["App Zone (Railway — containerized)"]
-        NginxLB["NginxLB\nImage: nginx:1.25-alpine\nCPU: 0.25 / Mem: 256Mi\nReplicas: 1"]
-        GameAPI["GameAPIServer\nImage: game-api:1.0.0\nCPU: 0.5 / Mem: 512Mi\nReplicas: 2-10 HPA"]
-        AdminAPI["AdminAPIServer\nImage: admin-api:1.0.0\nCPU: 0.25 / Mem: 256Mi\nReplicas: 1"]
+    subgraph "Supabase"
+        PGP["PG Primary"]
+        PGS["PG Standby"]
     end
 
-    subgraph DataZone["Data Zone"]
-        PostgresPrimary["PostgreSQL Primary\nImage: postgres:15-supabase\nCPU: 2.0 / Mem: 4Gi\nReplicas: 1 (primary)"]
-        PostgresReplica["PostgreSQL Replica\nImage: postgres:15-supabase\nCPU: 1.0 / Mem: 2Gi\nReplicas: 1 (read-only)"]
-        RedisUpstash["Redis Upstash\nImage: redis:7-upstash\nCPU: serverless / Mem: serverless\nReplicas: serverless"]
-        DBStorage[("PersistentVolume\nStorageClass: supabase-managed\n100Gi / SSD")]
+    subgraph "Upstash"
+        RP["Redis Primary"]
+        RR["Redis Replica"]
     end
 
-    subgraph ExternalSvc["External Services"]
-        SendGrid["SendGrid API v3\nhttps://api.sendgrid.com\nTransactional Email"]
-        Nodemailer["Nodemailer SMTP\nFallback Email\nSMTP:587"]
-        S3Backup["S3-compatible\nDB Backup Storage\nHTTPS:443"]
-        GitHubCI["GitHub Actions\nCI/CD Pipeline\nHTTPS:443"]
+    subgraph "External"
+        SG["SendGrid API"]
+        S3["S3 Backups"]
     end
 
-    GuestPlayer -->|"HTTPS:443 TLS 1.3"| VercelEdge
-    PetOwner -->|"HTTPS:443 TLS 1.3"| VercelEdge
-    AdminOperator -->|"HTTPS:443 TLS 1.3"| VercelEdge
-
-    VercelEdge --> PlayerApp
-    VercelEdge --> AdminPortal
-    PlayerApp -->|"HTTPS:443 TLS 1.3\n/api/v1/*"| NginxLB
-    AdminPortal -->|"HTTPS:443 TLS 1.3\n/admin/api/*"| NginxLB
-    NginxLB -->|"HTTP:3000\nupstream game_api"| GameAPI
-    NginxLB -->|"HTTP:3001\nupstream admin_api"| AdminAPI
-
-    GameAPI -->|"TCP:5432\nPostgreSQL Wire Protocol"| PostgresPrimary
-    GameAPI -->|"TCP:6379\nRedis Protocol"| RedisUpstash
-    GameAPI -->|"HTTPS:443\nSendGrid REST API"| SendGrid
-    AdminAPI -->|"TCP:5432\nPostgreSQL Wire Protocol"| PostgresPrimary
-    AdminAPI -->|"TCP:6379\nRedis Protocol"| RedisUpstash
-
-    PostgresPrimary -->|"streaming replication\nTCP:5432"| PostgresReplica
-    PostgresPrimary -->|"PVC: db-data\n100Gi / SSD"| DBStorage
-    PostgresReplica -->|"PVC: db-replica\n100Gi / SSD"| DBStorage
-
-    SendGrid -.->|"fallback 3 failures\nSMTP:587"| Nodemailer
-    PostgresPrimary -.->|"pg_dump daily\nHTTPS:443 [async]"| S3Backup
-    GitHubCI -->|"deploy push\nHTTPS:443"| VercelEdge
-    GitHubCI -->|"deploy push\nHTTPS:443"| NginxLB
+    CDN --> LB
+    LB --> API1
+    LB --> API2
+    API1 --> PGP
+    API2 --> PGP
+    API1 --> RP
+    API2 --> RP
+    PGP --> PGS
+    RP --> RR
+    PGP --> S3
+    W1 --> PGP
+    W2 --> PGP
+    API1 --> SG
+    W1 --> SG
 ```
+
+> HPA 觸發於 70% CPU；PG Primary 採流式複寫到 Standby（Supabase 託管），故障自動切換 RTO ≤ 60s。

@@ -1,133 +1,45 @@
 ---
 diagram: sequence-arena-battle
-uml-type: Sequence Diagram（Arena Battle — POST /api/v1/arena/enter Happy + Error）
-source: docs/EDD.md §3.8 Sequence + docs/API.md §5.3 Arena
-generated: 2026-05-08T00:00:00Z
+uml-type: 順序圖 — Arena Battle
+source: docs/EDD.md §4.5.4
+generated: 2026-05-10T00:50:00Z
 ---
 
-# Sequence Diagram — Arena Battle Matchmaking
+# Sequence Diagram — Arena Battle
 
-> 來源：docs/EDD.md §3.8 Sequence Diagrams + docs/API.md §5.3 Arena Endpoints
-
-## Overview
-
-The arena battle flow handles matchmaking, battle outcome computation, and leaderboard score
-updates. Players enter via `POST /api/v1/arena/enter` and the server holds a long-poll (HTTP
-long-polling) for up to 30 seconds (`arena_matchmaking_timeout_seconds = 30`) waiting for an
-opponent. If no opponent is found and the player accepted AI (`acceptAI: true`), an AI battle is
-resolved immediately. The battle outcome uses a seeded random ±15% modifier
-(`arena_battle_outcome_random_modifier_percent = 15`) for deterministic replay.
-
-Two modes are supported:
-- **RACE** — primary determining stat is `stat_speed`
-- **SUMO** — primary determining stat is `stat_strength`
-
-Rate limit: 10 battles/hour per pet by default (`arena_rate_limit_battles_per_hour_default = 10`),
-admin-tunable between 1 and 50 (`arena_rate_limit_admin_min = 1`, `arena_rate_limit_admin_max = 50`).
-
-## Diagram
+Player 進入 RACE/SUMO 競技場：API 透過 Redis ZADD 排隊，最多 30 秒內配對到對手；若 acceptAI=true 且超時則由 AI 對手結算；勝負與排行榜分數同步寫入 PG 與 Redis。
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    actor Player
-    participant PlayerApp as Player App<br/>(React + Phaser.js)
-    participant API as Game API Server<br/>(Fastify)
-    participant Redis
-    participant PG as PostgreSQL
+    participant P as Player
+    participant API as API Server
+    participant R as Redis
+    participant DB as PostgreSQL
 
-    Note over Player,PG: Pre-flight Checks
-
-    Player->>PlayerApp: Select mode (RACE / SUMO), click Enter Arena
-    PlayerApp->>API: POST /api/v1/arena/enter<br/>{ petId, mode, acceptAI }
-    API->>Redis: GET rl:arena:{pet_id}<br/>(rate limit: 10/hr default — arena_rate_limit_battles_per_hour_default = 10)
-    alt Rate limit exceeded
-        Redis-->>API: count ≥ limit
-        API-->>PlayerApp: HTTP 429 Retry-After header
-        PlayerApp-->>Player: "Battle limit reached. Try again later."
-    else Within limit
-        API->>PG: SELECT pets WHERE id = petId AND is_banned = FALSE
-        alt Pet banned
-            PG-->>API: is_banned = TRUE
-            API-->>PlayerApp: HTTP 403 { code: "PET_BANNED" }
-        else Pet allowed
-            PG-->>API: pet stats + active food buffs
-            Note over API: Compute effective stats:<br/>effectiveStat = baseStat + stat_delta (food buff)
-
-            Note over Player,PG: Matchmaking Phase (30 s window — arena_matchmaking_timeout_seconds = 30)
-
-            API->>Redis: ZADD matchmaking:queue:{mode}<br/>score=enqueue_epoch_ms<br/>member="{petId}:{epoch}"
-            API->>Redis: ZPOPMIN matchmaking:queue:{mode}<br/>(atomic pop of oldest entry — SCHEMA §4.2)<br/>discard if age > 45 s (stale; arena_matchmaking_timeout_seconds = 30 + 15 s buffer)
-            alt Opponent found within 30 s (arena_matchmaking_timeout_seconds = 30)
-                Redis-->>API: opponentEntry = "{opponentPetId}:{epoch}"
-                API->>Redis: ZREM matchmaking:queue:{mode} petEntry
-                API->>PG: SELECT pets WHERE id = opponentPetId
-                PG-->>API: opponent stats + food buffs
-            else Timeout (30 s — arena_matchmaking_timeout_seconds = 30) — no human opponent
-                Redis-->>API: no match
-                API->>Redis: ZREM matchmaking:queue:{mode} petEntry
-                alt acceptAI = true
-                    API->>API: Generate AI opponent stats
-                    Note over API: AI battle proceeds below
-                else acceptAI = false
-                    API-->>PlayerApp: HTTP 408<br/>{ code: "MATCHMAKING_TIMEOUT" }
-                    Note right of API: Rate-limit counter NOT incremented on timeout
-                    PlayerApp-->>Player: "No opponent found. Try AI battle?"
-                end
+    P->>API: POST /api/v1/arena/enter {petId, mode, acceptAI}
+    API->>R: INCR rl:arena:{pet_id} (TTL 3600)
+    alt rate limit > 10
+        API-->>P: HTTP 429 Retry-After
+    else
+        API->>R: ZADD matchmaking:queue:{mode} score=enqueue_epoch member="{petId}:{epoch_ms}"
+        loop poll up to 30s
+            API->>R: ZRANGEBYSCORE oldest opponent (excluding self)
+            alt opponent found
+                API->>R: ZREM both pets
+                API->>DB: SELECT both pet stats
+                API->>API: BattleCalculator.calculate(stats, mode, seed)
+                API->>DB: INSERT arena_matches; UPDATE leaderboard score
+                API->>R: ZADD leaderboard:global score=newScore member=petId
+                API-->>P: HTTP 200 {matchId, result, opponentPetId}
+            else timeout 30s and acceptAI=true
+                API->>API: AI opponent battle calculation
+                API->>DB: INSERT arena_matches (is_ai_opponent=TRUE)
+                API-->>P: HTTP 200 {matchId, result, isAiOpponent: true}
+            else timeout 30s and acceptAI=false
+                API-->>P: HTTP 408 MATCHMAKING_TIMEOUT
             end
-
-            Note over Player,PG: Battle Resolution
-
-            API->>API: seed = crypto.randomInt()<br/>modifier_a = seed-based ±15%<br/>modifier_b = inversely derived<br/>(arena_battle_outcome_random_modifier_percent = 15)
-            API->>API: Compute effectiveStatA = baseStat_a × (1 + modifier_a) + stat_delta_a<br/>Compute effectiveStatB = baseStat_b × (1 + modifier_b) + stat_delta_b<br/>winner = higher effective stat<br/>Tie-break: earlier enqueue epoch wins (challenger)
-            API->>API: duration = random(5, 15) seconds<br/>(arena_match_duration_min_seconds = 5,<br/>arena_match_duration_max_seconds = 15)
-            API->>API: Build battle_log JSONB event sequence
-
-            Note over Player,PG: Persist Result & Update Score
-
-            API->>PG: BEGIN TRANSACTION<br/>INSERT INTO arena_matches<br/>(pet_a_id, pet_b_id, is_ai_opponent, mode,<br/>winner_pet_id, random_seed, stat_delta_a,<br/>stat_delta_b, duration_seconds, battle_log)<br/>COMMIT
-            PG-->>API: matchId
-            API->>Redis: INCR rl:arena:{pet_id} EX 3600<br/>(record battle consumption;<br/>TTL = 3600 s — arena_rate_limit_counter_window_hours = 1)
-            alt PvP match (is_ai_opponent = false)
-                API->>Redis: MULTI<br/>ZADD leaderboard:global score=winnerNewScore member=winnerPetId<br/>ZADD leaderboard:global score=loserNewScore member=loserPetId<br/>EXEC<br/>(both ZADDs in MULTI/EXEC pipeline for atomicity)
-            else AI match (is_ai_opponent = true)
-                API->>Redis: ZADD leaderboard:global<br/>score=newLeaderboardScore member=petId<br/>(player's pet only — no AI synthetic entry)
-            end
-            Note right of Redis: Update lag ≤ 30 s<br/>(leaderboard_update_lag_max_seconds = 30)
-
-            Note over Player,PG: Animate & Display Result
-
-            API-->>PlayerApp: HTTP 200<br/>{ matchId, result: WIN|LOSS,<br/>opponentPetId, isAiOpponent,<br/>statDelta, newLeaderboardScore }
-            PlayerApp->>PlayerApp: Launch Phaser.js BattleAnimation<br/>(5–15 s animation window)
-            PlayerApp-->>Player: Show BattleResultCard (WIN / LOSS variant)
-            Note right of PlayerApp: Battle records page shows last 20<br/>(arena_battle_records_display_count = 20)
         end
     end
-
-    Note over Player,PG: Bot Detection (Background)
-
-    Note right of Redis: Bot detection: > 50 battles in 60-min window<br/>(bot_detection_battles_threshold = 50,<br/>bot_detection_window_minutes = 60)<br/>triggers admin suspicious-activity flag
 ```
 
-## Notes
-
-- **Matchmaking pop**: `ZPOPMIN matchmaking:queue:{mode}` atomically pops the oldest entry
-  (SCHEMA §4.2). If the popped entry is stale (age > ~45 s = `arena_matchmaking_timeout_seconds = 30`
-  + 15 s buffer), it is silently discarded and the consumer retries. Entry format:
-  `"{petId}:{enqueue_epoch_ms}"`.
-- **Rate limit not incremented on timeout**: If matchmaking times out without finding an opponent,
-  the battle counter `rl:arena:{pet_id}` is NOT incremented, so the player does not lose a
-  battle slot for a failed queue attempt.
-- **AI opponent**: When `acceptAI: true` and no human is found, the AI opponent is synthesized in
-  memory; no `pet_b_id` row is written — `is_ai_opponent = TRUE` and `pet_b_id = NULL` in
-  `arena_matches`.
-- **Dual leaderboard ZADD for PvP**: After a human-vs-human battle, both winner and loser scores
-  are updated via a Redis MULTI/EXEC pipeline (`ZADD leaderboard:global score=winnerNewScore
-  member=winnerPetId` + `ZADD leaderboard:global score=loserNewScore member=loserPetId`) for
-  atomicity. For AI matches (`is_ai_opponent = true`), only the requesting player's pet receives a
-  ZADD — no synthetic AI entry is written.
-- **Leaderboard score formula**: `win_rate × battles_played × level_multiplier` (ARCH P2). The
-  Redis sorted set (`leaderboard:global`) is authoritative; PostgreSQL `leaderboard_snapshots` is
-  the durable backup, retaining top 500 entries (`leaderboard_snapshot_retention_top_n = 500`).
-- **Banned pet leaderboard removal**: When a pet is banned, `ZREM leaderboard:global petId` is
-  called within 5 minutes (`leaderboard_ban_reflection_time_minutes = 5`).
+> Matchmaking 使用 Redis Sorted Set 確保「最早進入者優先配對」；BattleCalculator 為純函式，可基於 seed 重現結果以利反作弊比對。

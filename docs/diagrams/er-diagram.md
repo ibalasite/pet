@@ -1,241 +1,171 @@
-# Entity-Relationship Diagram — pixel-pet-arena
+---
+diagram: er-diagram
+uml-type: 實體關聯圖（ER Diagram）
+source: docs/SCHEMA.md §14
+generated: 2026-05-10T00:50:00Z
+note: 此圖描述資料庫表格關聯，請勿與 class-*.md 物件模型混淆
+---
 
-## Overview
+# Entity-Relationship Diagram
 
-This ER diagram covers all 12 PostgreSQL tables defined in SCHEMA.md §2, plus the Redis key-space
-structures defined in EDD §4.8 (shown as notes). Tables are grouped by domain:
-
-- **Identity & Auth**: `claim_identities`, `claim_codes`, `admin_accounts`
-- **Pet Core**: `pets`, `training_logs`, `food_buffs`
-- **Arena**: `arena_matches`
-- **Leaderboard**: `leaderboard_snapshots`
-- **Marketplace (Phase 3 / FF_MARKETPLACE)**: `marketplace_listings`, `marketplace_transactions`
-- **Governance**: `admin_audit_log`, `gdpr_requests`
-
-All IDs are UUID (`gen_random_uuid()`) except `admin_audit_log.id` which is `BIGSERIAL` for
-monotonic ordering. All timestamps are `TIMESTAMPTZ`.
-
-## Diagram
+下圖呈現所有 12 張 PostgreSQL 表與其 FK / cross-BC ID 引用關係。**雙線箭頭 `||--o{`** = 同 BC FK（DB-level 強制）；**虛線箭頭 `||..o{`** = cross-BC ID-only（v2.1 後移除 DB FK，僅在 application 層維持參照完整性）。
 
 ```mermaid
 erDiagram
     claim_identities {
-        UUID id PK
-        VARCHAR_64 email_hash UK
-        BYTEA email_encrypted
-        TIMESTAMPTZ deletion_requested_at
-        TIMESTAMPTZ created_at
-        TIMESTAMPTZ updated_at
+        uuid id PK
+        varchar email_hash UK
+        bytea email_encrypted
+        timestamptz deletion_requested_at
+        timestamptz created_at
+        timestamptz updated_at
     }
-
     pets {
-        UUID id PK
-        BIGINT seed UK
+        uuid id PK
+        bigint seed UK
         rarity_enum rarity
-        VARCHAR_64 pet_name
-        SMALLINT stat_speed
-        SMALLINT stat_strength
-        SMALLINT stat_stamina
-        SMALLINT level
-        INTEGER total_training_actions
-        TIMESTAMPTZ last_trained_at
-        VARCHAR_64 owner_token_hash
-        TIMESTAMPTZ claimed_at
-        UUID claim_identity_id FK
-        TIMESTAMPTZ reserved_until
-        BOOLEAN is_banned
-        TEXT banned_reason
-        TIMESTAMPTZ banned_at
-        JSONB generation_meta
-        TIMESTAMPTZ created_at
-        TIMESTAMPTZ updated_at
+        varchar pet_name
+        smallint stat_speed
+        smallint stat_strength
+        smallint stat_stamina
+        smallint level
+        integer total_training_actions
+        timestamptz last_trained_at
+        varchar owner_token_hash
+        timestamptz claimed_at
+        uuid claim_identity_id "Cross-BC ID-only"
+        timestamptz reserved_until
+        boolean is_banned
+        text banned_reason
+        timestamptz banned_at
+        jsonb generation_meta
+        timestamptz created_at
+        timestamptz updated_at
     }
-
     claim_codes {
-        UUID id PK
-        UUID pet_id FK
-        VARCHAR_64 email_hash
-        VARCHAR_64 code_hash
-        TIMESTAMPTZ expires_at
-        TIMESTAMPTZ used_at
-        SMALLINT attempts
-        TIMESTAMPTZ created_at
+        uuid id PK
+        uuid pet_id "Cross-BC ID-only"
+        varchar email_hash
+        varchar code_hash
+        timestamptz expires_at
+        timestamptz used_at
+        smallint attempts
+        timestamptz created_at
     }
-
-    training_logs {
-        UUID id PK
-        UUID pet_id FK
-        training_type_enum training_type
-        SMALLINT stat_delta
-        SMALLINT stat_after
-        TIMESTAMPTZ completed_at
-    }
-
-    food_buffs {
-        UUID id PK
-        UUID pet_id FK
-        VARCHAR_50 food_type
-        buff_stat_enum buff_stat
-        SMALLINT magnitude
-        BOOLEAN is_permanent
-        TIMESTAMPTZ expires_at
-        TIMESTAMPTZ consumed_at
-        TIMESTAMPTZ record_expires_at
-    }
-
     arena_matches {
-        UUID id PK
-        UUID pet_a_id FK
-        UUID pet_b_id FK
-        BOOLEAN is_ai_opponent
+        uuid id PK
+        uuid pet_a_id "Cross-BC ID-only"
+        uuid pet_b_id "Cross-BC ID-only"
+        boolean is_ai_opponent
         arena_mode_enum mode
-        UUID winner_pet_id FK
-        BIGINT random_seed
-        SMALLINT stat_delta_a
-        SMALLINT stat_delta_b
-        SMALLINT duration_seconds
-        JSONB battle_log
-        BOOLEAN is_flagged
-        TIMESTAMPTZ flagged_at
-        TIMESTAMPTZ completed_at
-        TIMESTAMPTZ updated_at
+        uuid winner_pet_id "Cross-BC ID-only"
+        bigint random_seed
+        smallint stat_delta_a
+        smallint stat_delta_b
+        smallint duration_seconds
+        jsonb battle_log
+        boolean is_flagged
+        timestamptz flagged_at
+        timestamptz completed_at
+        timestamptz updated_at
     }
-
     leaderboard_snapshots {
-        UUID id PK
-        TIMESTAMPTZ snapshot_time
-        JSONB entries
-        TIMESTAMPTZ created_at
+        uuid id PK
+        timestamptz snapshot_time
+        jsonb entries
+        timestamptz created_at
     }
-
+    training_logs {
+        uuid id PK
+        uuid pet_id FK
+        training_type_enum training_type
+        smallint stat_delta
+        smallint stat_after
+        timestamptz completed_at
+    }
+    food_buffs {
+        uuid id PK
+        uuid pet_id FK
+        varchar food_type
+        buff_stat_enum buff_stat
+        smallint magnitude
+        boolean is_permanent
+        timestamptz expires_at
+        timestamptz consumed_at
+        timestamptz record_expires_at
+    }
     marketplace_listings {
-        UUID id PK
-        UUID pet_id FK
-        VARCHAR_64 seller_token_hash
-        INTEGER price_credits
+        uuid id PK
+        uuid pet_id "Cross-BC ID-only"
+        varchar seller_token_hash
+        integer price_credits
         listing_status_enum status
-        TIMESTAMPTZ listed_at
-        TIMESTAMPTZ expires_at
-        TIMESTAMPTZ completed_at
-        TIMESTAMPTZ updated_at
+        timestamptz listed_at
+        timestamptz expires_at
+        timestamptz completed_at
+        timestamptz updated_at
     }
-
     marketplace_transactions {
-        UUID id PK
-        UUID listing_id FK, UK
-        UUID pet_id FK
-        VARCHAR_64 seller_token_hash
-        VARCHAR_64 buyer_token_hash
-        INTEGER price_credits
-        INTEGER fee_credits
-        TIMESTAMPTZ listed_at
-        TIMESTAMPTZ completed_at
+        uuid id PK
+        uuid listing_id FK,UK
+        uuid pet_id "Cross-BC ID-only"
+        varchar seller_token_hash
+        varchar buyer_token_hash
+        integer price_credits
+        integer fee_credits
+        timestamptz listed_at
+        timestamptz completed_at
     }
-
-    admin_accounts {
-        UUID id PK
-        VARCHAR_64 username UK
-        TEXT password_hash
-        TEXT totp_secret_encrypted
-        JSONB totp_backup_codes_hash
+    admin_users {
+        uuid id PK
+        varchar username UK
+        text password_hash
+        text totp_secret_encrypted
+        jsonb totp_backup_codes_hash
         admin_role_enum role
-        TIMESTAMPTZ last_login_at
-        SMALLINT failed_attempts
-        TIMESTAMPTZ locked_until
-        TIMESTAMPTZ deactivated_at
-        TIMESTAMPTZ created_at
-        TIMESTAMPTZ updated_at
+        timestamptz last_login_at
+        smallint failed_attempts
+        timestamptz locked_until
+        timestamptz deactivated_at
+        timestamptz created_at
+        timestamptz updated_at
     }
-
-    admin_audit_log {
-        BIGSERIAL id PK
-        UUID admin_id FK
-        VARCHAR_128 action
-        VARCHAR_64 target_type
-        TEXT target_id
-        JSONB detail
-        VARCHAR_64 ip_address_hash
-        TIMESTAMPTZ created_at
+    audit_logs {
+        bigserial id PK
+        uuid admin_id FK
+        varchar action
+        varchar target_type
+        text target_id
+        jsonb detail
+        varchar ip_address_hash
+        timestamptz created_at
     }
-
     gdpr_requests {
-        UUID id PK
-        UUID claim_identity_id FK
-        UUID initiating_pet_id FK
+        uuid id PK
+        uuid claim_identity_id FK
+        uuid initiating_pet_id "Cross-BC ID-only"
         gdpr_request_type_enum request_type
         gdpr_request_status_enum status
-        TIMESTAMPTZ submitted_at
-        TIMESTAMPTZ completed_at
-        TIMESTAMPTZ updated_at
-        TEXT admin_notes
+        timestamptz submitted_at
+        timestamptz completed_at
+        timestamptz updated_at
+        text admin_notes
     }
 
-    %% Relationships
-    claim_identities ||--o{ pets : "claim_identity_id (SET NULL)"
-    claim_identities ||--o{ gdpr_requests : "claim_identity_id (RESTRICT)"
+    %% Same-BC FKs (DB-level enforced)
+    pets             ||--o{ training_logs            : "owns (CASCADE)"
+    pets             ||--o{ food_buffs               : "owns (CASCADE)"
+    marketplace_listings ||--|| marketplace_transactions : "completes (RESTRICT, UQ)"
+    claim_identities ||--o{ gdpr_requests            : "subject of (RESTRICT)"
+    admin_users      ||--o{ audit_logs               : "actor (RESTRICT)"
 
-    pets ||--o{ claim_codes : "pet_id (CASCADE)"
-    pets ||--o{ training_logs : "pet_id (CASCADE)"
-    pets ||--o{ food_buffs : "pet_id (CASCADE)"
-    pets ||--o{ arena_matches : "pet_a_id (RESTRICT)"
-    pets |o--o{ arena_matches : "pet_b_id (SET NULL)"
-    pets |o--o{ arena_matches : "winner_pet_id (SET NULL)"
-    pets ||--o{ marketplace_listings : "pet_id (RESTRICT)"
-    pets ||--o{ marketplace_transactions : "pet_id (RESTRICT)"
-    pets |o--o{ gdpr_requests : "initiating_pet_id (SET NULL)"
-
-    marketplace_listings ||--o| marketplace_transactions : "listing_id (RESTRICT)"
-
-    admin_accounts |o--o{ admin_audit_log : "admin_id (RESTRICT, nullable)"
+    %% Cross-BC ID-only references (v2.1 strip DB FK)
+    claim_identities ||..o{ pets                     : "ID-only: claim_identity_id"
+    pets             ||..o{ claim_codes              : "ID-only: pet_id"
+    pets             ||..o{ arena_matches            : "ID-only: pet_a/pet_b/winner"
+    pets             ||..o{ marketplace_listings     : "ID-only: pet_id"
+    pets             ||..o{ marketplace_transactions : "ID-only: pet_id"
+    pets             ||..o{ gdpr_requests            : "ID-only: initiating_pet_id"
 ```
 
-## Enum Types
-
-All enums are created as PostgreSQL `ENUM` types before any table DDL.
-
-| Enum | Values | Used by |
-|---|---|---|
-| `rarity_enum` | COMMON, RARE, EPIC, LEGENDARY | `pets.rarity` |
-| `arena_mode_enum` | RACE, SUMO | `arena_matches.mode` |
-| `training_type_enum` | RUN, STRENGTH, STAMINA | `training_logs.training_type` |
-| `buff_stat_enum` | speed, strength, stamina | `food_buffs.buff_stat` |
-| `listing_status_enum` | active, cancelled, sold | `marketplace_listings.status` |
-| `admin_role_enum` | super_admin, moderator, read_only | `admin_accounts.role` |
-| `gdpr_request_type_enum` | erasure, data_access, restrict_processing, object_leaderboard, rectification | `gdpr_requests.request_type` |
-| `gdpr_request_status_enum` | pending, processing, completed, failed | `gdpr_requests.status` |
-
-## Key Constraints & Business Rules
-
-- **`pets.owner_token_hash`**: SHA-256 of the 32-byte URL token (`pet_access_token_min_bytes = 32`).
-  Raw token never stored. Paired with `claimed_at` (both NULL = unclaimed; both set = claimed),
-  enforced by `chk_pet_claim_consistency`.
-- **`pets.level`** is derived: `MAX(1, FLOOR(total_training_actions / 10))`
-  (`pet_level_formula_divisor = 10`) capped at `pet_level_max = 100`.
-- **`arena_matches.duration_seconds`**: constrained `BETWEEN 5 AND 15`
-  (`arena_match_duration_min_seconds = 5`, `arena_match_duration_max_seconds = 15`).
-- **`food_buffs.record_expires_at`**: `consumed_at + 30 days`
-  (`food_buff_record_retention_days = 30`). Background cleanup job targets this column.
-- **`admin_audit_log.id`**: `BIGSERIAL` (not UUID) for monotonic log ordering.
-  Retention: 2 years (`admin_audit_log_retention_years = 2`).
-- **`marketplace_transactions`**: immutable append-only; `listing_id` has a UNIQUE constraint
-  ensuring one transaction per listing. `fee_credits = FLOOR(price_credits × 0.05)`
-  (`trade_transaction_fee_percent = 5`).
-- **DDL execution order**: `claim_identities` before `pets`; `marketplace_listings` before
-  `marketplace_transactions`; `admin_accounts` before `admin_audit_log`.
-
-## Redis Key-Space (Non-Relational, for Reference)
-
-| Key Pattern | TTL | Purpose |
-|---|---|---|
-| `rl:claim:{email_hash}` | 3600 s | Claim attempt counter (limit: 5/hr — `auth_rate_limit_claim_attempts_per_hour = 5`) |
-| `rl:claim:cooldown:{email_hash}` | 60 s | Post-limit cooldown (`claim_email_retry_cooldown_seconds = 60`) |
-| `rl:arena:{pet_id}` | 3600 s | Arena battle counter (default 10/hr — `arena_battles_per_pet_per_hour_default = 10`; TTL = 3600 s — `arena_rate_limit_counter_window_hours = 1`) |
-| `rl:code_entry:{session_id}` | 900 s | OTP attempt counter (limit: 10 — `auth_rate_limit_code_entry_attempts_per_session = 10`) |
-| `rl:code_entry:cooldown:{session_id}` | 60 s | Post-limit code-entry cooldown (`claim_email_retry_cooldown_seconds = 60`) |
-| `rl:admin_login:{ip_hash}` | 900 s | Admin login IP rate limit (`admin_login_ip_rate_limit_attempts = 10`, `admin_login_ip_rate_limit_window_seconds = 900`) |
-| `rl:admin:{admin_id}` | 60 s | Per-admin request rate limit (100/min — `admin_portal_requests_per_minute_per_account = 100`) |
-| `leaderboard:global` | no TTL | Sorted set; score = arena_score; member = petId |
-| `matchmaking:queue:{mode}` | no TTL | Sorted set; score = enqueue epoch |
-| `session:admin:{session_id}` | 14400 s | Admin session JSON (`admin_session_inactivity_expiry_hours = 4`) |
-| `token:blacklist:{token_hash}` | 259200 s | Revoked pet tokens (`claim_token_cleanup_ttl_hours = 72`) |
-| `config:runtime` | 300 s | Cached runtime config (`config_cache_refresh_time_minutes = 5`) |
+> 圖例：`||--o{` 為同 BC FK（DB-level）；`||..o{` 為 cross-BC ID-only（無 DB FK）。此圖描述 Schema 表格關聯，請勿與 `class-*.md` 物件模型混淆。
