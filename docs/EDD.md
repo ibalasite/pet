@@ -470,6 +470,28 @@ graph TB
 
 任何 port 變動必須同步更新 `docs/LOCAL_DEPLOY.md`、`docker-compose.yml`、helm chart `values.yaml`、CI/CD env 檔。
 
+#### §3.5c K8s 資源規格（HPA / PDB / Resources）
+
+每個工作負載的水平自動擴縮（HPA）、Pod Disruption Budget（PDB）與 CPU/Memory request/limit 規格如下；Local / Staging 為對應壓縮值，Production 為承諾規模。
+
+| Workload | Env | Replicas (min/max) | HPA target | PDB | CPU req / lim | Mem req / lim |
+|----------|-----|--------------------|------------|-----|---------------|---------------|
+| API Server | development | 2 / 2（固定） | n/a（手動） | n/a | 100m / 500m | 256Mi / 512Mi |
+| API Server | staging | 2 / 4 | CPU 70%（HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT） | `minAvailable: 1` | 200m / 1000m | 384Mi / 768Mi |
+| API Server | production | **2 / 6** | CPU 70%；Memory 80% | **`minAvailable: 2`**（保證滾動更新最少 2 健康 Pod） | 250m / 1500m | 512Mi / 1024Mi |
+| Worker | development | 2 / 2（固定） | n/a | n/a | 100m / 500m | 256Mi / 512Mi |
+| Worker | staging | 2 / 3 | CPU 75% | `minAvailable: 1` | 100m / 500m | 256Mi / 512Mi |
+| Worker | production | **2 / 4** | CPU 75% | **`minAvailable: 1`**（idempotent job design） | 150m / 750m | 256Mi / 768Mi |
+
+#### §3.5d HPA / PDB 設計依據
+
+- **HPA min ≥ 2**：與 §3.6.1 SPOF 表一致；任何 workload `minReplicas < 2` 視為 HC-1 違規（CI gate `pdb_min_replicas_check.sh` 強制檢查）。
+- **PDB `minAvailable: 2` for API Server**：在 K8s rolling update / node drain 期間至少保留 2 個健康 Pod 對外服務，確保 Availability SLO 99.9%。
+- **PDB `minAvailable: 1` for Worker**：Worker 為 idempotent design，任何時刻單一 replica 即能完成所有背景 job；允許 1 replica 維護視窗。
+- **Resource request 與 §11.2 Capacity Planning 對齊**：peak 500 RPS / 250m per replica × 6 = 1.5 vCPU 總量，落在 Railway Pro 配額內。
+- **Liveness probe**：`GET /health/live`（純 process alive；timeout 1s；period 10s）；**Readiness probe**：`GET /health/ready`（依賴就緒；含 DB / Redis 連線；timeout 3s；period 5s；failureThreshold 3）。
+- **terminationGracePeriodSeconds: 35**：搭配 §3.6.5 Graceful Shutdown 30 秒 drain 預算 + 5 秒緩衝。
+
 ### §3.6 HA / SPOF / SCALE / BCP Architecture Specification
 
 #### §3.6.1 SPOF 分析表（Min Replicas ≥ 2）
@@ -912,7 +934,40 @@ classDiagram
         +int statDeltaA
         +int statDeltaB
     }
+    class BaseEntity {
+        <<AbstractEntity>>
+        +UUID id
+        +DateTime createdAt
+        +DateTime updatedAt
+        +equals(other) bool
+    }
+    class IDomainEvent {
+        <<interface>>
+        +string eventName
+        +DateTime occurredAt
+        +UUID aggregateId
+    }
+    class PetClaimedEvent {
+        <<DomainEvent>>
+        +UUID petId
+        +UUID claimIdentityId
+        +DateTime claimedAt
+    }
+    class ArenaMatchCompletedEvent {
+        <<DomainEvent>>
+        +UUID matchId
+        +UUID winnerPetId
+        +DateTime completedAt
+    }
 
+    BaseEntity <|-- Pet : inheritance
+    BaseEntity <|-- ClaimIdentity : inheritance
+    BaseEntity <|-- ClaimCode : inheritance
+    BaseEntity <|-- ArenaMatch : inheritance
+    BaseEntity <|-- TrainingLog : inheritance
+    BaseEntity <|-- FoodBuff : inheritance
+    PetClaimedEvent ..|> IDomainEvent : realization
+    ArenaMatchCompletedEvent ..|> IDomainEvent : realization
     Pet "1" *-- "1" PetStats : composition
     Pet "1" --> "1" Rarity : association
     Pet "1" o-- "*" TrainingLog : aggregation
@@ -925,6 +980,8 @@ classDiagram
     BattleCalculator ..> Pet : dependency
     BattleCalculator ..> OutcomeResult : dependency
 ```
+
+> 6 種 UML 關聯齊備：Inheritance（`<|--`）、Realization（`..|>`）、Composition（`*--`）、Aggregation（`o--`）、Association（`-->`）、Dependency（`..>`）— 滿足 §4.5.10 QG-UML-02。
 
 ##### Application Layer
 
