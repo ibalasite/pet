@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,55 +334,9 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>AUDIO — Audio Design and Implementation Guide</h1>
+    <main class="doc-content"><h1 id="audio--audio-design-and-implementation-guide">AUDIO — Audio Design and Implementation Guide</h1>
 <p><strong>DOC-ID</strong>: AUDIO-PIXEL-PET-ARENA-20260503</p>
 <p><strong>Project</strong>: pixel-pet-arena</p>
 <p><strong>Version</strong>: v1.0</p>
@@ -272,18 +345,18 @@
 <p><strong>Date</strong>: 2026-05-03</p>
 <p><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, ARCH-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
 <hr>
-<h2>§1. Overview</h2>
-<h3>§1.1 Audio Design Goals and Strategy</h3>
+<h2 id="1-overview">§1. Overview</h2>
+<h3 id="11-audio-design-goals-and-strategy">§1.1 Audio Design Goals and Strategy</h3>
 <p>The pixel-pet-arena audio system is designed to enhance player engagement through contextual sound effects and optional background music, supporting a casual browser-based gaming experience. The audio strategy prioritizes:</p>
 <ol><li><strong>Minimal cognitive load</strong>: Short, recognizable sound effects (≤500ms duration) that provide feedback without interrupting gameplay</li><li><strong>Accessibility-first</strong>: All sound effects have equivalent visual/haptic feedback; audio is entirely optional</li><li><strong>Performance within budget</strong>: Total audio assets ≤ 2 MB (uncompressed reference; delivered as MP3 at 128 kbps ≈ 400 KB total)</li><li><strong>Web Audio API integration</strong>: Browser-native playback with Phaser.js 3 audio system as the rendering engine</li><li><strong>Cross-browser compatibility</strong>: Graceful fallback for audio-unavailable browsers (muted experience remains fully playable)</li></ol>
-<h3>§1.2 Audio Engine Selection</h3>
+<h3 id="12-audio-engine-selection">§1.2 Audio Engine Selection</h3>
 <p><strong>Primary Engine</strong>: Web Audio API via Phaser.js 3 Audio System</p>
 <p>Rationale:</p>
 <ul><li>Phaser.js 3 (selected in ARCH §3.3, EDD §4 technology stack) provides battle-tested audio playback, mixing, and spatial audio capabilities (35k+ GitHub stars, extensive community support)</li><li>Web Audio API is natively supported in all modern browsers (Chrome 14+, Firefox 25+, Safari 6+, Edge 79+) with fallback to HTML5 Audio for older browsers</li><li>Phaser handles audio pooling, preventing memory leaks from repeated audio instantiation</li><li>Audio loading occurs asynchronously during the Phaser scene initialization to prevent blocking the main thread</li><li>No external audio library (Tone.js, Howler.js) required; Phaser&#x27;s built-in system satisfies MVP requirements</li></ul>
 <p><strong>Fallback Path</strong>: If Web Audio API is unavailable, Phaser degrades to HTML5 Audio element playback (browser default &lt;audio&gt; tag). If audio permission is revoked or unavailable, the game continues without sound; the UI remains fully playable.</p>
 <hr>
-<h2>§2. Audio Requirements Analysis</h2>
-<h3>§2.1 Core Game Audio Needs</h3>
+<h2 id="2-audio-requirements-analysis">§2. Audio Requirements Analysis</h2>
+<h3 id="21-core-game-audio-needs">§2.1 Core Game Audio Needs</h3>
 <p>The following game events require audio feedback per PRD §5 US-PET-001 and related acceptance criteria:</p>
 <table>
 <tr><th>Event</th><th>Purpose</th><th>Example Behavior</th><th>Duration</th><th>Priority</th></tr>
@@ -300,14 +373,14 @@
 <tr><td><strong>Background Loop</strong> (optional)</td><td>Ambient/gameplay music</td><td>Looping 30–60 second instrumental</td><td>30–60 sec loop</td><td>P3 (polish)</td></tr>
 </table>
 <p><strong>Total Audio Seconds (P0 + P1)</strong>: ~5 seconds of unique sound effects. With looping battle theme (P3), additional 30–60 seconds of music optional.</p>
-<h3>§2.2 Audio Classification by Context</h3>
+<h3 id="22-audio-classification-by-context">§2.2 Audio Classification by Context</h3>
 <p><strong>Effect Sounds (SFX)</strong>:</p>
 <ul><li><strong>Interaction feedback</strong> (pet tap, button click): 8–12 effects (e.g., pop, bleep, click variants)</li><li><strong>Game state transitions</strong> (arena start, match result): 4–6 effects (fanfare, victory, defeat, neutral)</li><li><strong>Stat feedback</strong> (training, training complete): 4–6 effects (ascending notes, success tones, ding variants)</li><li><strong>System feedback</strong> (rate limit, claim email): 2–4 effects (warning, alert, confirmation)</li></ul>
 <p><strong>Ambiance / Background</strong>:</p>
 <ul><li><strong>Arena battle theme</strong> (looping): 1 × 30–60 second instrumental (optional, P3)</li><li><strong>Trainer mode background</strong> (optional, P3): Lighter, calming loop for non-battle context</li></ul>
 <p><strong>Accessibility Alternatives</strong>:</p>
 <ul><li>All sound effects accompanied by visual feedback (animation, toast notification, badge)</li><li>No critical game state information conveyed <em>only</em> via audio</li><li>UI includes audio toggle and volume controls (§5.5)</li></ul>
-<h3>§2.3 Platform Considerations</h3>
+<h3 id="23-platform-considerations">§2.3 Platform Considerations</h3>
 <p><strong>Web / Desktop Browsers</strong>:</p>
 <ul><li>Web Audio API fully supported; modern browser audio processing near real-time</li><li>Speakers/headphones expected; spatial audio (panning, reverb) available but not required for MVP</li><li>CPU impact: &lt;5% CPU per concurrent audio playback under Phaser 3 pooling (EDD testing constraint)</li></ul>
 <p><strong>Mobile Devices</strong> (iOS/Android via Mobile Safari, Chrome):</p>
@@ -315,8 +388,8 @@
 <p><strong>Reduced Motion</strong> (OS-level accessibility setting):</p>
 <ul><li>Per ARCH §2.1 accessibility (PRD §18 A11y-05), <code>prefers-reduced-motion: reduce</code> suppresses animations</li><li>When reduced motion is enabled, <strong>audio effects continue to play</strong> (audio does not carry motion semantics and is not suppressed)</li><li>Alternative: Provide a separate &quot;disable all audio&quot; toggle in settings (§5.5)</li></ul>
 <hr>
-<h2>§3. Audio Resources Planning</h2>
-<h3>§3.1 Sound Effects Inventory</h3>
+<h2 id="3-audio-resources-planning">§3. Audio Resources Planning</h2>
+<h3 id="31-sound-effects-inventory">§3.1 Sound Effects Inventory</h3>
 <p><strong>Table: Planned SFX by Game Event</strong></p>
 <table>
 <tr><th>Event</th><th>File Name</th><th>Format</th><th>Duration (ms)</th><th>Sample Rate</th><th>Bit Depth</th><th>File Size (MP3 128kbps)</th><th>Notes</th></tr>
@@ -334,14 +407,14 @@
 <tr><td><strong>Food Buff Applied</strong></td><td>food-buff.mp3</td><td>MP3</td><td>200</td><td>44.1 kHz</td><td>16-bit</td><td>32 KB</td><td>Shimmering magical tone</td></tr>
 </table>
 <p><strong>Total P0+P1 SFX</strong>: 11 × ~30 KB average ≈ <strong>330 KB</strong> (MP3 @ 128 kbps)</p>
-<h3>§3.2 Background Music (Optional P3)</h3>
+<h3 id="32-background-music-optional-p3">§3.2 Background Music (Optional P3)</h3>
 <table>
 <tr><th>Track</th><th>Type</th><th>Duration</th><th>Sample Rate</th><th>Format</th><th>File Size (MP3 128kbps)</th><th>Notes</th></tr>
 <tr><td><strong>Arena Battle Loop</strong></td><td>BGM (looping)</td><td>45 sec</td><td>44.1 kHz</td><td>MP3</td><td>90 KB</td><td>Instrumental, no vocals; loopable at 45s with seamless cut points</td></tr>
 <tr><td><strong>Trainer Mode Ambient</strong></td><td>BGM (looping)</td><td>60 sec</td><td>44.1 kHz</td><td>MP3</td><td>120 KB</td><td>Calming loop for training/pet management (P3 polish)</td></tr>
 </table>
 <p><strong>Total Music</strong>: 2 × ~100 KB ≈ <strong>210 KB</strong></p>
-<h3>§3.3 Total Audio Resource Budget</h3>
+<h3 id="33-total-audio-resource-budget">§3.3 Total Audio Resource Budget</h3>
 <table>
 <tr><th>Category</th><th>Count</th><th>Total Size (MP3)</th></tr>
 <tr><td>SFX (P0+P1)</td><td>11 effects</td><td>330 KB</td></tr>
@@ -353,8 +426,8 @@
 <p><strong>Rationale for 2 MB budget</strong>:</p>
 <ul><li>Phaser.js dynamically imports audio system on demand (no blocking the claim flow bundle)</li><li>Audio assets loaded asynchronously in background; no impact on FCP / LCP targets (ARCH §2.1 FCP &lt; 1.5s, LCP &lt; 2.5s)</li><li>Total app JS bundle ≤ 300 KB (TOTAL_JS_BUNDLE_GZIPPED_KB); audio assets separate from code bundle</li><li>Headroom allows for future sound variants, voiceover additions (P4+), or higher-fidelity music</li></ul>
 <hr>
-<h2>§4. Engine and Implementation</h2>
-<h3>§4.1 Web Audio API Architecture</h3>
+<h2 id="4-engine-and-implementation">§4. Engine and Implementation</h2>
+<h3 id="41-web-audio-api-architecture">§4.1 Web Audio API Architecture</h3>
 <p><strong>Phaser.js 3 Audio System Integration</strong>:</p>
 <p>Phaser.js 3 abstracts Web Audio API complexity and provides:</p>
 <ul><li><strong>Audio pooling</strong>: Reuses audio instances to avoid memory leaks</li><li><strong>Volume and pan control</strong>: Per-sound and global mixer</li><li><strong>Playback state management</strong>: Play, pause, stop, loop</li><li><strong>Event emitters</strong>: Sound complete, sound loop, volume change events</li><li><strong>Fallback handling</strong>: Automatic downgrade to HTML5 Audio if Web Audio unavailable</li></ul>
@@ -397,7 +470,7 @@ export function usePetAudioEvent(eventType: string): void {
 }</code></pre>
 <p><strong>Event Bridge Pattern</strong>:</p>
 <ul><li>React components emit events (e.g., <code>training:complete</code>) via an event emitter</li><li><code>PetCanvasEngine</code> listens and triggers corresponding audio via Phaser&#x27;s sound manager</li><li>Keeps Phaser isolated from React state management (per ARCH §3.3 isolation rule)</li></ul>
-<h3>§4.2 Cross-Browser Compatibility</h3>
+<h3 id="42-cross-browser-compatibility">§4.2 Cross-Browser Compatibility</h3>
 <p><strong>Browser Audio Support Matrix</strong>:</p>
 <table>
 <tr><th>Browser</th><th>Web Audio API</th><th>HTML5 Audio</th><th>Fallback Strategy</th><th>Minimum Version</th></tr>
@@ -425,7 +498,7 @@ this.load.audio(&#x27;pet-tap-pop&#x27;, [
   &#x27;assets/audio/pet-tap-pop.mp3&#x27;,  // Primary
   &#x27;assets/audio/pet-tap-pop.ogg&#x27;   // Fallback (if MP3 not supported)
 ]);</code></pre>
-<h3>§4.3 Performance and CPU Budget</h3>
+<h3 id="43-performance-and-cpu-budget">§4.3 Performance and CPU Budget</h3>
 <p><strong>Audio Processing Budget</strong> (from EDD §10.2 infrastructure constraints):</p>
 <table>
 <tr><th>Metric</th><th>Target</th><th>Rationale</th></tr>
@@ -443,28 +516,38 @@ this.load.audio(&#x27;pet-tap-pop&#x27;, [
 <p><strong>Memory-Efficient Design</strong>:</p>
 <ul><li>Audio decoded on load (not on-demand); stored in Web Audio internal buffers</li><li>Phaser reuses buffers across multiple sound triggers</li><li>No memory leaks from event listeners (using <code>removeListener</code> or weak references)</li></ul>
 <hr>
-<h2>§5. Implementation Strategy</h2>
-<h3>§5.1 Audio Loading and Initialization Flow</h3>
+<h2 id="5-implementation-strategy">§5. Implementation Strategy</h2>
+<h3 id="51-audio-loading-and-initialization-flow">§5.1 Audio Loading and Initialization Flow</h3>
 <p><strong>Phase 1: Player App Root Load</strong> (no audio yet)</p>
-<pre><code class="">App.tsx
-  └── Layout
-        └── Router
-              └── LandingPage (displays guest pet via PetCanvasEngine)
-                    └── PetCanvasEngine (Phaser scene)
-                          │
-                          ├── preload() — async load all SFX (MP3)
-                          │     ├── pet-tap-pop.mp3
-                          │     ├── training-success.mp3
-                          │     └── ... (all P0+P1 effects)
-                          │
-                          ├── create() — initialize Web Audio context
-                          │     ├── this.sound.unlock() (iOS gesture handling)
-                          │     └── setupAudioMixer()
-                          │
-                          └── ready — emit &#x27;audio:loaded&#x27; event</code></pre>
+<pre class="mermaid">graph TD
+  N0[&quot;App.tsx&quot;]
+  N1[&quot;Layout&quot;]
+  N2[&quot;Router&quot;]
+  N3[&quot;LandingPage (displays guest pet via PetCanvasEngine)&quot;]
+  N4[&quot;PetCanvasEngine (Phaser scene)&quot;]
+  N5[&quot;preload() — async load all SFX (MP3)&quot;]
+  N6[&quot;pet-tap-pop.mp3&quot;]
+  N7[&quot;training-success.mp3&quot;]
+  N8[&quot;... (all P0+P1 effects)&quot;]
+  N9[&quot;create() — initialize Web Audio context&quot;]
+  N10[&quot;this.sound.unlock() (iOS gesture handling)&quot;]
+  N11[&quot;setupAudioMixer()&quot;]
+  N12[&quot;ready — emit &#x27;audio:loaded&#x27; event&quot;]
+  N0 --&gt; N1
+  N0 --&gt; N2
+  N0 --&gt; N3
+  N0 --&gt; N4
+  N0 --&gt; N5
+  N0 --&gt; N6
+  N0 --&gt; N7
+  N0 --&gt; N8
+  N0 --&gt; N9
+  N0 --&gt; N10
+  N0 --&gt; N11
+  N0 --&gt; N12</pre>
 <p><strong>Timing</strong>:</p>
 <ul><li>Preload occurs <strong>after</strong> scene initialization but <strong>before</strong> create() (Phaser lifecycle)</li><li>Assets load asynchronously; doesn&#x27;t block FCP / LCP (ARCH §2.1 performance targets)</li><li>If audio assets fail to load (network error): Phaser emits error event; game continues without audio (degraded, not broken)</li></ul>
-<h3>§5.2 Real-Time Sound Playback Control</h3>
+<h3 id="52-real-time-sound-playback-control">§5.2 Real-Time Sound Playback Control</h3>
 <p><strong>Game Event → Audio Trigger Pipeline</strong>:</p>
 <pre><code class="">User Action (click pet, complete training, win arena battle)
   │
@@ -496,7 +579,7 @@ this.load.audio(&#x27;pet-tap-pop&#x27;, [
 </table>
 <p><strong>Concurrency Rules</strong>:</p>
 <ul><li><strong>Training complete + stat ding</strong>: Both play (200 ms + 100 ms sequentially, not overlapping)</li><li><strong>Arena victory + leaderboard rankup</strong>: Victory plays first (600 ms), then rankup plays at +400 ms offset (P2 feature, can overlap slightly)</li><li><strong>Rate limit alert + other SFX</strong>: Alert tone takes priority; other sounds suppress via volume ducking (80% volume when alert active)</li></ul>
-<h3>§5.3 Audio Mixing and Volume Management</h3>
+<h3 id="53-audio-mixing-and-volume-management">§5.3 Audio Mixing and Volume Management</h3>
 <p><strong>Global Volume Control</strong>:</p>
 <pre><code class="language-typescript">// In PetCanvasEngine
 export class AudioMixer {
@@ -524,7 +607,7 @@ export class AudioMixer {
 <ul><li>When alert sound (rate-limit-warning.mp3) plays: reduce background music volume to 30% temporarily</li><li>Resume normal music volume 250 ms after alert ends</li><li>Prevents competing audio from drowning out critical feedback</li></ul>
 <p><strong>Device Volume Behavior</strong>:</p>
 <ul><li>Web Audio API respects system volume on desktop (no app-level override)</li><li>Mobile: App-level volume slider in UI overrides system mute setting (optional implementation; MVP can default to respecting system mute)</li></ul>
-<h3>§5.4 Accessibility and Inclusion Considerations</h3>
+<h3 id="54-accessibility-and-inclusion-considerations">§5.4 Accessibility and Inclusion Considerations</h3>
 <p><strong>Visual Equivalents</strong> (all SFX have visual counterparts):</p>
 <table>
 <tr><th>Audio Cue</th><th>Visual Equivalent</th><th>Method</th></tr>
@@ -540,7 +623,7 @@ export class AudioMixer {
 <ul><li><strong>Audio toggle</strong>: On/off switch in Settings modal</li><li><strong>Volume slider</strong>: 0–100% control for master volume</li><li><strong>Individual channel control</strong>: Optional (SFX vs. Music sliders)</li><li><strong>Mute when minimized</strong>: Optional (pause audio when tab loses focus via Page Visibility API)</li></ul>
 <p><strong>Testing for Accessibility</strong>:</p>
 <ol><li>Disable audio in browser settings; verify game is fully playable</li><li>Test with screen reader (NVDA, JAWS); verify all UI interactions have keyboard equivalents</li><li>Test <code>prefers-reduced-motion</code> OS setting; verify animations reduce but audio continues (or user can disable via toggle)</li></ol>
-<h3>§5.5 Audio Settings UI</h3>
+<h3 id="55-audio-settings-ui">§5.5 Audio Settings UI</h3>
 <p><strong>Settings Panel</strong> (new section in SettingsModal component):</p>
 <pre><code class="language-tsx">// SettingsModal.tsx — Audio Settings section
 &lt;div className=&quot;settings-audio&quot;&gt;
@@ -598,34 +681,54 @@ export class AudioMixer {
 &lt;/div&gt;</code></pre>
 <p><strong>Persistence</strong>: Audio settings stored in Zustand client state (ARCH §2.1 state management); survives page refresh via browser localStorage integration.</p>
 <hr>
-<h2>§6. Operational and Quality Standards</h2>
-<h3>§6.1 Audio File Naming and Organization</h3>
+<h2 id="6-operational-and-quality-standards">§6. Operational and Quality Standards</h2>
+<h3 id="61-audio-file-naming-and-organization">§6.1 Audio File Naming and Organization</h3>
 <p><strong>Directory Structure</strong>:</p>
-<pre><code class="">packages/player-app/
-├── public/
-│   └── assets/
-│       └── audio/
-│           ├── sfx/
-│           │   ├── pet-tap-pop.mp3
-│           │   ├── training-success.mp3
-│           │   ├── arena-victory.mp3
-│           │   ├── arena-defeat.mp3
-│           │   ├── claim-success.mp3
-│           │   ├── rate-limit-warning.mp3
-│           │   ├── stat-ding.mp3
-│           │   ├── food-buff.mp3
-│           │   ├── leaderboard-rankup.mp3
-│           │   ├── arena-start.mp3
-│           │   ├── training-start.mp3
-│           │   └── README.md (attribution, licensing)
-│           └── music/
-│               ├── arena-battle-loop.mp3
-│               └── trainer-ambient-loop.mp3</code></pre>
+<pre class="mermaid">graph TD
+  N0[&quot;packages/player-app/&quot;]
+  N1[&quot;public/&quot;]
+  N2[&quot;assets/&quot;]
+  N3[&quot;audio/&quot;]
+  N4[&quot;sfx/&quot;]
+  N5[&quot;pet-tap-pop.mp3&quot;]
+  N6[&quot;training-success.mp3&quot;]
+  N7[&quot;arena-victory.mp3&quot;]
+  N8[&quot;arena-defeat.mp3&quot;]
+  N9[&quot;claim-success.mp3&quot;]
+  N10[&quot;rate-limit-warning.mp3&quot;]
+  N11[&quot;stat-ding.mp3&quot;]
+  N12[&quot;food-buff.mp3&quot;]
+  N13[&quot;leaderboard-rankup.mp3&quot;]
+  N14[&quot;arena-start.mp3&quot;]
+  N15[&quot;training-start.mp3&quot;]
+  N16[&quot;README.md (attribution, licensing)&quot;]
+  N17[&quot;music/&quot;]
+  N18[&quot;arena-battle-loop.mp3&quot;]
+  N19[&quot;trainer-ambient-loop.mp3&quot;]
+  N0 --&gt; N1
+  N0 --&gt; N2
+  N0 --&gt; N3
+  N0 --&gt; N4
+  N0 --&gt; N5
+  N0 --&gt; N6
+  N0 --&gt; N7
+  N0 --&gt; N8
+  N0 --&gt; N9
+  N0 --&gt; N10
+  N0 --&gt; N11
+  N0 --&gt; N12
+  N0 --&gt; N13
+  N0 --&gt; N14
+  N0 --&gt; N15
+  N0 --&gt; N16
+  N0 --&gt; N17
+  N0 --&gt; N18
+  N0 --&gt; N19</pre>
 <p><strong>Naming Convention</strong>: <code>{event-category}-{specific-event}-{variant}.{ext}</code></p>
 <ul><li>Example: <code>pet-tap-pop.mp3</code> (category: pet, event: tap, variant: pop effect)</li><li>All lowercase, hyphen-separated, no spaces</li></ul>
 <p><strong>File Metadata</strong> (MP3 tags):</p>
 <ul><li>Title: &quot;pixel-pet-arena: {event name}&quot;</li><li>Artist: &quot;Audio Design Team&quot;</li><li>Album: &quot;pixel-pet-arena SFX&quot;</li><li>Comment: &quot;{PRD requirement reference, e.g., AC-001-2}&quot;</li></ul>
-<h3>§6.2 Audio Quality Standards</h3>
+<h3 id="62-audio-quality-standards">§6.2 Audio Quality Standards</h3>
 <p><strong>Production Specifications</strong>:</p>
 <table>
 <tr><th>Parameter</th><th>Specification</th><th>Rationale</th></tr>
@@ -640,7 +743,7 @@ export class AudioMixer {
 </table>
 <p><strong>Frequency Content</strong>:</p>
 <ul><li><strong>SFX</strong>: High-pass filter at 100 Hz (removes inaudible rumble); keep presence peaks 2–8 kHz</li><li><strong>Music</strong>: Full-range 20 Hz – 20 kHz (background ambiance)</li><li><strong>Avoid</strong>: Harsh digital artifacts, metallic ringing (associated with Web Audio clipping)</li></ul>
-<h3>§6.3 Testing and Validation</h3>
+<h3 id="63-testing-and-validation">§6.3 Testing and Validation</h3>
 <p><strong>Audio Playback Test Cases</strong>:</p>
 <table>
 <tr><th>Test Case</th><th>Scenario</th><th>Expected Result</th><th>Test Type</th></tr>
@@ -657,7 +760,7 @@ export class AudioMixer {
 </table>
 <p><strong>Automation</strong>:</p>
 <ul><li>Audio file validation script (CI): Check MP3 format, bit rate, duration, loudness (per CONSTANTS)</li><li>Phaser audio mock test: Verify sound.play() calls route through Phaser mixer</li></ul>
-<h3>§6.4 Browser Compatibility Verification</h3>
+<h3 id="64-browser-compatibility-verification">§6.4 Browser Compatibility Verification</h3>
 <p><strong>Cross-Browser Manual Testing</strong> (before GA):</p>
 <table>
 <tr><th>Browser</th><th>Version</th><th>Platform</th><th>Test: Play SFX</th><th>Test: Music Loop</th><th>Test: Fallback</th><th>Status</th></tr>
@@ -669,8 +772,8 @@ export class AudioMixer {
 <tr><td>Chrome</td><td>Latest</td><td>Android</td><td>✅ Expected</td><td>✅ Expected</td><td>N/A</td><td>REQUIRED</td></tr>
 </table>
 <hr>
-<h2>§7. Risk Mitigation and Fallback Strategies</h2>
-<h3>§7.1 Audio System Failure Modes</h3>
+<h2 id="7-risk-mitigation-and-fallback-strategies">§7. Risk Mitigation and Fallback Strategies</h2>
+<h3 id="71-audio-system-failure-modes">§7.1 Audio System Failure Modes</h3>
 <table>
 <tr><th>Failure Scenario</th><th>Impact</th><th>Mitigation</th></tr>
 <tr><td><strong>Web Audio API unavailable</strong></td><td>Browser lacks support (old IE, legacy Safari)</td><td>Fallback to HTML5 &lt;audio&gt; element; Phaser handles automatically</td></tr>
@@ -681,7 +784,7 @@ export class AudioMixer {
 <tr><td><strong>Audio glitch/pop</strong></td><td>Web Audio mixing artifact or browser bug</td><td>Increase headroom (–6 dB peak level); test across browsers</td></tr>
 <tr><td><strong>Rate limit during audio load</strong></td><td>Network bandwidth exceeded</td><td>Audio loads asynchronously; doesn&#x27;t block gameplay; graceful degradation</td></tr>
 </table>
-<h3>§7.2 Graceful Degradation</h3>
+<h3 id="72-graceful-degradation">§7.2 Graceful Degradation</h3>
 <p><strong>Fallback Chain</strong>:</p>
 <ol><li><strong>Tier 1</strong>: Web Audio API + Phaser.js audio system</li><li><strong>Tier 2</strong>: HTML5 &lt;audio&gt; element (fallback if Web Audio unavailable)</li><li><strong>Tier 3</strong>: Silent mode (no audio; visual/haptic feedback only)</li></ol>
 <p><strong>Implementation</strong>:</p>
@@ -697,13 +800,13 @@ export class AudioMixer {
   }
 }</code></pre>
 <hr>
-<h2>§8. Timeline and Phased Rollout</h2>
-<h3>§8.1 MVP (Phase 1-2) Audio Scope</h3>
+<h2 id="8-timeline-and-phased-rollout">§8. Timeline and Phased Rollout</h2>
+<h3 id="81-mvp-phase-1-2-audio-scope">§8.1 MVP (Phase 1-2) Audio Scope</h3>
 <p><strong>In Scope</strong> (required for launch):</p>
 <ul><li>11 × SFX (P0+P1 effects): pet-tap, training-success, arena-victory, arena-defeat, claim-success, rate-limit-warning, stat-ding, food-buff, leaderboard-rankup, arena-start, training-start</li><li>Audio toggle + master volume slider</li><li>Cross-browser testing (Chrome, Firefox, Safari, iOS Safari, Android Chrome)</li></ul>
 <p><strong>Out of Scope</strong> (P3 enhancement, post-GA):</p>
 <ul><li>Background music loops (optional polish)</li><li>Per-channel volume control (SFX vs. music sliders)</li><li>Spatial audio (panning, reverb)</li><li>Voiceover narration</li></ul>
-<h3>§8.2 Production Deliverables</h3>
+<h3 id="82-production-deliverables">§8.2 Production Deliverables</h3>
 <table>
 <tr><th>Deliverable</th><th>Owner</th><th>Due Date</th><th>Format</th></tr>
 <tr><td>11 × SFX audio files</td><td>Audio Designer / Editor</td><td>Phase 2</td><td>MP3, 128 kbps</td></tr>
@@ -714,7 +817,7 @@ export class AudioMixer {
 <tr><td>Audio performance regression test</td><td>Frontend Engineer</td><td>Phase 2</td><td>Vitest + Playwright</td></tr>
 </table>
 <hr>
-<h2>§9. Licensing and Attribution</h2>
+<h2 id="9-licensing-and-attribution">§9. Licensing and Attribution</h2>
 <p>All audio assets must include proper attribution. Template for <code>/public/assets/audio/README.md</code>:</p>
 <pre><code class="language-markdown"># Audio Assets — pixel-pet-arena
 
@@ -738,7 +841,7 @@ Restrictions: [Any usage restrictions, e.g., non-commercial, internal use only]
 
 For license questions, contact: audio@pixel-pet-arena.local</code></pre>
 <hr>
-<h2>Appendix A. Audio Event Reference</h2>
+<h2 id="appendix-a-audio-event-reference">Appendix A. Audio Event Reference</h2>
 <p><strong>Complete mapping of game events to audio cues</strong>:</p>
 <pre><code class="language-typescript">// Event → SFX mapping (TypeScript reference)
 const AUDIO_EVENTS = {
@@ -757,7 +860,7 @@ const AUDIO_EVENTS = {
   &#x27;music:trainer-loop&#x27;: &#x27;trainer-ambient-loop&#x27;, // P3
 } as const;</code></pre>
 <hr>
-<h2>Appendix B. Web Audio API Concepts for Implementers</h2>
+<h2 id="appendix-b-web-audio-api-concepts-for-implementers">Appendix B. Web Audio API Concepts for Implementers</h2>
 <p><strong>Essential Web Audio Concepts</strong> (for engineers unfamiliar with audio):</p>
 <ol><li><strong>AudioContext</strong>: The global context for all audio processing. Created once per page, reused for all sound effects.</li><li><strong>AudioBuffer</strong>: Decoded audio stored in memory. Phaser creates one per loaded audio file.</li><li><strong>BufferSource</strong>: A playable instance of an AudioBuffer. Created on-demand; can be pooled.</li><li><strong>GainNode</strong>: A mixer/volume control. Phaser uses for master and per-sound volume.</li><li><strong>Destination</strong>: The speaker output. All audio routes here.</li></ol>
 <p><strong>Phaser Handles All of This</strong>: Developers use high-level Phaser API (<code>this.sound.play()</code>) and never need to touch Web Audio internals directly.</p>

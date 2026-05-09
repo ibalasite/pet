@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,60 +334,14 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>Local Development Setup — pixel-pet-arena</h1>
+    <main class="doc-content"><h1 id="local-development-setup--pixel-pet-arena">Local Development Setup — pixel-pet-arena</h1>
 <p>This guide walks a developer joining the project for the first time through every step required to run all three services locally: the Fastify API, the React/Phaser player frontend, and the Vue 3 admin portal.</p>
 <hr>
-<h2>Prerequisites</h2>
+<h2 id="prerequisites">Prerequisites</h2>
 <p>Before you begin, make sure the following software is installed and available on your <code>PATH</code>.</p>
-<h3>Required versions</h3>
+<h3 id="required-versions">Required versions</h3>
 <table>
 <tr><th>Tool</th><th>Minimum version</th><th>Notes</th></tr>
 <tr><td>Node.js</td><td>20.x</td><td>Use <a href="https://github.com/nvm-sh/nvm" target="_blank" rel="noopener">nvm</a> or <a href="https://github.com/Schniz/fnm" target="_blank" rel="noopener">fnm</a> to manage versions</td></tr>
@@ -280,7 +353,7 @@
 <pre><code class="language-bash">node --version   # should print v20.x.x or higher
 pnpm --version   # should print 9.x.x or higher
 docker --version # should print Docker version 24.x or higher</code></pre>
-<h3>Supabase CLI (required for local setup)</h3>
+<h3 id="supabase-cli-required-for-local-setup">Supabase CLI (required for local setup)</h3>
 <p>The Supabase CLI is required for Steps 2 and 3 (<code>supabase start</code>, <code>supabase migration up</code>). Install it before proceeding:</p>
 <pre><code class="language-bash"># macOS — Homebrew
 brew install supabase/tap/supabase
@@ -289,23 +362,23 @@ brew install supabase/tap/supabase
 brew install supabase/tap/supabase</code></pre>
 <p>Verify installation:</p>
 <pre><code class="language-bash">supabase --version   # should print 2.x.x or higher</code></pre>
-<h3>Optional tools</h3>
+<h3 id="optional-tools">Optional tools</h3>
 <ul><li><strong>Redis CLI</strong> — useful for inspecting cache state. Install via Homebrew (<code>brew install redis</code>) on macOS; on Linux, install the <code>redis-tools</code> package. You do not need a locally installed Redis server — the Docker container is sufficient.</li></ul>
-<h3>Platform notes</h3>
+<h3 id="platform-notes">Platform notes</h3>
 <ul><li><strong>macOS</strong> is the primary development environment assumed throughout this guide. All commands are written for zsh/bash on macOS.</li><li><strong>Linux</strong> users: all commands work without modification. Ensure Docker Engine (not just Docker CLI) is running. You may need to prefix Docker commands with <code>sudo</code> depending on your group membership.</li><li><strong>Windows (WSL2)</strong>: run all commands inside a WSL2 terminal (Ubuntu 22.04 recommended). Docker Desktop for Windows with the WSL2 backend must be enabled. Paths and line endings should be handled automatically inside WSL2.</li></ul>
 <hr>
-<h2>Environment Setup</h2>
+<h2 id="environment-setup">Environment Setup</h2>
 <p>Each application in the monorepo has its own environment file. You must copy and populate all three before starting any service.</p>
-<h3>Clone the repository</h3>
+<h3 id="clone-the-repository">Clone the repository</h3>
 <pre><code class="language-bash">git clone https://github.com/&lt;your-org&gt;/pixel-pet-arena.git
 cd pixel-pet-arena</code></pre>
-<h3>Copy environment files</h3>
+<h3 id="copy-environment-files">Copy environment files</h3>
 <pre><code class="language-bash">cp apps/api/.env.example     apps/api/.env.local
 cp apps/player/.env.example  apps/player/.env.local
 cp apps/admin/.env.example   apps/admin/.env.local</code></pre>
-<h3>Key environment variables</h3>
+<h3 id="key-environment-variables">Key environment variables</h3>
 <p>Open each <code>.env.local</code> file and set the values listed below. Variables marked <strong>required</strong> will cause the service to fail on startup if missing or empty.</p>
-<h4><code>apps/api/.env.local</code></h4>
+<h4 id="appsapienvlocal"><code>apps/api/.env.local</code></h4>
 <table>
 <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
 <tr><td><code>DATABASE_URL</code></td><td>Yes</td><td>Leave blank for now — the value is printed by <code>supabase start</code> in Setup Steps step 2 (looks like <code>postgresql://postgres:postgres@localhost:54322/postgres</code>)</td></tr>
@@ -315,26 +388,26 @@ cp apps/admin/.env.example   apps/admin/.env.local</code></pre>
 <tr><td><code>SENDGRID_API_KEY</code></td><td>No</td><td>Can be any non-empty dummy string locally; emails are captured by the Supabase Inbucket testing inbox and viewable at <code>http://localhost:54324</code></td></tr>
 <tr><td><code>ADMIN_TOTP_ISSUER</code></td><td>Yes</td><td>The issuer name shown in your authenticator app, e.g. <code>pixel-pet-arena-local</code></td></tr>
 </table>
-<h4><code>apps/player/.env.local</code></h4>
+<h4 id="appsplayerenvlocal"><code>apps/player/.env.local</code></h4>
 <table>
 <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
 <tr><td><code>VITE_API_BASE_URL</code></td><td>Yes</td><td>Set to <code>http://localhost:3000</code></td></tr>
 </table>
-<h4><code>apps/admin/.env.local</code></h4>
+<h4 id="appsadminenvlocal"><code>apps/admin/.env.local</code></h4>
 <table>
 <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
 <tr><td><code>VITE_API_BASE_URL</code></td><td>Yes</td><td>Set to <code>http://localhost:3000</code></td></tr>
 </table>
-<h3>Generating a JWT_SECRET</h3>
+<h3 id="generating-a-jwt_secret">Generating a JWT_SECRET</h3>
 <p>Use Node.js to generate a cryptographically random secret. Run this command and paste the output into <code>apps/api/.env.local</code>:</p>
 <pre><code class="language-bash">node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(64).toString(&#x27;base64url&#x27;))&quot;</code></pre>
 <p>The output will be a base64url-encoded string of 64 random bytes. Keep this value private and never commit it to source control.</p>
-<h3>Feature flags</h3>
+<h3 id="feature-flags">Feature flags</h3>
 <p>The following feature flags have recommended local defaults. Set them in <code>apps/api/.env.local</code> to override behaviour without changing application code:</p>
 <pre><code class="language-bash">FF_MARKETPLACE=false
 FF_ARENA_SUMO=true</code></pre>
 <hr>
-<h2>Setup Steps</h2>
+<h2 id="setup-steps">Setup Steps</h2>
 <p>Follow these steps in order. Each step depends on the previous one completing successfully.</p>
 <ol><li><strong>Install all workspace dependencies.</strong></li></ol>
 <p>Run this from the repository root. pnpm will link workspace packages via symlinks and resolve shared dependencies through its virtual store.</p>
@@ -372,39 +445,39 @@ FF_ARENA_SUMO=true</code></pre>
 <pre><code class="language-bash">   pnpm --filter admin-app dev</code></pre>
 <p>Each of the three services in steps 6–8 should be run in separate terminal tabs or panes so you can observe their output simultaneously.</p>
 <hr>
-<h2>Verification</h2>
+<h2 id="verification">Verification</h2>
 <p>Once all three services are running, use the following checks to confirm a healthy local environment.</p>
-<h3>API health check</h3>
+<h3 id="api-health-check">API health check</h3>
 <pre><code class="language-bash">curl http://localhost:3000/health</code></pre>
 <p>Expected response:</p>
 <pre><code class="language-json">{&quot;status&quot;:&quot;healthy&quot;,&quot;checks&quot;:{&quot;database&quot;:&quot;ok&quot;,&quot;redis&quot;:&quot;ok&quot;},&quot;timestamp&quot;:&quot;2026-05-03T12:00:00Z&quot;}</code></pre>
 <p>Any non-200 response or a connection refusal indicates the API is not running or one or more upstream dependencies (database or Redis) are unhealthy.</p>
-<h3>Player frontend</h3>
+<h3 id="player-frontend">Player frontend</h3>
 <p>Open <code>http://localhost:5173</code> in your browser. You should see either a pet displayed on a pixel-art background, or a prompt asking you to generate your first pet. If the page is blank or shows a network error, check that the API is running and that <code>VITE_API_BASE_URL</code> is set correctly in <code>apps/player/.env.local</code>.</p>
-<h3>Admin portal login page</h3>
+<h3 id="admin-portal-login-page">Admin portal login page</h3>
 <p>Open <code>http://localhost:5174/admin/login</code> in your browser. A TOTP login form should appear with fields for username and one-time password. If the page does not load, check that the admin dev server started without errors on port 5174.</p>
-<h3>Leaderboard endpoint</h3>
+<h3 id="leaderboard-endpoint">Leaderboard endpoint</h3>
 <pre><code class="language-bash">curl http://localhost:3000/api/v1/leaderboard</code></pre>
 <p>Expected response: a JSON array (empty <code>[]</code> is fine on a freshly seeded database). A 500 error here usually indicates a database connectivity problem.</p>
-<h3>Test admin account</h3>
+<h3 id="test-admin-account">Test admin account</h3>
 <p>The <code>pnpm db:seed</code> command creates a default admin user. The seed script prints the username, initial password, and TOTP secret to the console. To log in to the admin portal:</p>
 <ol><li>Open <code>http://localhost:5174/admin/login</code>.</li><li>Enter the seeded credentials (username and password printed by <code>db:seed</code>).</li><li>Open your authenticator app (Google Authenticator, Authy, 1Password, etc.) and manually enter the TOTP secret printed by <code>db:seed</code>. The issuer name will match the <code>ADMIN_TOTP_ISSUER</code> value you set in the environment file.</li><li>Enter the six-digit TOTP code from your authenticator app to complete login.</li></ol>
 <hr>
-<h2>Common Issues and Troubleshooting</h2>
-<h3>Supabase will not start</h3>
+<h2 id="common-issues-and-troubleshooting">Common Issues and Troubleshooting</h2>
+<h3 id="supabase-will-not-start">Supabase will not start</h3>
 <p><strong>Symptom:</strong> <code>supabase start</code> hangs or prints a Docker-related error.</p>
 <ul><li>Verify Docker Desktop is running. On macOS, the Docker icon should be visible in the menu bar. On Linux, run <code>systemctl status docker</code> (or <code>sudo service docker status</code>) to confirm the daemon is active.</li><li>Run <code>docker info</code> to confirm the Docker daemon is responsive.</li><li>If a previous Supabase session left containers running in a broken state, stop and reset everything:</li></ul>
 <pre><code class="language-bash">  supabase stop --no-backup
   supabase start</code></pre>
 <ul><li>Check for port conflicts. Supabase uses ports <code>54321</code> (API), <code>54322</code> (PostgreSQL), <code>54323</code> (Studio), and <code>54324</code> (email). Run <code>lsof -i :54322</code> to see if anything else is using that port and stop it before retrying.</li></ul>
-<h3>Port already in use (3000, 5173, 5174)</h3>
+<h3 id="port-already-in-use-3000-5173-5174">Port already in use (3000, 5173, 5174)</h3>
 <p><strong>Symptom:</strong> A service fails to start with <code>EADDRINUSE</code> or a similar error.</p>
 <p>Find and kill the conflicting process:</p>
 <pre><code class="language-bash">lsof -ti :3000 | xargs kill -9
 lsof -ti :5173 | xargs kill -9
 lsof -ti :5174 | xargs kill -9</code></pre>
 <p>On Linux, substitute <code>fuser</code> if <code>lsof</code> is not installed: <code>fuser -k 3000/tcp</code>, <code>fuser -k 5173/tcp</code>, <code>fuser -k 5174/tcp</code>.</p>
-<h3>Redis connection refused or port 6379 already in use</h3>
+<h3 id="redis-connection-refused-or-port-6379-already-in-use">Redis connection refused or port 6379 already in use</h3>
 <p><strong>Symptom A — <code>docker run</code> fails with <code>port is already allocated</code>:</strong></p>
 <p>Port 6379 is already bound by a native Redis installation (e.g. installed via Homebrew or <code>apt</code>). Stop it before starting the Docker container:</p>
 <pre><code class="language-bash"># macOS (Homebrew)
@@ -417,18 +490,18 @@ sudo systemctl stop redis</code></pre>
 <ul><li>Check that the Redis Docker container is running:</li></ul>
 <pre><code class="language-bash">  docker ps --filter name=pixel-pet-redis</code></pre>
 <ul><li>If the container is not listed, start it again (see Setup Steps, step 5).</li><li>If the container is listed but the API still cannot connect, verify that <code>REDIS_URL=redis://localhost:6379</code> is set in <code>apps/api/.env.local</code>.</li></ul>
-<h3>TOTP setup for the local admin account</h3>
+<h3 id="totp-setup-for-the-local-admin-account">TOTP setup for the local admin account</h3>
 <p>If you lose the seed output or need to reset the admin TOTP:</p>
 <ol><li>Reset the admin account&#x27;s TOTP secret by running the seed command again:</li></ol>
 <pre><code class="language-bash">   pnpm db:seed --reset-admin</code></pre>
 <ol><li>The new TOTP secret will be printed to the console. Remove the old entry from your authenticator app and add the new secret.</li><li>Alternatively, query the <code>admin_users</code> table directly in Supabase Studio (<code>http://localhost:54323</code>) to retrieve the raw TOTP secret for manual entry.</li></ol>
-<h3>Database migration errors</h3>
+<h3 id="database-migration-errors">Database migration errors</h3>
 <p><strong>Symptom:</strong> <code>supabase migration up</code> fails with schema conflicts or missing tables.</p>
 <p>The safest fix for a local database is a full reset. This wipes all local data and re-applies every migration from scratch:</p>
 <pre><code class="language-bash">supabase db reset
 pnpm db:seed</code></pre>
 <p>Do not run <code>db reset</code> against any shared or staging environment — it is destructive.</p>
-<h3>pnpm workspace dependency issues</h3>
+<h3 id="pnpm-workspace-dependency-issues">pnpm workspace dependency issues</h3>
 <p><strong>Symptom:</strong> Imports from workspace packages fail, or you see <code>Cannot find module</code> errors after adding a new package.</p>
 <ul><li>Re-run <code>pnpm install</code> from the repository root. This rebuilds the workspace symlinks.</li><li>If a specific package was added to a sub-app, ensure the version specifier in that app&#x27;s <code>package.json</code> uses the <code>workspace:*</code> protocol:</li></ul>
 <pre><code class="language-json">  &quot;dependencies&quot;: {
@@ -438,10 +511,10 @@ pnpm db:seed</code></pre>
 <pre><code class="language-bash">  pnpm store prune
   pnpm install --force</code></pre>
 <hr>
-<h2>Development Workflow Tips</h2>
-<h3>Hot reload</h3>
+<h2 id="development-workflow-tips">Development Workflow Tips</h2>
+<h3 id="hot-reload">Hot reload</h3>
 <ul><li><strong>Player frontend</strong> (<code>apps/player</code>): Vite HMR is enabled by default. Changes to <code>.tsx</code>, <code>.ts</code>, <code>.css</code>, and Phaser scene files are reflected in the browser within milliseconds without a full page reload.</li><li><strong>Admin portal</strong> (<code>apps/admin</code>): Vite HMR is also enabled. Vue single-file components update in place.</li><li><strong>Backend API</strong> (<code>apps/api</code>): The API process is managed by <code>ts-node-dev</code> (or an equivalent nodemon configuration). The process restarts automatically when any <code>.ts</code> source file changes. Allow one to two seconds for the TypeScript compiler to pick up changes.</li></ul>
-<h3>Running tests</h3>
+<h3 id="running-tests">Running tests</h3>
 <p>Run the full test suite from the repository root:</p>
 <pre><code class="language-bash">pnpm test</code></pre>
 <p>Run end-to-end tests (requires all three services to be running):</p>
@@ -450,10 +523,10 @@ pnpm db:seed</code></pre>
 <pre><code class="language-bash">pnpm --filter api test
 pnpm --filter player-app test
 pnpm --filter admin-app test</code></pre>
-<h3>Supabase Studio</h3>
+<h3 id="supabase-studio">Supabase Studio</h3>
 <p>The Supabase Studio web interface is available at <code>http://localhost:54323</code> while <code>supabase start</code> is running. Use it to:</p>
 <ul><li>Browse and edit table data directly.</li><li>Inspect the <code>admin_users</code> table for TOTP secrets.</li><li>Monitor SQL query activity in the Logs section.</li><li>Manage Row Level Security policies during development.</li></ul>
-<h3>Feature flag overrides</h3>
+<h3 id="feature-flag-overrides">Feature flag overrides</h3>
 <p>Feature flags are read from environment variables at API startup. Override them in <code>apps/api/.env.local</code> without touching any application code:</p>
 <pre><code class="language-bash"># Enable the marketplace feature locally
 FF_MARKETPLACE=true
@@ -461,7 +534,7 @@ FF_MARKETPLACE=true
 # Disable the arena sumo mode locally
 FF_ARENA_SUMO=false</code></pre>
 <p>Restart the API process after changing flag values for them to take effect.</p>
-<h3>Useful one-liners</h3>
+<h3 id="useful-one-liners">Useful one-liners</h3>
 <pre><code class="language-bash"># Tail API logs
 pnpm --filter api dev 2&gt;&amp;1 | tee /tmp/api.log
 

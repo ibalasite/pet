@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details open>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,140 +334,9 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>Deployment</h1><pre><code class="language-plantuml">@startuml pixel-pet-arena-deployment
-
-!define EDGE #E3F2FD
-!define COMPUTE #F5F5F5
-!define STORAGE #E8F5E9
-!define EXTERNAL #FFF5E6
-
-skinparam linetype ortho
-
-package &quot;Vercel Edge&quot; #EDGE {
-  component [Global CDN] as cdn
-  component [Next.js / Vite\nStatic Assets] as staticAssets
-}
-
-package &quot;Railway Compute&quot; #COMPUTE {
-  component [API Server\nReplica 1] as api1
-  component [API Server\nReplica 2] as api2
-  component [Horizontal\nAutoscale\n(70% CPU)] as hpa
-  component [Nginx\nLoad Balancer] as lb
-}
-
-package &quot;Data Layer&quot; #STORAGE {
-  component [PostgreSQL\nPrimary (Writer)] as pgPrimary
-  component [PostgreSQL\nRead Replica] as pgReplica
-  component [Upstash Redis\nServerless] as redisUpstash
-}
-
-package &quot;External Services&quot; #EXTERNAL {
-  component [SendGrid\n(Primary Email)] as sendgridPrimary
-  component [Nodemailer SMTP\n(Fallback)] as nodemailer
-  component [S3-compatible\nBackups] as s3Backups
-}
-
-cdn --&gt; staticAssets: serves
-cdn --&gt; lb: routes to API
-
-api1 --&gt; lb: registers
-api2 --&gt; lb: registers
-hpa --&gt; api1: scales
-hpa --&gt; api2: scales
-
-lb --&gt; pgPrimary: writes
-api1 --&gt; pgPrimary: writes
-api2 --&gt; pgPrimary: writes
-
-lb --&gt; pgReplica: reads
-api1 --&gt; pgReplica: reads (leaderboard)
-api2 --&gt; pgReplica: reads (leaderboard)
-
-api1 --&gt; redisUpstash: rate limit / cache
-api2 --&gt; redisUpstash: rate limit / cache
-
-api1 --&gt; sendgridPrimary: email
-sendgridPrimary -.-&gt;|failover after\n3 consecutive failures| nodemailer
-
-pgPrimary --&gt; s3Backups: daily backup
-
-note right of hpa
-  Trigger: CPU &gt; 70%
-  Scale: +1 replica (max 4)
-  Cooldown: 5 minutes
-end note
-
-note right of pgPrimary
-  Managed Supabase
-  Auto-failover: 60s
-  Backup: daily
-  Retention: 30 days
-end note
-
-note right of redisUpstash
-  Serverless pay-per-request
-  Geo-proximity routing
-  No cold start
-  API: AWS compatible
-end note
-
-note right of sendgridPrimary
-  Monthly: 10k email limit
-  SPF + DKIM: configured
-  Complaint rate: &lt;0.1%
-  Delivery SLO P90: &lt;60s
-end note
-
-@enduml
-</code></pre><p style="color:var(--text-muted)">⚠️ PlantUML 圖表無法生成（請確認本機已安裝 plantuml 或網路可連至 plantuml.com）</p></main>
+    <main class="doc-content"><h1>Deployment</h1><div class="diagram-container diagram-container--puml"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" data-diagram-type="DESCRIPTION" preserveAspectRatio="none" style="background:#FFFFFF" version="1.1" viewBox="0 0 1211 858" zoomAndPan="magnify"><?plantuml 1.2026.4beta2?><defs/><g><!--cluster Vercel Edge--><g class="cluster" data-qualified-name="Vercel Edge" data-source-line="8" id="ent0002"><path d="M1036.86,153.04 L1131.6627,153.04 A3.75,3.75 0 0 1 1134.1627,155.54 L1141.1627,175.3369 L1193.86,175.3369 A2.5,2.5 0 0 1 1196.36,177.8369 L1196.36,378.58 A2.5,2.5 0 0 1 1193.86,381.08 L1036.86,381.08 A2.5,2.5 0 0 1 1034.36,378.58 L1034.36,155.54 A2.5,2.5 0 0 1 1036.86,153.04" fill="#E3F2FD" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="1034.36" x2="1141.1627" y1="175.3369" y2="175.3369"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="700" lengthAdjust="spacing" textLength="93.8027" x="1038.36" y="168.0351">Vercel Edge</text></g><!--cluster Railway Compute--><g class="cluster" data-qualified-name="Railway Compute" data-source-line="13" id="ent0005"><path d="M380.86,6 L518.7223,6 A3.75,3.75 0 0 1 521.2223,8.5 L528.2223,28.2969 L667.86,28.2969 A2.5,2.5 0 0 1 670.36,30.7969 L670.36,378.58 A2.5,2.5 0 0 1 667.86,381.08 L380.86,381.08 A2.5,2.5 0 0 1 378.36,378.58 L378.36,8.5 A2.5,2.5 0 0 1 380.86,6" fill="#F5F5F5" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="378.36" x2="528.2223" y1="28.2969" y2="28.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="700" lengthAdjust="spacing" textLength="136.8623" x="382.36" y="20.9951">Railway Compute</text></g><!--cluster Data Layer--><g class="cluster" data-qualified-name="Data Layer" data-source-line="20" id="ent0010"><path d="M20.86,405.08 L107.8356,405.08 A3.75,3.75 0 0 1 110.3356,407.58 L117.3356,427.3769 L541.86,427.3769 A2.5,2.5 0 0 1 544.36,429.8769 L544.36,516.17 A2.5,2.5 0 0 1 541.86,518.67 L20.86,518.67 A2.5,2.5 0 0 1 18.36,516.17 L18.36,407.58 A2.5,2.5 0 0 1 20.86,405.08" fill="#E8F5E9" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="18.36" x2="117.3356" y1="427.3769" y2="427.3769"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="700" lengthAdjust="spacing" textLength="85.9756" x="22.36" y="420.0751">Data Layer</text></g><!--cluster External Services--><g class="cluster" data-qualified-name="External Services" data-source-line="26" id="ent0014"><path d="M467.86,542.67 L606.1666,542.67 A3.75,3.75 0 0 1 608.6666,545.17 L615.6666,564.9669 L818.86,564.9669 A2.5,2.5 0 0 1 821.36,567.4669 L821.36,841.33 A2.5,2.5 0 0 1 818.86,843.83 L467.86,843.83 A2.5,2.5 0 0 1 465.36,841.33 L465.36,545.17 A2.5,2.5 0 0 1 467.86,542.67" fill="#FFF5E6" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="465.36" x2="615.6666" y1="564.9669" y2="564.9669"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="700" lengthAdjust="spacing" textLength="137.3066" x="469.36" y="557.6651">External Services</text></g><!--entity cdn--><g class="entity" data-qualified-name="Vercel Edge.cdn" data-source-line="9" id="ent0003"><rect fill="#F1F1F1" height="46.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="120.1377" x="1052.29" y="188.04"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="1152.4277" y="193.04"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="1150.4277" y="195.04"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="1150.4277" y="199.04"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="80.1377" x="1067.29" y="221.0351">Global CDN</text></g><!--entity staticAssets--><g class="entity" data-qualified-name="Vercel Edge.staticAssets" data-source-line="10" id="ent0004"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="130.043" x="1050.34" y="302.49"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="1160.383" y="307.49"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="1158.383" y="309.49"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="1158.383" y="313.49"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="89.6807" x="1065.34" y="335.4851">Next.js / Vite</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="90.043" x="1065.34" y="351.782">Static Assets</text></g><!--entity api1--><g class="entity" data-qualified-name="Railway Compute.api1" data-source-line="14" id="ent0006"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="112.5088" x="542.11" y="179.89"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="634.6188" y="184.89"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="632.6188" y="186.89"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="632.6188" y="190.89"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="72.5088" x="557.11" y="212.8851">API Server</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="64.6406" x="557.11" y="229.182">Replica 1</text></g><!--entity api2--><g class="entity" data-qualified-name="Railway Compute.api2" data-source-line="15" id="ent0007"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="112.5088" x="394.11" y="179.89"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="486.6188" y="184.89"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="484.6188" y="186.89"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="484.6188" y="190.89"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="72.5088" x="409.11" y="212.8851">API Server</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="64.6406" x="409.11" y="229.182">Replica 2</text></g><!--entity hpa--><g class="entity" data-qualified-name="Railway Compute.hpa" data-source-line="16" id="ent0008"><rect fill="#F1F1F1" height="78.8906" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="114.9561" x="537.88" y="41"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="632.8361" y="46"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="630.8361" y="48"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="630.8361" y="52"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="71.4834" x="552.88" y="73.9951">Horizontal</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="68.5781" x="552.88" y="90.292">Autoscale</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="74.9561" x="552.88" y="106.5889">(70% CPU)</text></g><!--entity lb--><g class="entity" data-qualified-name="Railway Compute.lb" data-source-line="17" id="ent0009"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="139.873" x="514.42" y="302.49"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="634.293" y="307.49"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="632.293" y="309.49"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="632.293" y="313.49"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="40.4072" x="529.42" y="335.4851">Nginx</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="99.873" x="529.42" y="351.782">Load Balancer</text></g><!--entity pgPrimary--><g class="entity" data-qualified-name="Data Layer.pgPrimary" data-source-line="21" id="ent0011"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="153.0664" x="208.83" y="440.08"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="341.8964" y="445.08"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="339.8964" y="447.08"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="339.8964" y="451.08"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="80.7529" x="223.83" y="473.0751">PostgreSQL</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="113.0664" x="223.83" y="489.372">Primary (Writer)</text></g><!--entity pgReplica--><g class="entity" data-qualified-name="Data Layer.pgReplica" data-source-line="22" id="ent0012"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="131.54" x="396.59" y="440.08"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="508.13" y="445.08"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="506.13" y="447.08"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="506.13" y="451.08"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="80.7529" x="411.59" y="473.0751">PostgreSQL</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="91.54" x="411.59" y="489.372">Read Replica</text></g><!--entity redisUpstash--><g class="entity" data-qualified-name="Data Layer.redisUpstash" data-source-line="23" id="ent0013"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="139.5244" x="34.6" y="440.08"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="154.1244" y="445.08"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="152.1244" y="447.08"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="152.1244" y="451.08"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="99.5244" x="49.6" y="473.0751">Upstash Redis</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="73.001" x="49.6" y="489.372">Serverless</text></g><!--entity sendgridPrimary--><g class="entity" data-qualified-name="External Services.sendgridPrimary" data-source-line="27" id="ent0015"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="148.5615" x="657.08" y="577.67"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="785.6415" y="582.67"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="783.6415" y="584.67"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="783.6415" y="588.67"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="64.6406" x="672.08" y="610.6651">SendGrid</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="108.5615" x="672.08" y="626.962">(Primary Email)</text></g><!--entity nodemailer--><g class="entity" data-qualified-name="External Services.nodemailer" data-source-line="28" id="ent0016"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="163.3135" x="641.7" y="765.24"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="785.0135" y="770.24"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="783.0135" y="772.24"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="783.0135" y="776.24"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="123.3135" x="656.7" y="798.2351">Nodemailer SMTP</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="68.6055" x="656.7" y="814.532">(Fallback)</text></g><!--entity s3Backups--><g class="entity" data-qualified-name="External Services.s3Backups" data-source-line="29" id="ent0017"><rect fill="#F1F1F1" height="62.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="140.9805" x="480.87" y="577.67"/><rect fill="#F1F1F1" height="10" style="stroke:#181818;stroke-width:0.5;" width="15" x="601.8505" y="582.67"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="599.8505" y="584.67"/><rect fill="#F1F1F1" height="2" style="stroke:#181818;stroke-width:0.5;" width="4" x="599.8505" y="588.67"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="100.9805" x="495.87" y="610.6651">S3-compatible</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="59.042" x="495.87" y="626.962">Backups</text></g><g class="entity" data-qualified-name="GMN35" data-source-line="57" id="ent0036"><path d="M688,52.75 L688,76.83 L653.19,80.83 L688,84.83 L688,108.1484 A0,0 0 0 0 688,108.1484 L874.7183,108.1484 A0,0 0 0 0 874.7183,108.1484 L874.7183,62.75 L864.7183,52.75 L688,52.75 A0,0 0 0 0 688,52.75" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M864.7183,52.75 L864.7183,62.75 L874.7183,62.75 L864.7183,52.75" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="129.7397" x="694" y="69.8169">Trigger: CPU &gt; 70%</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="165.7183" x="694" y="84.9497">Scale: +1 replica (max 4)</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="137.2109" x="694" y="100.0825">Cooldown: 5 minutes</text></g><g class="entity" data-qualified-name="GMN38" data-source-line="63" id="ent0039"><path d="M796,436.11 L796,506.6413 L944.7212,506.6413 L944.7212,446.11 L934.7212,436.11 L796,436.11" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M934.7212,436.11 L934.7212,446.11 L944.7212,446.11 L934.7212,436.11" fill="#FEFFDD" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="127.7212" x="802" y="453.1769">Managed Supabase</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="115.4575" x="802" y="468.3097">Auto-failover: 60s</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="87.6992" x="802" y="483.4425">Backup: daily</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="123.1382" x="802" y="498.5753">Retention: 30 days</text></g><g class="entity" data-qualified-name="GMN41" data-source-line="70" id="ent0042"><path d="M563.61,436.11 L563.61,506.6413 L761.1193,506.6413 L761.1193,446.11 L751.1193,436.11 L563.61,436.11" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M751.1193,436.11 L751.1193,446.11 L761.1193,446.11 L751.1193,436.11" fill="#FEFFDD" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="176.5093" x="569.61" y="453.1769">Serverless pay-per-request</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="143.5078" x="569.61" y="468.3097">Geo-proximity routing</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="83.186" x="569.61" y="483.4425">No cold start</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="135.7637" x="569.61" y="498.5753">API: AWS compatible</text></g><g class="entity" data-qualified-name="GMN44" data-source-line="77" id="ent0045"><path d="M840.19,573.7 L840.19,605.83 L805.93,609.83 L840.19,613.83 L840.19,644.2313 A0,0 0 0 0 840.19,644.2313 L1018.5357,644.2313 A0,0 0 0 0 1018.5357,644.2313 L1018.5357,583.7 L1008.5357,573.7 L840.19,573.7 A0,0 0 0 0 840.19,573.7" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><path d="M1008.5357,573.7 L1008.5357,583.7 L1018.5357,583.7 L1008.5357,573.7" fill="#FEFFDD" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="157.3457" x="846.19" y="590.7669">Monthly: 10k email limit</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="154.4385" x="846.19" y="605.8997">SPF + DKIM: configured</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="149.4429" x="846.19" y="621.0325">Complaint rate: &lt;0.1%</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="155.0542" x="846.19" y="636.1653">Delivery SLO P90: &lt;60s</text></g><!--link cdn to staticAssets--><g class="link" data-entity-1="ent0003" data-entity-2="ent0004" data-link-type="dependency" data-source-line="32" id="lnk18"><path d="M1112.36,234.83 C1112.36,254.03 1112.36,275.29 1112.36,296.33" fill="none" id="cdn-to-staticAssets" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="1112.36,302.33,1116.36,293.33,1112.36,297.33,1108.36,293.33,1112.36,302.33" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="42.5801" x="1069.36" y="264.6469">serves</text></g><!--link cdn to lb--><g class="link" data-entity-1="ent0003" data-entity-2="ent0009" data-link-type="dependency" data-source-line="33" id="lnk19"><path d="M1052.19,211.83 C943.26,211.83 724.56,211.83 724.56,211.83 C724.56,211.83 724.56,333.83 724.56,333.83 C724.56,333.83 695.51,333.83 660.46,333.83" fill="none" id="cdn-to-lb" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="654.46,333.83,663.46,337.83,659.46,333.83,663.46,329.83,654.46,333.83" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="83.2876" x="708.33" y="207.8969">routes to API</text></g><!--link api1 to lb--><g class="link" data-entity-1="ent0006" data-entity-2="ent0009" data-link-type="dependency" data-source-line="35" id="lnk20"><path d="M626.25,242.76 C626.25,261.06 626.25,278.03 626.25,296.32" fill="none" id="api1-to-lb" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="626.25,302.32,630.25,293.32,626.25,297.32,622.25,293.32,626.25,302.32" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="57.1924" x="568.25" y="268.6069">registers</text></g><!--link api2 to lb--><g class="link" data-entity-1="ent0007" data-entity-2="ent0009" data-link-type="dependency" data-source-line="36" id="lnk21"><path d="M507.03,221.83 C517.99,221.83 526.15,221.83 526.15,221.83 C526.15,221.83 526.15,262.9 526.15,296" fill="none" id="api2-to-lb" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="526.15,302,530.15,293,526.15,297,522.15,293,526.15,302" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="57.1924" x="468.15" y="265.4169">registers</text></g><!--link hpa to api1--><g class="link" data-entity-1="ent0008" data-entity-2="ent0006" data-link-type="dependency" data-source-line="37" id="lnk22"><path d="M597.47,120.38 C597.47,139.46 597.47,155.96 597.47,173.78" fill="none" id="hpa-to-api1" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="597.47,179.78,601.47,170.78,597.47,174.78,593.47,170.78,597.47,179.78" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="40.2695" x="556.47" y="146.1469">scales</text></g><!--link hpa to api2--><g class="link" data-entity-1="ent0008" data-entity-2="ent0007" data-link-type="dependency" data-source-line="38" id="lnk23"><path d="M537.64,80.83 C497.2,80.83 450.36,80.83 450.36,80.83 C450.36,80.83 450.36,135.05 450.36,173.63" fill="none" id="hpa-to-api2" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="450.36,179.63,454.36,170.63,450.36,174.63,446.36,170.63,450.36,179.63" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="40.2695" x="409.36" y="82.6569">scales</text></g><!--link lb to pgPrimary--><g class="link" data-entity-1="ent0009" data-entity-2="ent0011" data-link-type="dependency" data-source-line="40" id="lnk24"><path d="M514.15,333.83 C436.92,333.83 323.63,333.83 323.63,333.83 C323.63,333.83 323.63,393.21 323.63,433.82" fill="none" id="lb-to-pgPrimary" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="323.63,439.82,327.63,430.82,323.63,434.82,319.63,430.82,323.63,439.82" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="39.457" x="325.89" y="329.8969">writes</text></g><!--link api1 to pgPrimary--><g class="link" data-entity-1="ent0006" data-entity-2="ent0011" data-link-type="dependency" data-source-line="41" id="lnk25"><path d="M598.2,242.82 C598.2,262.01 598.2,282.83 598.2,282.83 C598.2,282.83 285.36,282.83 285.36,282.83 C285.36,282.83 285.36,380.14 285.36,433.82" fill="none" id="api1-to-pgPrimary" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="285.36,439.82,289.36,430.82,285.36,434.82,281.36,430.82,285.36,439.82" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="39.457" x="343.29" y="278.8969">writes</text></g><!--link api2 to pgPrimary--><g class="link" data-entity-1="ent0007" data-entity-2="ent0011" data-link-type="dependency" data-source-line="42" id="lnk26"><path d="M393.74,221.83 C333.59,221.83 247.09,221.83 247.09,221.83 C247.09,221.83 247.09,366.62 247.09,433.77" fill="none" id="api2-to-pgPrimary" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="247.09,439.77,251.09,430.77,247.09,434.77,243.09,430.77,247.09,439.77" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="39.457" x="207.09" y="253.5469">writes</text></g><!--link lb to pgReplica--><g class="link" data-entity-1="ent0009" data-entity-2="ent0012" data-link-type="dependency" data-source-line="44" id="lnk27"><path d="M521.28,365.35 C521.28,387.72 521.28,411.62 521.28,433.96" fill="none" id="lb-to-pgReplica" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="521.28,439.96,525.28,430.96,521.28,434.96,517.28,430.96,521.28,439.96" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="36.334" x="484.28" y="398.7169">reads</text></g><!--link api1 to pgReplica--><g class="link" data-entity-1="ent0006" data-entity-2="ent0012" data-link-type="dependency" data-source-line="45" id="lnk28"><path d="M541.74,200.83 C524.74,200.83 510.52,200.83 510.52,200.83 C510.52,200.83 510.52,362.44 510.52,433.81" fill="none" id="api1-to-pgReplica" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="510.52,439.81,514.52,430.81,510.52,434.81,506.52,430.81,510.52,439.81" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="129.5493" x="380.52" y="300.7769">reads (leaderboard)</text></g><!--link api2 to pgReplica--><g class="link" data-entity-1="ent0007" data-entity-2="ent0012" data-link-type="dependency" data-source-line="46" id="lnk29"><path d="M451.6,242.83 C451.6,292.94 451.6,383.98 451.6,433.95" fill="none" id="api2-to-pgReplica" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="451.6,439.95,455.6,430.95,451.6,434.95,447.6,430.95,451.6,439.95" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="129.5493" x="321.6" y="354.4569">reads (leaderboard)</text></g><!--link api1 to redisUpstash--><g class="link" data-entity-1="ent0006" data-entity-2="ent0013" data-link-type="dependency" data-source-line="48" id="lnk30"><path d="M570.15,242.72 C570.15,253.47 570.15,262.83 570.15,262.83 C570.15,262.83 127.61,262.83 127.61,262.83 C127.61,262.83 127.61,375.36 127.61,433.7" fill="none" id="api1-to-redisUpstash" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="127.61,439.7,131.61,430.7,127.61,434.7,123.61,430.7,127.61,439.7" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="110.2778" x="159.5" y="275.8969">rate limit / cache</text></g><!--link api2 to redisUpstash--><g class="link" data-entity-1="ent0007" data-entity-2="ent0013" data-link-type="dependency" data-source-line="49" id="lnk31"><path d="M393.88,200.83 C290.44,200.83 81.11,200.83 81.11,200.83 C81.11,200.83 81.11,362.44 81.11,433.81" fill="none" id="api2-to-redisUpstash" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="81.11,439.81,85.11,430.81,81.11,434.81,77.11,430.81,81.11,439.81" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="110.2778" x="7" y="196.8969">rate limit / cache</text></g><!--link api1 to sendgridPrimary--><g class="link" data-entity-1="ent0006" data-entity-2="ent0015" data-link-type="dependency" data-source-line="51" id="lnk32"><path d="M654.88,238.83 C707.73,238.83 778.56,238.83 778.56,238.83 C778.56,238.83 778.56,481.9 778.56,571.41" fill="none" id="api1-to-sendgridPrimary" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="778.56,577.41,782.56,568.41,778.56,572.41,774.56,568.41,778.56,577.41" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="35.8516" x="742.56" y="342.3469">email</text></g><!--link sendgridPrimary to nodemailer--><g class="link" data-entity-1="ent0015" data-entity-2="ent0016" data-link-type="dependency" data-source-line="52" id="lnk33"><path d="M731.05,640.36 C731.05,674.99 731.05,724.37 731.05,759.04" fill="none" id="sendgridPrimary-to-nodemailer" style="stroke:#181818;stroke-width:1;stroke-dasharray:7,7;"/><polygon fill="#181818" points="731.05,765.04,735.05,756.04,731.05,760.04,727.05,756.04,731.05,765.04" style="stroke:#181818;stroke-width:1;"/></g><!--link pgPrimary to s3Backups--><g class="link" data-entity-1="ent0011" data-entity-2="ent0017" data-link-type="dependency" data-source-line="54" id="lnk34"><path d="M259.85,503.14 C259.85,544.02 259.85,609.83 259.85,609.83 C259.85,609.83 388.13,609.83 474.42,609.83" fill="none" id="pgPrimary-to-s3Backups" style="stroke:#181818;stroke-width:1;"/><polygon fill="#181818" points="480.42,609.83,471.42,605.83,475.42,609.83,471.42,613.83,480.42,609.83" style="stroke:#181818;stroke-width:1;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="82.6528" x="233.79" y="605.8969">daily backup</text></g><!--link pgPrimary to GMN38--><g class="link" data-entity-1="ent0011" data-entity-2="ent0039" data-link-type="association" data-source-line="63" id="lnk40"><path d="M310.87,503 C310.87,516.77 310.87,529.83 310.87,529.83 C310.87,529.83 800.82,529.83 800.82,529.83 C800.82,529.83 800.82,519.23 800.82,507.06" fill="none" id="pgPrimary-GMN38" style="stroke:#181818;stroke-width:1;stroke-dasharray:7,7;"/></g><!--link redisUpstash to GMN41--><g class="link" data-entity-1="ent0013" data-entity-2="ent0042" data-link-type="association" data-source-line="70" id="lnk43"><path d="M104.36,502.71 C104.36,525.3 104.36,551.83 104.36,551.83 C104.36,551.83 592.73,551.83 592.73,551.83 C592.73,551.83 592.73,528.45 592.73,506.9" fill="none" id="redisUpstash-GMN41" style="stroke:#181818;stroke-width:1;stroke-dasharray:7,7;"/></g><?plantuml-src XLJRRjD047ttLmn5IArGIf9IBXP22ebJAf8qn2b58ZoixQcpTBDhTZTj3EBVcRMTYqDBbOTepzpEp9pnamIlkKG8UcS1F0rE-kr-ptjIWTsBuVXoIdZ_rFqsU3Yzc7GA_pVzq-3j1W--JeF9g3EWW3uPNdcUkU4oOvejG923pJC4fUrSULx6uXkM8XnyGHsZW219yM3D07vx0B5QP4gYjF3jJAY82UZsHj-16OWJMRUFS6MFVnXu0L-unPaCBRCyXeunQ4qHOWga1Bm_E-KdZ8ixbaENiYsjer0skq-XCpw74FKjwfcSO2PupA1Lf6OPRptksrxxjkk-7vNclvIqJCnaPscLYPcW3WvVDvz1TtnvL8JDCxRNSChbQYO7YYNmWGacOzI5fuXgtVMOPJ1WEUg3zRRs6nihOrEDuUV1J8urNp2Tm-6LfZdgidYMLl33SHCa7bMdLKprgiTSPhG7CoVNX1jQKp4ZWQRSaNPevLBh8bWH6Ka2S04yHdEmLjX-Co7Av4ppX0QuxYLOq8RBJWnPKxBUsyz89UXSKKCud8ufGvy94H67CbXkx7ibJnhkHVAAtE8-KC0ogqHtKhrSDoHQQ3JUrvJe4oKQWTaOHUI3LgH30rO1wSZpdBosDaoveM4O1xVlWKaf1UgYABiJKmriRq1FH0MuMQyFTsxhPblnNbFx0TCsNxLwHuibjNHr2nmA-aCTAQQJeztS__NR9jmL3FaoY_IPMN1Btu6OnNFSfdpKSvjqJoG-55ltzc1e79FlZYQypKJABElL-v2GGmvHyVGygQYsvkdSWhgk3djAxnIrxmuUtWETFe6XMvCFprj4llo472xO2buUaQshb4ZKdVJX51PSEhrun0zSylqIk-SxP98EAe5mcR686IJ8VNCQrqHHtJe6hvg6m99xHPtU4xIaTQweu4cJqFpXShKZ1jYUE6GiRsIe6nf_Bj5OCfwXQcHQhTmcyaBtNAQ4ZnGTc4ZSgMZdHtVWG-SgXEsXFLZ_tniVqjTrBcYHhUPDkSnozuxTk0_FeVVfVEXJRddDqoNnBmQyo0JZTDzEApwyQnwtt59wA3ZraqCuk83nsoPPtCJMPFu2?></g></svg></div></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,57 +334,11 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>ARCH — System Architecture</h1>
+    <main class="doc-content"><h1 id="arch--system-architecture">ARCH — System Architecture</h1>
 <hr>
-<h2>Document Control</h2>
+<h2 id="document-control">Document Control</h2>
 <table>
 <tr><th>欄位</th><th>內容</th></tr>
 <tr><td><strong>DOC-ID</strong></td><td>ARCH-PIXEL-PET-ARENA-20260503</td></tr>
@@ -277,17 +350,17 @@
 <tr><td><strong>上游文件</strong></td><td>EDD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</td></tr>
 </table>
 <hr>
-<h2>Change Log</h2>
+<h2 id="change-log">Change Log</h2>
 <table>
 <tr><th>版本</th><th>日期</th><th>作者</th><th>變更摘要</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (gendoc arch)</td><td>初稿：完整系統架構設計文件</td></tr>
 </table>
 <hr>
-<h2>目錄</h2>
-<ol><li><a href="#§1-architecture-overview" target="_blank" rel="noopener">§1. Architecture Overview</a></li><li><a href="#§2-component-architecture" target="_blank" rel="noopener">§2. Component Architecture</a></li><li><a href="#§3-key-architectural-decisions" target="_blank" rel="noopener">§3. Key Architectural Decisions</a></li><li><a href="#§4-data-flow-diagrams" target="_blank" rel="noopener">§4. Data Flow Diagrams</a></li><li><a href="#§5-security-architecture" target="_blank" rel="noopener">§5. Security Architecture</a></li><li><a href="#§6-scalability-and-reliability" target="_blank" rel="noopener">§6. Scalability and Reliability</a></li><li><a href="#§7-deployment-architecture" target="_blank" rel="noopener">§7. Deployment Architecture</a></li><li><a href="#§8-cross-cutting-concerns" target="_blank" rel="noopener">§8. Cross-Cutting Concerns</a></li><li><a href="#§9-高可用設計" target="_blank" rel="noopener">§9. 高可用設計</a></li><li><a href="#§10-災難恢復dr" target="_blank" rel="noopener">§10. 災難恢復（DR）</a></li><li><a href="#§11-技術棧全覽" target="_blank" rel="noopener">§11. 技術棧全覽</a></li><li><a href="#§12-observability-架構" target="_blank" rel="noopener">§12. Observability 架構</a></li><li><a href="#§13-外部依賴地圖" target="_blank" rel="noopener">§13. 外部依賴地圖</a></li><li><a href="#§14-architecture-decision-records" target="_blank" rel="noopener">§14. Architecture Decision Records</a></li><li><a href="#§15-架構審查檢查清單" target="_blank" rel="noopener">§15. 架構審查檢查清單</a></li><li><a href="#§16-cost-optimization--finops" target="_blank" rel="noopener">§16. Cost Optimization &amp; FinOps</a></li><li><a href="#§17-marketplace-feature-成本影響評估" target="_blank" rel="noopener">§17. Marketplace Feature 成本影響評估</a></li><li><a href="#§18-api-gateway--service-mesh-architecture" target="_blank" rel="noopener">§18. API Gateway &amp; Service Mesh Architecture</a></li><li><a href="#§19-admin-portal-架構" target="_blank" rel="noopener">§19. Admin Portal 架構</a></li></ol>
+<h2 id="目錄">目錄</h2>
+<ol><li><a href="#§1-architecture-overview">§1. Architecture Overview</a></li><li><a href="#§2-component-architecture">§2. Component Architecture</a></li><li><a href="#§3-key-architectural-decisions">§3. Key Architectural Decisions</a></li><li><a href="#§4-data-flow-diagrams">§4. Data Flow Diagrams</a></li><li><a href="#§5-security-architecture">§5. Security Architecture</a></li><li><a href="#§6-scalability-and-reliability">§6. Scalability and Reliability</a></li><li><a href="#§7-deployment-architecture">§7. Deployment Architecture</a></li><li><a href="#§8-cross-cutting-concerns">§8. Cross-Cutting Concerns</a></li><li><a href="#§9-高可用設計">§9. 高可用設計</a></li><li><a href="#§10-災難恢復dr">§10. 災難恢復（DR）</a></li><li><a href="#§11-技術棧全覽">§11. 技術棧全覽</a></li><li><a href="#§12-observability-架構">§12. Observability 架構</a></li><li><a href="#§13-外部依賴地圖">§13. 外部依賴地圖</a></li><li><a href="#§14-architecture-decision-records">§14. Architecture Decision Records</a></li><li><a href="#§15-架構審查檢查清單">§15. 架構審查檢查清單</a></li><li><a href="#§16-cost-optimization--finops">§16. Cost Optimization &amp; FinOps</a></li><li><a href="#§17-marketplace-feature-成本影響評估">§17. Marketplace Feature 成本影響評估</a></li><li><a href="#§18-api-gateway--service-mesh-architecture">§18. API Gateway &amp; Service Mesh Architecture</a></li><li><a href="#§19-admin-portal-架構">§19. Admin Portal 架構</a></li></ol>
 <hr>
-<h2>§1. Architecture Overview</h2>
-<h3>§1.1 Design Principles</h3>
+<h2 id="1-architecture-overview">§1. Architecture Overview</h2>
+<h3 id="11-design-principles">§1.1 Design Principles</h3>
 <p>The pixel-pet-arena architecture is governed by six first-order principles derived from the upstream documents:</p>
 <p><strong>P1 — Accountless Persistence</strong></p>
 <p>Identity equals a 32-byte cryptographic URL token (PET_ACCESS_TOKEN_MIN_BYTES = 32) produced by a 6-digit email OTP claim (CLAIM_CODE_DIGITS = 6). No session cookie, no password, no user table governs player identity. All architectural choices in the auth and data tiers flow from this constraint.</p>
@@ -302,27 +375,70 @@
 <p><strong>P6 — GDPR by Architecture</strong></p>
 <p>Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash. Raw email is never written to logs, databases, or analytics events. All five GDPR SLAs are first-class data-pipeline concerns: erasure (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days), restrict processing (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 hours), data access (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 days), object leaderboard (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5 business days), and rectification (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24 hours). See §5.4 for the complete SLA table.</p>
 <hr>
-<h3>§1.2 System Context Diagram (ASCII)</h3>
-<div class="umock__card"><div class="umock__card-title">EXTERNAL ACTORS</div><div class="umock__field"><label class="umock__field-label">EXTERNAL ACTORS</label><div class="umock__field-body"><pre class="umock__code"><code class=""> Guest Player│  │ Pet Owner        │  │Competitive Player │  │Admin Operator
- (no token)  │  │ (URL token)      │  │(token + arena)    │  │(TOTP session)</code></pre></div></div><div class="umock__info">└─────────┼───────────────────┼────────────────────────┼───────────────────┼─────────┘ HTTPS            │  HTTPS                  │  HTTPS</div><div class="umock__field"><label class="umock__field-label">▼                   ▼                         ▼                   ▼</label><div class="umock__field-body"><pre class="umock__code"><code class="">  CDN / Edge (Vercel)
-  ┌───────────────────────────────┐    ┌────────────────────────────────────────┐
-  Player App                   │    │  Admin Portal
-  React 18 + Phaser.js 3       │    │  Vue 3 + Element Plus
-  Vite 5 / TypeScript 5        │    │  Vite 5 / TypeScript 5</code></pre></div></div><div class="umock__info">└─────────────────┼────────────────────────────────────────────┼─────────────────────┘ HTTPS</div><div class="umock__field"><label class="umock__field-label">▼                                             ▼</label><div class="umock__field-body"><pre class="umock__code"><code class="">  API Gateway / Load Balancer (Nginx or Vercel Edge)
-  TLS termination · rate-limit header forwarding · X-Real-IP passthrough</code></pre></div></div><div class="umock__info">REST /api/v1/*</div><div class="umock__field"><label class="umock__field-label">▼                                             ▼</label><div class="umock__field-body"><pre class="umock__code"><code class="">  API Layer (Railway — containerized, autoscale HPA at 70% CPU)
-  ┌──────────────────────────────┐    ┌────────────────────────────────────────────┐
-  Game API Server              │    │  Admin API Server
-  Node.js 20 LTS / Fastify 4  │    │  Node.js 20 LTS / Fastify 4
-  ≥ 2 replicas                 │    │  1 replica (/admin ns plugin)</code></pre></div></div><div class="umock__info">└─────────────────┼────────────────────────────────────────────┼─────────────────────┘</div><div class="umock__info">┌─────────┴─────────────────────────────────┬─────────┘</div><div class="umock__field"><label class="umock__field-label">▼                                           ▼</label><div class="umock__field-body"><pre class="umock__code"><code class="">  Config cache (TTL 300s)
-  Token blacklist</code></pre></div></div><div class="umock__info">│</div><div class="umock__field"><label class="umock__field-label">▼</label><div class="umock__field-body"><pre class="umock__code"><code class="">  External Services
-  ┌────────────────────────────┐  ┌───────────────────────────────┐
-  SendGrid v3 API (primary) │  │  Nodemailer SMTP (fallback)
-  Transactional email only  │  │  Activates after 3 consec.
-  SPF + DKIM configured     │  │  SendGrid failures</code></pre></div></div><pre class="umock__code"><code class="">  GitHub Actions (CI/CD)    │  │  S3-compatible (DB backups)
-  Test → Build → Deploy     │  │  Supabase automated daily</code></pre></div>
+<h3 id="12-system-context-diagram-ascii">§1.2 System Context Diagram (ASCII)</h3>
+<pre class="mermaid">graph TD
+  N0[&quot;EXTERNAL ACTORS&quot;]
+  N1[&quot;Guest Player│  │ Pet Owner        │  │Competitive Player │  │Admin Operator&quot;]
+  N2[&quot;(no token)  │  │ (URL token)      │  │(token + arena)    │  │(TOTP session)&quot;]
+  N3[&quot;HTTPS            │  HTTPS                  │  HTTPS            │  HTTPS&quot;]
+  N4[&quot;▼                   ▼                         ▼                   ▼&quot;]
+  N5[&quot;CDN / Edge (Vercel)&quot;]
+  N6[&quot;Player App                   │    │  Admin Portal&quot;]
+  N7[&quot;React 18 + Phaser.js 3       │    │  Vue 3 + Element Plus&quot;]
+  N8[&quot;Vite 5 / TypeScript 5        │    │  Vite 5 / TypeScript 5&quot;]
+  N9[&quot;HTTPS                                       │ HTTPS&quot;]
+  N10[&quot;▼                                             ▼&quot;]
+  N11[&quot;API Gateway / Load Balancer (Nginx or Vercel Edge)&quot;]
+  N12[&quot;TLS termination · rate-limit header forwarding · X-Real-IP passthrough&quot;]
+  N13[&quot;REST /api/v1/*                              │ REST /admin/api/*&quot;]
+  N14[&quot;API Layer (Railway — containerized, autoscale HPA at 70% CPU)&quot;]
+  N15[&quot;Game API Server              │    │  Admin API Server&quot;]
+  N16[&quot;Node.js 20 LTS / Fastify 4  │    │  Node.js 20 LTS / Fastify 4&quot;]
+  N17[&quot;≥ 2 replicas                 │    │  1 replica (/admin ns plugin)&quot;]
+  N18[&quot;▼                                           ▼&quot;]
+  N19[&quot;PostgreSQL 15+          │            │  Redis 7+&quot;]
+  N20[&quot;(Supabase managed)      │            │  (Upstash serverless)&quot;]
+  N21[&quot;Primary writer           │            │  Leaderboard sorted set&quot;]
+  N22[&quot;+ 1 read replica         │            │  Rate-limit counters&quot;]
+  N23[&quot;Auto-failover 60s        │            │  Admin sessions&quot;]
+  N24[&quot;Daily S3 backup          │            │  Matchmaking queue&quot;]
+  N25[&quot;┘            │  Config cache (TTL 300s)&quot;]
+  N26[&quot;Token blacklist&quot;]
+  N27[&quot;▼&quot;]
+  N28[&quot;External Services&quot;]
+  N29[&quot;SendGrid v3 API (primary) │  │  Nodemailer SMTP (fallback)&quot;]
+  N30[&quot;Transactional email only  │  │  Activates after 3 consec.&quot;]
+  N31[&quot;SPF + DKIM configured     │  │  SendGrid failures&quot;]
+  N32[&quot;GitHub Actions (CI/CD)    │  │  S3-compatible (DB backups)&quot;]
+  N33[&quot;Test  Build  Deploy     │  │  Supabase automated daily&quot;]
+  N1 --&gt; N2
+  N3 --&gt; N4
+  N4 --&gt; N5
+  N6 --&gt; N7
+  N7 --&gt; N8
+  N9 --&gt; N10
+  N10 --&gt; N11
+  N11 --&gt; N12
+  N12 --&gt; N13
+  N13 --&gt; N10
+  N10 --&gt; N14
+  N15 --&gt; N16
+  N16 --&gt; N17
+  N19 --&gt; N20
+  N20 --&gt; N21
+  N21 --&gt; N22
+  N22 --&gt; N23
+  N23 --&gt; N24
+  N24 --&gt; N25
+  N25 --&gt; N26
+  N26 --&gt; N27
+  N27 --&gt; N28
+  N29 --&gt; N30
+  N30 --&gt; N31
+  N32 --&gt; N33</pre>
 <hr>
-<h2>§2. Component Architecture</h2>
-<h3>§2.1 Frontend Architecture (React + Phaser.js Player App)</h3>
+<h2 id="2-component-architecture">§2. Component Architecture</h2>
+<h3 id="21-frontend-architecture-react--phaserjs-player-app">§2.1 Frontend Architecture (React + Phaser.js Player App)</h3>
 <p><strong>Technology</strong>: React 18, Vite 5, TypeScript 5, Phaser.js 3 (dynamically imported)</p>
 <p>The player app is a client-side SPA served from Vercel&#x27;s global CDN. No server-side rendering is required; all routes are client-rendered via React Router v6. Phaser.js is dynamically imported to avoid blocking the initial claim-flow bundle.</p>
 <p><strong>Bundle Budget</strong>: JS ≤ 300 KB gzipped (TOTAL_JS_BUNDLE_GZIPPED_KB = 300); CSS ≤ 50 KB gzipped (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50).</p>
@@ -335,48 +451,124 @@
 <tr><td>Form state</td><td>React Hook Form + Zod</td><td>ClaimEmailForm, ClaimCodeForm</td></tr>
 </table>
 <p><strong>Component Hierarchy Summary</strong>:</p>
-<pre><code class="">App
-├── Layout
-│   ├── NavBar (hasPetToken prop — shows/hides pet links)
-│   └── Router (React Router v6)
-│       ├── LandingPage (/)
-│       │   ├── PetCanvas          ← Phaser.js instance (PetCanvasEngine — sole Phaser import boundary)
-│       │   ├── RarityHint
-│       │   ├── ClaimCTA
-│       │   └── SocialProofCounter
-│       ├── ClaimPage (/claim)
-│       │   └── ClaimFlow (3-step compound — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
-│       │       ├── ClaimEmailForm
-│       │       ├── ClaimCodeForm
-│       │       └── URLReveal
-│       ├── PetPage (/pet/:petId)
-│       │   ├── PetCanvas
-│       │   ├── RarityBadge
-│       │   ├── StatsPanel → StatBar ×3
-│       │   ├── TrainingEntry
-│       │   ├── FoodInventory → FoodItem ×N
-│       │   ├── ArenaEntry
-│       │   └── NeglectedState (if last_trained_at &gt; 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)
-│       ├── TrainingPage (/pet/:petId/train)
-│       │   ├── TrainingActions → TrainingActionCard ×3 (TRAINING_ACTIONS_PER_DAY = 3)
-│       │   ├── StatChangeIndicator (visible TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s)
-│       │   ├── DailyResetTimer
-│       │   └── TrainingStreak
-│       ├── BattleRecordsPage (/pet/:petId/records)
-│       │   ├── PetSummaryCard
-│       │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
-│       ├── ArenaPage (/arena)
-│       │   ├── ModeSelector (RACE / SUMO)
-│       │   ├── MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)
-│       │   └── BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)
-│       ├── BattleResultPage (/arena/result/:battleId)
-│       │   ├── BattleResultCard (WIN/LOSS variants)
-│       │   └── [OQ-E05 open: Open Graph card generation method TBD]
-│       ├── LeaderboardPage (/leaderboard)
-│       │   ├── RarityFilter
-│       │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100) → LeaderboardRow ×100
-│       │   └── OwnerRankBanner
-│       └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only</code></pre>
+<pre class="mermaid">graph TD
+  N0[&quot;App&quot;]
+  N1[&quot;Layout&quot;]
+  N2[&quot;NavBar (hasPetToken prop — shows/hides pet links)&quot;]
+  N3[&quot;Router (React Router v6)&quot;]
+  N4[&quot;LandingPage (/)&quot;]
+  N5[&quot;PetCanvas           Phaser.js instance (PetCanvasEngine — sole Phaser import boundary)&quot;]
+  N6[&quot;RarityHint&quot;]
+  N7[&quot;ClaimCTA&quot;]
+  N8[&quot;SocialProofCounter&quot;]
+  N9[&quot;ClaimPage (/claim)&quot;]
+  N10[&quot;ClaimFlow (3-step compound — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)&quot;]
+  N11[&quot;ClaimEmailForm&quot;]
+  N12[&quot;ClaimCodeForm&quot;]
+  N13[&quot;URLReveal&quot;]
+  N14[&quot;PetPage (/pet/:petId)&quot;]
+  N15[&quot;PetCanvas&quot;]
+  N16[&quot;RarityBadge&quot;]
+  N17[&quot;StatsPanel  StatBar ×3&quot;]
+  N18[&quot;TrainingEntry&quot;]
+  N19[&quot;FoodInventory  FoodItem ×N&quot;]
+  N20[&quot;ArenaEntry&quot;]
+  N21[&quot;NeglectedState (if last_trained_at &gt; 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)&quot;]
+  N22[&quot;TrainingPage (/pet/:petId/train)&quot;]
+  N23[&quot;TrainingActions  TrainingActionCard ×3 (TRAINING_ACTIONS_PER_DAY = 3)&quot;]
+  N24[&quot;StatChangeIndicator (visible TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s)&quot;]
+  N25[&quot;DailyResetTimer&quot;]
+  N26[&quot;TrainingStreak&quot;]
+  N27[&quot;BattleRecordsPage (/pet/:petId/records)&quot;]
+  N28[&quot;PetSummaryCard&quot;]
+  N29[&quot;BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)&quot;]
+  N30[&quot;ArenaPage (/arena)&quot;]
+  N31[&quot;ModeSelector (RACE / SUMO)&quot;]
+  N32[&quot;MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)&quot;]
+  N33[&quot;BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)&quot;]
+  N34[&quot;BattleResultPage (/arena/result/:battleId)&quot;]
+  N35[&quot;BattleResultCard (WIN/LOSS variants)&quot;]
+  N36[&quot;[OQ-E05 open: Open Graph card generation method TBD]&quot;]
+  N37[&quot;LeaderboardPage (/leaderboard)&quot;]
+  N38[&quot;RarityFilter&quot;]
+  N39[&quot;LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100)  LeaderboardRow ×100&quot;]
+  N40[&quot;OwnerRankBanner&quot;]
+  N41[&quot;MarketplacePage (/marketplace)   FF_MARKETPLACE only&quot;]
+  N0 --&gt; N1
+  N1 --&gt; N2
+  N2 --&gt; N3
+  N3 --&gt; N4
+  N4 --&gt; N5
+  N5 --&gt; N6
+  N6 --&gt; N7
+  N7 --&gt; N8
+  N8 --&gt; N9
+  N9 --&gt; N10
+  N10 --&gt; N11
+  N11 --&gt; N12
+  N12 --&gt; N13
+  N13 --&gt; N14
+  N14 --&gt; N15
+  N15 --&gt; N16
+  N16 --&gt; N17
+  N17 --&gt; N18
+  N18 --&gt; N19
+  N19 --&gt; N20
+  N20 --&gt; N21
+  N21 --&gt; N22
+  N22 --&gt; N23
+  N23 --&gt; N24
+  N24 --&gt; N25
+  N25 --&gt; N26
+  N26 --&gt; N27
+  N27 --&gt; N28
+  N28 --&gt; N29
+  N29 --&gt; N30
+  N30 --&gt; N31
+  N31 --&gt; N32
+  N32 --&gt; N33
+  N33 --&gt; N34
+  N34 --&gt; N35
+  N35 --&gt; N36
+  N36 --&gt; N37
+  N37 --&gt; N38
+  N38 --&gt; N39
+  N39 --&gt; N40
+  N40 --&gt; N41
+  N0 --&gt; N2
+  N0 --&gt; N3
+  N0 --&gt; N4
+  N0 --&gt; N6
+  N0 --&gt; N7
+  N0 --&gt; N8
+  N0 --&gt; N9
+  N0 --&gt; N10
+  N0 --&gt; N11
+  N0 --&gt; N12
+  N0 --&gt; N13
+  N0 --&gt; N14
+  N0 --&gt; N15
+  N0 --&gt; N16
+  N0 --&gt; N18
+  N0 --&gt; N20
+  N0 --&gt; N21
+  N0 --&gt; N22
+  N0 --&gt; N24
+  N0 --&gt; N25
+  N0 --&gt; N26
+  N0 --&gt; N27
+  N0 --&gt; N28
+  N0 --&gt; N29
+  N0 --&gt; N30
+  N0 --&gt; N31
+  N0 --&gt; N32
+  N0 --&gt; N33
+  N0 --&gt; N34
+  N0 --&gt; N35
+  N0 --&gt; N36
+  N0 --&gt; N37
+  N0 --&gt; N38
+  N0 --&gt; N40</pre>
 <p><strong>Pixel Art Rendering</strong>:</p>
 <ul><li>Engine: Phaser.js 3, isolated in <code>PetCanvasEngine</code> class. No other component may import Phaser directly.</li><li>Sprites: 32×32 px per frame (SPRITE_RESOLUTION_PX = 32), PNG with transparency</li><li>CSS: <code>image-rendering: pixelated</code> + <code>image-rendering: crisp-edges</code> on canvas element</li><li>FPS target: ≥ 30 FPS sustained (PET_ANIMATION_FPS_MIN = 30)</li><li>Reduced motion: <code>prefers-reduced-motion: reduce</code> → static sprite, no particles</li><li>WebGL unavailable: Canvas 2D fallback rendering with static sprite image (no animation)</li><li>Pet render on load: ≤ 2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)</li></ul>
 <p><strong>Performance Targets</strong>:</p>
@@ -391,7 +583,7 @@
 <p><strong>Accessibility (WCAG 2.1 AA)</strong>:</p>
 <ul><li>Focus indicator contrast ratio ≥ 3:1 (A11Y_FOCUS_CONTRAST_RATIO = 3:1)</li><li>Normal text contrast ratio ≥ 4.5:1 (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1)</li><li>Large text contrast ratio ≥ 3:1 (A11Y_TEXT_CONTRAST_LARGE = 3:1)</li><li>Claim code expiry warning at 2 minutes remaining (A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY_MINUTES = 2)</li><li>All interactive elements are keyboard-navigable; focus is trapped in modal dialogs; <code>aria-live</code> regions used for dynamic content (EDD §8.4)</li></ul>
 <hr>
-<h3>§2.2 Admin Portal Architecture (Vue 3 + Element Plus)</h3>
+<h3 id="22-admin-portal-architecture-vue-3--element-plus">§2.2 Admin Portal Architecture (Vue 3 + Element Plus)</h3>
 <p><strong>Technology</strong>: Vue 3 (Composition API), Element Plus, Vite 5, TypeScript 5, Pinia, Axios, ECharts (vue-echarts)</p>
 <p>The admin portal is a separate Vite application, deployed to Vercel independently from the player app. It connects exclusively to <code>/admin/api/*</code> endpoints. Deliberate stack separation prevents the pixel-art CSS design system from bleeding into the data-dense admin UI.</p>
 <p><strong>Deployment</strong>: Separate Vercel project, separate route prefix or subdomain (<code>admin.pixel-pet-arena.com</code> — OQ-E03 open).</p>
@@ -414,7 +606,7 @@
 <p><strong>State</strong>: Pinia (Vue-native) for local portal state. Axios with request/response interceptors for session expiry (4h inactivity — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4; 8h absolute — ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8).</p>
 <p><strong>Performance</strong>: Pages load ≤ 3 seconds with up to 1 million pet records (ADMIN_PAGE_LOAD_TIME_SECONDS = 3; PRD NFR-ADMIN-06). Pet search returns up to 1 million records in ≤ 2 seconds (ADMIN_SEARCH_RESPONSE_TIME_SECONDS = 2; PRD NFR-ADMIN-06). Single moderator handles 100 moderation actions/day without degradation (ADMIN_DAILY_MODERATION_ACTIONS_CAPACITY = 100).</p>
 <hr>
-<h3>§2.3 Backend API Architecture (Node.js 20 + Fastify 4)</h3>
+<h3 id="23-backend-api-architecture-nodejs-20--fastify-4">§2.3 Backend API Architecture (Node.js 20 + Fastify 4)</h3>
 <p><strong>Technology</strong>: Node.js 20 LTS, Fastify 4, TypeScript 5</p>
 <p>Two Fastify processes share the same codebase and database credentials via environment variables:</p>
 <ul><li><strong>Game API Server</strong>: ≥ 2 replicas on Railway; handles all <code>/api/v1/*</code> player-facing routes.</li><li><strong>Admin API Server</strong>: 1 replica; handles all <code>/admin/api/*</code> routes via a dedicated Fastify plugin registered under the <code>/admin</code> prefix.</li></ul>
@@ -437,7 +629,7 @@
 </table>
 <p><strong>Containerization</strong>: Multi-stage Docker build (<code>node:20-alpine</code>), non-root user, &lt; 150 MB image target (EDD §10.2 infrastructure constraints). Health check: <code>GET /health</code> ≤ 500 ms (HEALTH_CHECK_RESPONSE_TIME_MS = 500). Images stored in GitHub Container Registry (ghcr.io).</p>
 <hr>
-<h3>§2.4 Database Architecture (PostgreSQL/Supabase)</h3>
+<h3 id="24-database-architecture-postgresqlsupabase">§2.4 Database Architecture (PostgreSQL/Supabase)</h3>
 <p><strong>Technology</strong>: PostgreSQL 15+ managed by Supabase</p>
 <p><strong>Core Tables</strong> (Impl Phase = EDD implementation phase 1/2/3, distinct from PRD priority P0/P1/P2):</p>
 <table>
@@ -464,7 +656,7 @@
 <p><strong>GDPR Data Design</strong>:</p>
 <ul><li>Raw email never written to any column or log</li><li><code>claim_identities.email_encrypted</code>: AES-256-GCM ciphertext (nulled within 24h of erasure request — GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24)</li><li><code>claim_identities.email_hash</code>: SHA-256 of lowercased email (retained permanently for anti-re-registration)</li><li><code>pets.claim_identity_id</code> FK enables GDPR self-service endpoint to locate the identity without querying ephemeral <code>claim_codes</code> (purged after CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72 hours)</li></ul>
 <hr>
-<h3>§2.5 Cache Architecture (Redis/Upstash)</h3>
+<h3 id="25-cache-architecture-redisupstash">§2.5 Cache Architecture (Redis/Upstash)</h3>
 <p><strong>Technology</strong>: Redis 7+ via Upstash (serverless, pay-per-request)</p>
 <p>Redis serves six distinct responsibilities, each with its own key-pattern and TTL discipline:</p>
 <p><strong>1. Leaderboard (Authoritative Real-Time)</strong></p>
@@ -506,7 +698,7 @@ TTL:   259200s (72h — CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72)
 Value: &quot;1&quot;</code></pre>
 <p>Written atomically when a recovery flow replaces a pet access token, ensuring in-flight requests using the old token are immediately rejected.</p>
 <hr>
-<h3>§2.6 Email Service Architecture (SendGrid + Nodemailer Fallback)</h3>
+<h3 id="26-email-service-architecture-sendgrid--nodemailer-fallback">§2.6 Email Service Architecture (SendGrid + Nodemailer Fallback)</h3>
 <p><strong>Primary</strong>: SendGrid v3 API</p>
 <p>Transactional emails only: claim password delivery (6-digit OTP), access-link recovery. No marketing email without separate explicit opt-in (CAN-SPAM compliance).</p>
 <p>Configuration:</p>
@@ -516,8 +708,8 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Email Security Design</strong>:</p>
 <ul><li>Claim email contains ONLY the 6-digit numeric code — no clickable URLs</li><li>Rationale: Mitigates email-client pre-scanning attacks (Gmail/Outlook auto-clicking URLs would claim the pet without user intent)</li><li>Players manually type the code into the browser claim form</li></ul>
 <hr>
-<h2>§3. Key Architectural Decisions</h2>
-<h3>§3.1 ADR-001: No User Accounts — Email OTP + URL Token Identity</h3>
+<h2 id="3-key-architectural-decisions">§3. Key Architectural Decisions</h2>
+<h3 id="31-adr-001-no-user-accounts--email-otp--url-token-identity">§3.1 ADR-001: No User Accounts — Email OTP + URL Token Identity</h3>
 <p><strong>Status</strong>: Accepted</p>
 <p><strong>Context</strong>:</p>
 <p>Casual browser games lose 85–95% of visitors at traditional account registration walls (industry data, BRD §2.3). The product&#x27;s core hypothesis (BRD O1) is that an email claim conversion rate ≥ 10% (CLAIM_CONVERSION_TARGET_PERCENT = 10) is achievable if and only if the identity mechanism requires no password creation, no email verification link click, and no profile setup. Existing alternatives (LocalStorage, cookies) fail on multi-device persistence.</p>
@@ -529,7 +721,7 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Consequences</strong>:</p>
 <ul><li>Positive: Removes the #1 conversion barrier; enables viral URL sharing; simplifies auth infrastructure (no OAuth, no session table for players)</li><li>Positive: GDPR-friendly — &quot;email as identity&quot; means erasure is a first-class, well-scoped operation</li><li>Negative: Token loss requires a recovery flow (not self-service password reset); users who lose both their URL and email access are unrecoverable</li><li>Negative: Bookmark-based access requires UX education; some users will not understand the mechanism</li><li>Risk: If claim conversion stays below CLAIM_CONVERSION_PIVOT_THRESHOLD_PERCENT = 3% after 4 weeks, the product pivots to anonymous-token mode per BRD kill criteria</li></ul>
 <hr>
-<h3>§3.2 ADR-002: Monorepo Structure</h3>
+<h3 id="32-adr-002-monorepo-structure">§3.2 ADR-002: Monorepo Structure</h3>
 <p><strong>Status</strong>: Accepted</p>
 <p><strong>Context</strong>:</p>
 <p>Three independently deployable units (player app, admin portal, API server) share domain types (Pet, ArenaMatch, LeaderboardEntry), Zod validation schemas, and constants from CONSTANTS-PIXEL-PET-ARENA-20260503. Polyrepo approaches require either duplication or a separate shared-package publish cycle, both of which add friction within the MVP budget (MVP_BUDGET_USD = 40,000).</p>
@@ -544,7 +736,7 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Consequences</strong>:</p>
 <ul><li>Positive: Type-safe contract sharing between frontend and backend without publishing overhead</li><li>Positive: Single CI pipeline; atomic cross-package changes</li><li>Positive: Consistent toolchain (Vite 5, TypeScript 5, pnpm) across all packages</li><li>Negative: A monorepo requires disciplined package boundary enforcement to prevent circular dependencies</li><li>Negative: A single failing CI step blocks all deployments</li></ul>
 <hr>
-<h3>§3.3 ADR-003: React + Phaser.js for Player App</h3>
+<h3 id="33-adr-003-react--phaserjs-for-player-app">§3.3 ADR-003: React + Phaser.js for Player App</h3>
 <p><strong>Status</strong>: Accepted</p>
 <p><strong>Context</strong>:</p>
 <p>The player app requires two distinct rendering contexts: (1) pixel-art game canvas with frame animation, sprite physics, and touch interaction (Phaser.js domain); (2) standard web UI for forms, stat bars, leaderboard tables, and navigation chrome (React domain). Using only Phaser.js for everything would require rebuilding standard HTML form components. Using only React would require a custom canvas engine.</p>
@@ -554,7 +746,7 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Consequences</strong>:</p>
 <ul><li>Positive: Leverages Phaser.js 3&#x27;s mature sprite animation and WebGL rendering (35k+ GitHub stars, active community — BRD §0)</li><li>Positive: React handles accessible form flows, ARIA, and keyboard navigation while Phaser handles canvas</li><li>Positive: Dynamic import of Phaser keeps the initial bundle within the 300 KB gzipped budget (TOTAL_JS_BUNDLE_GZIPPED_KB = 300)</li><li>Negative: Two rendering contexts increase complexity; team must understand both React and Phaser lifecycles</li><li>Negative: Phaser&#x27;s internal game loop must be properly destroyed on React component unmount to prevent memory leaks</li></ul>
 <hr>
-<h3>§3.4 ADR-004: Vue 3 + Element Plus for Admin Portal</h3>
+<h3 id="34-adr-004-vue-3--element-plus-for-admin-portal">§3.4 ADR-004: Vue 3 + Element Plus for Admin Portal</h3>
 <p><strong>Status</strong>: Accepted</p>
 <p><strong>Context</strong>:</p>
 <p>The admin portal is data-dense: paginated tables, complex forms, modals, and chart visualizations. Element Plus provides a production-grade data table with built-in sorting, filtering, and pagination that would require significant custom code in React. The admin portal has no need for Phaser.js, pixel-art design tokens, or the player-app design system.</p>
@@ -564,7 +756,7 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Consequences</strong>:</p>
 <ul><li>Positive: Element Plus&#x27;s <code>el-table</code> handles admin&#x27;s data-density requirements with minimal custom code</li><li>Positive: Vue 3&#x27;s Composition API + Pinia is well-matched to form-heavy admin CRUD interfaces</li><li>Positive: Complete isolation prevents admin CSS from bleeding into the pixel-art game UI</li><li>Negative: Team must maintain proficiency in both React (player app) and Vue 3 (admin portal)</li><li>Negative: Shared domain types must be carefully versioned in the <code>shared</code> package to prevent divergence</li></ul>
 <hr>
-<h3>§3.5 ADR-005: Node.js/Fastify over Go/Fiber</h3>
+<h3 id="35-adr-005-nodejsfastify-over-gofiber">§3.5 ADR-005: Node.js/Fastify over Go/Fiber</h3>
 <p><strong>Status</strong>: Accepted</p>
 <p><strong>Context</strong>:</p>
 <p>Go/Fiber was evaluated for the arena service due to higher goroutine concurrency efficiency. At the projected load of PEAK_OPERATION_RPS = 500 RPS and PEAK_CONCURRENT_USERS = 2,000, Go would offer a measurable throughput advantage per core.</p>
@@ -574,7 +766,7 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Consequences</strong>:</p>
 <ul><li>Positive: TypeScript types and Zod schemas shared across frontend and backend without re-definition</li><li>Positive: Fastify&#x27;s plugin system cleanly separates game API and admin API as two plugins in one process</li><li>Positive: Smaller team can maintain one language stack instead of two</li><li>Negative: Node.js thread model limits CPU-intensive operations (pet generation for large batches); mitigated via worker threads for batch generation (PET_GENERATION_CONCURRENT_BATCH = 1,000 pets in PET_GENERATION_CONCURRENT_BATCH_TIME_SECONDS = 10s target)</li><li>Negative: If load exceeds 500 RPS peak sustained, a Go microservice split may be required for the arena service</li></ul>
 <hr>
-<h3>§3.6 ADR-006: PostgreSQL + Redis Dual Storage</h3>
+<h3 id="36-adr-006-postgresql--redis-dual-storage">§3.6 ADR-006: PostgreSQL + Redis Dual Storage</h3>
 <p><strong>Status</strong>: Accepted</p>
 <p><strong>Context</strong>:</p>
 <p>Two data access patterns exist with conflicting requirements: (1) Leaderboard reads must be O(log N) sorted-set operations at ≤ 30-second update lag (LEADERBOARD_UPDATE_LAG_MAX_SECONDS = 30) with sub-millisecond ranking queries. (2) Pet ownership, battle history, GDPR compliance, and audit logging require ACID transactions, foreign key integrity, and point-in-time recovery.</p>
@@ -585,7 +777,7 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Consequences</strong>:</p>
 <ul><li>Positive: Leaderboard ZRANGEBYSCORE is O(log N + M) — scales to millions of entries without query degradation</li><li>Positive: Redis TTL-based rate limiting requires no background cleanup jobs (TTL expiry is automatic)</li><li>Positive: Upstash serverless Redis has no fixed monthly cost floor — pay-per-request matches MVP budget discipline</li><li>Negative: Two stores to monitor, back up, and reason about during incidents</li><li>Negative: Leaderboard reconstruction from PostgreSQL snapshots after full Redis flush may exceed 30s during peak load (OQ-E06 — explicit SLA and drill required)</li></ul>
 <hr>
-<h3>§3.7 ADR-007: Feature Flag Strategy (FF_MARKETPLACE)</h3>
+<h3 id="37-adr-007-feature-flag-strategy-ff_marketplace">§3.7 ADR-007: Feature Flag Strategy (FF_MARKETPLACE)</h3>
 <p><strong>Status</strong>: Accepted (implementation approach partially open — OQ-E07)</p>
 <p><strong>Context</strong>:</p>
 <p>The marketplace (Phase 3 — F-TRADE-01) requires DAU &gt; 1,000 sustained for 2 weeks before activation (DAU_MARKETPLACE_TRIGGER = 1,000). The sumo arena mode (F-ARENA-02) is P1 scope. The admin portal itself is behind <code>FF_ADMIN_PORTAL</code> during alpha.</p>
@@ -611,8 +803,8 @@ Value: &quot;1&quot;</code></pre>
 <p><strong>Consequences</strong>:</p>
 <ul><li>Positive: Environment variable flags require no additional infrastructure in Phase 1-2</li><li>Positive: Marketplace code ships in Phase 1-2 builds (behind the flag) — no feature-branch divergence</li><li>Negative: Environment variable flags cannot support per-user gradual rollout or A/B targeting without a third-party flag service</li><li>Negative: Flag state is not visible in the admin portal until a feature flag management module is added</li></ul>
 <hr>
-<h2>§4. Data Flow Diagrams</h2>
-<h3>§4.1 Pet Claim Flow</h3>
+<h2 id="4-data-flow-diagrams">§4. Data Flow Diagrams</h2>
+<h3 id="41-pet-claim-flow">§4.1 Pet Claim Flow</h3>
 <pre><code class="">Guest Browser                  Game API (Fastify)          PostgreSQL       Redis         SendGrid
      │                               │                          │               │               │
      │  GET /api/v1/pets/random       │                          │               │               │
@@ -667,7 +859,7 @@ Value: &quot;1&quot;</code></pre>
      │                               │                          │               │               │
      │  [Player bookmarks petUrl]    │                          │               │               │</code></pre>
 <hr>
-<h3>§4.2 Arena Battle Flow</h3>
+<h3 id="42-arena-battle-flow">§4.2 Arena Battle Flow</h3>
 <pre><code class="">Pet Owner Browser              Game API                    PostgreSQL       Redis
      │                               │                          │               │
      │  POST /api/v1/arena/enter     │                          │               │
@@ -734,7 +926,7 @@ Value: &quot;1&quot;</code></pre>
      │  HTTP 408 MATCHMAKING_TIMEOUT │                          │               │
      │&lt;──────────────────────────────│ [Rate limit NOT incremented on timeout]   │</code></pre>
 <hr>
-<h3>§4.3 Leaderboard Update Flow</h3>
+<h3 id="43-leaderboard-update-flow">§4.3 Leaderboard Update Flow</h3>
 <pre><code class="">Arena Match Completion         Game API                    PostgreSQL       Redis
 (Post-battle write path)            │                          │               │
      │                               │                          │               │
@@ -772,7 +964,7 @@ GET /api/v1/leaderboard        │                          │               �
      │  {entries[100], degraded=true}│                          │               │
      │&lt;──────────────────────────────│                          │               │</code></pre>
 <hr>
-<h3>§4.4 GDPR Erasure Flow</h3>
+<h3 id="44-gdpr-erasure-flow">§4.4 GDPR Erasure Flow</h3>
 <pre><code class="">Pet Owner Browser              Game API                    PostgreSQL       Redis
      │                               │                          │               │
      │  POST /api/v1/gdpr/request    │                          │               │
@@ -801,8 +993,8 @@ GET /api/v1/leaderboard        │                          │               �
      │                               │ [email_hash retained for anti-re-registration]
      │                               │ [pets rows retained with owner_token_hash NULL]</code></pre>
 <hr>
-<h2>§5. Security Architecture</h2>
-<h3>§5.1 Authentication and Authorization Model</h3>
+<h2 id="5-security-architecture">§5. Security Architecture</h2>
+<h3 id="51-authentication-and-authorization-model">§5.1 Authentication and Authorization Model</h3>
 <p><strong>Player Identity Layer</strong>:</p>
 <p>Players have no accounts. Identity is established by possession of a 32-byte URL-safe base64 pet access token. The token is:</p>
 <ol><li>Generated once via <code>crypto.randomBytes(32)</code> at claim completion</li><li>Transmitted exactly once (in the pet URL reveal screen)</li><li>Never stored in plaintext — only its SHA-256 hash in <code>pets.owner_token_hash</code></li><li>Verified on every authenticated request by hashing the received token and comparing to the stored hash</li><li>Passed as <code>Authorization: Bearer &lt;token&gt;</code> header or <code>?token=</code> query parameter</li></ol>
@@ -821,7 +1013,7 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td><code>read_only</code></td><td>GET-only access to dashboard, pet list, leaderboard, battle records, email monitor, analytics</td></tr>
 </table>
 <hr>
-<h3>§5.2 Token Security</h3>
+<h3 id="52-token-security">§5.2 Token Security</h3>
 <table>
 <tr><th>Token</th><th>Entropy</th><th>Storage</th><th>Transmission</th><th>Revocation</th></tr>
 <tr><td>Pet access token</td><td>32 bytes (PET_ACCESS_TOKEN_MIN_BYTES = 32)</td><td>SHA-256 hash only in <code>pets.owner_token_hash</code></td><td>Once in pet URL; thereafter in <code>Authorization</code> header</td><td><code>owner_token_hash = NULL</code> by admin or recovery</td></tr>
@@ -832,7 +1024,7 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>Anti-enumeration</strong>: <code>POST /api/v1/claim/recover</code> always returns HTTP 200 with a synthetic <code>claimId</code> regardless of whether the email/petId combination is valid. This prevents an attacker from enumerating valid pet-owner email pairs.</p>
 <p><strong>Email OTP design</strong>: The claim email contains ONLY the 6-digit numeric code — no clickable link. This mitigates pre-scanning attacks where email clients (Gmail, Outlook) auto-fetch URLs and could inadvertently trigger claim.</p>
 <hr>
-<h3>§5.3 Rate Limiting Architecture</h3>
+<h3 id="53-rate-limiting-architecture">§5.3 Rate Limiting Architecture</h3>
 <p>All rate limits are enforced by Redis counters with automatic TTL expiry. If Redis is unavailable, rate limits on player endpoints are not enforced (logged as alert). OTP code entry is fail-closed (entry blocked on Redis unavailability).</p>
 <table>
 <tr><th>Endpoint</th><th>Limit</th><th>Window</th><th>Key Pattern</th></tr>
@@ -847,7 +1039,7 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>Leaderboard Ban Reflection</strong>: When a ban is applied via <code>POST /admin/api/pets/:petId/ban</code>, the banned pet must be removed from <code>leaderboard:global</code> (ZREM) within 5 minutes (LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5). This SLA is enforced as a synchronous ZREM in the ban transaction, not a background job.</p>
 <p><strong>Moderation Reason</strong>: All admin ban/unban/flag operations require a reason field with a maximum of 500 characters (ADMIN_MODERATION_REASON_MAX_CHARS = 500). The reason is stored in the <code>audit_logs.detail</code> JSONB field and validated at the API boundary.</p>
 <hr>
-<h3>§5.4 GDPR Compliance Architecture</h3>
+<h3 id="54-gdpr-compliance-architecture">§5.4 GDPR Compliance Architecture</h3>
 <p><strong>Data Minimization</strong>:</p>
 <ul><li>Raw email is held in memory only during the claim transaction. Database stores only: AES-256-GCM ciphertext (<code>email_encrypted</code>) and SHA-256 hash (<code>email_hash</code>) for lookup.</li><li>IP addresses are hashed on ingress. Raw IP never written to any log or database column. Hashed IP retained 90 days (IP_ADDRESS_LOG_RETENTION_DAYS = 90).</li><li>The <code>pets.claim_identity_id</code> FK is the durable link between a pet and its owner&#x27;s identity record — maintained after <code>claim_codes</code> records are purged (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h).</li></ul>
 <p><strong>GDPR SLA Table</strong>:</p>
@@ -864,7 +1056,7 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>CAN-SPAM</strong>: All emails are transactional. No marketing email without separate explicit opt-in. Claim and recovery emails contain ONLY the 6-digit code — no promotional content.</p>
 <p><strong>Audit Log</strong>: All admin actions (mutations, GDPR operations, role changes) written to <code>audit_logs</code> with actor ID, action type, target entity, reason, and timestamp. Retention: ADMIN_AUDIT_LOG_RETENTION_YEARS = 2 years. Search response time for any 12-month window: ≤ 3 seconds (ADMIN_AUDIT_LOG_SEARCH_RESPONSE_TIME_SECONDS = 3).</p>
 <hr>
-<h3>§5.5 Transport and Header Security</h3>
+<h3 id="55-transport-and-header-security">§5.5 Transport and Header Security</h3>
 <p><strong>TLS</strong>: Minimum TLS 1.2 at the API gateway; TLS 1.3 preferred (PRD NFR-SEC-06). TLS termination at the Nginx/Vercel Edge layer per §1.2 diagram. Downgrade to HTTP never permitted.</p>
 <p><strong>Security Response Headers</strong> (set on all API and frontend responses):</p>
 <table>
@@ -878,8 +1070,8 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>Content Security Policy</strong> (PRD NFR-SEC-08):</p>
 <ul><li>Phase 1-2: <code>default-src &#x27;self&#x27;; script-src &#x27;self&#x27; &#x27;unsafe-inline&#x27;</code> — <strong>accepted deviation from PRD NFR-SEC-08</strong> (<code>unsafe-inline</code> required by Phaser.js canvas rendering in Phase 1-2). Risk accepted: script injection surface is limited by Phaser.js&#x27;s inline canvas model; all other NFR-SEC controls (TLS, HSTS, token hashing) remain enforced. Deviation documented as accepted risk in the project risk register.</li><li>Phase 3 hardening: nonce-based CSP (<code>script-src &#x27;self&#x27; &#x27;nonce-{RANDOM}&#x27;</code>) with no <code>unsafe-inline</code> eliminates the deviation (EDD §13.3)</li></ul>
 <hr>
-<h2>§6. Scalability and Reliability</h2>
-<h3>§6.1 Horizontal Scaling Strategy</h3>
+<h2 id="6-scalability-and-reliability">§6. Scalability and Reliability</h2>
+<h3 id="61-horizontal-scaling-strategy">§6.1 Horizontal Scaling Strategy</h3>
 <p><strong>API Layer</strong>:</p>
 <ul><li>Game API: minimum 2 replicas at all times (HA), autoscale on CPU ≥ 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70)</li><li>Railway autoscaling or Kubernetes HPA handles scale-out</li><li>Baseline per-replica: 512 MB RAM, 0.5 CPU; burst ceiling: 2 GB RAM, 2 CPU (EDD §10.2 infrastructure constraints)</li><li>All replicas are stateless (no in-process session state; all state in Redis or PostgreSQL)</li></ul>
 <p><strong>Statelessness Guarantee</strong>:</p>
@@ -891,7 +1083,7 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>Database Read Scaling</strong>:</p>
 <p>Read replica handles: leaderboard queries, public pet page reads, admin list views. Primary writer handles: all inserts and updates. Connection pool: minimum 20 (DB_CONNECTION_POOL_MIN_CONNECTIONS = 20), burst maximum 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS = 50).</p>
 <hr>
-<h3>§6.2 Database Reliability (Supabase)</h3>
+<h3 id="62-database-reliability-supabase">§6.2 Database Reliability (Supabase)</h3>
 <table>
 <tr><th>Aspect</th><th>Specification</th><th>Constant</th></tr>
 <tr><td>Automated failover</td><td>≤ 60 seconds to promote read replica</td><td>DB_AUTOFAILOVER_TIME_SECONDS = 60</td></tr>
@@ -903,7 +1095,7 @@ GET /api/v1/leaderboard        │                          │               �
 </table>
 <p><strong>Vendor Migration Contingency</strong>: Documented 14-day migration plan exists for moving PostgreSQL hosting to AWS RDS if Supabase availability SLAs are breached (VENDOR_MIGRATION_PLAN_DAYS = 14).</p>
 <hr>
-<h3>§6.3 Redis Reliability (Upstash)</h3>
+<h3 id="63-redis-reliability-upstash">§6.3 Redis Reliability (Upstash)</h3>
 <p><strong>Upstash Durability</strong>: Upstash provides built-in persistence across its serverless Redis infrastructure.</p>
 <p><strong>Leaderboard Reconstruction</strong>:</p>
 <p>On full Redis flush, the leaderboard sorted set is reconstructed from the most recent <code>leaderboard_snapshots</code> PostgreSQL entry (top 500 entries). This reconstruction path is tested in the staging environment. The reconstruction SLA under peak load (OQ-E06) is an open question requiring explicit drill and measurement before GA.</p>
@@ -916,7 +1108,7 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td>Partial key loss</td><td>Individual rate-limit counters lost (brief period of un-rate-limited access); blacklisted tokens briefly re-accessible (brief window)</td><td>Session tokens for logged-in admins lost (re-login required)</td></tr>
 </table>
 <hr>
-<h3>§6.4 Email Reliability</h3>
+<h3 id="64-email-reliability">§6.4 Email Reliability</h3>
 <p><strong>Dual-Provider Architecture</strong>:</p>
 <pre><code class="">Request to send email
          │
@@ -938,8 +1130,8 @@ GET /api/v1/leaderboard        │                          │               �
 <ul><li>Delivery success rate ≥ 98% (CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98)</li><li>P90 delivery latency ≤ 60 seconds (EMAIL_DELIVERY_P90_SECONDS)</li><li>Email delivery failure rate alert fires at &gt; 2% over 30-minute window (EMAIL_DELIVERY_FAILURE_RATE_MAX_PERCENT = 2; OBSERVABILITY_EMAIL_FAILURE_ALERT_WINDOW_MINUTES = 30)</li><li>Spam complaint rate &lt; 0.1% (SPAM_COMPLAINT_RATE_MAX_PERCENT = 0.1)</li></ul>
 <p><strong>Monthly Capacity</strong>: SendGrid plan ceiling 10,000 emails/month (EMAIL_SENDGRID_MONTHLY_LIMIT = 10,000). Upgrade trigger when projected monthly volume approaches this cap.</p>
 <hr>
-<h2>§7. Deployment Architecture</h2>
-<h3>§7.1 Infrastructure Overview</h3>
+<h2 id="7-deployment-architecture">§7. Deployment Architecture</h2>
+<h3 id="71-infrastructure-overview">§7.1 Infrastructure Overview</h3>
 <table>
 <tr><th>Component</th><th>Service</th><th>Configuration</th></tr>
 <tr><td>Player App (static)</td><td>Vercel — Global CDN</td><td>Vite build, auto-deploy from <code>main</code> branch</td></tr>
@@ -955,20 +1147,40 @@ GET /api/v1/leaderboard        │                          │               �
 </table>
 <p><strong>Monthly Infrastructure Cost at DAU ≤ 5,000</strong>: $50–$200 (SERVER_COST_DAU5K_MONTHLY_MIN_USD = 50; SERVER_COST_DAU5K_MONTHLY_MAX_USD = 200). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000).</p>
 <hr>
-<h3>§7.2 CI/CD Pipeline</h3>
-<div class="umock__card"><div class="umock__card-title">GitHub Actions — test job</div><div class="umock__info">GitHub Actions — test job 1. pnpm install (all workspaces) 2. pnpm run type-check (TypeScript 5 strict) 3. pnpm run lint (ESLint — max-lines=800, max-lines-per-function=50) │  4. pnpm run test:unit (Vitest, min 80% coverage — UNIT_TEST_COVERAGE_MIN_PERCENT) 5. pnpm run test:integration (Vitest + test PostgreSQL + test Redis) └──────────────────────────┬───────────────────────────────────────────┘ │ [tests pass]</div><div class="umock__field"><label class="umock__field-label">▼</label><div class="umock__field-body"><pre class="umock__code"><code class="">  GitHub Actions — build job
-  1. pnpm run build (Vite — player-app, admin-app)
-  2. docker build --target runtime (node:20-alpine multi-stage)
-  3. docker push ghcr.io/pixel-pet-arena/api:sha-{commit}</code></pre></div></div><div class="umock__info">│ [build succeeds]  [on: push to main only]</div><div class="umock__field"><label class="umock__field-label">▼</label><div class="umock__field-body"><pre class="umock__code"><code class="">  GitHub Actions — deploy-staging job
-  1. Deploy API image to Railway (staging environment)
-  2. pnpm run db:migrate --env staging (node-pg-migrate, idempotent)
-  3. Deploy player-app build to Vercel (staging)
-  4. Deploy admin-app build to Vercel (staging)
-  5. Run Playwright smoke tests (key user flows)</code></pre></div></div><div class="umock__info">│ [staging healthy]  [manual approval gate] ▼ ┌──────────────────────────────────────────────────────────────────────┐ GitHub Actions — deploy-production job 1. Deploy API image to Railway (production) 2. pnpm run db:migrate --env production 3. Deploy player-app and admin-app to Vercel (production) 4. Run Playwright smoke tests (production URLs) 5. Notify Slack channel on success / failure</div></div>
+<h3 id="72-cicd-pipeline">§7.2 CI/CD Pipeline</h3>
+<pre class="mermaid">graph TD
+  N0[&quot;GitHub Repository&quot;]
+  N1[&quot;git push to main / pull_request&quot;]
+  N2[&quot;▼&quot;]
+  N3[&quot;GitHub Actions — test job&quot;]
+  N4[&quot;1. pnpm install (all workspaces)&quot;]
+  N5[&quot;2. pnpm run type-check (TypeScript 5 strict)&quot;]
+  N6[&quot;3. pnpm run lint (ESLint — max-lines=800, max-lines-per-function=50)&quot;]
+  N7[&quot;4. pnpm run test:unit (Vitest, min 80% coverage — UNIT_TEST_COVERAGE_MIN_PERCENT)&quot;]
+  N8[&quot;5. pnpm run test:integration (Vitest + test PostgreSQL + test Redis)&quot;]
+  N9[&quot;[tests pass]&quot;]
+  N10[&quot;GitHub Actions — build job&quot;]
+  N11[&quot;1. pnpm run build (Vite — player-app, admin-app)&quot;]
+  N12[&quot;2. docker build --target runtime (node:20-alpine multi-stage)&quot;]
+  N13[&quot;3. docker push ghcr.io/pixel-pet-arena/api:sha-{commit}&quot;]
+  N14[&quot;[build succeeds]  [on: push to main only]&quot;]
+  N15[&quot;GitHub Actions — deploy-staging job&quot;]
+  N16[&quot;1. Deploy API image to Railway (staging environment)&quot;]
+  N17[&quot;2. pnpm run db:migrate --env staging (node-pg-migrate, idempotent)&quot;]
+  N18[&quot;3. Deploy player-app build to Vercel (staging)&quot;]
+  N19[&quot;4. Deploy admin-app build to Vercel (staging)&quot;]
+  N20[&quot;5. Run Playwright smoke tests (key user flows)&quot;]
+  N21[&quot;[staging healthy]  [manual approval gate]&quot;]
+  N22[&quot;GitHub Actions — deploy-production job&quot;]
+  N23[&quot;1. Deploy API image to Railway (production)&quot;]
+  N24[&quot;2. pnpm run db:migrate --env production&quot;]
+  N25[&quot;3. Deploy player-app and admin-app to Vercel (production)&quot;]
+  N26[&quot;4. Run Playwright smoke tests (production URLs)&quot;]
+  N27[&quot;5. Notify Slack channel on success / failure&quot;]</pre>
 <p><strong>Key CI Quality Gates</strong>:</p>
 <ul><li>Unit test coverage minimum 80% (UNIT_TEST_COVERAGE_MIN_PERCENT = 80)</li><li>Module line limit 800 (CODE_MODULE_MAX_LINES = 800); function line limit 50 (CODE_FUNCTION_MAX_LINES = 50) — enforced by ESLint, CI fails on violation</li><li><code>EXPLAIN ANALYZE</code> gate for any new query touching tables &gt; 10k rows</li><li>Playwright E2E visual regression at breakpoints 320, 768, 1024, 1440px</li></ul>
 <hr>
-<h3>§7.3 Environment Strategy</h3>
+<h3 id="73-environment-strategy">§7.3 Environment Strategy</h3>
 <table>
 <tr><th>Environment</th><th>Purpose</th><th>Database</th><th>Redis</th><th>Deployment Trigger</th></tr>
 <tr><td><code>development</code></td><td>Local dev</td><td>PostgreSQL (Docker Compose)</td><td>Redis (Docker Compose)</td><td>Manual (<code>pnpm dev</code>)</td></tr>
@@ -980,8 +1192,8 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>Feature Flag Promotion</strong>:</p>
 <ul><li><code>FF_MARKETPLACE</code> promoted from <code>false</code> to <code>true</code> in production when DAU &gt; 1,000 sustained for 2 weeks (DAU_MARKETPLACE_TRIGGER = 1,000) — environment variable change, no redeployment required; config cache propagates within CONFIG_CACHE_REFRESH_TIME_MINUTES = 5 minutes</li></ul>
 <hr>
-<h2>§8. Cross-Cutting Concerns</h2>
-<h3>§8.1 Logging and Observability</h3>
+<h2 id="8-cross-cutting-concerns">§8. Cross-Cutting Concerns</h2>
+<h3 id="81-logging-and-observability">§8.1 Logging and Observability</h3>
 <p><strong>Structured Logging</strong>:</p>
 <ul><li>Engine: <code>pino</code> (Fastify&#x27;s native logger) — all logs emitted as JSON</li><li>Correlation: <code>X-Request-Id</code> header generated at API gateway, threaded through all log entries for a request</li><li>Log levels: ERROR (unhandled exceptions), WARN (rate limit breaches, Redis unavailable), INFO (request lifecycle, claim events), DEBUG (disabled in production)</li><li>Transport: JSON logs → Railway log drain → Datadog (or equivalent external aggregator)</li></ul>
 <p><strong>PII in Logs — Hard Rules</strong>:</p>
@@ -1022,7 +1234,7 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td>Spam complaint rate</td><td>&lt; 0.1%</td><td>SPAM_COMPLAINT_RATE_MAX_PERCENT</td></tr>
 </table>
 <hr>
-<h3>§8.2 Error Handling Strategy</h3>
+<h3 id="82-error-handling-strategy">§8.2 Error Handling Strategy</h3>
 <p><strong>API Error Envelope</strong>:</p>
 <p>All API errors return a consistent envelope:</p>
 <pre><code class="language-json">{
@@ -1042,7 +1254,7 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>Circuit Breaking Posture</strong>:</p>
 <ul><li>Redis unavailability: rate limits degrade gracefully (not enforced, alerted); OTP entry fails closed; leaderboard falls back to PostgreSQL</li><li>SendGrid failure: Nodemailer SMTP activates after SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3 consecutive failures</li><li>PostgreSQL primary failure: automated failover to read replica within DB_AUTOFAILOVER_TIME_SECONDS = 60 seconds; write operations return HTTP 503 during failover window</li></ul>
 <hr>
-<h3>§8.3 Configuration Management</h3>
+<h3 id="83-configuration-management">§8.3 Configuration Management</h3>
 <p><strong>Constants Governance</strong>:</p>
 <p>All numeric constants originate from <code>CONSTANTS-PIXEL-PET-ARENA-20260503</code> (constants.json). No magic numbers appear in implementation code. The <code>packages/shared/constants.ts</code> file is the single source of truth for all constant values in TypeScript, auto-generated from <code>constants.json</code> at build time. Any change to a business constant requires updating <code>constants.json</code> first and propagating through all downstream documents.</p>
 <p><strong>Runtime-Tunable Parameters</strong> (admin-configurable via <code>PUT /admin/api/config/runtime</code>):</p>
@@ -1056,7 +1268,7 @@ GET /api/v1/leaderboard        │                          │               �
 <hr>
 <p><em>This ARCH document is the authoritative system architecture specification for pixel-pet-arena. All implementation must reference and comply with this document. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 (constants.json). Conflicts between this ARCH and upstream EDD/PRD/PDD shall be resolved by filing an Engineering Change Request (ECR) against the relevant upstream document.</em></p>
 <hr>
-<h2>§9. 高可用設計</h2>
+<h2 id="9-高可用設計">§9. 高可用設計</h2>
 <p>Pixel Pet Arena targets 99.9% monthly availability (CONSTANTS: Availability). The following design decisions support this target:</p>
 <table>
 <tr><th>Component</th><th>HA Strategy</th><th>RTO</th><th>RPO</th></tr>
@@ -1068,18 +1280,18 @@ GET /api/v1/leaderboard        │                          │               �
 </table>
 <p><strong>Maintenance windows</strong>: Max 2 hours/month (CONSTANTS: DB_MAINTENANCE_WINDOW_MAX), 48h advance notice required.</p>
 <hr>
-<h2>§10. 災難恢復（DR）</h2>
-<h3>§10.1 Backup Strategy</h3>
+<h2 id="10-災難恢復dr">§10. 災難恢復（DR）</h2>
+<h3 id="101-backup-strategy">§10.1 Backup Strategy</h3>
 <table>
 <tr><th>Data</th><th>Backup Frequency</th><th>Retention</th><th>Location</th></tr>
 <tr><td>PostgreSQL (all tables)</td><td>Daily automated snapshot (Supabase)</td><td>7 days</td><td>Supabase managed</td></tr>
 <tr><td>Redis leaderboard</td><td>Upstash built-in durability (AOF)</td><td>Real-time</td><td>Upstash</td></tr>
 <tr><td>Pet sprites / static assets</td><td>Versioned via git + Vercel deployment</td><td>Indefinite</td><td>Vercel CDN</td></tr>
 </table>
-<h3>§10.2 Recovery Procedures</h3>
+<h3 id="102-recovery-procedures">§10.2 Recovery Procedures</h3>
 <ul><li><strong>Database restore</strong>: Supabase point-in-time recovery; rebuild Redis from <code>leaderboard_snapshots</code> table if needed</li><li><strong>Redis rebuild SLA</strong>: Full leaderboard rebuild from PostgreSQL within 60 seconds at normal load</li><li><strong>Full disaster recovery test</strong>: Quarterly; simulate DB restore + Redis rebuild; document results in runbook</li></ul>
 <hr>
-<h2>§11. 技術棧全覽</h2>
+<h2 id="11-技術棧全覽">§11. 技術棧全覽</h2>
 <table>
 <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Rationale</th></tr>
 <tr><td>Frontend</td><td>Next.js + Phaser 3</td><td>Next 14 / Phaser 3.60</td><td>SSR for SEO; Canvas 2D for pet animation ≥ 30 FPS</td></tr>
@@ -1092,8 +1304,8 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td>CDN</td><td>Vercel Edge</td><td>—</td><td>Static assets + sprite sheets; global edge caching</td></tr>
 </table>
 <hr>
-<h2>§12. Observability 架構</h2>
-<h3>§12.1 Metrics (RED Method)</h3>
+<h2 id="12-observability-架構">§12. Observability 架構</h2>
+<h3 id="121-metrics-red-method">§12.1 Metrics (RED Method)</h3>
 <table>
 <tr><th>Metric</th><th>Tool</th><th>Alert Threshold</th><th>CONSTANTS Reference</th></tr>
 <tr><td>Request Rate</td><td>Datadog</td><td>—</td><td>—</td></tr>
@@ -1103,12 +1315,12 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td>Redis memory</td><td>Upstash + Datadog</td><td>&gt; 80%</td><td>INFRA_REDIS_ALERT_THRESHOLD</td></tr>
 <tr><td>DB connection pool</td><td>Supabase + Datadog</td><td>&gt; 80%</td><td>INFRA_DB_POOL_ALERT_THRESHOLD</td></tr>
 </table>
-<h3>§12.2 Logs</h3>
+<h3 id="122-logs">§12.2 Logs</h3>
 <p>Structured JSON logs from all services. Fields: <code>timestamp</code>, <code>level</code>, <code>service</code>, <code>trace_id</code>, <code>event</code>, <code>duration_ms</code>. PII (email, IP) never logged raw — hashed only.</p>
-<h3>§12.3 Traces</h3>
+<h3 id="123-traces">§12.3 Traces</h3>
 <p><code>X-Trace-ID</code> header propagated across all boundaries. Used for debugging arena battle E2E latency (SLA: &lt; 2s per CONSTANTS: <code>Arena Battle Result E2E</code>).</p>
 <hr>
-<h2>§13. 外部依賴地圖</h2>
+<h2 id="13-外部依賴地圖">§13. 外部依賴地圖</h2>
 <table>
 <tr><th>Service</th><th>Provider</th><th>Criticality</th><th>Failover</th><th>SLA</th></tr>
 <tr><td>Database</td><td>Supabase</td><td>CRITICAL</td><td>Read replica (manual)</td><td>99.9%</td></tr>
@@ -1121,7 +1333,7 @@ GET /api/v1/leaderboard        │                          │               �
 </table>
 <p><strong>Vendor migration plan</strong>: 14 days (CONSTANTS: VENDOR_MIGRATION_PLAN_DAYS) for SendGrid → alternative SMTP or PostgreSQL → alternative managed DB.</p>
 <hr>
-<h2>§14. Architecture Decision Records</h2>
+<h2 id="14-architecture-decision-records">§14. Architecture Decision Records</h2>
 <table>
 <tr><th>ADR #</th><th>Title</th><th>Status</th><th>Decision</th></tr>
 <tr><td>ADR-001</td><td>Use Supabase (managed PostgreSQL) over self-hosted</td><td>Accepted</td><td>Reduces ops burden for MVP; acceptable vendor lock-in at DAU ≤ 5k</td></tr>
@@ -1133,16 +1345,16 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td>ADR-007</td><td>Email-based passwordless auth over OAuth</td><td>Accepted</td><td>PRD requirement; reduces friction; no third-party OAuth vendor risk</td></tr>
 </table>
 <hr>
-<h2>§15. 架構審查檢查清單</h2>
-<h3>§15.1 安全性</h3>
+<h2 id="15-架構審查檢查清單">§15. 架構審查檢查清單</h2>
+<h3 id="151-安全性">§15.1 安全性</h3>
 <ul><li style="list-style:none"><input type="checkbox" checked disabled> 所有 API 端點有 authentication guard（admin routes + user routes）</li><li style="list-style:none"><input type="checkbox" checked disabled> Rate limiting 實作在 NestJS middleware（Redis 計數器）</li><li style="list-style:none"><input type="checkbox" checked disabled> SQL injection 防護：使用 Prisma ORM（parameterized queries）</li><li style="list-style:none"><input type="checkbox" checked disabled> CSRF 保護：stateless JWT + SameSite cookie</li><li style="list-style:none"><input type="checkbox" checked disabled> Secrets 在 ENV vars；不在 code 或 image 中</li><li style="list-style:none"><input type="checkbox" disabled> Security audit（pre-launch）</li></ul>
-<h3>§15.2 可靠性</h3>
+<h3 id="152-可靠性">§15.2 可靠性</h3>
 <ul><li style="list-style:none"><input type="checkbox" checked disabled> Health check endpoint <code>/health</code>（500ms SLA）</li><li style="list-style:none"><input type="checkbox" checked disabled> Email fallback（SendGrid → SMTP after 3 failures）</li><li style="list-style:none"><input type="checkbox" checked disabled> Database connection pool 設定（min 20 connections）</li><li style="list-style:none"><input type="checkbox" disabled> DR test（quarterly）</li><li style="list-style:none"><input type="checkbox" disabled> Load test at PEAK_OPERATION_RPS = 500</li></ul>
-<h3>§15.3 可觀察性</h3>
+<h3 id="153-可觀察性">§15.3 可觀察性</h3>
 <ul><li style="list-style:none"><input type="checkbox" checked disabled> Structured JSON logging</li><li style="list-style:none"><input type="checkbox" checked disabled> Trace ID propagation</li><li style="list-style:none"><input type="checkbox" checked disabled> Error rate alerting（Sentry + Datadog）</li><li style="list-style:none"><input type="checkbox" disabled> Custom dashboard for MAAPO / DAP metrics（post-launch）</li></ul>
 <hr>
-<h2>§16. Cost Optimization &amp; FinOps</h2>
-<h3>§16.1 MVP Cost Structure (DAU ≤ 5k)</h3>
+<h2 id="16-cost-optimization--finops">§16. Cost Optimization &amp; FinOps</h2>
+<h3 id="161-mvp-cost-structure-dau--5k">§16.1 MVP Cost Structure (DAU ≤ 5k)</h3>
 <table>
 <tr><th>Service</th><th>Monthly Cost</th><th>Tier</th><th>Scale Trigger</th></tr>
 <tr><td>Vercel</td><td>$0–20</td><td>Hobby / Pro</td><td>Edge function invocations &gt; 1M/month</td></tr>
@@ -1154,10 +1366,10 @@ GET /api/v1/leaderboard        │                          │               �
 <tr><td>Datadog</td><td>$15–30</td><td>Free</td><td>Metrics &gt; 500/month</td></tr>
 <tr><td><strong>Total</strong></td><td><strong>$20–125</strong></td><td>—</td><td>Per CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MIN/MAX ($50–200)</td></tr>
 </table>
-<h3>§16.2 Cost Guardrails</h3>
+<h3 id="162-cost-guardrails">§16.2 Cost Guardrails</h3>
 <ul><li>Monthly cost alert at $150 (75% of CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX)</li><li>Auto-scaling limited to Railway horizontal pod expansion (max 3 replicas for MVP)</li></ul>
 <hr>
-<h2>§17. Marketplace Feature 成本影響評估</h2>
+<h2 id="17-marketplace-feature-成本影響評估">§17. Marketplace Feature 成本影響評估</h2>
 <blockquote><p>This section evaluates the cost impact of enabling <code>FF_MARKETPLACE</code> (pet trading feature).</p></blockquote>
 <blockquote><p>Activation trigger: DAU ≥ 1000 sustained 2 weeks (CONSTANTS: DAU_MARKETPLACE_TRIGGER).</p></blockquote>
 <table>
@@ -1170,9 +1382,9 @@ GET /api/v1/leaderboard        │                          │               �
 </table>
 <p><strong>Decision</strong>: Enable FF_MARKETPLACE when DAU ≥ 1000 sustained. Monitor Supabase connection pool utilization; upgrade to Pro tier if &gt; 60%.</p>
 <hr>
-<h2>§18. API Gateway &amp; Service Mesh Architecture</h2>
+<h2 id="18-api-gateway--service-mesh-architecture">§18. API Gateway &amp; Service Mesh Architecture</h2>
 <p>Pixel Pet Arena uses a <strong>direct-call architecture</strong> for MVP (no API gateway or service mesh). All routing is handled by NestJS Router + Vercel Edge.</p>
-<h3>§18.1 Request Flow</h3>
+<h3 id="181-request-flow">§18.1 Request Flow</h3>
 <pre><code class="">User Browser
   → Vercel Edge (CDN / Next.js SSR)
     → NestJS API (/api/v1/*)        [Railway]
@@ -1184,17 +1396,17 @@ Admin Browser
   → Vercel Edge (/admin/*)
     → NestJS API (/api/admin/*)     [Railway, same deployment]
       → Supabase PostgreSQL</code></pre>
-<h3>§18.2 Future API Gateway (Post-GA)</h3>
+<h3 id="182-future-api-gateway-post-ga">§18.2 Future API Gateway (Post-GA)</h3>
 <p>If traffic exceeds PEAK_OPERATION_RPS = 500 or multi-region deployment is required, evaluate:</p>
 <ul><li><strong>Cloudflare Workers</strong> for edge-side rate limiting and geo-routing</li><li><strong>Kong Gateway</strong> for service mesh if microservices are introduced</li></ul>
 <hr>
-<h2>§19. Admin Portal 架構</h2>
+<h2 id="19-admin-portal-架構">§19. Admin Portal 架構</h2>
 <p>The admin portal is deployed as part of the same Next.js application (route: <code>/admin/*</code>). Separation from player routes is enforced at the NestJS authentication layer.</p>
-<h3>§19.1 Admin Authentication</h3>
+<h3 id="191-admin-authentication">§19.1 Admin Authentication</h3>
 <ul><li>Dedicated admin JWT (separate secret from player JWT)</li><li>Session inactivity expiry: 4 hours (CONSTANTS: ADMIN_SESSION_INACTIVITY_EXPIRY)</li><li>Absolute session expiry: 8 hours (CONSTANTS: ADMIN_SESSION_ABSOLUTE_EXPIRY)</li><li>Rate limit: 100 requests/minute per admin (CONSTANTS: ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE)</li></ul>
-<h3>§19.2 Admin API Routes</h3>
+<h3 id="192-admin-api-routes">§19.2 Admin API Routes</h3>
 <p>All admin endpoints are prefixed <code>/api/admin/</code> and guarded by <code>AdminAuthGuard</code>. Response time SLA: 2 seconds for search (up to 1M pet records). See <code>docs/API.md §Admin</code> for full endpoint list.</p>
-<h3>§19.3 Admin Data Access</h3>
+<h3 id="193-admin-data-access">§19.3 Admin Data Access</h3>
 <p>Admin queries hit read replicas where available to reduce load on primary. Audit logs written for all admin moderation actions (retention: 2 years per CONSTANTS: ADMIN_AUDIT_LOG_RETENTION).</p></main>
   </div>
   <script type="module">

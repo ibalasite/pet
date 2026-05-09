@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,60 +334,14 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>VDD — Visual Design Document</h1>
+    <main class="doc-content"><h1 id="vdd--visual-design-document">VDD — Visual Design Document</h1>
 <p>&lt;!-- SDLC Requirements Engineering — Layer 3.5: Visual Design --&gt;</p>
 <p>&lt;!-- Upstream: IDEA.md, BRD.md, PRD.md, PDD.md, CONSTANTS.md --&gt;</p>
 <p>&lt;!-- Answers: What does it look like? What are the visual rules? How does it feel? --&gt;</p>
 <hr>
-<h2>§0 Document Control</h2>
+<h2 id="0-document-control">§0 Document Control</h2>
 <table>
 <tr><th>Field</th><th>Content</th></tr>
 <tr><td><strong>DOC-ID</strong></td><td>VDD-PIXEL-PET-ARENA-20260503</td></tr>
@@ -282,28 +355,28 @@
 <tr><td><strong>Downstream Documents</strong></td><td>EDD.md (Engineering Design), Implementation code</td></tr>
 <tr><td><strong>審閱者 / Reviewers</strong></td><td>Design Lead (Art Director), Product Manager, Frontend Architect</td></tr>
 </table>
-<h3>Version Table</h3>
+<h3 id="version-table">Version Table</h3>
 <table>
 <tr><th>Version</th><th>Date</th><th>Author</th><th>Summary</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (VDD Gen Agent)</td><td>Initial generation from upstream IDEA, BRD, PRD, PDD, CONSTANTS documents</td></tr>
 <tr><td>v1.1</td><td>2026-05-03</td><td>VDD Fix Agent (review-r2)</td><td>Fix 8 findings: purple scale PDD alignment (hue 280), neutral token aliases, competitor table columns, Figma handoff status, component token coverage, brand positioning §1.0, reviewers field, background file sizes</td></tr>
 </table>
-<h3>Downstream Declaration</h3>
+<h3 id="downstream-declaration">Downstream Declaration</h3>
 <p>This VDD is the authoritative visual specification for pixel-pet-arena. All frontend implementation, Figma component design, sprite asset production, and CSS token declarations must reference and comply with this document. Conflicts between this VDD and the PDD §9 Design System Reference shall be resolved by this VDD, which supersedes and extends the PDD design token declarations.</p>
 <hr>
-<h2>Change Log</h2>
+<h2 id="change-log">Change Log</h2>
 <table>
 <tr><th>版本</th><th>日期</th><th>作者</th><th>變更摘要</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (VDD Gen Agent)</td><td>初稿（從 IDEA / BRD / PRD / PDD / CONSTANTS 生成）</td></tr>
 <tr><td>v1.1</td><td>2026-05-03</td><td>VDD Fix Agent (review-r2)</td><td>修復 8 個 findings：purple scale PDD 對齊、neutral token alias、competitor 表格欄位、Figma handoff 狀態、component token 覆蓋率、brand positioning §1.0、reviewers 欄位、background 檔案大小</td></tr>
 </table>
 <hr>
-<h2>Platform Scope Declaration</h2>
+<h2 id="platform-scope-declaration">Platform Scope Declaration</h2>
 <ul><li style="list-style:none"><input type="checkbox" checked disabled> <strong>Web App / SaaS (Browser)</strong> — pixel-pet-arena is implemented as an HTML5 browser application using Phaser.js for canvas rendering and React for UI chrome. It is NOT built on Unity, Cocos2d, or any native game engine. The pixel art aesthetic is rendered via HTML5 Canvas with CSS <code>image-rendering: pixelated</code>.</li><li style="list-style:none"><input type="checkbox" disabled> iOS Native</li><li style="list-style:none"><input type="checkbox" disabled> Android Native</li><li style="list-style:none"><input type="checkbox" disabled> Desktop App (Electron/Tauri)</li><li style="list-style:none"><input type="checkbox" disabled> Unity/Cocos Game Engine</li></ul>
 <p><strong>Platform notes</strong>: The game canvas uses Phaser.js 3 for sprite animation and physics. All UI chrome (navigation, forms, leaderboard, admin portal) is built in React with CSS custom properties. The design system bridges both contexts through shared color tokens and pixel-art visual language.</p>
 <hr>
-<h2>§1 Design Mission</h2>
-<h3>§1.0 Brand Positioning Statement</h3>
+<h2 id="1-design-mission">§1 Design Mission</h2>
+<h3 id="10-brand-positioning-statement">§1.0 Brand Positioning Statement</h3>
 <table>
 <tr><th>Dimension</th><th>Content</th></tr>
 <tr><td><strong>Target Audience</strong></td><td>Competitive browser gamers aged 16–35 who grew up with retro games (Game Boy, GBA, early browser games) and value collectibles with genuine aesthetic craft</td></tr>
@@ -311,13 +384,13 @@
 <tr><td><strong>Brand Promise</strong></td><td>Your pixel pet should look like it belongs in a game that cost $30, not a Flash game from 2005</td></tr>
 <tr><td><strong>Visual Claim</strong></td><td>Dark canvas × hard pixel precision × rarity hierarchy = a collectible that looks worth fighting for</td></tr>
 </table>
-<h4>How Positioning Drives Visual Decisions</h4>
+<h4 id="how-positioning-drives-visual-decisions">How Positioning Drives Visual Decisions</h4>
 <ul><li>&quot;Dark luxury&quot; → primary surface is deep navy (#0d1b2a equiv.), NOT white; dark mode is primary, not an afterthought</li><li>&quot;Pixel precision&quot; → 4px/8px grid enforced, no CSS blur on game UI, hard-edge shadows</li><li>&quot;Rarity hierarchy&quot; → Common/Rare/Epic/Legendary visual system is the single most important visual differentiator; no other element may use these colors out of context</li><li>&quot;Premium quality&quot; → Press Start 2P reserved for game elements; Inter for UI text; never Comic Sans or decorative novelty fonts</li></ul>
 <hr>
-<h3>§1.1 Visual Positioning Statement</h3>
+<h3 id="11-visual-positioning-statement">§1.1 Visual Positioning Statement</h3>
 <p>pixel-pet-arena is visually positioned as the <strong>dark luxury pixel-art game</strong> for a generation that grew up with retro games but lives in modern SaaS. It occupies the intersection of 8-bit/16-bit era nostalgia and contemporary web product quality — where <code>Press Start 2P</code> headlines sit alongside Inter body copy, where pixel-perfect sprites glow with modern <code>oklch</code> color science, and where game mechanics are delivered through a UI that respects both retro aesthetic purity and WCAG 2.1 AA accessibility.</p>
 <p><strong>Differentiation in one line</strong>: While Neopets looks frozen in 2004 and CryptoKitties looks like a blockchain dashboard, pixel-pet-arena looks like a premium collectible game designed today — for players who appreciate craft.</p>
-<h3>§1.2 Design Principles</h3>
+<h3 id="12-design-principles">§1.2 Design Principles</h3>
 <p><strong>Principle 1 — Pixel Art Purity Without Compromise</strong></p>
 <p>Every UI element — buttons, cards, modals, stat bars, badges — must read as part of the pixel-art game world. No generic Material Design defaults, no unstyled Tailwind components, no antialiased rounded-corner SaaS chrome. Pixel borders are hard (<code>border-radius: 0px</code>). Shadows are hard-offset (<code>4px 4px 0px</code>). The UI must feel like the game spawned its own interface, not like a web app bolted onto a game.</p>
 <blockquote><p><strong>DO</strong>: Use 4px grid snapping, hard 4px box-shadow offset on interactive elements, integer pixel values only.</p></blockquote>
@@ -336,7 +409,7 @@
 <blockquote><p><strong>DON&#x27;T</strong>: Animate layout-affecting properties (width/height/position); reserve spring animations for delight, not all interactions.</p></blockquote>
 <p><strong>Principle 5 — Accessibility as Competitive Advantage</strong></p>
 <p>Focus rings are gold (<code>#ffd700</code>) — they look intentional. Contrast ratios exceed minimums — <code>--color-text-primary</code> achieves 12.4:1 on the dark base. Reduced-motion fallbacks are designed, not omitted. Accessibility is not compliance; it is craftsmanship that signals product quality to the developer and enthusiast early-adopter community.</p>
-<h3>§1.3 Competitor Visual Differentiation Table</h3>
+<h3 id="13-competitor-visual-differentiation-table">§1.3 Competitor Visual Differentiation Table</h3>
 <table>
 <tr><th>Competitor</th><th>Visual Direction</th><th>Key Visual Weakness</th><th>Our Differentiation</th><th>Primary Color (hex)</th><th>Font Style</th><th>UI Density</th></tr>
 <tr><td><strong>Neopets</strong></td><td>Bright primary colors, Comic Sans-era typography, Flash-era UI chrome, inconsistent icon styles</td><td>Frozen in 2004; heavy visual clutter; no coherent design system; poor mobile adaptation</td><td>Dark luxury direction; coherent pixel-art design system; modern typography pairing; mobile-first responsive</td><td><code>#00AAFF</code> (bright blue)</td><td>Comic Sans-adjacent, rounded decorative</td><td>High, cluttered</td></tr>
@@ -345,18 +418,18 @@
 <tr><td><strong>Tamagotchi (Official App)</strong></td><td>Cute rounded pastel, device-chrome skeuomorphic, retro LCD simulation</td><td>Device-locked mental model; childish palette limits adult appeal; no competitive visual hierarchy</td><td>Competitive dark tone; adult-appropriate luxury direction; rarity hierarchy as status symbol</td><td><code>#E91E8C</code> (pink)</td><td>Rounded sans, Nunito</td><td>Low, toy-like</td></tr>
 <tr><td><strong>Axie Infinity</strong></td><td>Fantasy game art meets DeFi dashboard; over-produced 3D art; crypto-first UX</td><td>Steep visual complexity; intimidating for casual players; financial dashboard in game wrapper</td><td>Approachable pixel-art simplicity; clean information hierarchy; zero financial-product vocabulary</td><td><code>#00C0FF</code> (cyan)</td><td>Bold futuristic, custom</td><td>Medium-high, dashboard</td></tr>
 </table>
-<h3>§1.4 Visual Hierarchy Rules</h3>
-<h4>Scale Contrast Rules</h4>
+<h3 id="14-visual-hierarchy-rules">§1.4 Visual Hierarchy Rules</h3>
+<h4 id="scale-contrast-rules">Scale Contrast Rules</h4>
 <ul><li>H1 (<code>--text-h1</code>) must be ≥2× body text (<code>--text-body</code>) font size at any viewport width</li><li>H2 must be ≥1.5× body text font size</li><li>Caption/metadata text must be ≤0.875× body text (use <code>--text-small</code> or <code>--text-caption</code>)</li><li>Pixel art font (Press Start 2P) automatically enforces strong scale contrast due to its bold monospace nature</li></ul>
-<h4>Weight Contrast Rules</h4>
+<h4 id="weight-contrast-rules">Weight Contrast Rules</h4>
 <ul><li>Use font-weight 700 (Bold) only for: H1, H2, CTA button labels, stat values (HP/ATK/DEF)</li><li>Use font-weight 600 (Semibold) for: H3, nav active state, rarity badge labels</li><li>Use font-weight 400 (Regular) for: all body copy, secondary labels, metadata</li><li>Pixel art headers (Press Start 2P) are always treated as Bold weight regardless of CSS weight setting</li></ul>
-<h4>Color Emphasis Rules</h4>
+<h4 id="color-emphasis-rules">Color Emphasis Rules</h4>
 <ul><li>Primary emphasis: <code>--color-brand-primary</code> (purple) — used for interactive elements, active states, primary CTAs only</li><li>Secondary emphasis: <code>--color-brand-accent</code> (gold) — used for Legendary tier and premium actions only</li><li>Muted/secondary text: <code>--color-text-secondary</code> — all supporting text, timestamps, counts</li><li>Disabled/invisible: <code>--color-text-disabled</code> — 40% opacity, use for explicitly disabled UI elements only</li><li>NEVER use rarity colors (<code>--color-rarity-*</code>) for non-rarity contexts</li></ul>
-<h4>Whitespace Rhythm Rules</h4>
+<h4 id="whitespace-rhythm-rules">Whitespace Rhythm Rules</h4>
 <ul><li>Page-level gaps: use <code>--space-section</code> (<code>clamp(4rem, 3rem + 5vw, 10rem)</code> — see §6.2) or larger; <code>--primitive-space-12</code> (48px) is for component-level spacing, not page-level sections</li><li>Component-level gaps: use <code>--space-component-gap</code> (<code>--primitive-space-4</code>: 16px)</li><li>Within-component gaps: use <code>--primitive-space-2</code> (8px) or <code>--primitive-space-1</code> (4px)</li><li>Pixel art elements snap to 8px grid; use multiples of 8px for all game UI spacing</li></ul>
 <hr>
-<h2>§2 Art Direction</h2>
-<h3>§2.1 Visual References</h3>
+<h2 id="2-art-direction">§2 Art Direction</h2>
+<h3 id="21-visual-references">§2.1 Visual References</h3>
 <p>The following concrete references ground the visual direction. These are not mood keywords — they are specific products and specific design decisions we borrow or diverge from.</p>
 <table>
 <tr><th>Reference</th><th>URL / Source</th><th>What we borrow</th><th>What we intentionally differ</th></tr>
@@ -366,16 +439,16 @@
 <tr><td><strong>Dark Souls III UI</strong></td><td>HUD design philosophy reference — minimal, atmospheric, every element earns its presence</td><td>Health/stamina bar layout inspiration; text treatment at small sizes; philosophy of UI that doesn&#x27;t overwhelm the game canvas</td><td>Our product is much lighter and more game-casual; we use bright rarity colors vs Dark Souls&#x27; muted palette; we have verbose labels where Souls uses iconography</td></tr>
 <tr><td><strong>GOG.com dark theme</strong></td><td>https://www.gog.com</td><td>Dark navy surface system; card hover glow effect; text hierarchy in dark mode; SaaS dark luxury baseline</td><td>We use pixel-art borders (0px radius) vs GOG&#x27;s rounded cards; our primary font is Press Start 2P vs GOG&#x27;s clean sans-serif; game-first vs store-first information hierarchy</td></tr>
 </table>
-<h3>§2.2 Emotional Tone Map</h3>
+<h3 id="22-emotional-tone-map">§2.2 Emotional Tone Map</h3>
 <table>
 <tr><th>Brand Emotion</th><th>Visual Expression</th><th>Key Design Decisions</th></tr>
 <tr><td><strong>Competitive Excitement</strong></td><td>High contrast, spring easing, gold accents</td><td><code>--primitive-ease-spring</code> for battle outcomes; <code>--color-brand-accent</code> (gold) for win states; stat bar animations use scale transform</td></tr>
 <tr><td><strong>Nostalgic Warmth</strong></td><td>Limited palettes, pixel precision, retro font</td><td>Press Start 2P as primary display font; max 16 colors per sprite; 0px border-radius on pixel-art elements</td></tr>
 <tr><td><strong>Premium Exclusivity</strong></td><td>Dark navy base, rarity glow hierarchy, CRT effect</td><td>Legendary tier uses CSS CRT shimmer animation; dark surface (<code>#0d1117</code> equivalent) as canvas; Epic+ items have drop-shadow glow</td></tr>
 </table>
-<h3>§2.3 Mood Board Keywords</h3>
+<h3 id="23-mood-board-keywords">§2.3 Mood Board Keywords</h3>
 <ol><li><strong>Pixel</strong> — Hard edges, grid-snapped geometry, 8px/16px/32px multiples, <code>image-rendering: pixelated</code>, no antialiasing on sprite elements</li><li><strong>Nostalgic</strong> — NES/SNES color constraints (limited palettes per sprite), CRT glow effects on Legendary tier, scanline texture on selected surfaces, retro monospace display font (<code>Press Start 2P</code>)</li><li><strong>Vibrant</strong> — Rarity colors selected for maximum perceptual impact against the dark navy base: teal, purple, gold against <code>oklch(12% 0.04 280)</code> — saturation deliberately high</li><li><strong>Playful</strong> — Spring easing on interactions (<code>cubic-bezier(0.34, 1.56, 0.64, 1)</code>), particle bursts on victories, stat indicators that float upward, rarity badges that overshoot on reveal</li><li><strong>Collectible</strong> — Rarity tier visual language borrows from physical trading cards: border treatments, holographic-inspired shimmer on Legendary, rarity probability disclosures, numbered editions aesthetic</li></ol>
-<h3>§2.4 Design Reference Sources (Category Breakdown)</h3>
+<h3 id="24-design-reference-sources-category-breakdown">§2.4 Design Reference Sources (Category Breakdown)</h3>
 <table>
 <tr><th>Category</th><th>Reference Direction</th><th>Specific Influences</th></tr>
 <tr><td><strong>Color</strong></td><td>Deep navy / gold / teal palette inspired by premium dark trading card designs; oklch perceptual uniformity ensures rarity colors pop equally across tiers</td><td>Night sky (#1a1a2e), arcade CRT phosphor glow (teal #4ecdc4), sunset gold (#fdcb6e), neon purple (#a29bfe)</td></tr>
@@ -384,22 +457,22 @@
 <tr><td><strong>Illustration</strong></td><td>64×64px pixel sprites with 4-8 frame idle animations; hard outlines, no antialiasing; 5+ attribute dimensions for procedural generation</td><td>itch.io pixel art game tradition; classic RPG monster sprite proportions; Pokémon-inspired rarity visual differentiation</td></tr>
 <tr><td><strong>Motion</strong></td><td>Purposeful animation that communicates game state: stat floats indicate gain, particle bursts signal victories, shimmer effects signal rarity</td><td>Spring easing for satisfaction on successful actions; expo-out for smooth page transitions; CRT scanline sweep for loading states</td></tr>
 </table>
-<h3>§2.5 Light &amp; Material Direction</h3>
+<h3 id="25-light--material-direction">§2.5 Light &amp; Material Direction</h3>
 <p><strong>Primary surface material</strong>: Matte deep navy (<code>oklch(12% 0.04 280)</code>, <code>#1a1a2e</code>) — no gradients on base surfaces. Texture is achieved through hard-offset pixel shadows, not light simulation.</p>
 <p><strong>Elevation model</strong>: Pixel-art hard-offset shadows communicate depth without blur or realistic light physics:</p>
 <ul><li>Base surface: no shadow</li><li>Raised (cards, panels): <code>4px 4px 0px #0d0d1a</code></li><li>Floating (modals, overlays): <code>6px 6px 0px #0d0d1a</code></li><li>Interactive press: shadow collapses to <code>2px 2px 0px #0d0d1a</code> on active state</li></ul>
 <p><strong>Legendary special material</strong>: CRT glow effect achieved via <code>box-shadow: 0 0 24px color-mix(in oklch, #fdcb6e, transparent 30%)</code> — simulates the warm phosphor glow of a CRT monitor displaying a golden item. This is the one exception to the no-blur rule: blur is permitted exclusively for Legendary rarity glow effects.</p>
 <p><strong>Rarity material language</strong>:</p>
 <ul><li><strong>Common</strong>: Flat grey, matte, no glow — <code>#b2bec3</code> border</li><li><strong>Rare</strong>: Teal accent border, subtle outer glow — <code>#4ecdc4</code> border + faint teal glow</li><li><strong>Epic</strong>: Purple animated shimmer border — <code>#a29bfe</code> border + shimmer sweep animation</li><li><strong>Legendary</strong>: Gold CRT glow + animated shimmer — <code>#fdcb6e</code> border + <code>legendary-shimmer 2s ease-in-out infinite</code></li></ul>
-<h3>§2.6 World / Art Style Declaration</h3>
+<h3 id="26-world--art-style-declaration">§2.6 World / Art Style Declaration</h3>
 <p>pixel-pet-arena occupies the <strong>Pixel Art Retro-Futurism</strong> style direction: pixel aesthetics as the primary visual language, applied with modern color science (oklch), modern typography pairing, and modern interaction design principles.</p>
 <p><strong>What this is NOT</strong>:</p>
 <ul><li>Not &quot;clean minimal&quot; (the default Tailwind template trap)</li><li>Not generic dark mode SaaS</li><li>Not 3D rendered game art</li><li>Not pastel kawaii</li></ul>
 <p><strong>What this IS</strong>:</p>
 <ul><li>Hard pixel borders on all UI chrome</li><li>Limited color palettes per sprite (authentic pixel constraint)</li><li>Modern oklch color definitions (perceptually uniform, not nostalgic in implementation)</li><li>CRT glow for Legendary rarity (aesthetic nostalgia + modern CSS)</li><li>Grid-snapped spacing on 8px multiples throughout</li></ul>
 <hr>
-<h2>§3 Brand Identity</h2>
-<h3>§3.1 Primary Palette</h3>
+<h2 id="3-brand-identity">§3 Brand Identity</h2>
+<h3 id="31-primary-palette">§3.1 Primary Palette</h3>
 <p>All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical hex, oklch, and WCAG contrast data.</p>
 <table>
 <tr><th>Token Name</th><th>Hex</th><th>oklch</th><th>WCAG Contrast on <code>--color-surface-base</code></th><th>Usage</th></tr>
@@ -412,7 +485,7 @@
 <tr><td><code>--color-neutral-50</code></td><td><code>#e8e8f0</code></td><td><code>oklch(93% 0.01 280)</code></td><td>12.4:1 (AAA)</td><td>Primary body text — highest contrast on dark base</td></tr>
 <tr><td><code>--color-focus</code></td><td><code>#ffd700</code></td><td><code>oklch(90% 0.17 82)</code></td><td>3.1:1 (AA non-text)</td><td>Focus ring on all interactive elements</td></tr>
 </table>
-<h3>§3.2 Semantic / Functional Colors</h3>
+<h3 id="32-semantic--functional-colors">§3.2 Semantic / Functional Colors</h3>
 <table>
 <tr><th>Token</th><th>Light Hex</th><th>Dark Hex</th><th>Usage</th></tr>
 <tr><td><code>--color-success</code></td><td><code>#00836b</code></td><td><code>#00b894</code></td><td>Training complete, claim success, pet ownership confirmed</td></tr>
@@ -420,7 +493,7 @@
 <tr><td><code>--color-error</code></td><td><code>#cc3333</code></td><td><code>#e87c7c</code></td><td>Form validation errors, invalid code entry, API failures</td></tr>
 <tr><td><code>--color-info</code></td><td><code>#4a80cc</code></td><td><code>#7cb4e8</code></td><td>Informational tips, probability disclosures, AI opponent labels</td></tr>
 </table>
-<h3>§3.3 Rarity Color System</h3>
+<h3 id="33-rarity-color-system">§3.3 Rarity Color System</h3>
 <p>The rarity color system is the core brand differentiator. Colors are selected for maximum perceptual impact against the dark navy base, verified for WCAG AA contrast, and designed to evoke the emotional register of each tier.</p>
 <table>
 <tr><th>Rarity Tier</th><th>Probability</th><th>Dark Hex</th><th>Light Hex</th><th>oklch (dark)</th><th>WCAG on Dark Base</th><th>Visual Treatment</th><th>CONSTANTS Reference</th></tr>
@@ -448,7 +521,7 @@
 <p><strong>Trade minimum price formula</strong> (from CONSTANTS §2):</p>
 <p><code>min_price = (pet_level × 100) + (rarity_multiplier × 500)</code></p>
 <ul><li>Common: <code>(level × 100) + 500</code></li><li>Rare: <code>(level × 100) + 1000</code></li><li>Epic: <code>(level × 100) + 2000</code></li><li>Legendary: <code>(level × 100) + 4000</code></li></ul>
-<h3>§3.4 Logo Usage Guidelines</h3>
+<h3 id="34-logo-usage-guidelines">§3.4 Logo Usage Guidelines</h3>
 <p><strong>Logo lockup</strong>: The pixel-pet-arena wordmark uses <code>Press Start 2P</code> at 16px on dark backgrounds and 14px on light backgrounds. The logo must always appear on a surface with minimum 4.5:1 contrast against the letter forms.</p>
 <p><strong>Logo clearance</strong>: Minimum 16px (2 pixel grid units at 8px base) on all sides.</p>
 <p><strong>Logo color variants</strong>:</p>
@@ -461,8 +534,8 @@
 <p><strong>What not to do</strong>:</p>
 <ul><li>Do not apply the wordmark in any rarity color other than gold in non-Legendary contexts</li><li>Do not place the logo on surfaces below 4.5:1 contrast</li><li>Do not use a font other than <code>Press Start 2P</code> for the wordmark</li><li>Do not apply gradients to the wordmark</li><li>Do not render the wordmark below 80px wide in digital contexts</li></ul>
 <hr>
-<h2>§4 Character &amp; World Design</h2>
-<h3>§4.1 Pixel Pet Visual System</h3>
+<h2 id="4-character--world-design">§4 Character &amp; World Design</h2>
+<h3 id="41-pixel-pet-visual-system">§4.1 Pixel Pet Visual System</h3>
 <p>The pixel pet is the product&#x27;s hero element. Every other design decision in the product serves to frame, celebrate, or reward the pet.</p>
 <p><strong>Pet rarity visual language summary</strong>:</p>
 <table>
@@ -472,7 +545,7 @@
 <tr><td>Epic</td><td>3px solid</td><td><code>#a29bfe</code></td><td><code>0 0 12px rgba(162,155,254,0.4)</code></td><td>Idle wiggle + epic-shimmer border</td><td>Purple tint <code>rgba(162,155,254,0.07)</code></td></tr>
 <tr><td>Legendary</td><td>3px solid</td><td><code>#fdcb6e</code></td><td><code>legendary-shimmer 2s ease-in-out infinite</code></td><td>Idle wiggle + legendary-shimmer + particle sparkles every 8s</td><td>Gold tint <code>rgba(253,203,110,0.08)</code></td></tr>
 </table>
-<h3>§4.2 Pet Sprite Specifications</h3>
+<h3 id="42-pet-sprite-specifications">§4.2 Pet Sprite Specifications</h3>
 <p><strong>Sprite grid system</strong>: All pet sprites are drawn on a <strong>64×64px pixel grid</strong> at 1x. The 64px canvas is the canonical sprite size for My Pet Page and Battle Result Page. Smaller contexts (leaderboard thumbnails, trade cards) use the 32×32px reduced sprite.</p>
 <p><strong>Sprite sizes</strong>:</p>
 <ul><li>Hero canvas (Landing, My Pet, Battle Result): 64×64px @ 1x; 128×128px @ 2x (retina)</li><li>Leaderboard thumbnail: 32×32px @ 1x; 64×64px @ 2x</li><li>Trade card (Marketplace): 48×48px @ 1x; 96×96px @ 2x</li><li>OG social share card: 128×128px sprite rendered on 1200×630px card</li></ul>
@@ -482,12 +555,12 @@
 <ul><li>Maximum 16 colors per sprite (not counting transparency)</li><li>Outline pixels use one-shade-darker version of adjacent color</li><li>No antialiasing: all pixel boundaries are hard edges</li><li>CSS rendering: <code>image-rendering: pixelated; image-rendering: crisp-edges;</code></li></ul>
 <p><strong>Sprite generation dimensions</strong> (from PRD AC-001-3 and CONSTANTS):</p>
 <ul><li><code>PET_GENERATION_DIMENSIONS = 6</code>: body type, head type, color palette, accessory, rarity trait, pattern</li><li><code>PET_GENERATION_COMBINATIONS_MIN = 1,000,000,000</code> — at least 1 billion combinations</li><li>Seed is deterministic: same seed always generates same appearance (<code>AC-002-2</code>)</li></ul>
-<h3>§4.3 Arena Visual Environment Specs</h3>
+<h3 id="43-arena-visual-environment-specs">§4.3 Arena Visual Environment Specs</h3>
 <p><strong>Race arena visual treatment</strong>:</p>
 <ul><li>Background: dark track tile pattern — repeating 16×8px pixel tile on <code>--color-surface-overlay</code></li><li>Track lane: 2-pixel dashed dividers in <code>--color-neutral-700</code></li><li>Finish line: alternating 4×4px checkered pattern in <code>--color-neutral-50</code> and <code>--color-neutral-900</code></li><li>Victory effects: 24-particle gold burst from winner sprite; particles are 2×2px squares in Legendary gold</li></ul>
 <p><strong>Sumo arena visual treatment</strong> [P1]:</p>
 <ul><li>Ring: circular pixel border in <code>--color-brand-accent</code>, 4px wide; interior <code>--color-surface-raised</code></li><li>Push-out zone: darker ring edge <code>--color-neutral-900</code></li><li>Defeat animation: losing sprite slides off ring edge with <code>ease-in</code> acceleration</li></ul>
-<h3>§4.4 Pixel Art Grid System</h3>
+<h3 id="44-pixel-art-grid-system">§4.4 Pixel Art Grid System</h3>
 <p>All spacing, sizing, and positioning of pixel art elements must snap to the pixel grid:</p>
 <table>
 <tr><th>Grid Unit</th><th>Value</th><th>Usage</th></tr>
@@ -499,8 +572,8 @@
 </table>
 <p><strong>The 8px rule</strong>: No pixel art element — border, shadow offset, icon, sprite dimension — may use a value that is not a multiple of 8px. This rule applies to sprites and game canvas elements only. Body text and data tables are exempt and follow the <code>--primitive-space-*</code> token scale (4px base unit).</p>
 <hr>
-<h2>§5 UI Visual System — Typography</h2>
-<h3>§5.1 Font Families</h3>
+<h2 id="5-ui-visual-system--typography">§5 UI Visual System — Typography</h2>
+<h3 id="51-font-families">§5.1 Font Families</h3>
 <table>
 <tr><th>Role</th><th>Family</th><th>Source</th><th>Fallback</th></tr>
 <tr><td><strong>Display / Game Chrome</strong></td><td><code>Press Start 2P</code></td><td>Google Fonts</td><td><code>&#x27;Courier New&#x27;, Courier, monospace</code></td></tr>
@@ -509,7 +582,7 @@
 </table>
 <p><strong>Selection rationale</strong>:</p>
 <ul><li><code>Press Start 2P</code> is the canonical pixel-art game font — blocky, grid-aligned, immediately evocative of 8-bit gaming. Limited to headings and game-world UI elements to avoid readability issues at small sizes.</li><li><code>Inter</code> is chosen for superior legibility in data-dense contexts (leaderboard tables, stats panels, form labels) and excellent international character support (for future <code>ja</code>, <code>zh-TW</code> i18n).</li><li>Two-family maximum is enforced per performance rules — no additional display fonts.</li></ul>
-<h3>§5.2 Type Scale</h3>
+<h3 id="52-type-scale">§5.2 Type Scale</h3>
 <p>Inherits from PDD §9.2. All values confirmed below:</p>
 <table>
 <tr><th>Level</th><th>Token</th><th>Font Family</th><th>Size (clamp)</th><th>Weight</th><th>Line Height</th><th>Letter Spacing</th><th>Usage</th></tr>
@@ -525,7 +598,7 @@
 <tr><td><strong>Code / URL</strong></td><td><code>--text-mono</code></td><td>System monospace</td><td><code>0.875rem</code> (14px)</td><td>400</td><td>1.5</td><td><code>0em</code></td><td>Unique URL display, 6-digit claim code input fields</td></tr>
 <tr><td><strong>Numeric / Stats</strong></td><td><code>--text-stat</code></td><td>Inter</td><td>Context-dependent</td><td>700</td><td>1</td><td><code>-0.01em</code></td><td>Stat values (speed/strength/stamina), leaderboard scores, countdown timers — tight for stat numbers</td></tr>
 </table>
-<h3>§5.3 Font Loading Strategy</h3>
+<h3 id="53-font-loading-strategy">§5.3 Font Loading Strategy</h3>
 <pre><code class="language-html">&lt;!-- Preload critical above-fold font only --&gt;
 &lt;link rel=&quot;preload&quot; href=&quot;https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap&quot; as=&quot;style&quot;&gt;
 
@@ -533,9 +606,9 @@
 &lt;link rel=&quot;preload&quot; href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap&quot; as=&quot;style&quot;&gt;</code></pre>
 <ul><li><code>font-display: swap</code> on both families — content renders with fallback while fonts load</li><li>Preload only <code>Press Start 2P</code> as the above-fold visible font on the landing page</li><li><code>Inter</code> 400 + 600 only — no other weights to minimize font payload</li><li>Fallback stack ensures layout stability during font swap (no CLS impact)</li></ul>
 <hr>
-<h2>§6 Design Tokens — Three-Layer Architecture</h2>
+<h2 id="6-design-tokens--three-layer-architecture">§6 Design Tokens — Three-Layer Architecture</h2>
 <p>This section extends and canonicalizes PDD §9.3. All tokens here are the authoritative values. Where a token appears in both PDD §9.3 and this VDD §6, this VDD takes precedence.</p>
-<h3>§6.1 Layer 1 — Primitive Tokens</h3>
+<h3 id="61-layer-1--primitive-tokens">§6.1 Layer 1 — Primitive Tokens</h3>
 <pre><code class="language-css">/* =============================================
    PRIMITIVE: Color Scales
    ============================================= */
@@ -677,7 +750,7 @@
 --primitive-ease-in-out: cubic-bezier(0.4, 0, 0.6, 1);        /* Pulse animations */
 --primitive-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);      /* Leaderboard updates */
 --primitive-ease-in: cubic-bezier(0.4, 0, 1, 1);              /* Sumo defeat slide-off */</code></pre>
-<h3>§6.2 Layer 2 — Semantic Tokens</h3>
+<h3 id="62-layer-2--semantic-tokens">§6.2 Layer 2 — Semantic Tokens</h3>
 <pre><code class="language-css">/* =============================================
    SEMANTIC: Surface Colors
    ============================================= */
@@ -875,9 +948,9 @@
 --text-stat-line-height: 1;
 --text-stat-letter-spacing: -0.01em;
 --text-stat-size: 1.5rem; /* Context-dependent — override per screen spec */</code></pre>
-<h3>§6.2.5 Typography Tokens</h3>
+<h3 id="625-typography-tokens">§6.2.5 Typography Tokens</h3>
 <p>All <code>--text-*</code> CSS custom properties declared above map directly to the §5.2 type scale. Each level exposes five sub-tokens: <code>-size</code>, <code>-family</code>, <code>-weight</code>, <code>-line-height</code>, and <code>-letter-spacing</code>. Component authors must use these tokens rather than hardcoding font values. The font families are also available via <code>--font-pixel</code>, <code>--font-body</code>, and <code>--font-mono</code> shorthand tokens.</p>
-<h3>§6.3 Layer 3 — Component Tokens</h3>
+<h3 id="63-layer-3--component-tokens">§6.3 Layer 3 — Component Tokens</h3>
 <pre><code class="language-css">/* =============================================
    COMPONENT: Button (Primary)
    ============================================= */
@@ -1025,7 +1098,7 @@
 <tr><td>Disabled</td><td><code>--dropdown-border</code></td><td><code>--dropdown-bg</code></td><td><code>--dropdown-text</code> at <code>--dropdown-disabled-opacity</code> (0.4)</td></tr>
 <tr><td>Error</td><td><code>--dropdown-error-border</code></td><td><code>--dropdown-bg</code></td><td><code>--dropdown-text</code></td></tr>
 </table>
-<h3>§6.x Token Name Changes from PDD §9.3</h3>
+<h3 id="6x-token-name-changes-from-pdd-93">§6.x Token Name Changes from PDD §9.3</h3>
 <p>The following component-level token names extend PDD §9.3. Where VDD uses a more specific name, the PDD name is shown for reference:</p>
 <table>
 <tr><th>VDD Token Name</th><th>PDD §9.3 Token Name</th><th>Change Type</th><th>Rationale</th></tr>
@@ -1038,7 +1111,7 @@
 --badge-legendary-border-color: var(--badge-legendary-border);
 --canvas-border: var(--pet-canvas-border);
 --canvas-shadow: var(--pet-canvas-shadow-legendary);</code></pre>
-<h3>§6.4 Dark Mode Token Mapping</h3>
+<h3 id="64-dark-mode-token-mapping">§6.4 Dark Mode Token Mapping</h3>
 <p>Inherits from PDD §9.4. The following table is the canonical dark/light token mapping with WCAG contrast verification.</p>
 <table>
 <tr><th>Semantic Token</th><th>Light Mode Value (hex)</th><th>Dark Mode Value (hex)</th><th>WCAG Contrast (text:bg)</th><th>Notes</th></tr>
@@ -1065,7 +1138,7 @@
 <tr><td><code>--color-border-strong</code></td><td><code>#9898c0</code></td><td><code>#4d4d7a</code></td><td>N/A (border)</td><td>Hover/active state border</td></tr>
 <tr><td><code>--color-border-focus</code></td><td><code>var(--color-focus)</code></td><td><code>var(--color-focus)</code></td><td>N/A</td><td>Inherits focus color</td></tr>
 </table>
-<h3>§6.5 Motion Tokens</h3>
+<h3 id="65-motion-tokens">§6.5 Motion Tokens</h3>
 <pre><code class="language-css">/* =============================================
    MOTION: Semantic Easing Aliases
    ============================================= */
@@ -1114,8 +1187,8 @@
   /* Exception: ARIA live regions still announce */
   [aria-live] { /* No override needed */ }
 }</code></pre>
-<h3>§6.6 Responsive Visual Behavior Rules</h3>
-<h4>Per-Breakpoint Visual Density Strategy</h4>
+<h3 id="66-responsive-visual-behavior-rules">§6.6 Responsive Visual Behavior Rules</h3>
+<h4 id="per-breakpoint-visual-density-strategy">Per-Breakpoint Visual Density Strategy</h4>
 <table>
 <tr><th>Breakpoint</th><th>Width</th><th>Density</th><th>Strategy</th></tr>
 <tr><td>xs</td><td>320px</td><td>Ultra-compact</td><td>Single column; PetCard reduced to 48px canvas; stats collapsed to icon-only</td></tr>
@@ -1125,15 +1198,15 @@
 <tr><td>xl</td><td>1440px</td><td>Spacious</td><td>4-column grids; expanded arena battle view</td></tr>
 <tr><td>2xl</td><td>1920px</td><td>Max-width capped</td><td>max-width: 1440px centered; no further layout changes</td></tr>
 </table>
-<h4>Spacing Token Scaling Per Breakpoint</h4>
+<h4 id="spacing-token-scaling-per-breakpoint">Spacing Token Scaling Per Breakpoint</h4>
 <ul><li><code>--space-section</code>: uses <code>clamp(4rem, 3rem + 5vw, 10rem)</code> — computed values approx. xs≈64px / md≈80px / xl=160px (max); see §6.2 canonical definition</li><li><code>--space-page-padding</code>: xs=16px / md=24px / xl=32px</li><li>PetCanvas container: xs=48px / sm=64px / md=64px / lg=80px</li></ul>
-<h4>Sprite/Image Visual Focus Adaptation</h4>
+<h4 id="spriteimage-visual-focus-adaptation">Sprite/Image Visual Focus Adaptation</h4>
 <ul><li>At 48px display size: show only primary rarity border + base sprite, hide glow effects</li><li>At 64px display size: full sprite + rarity border + glow for Epic/Legendary</li><li>At 80px+ display size: full sprite + rarity border + glow + stat overlay on hover</li><li>Use CSS <code>image-rendering: pixelated</code> on all sprite images to prevent anti-aliasing blur at non-native sizes</li></ul>
-<h4>Type Scale Graceful Wrapping (Press Start 2P)</h4>
+<h4 id="type-scale-graceful-wrapping-press-start-2p">Type Scale Graceful Wrapping (Press Start 2P)</h4>
 <ul><li>H1 at 320px: max 12 characters per line; longer names must use <code>word-break: break-all</code></li><li>H2 at 320px: ≤14 characters; use <code>--text-h3</code> size as fallback at xs breakpoint if H2 would cause overflow</li><li>Body text (Inter): <code>word-break: break-word; hyphens: auto</code> at xs</li></ul>
 <hr>
-<h2>§7 Asset Pipeline</h2>
-<h3>§7.1 Sprite / Pixel Art Output Specifications</h3>
+<h2 id="7-asset-pipeline">§7 Asset Pipeline</h2>
+<h3 id="71-sprite--pixel-art-output-specifications">§7.1 Sprite / Pixel Art Output Specifications</h3>
 <table>
 <tr><th>Asset Type</th><th>Format</th><th>Dimensions</th><th>Naming Convention</th><th>Notes</th></tr>
 <tr><td>Pet sprite (hero)</td><td>PNG-24 (with alpha)</td><td>64×64px @1x; 128×128px @2x</td><td><code>pet-{seed}-{rarity}-64.png</code>, <code>pet-{seed}-{rarity}-128.png</code></td><td>Generated server-side from seed</td></tr>
@@ -1144,19 +1217,19 @@
 <tr><td>UI icons (fallback)</td><td>PNG-24</td><td>16×16, 24×24, 32×32</td><td><code>icon-{name}-{size}.png</code></td><td>For browsers without reliable SVG support</td></tr>
 </table>
 <p><strong>Sprite atlas spec</strong>: All pet sprites for a single session are packed into a runtime sprite atlas (1024×1024px max) to minimize draw calls in Phaser.js. Atlas JSON configuration follows the Phaser.js <code>atlasJSON</code> format.</p>
-<h3>§7.2 Icon Specifications</h3>
+<h3 id="72-icon-specifications">§7.2 Icon Specifications</h3>
 <p><strong>Game UI Icons (custom pixel-art)</strong>:</p>
 <ul><li>Type: Custom pixel-art icons — 24×24px at 2× = 48×48 source canvas, 2px stroke at 24px, 0px border-radius, hard pixel edges</li><li>SVG <code>viewBox</code> must be <code>&quot;0 0 16 16&quot;</code> or <code>&quot;0 0 24 24&quot;</code> — no non-standard viewBox dimensions</li><li>Icon colors are inherited via <code>currentColor</code> — no hard-coded fill/stroke colors in SVG source</li><li>Decorative icons use <code>aria-hidden=&quot;true&quot;</code>; functional icons have <code>aria-label</code> on the parent interactive element</li><li>All paths snapped to pixel grid, no rounded corners</li></ul>
 <p><strong>Non-Game UI Icons (forms, admin portal, navigation)</strong>:</p>
 <ul><li>Library: Phosphor Icons v2.1 (https://phosphoricons.com) as the base library</li><li>Weight variant: &quot;Bold&quot; for consistency with pixel-art visual density</li><li>Customization: Adjusted to match pixel-art aesthetic where possible (hard edges, minimal curves)</li><li>Admin portal: Phosphor Icons Bold used exclusively (no custom pixel icons in admin context)</li></ul>
-<h3>§7.3 Illustration Style</h3>
+<h3 id="73-illustration-style">§7.3 Illustration Style</h3>
 <p><strong>Pixel Sprites</strong> (primary illustration type for all game elements):</p>
 <ul><li>Scope: pets, arena environment, items</li><li>Canvas: 64×64px base on 8px pixel grid</li><li>Color constraint: max 16 colors per sprite</li><li>Rendering: hard-edge, no anti-aliasing</li><li>CSS: <code>image-rendering: pixelated; image-rendering: crisp-edges;</code></li></ul>
 <p><strong>Non-Sprite Illustrations</strong> (empty states, onboarding, error pages):</p>
 <ul><li>Style: 2D flat vector illustration with pixel-art-inspired edges</li><li>Technique: CSS <code>image-rendering: pixelated</code> on rasterized versions for pixelated look</li><li>Border radius: 4px maximum</li><li>Color palette: limited, matching brand tokens only</li></ul>
 <p><strong>Admin Portal Illustrations</strong>:</p>
 <ul><li>Style: Minimal line illustrations using Phosphor Icons extended</li><li>Pixel-art aesthetic is NOT used in admin contexts</li><li>Consistent with professional data-tool visual language</li></ul>
-<h3>§7.4 Logo Asset Export Specifications</h3>
+<h3 id="74-logo-asset-export-specifications">§7.4 Logo Asset Export Specifications</h3>
 <table>
 <tr><th>Version</th><th>Format</th><th>Size</th><th>Use Case</th></tr>
 <tr><td>Primary (dark bg)</td><td>SVG + PNG @2x</td><td>Nav: 160×32px; Header: 240×48px</td><td>Primary logo on dark surfaces</td></tr>
@@ -1167,7 +1240,7 @@
 </table>
 <p><strong>Constraints</strong>:</p>
 <ul><li>Maximum file sizes: SVG &lt; 8KB, PNG @2x &lt; 50KB</li><li>Optimization: SVGO for SVG, pngquant for PNG</li><li>Naming: <code>logo-primary-dark.svg</code>, <code>logo-inverted.png</code>, <code>mark-64.png</code></li></ul>
-<h3>§7.5 Background Specifications</h3>
+<h3 id="75-background-specifications">§7.5 Background Specifications</h3>
 <table>
 <tr><th>Asset</th><th>Format</th><th>Dimensions</th><th>Max File Size</th><th>Notes</th></tr>
 <tr><td>Arena race track tile</td><td>PNG → CSS <code>background-repeat: repeat-x</code></td><td>32×8px tile</td><td>≤2KB</td><td>Dark pixel grid pattern</td></tr>
@@ -1176,7 +1249,7 @@
 <tr><td>OG social card background</td><td>AVIF (primary) + WebP (fallback) + PNG (last resort)</td><td>1200×630px</td><td>≤150KB AVIF / ≤200KB WebP</td><td>Pre-rendered per pet; includes sprite, rarity, stats</td></tr>
 <tr><td>Page background pattern</td><td>SVG (primary) + PNG (fallback)</td><td>Tileable pattern</td><td>≤10KB SVG / ≤20KB PNG</td><td>Subtle texture on base surfaces if used</td></tr>
 </table>
-<h3>§7.6 Naming Conventions</h3>
+<h3 id="76-naming-conventions">§7.6 Naming Conventions</h3>
 <p><strong>General pattern</strong>: <code>{context}-{descriptor}-{variant}-{size}.{ext}</code></p>
 <p>Examples:</p>
 <ul><li><code>icon-arena-race-24.svg</code></li><li><code>icon-rarity-legendary-16.svg</code></li><li><code>bg-arena-track-32x8.png</code></li><li><code>og-battle-result-1200x630.avif</code></li></ul>
@@ -1184,7 +1257,7 @@
 <ul><li><code>badge-common.svg</code>, <code>badge-rare.svg</code>, <code>badge-epic.svg</code>, <code>badge-legendary.svg</code></li></ul>
 <p><strong>Prohibited naming patterns</strong>:</p>
 <ul><li>No <code>final</code>, <code>final2</code>, <code>v2</code>, <code>new</code>, <code>temp</code> in production asset names</li><li>No spaces in filenames — use hyphens only</li></ul>
-<h3>§7.7 Figma → Code Delivery Spec</h3>
+<h3 id="77-figma--code-delivery-spec">§7.7 Figma → Code Delivery Spec</h3>
 <p><strong>Figma File</strong>: <code>https://www.figma.com/file/[PIXEL-PET-ARENA-DESIGN-FILE]</code> <em>(pending: Design Lead to create and share by Sprint 1 end)</em></p>
 <blockquote><p><strong>Note</strong>: All Figma frame links must be populated before entering FRONTEND implementation phase.</p></blockquote>
 <p><strong>Per-Component Figma Links</strong>:</p>
@@ -1219,9 +1292,9 @@
 <p><strong>Known Deviations (Figma vs. CSS)</strong>:</p>
 <ul><li>Press Start 2P line-height in Figma may differ slightly from CSS due to pixel-grid snapping (expect ±2px differences in vertical rhythm)</li><li>CRT glow effects (<code>box-shadow</code> on Legendary tier) must be approximated in Figma using a glow layer effect — exact CSS rendering will differ</li></ul>
 <hr>
-<h2>§8 Screen Visual Specs</h2>
+<h2 id="8-screen-visual-specs">§8 Screen Visual Specs</h2>
 <p>This section provides visual design specifications for all P0 screens. Constants from <code>CONSTANTS.md</code> are referenced directly.</p>
-<h3>§8.1 Landing Page — Route: <code>/</code></h3>
+<h3 id="81-landing-page--route">§8.1 Landing Page — Route: <code>/</code></h3>
 <p><strong>Visual hierarchy</strong>:</p>
 <ol><li>Pet canvas (dominant hero — occupies 60%+ of viewport on mobile, 50% left column on desktop)</li><li>Rarity shimmer hint on canvas border (passive discovery)</li><li><code>ClaimCTA</code> button (surfaces after 30s or first interaction)</li><li>Social proof counter (&quot;X pets claimed today&quot;)</li><li>Navigation (minimal — Leaderboard link only)</li></ol>
 <p><strong>Grid / Layout</strong>:</p>
@@ -1233,7 +1306,7 @@
 <p><strong>Empty state</strong>: No empty state — page always has a generated pet (random seed on page load)</p>
 <p><strong>Loading state</strong>: Progressive pixel-art scanline reveal — canvas rows reveal top-to-bottom over <code>&lt;2s</code> (per CONSTANTS <code>Pet Render on Load &lt; 2s</code>)</p>
 <hr>
-<h3>§8.2 Claim Pet Page — Route: <code>/claim</code></h3>
+<h3 id="82-claim-pet-page--route-claim">§8.2 Claim Pet Page — Route: <code>/claim</code></h3>
 <p><strong>Visual hierarchy</strong>:</p>
 <ol><li>Step indicator (Email → Code → Done) at top</li><li>Active form step (full-width card, centered)</li><li>Countdown timer (visible when code entry step active)</li><li>URL reveal (celebratory, prominent, with copy button)</li></ol>
 <p><strong>Color usage</strong>:</p>
@@ -1243,7 +1316,7 @@
 <p><strong>Empty/Loading states</strong>:</p>
 <ul><li>Submit loading: pixel spinner in button, <code>aria-busy=&quot;true&quot;</code></li><li>Code expiry warning at T-2 minutes: amber <code>role=&quot;alert&quot;</code> banner (CONSTANTS: <code>A11Y_CLAIM_CODE_WARNING_BEFORE_EXPIRY = 2 minutes</code>)</li><li>Expired code: error inline; &quot;Request New Code&quot; link appears</li></ul>
 <hr>
-<h3>§8.3 My Pet Page — Route: <code>/pet/:petId</code></h3>
+<h3 id="83-my-pet-page--route-petpetid">§8.3 My Pet Page — Route: <code>/pet/:petId</code></h3>
 <p><strong>Visual hierarchy (Z-pattern)</strong>:</p>
 <ol><li>Pet canvas (top-left anchor — deterministic from seed, owned pet state)</li><li>Rarity badge + level (top-right — status at a glance)</li><li>Stats panel (horizontal band — three stat bars + level)</li><li>Training entry button (bottom-left — primary recurring action)</li><li>Food inventory (bottom-center — item grid)</li><li>Arena entry button (bottom-right — competitive entry point)</li></ol>
 <p><strong>Color usage</strong>:</p>
@@ -1252,7 +1325,7 @@
 <ul><li>Pet name: <code>Press Start 2P</code> H2 in <code>--color-text-primary</code></li><li>Stat values: Inter Numeric 700 in <code>--color-brand-accent</code></li><li>Training countdown: Inter Caption in <code>--color-text-secondary</code></li></ul>
 <p><strong>Loading state</strong>: Skeleton shimmer on stats panel while pet data loads; canvas shows static first-frame sprite</p>
 <hr>
-<h3>§8.4 Training Page — Route: <code>/pet/:petId/train</code></h3>
+<h3 id="84-training-page--route-petpetidtrain">§8.4 Training Page — Route: <code>/pet/:petId/train</code></h3>
 <p><strong>Visual hierarchy</strong>:</p>
 <ol><li>Three training action cards (Run / Strength / Stamina) — horizontal on desktop, swipeable carousel on mobile</li><li>Daily reset countdown (bottom of cards area)</li><li>Training streak counter (motivational hook)</li><li>Stat change indicator overlay (floats upward on success)</li></ol>
 <p><strong>Color usage</strong>:</p>
@@ -1260,7 +1333,7 @@
 <p><strong>Key numbers</strong> (from CONSTANTS):</p>
 <ul><li><code>TRAINING_ACTIONS_PER_DAY = 3</code> — shown as &quot;X actions remaining today&quot;</li><li><code>TRAINING_STAT_POINTS_MIN = 1</code> to <code>TRAINING_STAT_POINTS_MAX = 3</code> — gain range displayed</li><li><code>PET_STAT_MAX = 100</code> — MAX badge triggers at this value; HTTP 400 from API</li><li><code>TRAINING_STAT_DISPLAY_DURATION = 2</code> seconds — stat indicator hold duration</li><li><code>TRAINING_NEGLECT_THRESHOLD = 3 days</code> — shown in streak counter context</li></ul>
 <hr>
-<h3>§8.5 Arena Page — Route: <code>/arena</code></h3>
+<h3 id="85-arena-page--route-arena">§8.5 Arena Page — Route: <code>/arena</code></h3>
 <p><strong>Visual hierarchy</strong>:</p>
 <ol><li>Mode selector cards (Race / Sumo if <code>FF_ARENA_SUMO</code> ON)</li><li>Pre-battle stats panel (current pet stats + active food buffs)</li><li>&quot;Enter Arena&quot; primary CTA button</li><li>Matchmaking status indicator (replaces CTA after click)</li><li>Rate limit banner (amber, slides in from top if limit reached)</li></ol>
 <p><strong>Color usage</strong>:</p>
@@ -1269,14 +1342,14 @@
 <ul><li><code>ARENA_RATE_LIMIT_BATTLES_PER_HOUR = 10</code> — shown in countdown when exhausted</li><li><code>ARENA_MATCHMAKING_TIMEOUT = 30</code> seconds — timeout before AI offer appears</li><li><code>ARENA_MATCH_DURATION_MIN = 5</code> to <code>ARENA_MATCH_DURATION_MAX = 15</code> seconds — battle animation range</li></ul>
 <p><strong>Empty state</strong>: If no arena modes available (all behind feature flags), shows &quot;Arena opening soon&quot; with pixel-art locked door illustration</p>
 <hr>
-<h3>§8.6 Battle Result Page — Route: <code>/arena/result/:battleId</code></h3>
+<h3 id="86-battle-result-page--route-arenaresultbattleid">§8.6 Battle Result Page — Route: <code>/arena/result/:battleId</code></h3>
 <p><strong>Visual hierarchy</strong>:</p>
 <ol><li>WIN/LOSS banner (hero — full width, dominant color treatment)</li><li>Stat comparison table (both pets side by side)</li><li>Share battle URL button (social growth mechanism)</li><li>Action buttons row (Enter Again / Return to Pet / View Leaderboard)</li></ol>
 <p><strong>Color usage</strong>:</p>
 <ul><li>WIN state: <code>--color-rarity-legendary</code> (#fdcb6e) border + gold particle burst (24 particles)</li><li>LOSS state: <code>--color-text-secondary</code> palette, muted — motivational message in <code>--color-brand-secondary</code></li><li>Winning stat cells: highlighted in <code>--color-brand-accent</code></li><li>Share button: <code>--button-primary-bg</code> with share icon</li></ul>
 <p><strong>Loading/animation</strong>: WIN reveal triggers 1200ms celebration (<code>--motion-celebration-duration</code>); LOSS reveals with 400ms <code>ease-out-expo</code> fade. Battle animation from Phaser.js precedes this page (5–15s per CONSTANTS).</p>
 <hr>
-<h3>§8.7 Leaderboard Page — Route: <code>/leaderboard</code></h3>
+<h3 id="87-leaderboard-page--route-leaderboard">§8.7 Leaderboard Page — Route: <code>/leaderboard</code></h3>
 <p><strong>Visual hierarchy (F-pattern)</strong>:</p>
 <ol><li>Page title + rarity filter tabs (first F-bar)</li><li>Owner rank banner (if pet token present) — slides in below nav</li><li>Leaderboard table (F-pattern scan: rank # left → pet name → rarity badge → score → win rate)</li><li>Pagination / infinite scroll trigger at bottom</li></ol>
 <p><strong>Color usage</strong>:</p>
@@ -1285,7 +1358,7 @@
 <ul><li><code>LEADERBOARD_TOP_DISPLAY = 100</code> — default view shows top 100</li><li><code>LEADERBOARD_UPDATE_LAG_MAX = 30</code> seconds — max eventual consistency lag</li></ul>
 <p><strong>Empty state</strong>: Shown while loading — skeleton shimmer rows matching table column layout</p>
 <hr>
-<h3>§8.8 Battle Records Page — Route: <code>/pet/:petId/records</code></h3>
+<h3 id="88-battle-records-page--route-petpetidrecords">§8.8 Battle Records Page — Route: <code>/pet/:petId/records</code></h3>
 <p><strong>Visual hierarchy</strong>:</p>
 <ol><li>Pet profile card (sprite + rarity + level + W/L ratio)</li><li>Share page button (prominent — this page is the viral growth surface)</li><li>Battle history table (last <code>ARENA_BATTLE_RECORDS_DISPLAY = 20</code> battles per CONSTANTS)</li><li>Empty state CTA when fewer than 20 battles</li></ol>
 <p><strong>Color usage</strong>:</p>
@@ -1293,15 +1366,15 @@
 <p><strong>Open Graph meta spec</strong> (social share card):</p>
 <ul><li>Image dimensions: 1200×630px</li><li>Layout: pet sprite (128×128px) left, name + rarity badge center, W/L record right</li><li>Background: <code>--color-surface-base</code> (#1a1a2e)</li><li>Border on pet sprite: rarity-tier color at 4px</li></ul>
 <hr>
-<h3>§8.9 Marketplace Page — Route: <code>/marketplace</code> (behind <code>FF_MARKETPLACE</code>)</h3>
+<h3 id="89-marketplace-page--route-marketplace-behind-ff_marketplace">§8.9 Marketplace Page — Route: <code>/marketplace</code> (behind <code>FF_MARKETPLACE</code>)</h3>
 <p>Active only when <code>DAU_MARKETPLACE_TRIGGER = 1000</code> users sustained for 2 weeks (per CONSTANTS).</p>
 <p><strong>Visual hierarchy</strong>:</p>
 <ol><li>Feature gate banner if FF OFF (amber, DAU progress)</li><li>Filter/sort bar (rarity filter + sort by: level, rarity, recency)</li><li>Pet listing grid (card-based, rarity border treatment)</li><li>Individual listing card: sprite, rarity badge, level, trade terms</li></ol>
 <p><strong>Key numbers</strong> (from CONSTANTS):</p>
 <ul><li><code>MARKETPLACE_TRADE_ANTIFLIP_PROTECTION = 7 days</code> — shown in trade confirmation</li><li><code>TRADE_TRANSACTION_FEE = 5%</code> — shown as fee disclosure before confirm</li><li>Trade minimum price formula: <code>(pet_level × 100) + (rarity_multiplier × 500)</code> using rarity multipliers (Common=1, Rare=2, Epic=4, Legendary=8)</li></ul>
 <hr>
-<h2>§9 Accessibility Visual Standards</h2>
-<h3>§9.1 Contrast Ratio Verification Table</h3>
+<h2 id="9-accessibility-visual-standards">§9 Accessibility Visual Standards</h2>
+<h3 id="91-contrast-ratio-verification-table">§9.1 Contrast Ratio Verification Table</h3>
 <table>
 <tr><th>UI Element</th><th>Token</th><th>Foreground Hex</th><th>Background Hex</th><th>Contrast Ratio</th><th>WCAG Level</th><th>Notes</th></tr>
 <tr><td>Body text</td><td><code>--color-text-primary</code> on <code>--color-surface-base</code></td><td><code>#e8e8f0</code></td><td><code>#1a1a2e</code></td><td><strong>12.4:1</strong></td><td>AAA</td><td>Primary reading text</td></tr>
@@ -1320,7 +1393,7 @@
 <tr><td>Text on raised surface</td><td><code>--color-text-primary</code> on <code>--color-surface-raised</code></td><td><code>#e8e8f0</code></td><td><code>#242444</code></td><td><strong>11.1:1</strong></td><td>AAA</td><td>Text on cards/modals</td></tr>
 </table>
 <blockquote><p><strong>Design Review Required</strong>: Two pairings in the table above have contrast ratios below WCAG AA (4.5:1 for normal text): &quot;Brand primary (button text)&quot; at 3.51:1 and &quot;Warning banner text&quot; at 2.59:1. Both must undergo design review and remediation before production launch.</p></blockquote>
-<h3>§9.2 Focus Style Specifications</h3>
+<h3 id="92-focus-style-specifications">§9.2 Focus Style Specifications</h3>
 <p>All interactive elements use a consistent focus ring derived from <code>--color-focus</code> (#ffd700):</p>
 <pre><code class="language-css">/* Global focus ring — applied via :focus-visible to avoid visible focus on mouse click */
 :focus-visible {
@@ -1342,7 +1415,7 @@
 }</code></pre>
 <p><strong>Focus ring contrast verification</strong>:</p>
 <ul><li><code>#ffd700</code> on <code>#1a1a2e</code> (dark base): 12.1:1 — exceeds AAA</li><li><code>#ffd700</code> on <code>#242444</code> (raised surface): 11.1:1 — exceeds AAA</li><li><code>#ffd700</code> on <code>#6c5ce7</code> (primary button): 4.2:1 — meets AA</li></ul>
-<h3>§9.3 Color-Blind Accessibility Check</h3>
+<h3 id="93-color-blind-accessibility-check">§9.3 Color-Blind Accessibility Check</h3>
 <p>The rarity system must be distinguishable without relying solely on hue. Each tier uses a combination of:</p>
 <table>
 <tr><th>Rarity</th><th>Hue</th><th>Saturation</th><th>Lightness</th><th>Additional Differentiator</th></tr>
@@ -1353,10 +1426,10 @@
 </table>
 <p><strong>Deuteranopia / protanopia check</strong>: Rare (teal) and Legendary (gold) remain perceptually distinct under red-green color blindness simulation. Epic (purple) and Common (grey) are also differentiated by saturation, not just hue. Text labels accompany all rarity badges as a redundant signal (per WCAG 1.4.1 Use of Color).</p>
 <p><strong>Tritanopia check</strong>: Gold and teal can appear similar under blue-yellow color blindness. Mitigation: Epic (purple) and Legendary (gold) are further differentiated by animation treatment (epic-shimmer vs. legendary-shimmer + CRT glow), ensuring all four tiers remain distinguishable.</p>
-<h3>§9.4 Icon Accessibility Guidelines</h3>
+<h3 id="94-icon-accessibility-guidelines">§9.4 Icon Accessibility Guidelines</h3>
 <ul><li>All functional icons (share, copy, enter arena) have an accessible label on the parent interactive element (<code>aria-label</code> on <code>&lt;button&gt;</code>)</li><li>All decorative icons use <code>aria-hidden=&quot;true&quot;</code> with empty <code>alt=&quot;&quot;</code></li><li>Icon-only buttons must have a visible tooltip on hover/focus (<code>title</code> attribute + tooltip component)</li><li>Icon sizes meet minimum touch targets: 16px icon inside 44×44px button minimum</li><li>Pixel-art icons maintain ≥ 3:1 contrast ratio against their container background (non-text contrast per WCAG 1.4.11)</li></ul>
 <hr>
-<h2>§10 開放問題 (Open Questions)</h2>
+<h2 id="10-開放問題-open-questions">§10 開放問題 (Open Questions)</h2>
 <table>
 <tr><th>#</th><th>問題</th><th>優先度</th><th>負責人</th><th>截止日</th></tr>
 <tr><td>OQ-01</td><td>Pixel-art sprite sheet 是否採用外包，或由 AI 工具生成原始素材？影響 §7 Asset Pipeline 的交付規格</td><td>HIGH</td><td>Art Director</td><td>TBD</td></tr>
@@ -1365,8 +1438,8 @@
 <tr><td>OQ-04</td><td>Admin portal 是否需要自訂 branding（logo、色調），或維持目前中性風格？</td><td>LOW</td><td>Product Manager</td><td>TBD</td></tr>
 </table>
 <hr>
-<h2>§11 工程交付規格 (Engineering Handoff Specification)</h2>
-<h3>§11.1 交付物清單</h3>
+<h2 id="11-工程交付規格-engineering-handoff-specification">§11 工程交付規格 (Engineering Handoff Specification)</h2>
+<h3 id="111-交付物清單">§11.1 交付物清單</h3>
 <table>
 <tr><th>交付物</th><th>格式</th><th>負責人</th><th>狀態</th></tr>
 <tr><td>Design Tokens (CSS variables)</td><td><code>tokens.css</code></td><td>Frontend Architect</td><td>To Implement</td></tr>
@@ -1376,10 +1449,10 @@
 <tr><td>Icon set (functional + decorative)</td><td>SVG sprite</td><td>Design Lead</td><td>To Design</td></tr>
 <tr><td>Color palette file</td><td><code>palette.json</code> (HSL + hex)</td><td>Design Lead</td><td>To Design</td></tr>
 </table>
-<h3>§11.2 交付標準</h3>
+<h3 id="112-交付標準">§11.2 交付標準</h3>
 <ul><li>所有 token 必須與 <code>docs/CONSTANTS.md §1</code> 數值對齊</li><li>Sprite 須通過 §9 的 contrast ratio 測試</li><li>每個元件附 focus / hover / disabled 三態規格</li><li>所有 motion spec 須滿足 <code>prefers-reduced-motion: reduce</code> fallback</li></ul>
 <hr>
-<h2>§12 參考文件 (References)</h2>
+<h2 id="12-參考文件-references">§12 參考文件 (References)</h2>
 <table>
 <tr><th>文件</th><th>路徑</th><th>說明</th></tr>
 <tr><td>PRD</td><td><code>docs/PRD.md</code></td><td>功能需求與 A11y NFR 來源</td></tr>
@@ -1391,9 +1464,9 @@
 <tr><td>CSS Custom Properties</td><td>https://developer.mozilla.org/en-US/docs/Web/CSS/--*</td><td>Design token 實作參考</td></tr>
 </table>
 <hr>
-<h2>§13 Admin UI Design Specs</h2>
+<h2 id="13-admin-ui-design-specs">§13 Admin UI Design Specs</h2>
 <blockquote><p>This section covers the admin backend design since <code>has_admin_backend = true</code> (per PRD Document Control).</p></blockquote>
-<h3>§13.1 Admin Color Scheme</h3>
+<h3 id="131-admin-color-scheme">§13.1 Admin Color Scheme</h3>
 <p>The admin portal uses a <strong>distinct, professional color scheme</strong> deliberately separated from the frontend pixel-art brand. The admin visual language is: dark sidebar, neutral-light content area, data-dense tables. This prevents operators from confusing admin and player contexts.</p>
 <p><strong>Admin Surface Tokens</strong>:</p>
 <table>
@@ -1418,7 +1491,7 @@
 <tr><td><code>--admin-success-text</code></td><td><code>#065f46</code></td><td><strong>7.8:1 on white</strong></td><td>AAA — success labels</td></tr>
 </table>
 <p><strong>Note on sidebar contrast</strong>: <code>--admin-sidebar-text</code> (<code>var(--primitive-grey-50)</code>) on <code>--admin-sidebar-bg</code> (<code>var(--primitive-grey-900)</code>) achieves <strong>15.2:1</strong> — well above the AAA minimum of 7:1 required for high-stakes admin interfaces.</p>
-<h3>§13.2 Admin Layout Specs</h3>
+<h3 id="132-admin-layout-specs">§13.2 Admin Layout Specs</h3>
 <table>
 <tr><th>Element</th><th>Dimension</th><th>Notes</th></tr>
 <tr><td>Sidebar width (expanded)</td><td><strong>240px</strong></td><td>Fixed left sidebar; collapses to 64px (icon-only) on smaller admin screens</td></tr>
@@ -1432,7 +1505,7 @@
 <tr><td>Admin touch target</td><td><strong>36px</strong> minimum</td><td>Admin is desktop-primary; WCAG 2.5.5 still applies</td></tr>
 </table>
 <p><strong>Admin layout grid</strong>: 12-column CSS grid in content area. Dashboard metric cards: 4-column each (3 per row). Full-width tables: 12-column span.</p>
-<h3>§13.3 Element Plus Theme Customization Variables</h3>
+<h3 id="133-element-plus-theme-customization-variables">§13.3 Element Plus Theme Customization Variables</h3>
 <p>The admin portal uses Element Plus (Vue 3 component library) with a custom theme aligned to the admin color scheme. The following 7 <code>--el-color-primary-*</code> values must be calculated and applied:</p>
 <table>
 <tr><th>CSS Variable</th><th>Hex Value</th><th>Calculation Method</th><th>[AI 推斷]</th></tr>
@@ -1454,7 +1527,7 @@
   --el-color-primary-light-9: #edebfd;
   --el-color-primary-dark-2: #5548d5;
 }</code></pre>
-<h3>§13.4 Admin Table / Form Design Specs</h3>
+<h3 id="134-admin-table--form-design-specs">§13.4 Admin Table / Form Design Specs</h3>
 <p><strong>5 Table Scenarios</strong>:</p>
 <table>
 <tr><th>Scenario</th><th>Table Name</th><th>Key Columns</th><th>Special Treatment</th></tr>
@@ -1483,8 +1556,8 @@
 </table>
 <p>All role tag combinations are verified at minimum 4.5:1 contrast (AA) for their respective text/background pairing. [AI 推斷]</p>
 <hr>
-<h2>Appendix A: Token Quick Reference</h2>
-<h3>A.1 Critical Token Values at a Glance</h3>
+<h2 id="appendix-a-token-quick-reference">Appendix A: Token Quick Reference</h2>
+<h3 id="a1-critical-token-values-at-a-glance">A.1 Critical Token Values at a Glance</h3>
 <table>
 <tr><th>Token</th><th>Dark Hex</th><th>Purpose</th></tr>
 <tr><td><code>--color-surface-base</code></td><td><code>#1a1a2e</code></td><td>Page background</td></tr>
@@ -1499,7 +1572,7 @@
 <tr><td><code>--admin-sidebar-bg</code></td><td><code>#111827</code></td><td>Admin sidebar</td></tr>
 <tr><td><code>--admin-content-bg</code></td><td><code>#f9fafb</code></td><td>Admin content area</td></tr>
 </table>
-<h3>A.2 Key Animation Durations</h3>
+<h3 id="a2-key-animation-durations">A.2 Key Animation Durations</h3>
 <table>
 <tr><th>Purpose</th><th>Duration</th><th>Easing</th><th>Reduced Motion</th></tr>
 <tr><td>Button press</td><td>120ms</td><td><code>--primitive-ease-spring</code></td><td>Instant</td></tr>
@@ -1508,7 +1581,7 @@
 <tr><td>Rarity reveal</td><td>600ms</td><td><code>--primitive-ease-spring</code></td><td>Instant</td></tr>
 <tr><td>Victory celebration</td><td>1200ms</td><td><code>--primitive-ease-out-expo</code></td><td>Instant reveal</td></tr>
 </table>
-<h3>A.3 CONSTANTS Cross-Reference for VDD</h3>
+<h3 id="a3-constants-cross-reference-for-vdd">A.3 CONSTANTS Cross-Reference for VDD</h3>
 <table>
 <tr><th>CONSTANTS Name</th><th>Value</th><th>VDD Section Referenced</th></tr>
 <tr><td><code>PET_STAT_MAX</code></td><td>100</td><td>§6.3 Stat Bar tokens, §8.4 Training Page</td></tr>
@@ -1530,23 +1603,23 @@
 <tr><td><code>GDPR_EMAIL_HASHING_INTERNAL_SLA</code></td><td>24h</td><td>§13.4 Admin Form F2</td></tr>
 </table>
 <hr>
-<h2>§14 Seasonal &amp; Event Visual Variants</h2>
-<h3>Mutable Elements (can change for seasonal events)</h3>
+<h2 id="14-seasonal--event-visual-variants">§14 Seasonal &amp; Event Visual Variants</h2>
+<h3 id="mutable-elements-can-change-for-seasonal-events">Mutable Elements (can change for seasonal events)</h3>
 <ul><li>Color scheme overlay (e.g., Halloween dark orange tint on <code>--color-surface-base</code>)</li><li>Event-specific pet background illustrations</li><li>Navigation banner background</li><li>Arena border treatment (alternative glow colors for event seasons)</li></ul>
-<h3>Immutable Elements (core brand — never change)</h3>
+<h3 id="immutable-elements-core-brand--never-change">Immutable Elements (core brand — never change)</h3>
 <ul><li>Logo treatment and wordmark</li><li><code>--color-brand-primary</code> (purple) and <code>--color-rarity-*</code> system</li><li>Press Start 2P as primary display font</li><li>Pixel grid alignment rules (4px/8px grid snap)</li><li>WCAG contrast requirements</li></ul>
-<h3>Example: Winter Tournament Variant</h3>
+<h3 id="example-winter-tournament-variant">Example: Winter Tournament Variant</h3>
 <ul><li><code>--color-surface-base</code> shifts to <code>oklch(8% 0.02 220)</code> — deep ice blue</li><li>Event accent: <code>oklch(90% 0.04 210)</code> — ice white</li><li>Snowflake particle system on arena background (CSS only, no layout impact)</li><li>Seasonal banner replaces standard nav background (same dimensions, different illustration)</li></ul>
 <hr>
-<h2>§15 Brand Extension Guidelines</h2>
-<h3>Scenario 1: Seasonal Tournament Sub-brand (e.g., &quot;Championship Edition&quot;)</h3>
+<h2 id="15-brand-extension-guidelines">§15 Brand Extension Guidelines</h2>
+<h3 id="scenario-1-seasonal-tournament-sub-brand-eg-championship-edition">Scenario 1: Seasonal Tournament Sub-brand (e.g., &quot;Championship Edition&quot;)</h3>
 <ul><li><strong>Logo</strong>: Existing wordmark + &quot;Championship&quot; in <code>--text-small</code> Inter, positioned below in gold (<code>--color-brand-accent</code>)</li><li><strong>Color system</strong>: All standard tokens maintained; add supplementary <code>--color-tournament-accent = oklch(72% 0.24 45)</code> (gold variant)</li><li><strong>Typography</strong>: No change (Press Start 2P + Inter)</li><li><strong>Cannot</strong>: change purple <code>--color-brand-primary</code> or rarity token values</li></ul>
-<h3>Scenario 2: Community Partnership / Co-branding</h3>
+<h3 id="scenario-2-community-partnership--co-branding">Scenario 2: Community Partnership / Co-branding</h3>
 <ul><li><strong>Logo placement</strong>: Partner logo appears at same optical weight as Pixel Pet Arena logo; maximum 80% of PPA logo height</li><li><strong>Color hierarchy</strong>: PPA <code>--color-brand-primary</code> takes precedence; partner primary color used as accent only</li><li><strong>Background</strong>: PPA dark surface (<code>#0d1117</code> equiv.) is required; partner cannot mandate light background</li><li><strong>Required disclaimer text</strong>: &quot;Powered by Pixel Pet Arena&quot; in <code>--text-caption</code> size</li></ul>
 <hr>
 <p><em>This VDD was generated by the VDD Gen Agent from upstream documents IDEA-PIXEL-PET-ARENA-20260503, BRD-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, and CONSTANTS-PIXEL-PET-ARENA-20260503. All AI-inferred values are marked [AI 推斷]. Token values that inherit directly from PDD §9 are not marked as AI-inferred.</em></p>
 <hr>
-<h2>§14 審核簽核 (Approval Sign-off)</h2>
+<h2 id="14-審核簽核-approval-sign-off">§14 審核簽核 (Approval Sign-off)</h2>
 <table>
 <tr><th>角色</th><th>姓名 / 負責人</th><th>審核日期</th><th>簽核狀態</th></tr>
 <tr><td>Art Director</td><td>TBD</td><td>—</td><td>Pending</td></tr>

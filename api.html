@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,55 +334,9 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>API Specification — pixel-pet-arena</h1>
+    <main class="doc-content"><h1 id="api-specification--pixel-pet-arena">API Specification — pixel-pet-arena</h1>
 <p><strong>DOC-ID</strong>: API-PIXEL-PET-ARENA-20260503</p>
 <p><strong>Version</strong>: v1.0</p>
 <p><strong>Status</strong>: DRAFT</p>
@@ -271,15 +344,15 @@
 <p><strong>Date</strong>: 2026-05-03</p>
 <p><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, ARCH-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
 <hr>
-<h2>Table of Contents</h2>
-<ol><li><a href="#1-overview" target="_blank" rel="noopener">Overview</a></li><li><a href="#2-authentication" target="_blank" rel="noopener">Authentication</a></li><li><a href="#3-rate-limiting" target="_blank" rel="noopener">Rate Limiting</a></li><li><a href="#4-error-response-format" target="_blank" rel="noopener">Error Response Format</a></li><li><a href="#5-public-player-api" target="_blank" rel="noopener">Public Player API — <code>/api/v1/</code></a></li></ol>
-<ul><li style="margin-left:1.5rem">5.1 <a href="#51-claim-flow" target="_blank" rel="noopener">Claim Flow</a></li><li style="margin-left:1.5rem">5.2 <a href="#52-pet-endpoints" target="_blank" rel="noopener">Pet Endpoints</a></li><li style="margin-left:1.5rem">5.3 <a href="#53-arena-endpoints" target="_blank" rel="noopener">Arena Endpoints</a></li><li style="margin-left:1.5rem">5.4 <a href="#54-leaderboard-endpoints" target="_blank" rel="noopener">Leaderboard Endpoints</a></li><li style="margin-left:1.5rem">5.5 <a href="#55-gdpr-self-service-endpoints" target="_blank" rel="noopener">GDPR Self-Service Endpoints</a></li><li style="margin-left:1.5rem">5.6 <a href="#56-marketplace-endpoints-phase-3--ff_marketplace" target="_blank" rel="noopener">Marketplace Endpoints (Phase 3)</a></li></ul>
-<ol><li><a href="#6-admin-api" target="_blank" rel="noopener">Admin API — <code>/admin/api/</code></a></li></ol>
-<ul><li style="margin-left:1.5rem">6.1 <a href="#61-admin-authentication" target="_blank" rel="noopener">Admin Authentication</a></li><li style="margin-left:1.5rem">6.2 <a href="#62-admin-role-management" target="_blank" rel="noopener">Admin Role Management</a></li><li style="margin-left:1.5rem">6.3 <a href="#63-admin-pet-management" target="_blank" rel="noopener">Admin Pet Management</a></li><li style="margin-left:1.5rem">6.4 <a href="#64-admin-arena--battle-management" target="_blank" rel="noopener">Admin Arena &amp; Battle Management</a></li><li style="margin-left:1.5rem">6.5 <a href="#65-admin-leaderboard" target="_blank" rel="noopener">Admin Leaderboard</a></li><li style="margin-left:1.5rem">6.6 <a href="#66-admin-configuration" target="_blank" rel="noopener">Admin Configuration</a></li><li style="margin-left:1.5rem">6.7 <a href="#67-admin-gdpr-queue" target="_blank" rel="noopener">Admin GDPR Queue</a></li><li style="margin-left:1.5rem">6.8 <a href="#68-admin-audit-log" target="_blank" rel="noopener">Admin Audit Log</a></li><li style="margin-left:1.5rem">6.9 <a href="#69-admin-dashboard-analytics--email-monitor" target="_blank" rel="noopener">Admin Dashboard, Analytics &amp; Email Monitor</a></li></ul>
-<ol><li><a href="#7-websocket--real-time" target="_blank" rel="noopener">WebSocket / Real-Time</a></li><li><a href="#8-pagination" target="_blank" rel="noopener">Pagination</a></li><li><a href="#9-changelog--versioning" target="_blank" rel="noopener">Changelog / Versioning</a></li><li><a href="#10-health-check" target="_blank" rel="noopener">Health Check</a></li></ol>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol><li><a href="#1-overview">Overview</a></li><li><a href="#2-authentication">Authentication</a></li><li><a href="#3-rate-limiting">Rate Limiting</a></li><li><a href="#4-error-response-format">Error Response Format</a></li><li><a href="#5-public-player-api">Public Player API — <code>/api/v1/</code></a></li></ol>
+<ul><li style="margin-left:1.5rem">5.1 <a href="#51-claim-flow">Claim Flow</a></li><li style="margin-left:1.5rem">5.2 <a href="#52-pet-endpoints">Pet Endpoints</a></li><li style="margin-left:1.5rem">5.3 <a href="#53-arena-endpoints">Arena Endpoints</a></li><li style="margin-left:1.5rem">5.4 <a href="#54-leaderboard-endpoints">Leaderboard Endpoints</a></li><li style="margin-left:1.5rem">5.5 <a href="#55-gdpr-self-service-endpoints">GDPR Self-Service Endpoints</a></li><li style="margin-left:1.5rem">5.6 <a href="#56-marketplace-endpoints-phase-3--ff_marketplace">Marketplace Endpoints (Phase 3)</a></li></ul>
+<ol><li><a href="#6-admin-api">Admin API — <code>/admin/api/</code></a></li></ol>
+<ul><li style="margin-left:1.5rem">6.1 <a href="#61-admin-authentication">Admin Authentication</a></li><li style="margin-left:1.5rem">6.2 <a href="#62-admin-role-management">Admin Role Management</a></li><li style="margin-left:1.5rem">6.3 <a href="#63-admin-pet-management">Admin Pet Management</a></li><li style="margin-left:1.5rem">6.4 <a href="#64-admin-arena--battle-management">Admin Arena &amp; Battle Management</a></li><li style="margin-left:1.5rem">6.5 <a href="#65-admin-leaderboard">Admin Leaderboard</a></li><li style="margin-left:1.5rem">6.6 <a href="#66-admin-configuration">Admin Configuration</a></li><li style="margin-left:1.5rem">6.7 <a href="#67-admin-gdpr-queue">Admin GDPR Queue</a></li><li style="margin-left:1.5rem">6.8 <a href="#68-admin-audit-log">Admin Audit Log</a></li><li style="margin-left:1.5rem">6.9 <a href="#69-admin-dashboard-analytics--email-monitor">Admin Dashboard, Analytics &amp; Email Monitor</a></li></ul>
+<ol><li><a href="#7-websocket--real-time">WebSocket / Real-Time</a></li><li><a href="#8-pagination">Pagination</a></li><li><a href="#9-changelog--versioning">Changelog / Versioning</a></li><li><a href="#10-health-check">Health Check</a></li></ol>
 <hr>
-<h2>1. Overview</h2>
-<h3>1.1 Base URL</h3>
+<h2 id="1-overview">1. Overview</h2>
+<h3 id="11-base-url">1.1 Base URL</h3>
 <table>
 <tr><th>Environment</th><th>Base URL</th></tr>
 <tr><td>Production (Player API)</td><td><code>https://api.pixel-pet-arena.com/api/v1</code></td></tr>
@@ -287,17 +360,17 @@
 <tr><td>Local development</td><td><code>http://localhost:3000</code></td></tr>
 </table>
 <p>All player-facing routes use the <code>/api/v1/</code> prefix. All admin routes use the <code>/admin/api/</code> prefix. Both prefixes are served by the same Node.js/Fastify process; the admin plugin is registered under <code>/admin</code>.</p>
-<h3>1.2 Versioning Strategy</h3>
+<h3 id="12-versioning-strategy">1.2 Versioning Strategy</h3>
 <ul><li><strong>Current version</strong>: <code>v1</code></li><li><strong>Versioning scheme</strong>: URI path versioning (<code>/api/v1/</code>, <code>/api/v2/</code>, …)</li><li><strong>Backward compatibility</strong>: The platform maintains backward compatibility for at least <strong>1 major version</strong> simultaneously (<code>api_backward_compat_versions = 1</code> from <code>constants.json</code>).</li><li><strong>Deprecation notice</strong>: Deprecated API versions receive a minimum <strong>90 days</strong> advance notice before removal (<code>api_deprecation_notice_days = 90</code> from <code>constants.json</code>). Deprecated endpoints will respond with a <code>Deprecation</code> response header indicating the removal date.</li><li><strong>Admin API</strong>: The admin API (<code>/admin/api/</code>) follows the same deprecation policy but is not versioned separately from the player API.</li></ul>
-<h3>1.3 Content Type</h3>
+<h3 id="13-content-type">1.3 Content Type</h3>
 <p>All requests and responses use:</p>
 <pre><code class="">Content-Type: application/json</code></pre>
 <p>Request bodies must be JSON-encoded. Endpoints that accept no body (GET and body-less DELETE) must not include a <code>Content-Type</code> request header. DELETE endpoints that carry a request body (e.g. <code>DELETE /admin/api/battles/:matchId/flag</code>) must include <code>Content-Type: application/json</code> like any other body-bearing request.</p>
-<h3>1.4 HTTPS</h3>
+<h3 id="14-https">1.4 HTTPS</h3>
 <p>All endpoints require TLS. Plain HTTP requests are rejected at the load balancer level with a redirect to HTTPS.</p>
 <hr>
-<h2>2. Authentication</h2>
-<h3>2.1 Pet Access Token (Player Endpoints)</h3>
+<h2 id="2-authentication">2. Authentication</h2>
+<h3 id="21-pet-access-token-player-endpoints">2.1 Pet Access Token (Player Endpoints)</h3>
 <p>Most write-capable player endpoints require a <strong>pet access token</strong> — a 32-byte cryptographically random URL-safe Base64 string (<code>pet_access_token_min_bytes = 32</code> from <code>constants.json</code>).</p>
 <p><strong>How a token is obtained:</strong></p>
 <ol><li>Player calls <code>POST /api/v1/claim</code> with their email and pet ID.</li><li>System sends a 6-digit OTP to the email (<code>claim_code_digits = 6</code> from <code>constants.json</code>).</li><li>Player submits the OTP to <code>POST /api/v1/claim/verify</code>.</li><li>On success, the server responds with <code>petToken</code> (the 32-byte token) and <code>petUrl</code> (the bookmarkable URL that embeds the token). <strong>This is the only time the raw token is transmitted.</strong></li><li>The server stores only the SHA-256 hash of the token in <code>pets.owner_token_hash</code>. The raw token is never stored.</li></ol>
@@ -309,7 +382,7 @@
 <ul><li>Tokens do not expire automatically.</li><li>A token is invalidated immediately if an admin revokes it (sets <code>owner_token_hash = NULL</code>) or if a recovery flow issues a replacement. Replaced tokens are added to a Redis blacklist (<code>token:blacklist:{token_hash}</code>) with a 72-hour TTL (<code>claim_token_cleanup_ttl_hours = 72</code> — this constant governs both claim_codes row cleanup and token blacklist TTL by design; both use the same 72-hour window per EDD §4.3 and §4.8).</li></ul>
 <p><strong>Token recovery:</strong></p>
 <p>Players who lose their bookmarked URL may recover access via <code>POST /api/v1/claim/recover</code>. A new OTP is sent; on verification, a fresh token is issued and the old token is invalidated.</p>
-<h3>2.2 Admin Session Token</h3>
+<h3 id="22-admin-session-token">2.2 Admin Session Token</h3>
 <p>Admin operators authenticate via username + password + TOTP. On success, the server creates a server-side session stored in Redis and sets a session cookie.</p>
 <p><strong>Cookie properties:</strong></p>
 <pre><code class="">Set-Cookie: session=&lt;session_id&gt;; HttpOnly; SameSite=Strict; Secure; Path=/admin</code></pre>
@@ -322,7 +395,7 @@
 <p>Every authenticated admin request resets the inactivity clock. When the absolute expiry is reached, the session is invalidated regardless of activity.</p>
 <p><strong>First-login TOTP enrollment:</strong></p>
 <p>On first login, if TOTP is not yet configured, the server returns HTTP 403 using the standard error envelope (§4.1) with <code>error.code = &quot;TOTP_SETUP_REQUIRED&quot;</code> and <code>error.details.setupToken</code> containing a short-lived signed JWT. The admin must complete TOTP setup via <code>POST /admin/api/auth/totp/setup</code> before a session is granted.</p>
-<h3>2.3 Authentication Errors</h3>
+<h3 id="23-authentication-errors">2.3 Authentication Errors</h3>
 <table>
 <tr><th>Scenario</th><th>HTTP Status</th><th>Error Code</th></tr>
 <tr><td>Missing or invalid <code>Authorization: Bearer</code> token</td><td>401</td><td><code>UNAUTHORIZED</code></td></tr>
@@ -334,9 +407,9 @@
 <tr><td>TOTP setup required before first session</td><td>403</td><td><code>TOTP_SETUP_REQUIRED</code></td></tr>
 </table>
 <hr>
-<h2>3. Rate Limiting</h2>
+<h2 id="3-rate-limiting">3. Rate Limiting</h2>
 <p>All rate limits are enforced via Redis counters. When a limit is exceeded the server returns <strong>HTTP 429</strong> with a <code>Retry-After</code> header indicating seconds to wait.</p>
-<h3>3.1 Player Rate Limits</h3>
+<h3 id="31-player-rate-limits">3.1 Player Rate Limits</h3>
 <table>
 <tr><th>Limit</th><th>Value</th><th>Constant</th><th>Scope</th><th>Redis Key Pattern</th></tr>
 <tr><td>Arena battles per pet per hour (default)</td><td><strong>10</strong></td><td><code>arena_battles_per_pet_per_hour_default = 10</code></td><td>Per pet ID</td><td><code>rl:arena:{pet_id}</code> TTL 3600s</td></tr>
@@ -350,7 +423,7 @@
 <p><strong>Important</strong>: The arena battle rate limit is the default value. Admins may tune it within the range <code>[arena_rate_limit_admin_min, arena_rate_limit_admin_max]</code> via <code>PUT /admin/api/config/runtime</code>. Changes take effect within 5 minutes (<code>config_cache_refresh_time_minutes = 5</code>).</p>
 <p><strong>Fail-open / fail-closed behavior:</strong></p>
 <ul><li>Player rate limits (arena, claim email) are <strong>fail-open</strong>: if Redis is unavailable, the counter is not enforced but the failure is logged as an alert.</li><li>OTP code entry rate limit is <strong>fail-closed</strong>: if Redis is unavailable, code entry is blocked to prevent brute-force bypass.</li></ul>
-<h3>3.2 Admin Rate Limits</h3>
+<h3 id="32-admin-rate-limits">3.2 Admin Rate Limits</h3>
 <table>
 <tr><th>Limit</th><th>Value</th><th>Constant</th><th>Scope</th><th>Redis Key Pattern</th></tr>
 <tr><td>Admin portal requests per minute</td><td><strong>100</strong></td><td><code>admin_portal_requests_per_minute_per_account = 100</code></td><td>Per admin account</td><td><code>rl:admin:{admin_id}</code> TTL 60s</td></tr>
@@ -360,9 +433,9 @@
 <tr><td>Admin account lockout duration</td><td><strong>30 minutes</strong></td><td><code>admin_login_lockout_duration_minutes = 30</code></td><td>Per admin account</td><td><code>admin_users.locked_until</code> column</td></tr>
 </table>
 <hr>
-<h2>4. Error Response Format</h2>
+<h2 id="4-error-response-format">4. Error Response Format</h2>
 <p>All errors use a standard envelope. Successful responses also use this envelope with <code>&quot;success&quot;: true</code> and <code>&quot;error&quot;: null</code>.</p>
-<h3>4.1 Standard Envelope</h3>
+<h3 id="41-standard-envelope">4.1 Standard Envelope</h3>
 <pre><code class="language-json">{
   &quot;success&quot;: false,
   &quot;data&quot;: null,
@@ -384,7 +457,7 @@
   }
 }</code></pre>
 <p>The <code>details</code> field is optional and only populated when additional structured context is useful (e.g. validation field errors). It is omitted in production when it would expose internal implementation details.</p>
-<h3>4.2 HTTP Status Code Reference</h3>
+<h3 id="42-http-status-code-reference">4.2 HTTP Status Code Reference</h3>
 <table>
 <tr><th>HTTP Status</th><th>Meaning</th></tr>
 <tr><td>200</td><td>Success</td></tr>
@@ -401,7 +474,7 @@
 <tr><td>500</td><td>Internal Server Error</td></tr>
 <tr><td>503</td><td>Service Unavailable (health check: one or more dependency checks failed)</td></tr>
 </table>
-<h3>4.3 Error Code Reference</h3>
+<h3 id="43-error-code-reference">4.3 Error Code Reference</h3>
 <table>
 <tr><th>Error Code</th><th>HTTP</th><th>Description</th></tr>
 <tr><td><code>VALIDATION_ERROR</code></td><td>400</td><td>Request body or query parameters failed schema validation</td></tr>
@@ -429,12 +502,12 @@
 <tr><td><code>INTERNAL_SERVER_ERROR</code></td><td>500</td><td>Unexpected internal server error; <code>stack</code> and internal details are stripped from production responses</td></tr>
 </table>
 <hr>
-<h2>5. Public Player API</h2>
+<h2 id="5-public-player-api">5. Public Player API</h2>
 <p><strong>Base prefix</strong>: <code>/api/v1/</code></p>
 <p>All player endpoints return the standard JSON envelope. Read endpoints have a P99 latency target of <strong>&lt; 200 ms</strong> at 100 RPS (<code>p99_api_latency_read_ms_at_100_rps = 200</code>). Write endpoints (training, arena) have a P99 latency target of <strong>&lt; 500 ms</strong> at 100 RPS (<code>p99_api_latency_write_ms_at_100_rps = 500</code>).</p>
 <hr>
-<h3>5.1 Claim Flow</h3>
-<h4><code>POST /api/v1/claim</code></h4>
+<h3 id="51-claim-flow">5.1 Claim Flow</h3>
+<h4 id="post-apiv1claim"><code>POST /api/v1/claim</code></h4>
 <p>Initiates the email claim flow. Sends a 6-digit OTP to the provided email address and binds it to a specific unclaimed pet.</p>
 <p><strong>Auth</strong>: None (rate-limited by email address)</p>
 <p><strong>Request body:</strong></p>
@@ -474,7 +547,7 @@
 <tr><td>429</td><td><code>RATE_LIMIT_EXCEEDED</code></td><td>Hourly claim attempt limit exceeded</td></tr>
 </table>
 <hr>
-<h4><code>POST /api/v1/claim/verify</code></h4>
+<h4 id="post-apiv1claimverify"><code>POST /api/v1/claim/verify</code></h4>
 <p>Verifies the 6-digit OTP and, on success, issues the pet access token.</p>
 <p><strong>Auth</strong>: None (rate-limited by session)</p>
 <p><strong>Request body:</strong></p>
@@ -513,7 +586,7 @@
 <tr><td>429</td><td><code>MAX_ATTEMPTS_REACHED</code></td><td>10-attempt session limit reached (<code>claim_code_entry_attempts_per_session = 10</code>)</td></tr>
 </table>
 <hr>
-<h4><code>POST /api/v1/claim/recover</code></h4>
+<h4 id="post-apiv1claimrecover"><code>POST /api/v1/claim/recover</code></h4>
 <p>Sends a recovery OTP to the email associated with a previously claimed pet. Used when the player has lost their bookmarked URL. Always returns HTTP 200 regardless of whether the email/petId combination matches, to prevent account enumeration.</p>
 <p>On successful OTP verification via <code>POST /api/v1/claim/verify</code> (recovery path), the server atomically: (1) generates a new 32-byte token; (2) writes the old token hash to the Redis blacklist (<code>token:blacklist:{old_hash}</code>, TTL 72 hours); (3) updates <code>pets.owner_token_hash</code> with the new hash.</p>
 <p><strong>Auth</strong>: None</p>
@@ -539,8 +612,8 @@
 <tr><td>400</td><td><code>VALIDATION_ERROR</code></td><td>Malformed <code>email</code> or <code>petId</code> UUID</td></tr>
 </table>
 <hr>
-<h3>5.2 Pet Endpoints</h3>
-<h4><code>GET /api/v1/pets/random</code></h4>
+<h3 id="52-pet-endpoints">5.2 Pet Endpoints</h3>
+<h4 id="get-apiv1petsrandom"><code>GET /api/v1/pets/random</code></h4>
 <p>Generates a new unclaimed random pet for guest display. No authentication required. The pet is reserved in the database for 24 hours (<code>pet_reservation_ttl_hours = 24</code>) before cleanup.</p>
 <p><strong>Auth</strong>: None</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -577,7 +650,7 @@
 <tr><td><code>reservedUntil</code></td><td>The pet is reserved for 24 hours (<code>pet_reservation_ttl_hours = 24</code>). Client should display a countdown to encourage claiming.</td></tr>
 </table>
 <hr>
-<h4><code>GET /api/v1/pets/:petId</code></h4>
+<h4 id="get-apiv1petspetid"><code>GET /api/v1/pets/:petId</code></h4>
 <p>Fetches public pet data. Optionally authenticates to determine ownership.</p>
 <p><strong>Auth</strong>: Optional (<code>Authorization: Bearer &lt;petToken&gt;</code> or <code>?token=</code>)</p>
 <p><strong>Path parameters:</strong></p>
@@ -616,7 +689,7 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h4><code>GET /api/v1/pets/:petId/stats</code></h4>
+<h4 id="get-apiv1petspetidstats"><code>GET /api/v1/pets/:petId/stats</code></h4>
 <p>Returns the full stats panel for a pet including training history summary. <em>(EDD extension — not individually enumerated in EDD §5.2; the core stats are available on <code>GET /api/v1/pets/:petId</code> but this endpoint provides the training-history summary fields.)</em></p>
 <p><strong>Auth</strong>: Optional</p>
 <p><strong>Path parameters:</strong></p>
@@ -667,7 +740,7 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h4><code>POST /api/v1/pets/:petId/train</code></h4>
+<h4 id="post-apiv1petspetidtrain"><code>POST /api/v1/pets/:petId/train</code></h4>
 <p>Performs one training action on the authenticated player&#x27;s pet, incrementing a stat by 1–3 points.</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
 <p><strong>Request body:</strong></p>
@@ -710,7 +783,7 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h4><code>POST /api/v1/pets/:petId/feed</code></h4>
+<h4 id="post-apiv1petspetidfeed"><code>POST /api/v1/pets/:petId/feed</code></h4>
 <p>Applies a food buff to the authenticated player&#x27;s pet, granting a temporary or permanent stat increase.</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
 <p><strong>Request body:</strong></p>
@@ -761,8 +834,8 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h3>5.3 Arena Endpoints</h3>
-<h4><code>POST /api/v1/arena/enter</code></h4>
+<h3 id="53-arena-endpoints">5.3 Arena Endpoints</h3>
+<h4 id="post-apiv1arenaenter"><code>POST /api/v1/arena/enter</code></h4>
 <p>Enters the authenticated pet into the matchmaking queue for an arena battle. Uses HTTP long-polling: the request waits up to 30 seconds for an opponent (<code>arena_matchmaking_timeout_seconds = 30</code>). If no opponent is found and <code>acceptAI</code> is <code>true</code>, an AI battle is resolved immediately.</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
 <p><strong>Request body:</strong></p>
@@ -822,7 +895,7 @@
   }
 }</code></pre>
 <hr>
-<h4><code>GET /api/v1/arena/match/:matchId</code></h4>
+<h4 id="get-apiv1arenamatchmatchid"><code>GET /api/v1/arena/match/:matchId</code></h4>
 <p>Fetches the full record of a completed arena match. Public endpoint — no authentication required.</p>
 <p><strong>Auth</strong>: None</p>
 <p><strong>Path parameters:</strong></p>
@@ -870,7 +943,7 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No match with the given <code>matchId</code></td></tr>
 </table>
 <hr>
-<h4><code>GET /api/v1/arena/history/:petId</code></h4>
+<h4 id="get-apiv1arenahistorypetid"><code>GET /api/v1/arena/history/:petId</code></h4>
 <p>Returns the last 20 arena battles for a pet. Public endpoint.</p>
 <p><strong>Auth</strong>: None</p>
 <p><strong>Path parameters:</strong></p>
@@ -917,8 +990,8 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h3>5.4 Leaderboard Endpoints</h3>
-<h4><code>GET /api/v1/leaderboard</code></h4>
+<h3 id="54-leaderboard-endpoints">5.4 Leaderboard Endpoints</h3>
+<h4 id="get-apiv1leaderboard"><code>GET /api/v1/leaderboard</code></h4>
 <p>Returns the global leaderboard. Source: Redis sorted set (<code>leaderboard:global</code>). Update lag is at most 30 seconds (<code>leaderboard_update_lag_max_seconds = 30</code>). Returns the top <strong>100</strong> pets publicly (<code>leaderboard_top_display = 100</code>).</p>
 <p><strong>Auth</strong>: None</p>
 <p><strong>Query parameters:</strong></p>
@@ -959,7 +1032,7 @@
 <tr><td>400</td><td><code>VALIDATION_ERROR</code></td><td>Invalid <code>rarity</code> value or non-integer <code>page</code>/<code>limit</code></td></tr>
 </table>
 <hr>
-<h4><code>GET /api/v1/leaderboard/rank/:petId</code></h4>
+<h4 id="get-apiv1leaderboardrankpetid"><code>GET /api/v1/leaderboard/rank/:petId</code></h4>
 <p>Returns the leaderboard rank of a specific pet.</p>
 <p><strong>Auth</strong>: None</p>
 <p><strong>Path parameters:</strong></p>
@@ -984,9 +1057,9 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h3>5.5 GDPR Self-Service Endpoints</h3>
+<h3 id="55-gdpr-self-service-endpoints">5.5 GDPR Self-Service Endpoints</h3>
 <p>Players identify via their pet access token. GDPR requests are scoped to the <code>claim_identity_id</code> associated with the authenticated pet.</p>
-<h4><code>POST /api/v1/gdpr/request</code></h4>
+<h4 id="post-apiv1gdprrequest"><code>POST /api/v1/gdpr/request</code></h4>
 <p>Submits a GDPR request (erasure, data access, restrict processing, object leaderboard, or rectification).</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
 <p><strong>Request body:</strong></p>
@@ -1022,7 +1095,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Missing or invalid pet token</td></tr>
 </table>
 <hr>
-<h4><code>GET /api/v1/gdpr/request/status</code></h4>
+<h4 id="get-apiv1gdprrequeststatus"><code>GET /api/v1/gdpr/request/status</code></h4>
 <p>Checks the status of a specific GDPR request. The server validates that the authenticating pet token&#x27;s <code>claim_identity_id</code> matches the request&#x27;s identity before returning status (prevents cross-identity polling).</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
 <p><strong>Query parameters:</strong></p>
@@ -1052,24 +1125,24 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No GDPR request found with the given <code>jobId</code></td></tr>
 </table>
 <hr>
-<h3>5.6 Marketplace Endpoints (Phase 3 — FF_MARKETPLACE)</h3>
+<h3 id="56-marketplace-endpoints-phase-3--ff_marketplace">5.6 Marketplace Endpoints (Phase 3 — FF_MARKETPLACE)</h3>
 <p>These endpoints are <strong>only active when the feature flag <code>FF_MARKETPLACE</code> is enabled</strong>. All write endpoints require pet access token authentication. Browse endpoint is public.</p>
 <p>The platform fee on completed trades is <strong>5%</strong> (<code>trade_transaction_fee_percent = 5</code>), within the BRD-defined range of 5–10% (<code>trade_fee_range_brd_min_percent = 5</code>, <code>trade_fee_range_brd_max_percent = 10</code>).</p>
-<h4><code>GET /api/v1/marketplace/listings</code></h4>
+<h4 id="get-apiv1marketplacelistings"><code>GET /api/v1/marketplace/listings</code></h4>
 <p>Browse active marketplace listings.</p>
 <p><strong>Auth</strong>: None</p>
 <p><strong>Query parameters:</strong> <code>?page=1&amp;limit=20&amp;sortBy=price|rarity|level&amp;order=asc|desc</code></p>
 <p><strong>Response (HTTP 200):</strong> Paginated list of active listings with pet summary and price.</p>
-<h4><code>POST /api/v1/marketplace/listings</code></h4>
+<h4 id="post-apiv1marketplacelistings"><code>POST /api/v1/marketplace/listings</code></h4>
 <p>Create a new listing. Min price formula: <code>(pet_level <em> 100) + (rarity_multiplier </em> 500)</code>. Rarity multipliers: Common = 1, Rare = 2, Epic = 4, Legendary = 8 (<code>trade_min_price_formula_level_coeff = 100</code>, <code>trade_min_price_formula_rarity_coeff = 500</code>, <code>rarity_multiplier_*</code> values from <code>constants.json</code>). Anti-flip: Pet cannot be re-listed within <strong>7 days</strong> of its last completed purchase (<code>marketplace_trade_antiflip_protection_days = 7</code>).</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
-<h4><code>DELETE /api/v1/marketplace/listings/:listingId</code></h4>
+<h4 id="delete-apiv1marketplacelistingslistingid"><code>DELETE /api/v1/marketplace/listings/:listingId</code></h4>
 <p>Cancel an active listing. Only the listing&#x27;s owner may cancel.</p>
 <p><strong>Auth</strong>: Required (pet owner token — owner of listed pet)</p>
-<h4><code>POST /api/v1/marketplace/listings/:listingId/buy</code></h4>
+<h4 id="post-apiv1marketplacelistingslistingidbuy"><code>POST /api/v1/marketplace/listings/:listingId/buy</code></h4>
 <p>Purchase a listing. A <strong>5% platform fee</strong> (<code>trade_transaction_fee_percent = 5</code>) is deducted from the seller&#x27;s proceeds and credited to the platform.</p>
 <p><strong>Auth</strong>: Required (pet owner token — buyer&#x27;s token)</p>
-<h4><code>GET /api/v1/marketplace/history/:petId</code></h4>
+<h4 id="get-apiv1marketplacehistorypetid"><code>GET /api/v1/marketplace/history/:petId</code></h4>
 <p>Returns trade history for a pet. <strong>Private</strong> — only the pet&#x27;s current owner can view (trade prices are commercial-in-confidence).</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
 <p><strong>Error responses for all marketplace endpoints:</strong></p>
@@ -1082,7 +1155,7 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>Listing or pet not found (path-param endpoints)</td></tr>
 </table>
 <hr>
-<h2>6. Admin API</h2>
+<h2 id="6-admin-api">6. Admin API</h2>
 <p><strong>Base prefix</strong>: <code>/admin/api/</code></p>
 <p>All admin endpoints require a valid admin session cookie. All mutations write an entry to the audit log. Rate limit: <strong>100 requests per minute per admin account</strong> (<code>admin_portal_requests_per_minute_per_account = 100</code>; Redis key <code>rl:admin:{admin_id}</code>, TTL 60s).</p>
 <p><strong>Role access summary:</strong></p>
@@ -1093,8 +1166,8 @@
 <tr><td><code>read_only</code></td><td>GET-only access to dashboard, pet list, leaderboard, battle records, email monitor, analytics — no mutations</td></tr>
 </table>
 <hr>
-<h3>6.1 Admin Authentication</h3>
-<h4><code>POST /admin/api/auth/login</code></h4>
+<h3 id="61-admin-authentication">6.1 Admin Authentication</h3>
+<h4 id="post-adminapiauthlogin"><code>POST /admin/api/auth/login</code></h4>
 <p>Authenticates an admin with username, password, and TOTP code. On success, sets a session cookie.</p>
 <p><strong>Auth</strong>: None</p>
 <p><strong>Request body:</strong></p>
@@ -1133,7 +1206,7 @@
 <tr><td>429</td><td><code>RATE_LIMIT_EXCEEDED</code></td><td>IP pre-auth rate limit exceeded</td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/auth/totp/setup</code></h4>
+<h4 id="post-adminapiauthtotpsetup"><code>POST /admin/api/auth/totp/setup</code></h4>
 <p>Completes TOTP enrollment for a first-time admin login. Requires the short-lived <code>setupToken</code> returned by the login endpoint.</p>
 <p><strong>Auth</strong>: Setup token (signed JWT from login response — not a session)</p>
 <p><strong>Request body:</strong></p>
@@ -1174,7 +1247,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td><code>setupToken</code> is missing, invalid, or expired</td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/auth/logout</code></h4>
+<h4 id="post-adminapiauthlogout"><code>POST /admin/api/auth/logout</code></h4>
 <p>Invalidates the current admin session. Writes a logout event to the audit log.</p>
 <p><strong>Auth</strong>: Admin session</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1189,7 +1262,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid</td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/auth/totp/verify</code></h4>
+<h4 id="post-adminapiauthtotpverify"><code>POST /admin/api/auth/totp/verify</code></h4>
 <p>Verifies a TOTP code against the current admin&#x27;s secret. Used for step-up authentication before sensitive operations. <em>(EDD extension — not enumerated in EDD §5.5; complements the TOTP setup flow in EDD §6.3; required for Super Admin sensitive write operations.)</em></p>
 <p><strong>Auth</strong>: Admin session</p>
 <p><strong>Request body:</strong></p>
@@ -1211,8 +1284,8 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid, or TOTP code does not match</td></tr>
 </table>
 <hr>
-<h3>6.2 Admin Role Management</h3>
-<h4><code>GET /admin/api/roles</code></h4>
+<h3 id="62-admin-role-management">6.2 Admin Role Management</h3>
+<h4 id="get-adminapiroles"><code>GET /admin/api/roles</code></h4>
 <p>Lists all admin users and their roles.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Query parameters:</strong> <code>?page=1&amp;limit=20</code></p>
@@ -1240,7 +1313,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/roles</code></h4>
+<h4 id="post-adminapiroles"><code>POST /admin/api/roles</code></h4>
 <p>Creates a new admin account.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Request body:</strong></p>
@@ -1270,7 +1343,7 @@
 <tr><td>409</td><td><code>CONFLICT</code></td><td>Username already exists</td></tr>
 </table>
 <hr>
-<h4><code>DELETE /admin/api/roles/:adminId</code></h4>
+<h4 id="delete-adminapirolesadminid"><code>DELETE /admin/api/roles/:adminId</code></h4>
 <p>Soft-deactivates an admin account. Sets <code>deactivated_at = NOW()</code>. The account row is never hard-deleted (audit log FK integrity). Login is immediately blocked.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1289,7 +1362,7 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No admin account with the given <code>adminId</code></td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/roles/:adminId/totp/reset</code></h4>
+<h4 id="post-adminapirolesadminidtotpreset"><code>POST /admin/api/roles/:adminId/totp/reset</code></h4>
 <p>Resets TOTP for an admin account — clears <code>totp_secret_encrypted</code> and <code>totp_backup_codes_hash</code>, forcing re-enrollment on next login. Used when an admin loses their authenticator device.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1308,8 +1381,8 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No admin account with the given <code>adminId</code></td></tr>
 </table>
 <hr>
-<h3>6.3 Admin Pet Management</h3>
-<h4><code>GET /admin/api/pets</code></h4>
+<h3 id="63-admin-pet-management">6.3 Admin Pet Management</h3>
+<h4 id="get-adminapipets"><code>GET /admin/api/pets</code></h4>
 <p>Lists pets with optional search and filtering. Supports up to 1 million records with a response time target of ≤ 2 seconds (<code>admin_search_response_time_seconds = 2</code>).</p>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
 <p><strong>Query parameters:</strong></p>
@@ -1348,7 +1421,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid</td></tr>
 </table>
 <hr>
-<h4><code>GET /admin/api/pets/:petId</code></h4>
+<h4 id="get-adminapipetspetid"><code>GET /admin/api/pets/:petId</code></h4>
 <p>Returns full pet details including owner info and ban history. <em>(EDD extension — implied by ARCH §2.2 admin pet management; not individually enumerated in EDD §5.5 but required for the admin pet detail view.)</em></p>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
 <p><strong>Response (HTTP 200):</strong> Full pet record including <code>bannedReason</code>, <code>bannedAt</code>, <code>claimedAt</code>, <code>generationMeta</code>, current stats, and last 20 battle records.</p>
@@ -1359,7 +1432,7 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h4><code>PUT /admin/api/pets/:petId</code></h4>
+<h4 id="put-adminapipetspetid"><code>PUT /admin/api/pets/:petId</code></h4>
 <p>Updates administrative fields on a pet (e.g. correcting <code>petName</code> after content moderation review). <em>(EDD extension — not enumerated in EDD §5.5; scoped to Super Admin only for content moderation corrections; audit-logged.)</em></p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Request body:</strong> Partial pet fields that are admin-editable (e.g. <code>petName</code>).</p>
@@ -1380,7 +1453,7 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/pets/:petId/ban</code></h4>
+<h4 id="post-adminapipetspetidban"><code>POST /admin/api/pets/:petId/ban</code></h4>
 <p>Bans a pet. The pet is removed from the public leaderboard within <strong>5 minutes</strong> (<code>leaderboard_ban_reflection_time_minutes = 5</code>). Banned pets receive <code>PET_BANNED</code> on arena entry.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+</p>
 <p><strong>Request body:</strong></p>
@@ -1405,7 +1478,7 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/pets/:petId/unban</code></h4>
+<h4 id="post-adminapipetspetidunban"><code>POST /admin/api/pets/:petId/unban</code></h4>
 <p>Lifts a ban from a pet. Pet is restored to the leaderboard if eligible.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+</p>
 <p><strong>Request body:</strong></p>
@@ -1430,8 +1503,8 @@
 <tr><td>404</td><td><code>PET_NOT_FOUND</code></td><td>No pet with the given <code>petId</code> exists</td></tr>
 </table>
 <hr>
-<h3>6.4 Admin Arena &amp; Battle Management</h3>
-<h4><code>GET /admin/api/battles</code></h4>
+<h3 id="64-admin-arena--battle-management">6.4 Admin Arena &amp; Battle Management</h3>
+<h4 id="get-adminapibattles"><code>GET /admin/api/battles</code></h4>
 <p>Lists arena battles with optional filters.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
 <p><strong>Query parameters:</strong></p>
@@ -1471,7 +1544,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid</td></tr>
 </table>
 <hr>
-<h4><code>GET /admin/api/suspicious</code></h4>
+<h4 id="get-adminapisuspicious"><code>GET /admin/api/suspicious</code></h4>
 <p>Lists pets flagged by the bot detection system — pets with more than 50 battles in a 60-minute rolling window (<code>bot_detection_battles_threshold = 50</code>, <code>bot_detection_window_minutes = 60</code>).</p>
 <p><strong>Auth</strong>: Admin session — Moderator+</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1498,7 +1571,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is below <code>moderator</code></td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/battles/:matchId/flag</code></h4>
+<h4 id="post-adminapibattlesmatchidflag"><code>POST /admin/api/battles/:matchId/flag</code></h4>
 <p>Flags a battle record as suspicious.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+</p>
 <p><strong>Request body:</strong></p>
@@ -1521,7 +1594,7 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No match with the given <code>matchId</code></td></tr>
 </table>
 <hr>
-<h4><code>DELETE /admin/api/battles/:matchId/flag</code></h4>
+<h4 id="delete-adminapibattlesmatchidflag"><code>DELETE /admin/api/battles/:matchId/flag</code></h4>
 <p>Removes a flag from a battle record.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+</p>
 <p><strong>Request body:</strong></p>
@@ -1544,8 +1617,8 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No match with the given <code>matchId</code></td></tr>
 </table>
 <hr>
-<h3>6.5 Admin Leaderboard</h3>
-<h4><code>GET /admin/api/leaderboard</code></h4>
+<h3 id="65-admin-leaderboard">6.5 Admin Leaderboard</h3>
+<h4 id="get-adminapileaderboard"><code>GET /admin/api/leaderboard</code></h4>
 <p>Returns the top <strong>500</strong> pets (<code>leaderboard_admin_view = 500</code>), with suspicious-flag annotations for pets exceeding the battles-per-hour threshold (<code>leaderboard_admin_suspicious_flag_battles_per_hour = 50</code>).</p>
 <blockquote><p><strong>Pagination</strong>: This endpoint is a <strong>hard-capped list</strong>, not paginated. It always returns up to 500 entries in a single response. The standard <code>page</code>/<code>limit</code> pagination parameters (§8) do not apply here. The <code>meta</code> envelope is omitted; total entry count is implicitly bounded by <code>leaderboard_admin_view = 500</code>.</p></blockquote>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
@@ -1577,7 +1650,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid</td></tr>
 </table>
 <hr>
-<h4><code>DELETE /admin/api/leaderboard/:petId</code></h4>
+<h4 id="delete-adminapileaderboardpetid"><code>DELETE /admin/api/leaderboard/:petId</code></h4>
 <p>Removes a specific pet from the leaderboard (ban reflection). This is equivalent to banning and untracking; the pet&#x27;s row in Redis is removed from the <code>leaderboard:global</code> sorted set. The ban itself must be applied separately via <code>POST /admin/api/pets/:petId/ban</code>.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1594,8 +1667,8 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No pet with the given <code>petId</code> on the leaderboard</td></tr>
 </table>
 <hr>
-<h3>6.6 Admin Configuration</h3>
-<h4><code>GET /admin/api/config/runtime</code></h4>
+<h3 id="66-admin-configuration">6.6 Admin Configuration</h3>
+<h4 id="get-adminapiconfigruntime"><code>GET /admin/api/config/runtime</code></h4>
 <p>Returns current runtime configuration values. These are the admin-tunable parameters that take effect within 5 minutes of a change (<code>config_cache_refresh_time_minutes = 5</code>).</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1621,7 +1694,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>PUT /admin/api/config/runtime</code></h4>
+<h4 id="put-adminapiconfigruntime"><code>PUT /admin/api/config/runtime</code></h4>
 <p>Updates runtime configuration values. Changes take effect within 5 minutes (<code>config_cache_refresh_time_minutes = 5</code>). All parameters are validated against CONSTANTS-defined admin-tunable ranges.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Request body (all fields optional — include only fields being updated):</strong></p>
@@ -1652,7 +1725,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>GET /admin/api/config/economy</code></h4>
+<h4 id="get-adminapiconfigeconomy"><code>GET /admin/api/config/economy</code></h4>
 <p>Returns current economy configuration values.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1675,7 +1748,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>PUT /admin/api/config/economy</code></h4>
+<h4 id="put-adminapiconfigeconomy"><code>PUT /admin/api/config/economy</code></h4>
 <p>Updates economy configuration parameters. Changes take effect within 5 minutes (<code>config_cache_refresh_time_minutes = 5</code>).</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Request body:</strong></p>
@@ -1702,7 +1775,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>GET /admin/api/config/flags</code></h4>
+<h4 id="get-adminapiconfigflags"><code>GET /admin/api/config/flags</code></h4>
 <p>Returns current feature flag states.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1723,7 +1796,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>PUT /admin/api/config/flags/:flag</code></h4>
+<h4 id="put-adminapiconfigflagsflag"><code>PUT /admin/api/config/flags/:flag</code></h4>
 <p>Enables or disables a feature flag.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Path parameters:</strong></p>
@@ -1754,8 +1827,8 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No feature flag with the given <code>flag</code> name</td></tr>
 </table>
 <hr>
-<h3>6.7 Admin GDPR Queue</h3>
-<h4><code>GET /admin/api/gdpr</code></h4>
+<h3 id="67-admin-gdpr-queue">6.7 Admin GDPR Queue</h3>
+<h4 id="get-adminapigdpr"><code>GET /admin/api/gdpr</code></h4>
 <p>Lists all GDPR requests with optional status and type filtering. For Super Admin use only.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Query parameters:</strong></p>
@@ -1791,7 +1864,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>POST /admin/api/gdpr/delete</code></h4>
+<h4 id="post-adminapigdprdelete"><code>POST /admin/api/gdpr/delete</code></h4>
 <p>Initiates an admin-triggered erasure request (e.g. for a support ticket). Email hash is converted to SHA-256 within 24 hours (<code>gdpr_email_hashing_internal_sla_hours = 24</code>) and reported compliant within 7 days (<code>gdpr_email_deletion_window_days = 7</code>).</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Request body:</strong></p>
@@ -1817,7 +1890,7 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h4><code>PATCH /admin/api/gdpr/:requestId</code></h4>
+<h4 id="patch-adminapigdprrequestid"><code>PATCH /admin/api/gdpr/:requestId</code></h4>
 <p>Updates the status of a non-erasure GDPR request (data_access, restrict_processing, object_leaderboard, rectification). Erasure requests are managed exclusively via <code>POST /admin/api/gdpr/delete</code>.</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Path parameters:</strong></p>
@@ -1851,8 +1924,8 @@
 <tr><td>404</td><td><code>NOT_FOUND</code></td><td>No GDPR request with the given <code>requestId</code></td></tr>
 </table>
 <hr>
-<h3>6.8 Admin Audit Log</h3>
-<h4><code>GET /admin/api/audit</code></h4>
+<h3 id="68-admin-audit-log">6.8 Admin Audit Log</h3>
+<h4 id="get-adminapiaudit"><code>GET /admin/api/audit</code></h4>
 <p>Returns audit log entries. Search any 12-month window in ≤ 3 seconds (<code>admin_audit_log_search_response_time_seconds = 3</code>). Audit logs are retained for <strong>2 years</strong> (<code>admin_audit_log_retention_years = 2</code>).</p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
 <p><strong>Query parameters:</strong></p>
@@ -1893,8 +1966,8 @@
 <tr><td>403</td><td><code>FORBIDDEN</code></td><td>Authenticated admin role is not <code>super_admin</code></td></tr>
 </table>
 <hr>
-<h3>6.9 Admin Dashboard, Analytics &amp; Email Monitor</h3>
-<h4><code>GET /admin/api/dashboard</code></h4>
+<h3 id="69-admin-dashboard-analytics--email-monitor">6.9 Admin Dashboard, Analytics &amp; Email Monitor</h3>
+<h4 id="get-adminapidashboard"><code>GET /admin/api/dashboard</code></h4>
 <p>Returns a real-time summary of platform health for the admin dashboard. Metrics sourced from Redis counters and PostgreSQL aggregates. Page load target ≤ 3 seconds (<code>admin_page_load_time_seconds = 3</code>).</p>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1918,7 +1991,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid</td></tr>
 </table>
 <hr>
-<h4><code>GET /admin/api/analytics</code></h4>
+<h4 id="get-adminapianalytics"><code>GET /admin/api/analytics</code></h4>
 <p>Returns product analytics time-series data.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
 <p><strong>Query parameters:</strong></p>
@@ -1952,7 +2025,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid</td></tr>
 </table>
 <hr>
-<h4><code>GET /admin/api/email/monitor</code></h4>
+<h4 id="get-adminapiemailmonitor"><code>GET /admin/api/email/monitor</code></h4>
 <p>Returns email delivery health metrics from SendGrid webhook logs.</p>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
 <p><strong>Response (HTTP 200):</strong></p>
@@ -1974,7 +2047,7 @@
 <tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>Admin session missing or invalid</td></tr>
 </table>
 <hr>
-<h2>7. WebSocket / Real-Time</h2>
+<h2 id="7-websocket--real-time">7. WebSocket / Real-Time</h2>
 <p><strong>Scope note</strong>: Per the EDD and ARCH, the arena battle resolution uses <strong>HTTP long-polling</strong> on <code>POST /api/v1/arena/enter</code> (waiting up to 30 seconds — <code>arena_matchmaking_timeout_seconds = 30</code>) rather than a WebSocket connection. This is sufficient for the MVP load profile (500 RPS peak, 2000 PCU — <code>peak_operation_rps = 500</code>, <code>peak_concurrent_users = 2000</code>) and avoids the operational complexity of a persistent WebSocket server within the MVP budget (<code>mvp_budget_usd = 40000</code>).</p>
 <p><strong>Real-time updates</strong> currently handled by client-side polling:</p>
 <table>
@@ -1985,7 +2058,7 @@
 </table>
 <p><strong>WebSocket consideration for Phase 2+</strong>: If live leaderboard push, arena spectator mode, or real-time battle animations are added in a future phase, a WebSocket endpoint at <code>wss://api.pixel-pet-arena.com/ws</code> may be introduced. This will be documented as an addendum to v1 API.</p>
 <hr>
-<h2>8. Pagination</h2>
+<h2 id="8-pagination">8. Pagination</h2>
 <p>All list endpoints that may return more than 20 results support cursor-less offset pagination using the following standard query parameters:</p>
 <table>
 <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Max</th><th>Description</th></tr>
@@ -2004,16 +2077,16 @@
 <p><strong>Admin pet search</strong>: Supports returning up to 1 million records efficiently, with response time ≤ 2 seconds (<code>admin_search_response_time_seconds = 2</code>).</p>
 <p><strong>Public leaderboard</strong>: Hard cap of 100 entries (<code>leaderboard_top_display = 100</code>). Admin leaderboard: hard cap of 500 entries (<code>leaderboard_admin_view = 500</code>).</p>
 <hr>
-<h2>9. Changelog / Versioning</h2>
-<h3>v1.0 — 2026-05-03</h3>
+<h2 id="9-changelog--versioning">9. Changelog / Versioning</h2>
+<h3 id="v10--2026-05-03">v1.0 — 2026-05-03</h3>
 <ul><li>Initial release of the pixel-pet-arena REST API.</li><li>Player API routes: claim flow (initiate, verify, recover), pet CRUD, arena (enter, match fetch, history), leaderboard (global, per-pet rank), GDPR self-service, marketplace (Phase 3 / FF_MARKETPLACE).</li><li>Admin API routes: authentication (login, logout, TOTP setup/verify), role management, pet management (list, ban, unban), arena/battle management (list, flag, unflag), leaderboard (admin view, ban reflection), runtime config, economy config, feature flags, GDPR queue, audit log, dashboard, analytics, email monitor.</li><li>All rate limits sourced from <code>constants.json</code>.</li><li>Backward compatibility: 1 prior major version (<code>api_backward_compat_versions = 1</code>).</li><li>Deprecation notice period: 90 days (<code>api_deprecation_notice_days = 90</code>).</li></ul>
-<h3>Versioning Policy</h3>
+<h3 id="versioning-policy">Versioning Policy</h3>
 <p>When breaking changes are required:</p>
 <ol><li>A new version prefix is introduced (e.g. <code>/api/v2/</code>).</li><li>The previous version (<code>/api/v1/</code>) is maintained for a minimum of 1 complete version lifecycle (<code>api_backward_compat_versions = 1</code>).</li><li>A <code>Deprecation</code> response header is added to all v1 responses with the sunset date at least 90 days in the future (<code>api_deprecation_notice_days = 90</code>).</li><li>Release notes will be published to the developer changelog before the deprecation notice date.</li></ol>
 <p>Non-breaking changes (additive fields, new optional query parameters, new endpoints) are deployed without a version bump and are backward compatible by definition.</p>
 <hr>
-<h2>10. Health Check</h2>
-<h4><code>GET /health</code></h4>
+<h2 id="10-health-check">10. Health Check</h2>
+<h4 id="get-health"><code>GET /health</code></h4>
 <p>Returns platform health status. Required by PRD NFR-AVAIL-06.</p>
 <blockquote><p><strong>Note</strong>: This endpoint intentionally uses a minimal response body (<code>{status, checks, timestamp}</code>) rather than the standard <code>{success, data, error, meta}</code> envelope described in §4.1. Health-check consumers (load balancers, uptime monitors) expect this lightweight format.</p></blockquote>
 <p><strong>Auth</strong>: None</p>

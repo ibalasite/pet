@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,55 +334,9 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>ANIM — Animation &amp; Sprite Design</h1>
+    <main class="doc-content"><h1 id="anim--animation--sprite-design">ANIM — Animation &amp; Sprite Design</h1>
 <p><strong>DOC-ID</strong>: ANIM-PIXEL-PET-ARENA-20260503</p>
 <p><strong>Project</strong>: pixel-pet-arena</p>
 <p><strong>Version</strong>: v1.0</p>
@@ -272,12 +345,12 @@
 <p><strong>Date</strong>: 2026-05-04</p>
 <p><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, ARCH-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
 <hr>
-<h2>§1. Overview</h2>
-<h3>§1.1 Animation Design Vision</h3>
+<h2 id="1-overview">§1. Overview</h2>
+<h3 id="11-animation-design-vision">§1.1 Animation Design Vision</h3>
 <p>pixel-pet-arena delivers a retro-pixel aesthetic with smooth, performant sprite animation across all major browsers. The animation system is built on <strong>Phaser.js 3</strong> (v3.55.2 or later), isolated within the <code>PetCanvasEngine</code> React component. Animation runtime targets ≥30 FPS sustained on desktop and modern mobile browsers (ARCH §2.1, EDD §1; PET_ANIMATION_FPS_MIN = 30).</p>
 <p>The pet animation system must support:</p>
 <ol><li><strong>Idle animation</strong> — looping sprite frame sequence while pet awaits interaction</li><li><strong>Interaction animation</strong> — visual feedback on touch/click (hop, bounce, head turn)</li><li><strong>Movement animation</strong> — path-based locomotion during training or arena transitions</li><li><strong>Arena battle animation</strong> — 5–15 second battle sequence with health bars and outcome reveal (ARENA_MATCH_DURATION_MIN_SECONDS = 5; ARENA_MATCH_DURATION_MAX_SECONDS = 15)</li><li><strong>Level-up animation</strong> — transition effect + particle burst when pet advances</li><li><strong>Stat buff animation</strong> — brief visual indicator (glow, flash) when food buff applied</li><li><strong>Neglect state</strong> — desaturated visual after 3+ days without training (TRAINING_NEGLECT_THRESHOLD_DAYS = 3)</li></ol>
-<h3>§1.2 Technical Stack Selection</h3>
+<h3 id="12-technical-stack-selection">§1.2 Technical Stack Selection</h3>
 <p><strong>Engine</strong>: Phaser.js 3.55.2 (or 3.x latest LTS)</p>
 <ul><li><strong>Why Phaser.js</strong>: Mature sprite animation API, WebGL rendering, input handling, built-in physics, 35k+ GitHub stars, active community (EDD §3.3)</li><li><strong>Bundle impact</strong>: Dynamically imported to avoid blocking initial claim-flow bundle; paid for only on landing page / pet pages</li><li><strong>Fallback</strong>: Static sprite image on Canvas 2D when WebGL unavailable (ARCH §2.1)</li></ul>
 <p><strong>Sprite Format</strong>: PNG with transparency (RGBA 8-bit)</p>
@@ -291,39 +364,62 @@
 <p><strong>Performance Targets</strong>:</p>
 <ul><li>FPS: ≥30 sustained (PET_ANIMATION_FPS_MIN = 30; ARCH §2.1)</li><li>Pet canvas render on page load: ≤2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)</li><li>Pet interaction response: ≤200 ms (PET_INTERACTION_RESPONSE_MS = 200; ARCH §8.1)</li><li>WebGL unavailable fallback: static sprite, no animation</li><li>Reduced motion mode: static sprite per <code>prefers-reduced-motion: reduce</code> (ARCH §2.1)</li></ul>
 <hr>
-<h2>§2. Animation Requirements Analysis</h2>
-<h3>§2.1 Pet Generation &amp; Asset Mapping</h3>
+<h2 id="2-animation-requirements-analysis">§2. Animation Requirements Analysis</h2>
+<h3 id="21-pet-generation--asset-mapping">§2.1 Pet Generation &amp; Asset Mapping</h3>
 <p>Each pet is uniquely generated via a 6-dimensional attribute vector (PET_GENERATION_DIMENSIONS = 6; EDD §0):</p>
 <ol><li><strong>body</strong> — frame silhouette (e.g., round, square, tall, short)</li><li><strong>head</strong> — facial feature set (e.g., pointed, round, animal-like)</li><li><strong>color_palette</strong> — primary + secondary color (e.g., blue-yellow, green-purple)</li><li><strong>accessory</strong> — optional visual augment (e.g., hat, scarf, crown)</li><li><strong>rarity_trait</strong> — visual distinctiveness (common → legendary glow)</li><li><strong>pattern</strong> — spot, stripe, or gradient overlay</li></ol>
 <p><strong>Asset Organization</strong>:</p>
-<pre><code class="">assets/sprites/
-├── bodies/
-│   ├── body_round.png
-│   ├── body_square.png
-│   ├── body_tall.png
-│   └── body_short.png
-├── heads/
-│   ├── head_pointed.png
-│   ├── head_round.png
-│   └── head_animal.png
-├── accessories/
-│   ├── accessory_hat.png
-│   ├── accessory_scarf.png
-│   └── accessory_crown.png
-├── patterns/
-│   ├── pattern_spot.png
-│   ├── pattern_stripe.png
-│   └── pattern_gradient.png
-└── effects/
-    ├── rarity_common.png  (no effect)
-    ├── rarity_rare.png    (blue glow)
-    ├── rarity_epic.png    (purple glow)
-    └── rarity_legendary.png  (gold glow)</code></pre>
+<pre class="mermaid">graph TD
+  N0[&quot;assets/sprites/&quot;]
+  N1[&quot;bodies/&quot;]
+  N2[&quot;body_round.png&quot;]
+  N3[&quot;body_square.png&quot;]
+  N4[&quot;body_tall.png&quot;]
+  N5[&quot;body_short.png&quot;]
+  N6[&quot;heads/&quot;]
+  N7[&quot;head_pointed.png&quot;]
+  N8[&quot;head_round.png&quot;]
+  N9[&quot;head_animal.png&quot;]
+  N10[&quot;accessories/&quot;]
+  N11[&quot;accessory_hat.png&quot;]
+  N12[&quot;accessory_scarf.png&quot;]
+  N13[&quot;accessory_crown.png&quot;]
+  N14[&quot;patterns/&quot;]
+  N15[&quot;pattern_spot.png&quot;]
+  N16[&quot;pattern_stripe.png&quot;]
+  N17[&quot;pattern_gradient.png&quot;]
+  N18[&quot;effects/&quot;]
+  N19[&quot;rarity_common.png  (no effect)&quot;]
+  N20[&quot;rarity_rare.png    (blue glow)&quot;]
+  N21[&quot;rarity_epic.png    (purple glow)&quot;]
+  N22[&quot;rarity_legendary.png  (gold glow)&quot;]
+  N0 --&gt; N1
+  N0 --&gt; N2
+  N0 --&gt; N3
+  N0 --&gt; N4
+  N0 --&gt; N5
+  N0 --&gt; N6
+  N0 --&gt; N7
+  N0 --&gt; N8
+  N0 --&gt; N9
+  N0 --&gt; N10
+  N0 --&gt; N11
+  N0 --&gt; N12
+  N0 --&gt; N13
+  N0 --&gt; N14
+  N0 --&gt; N15
+  N0 --&gt; N16
+  N0 --&gt; N17
+  N0 --&gt; N18
+  N0 --&gt; N19
+  N0 --&gt; N20
+  N0 --&gt; N21
+  N0 --&gt; N22</pre>
 <p><strong>Runtime Composition</strong>:</p>
 <p>At pet render time, the base body sprite (animated) is composed with:</p>
 <ol><li>Head overlay (static or looping blink animation)</li><li>Accessory (static, positioned via offsets)</li><li>Pattern overlay (static, semitransparent)</li><li>Rarity effect (glowing particle or shader effect, loops)</li></ol>
 <p>Total rendered sprite at 32×32 is the result of layer blending in WebGL, or canvas composite draw operations.</p>
-<h3>§2.2 Animation Inventory (15+ Concrete Animations)</h3>
+<h3 id="22-animation-inventory-15-concrete-animations">§2.2 Animation Inventory (15+ Concrete Animations)</h3>
 <table>
 <tr><th>Animation ID</th><th>Sprite Frame Count</th><th>Duration (ms)</th><th>Loop?</th><th>Trigger</th><th>Notes</th></tr>
 <tr><td><code>anim_idle_default</code></td><td>4 frames</td><td>800</td><td>Yes</td><td>Continuous when pet not interacting</td><td>Gentle bob/breathe; plays on landing page and pet page idle states</td></tr>
@@ -344,7 +440,7 @@
 <tr><td><code>anim_neglect_desaturate</code></td><td>1 frame</td><td>—</td><td>No</td><td>Triggered when last_trained_at &gt; 3 days</td><td>Desaturated shader applied (no frame anim)</td></tr>
 </table>
 <p><strong>Total Frame Count</strong>: ~70 frames across all 15 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).</p>
-<h3>§2.3 Animation Spritesheet Planning</h3>
+<h3 id="23-animation-spritesheet-planning">§2.3 Animation Spritesheet Planning</h3>
 <p><strong>Strategy</strong>: Combine all character animations into a single <strong>character spritesheet</strong> per pet generation variant (body × head combination).</p>
 <p><strong>Spritesheet Grid</strong> (example for one body/head combo):</p>
 <pre><code class="">Row 0:  [anim_idle_default frames 0-3]            [anim_idle_sleep frames 0-2]        [anim_idle_happy frames 0-5]
@@ -363,43 +459,64 @@ Compressed PNG: ~80–120 KB per variant (subject to color optimization)</code><
 <p><strong>Compressed (gzipped)</strong>: ~3.6 MB (at typical 75% gzip ratio)</p>
 <p>This exceeds the per-page CSS budget of 50 KB (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50; ARCH §2.1), so spritesheet loading must be:</p>
 <ol><li><strong>Lazy loaded</strong> on demand (only load spritesheet when pet is rendered)</li><li><strong>Background fetched</strong> using <code>fetch()</code> with cache headers</li><li><strong>Cached</strong> in browser localStorage or IndexedDB</li></ol>
-<h3>§2.4 Memory Budget</h3>
+<h3 id="24-memory-budget">§2.4 Memory Budget</h3>
 <p><strong>GPU Memory</strong> (WebGL texture memory):</p>
 <ul><li>One active spritesheet in VRAM: ~1–3 MB (uncompressed texture)</li><li>Phaser sprite object pool: 10 active sprites × 50 KB metadata = 500 KB</li><li>Total GPU budget: ≤5 MB per scene (ARCH §2.1 budget not explicitly stated; inferred from 30 FPS target on mobile)</li></ul>
 <p><strong>CPU/RAM Memory</strong>:</p>
 <ul><li>Phaser scene state: ~200 KB</li><li>Loaded spritesheet decoded (PNG → RGBA): ~3 MB per variant in RAM</li><li>Cache: LRU cache for last 3–5 variants = 9–15 MB</li><li>Animation state machines (timers, callbacks): ~50 KB</li></ul>
 <p><strong>Total Runtime Memory</strong>: ~25–30 MB at steady state (conservative; mobile target is 128+ MB modern phones)</p>
 <hr>
-<h2>§3. Sprite Asset Planning</h2>
-<h3>§3.1 Sprite Design Specification</h3>
+<h2 id="3-sprite-asset-planning">§3. Sprite Asset Planning</h2>
+<h3 id="31-sprite-design-specification">§3.1 Sprite Design Specification</h3>
 <p><strong>Canvas Size</strong>: 32×32 pixels (SPRITE_RESOLUTION_PX = 32)</p>
 <ul><li><strong>Safe area</strong>: 24×24 px center; 4 px margin on all sides for antialiasing and animation movement</li><li><strong>Color depth</strong>: 8-bit indexed (256 colors) for 2:1 file size advantage over 32-bit RGBA where possible</li><li><strong>Transparency</strong>: Per-pixel alpha channel (PNG transparency)</li></ul>
 <p><strong>Animation Constraints</strong>:</p>
 <ol><li>No frame should exceed 32×32 boundary (no overflow)</li><li>Limb movement must stay within 28×28 safe area to prevent edge clipping during movement tweens</li><li>Head tilt/rotation must use sprite frame rotation, not Phaser sprite rotation (smoother pixel-art aesthetic)</li></ol>
 <p><strong>Design Guidelines</strong>:</p>
 <ul><li>Iconic silhouette: pet must be recognizable at 32×32 from 1–2 meters distance</li><li>Color consistency: primary color dominates 60% of sprite; secondary 30%; accents 10%</li><li>Contrast: 4.5:1 text contrast ratio for overlaid stat numbers (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1; ARCH §2.1)</li><li>Animation readability: extreme poses (leap, crouch) must differ by ≥20% pixel displacement</li></ul>
-<h3>§3.2 Asset File Organization &amp; Naming</h3>
-<pre><code class="">assets/
-├── sprites/
-│   ├── characters/
-│   │   ├── body_round_head_pointed_blue_yellow.png     (spritesheet, 768×768)
-│   │   ├── body_round_head_pointed_green_purple.png
-│   │   ├── ... (144 total spritesheets)
-│   │   └── legend.json  # Atlas/texture definition
-│   ├── effects/
-│   │   ├── particle_stars.png                          (small 16×16 particle sprite)
-│   │   ├── particle_sparkle.png
-│   │   ├── glow_blue.png                               (rarity effect glow overlay)
-│   │   ├── glow_purple.png
-│   │   └── glow_gold.png
-│   ├── ui/
-│   │   ├── health_bar_bg.png
-│   │   ├── health_bar_fill.png
-│   │   ├── level_badge.png
-│   │   └── stat_indicator.png
-│   └── tile_sets/
-│       └── arena_floor.png                             (background for battle scene)
-└── sprites_manifest.json                               # Master registry of all sprite variants</code></pre>
+<h3 id="32-asset-file-organization--naming">§3.2 Asset File Organization &amp; Naming</h3>
+<pre class="mermaid">graph TD
+  N0[&quot;assets/&quot;]
+  N1[&quot;sprites/&quot;]
+  N2[&quot;characters/&quot;]
+  N3[&quot;body_round_head_pointed_blue_yellow.png     (spritesheet, 768×768)&quot;]
+  N4[&quot;body_round_head_pointed_green_purple.png&quot;]
+  N5[&quot;... (144 total spritesheets)&quot;]
+  N6[&quot;legend.json  # Atlas/texture definition&quot;]
+  N7[&quot;effects/&quot;]
+  N8[&quot;particle_stars.png                          (small 16×16 particle sprite)&quot;]
+  N9[&quot;particle_sparkle.png&quot;]
+  N10[&quot;glow_blue.png                               (rarity effect glow overlay)&quot;]
+  N11[&quot;glow_purple.png&quot;]
+  N12[&quot;glow_gold.png&quot;]
+  N13[&quot;ui/&quot;]
+  N14[&quot;health_bar_bg.png&quot;]
+  N15[&quot;health_bar_fill.png&quot;]
+  N16[&quot;level_badge.png&quot;]
+  N17[&quot;stat_indicator.png&quot;]
+  N18[&quot;tile_sets/&quot;]
+  N19[&quot;arena_floor.png                             (background for battle scene)&quot;]
+  N20[&quot;sprites_manifest.json                               # Master registry of all sprite variants&quot;]
+  N0 --&gt; N1
+  N0 --&gt; N2
+  N0 --&gt; N3
+  N0 --&gt; N4
+  N0 --&gt; N5
+  N0 --&gt; N6
+  N0 --&gt; N7
+  N0 --&gt; N8
+  N0 --&gt; N9
+  N0 --&gt; N10
+  N0 --&gt; N11
+  N0 --&gt; N12
+  N0 --&gt; N13
+  N0 --&gt; N14
+  N0 --&gt; N15
+  N0 --&gt; N16
+  N0 --&gt; N17
+  N0 --&gt; N18
+  N0 --&gt; N19
+  N0 --&gt; N20</pre>
 <p><strong>Manifest Structure</strong> (sprites_manifest.json):</p>
 <pre><code class="language-json">{
   &quot;variants&quot;: [
@@ -422,8 +539,8 @@ Compressed PNG: ~80–120 KB per variant (subject to color optimization)</code><
   &quot;estimatedTotalSize&quot;: 14400000
 }</code></pre>
 <hr>
-<h2>§4. Animation Engine &amp; Implementation</h2>
-<h3>§4.1 Phaser.js Integration</h3>
+<h2 id="4-animation-engine--implementation">§4. Animation Engine &amp; Implementation</h2>
+<h3 id="41-phaserjs-integration">§4.1 Phaser.js Integration</h3>
 <p><strong>PetCanvasEngine Component</strong> (React wrapper):</p>
 <pre><code class="language-typescript">// src/components/PetCanvasEngine/PetCanvasEngine.tsx
 import Phaser from &#x27;phaser&#x27;;
@@ -500,7 +617,7 @@ function updatePetScene(this: Phaser.Scene) {
   // Update loop (60 Hz, but animation plays at independent frame rate)
 }</code></pre>
 <p><strong>Architectural Rule</strong> (ARCH §2.1): Only <code>PetCanvasEngine</code> may import Phaser. No other component, hook, or utility may reference Phaser directly. Communication between Phaser scenes and React state uses an event emitter bridge.</p>
-<h3>§4.2 Animation State Machine</h3>
+<h3 id="42-animation-state-machine">§4.2 Animation State Machine</h3>
 <p>Each pet sprite maintains a state machine for animation sequencing:</p>
 <pre><code class="">State: IDLE
   ├─ Idle anim (loops indefinitely)
@@ -573,7 +690,7 @@ class PetAnimStateMachine {
     return this.currentState;
   }
 }</code></pre>
-<h3>§4.3 Animation Playback Timing</h3>
+<h3 id="43-animation-playback-timing">§4.3 Animation Playback Timing</h3>
 <p><strong>Frame Duration Formula</strong>:</p>
 <pre><code class="">frame_duration_ms = animation_total_duration_ms / frame_count</code></pre>
 <p>For example:</p>
@@ -582,39 +699,42 @@ class PetAnimStateMachine {
 <p>At 30 FPS, the screen redraws every 33.3 ms. Phaser&#x27;s internal timestep is 60 Hz by default. Animation frames are synced to the game loop automatically — no manual frame rate calculation needed.</p>
 <p><strong>Guaranteed Performance</strong>:</p>
 <ol><li>If device is capable of 60 FPS, animations play smoothly at intended durations</li><li>If device can only achieve 30 FPS (older mobile), animations still play (at half playback speed relative to the timer), but visually smooth within device capability</li><li>Reduced motion mode (<code>prefers-reduced-motion: reduce</code>) disables all animations and displays static sprite instead</li></ol>
-<h3>§4.4 Particle Effects</h3>
+<h3 id="44-particle-effects">§4.4 Particle Effects</h3>
 <p><strong>Level-Up Burst</strong>:</p>
 <ul><li>12 star particles spawn in arc pattern around pet</li><li>Duration: 1.2 seconds</li><li>Opacity fade: 100% → 0% over duration</li><li>Scale fade: 1.0 → 0.5 over duration</li><li>Uses Phaser Particle Emitter with custom particle sprite (<code>particle_stars.png</code>, 16×16 px)</li></ul>
 <p><strong>Rarity Glow</strong> (persistent):</p>
 <ul><li>Rarity-tier-dependent glow effect applied as post-process shader</li><li>Common (no glow) | Rare (blue) | Epic (purple) | Legendary (gold)</li><li>Shader parameterized by rarity; updates when pet rarity changes</li><li>Alpha pulse: 0.7 → 1.0 → 0.7 over 2 seconds, loops</li></ul>
 <hr>
-<h2>§5. Performance &amp; Optimization</h2>
-<h3>§5.1 Asset Loading Strategy</h3>
+<h2 id="5-performance--optimization">§5. Performance &amp; Optimization</h2>
+<h3 id="51-asset-loading-strategy">§5.1 Asset Loading Strategy</h3>
 <p><strong>Critical Path Optimization</strong>:</p>
 <ol><li><strong>Initial page load</strong> (landing page, claim page): no Phaser import; static sprite fallback only</li><li><strong>Pet page load</strong>: async fetch + load spritesheet as non-blocking background task</li><li><strong>Lazy spritesheet cache</strong>: LRU cache (last 3 variants in memory)</li></ol>
 <p><strong>Loading Flow</strong>:</p>
-<pre><code class="">User navigates to /pet/:petId
-     ↓
-React mounts &lt;PetCanvasEngine&gt;
-     ↓
-Phaser scene preload fires
-     ↓
-deriveVariantFromSeed(petSeed) → variant key
-     ↓
-Check browser cache / IndexedDB for spritesheet
-     ├─ Hit: use cached spritesheet
-     └─ Miss: fetch from CDN, cache, then use
-     ↓
-Sprite created, initial idle animation plays</code></pre>
+<pre class="mermaid">graph TD
+  N0[&quot;User navigates to /pet/:petId&quot;]
+  N1[&quot;React mounts &lt;PetCanvasEngine&quot;]
+  N2[&quot;Phaser scene preload fires&quot;]
+  N3[&quot;deriveVariantFromSeed(petSeed)  variant key&quot;]
+  N4[&quot;Check browser cache / IndexedDB for spritesheet&quot;]
+  N5[&quot;Hit: use cached spritesheet&quot;]
+  N6[&quot;Miss: fetch from CDN, cache, then use&quot;]
+  N7[&quot;Sprite created, initial idle animation plays&quot;]
+  N0 --&gt; N1
+  N1 --&gt; N2
+  N2 --&gt; N3
+  N3 --&gt; N4
+  N4 --&gt; N5
+  N5 --&gt; N6
+  N6 --&gt; N7</pre>
 <p><strong>Cache Strategy</strong>:</p>
 <ul><li><strong>Browser cache</strong> (HTTP cache headers): 24 hours (Cache-Control: max-age=86400)</li><li><strong>IndexedDB persistent cache</strong>: Keep last 5 accessed variants (LRU eviction)</li><li><strong>Memory cache</strong>: Current scene spritesheet only</li><li><strong>CDN</strong>: Cloudflare or Vercel Edge caching for 1-hour TTL</li></ul>
 <p><strong>Expected Load Time</strong>:</p>
 <ul><li>Spritesheet from HTTP cache (hit): ≤200 ms</li><li>Spritesheet from network (miss): ≤1 second (gzipped ~100 KB download on 4G)</li><li>Phaser scene initialization + sprite creation: ≤500 ms</li><li><strong>Total PET_RENDER_ON_LOAD_SECONDS target</strong>: ≤2 seconds ✓</li></ul>
-<h3>§5.2 WebGL Fallback</h3>
+<h3 id="52-webgl-fallback">§5.2 WebGL Fallback</h3>
 <p><strong>When WebGL unavailable</strong>:</p>
 <ul><li>Detect Phaser.AUTO fallback to Canvas 2D</li><li>Load static sprite image (first frame of idle animation) instead of spritesheet</li><li>No animation playback; static sprite only</li><li>User experience: pet visible but not animated; no functional loss</li></ul>
 <p><strong>Fallback sprite asset</strong>: <code>assets/sprites/characters/{variant}_static.png</code> (32×32 px, same as first frame)</p>
-<h3>§5.3 Reduced Motion Support</h3>
+<h3 id="53-reduced-motion-support">§5.3 Reduced Motion Support</h3>
 <p><strong>CSS Media Query</strong>:</p>
 <pre><code class="language-css">@media (prefers-reduced-motion: reduce) {
   /* Animations disabled */
@@ -628,11 +748,11 @@ if (prefersReducedMotion) {
   return &lt;img src={staticSpriteUrl} alt=&quot;Pet&quot; /&gt;;
 }</code></pre>
 <hr>
-<h2>§6. Cross-Platform Considerations</h2>
-<h3>§6.1 Desktop (Chrome, Firefox, Safari, Edge)</h3>
+<h2 id="6-cross-platform-considerations">§6. Cross-Platform Considerations</h2>
+<h3 id="61-desktop-chrome-firefox-safari-edge">§6.1 Desktop (Chrome, Firefox, Safari, Edge)</h3>
 <p><strong>Target</strong>: 60 FPS, modern WebGL</p>
 <ul><li>Spritesheet size: full 768×768 px, 32-bit RGBA</li><li>Animation frame rate: native 200 ms per frame (typical)</li><li>Performance: ✓ No issues expected</li></ul>
-<h3>§6.2 Mobile (iOS Safari, Chrome Android)</h3>
+<h3 id="62-mobile-ios-safari-chrome-android">§6.2 Mobile (iOS Safari, Chrome Android)</h3>
 <p><strong>Target</strong>: 30 FPS, WebGL 1.0 or Canvas 2D fallback</p>
 <p><strong>iPhone 12+ / Android Flagship</strong>:</p>
 <ul><li>WebGL available, sufficient VRAM</li><li>Spritesheet size: 768×768 px, but test 256-color indexed PNG for file size</li><li>Animation frame rate: 200 ms per frame (achievable at 30 FPS)</li><li>Performance: ✓ Target met</li></ul>
@@ -640,29 +760,29 @@ if (prefersReducedMotion) {
 <ul><li>WebGL available but limited VRAM (&lt; 128 MB)</li><li>Spritesheet loaded on demand; garbage collected when scene unloaded</li><li>Animation frame rate: 200 ms per frame (achievable)</li><li>Performance: ⚠ Monitor memory; may need spritesheet size reduction</li></ul>
 <p><strong>Low-end Android (Android 5–7)</strong>:</p>
 <ul><li>WebGL unavailable; Canvas 2D fallback</li><li>Static sprite displayed (no animation)</li><li>User experience degraded but functional</li><li>Performance: ✓ No crash</li></ul>
-<h3>§6.3 Tablet Orientation Changes</h3>
+<h3 id="63-tablet-orientation-changes">§6.3 Tablet Orientation Changes</h3>
 <p><strong>Portrait ↔ Landscape</strong>:</p>
 <ul><li>Phaser canvas resizes via <code>scale</code> plugin (Phaser.Scale.RESIZE)</li><li>Sprite position maintained (center of canvas)</li><li>All animations continue playing without interruption</li><li>No state loss</li></ul>
 <hr>
-<h2>§7. Implementation Phases</h2>
-<h3>§7.1 Phase 1: Core Idle Animation (Weeks 1–2)</h3>
+<h2 id="7-implementation-phases">§7. Implementation Phases</h2>
+<h3 id="71-phase-1-core-idle-animation-weeks-12">§7.1 Phase 1: Core Idle Animation (Weeks 1–2)</h3>
 <p><strong>Deliverables</strong>:</p>
 <ul><li>4 body/head variants designed and spritesheet created</li><li><code>anim_idle_default</code> and <code>anim_idle_sleep</code> implemented in Phaser</li><li>State machine for IDLE → INTERACTING transition</li><li>Landing page pet preview with idle loop</li><li>Performance verified: ≥30 FPS on target devices</li></ul>
 <p><strong>Sprite Assets</strong>: 4 spritesheets (16 KB each, uncompressed) = 64 KB total</p>
-<h3>§7.2 Phase 2: Interaction &amp; Training Animation (Weeks 3–4)</h3>
+<h3 id="72-phase-2-interaction--training-animation-weeks-34">§7.2 Phase 2: Interaction &amp; Training Animation (Weeks 3–4)</h3>
 <p><strong>Deliverables</strong>:</p>
 <ul><li>All 15 animations implemented and tested</li><li>Training action flow animated (flex, eat)</li><li>Level-up particle effect + burst animation</li><li>Stat buff glow effect</li><li>Neglect state desaturation shader</li></ul>
 <p><strong>Sprite Assets</strong>: All 144 variants created; total ~14.4 MB (gzipped ~3.6 MB)</p>
-<h3>§7.3 Phase 3: Arena Battle Animation (Weeks 5–6)</h3>
+<h3 id="73-phase-3-arena-battle-animation-weeks-56">§7.3 Phase 3: Arena Battle Animation (Weeks 5–6)</h3>
 <p><strong>Deliverables</strong>:</p>
 <ul><li>Battle entry, idle, attack, hit, win/lose animations integrated</li><li>5–15 second battle sequence choreography</li><li>Health bar animation (filling/draining)</li><li>Opponent sprite rendering (AI pet generation visualization)</li><li>Battle result screen animation</li></ul>
 <p><strong>Sprite Assets</strong>: Arena-specific effects, health bars, opponent sprite variants</p>
-<h3>§7.4 Phase 4: Polish &amp; Optimization (Week 7)</h3>
+<h3 id="74-phase-4-polish--optimization-week-7">§7.4 Phase 4: Polish &amp; Optimization (Week 7)</h3>
 <p><strong>Deliverables</strong>:</p>
 <ul><li>Spritesheet caching implementation (IndexedDB + HTTP cache)</li><li>Performance profiling and optimization (target ≥30 FPS maintained)</li><li>Cross-platform testing (desktop + mobile + tablet)</li><li>Reduced motion compliance verification</li><li>WebGL fallback testing</li></ul>
 <hr>
-<h2>§8. Testing Strategy</h2>
-<h3>§8.1 Visual Regression Testing</h3>
+<h2 id="8-testing-strategy">§8. Testing Strategy</h2>
+<h3 id="81-visual-regression-testing">§8.1 Visual Regression Testing</h3>
 <p><strong>Tool</strong>: Playwright visual regression snapshots at breakpoints: 320, 768, 1024, 1440 px (WEB TESTING RULES, priority 1)</p>
 <p><strong>Test Cases</strong>:</p>
 <table>
@@ -674,11 +794,11 @@ if (prefersReducedMotion) {
 <tr><td><code>test_neglect_desaturate</code></td><td>768</td><td>3+ days → desaturated sprite</td><td>Hue shift visible in comparison</td></tr>
 <tr><td><code>test_reduced_motion_static</code></td><td>1024</td><td>prefers-reduced-motion active</td><td>No animation, static sprite displayed</td></tr>
 </table>
-<h3>§8.2 Performance Testing</h3>
+<h3 id="82-performance-testing">§8.2 Performance Testing</h3>
 <p><strong>Metrics</strong>:</p>
 <ul><li>FPS stability: ≥30 FPS sustained for 60 seconds (idle loop)</li><li>Memory: &lt; 50 MB RAM on mobile (spritesheet + scene state)</li><li>Load time: spritesheet load ≤1 second on 4G network</li><li>CPU: &lt; 15% CPU usage on idle loop (mobile)</li></ul>
 <p><strong>Tool</strong>: Lighthouse (Chrome DevTools) + custom Phaser performance monitor</p>
-<h3>§8.3 Cross-Browser Testing</h3>
+<h3 id="83-cross-browser-testing">§8.3 Cross-Browser Testing</h3>
 <table>
 <tr><th>Browser</th><th>OS</th><th>WebGL</th><th>Canvas 2D Fallback</th><th>Test Status</th></tr>
 <tr><td>Chrome</td><td>Windows 10+</td><td>Yes</td><td>N/A</td><td>✓ Pass</td></tr>
@@ -689,7 +809,7 @@ if (prefersReducedMotion) {
 <tr><td>Safari</td><td>iOS 13+</td><td>Yes</td><td>Fallback if unavailable</td><td>✓ Pass</td></tr>
 <tr><td>Chrome</td><td>Android 5–7</td><td>No</td><td>Yes, static sprite</td><td>⚠ Functional (no animation)</td></tr>
 </table>
-<h3>§8.4 Accessibility Testing</h3>
+<h3 id="84-accessibility-testing">§8.4 Accessibility Testing</h3>
 <table>
 <tr><th>Criterion</th><th>Verification</th><th>Status</th></tr>
 <tr><td>Reduced motion</td><td>Phaser disabled; static sprite displayed; <code>prefers-reduced-motion: reduce</code> respected</td><td>✓ Pass</td></tr>
@@ -699,8 +819,8 @@ if (prefersReducedMotion) {
 <tr><td>Focus visible</td><td>No focus required on Phaser canvas (read-only); HTML form controls have focus indicators</td><td>✓ Pass</td></tr>
 </table>
 <hr>
-<h2>§9. Risk Mitigation &amp; Open Questions</h2>
-<h3>§9.1 Risks</h3>
+<h2 id="9-risk-mitigation--open-questions">§9. Risk Mitigation &amp; Open Questions</h2>
+<h3 id="91-risks">§9.1 Risks</h3>
 <table>
 <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
 <tr><td>WebGL unavailable on older Android</td><td>5–10% of users see static sprite instead of animation</td><td>Canvas 2D fallback; static sprite asset provided; no functional loss</td></tr>
@@ -708,7 +828,7 @@ if (prefersReducedMotion) {
 <tr><td>Animation frame rate unstable below 30 FPS</td><td>Animation looks janky; poor user experience</td><td>Cap frame rate to 30 FPS; reduce particle count on low-end devices; performance budget enforced</td></tr>
 <tr><td>Phaser.js 3.x deprecation after 2027</td><td>Codebase becomes unmaintained</td><td>Use v3.55+ LTS; pin version; plan v4 migration by 2027</td></tr>
 </table>
-<h3>§9.2 Open Questions</h3>
+<h3 id="92-open-questions">§9.2 Open Questions</h3>
 <p><strong>OQ-E01: Final Sprite Resolution &amp; Variant Count</strong></p>
 <ul><li>Current assumption: 32×32 px per frame, 144 total variants</li><li>Decision required: Test upscaling to 64×64 px for retina displays; confirm final variant count (body × head × color combo)</li><li>Acceptance: Performance test on iPhone 8 and Android 6; target ≤2 s load time maintained</li></ul>
 <p><strong>OQ-E02: Spine vs. Phaser.js Native Sprites</strong></p>
@@ -716,8 +836,8 @@ if (prefersReducedMotion) {
 <p><strong>OQ-E03: Arena AI Pet Animation</strong></p>
 <ul><li>Current: Spawn synthetic AI pet with random seed; render same spritesheet logic</li><li>Question: Do we animate the AI pet with same 15-animation set, or use simplified 3-animation subset?</li><li>Decision required: Balance realism (full animation) vs. performance (simplified)</li><li>Acceptance: Benchmark with 20 concurrent pets on-screen; confirm ≥30 FPS maintained</li></ul>
 <hr>
-<h2>§10. Monitoring &amp; Observability</h2>
-<h3>§10.1 Animation Performance Metrics</h3>
+<h2 id="10-monitoring--observability">§10. Monitoring &amp; Observability</h2>
+<h3 id="101-animation-performance-metrics">§10.1 Animation Performance Metrics</h3>
 <table>
 <tr><th>Metric</th><th>Target</th><th>Constant</th><th>Monitoring</th></tr>
 <tr><td>Pet canvas render time</td><td>≤2 seconds</td><td>PET_RENDER_ON_LOAD_SECONDS</td><td>Lighthouse CLS / LCP</td></tr>
@@ -725,7 +845,7 @@ if (prefersReducedMotion) {
 <tr><td>Spritesheet load latency</td><td>≤1 second</td><td>(derived from bundle budget)</td><td>Network waterfall in DevTools</td></tr>
 <tr><td>Memory (per scene)</td><td>≤50 MB</td><td>(inferred)</td><td>Chrome DevTools Memory profiler</td></tr>
 </table>
-<h3>§10.2 Error Handling</h3>
+<h3 id="102-error-handling">§10.2 Error Handling</h3>
 <p><strong>Fallback chains</strong>:</p>
 <ol><li>WebGL available → Full animation (target)</li><li>WebGL unavailable → Canvas 2D fallback (degraded)</li><li>Canvas 2D unavailable → Static sprite image (severely degraded but functional)</li><li>Spritesheet fails to load → Generic placeholder sprite (error recovery)</li></ol>
 <p><strong>Error logging</strong> (pino, structured JSON):</p>
@@ -737,7 +857,7 @@ if (prefersReducedMotion) {
   &quot;fallback&quot;: &quot;canvas_2d&quot;
 }</code></pre>
 <hr>
-<h2>Appendix: Asset File Size Budget</h2>
+<h2 id="appendix-asset-file-size-budget">Appendix: Asset File Size Budget</h2>
 <table>
 <tr><th>Asset Category</th><th>Count</th><th>Size per Unit</th><th>Total (Uncompressed)</th><th>Compressed (gzip)</th></tr>
 <tr><td>Character spritesheets (144 variants × 768×768 px)</td><td>144</td><td>100 KB avg</td><td>14.4 MB</td><td>~3.6 MB</td></tr>

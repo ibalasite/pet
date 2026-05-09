@@ -22,21 +22,82 @@
     }
     .sidebar__section details[open] > summary::before { transform: rotate(90deg); }
     .sidebar__section details .sidebar__link { padding-left: 1.75rem; font-size: 0.8125rem; }
+    .sidebar__section details details > summary { padding-left: 1.75rem; }
+    .sidebar__section details details .sidebar__link { padding-left: 2.5rem; }
+    /* B5/B8: labels inside details are sub-labels — indent past their parent <summary>. */
+    .sidebar__section details > .sidebar__label {
+      padding-left: 2.25rem;
+    }
+    .sidebar__section details details > .sidebar__label {
+      padding-left: 3rem;
+    }
+    /* B5: sub-label inside diagrams folding for prefix groups (Activity / Class / ...) */
+    .sidebar__label--sub {
+      padding: 0.25rem 1rem 0.125rem 3rem;
+      font-size: 0.6875rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* B5: links following a sub-label indent further still */
+    .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
+      padding-left: 3.5rem;
+    }
+    /* G-Q2: lightbox cloned-diagram visibility.
+       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       which collapses the cloned .diagram-container to 0×0; its child SVG
+       with `width:100%` then renders empty. Force a sensible explicit
+       width so the cloned content is actually visible. */
+    .lightbox__zoom-content .diagram-container {
+      width: 80vw;
+      max-width: 1400px;
+      min-width: 60vw;
+    }
+    .lightbox__zoom-content .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      display: block;
+    }
+    .lightbox__zoom-content .diagram-container .mermaid {
+      width: 100%;
+      max-width: none;
+    }
+    .lightbox__zoom-content svg {
+      height: auto;
+    }
+    /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
+       content's intrinsic size when a PUML SVG / pre.mermaid has wide
+       content. Without min-width:0, the flex item's default min-width is
+       its min-content (i.e. SVG natural width), which pushes <main> to
+       3000px+ on PUML pages and breaks layout.
+
+       Pair with `<pre> { max-width: 100% }` so wide source content scrolls
+       inside the <pre> block instead of expanding the page. */
+    main.doc-content {
+      min-width: 0;
+    }
+    .doc-content pre {
+      max-width: 100%;
+    }
+    .doc-content .diagram-container {
+      max-width: 100%;
+      overflow-x: auto;
+    }
 
     /* ─── UI Mock DSL (stage 9) ─── */
     .umock { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1e293b; }
     .umock__page, .umock__modal, .umock__card {
-      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      border: 1.5px solid #94a3b8; border-radius: 8px; background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 1rem 0;
       overflow: hidden;
     }
     .umock__card-title { padding: 0.625rem 1rem; font-weight: 600; font-size: 0.95rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
-      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+      padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
     .umock__modal-title { font-weight: 600; font-size: 1rem; }
     .umock__modal-close { color: #94a3b8; font-size: 1.1rem; cursor: default; }
     .umock__modal-body, .umock__page > .umock__section,
@@ -85,10 +146,11 @@
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
-    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.875rem; }
-    .umock__table th, .umock__table td { padding: 0.5rem 0.625rem; text-align: left;
-      border-bottom: 1px solid #e2e8f0; }
-    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .umock__table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .umock__table th, .umock__table td { padding: 0.75rem 0.875rem; text-align: left;
+      border-bottom: 1px solid #cbd5e1; }
+    .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
+      border-bottom: 2px solid #94a3b8; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -169,41 +231,98 @@
 <div class="sidebar__section">
 <details>
 <summary>📁 blueprint/</summary>
-<a class="sidebar__link" href="blueprint__mock-mock_server_guide.html">Mock Server Guide</a>
+<details>
+<summary>📁 mock/</summary>
+<a class="sidebar__link" href="blueprint/mock/mock_server_guide.html">Mock Server Guide</a>
+</details>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📁 contracts/</summary>
-<a class="sidebar__link" href="contracts__api-admin-contract.html">Api Admin Contract</a>
-<a class="sidebar__link" href="contracts__api-player-contract.html">Api Player Contract</a>
-<a class="sidebar__link" href="contracts__event-schema-contract.html">Event Schema Contract</a>
+<a class="sidebar__link" href="contracts/api-admin-contract.html">Api Admin Contract</a>
+<a class="sidebar__link" href="contracts/api-player-contract.html">Api Player Contract</a>
+<a class="sidebar__link" href="contracts/event-schema-contract.html">Event Schema Contract</a>
 </details>
 </div>
 <div class="sidebar__section">
-<details>
+<details open>
 <summary>📁 prototype/</summary>
-<a class="sidebar__link" href="prototype__admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype__arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype__pet-display-prototype.html">Pet Display Prototype</a>
+<div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
+<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<div class="sidebar__label sidebar__label--sub">規格文件</div>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
 <details>
 <summary>📎 req/</summary>
-<a class="sidebar__link" href="req__idea-input.html">Idea Input</a>
-<a class="sidebar__link" href="req.html">📥 附件下載清單</a>
+<a class="sidebar__link" href="req/idea-input.html">Idea Input</a>
 </details>
 </div>
 <div class="sidebar__section">
-<div class="sidebar__label">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
-</div>
-<div class="sidebar__section">
 <details>
-<summary>📐 PlantUML</summary>
+<summary>📁 diagrams/</summary>
+<div class="sidebar__label">Server UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/activity-arena-battle.html">📐 Activity Arena Battle</a>
+<a class="sidebar__link" href="diagrams/activity-claim-and-train.html">📐 Activity Claim And Train</a>
+<a class="sidebar__link" href="diagrams/activity-claim-flow.html">📐 Activity Claim Flow</a>
+<a class="sidebar__link" href="diagrams/activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/class-application.html">📐 Class Application</a>
+<a class="sidebar__link" href="diagrams/class-domain.html">🗂️ 類別圖：領域模型</a>
+<a class="sidebar__link" href="diagrams/class-infra-presentation.html">📐 Class Infra Presentation</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/sequence-arena-battle.html">📐 Sequence Arena Battle</a>
+<a class="sidebar__link" href="diagrams/sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
+<a class="sidebar__link" href="diagrams/sequence-claim-flow.html">📐 Sequence Claim Flow</a>
+<a class="sidebar__link" href="diagrams/sequence-gdpr-erasure.html">📐 Sequence Gdpr Erasure</a>
+<a class="sidebar__link" href="diagrams/sequence-training.html">📐 Sequence Training</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/state-machine-arena-match.html">📐 State Machine Arena Match</a>
+<a class="sidebar__link" href="diagrams/state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
+<div class="sidebar__label sidebar__label--sub">CI/CD</div>
+<a class="sidebar__link" href="diagrams/cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
+<a class="sidebar__link" href="diagrams/cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
+<a class="sidebar__link" href="diagrams/cicd-secret-flow.html">📐 Cicd Secret Flow</a>
+<a class="sidebar__link" href="diagrams/developer-workflow-activity.html">📐 Developer Workflow Activity</a>
+<a class="sidebar__link" href="diagrams/infra-local-topology.html">📐 Infra Local Topology</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/communication.html">🤝 協作圖</a>
+<a class="sidebar__link" href="diagrams/component.html">🧩 元件圖</a>
+<a class="sidebar__link" href="diagrams/deployment.html">☁️ 部署圖</a>
+<a class="sidebar__link" href="diagrams/er-diagram.html">🗃️ ER 關聯圖</a>
+<a class="sidebar__link" href="diagrams/object-snapshot.html">📸 物件圖：快照</a>
+<a class="sidebar__link" href="diagrams/use-case.html">👤 用例圖 (Use Case)</a>
+<div class="sidebar__label">Frontend UML</div>
+<div class="sidebar__label sidebar__label--sub">Activity</div>
+<a class="sidebar__link" href="diagrams/frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-init.html">🚀 前端活動圖：初始化</a>
+<a class="sidebar__link" href="diagrams/frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
+<div class="sidebar__label sidebar__label--sub">Class</div>
+<a class="sidebar__link" href="diagrams/frontend-class-component.html">🗂️ 前端類別圖：元件</a>
+<a class="sidebar__link" href="diagrams/frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
+<a class="sidebar__link" href="diagrams/frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
+<div class="sidebar__label sidebar__label--sub">Sequence</div>
+<a class="sidebar__link" href="diagrams/frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
+<a class="sidebar__link" href="diagrams/frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
+<div class="sidebar__label sidebar__label--sub">State</div>
+<a class="sidebar__link" href="diagrams/frontend-state-scene.html">🔀 前端狀態機：場景</a>
+<a class="sidebar__link" href="diagrams/frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
+<div class="sidebar__label sidebar__label--sub">其他</div>
+<a class="sidebar__link" href="diagrams/frontend-communication.html">🤝 前端協作圖：WS 協議</a>
+<a class="sidebar__link" href="diagrams/frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
+<a class="sidebar__link" href="diagrams/frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
+<a class="sidebar__link" href="diagrams/frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
+<a class="sidebar__link" href="diagrams/frontend-use-case.html">👤 前端用例圖</a>
+<div class="sidebar__label">PlantUML</div>
 <a class="sidebar__link" href="puml--diagrams-puml-class-diagram.html">Class Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-component-diagram.html">Component Diagram</a>
 <a class="sidebar__link" href="puml--diagrams-puml-dataflow-diagram.html">Dataflow Diagram</a>
@@ -215,55 +334,9 @@
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
 </div>
-<div class="sidebar__section">
-<div class="sidebar__label">Server UML</div>
-<a class="sidebar__link" href="diag-activity-arena-battle.html">📐 Activity Arena Battle</a>
-<a class="sidebar__link" href="diag-activity-claim-and-train.html">📐 Activity Claim And Train</a>
-<a class="sidebar__link" href="diag-activity-gdpr-erasure.html">📐 Activity Gdpr Erasure</a>
-<a class="sidebar__link" href="diag-cicd-pipeline-sequence.html">📐 Cicd Pipeline Sequence</a>
-<a class="sidebar__link" href="diag-cicd-pr-gate-activity.html">📐 Cicd Pr Gate Activity</a>
-<a class="sidebar__link" href="diag-cicd-secret-flow.html">📐 Cicd Secret Flow</a>
-<a class="sidebar__link" href="diag-class-application.html">📐 Class Application</a>
-<a class="sidebar__link" href="diag-class-domain.html">🗂️ 類別圖：領域模型</a>
-<a class="sidebar__link" href="diag-class-infra-presentation.html">📐 Class Infra Presentation</a>
-<a class="sidebar__link" href="diag-communication.html">🤝 協作圖</a>
-<a class="sidebar__link" href="diag-component.html">🧩 元件圖</a>
-<a class="sidebar__link" href="diag-deployment.html">☁️ 部署圖</a>
-<a class="sidebar__link" href="diag-developer-workflow-activity.html">📐 Developer Workflow Activity</a>
-<a class="sidebar__link" href="diag-er-diagram.html">🗃️ ER 關聯圖</a>
-<a class="sidebar__link" href="diag-infra-local-topology.html">📐 Infra Local Topology</a>
-<a class="sidebar__link" href="diag-object-snapshot.html">📸 物件圖：快照</a>
-<a class="sidebar__link" href="diag-sequence-arena-battle.html">📐 Sequence Arena Battle</a>
-<a class="sidebar__link" href="diag-sequence-arena-enter-error.html">📐 Sequence Arena Enter Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow-error.html">📐 Sequence Claim Flow Error</a>
-<a class="sidebar__link" href="diag-sequence-claim-flow.html">📐 Sequence Claim Flow</a>
-<a class="sidebar__link" href="diag-sequence-training.html">📐 Sequence Training</a>
-<a class="sidebar__link" href="diag-state-machine-arena-match.html">📐 State Machine Arena Match</a>
-<a class="sidebar__link" href="diag-state-machine-pet-lifecycle.html">📐 State Machine Pet Lifecycle</a>
-<a class="sidebar__link" href="diag-use-case.html">👤 用例圖 (Use Case)</a>
-</div>
-<div class="sidebar__section">
-<div class="sidebar__label">Frontend UML</div>
-<a class="sidebar__link" href="diag-frontend-activity-gameplay.html">📊 前端活動圖：遊戲主流程</a>
-<a class="sidebar__link" href="diag-frontend-activity-init.html">🚀 前端活動圖：初始化</a>
-<a class="sidebar__link" href="diag-frontend-activity-ui.html">🖱️ 前端活動圖：UI 互動</a>
-<a class="sidebar__link" href="diag-frontend-class-component.html">🗂️ 前端類別圖：元件</a>
-<a class="sidebar__link" href="diag-frontend-class-scene.html">🎬 前端類別圖：場景控制器</a>
-<a class="sidebar__link" href="diag-frontend-class-services.html">⚙️ 前端類別圖：Client 服務</a>
-<a class="sidebar__link" href="diag-frontend-communication.html">🤝 前端協作圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-component.html">🧩 前端元件圖：Cocos 節點樹</a>
-<a class="sidebar__link" href="diag-frontend-deployment.html">☁️ 前端部署圖：建構管線</a>
-<a class="sidebar__link" href="diag-frontend-object-snapshot.html">📸 前端物件圖：UI 快照</a>
-<a class="sidebar__link" href="diag-frontend-sequence-scene.html">🔄 前端循序圖：場景切換</a>
-<a class="sidebar__link" href="diag-frontend-sequence-shoot.html">🎯 前端循序圖：射擊流程</a>
-<a class="sidebar__link" href="diag-frontend-sequence-ws.html">🔌 前端循序圖：WS 協議</a>
-<a class="sidebar__link" href="diag-frontend-state-scene.html">🔀 前端狀態機：場景</a>
-<a class="sidebar__link" href="diag-frontend-state-ui.html">🖥️ 前端狀態機：UI</a>
-<a class="sidebar__link" href="diag-frontend-use-case.html">👤 前端用例圖</a>
-</div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1>Cross-Document Alignment Report — pixel-pet-arena</h1>
+    <main class="doc-content"><h1 id="cross-document-alignment-report--pixel-pet-arena">Cross-Document Alignment Report — pixel-pet-arena</h1>
 <p><strong>DOC-ID</strong>: ALIGN-PIXEL-PET-ARENA-20260504</p>
 <p><strong>Status</strong>: VERIFIED</p>
 <p><strong>Generated</strong>: 2026-05-04</p>
@@ -273,12 +346,12 @@
 <p>docs/CICD.md, docs/FRONTEND.md, docs/test-plan.md, docs/RTM.md,</p>
 <p>docs/LOCAL_DEPLOY.md, docs/runbook.md, docs/DEVELOPER_GUIDE.md</p>
 <hr>
-<h2>Alignment Issues</h2>
+<h2 id="alignment-issues">Alignment Issues</h2>
 <p>Each issue is cited with the exact document and section where the inconsistency or error</p>
 <p>was found, compared against the authoritative facts established in the project ground</p>
 <p>truth.</p>
 <hr>
-<h3>ISSUE-001 — Health endpoint path: runbook.md uses <code>/api/v1/health</code> instead of <code>/health</code></h3>
+<h3 id="issue-001--health-endpoint-path-runbookmd-uses-apiv1health-instead-of-health">ISSUE-001 — Health endpoint path: runbook.md uses <code>/api/v1/health</code> instead of <code>/health</code></h3>
 <p><strong>Location</strong>: <code>docs/runbook.md</code> — §Deployment / Post-Deployment Smoke Tests (line 129),</p>
 <p>§Deployment / Backend Deployment Steps (lines 71, 76), §Incident Response / P0 (line 156,</p>
 <p>164), §Health Checks and Monitoring (line 435), §On-Call Quick Reference (line 572).</p>
@@ -294,7 +367,7 @@
 <p><strong>Recommendation</strong>: Replace every occurrence of <code>/api/v1/health</code> in <code>docs/runbook.md</code> with</p>
 <p><code>/health</code> to match the canonical definition in <code>docs/API.md §10</code> and <code>docs/CICD.md</code>.</p>
 <hr>
-<h3>ISSUE-002 — Health response body: runbook.md uses <code>&quot;status&quot;:&quot;ok&quot;</code> instead of <code>&quot;status&quot;:&quot;healthy&quot;</code></h3>
+<h3 id="issue-002--health-response-body-runbookmd-uses-statusok-instead-of-statushealthy">ISSUE-002 — Health response body: runbook.md uses <code>&quot;status&quot;:&quot;ok&quot;</code> instead of <code>&quot;status&quot;:&quot;healthy&quot;</code></h3>
 <p><strong>Location</strong>: <code>docs/runbook.md</code> — §Deployment / Post-Deployment Smoke Tests (line 129),</p>
 <p>§Deployment / Backend Deployment Steps (line 76), §Health Checks and Monitoring (line 445).</p>
 <p><strong>Description</strong>: The authoritative health response (from <code>docs/API.md §10</code> and confirmed in</p>
@@ -311,7 +384,7 @@
 <p><code>docs/API.md §10</code>. Remove the extended fields (<code>version</code>, <code>buildSha</code>, <code>featureFlags</code>,</p>
 <p><code>email</code> check) unless those fields are also added to <code>docs/API.md §10</code>.</p>
 <hr>
-<h3>ISSUE-003 — JWT_SECRET purpose mislabelled in runbook.md On-Call Quick Reference</h3>
+<h3 id="issue-003--jwt_secret-purpose-mislabelled-in-runbookmd-on-call-quick-reference">ISSUE-003 — JWT_SECRET purpose mislabelled in runbook.md On-Call Quick Reference</h3>
 <p><strong>Location</strong>: <code>docs/runbook.md</code> — §On-Call Quick Reference (line 586).</p>
 <p><strong>Description</strong>: The runbook quick-reference table describes <code>JWT_SECRET</code> as &quot;used for claim</p>
 <p>token signing&quot;. The authoritative description — confirmed in `docs/LOCAL_DEPLOY.md §Key</p>
@@ -327,7 +400,7 @@
 <p>short-lived TOTP setup token returned during first-time admin enrollment only — not used for</p>
 <p>player auth or admin sessions.&quot;</p>
 <hr>
-<h3>ISSUE-004 — Local migration command: LOCAL_DEPLOY.md uses <code>supabase db push</code>; authoritative command is <code>supabase migration up</code></h3>
+<h3 id="issue-004--local-migration-command-local_deploymd-uses-supabase-db-push-authoritative-command-is-supabase-migration-up">ISSUE-004 — Local migration command: LOCAL_DEPLOY.md uses <code>supabase db push</code>; authoritative command is <code>supabase migration up</code></h3>
 <p><strong>Location</strong>: <code>docs/LOCAL_DEPLOY.md</code> — §Setup Steps / Step 3 (lines 153–162).</p>
 <p><strong>Description</strong>: <code>docs/LOCAL_DEPLOY.md</code> step 3 tells developers to run <code>supabase db push</code> and</p>
 <p>mentions <code>pnpm db:migrate</code> as an alternative. The Supabase CLI v2 canonical local migration</p>
@@ -340,7 +413,7 @@
 <p><strong>Recommendation</strong>: Replace <code>supabase db push</code> in <code>docs/LOCAL_DEPLOY.md §Step 3</code> with</p>
 <p><code>supabase migration up</code>, consistent with <code>docs/DEVELOPER_GUIDE.md</code> and the CI gate diagram.</p>
 <hr>
-<h3>ISSUE-005 — detect-secrets baseline update command: CICD.md uses <code>--update</code> flag; DEVELOPER_GUIDE.md and all diagrams use <code>--baseline</code></h3>
+<h3 id="issue-005--detect-secrets-baseline-update-command-cicdmd-uses---update-flag-developer_guidemd-and-all-diagrams-use---baseline">ISSUE-005 — detect-secrets baseline update command: CICD.md uses <code>--update</code> flag; DEVELOPER_GUIDE.md and all diagrams use <code>--baseline</code></h3>
 <p><strong>Location</strong>: <code>docs/CICD.md</code> — §Secrets Detection (line 1029); <code>docs/DEVELOPER_GUIDE.md</code></p>
 <p>(line 684); <code>docs/diagrams/cicd-secrets-rotation.md</code> (line 30, 141); <code>docs/diagrams/cicd-pr-gate.md</code> (line 39, 105).</p>
 <p><strong>Description</strong>: <code>docs/CICD.md §Secrets Detection</code> instructs developers to run</p>
@@ -356,7 +429,7 @@
 <p><code>detect-secrets scan --baseline .secrets.baseline</code>, matching all other documents and the</p>
 <p>authoritative command.</p>
 <hr>
-<h3>ISSUE-006 — RTM user story count (17) disagrees with test-plan.md user story count (18)</h3>
+<h3 id="issue-006--rtm-user-story-count-17-disagrees-with-test-planmd-user-story-count-18">ISSUE-006 — RTM user story count (17) disagrees with test-plan.md user story count (18)</h3>
 <p><strong>Location</strong>: <code>docs/RTM.md</code> — Overview (line 14) and Coverage table (line 86);</p>
 <p><code>docs/test-plan.md</code> — §1.1 (line 39), §2.2 (line 83).</p>
 <p><strong>Description</strong>: <code>docs/RTM.md</code> states &quot;all 17 user stories&quot; and the coverage table shows 17</p>
@@ -371,7 +444,7 @@
 <p><code>admin-portal.feature</code> (client BDD), integration tests, and E2E tests as documented in</p>
 <p><code>docs/test-plan.md §2.2</code>, and update the total count from 17 to 18.</p>
 <hr>
-<h3>ISSUE-007 — test-plan.md unit test file paths use <code>packages/</code> directory layout; CICD.md and DEVELOPER_GUIDE.md use <code>apps/</code> layout</h3>
+<h3 id="issue-007--test-planmd-unit-test-file-paths-use-packages-directory-layout-cicdmd-and-developer_guidemd-use-apps-layout">ISSUE-007 — test-plan.md unit test file paths use <code>packages/</code> directory layout; CICD.md and DEVELOPER_GUIDE.md use <code>apps/</code> layout</h3>
 <p><strong>Location</strong>: <code>docs/test-plan.md</code> — §5 Unit Tests (lines 298, 330, 362, 401, 433, 451),</p>
 <p>§6 Integration Tests (lines 480, 526, 551, 590), §13.1 Coverage table (lines 1506–1510);</p>
 <p><code>docs/CICD.md</code> — coverage assertion paths (lines 203–205); <code>docs/DEVELOPER_GUIDE.md</code></p>
@@ -389,12 +462,12 @@
 <p><code>packages/admin-app/</code> path references in <code>docs/test-plan.md</code> to <code>apps/api/</code>, <code>apps/player/</code>,</p>
 <p>and <code>apps/admin/</code> respectively, to match the canonical directory layout.</p>
 <hr>
-<h2>Cross-Document Gaps</h2>
+<h2 id="cross-document-gaps">Cross-Document Gaps</h2>
 <p>The following items are present or clearly specified in one document but absent from or</p>
 <p>contradicted by one or more others. Each entry references the source document and the</p>
 <p>document(s) where the item is missing.</p>
 <hr>
-<h3>GAP-001 — runbook.md health schema includes fields (<code>version</code>, <code>buildSha</code>, <code>featureFlags</code>, <code>email</code>) absent from API.md §10</h3>
+<h3 id="gap-001--runbookmd-health-schema-includes-fields-version-buildsha-featureflags-email-absent-from-apimd-10">GAP-001 — runbook.md health schema includes fields (<code>version</code>, <code>buildSha</code>, <code>featureFlags</code>, <code>email</code>) absent from API.md §10</h3>
 <p><strong>Present in</strong>: <code>docs/runbook.md §Health Checks and Monitoring</code> (the healthy JSON example</p>
 <p>includes <code>&quot;status&quot;:&quot;ok&quot;</code>, <code>&quot;version&quot;</code>, <code>&quot;buildSha&quot;</code>, <code>&quot;featureFlags&quot;</code>, and an <code>&quot;email&quot;</code> check</p>
 <p>block).</p>
@@ -405,46 +478,46 @@
 <p>return. Load balancer or monitoring configurations built from the runbook schema will check</p>
 <p>for fields that do not exist.</p>
 <hr>
-<h3>GAP-002 — US-ADMIN-006 missing from RTM but tested in test-plan.md</h3>
+<h3 id="gap-002--us-admin-006-missing-from-rtm-but-tested-in-test-planmd">GAP-002 — US-ADMIN-006 missing from RTM but tested in test-plan.md</h3>
 <p><strong>Present in</strong>: <code>docs/test-plan.md §2.2</code> (US-ADMIN-006 row), <code>docs/PRD.md</code> (US-ADMIN-006</p>
 <p>defined as P1 story), <code>docs/CICD.md §Coverage Enforcement</code> (implicit coverage requirement).</p>
 <p><strong>Absent from</strong>: <code>docs/RTM.md</code> requirements table and test-cases table.</p>
 <p><strong>Impact</strong>: If the RTM is used as the traceability artifact for a compliance review or sprint</p>
 <p>sign-off, US-ADMIN-006&#x27;s test coverage is invisible. See also ISSUE-006 above.</p>
 <hr>
-<h3>GAP-003 — runbook.md health checks reference <code>/api/v1/health</code> while CICD.md and API.md use <code>/health</code></h3>
+<h3 id="gap-003--runbookmd-health-checks-reference-apiv1health-while-cicdmd-and-apimd-use-health">GAP-003 — runbook.md health checks reference <code>/api/v1/health</code> while CICD.md and API.md use <code>/health</code></h3>
 <p>Detailed in ISSUE-001. As a cross-document gap, the runbook represents the only document in</p>
 <p>the set that uses the wrong path. All other documents (<code>docs/API.md</code>, <code>docs/CICD.md</code>,</p>
 <p><code>docs/LOCAL_DEPLOY.md</code>, <code>docs/DEVELOPER_GUIDE.md</code>) correctly use <code>GET /health</code>.</p>
 <hr>
-<h3>GAP-004 — detect-secrets <code>--update</code> vs <code>--baseline</code> flag undocumented discrepancy</h3>
+<h3 id="gap-004--detect-secrets---update-vs---baseline-flag-undocumented-discrepancy">GAP-004 — detect-secrets <code>--update</code> vs <code>--baseline</code> flag undocumented discrepancy</h3>
 <p><strong>Present in (--update variant)</strong>: <code>docs/CICD.md §Secrets Detection</code>.</p>
 <p><strong>Present in (--baseline variant, authoritative)</strong>: <code>docs/DEVELOPER_GUIDE.md</code>,</p>
 <p><code>docs/diagrams/cicd-secrets-rotation.md</code>, <code>docs/diagrams/cicd-pr-gate.md</code>.</p>
 <p><strong>Impact</strong>: A developer who finds the instructions in <code>docs/CICD.md</code> first may run the wrong</p>
 <p>command when attempting to add a false positive to the baseline. See ISSUE-005.</p>
 <hr>
-<h3>GAP-005 — runbook.md JWT_SECRET description disagrees with all other documents</h3>
+<h3 id="gap-005--runbookmd-jwt_secret-description-disagrees-with-all-other-documents">GAP-005 — runbook.md JWT_SECRET description disagrees with all other documents</h3>
 <p><strong>Described correctly in</strong>: <code>docs/LOCAL_DEPLOY.md §Key environment variables</code>,</p>
 <p><code>docs/DEVELOPER_GUIDE.md §2.4</code>, <code>docs/CICD.md §Secrets Management</code>, <code>docs/API.md §2.2</code>,</p>
 <p><code>docs/test-plan.md §3.3</code>.</p>
 <p><strong>Described incorrectly in</strong>: <code>docs/runbook.md §On-Call Quick Reference</code> (&quot;used for claim</p>
 <p>token signing&quot;). See ISSUE-003.</p>
 <hr>
-<h3>GAP-006 — LOCAL_DEPLOY.md uses <code>supabase db push</code> while other documents use <code>supabase migration up</code></h3>
+<h3 id="gap-006--local_deploymd-uses-supabase-db-push-while-other-documents-use-supabase-migration-up">GAP-006 — LOCAL_DEPLOY.md uses <code>supabase db push</code> while other documents use <code>supabase migration up</code></h3>
 <p><strong>Present in (supabase db push)</strong>: <code>docs/LOCAL_DEPLOY.md §Step 3</code>.</p>
 <p><strong>Absent from / contradicted by</strong>: <code>docs/DEVELOPER_GUIDE.md</code> (lines 277, 825, 1042),</p>
 <p><code>docs/diagrams/cicd-pr-gate.md</code> (lines 27, 88) — all of which use <code>supabase migration up</code>.</p>
 <p><strong>Impact</strong>: Developers following LOCAL_DEPLOY.md will run an incorrect command. See ISSUE-004.</p>
 <hr>
-<h3>GAP-007 — Runbook health check schema has three-value <code>status</code> (<code>ok</code>, <code>degraded</code>, <code>error</code>) vs API.md three-value (<code>healthy</code>, <code>degraded</code>, <code>down</code>)</h3>
+<h3 id="gap-007--runbook-health-check-schema-has-three-value-status-ok-degraded-error-vs-apimd-three-value-healthy-degraded-down">GAP-007 — Runbook health check schema has three-value <code>status</code> (<code>ok</code>, <code>degraded</code>, <code>error</code>) vs API.md three-value (<code>healthy</code>, <code>degraded</code>, <code>down</code>)</h3>
 <p><strong>Present in</strong>: <code>docs/runbook.md §Health Checks and Monitoring</code> — the degraded example uses</p>
 <p><code>&quot;status&quot;: &quot;degraded&quot;</code> and the unhealthy response uses <code>&quot;status&quot;: &quot;error&quot;</code> (line 491).</p>
 <p><strong>Contradicted by</strong>: <code>docs/API.md §10</code> (line 2515), which defines: <code>healthy</code>, <code>degraded</code>,</p>
 <p><code>down</code>. The CICD comment at line 1277 also shows <code>&quot;status&quot;:&quot;healthy&quot;</code>. The runbook uses <code>&quot;ok&quot;</code></p>
 <p>for the healthy state and <code>&quot;error&quot;</code> for the fully down state — two of three values differ.</p>
 <hr>
-<h2>Alignment Summary</h2>
+<h2 id="alignment-summary">Alignment Summary</h2>
 <p>Overall, the pixel-pet-arena documentation set is well-structured and shows strong</p>
 <p>internal consistency across the majority of its documents. The CONSTANTS.md source of truth</p>
 <p>is consistently referenced by ID across EDD.md, API.md, SCHEMA.md, ARCH.md, and PRD.md with</p>
@@ -477,7 +550,7 @@
 <p>All 7 issues are correctible without architectural change. None affect the EDD, API,</p>
 <p>SCHEMA, or ARCH documents, which are internally consistent and mutually aligned.</p>
 <hr>
-<h2>Fix Status</h2>
+<h2 id="fix-status">Fix Status</h2>
 <p>All 7 alignment issues have been resolved in commit <code>docs(gendoc)[ALIGN-FIX]</code> and verified on 2026-05-03.</p>
 <table>
 <tr><th>Issue</th><th>Severity</th><th>File</th><th>Fix Applied</th><th>Status</th></tr>
@@ -489,11 +562,11 @@
 <tr><td>ISSUE-006</td><td>MEDIUM</td><td><code>docs/RTM.md</code></td><td>US-ADMIN-006 (Game Economy Configuration, P1) added to requirements table, test-cases table, and coverage summary; total count updated from 17 to 18</td><td>VERIFIED ✅</td></tr>
 <tr><td>ISSUE-007</td><td>LOW</td><td><code>docs/test-plan.md</code></td><td>All <code>packages/api/</code>, <code>packages/player-app/</code>, <code>packages/admin-app/</code> paths updated to <code>apps/api/</code>, <code>apps/player/</code>, <code>apps/admin/</code></td><td>VERIFIED ✅</td></tr>
 </table>
-<h2>Verification</h2>
+<h2 id="verification">Verification</h2>
 <p><strong>Verification Date</strong>: 2026-05-03</p>
 <p><strong>Method</strong>: grep checks and manual review of each affected document and section</p>
 <p><strong>Result</strong>: All clear — every fix confirmed present; no regressions detected</p>
-<h3>Verification Detail</h3>
+<h3 id="verification-detail">Verification Detail</h3>
 <table>
 <tr><th>Issue</th><th>Verification Check</th><th>Result</th></tr>
 <tr><td>ISSUE-001</td><td><code>grep -n &quot;api/v1/health&quot; docs/runbook.md</code> — no matches</td><td>CLEAR ✅</td></tr>
