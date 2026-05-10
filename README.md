@@ -1,6 +1,6 @@
 <!--
   DOC-ID:  README-PIXEL-PET-ARENA-20260511
-  Version: v1.3
+  Version: v1.4
   Status:  IN_REVIEW
   Author:  AI Generated (gendoc readme)
   Date:    2026-05-11
@@ -22,6 +22,8 @@
                                      list with features/*.feature, post-HTML pipeline state
     v1.3  2026-05-11  AI Generated  Refresh from upstream — add Interactive Demos section
                                      (UI Prototype + API Explorer + Admin Portal)
+    v1.4  2026-05-11  AI Generated  Re-verified upstream consistency in /gendoc-gen-html
+                                     full-auto cycle (BRD/PRD/PDD/EDD/ARCH/API/SCHEMA/CICD)
 -->
 
 # pixel-pet-arena
