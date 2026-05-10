@@ -1,289 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pixel Pet Arena — Interactive Prototype with 10 player-facing screens, animated pixel pets, training, battles, leaderboard, marketplace, and GDPR self-service.">
   <title>Pixel Pet Arena — Interactive Prototype</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="assets/prototype.css">
-  <style>
-    /* Shell chrome */
-    #proto-shell { display:flex; flex-direction:column; min-height:100vh; }
-
-    #proto-topbar {
-      position: sticky; top: 0; z-index: 200;
-      display: flex; align-items: center; gap: 12px;
-      padding: 8px 16px;
-      background: var(--color-surface);
-      border-bottom: 2px solid var(--color-primary);
-      box-shadow: 0 4px 0 #0d0d1a;
-      font-family: var(--font-pixel);
-      font-size: 9px;
-    }
-    #proto-topbar .brand { color: var(--color-accent); font-size: 10px; white-space: nowrap; }
-    #proto-topbar .sep { color: var(--color-text-secondary); }
-    #proto-breadcrumb { color: var(--color-text-primary); flex: 1; }
-    #proto-topbar button, #proto-topbar a {
-      background: transparent; border: 1px solid var(--color-text-secondary);
-      color: var(--color-text-secondary); padding: 4px 8px; cursor: pointer;
-      font-family: var(--font-pixel); font-size: 8px; text-decoration: none;
-      transition: all 0.15s; white-space: nowrap;
-    }
-    #proto-topbar button:hover, #proto-topbar a:hover {
-      border-color: var(--color-primary); color: var(--color-primary);
-    }
-    #btn-back { border-color: var(--color-text-secondary); }
-    #btn-flowmap { border-color: var(--color-accent); color: var(--color-accent); }
-    #btn-flowmap:hover { background: var(--color-accent); color: #1a1a2e; }
-    .topbar-links { display: flex; gap: 8px; }
-
-    #proto-content { flex: 1; overflow-y: auto; }
-
-    /* All screens hidden by default */
-    .screen { display: none; min-height: calc(100vh - 50px); }
-    .screen.active { display: block; }
-
-    /* Flow map modal */
-    #flow-map-modal {
-      position: fixed; inset: 0; z-index: 1000;
-      background: rgba(10,10,20,0.9);
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px;
-    }
-    #flow-map-modal.hidden { display: none; }
-    .flow-map-inner {
-      background: var(--color-surface);
-      border: 2px solid var(--color-primary);
-      box-shadow: var(--shadow);
-      padding: 24px; max-width: 900px; width: 100%;
-      max-height: 80vh; overflow-y: auto;
-    }
-    .flow-map-title {
-      font-family: var(--font-pixel); font-size: 12px;
-      color: var(--color-accent); margin-bottom: 20px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .flow-map-close {
-      background: none; border: 1px solid var(--color-error);
-      color: var(--color-error); padding: 4px 10px; cursor: pointer;
-      font-family: var(--font-pixel); font-size: 9px;
-    }
-    #screen-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
-    }
-    .screen-card {
-      background: var(--color-background);
-      border: 1px solid var(--color-text-secondary);
-      padding: 12px; cursor: pointer; transition: all 0.15s;
-    }
-    .screen-card:hover {
-      border-color: var(--color-primary);
-      background: var(--color-surface-overlay);
-      box-shadow: 4px 4px 0 var(--color-primary);
-    }
-    .screen-card .sc-id {
-      font-family: var(--font-pixel); font-size: 7px;
-      color: var(--color-text-secondary); margin-bottom: 6px;
-    }
-    .screen-card .sc-name {
-      font-family: var(--font-pixel); font-size: 9px;
-      color: var(--color-text-primary); margin-bottom: 8px;
-    }
-    .screen-card .sc-desc {
-      font-family: var(--font-ui); font-size: 11px;
-      color: var(--color-text-secondary); line-height: 1.4;
-    }
-    .flow-entry-badge {
-      display: inline-block;
-      background: var(--color-success); color: #0d0d1a;
-      font-family: var(--font-pixel); font-size: 7px;
-      padding: 2px 6px; margin-bottom: 4px;
-    }
-    .flow-admin-section {
-      margin-top: 20px; padding-top: 16px;
-      border-top: 1px solid var(--color-text-secondary);
-    }
-    .flow-section-label {
-      font-family: var(--font-pixel); font-size: 9px;
-      color: var(--color-warning); margin-bottom: 12px;
-    }
-
-    /* Audio banner */
-    #audio-banner {
-      position: fixed; bottom: 16px; right: 16px; z-index: 300;
-      background: var(--color-surface);
-      border: 1px solid var(--color-warning);
-      padding: 10px 14px; font-family: var(--font-pixel); font-size: 9px;
-      color: var(--color-warning); cursor: pointer;
-      box-shadow: 4px 4px 0 #0d0d1a;
-    }
-    #audio-banner:hover { background: var(--color-warning); color: #1a1a2e; }
-    #audio-banner.hidden { display: none; }
-
-    /* FX canvas */
-    #fx-canvas {
-      position: fixed; top: 0; left: 0;
-      pointer-events: none; z-index: 999;
-      width: 100vw; height: 100vh;
-    }
-  </style>
 </head>
 <body>
+  <nav id="proto-nav" aria-label="Prototype navigation">
+    <a href="../index.html" class="nav-link nav-link--docs" title="返回文件站">← 文件站</a>
+    <button onclick="router.back()" class="nav-btn" title="返回上一頁">← 返回</button>
+    <span id="breadcrumb">Loading...</span>
+    <span class="nav-spacer"></span>
+    <button onclick="showFlowMap()" class="nav-btn" title="查看所有畫面">📍 流程地圖</button>
+    <a href="api-explorer/index.html" class="nav-link" title="API Explorer">🔌 API Explorer</a>
+    <a href="admin/admin-login.html" class="nav-link nav-link--admin" title="管理員後台">🛡️ Admin Portal</a>
+  </nav>
 
-<div id="proto-shell">
-
-  <!-- Top bar -->
-  <header id="proto-topbar">
-    <span class="brand">◆ PPA</span>
-    <span class="sep">│</span>
-    <span id="proto-breadcrumb">PROTOTYPE</span>
-    <div class="topbar-links">
-      <button id="btn-back" onclick="protoBack()">← BACK</button>
-      <button id="btn-flowmap" onclick="showFlowMap()">📍 FLOW MAP</button>
-      <a href="api-explorer/index.html" target="_blank">API EXPLORER ↗</a>
-      <a href="admin/index.html" target="_blank">ADMIN ↗</a>
-    </div>
-  </header>
-
-  <!-- Screen containers (all 10 screens rendered into these) -->
-  <main id="proto-content">
-    <div id="screen-landing"  class="screen"></div>
-    <div id="screen-claim"    class="screen"></div>
-    <div id="screen-pet"      class="screen"></div>
-    <div id="screen-training" class="screen"></div>
-    <div id="screen-arena"    class="screen"></div>
-    <div id="screen-arena-result" class="screen"></div>
-    <div id="screen-leaderboard"  class="screen"></div>
-    <div id="screen-battle-records" class="screen"></div>
-    <div id="screen-marketplace" class="screen"></div>
-    <div id="screen-gdpr"     class="screen"></div>
+  <main id="proto-content" role="main">
+    <!-- Screen content rendered here by router -->
   </main>
 
-  <!-- Flow map modal -->
-  <div id="flow-map-modal" class="hidden">
-    <div class="flow-map-inner">
-      <div class="flow-map-title">
-        <span>📍 SCREEN FLOW MAP</span>
-        <button class="flow-map-close" onclick="hideFlowMap()">✕ CLOSE</button>
-      </div>
-      <!-- Player screens -->
-      <div class="flow-section-label">PLAYER SCREENS (10)</div>
+  <!-- Flow map modal (overlay listing all 10 screens) -->
+  <div id="flow-map-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="flow-map-title">
+    <div class="modal-card">
+      <h2 id="flow-map-title">📍 使用者流程地圖</h2>
+      <p class="text-secondary">點擊任一畫面跳轉。</p>
       <div id="screen-grid"></div>
-      <!-- Admin screens -->
-      <div class="flow-admin-section">
-        <div class="flow-section-label">ADMIN PORTAL (separate app)</div>
-        <div id="admin-screen-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;"></div>
+      <div class="modal-actions">
+        <button onclick="hideFlowMap()" class="btn btn-secondary">關閉</button>
       </div>
     </div>
   </div>
 
-  <!-- Audio unlock (iOS) -->
-  <div id="audio-banner" class="hidden" onclick="audioUnlock()">🔊 TAP TO ENABLE AUDIO</div>
+  <!-- iOS audio unlock button (visible until first click) -->
+  <button id="audio-unlock-btn"
+          onclick="audioEngine.unlock(); this.style.display='none';"
+          aria-label="Enable audio">🔊 啟用音效</button>
 
-  <!-- Particle canvas -->
-  <canvas id="fx-canvas"></canvas>
+  <!-- Particle FX overlay -->
+  <canvas id="fx-canvas" aria-hidden="true"></canvas>
 
-</div>
+  <!-- Toast container -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-<!-- Data first -->
-<script src="assets/mock-data.js"></script>
-<!-- Then prototype logic (sets up router + renders initial screen) -->
-<script src="assets/prototype.js"></script>
-
-<script>
-/* Shell helpers exposed globally for prototype.js */
-function protoBack() {
-  if (window._proto_history && window._proto_history.length > 1) {
-    window._proto_history.pop();
-    var prev = window._proto_history[window._proto_history.length - 1];
-    if (prev) window.go(prev, true);
-  }
-}
-
-function showFlowMap() {
-  document.getElementById('flow-map-modal').classList.remove('hidden');
-  buildFlowMap();
-}
-
-function hideFlowMap() {
-  document.getElementById('flow-map-modal').classList.add('hidden');
-}
-
-function buildFlowMap() {
-  var grid = document.getElementById('screen-grid');
-  if (grid.children.length > 0) return; // already built
-
-  var screens = [
-    {id:'screen-landing',  name:'LANDING',         desc:'Entry — claim or browse',          entry:true},
-    {id:'screen-claim',    name:'CLAIM PET',        desc:'3-step: Email → OTP → URL',        entry:false},
-    {id:'screen-pet',      name:'MY PET',           desc:'Stats, food, actions',             entry:false},
-    {id:'screen-training', name:'TRAINING',         desc:'Sprint/Lift/Endurance daily',      entry:false},
-    {id:'screen-arena',    name:'ARENA LOBBY',      desc:'Race or Sumo matchmaking',         entry:false},
-    {id:'screen-arena-result', name:'BATTLE RESULT',desc:'Win/Loss + stat comparison',       entry:false},
-    {id:'screen-leaderboard',  name:'LEADERBOARD',  desc:'Top 100 by arena score',           entry:false},
-    {id:'screen-battle-records',name:'BATTLE RECORDS',desc:'Pet battle history (public)',     entry:false},
-    {id:'screen-marketplace',  name:'MARKETPLACE',  desc:'Feature-gated pet trading',        entry:false},
-    {id:'screen-gdpr',     name:'GDPR',             desc:'Data rights self-service',         entry:false},
-  ];
-
-  screens.forEach(function(s) {
-    var card = document.createElement('div');
-    card.className = 'screen-card';
-    card.innerHTML =
-      (s.entry ? '<div class="flow-entry-badge">ENTRY</div><br>' : '') +
-      '<div class="sc-id">' + s.id + '</div>' +
-      '<div class="sc-name">' + s.name + '</div>' +
-      '<div class="sc-desc">' + s.desc + '</div>';
-    card.onclick = function() {
-      hideFlowMap();
-      if (window.go) window.go(s.id);
-    };
-    grid.appendChild(card);
-  });
-
-  var adminGrid = document.getElementById('admin-screen-grid');
-  var adminScreens = [
-    {name:'Dashboard',    href:'admin/index.html',       desc:'Metrics, quick actions, activity'},
-    {name:'Pet Mgmt',     href:'admin/pets.html',         desc:'Search, ban/unban pets'},
-    {name:'Leaderboard',  href:'admin/leaderboard.html',  desc:'Manage rankings, flag suspicious'},
-    {name:'Config',       href:'admin/config.html',       desc:'Runtime config + feature flags'},
-    {name:'Analytics',    href:'admin/analytics.html',    desc:'DAU, battles, rarity charts'},
-  ];
-  adminScreens.forEach(function(s) {
-    var card = document.createElement('div');
-    card.className = 'screen-card';
-    card.innerHTML =
-      '<div class="sc-id" style="color:var(--color-warning)">admin</div>' +
-      '<div class="sc-name">' + s.name + '</div>' +
-      '<div class="sc-desc">' + s.desc + '</div>';
-    card.onclick = function() { window.open(s.href, '_blank'); };
-    adminGrid.appendChild(card);
-  });
-}
-
-function audioUnlock() {
-  document.getElementById('audio-banner').classList.add('hidden');
-  if (window._audio_unlocked !== undefined) window._audio_unlocked = true;
-}
-
-/* Mobile: show audio banner */
-if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-  document.getElementById('audio-banner').classList.remove('hidden');
-}
-
-/* Close flow map on backdrop click */
-document.getElementById('flow-map-modal').addEventListener('click', function(e) {
-  if (e.target === this) hideFlowMap();
-});
-
-/* Keyboard */
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') hideFlowMap();
-});
-</script>
-
+  <!-- Scripts: order matters -->
+  <script src="assets/mock-data.js"></script>
+  <script src="assets/audio-engine.js"></script>
+  <script src="assets/fx-engine.js"></script>
+  <script src="assets/prototype.js"></script>
 </body>
 </html>

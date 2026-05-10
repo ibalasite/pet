@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roles · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user">System Admin (super_admin)</span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">Logout</button>
+  </div>
+</header>
+
+<nav class="admin-sidebar">
+  <div class="sidebar-brand">🛡️ Admin Portal</div>
+  <ul class="sidebar-nav">
+    <li class="nav-item"><a href="admin-dashboard.html">📊 Dashboard</a></li>
+    <li class="nav-item"><a href="admin-users.html">👥 Users</a></li>
+    <li class="nav-item active"><a href="admin-roles.html">🗝️ Roles</a></li>
+    <li class="nav-item"><a href="admin-audit-log.html">📜 Audit Log</a></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>🐾 Pet Moderation</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>🏆 Leaderboard</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>⚙️ Runtime Config</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>📧 Email Monitor</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>📈 Analytics</span></li>
+  </ul>
+</nav>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">🗝️ Role Management</h1>
+    <button class="btn btn-primary" onclick="openModal('newRoleModal')">+ New Role</button>
+  </div>
+
+  <div class="role-grid" id="roleGrid"></div>
+</main>
+
+<!-- New Role Modal -->
+<div class="modal-overlay" id="newRoleModal" role="dialog" aria-modal="true" aria-labelledby="newRoleTitle">
+  <div class="modal-card">
+    <h3 id="newRoleTitle">+ New Role</h3>
+    <p class="modal-desc">Custom roles inherit no permissions by default. Enable permissions after creation.</p>
+    <form id="newRoleForm" onsubmit="return submitNewRole(event)">
+      <div class="form-group">
+        <label for="newRoleId">Role ID</label>
+        <input type="text" id="newRoleId" class="form-input mono" required pattern="[a-z_]{3,32}" placeholder="content_lead" />
+      </div>
+      <div class="form-group">
+        <label for="newRoleDisplay">Display name</label>
+        <input type="text" id="newRoleDisplay" class="form-input" required placeholder="Content Lead" />
+      </div>
+      <div class="form-group">
+        <label for="newRoleDesc">Description</label>
+        <textarea id="newRoleDesc" class="form-textarea" rows="3" required placeholder="What can this role do?"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('newRoleModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create role</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  // Build a per-role mutable permission set so toggling is local to this page.
+  const rolePermissionState = {};
+  ADMIN_MOCK.roles.forEach((r) => {
+    rolePermissionState[r.id] = new Set(r.permissions);
+  });
+
+  // Group permissions by module for chip layout
+  function permissionsByModule() {
+    const map = {};
+    ADMIN_MOCK.permissions.forEach((p) => {
+      if (!map[p.module]) map[p.module] = [];
+      map[p.module].push(p);
+    });
+    return map;
+  }
+
+  function moduleLabel(mod) {
+    const labels = {
+      pet:         '🐾 Pet',
+      leaderboard: '🏆 Leaderboard',
+      battle:      '⚔️ Battle',
+      user:        '👥 User',
+      role:        '🗝️ Role',
+      audit:       '📜 Audit',
+      config:      '⚙️ Config',
+      email:       '📧 Email',
+      analytics:   '📈 Analytics',
+      gdpr:        '🛡️ GDPR',
+    };
+    return labels[mod] || mod;
+  }
+
+  function renderRoleCards() {
+    const grid = document.getElementById('roleGrid');
+    grid.textContent = '';
+
+    ADMIN_MOCK.roles.forEach((role) => {
+      const card = document.createElement('div');
+      card.className = 'role-card';
+      card.dataset.roleId = role.id;
+
+      // Head
+      const head = document.createElement('div');
+      head.className = 'role-card-head';
+
+      const titleWrap = document.createElement('div');
+      const tag = document.createElement('span');
+      tag.className = 'role-tag ' + role.color_class;
+      tag.textContent = role.id;
+      const h = document.createElement('h3');
+      h.style.marginTop = '8px';
+      h.textContent = role.display;
+      titleWrap.appendChild(tag);
+      titleWrap.appendChild(h);
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn';
+      editBtn.textContent = 'Edit Permissions';
+      editBtn.addEventListener('click', () => togglePanel(role.id));
+
+      head.appendChild(titleWrap);
+      head.appendChild(editBtn);
+      card.appendChild(head);
+
+      // Description + meta
+      const desc = document.createElement('p');
+      desc.className = 'text-dim';
+      desc.style.fontSize = '12px';
+      desc.style.margin = '0 0 12px';
+      desc.textContent = role.description;
+      card.appendChild(desc);
+
+      const meta = document.createElement('div');
+      meta.className = 'role-meta';
+      meta.appendChild(document.createTextNode('Assigned users: '));
+      const count = document.createElement('span');
+      count.className = 'role-user-count';
+      count.textContent = role.user_count;
+      meta.appendChild(count);
+      meta.appendChild(document.createTextNode(' · permissions: '));
+      const permCount = document.createElement('span');
+      permCount.className = 'role-user-count';
+      permCount.textContent = rolePermissionState[role.id].size;
+      meta.appendChild(permCount);
+      card.appendChild(meta);
+
+      // Permission panel (collapsed)
+      const panel = document.createElement('div');
+      panel.className = 'permission-panel';
+      panel.id = 'panel-' + role.id;
+
+      const grouped = permissionsByModule();
+      Object.keys(grouped).forEach((mod) => {
+        const group = document.createElement('div');
+        group.className = 'permission-group';
+        const h4 = document.createElement('h4');
+        h4.textContent = moduleLabel(mod);
+        group.appendChild(h4);
+
+        const chips = document.createElement('div');
+        chips.className = 'permission-chips';
+        grouped[mod].forEach((perm) => {
+          const key = perm.module + '.' + perm.action;
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'permission-chip';
+          chip.title = perm.desc;
+          chip.textContent = key;
+          if (rolePermissionState[role.id].has(key)) {
+            chip.classList.add('enabled');
+          }
+          chip.addEventListener('click', () => {
+            const set = rolePermissionState[role.id];
+            if (set.has(key)) {
+              set.delete(key);
+              chip.classList.remove('enabled');
+              showToast('Revoked ' + key + ' for ' + role.display, 'warning');
+            } else {
+              set.add(key);
+              chip.classList.add('enabled');
+              showToast('Granted ' + key + ' for ' + role.display, 'success');
+            }
+            permCount.textContent = set.size;
+          });
+          chips.appendChild(chip);
+        });
+        group.appendChild(chips);
+        panel.appendChild(group);
+      });
+
+      const saveRow = document.createElement('div');
+      saveRow.className = 'flex-end';
+      saveRow.style.marginTop = '16px';
+      const cancel = document.createElement('button');
+      cancel.className = 'btn btn-ghost';
+      cancel.textContent = 'Collapse';
+      cancel.addEventListener('click', () => togglePanel(role.id));
+      const save = document.createElement('button');
+      save.className = 'btn btn-success';
+      save.textContent = 'Save Changes';
+      save.addEventListener('click', () => {
+        showToast('✅ Role permissions updated for ' + role.display, 'success');
+      });
+      saveRow.appendChild(cancel);
+      saveRow.appendChild(save);
+      panel.appendChild(saveRow);
+
+      card.appendChild(panel);
+      grid.appendChild(card);
+    });
+  }
+
+  function togglePanel(roleId) {
+    const panel = document.getElementById('panel-' + roleId);
+    if (!panel) return;
+    panel.classList.toggle('open');
+  }
+
+  function submitNewRole(e) {
+    e.preventDefault();
+    const id      = document.getElementById('newRoleId').value.trim();
+    const display = document.getElementById('newRoleDisplay').value.trim();
+    const desc    = document.getElementById('newRoleDesc').value.trim();
+
+    if (ADMIN_MOCK.roles.some((r) => r.id === id)) {
+      showToast('Role ID "' + id + '" already exists.', 'error');
+      return false;
+    }
+
+    ADMIN_MOCK.roles.push({
+      id: id,
+      display: display,
+      description: desc,
+      user_count: 0,
+      color_class: 'auditor',
+      permissions: [],
+    });
+    rolePermissionState[id] = new Set();
+
+    document.getElementById('newRoleForm').reset();
+    closeModal('newRoleModal');
+    renderRoleCards();
+    showToast('✅ Role created: ' + display, 'success');
+    return false;
+  }
+
+  renderRoleCards();
+</script>
+</body>
+</html>

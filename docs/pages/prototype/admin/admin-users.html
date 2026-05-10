@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user">System Admin (super_admin)</span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">Logout</button>
+  </div>
+</header>
+
+<nav class="admin-sidebar">
+  <div class="sidebar-brand">🛡️ Admin Portal</div>
+  <ul class="sidebar-nav">
+    <li class="nav-item"><a href="admin-dashboard.html">📊 Dashboard</a></li>
+    <li class="nav-item active"><a href="admin-users.html">👥 Users</a></li>
+    <li class="nav-item"><a href="admin-roles.html">🗝️ Roles</a></li>
+    <li class="nav-item"><a href="admin-audit-log.html">📜 Audit Log</a></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>🐾 Pet Moderation</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>🏆 Leaderboard</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>⚙️ Runtime Config</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>📧 Email Monitor</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>📈 Analytics</span></li>
+  </ul>
+</nav>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">👥 User Management</h1>
+    <button class="btn btn-primary" onclick="openModal('newUserModal')">+ New User</button>
+  </div>
+
+  <!-- Search bar -->
+  <div class="search-bar">
+    <input type="text" id="searchKeyword" class="form-input" placeholder="Search username, name, or email…" />
+    <select id="filterRole" class="form-select">
+      <option value="">All roles</option>
+      <option value="super_admin">Super Admin</option>
+      <option value="moderator">Moderator</option>
+      <option value="auditor">Auditor</option>
+      <option value="support_agent">Support Agent</option>
+      <option value="analyst">Analyst</option>
+    </select>
+    <select id="filterStatus" class="form-select">
+      <option value="">All statuses</option>
+      <option value="active">Active</option>
+      <option value="locked">Locked</option>
+      <option value="inactive">Inactive</option>
+    </select>
+    <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+    <button class="btn btn-ghost" onclick="clearFilters()">Clear</button>
+  </div>
+
+  <!-- Users table -->
+  <table class="data-table" id="usersTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Last login</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="pagination" id="paginationContainer">
+    <span class="pagination-info" id="paginationInfo">— records</span>
+  </div>
+</main>
+
+<!-- New User Modal -->
+<div class="modal-overlay" id="newUserModal" role="dialog" aria-modal="true" aria-labelledby="newUserTitle">
+  <div class="modal-card">
+    <h3 id="newUserTitle">+ New Admin User</h3>
+    <p class="modal-desc">Creates an admin account. The user will receive an enrollment email and must enable MFA on first login.</p>
+
+    <form id="newUserForm" onsubmit="return submitNewUser(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="newUsername">Username</label>
+          <input type="text" id="newUsername" class="form-input" required pattern="[a-z0-9_-]{3,32}" placeholder="alice" />
+        </div>
+        <div class="form-group">
+          <label for="newName">Display name</label>
+          <input type="text" id="newName" class="form-input" required placeholder="Alice Chen" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="newEmail">Email</label>
+        <input type="email" id="newEmail" class="form-input" required placeholder="alice@pixelpet.arena" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="newRole">Role</label>
+          <select id="newRole" class="form-select" required>
+            <option value="moderator">Moderator</option>
+            <option value="auditor">Auditor</option>
+            <option value="support_agent">Support Agent</option>
+            <option value="analyst">Analyst</option>
+            <option value="super_admin">Super Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="newPassword">Initial password</label>
+          <input type="password" id="newPassword" class="form-input mono" required minlength="10" placeholder="At least 10 characters" autocomplete="new-password" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('newUserModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create user</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  let renderRows = ADMIN_MOCK.users.slice();
+
+  function renderTable() {
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.textContent = '';
+
+    renderRows.forEach((u) => {
+      const tr = document.createElement('tr');
+
+      tr.appendChild(td(u.id, 'mono'));
+      tr.appendChild(td(u.username, 'mono'));
+      tr.appendChild(td(u.name));
+      tr.appendChild(td(u.email));
+
+      const roleCell = document.createElement('td');
+      const roleTag  = document.createElement('span');
+      roleTag.className = 'role-tag ' + roleColorClass(u.role);
+      roleTag.textContent = u.role;
+      roleCell.appendChild(roleTag);
+      tr.appendChild(roleCell);
+
+      const statusCell = document.createElement('td');
+      const statusBadge = document.createElement('span');
+      statusBadge.className = 'status-badge ' + (u.status || 'inactive');
+      statusBadge.textContent = u.status;
+      statusCell.appendChild(statusBadge);
+      tr.appendChild(statusCell);
+
+      tr.appendChild(td(u.last_login || '—', 'mono'));
+
+      // Action buttons
+      const actCell = document.createElement('td');
+      const actWrap = document.createElement('div');
+      actWrap.className = 'action-cell';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'icon-btn';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', () => showToast('Editing ' + u.username + ' (demo)', 'success'));
+
+      const lockBtn = document.createElement('button');
+      const isLocked = u.status === 'locked';
+      lockBtn.className = 'icon-btn ' + (isLocked ? 'success' : 'danger');
+      lockBtn.textContent = isLocked ? 'Unlock' : 'Lock';
+      lockBtn.addEventListener('click', () => {
+        u.status = isLocked ? 'active' : 'locked';
+        showToast((isLocked ? 'Unlocked ' : 'Locked ') + u.username, isLocked ? 'success' : 'warning');
+        renderTable();
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn danger';
+      delBtn.textContent = 'Delete';
+      delBtn.disabled = u.username === 'admin';
+      if (u.username === 'admin') {
+        delBtn.title = 'Super admin cannot be deleted';
+      }
+      delBtn.addEventListener('click', () => {
+        if (confirm('Delete admin user "' + u.username + '"? This cannot be undone.')) {
+          ADMIN_MOCK.users = ADMIN_MOCK.users.filter((x) => x.id !== u.id);
+          renderRows = renderRows.filter((x) => x.id !== u.id);
+          showToast('🗑 Deleted ' + u.username, 'warning');
+          renderTable();
+        }
+      });
+
+      actWrap.appendChild(editBtn);
+      actWrap.appendChild(lockBtn);
+      actWrap.appendChild(delBtn);
+      actCell.appendChild(actWrap);
+      tr.appendChild(actCell);
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('paginationInfo').textContent =
+      'Showing all ' + renderRows.length + ' user' + (renderRows.length === 1 ? '' : 's');
+  }
+
+  function td(text, cls) {
+    const el = document.createElement('td');
+    if (cls) el.className = cls;
+    el.textContent = text == null ? '—' : text;
+    return el;
+  }
+
+  function applyFilters() {
+    const kw  = (document.getElementById('searchKeyword').value || '').trim().toLowerCase();
+    const r   = document.getElementById('filterRole').value;
+    const st  = document.getElementById('filterStatus').value;
+
+    renderRows = ADMIN_MOCK.users.filter((u) => {
+      if (kw) {
+        const hay = (u.username + ' ' + u.name + ' ' + u.email).toLowerCase();
+        if (hay.indexOf(kw) === -1) return false;
+      }
+      if (r && u.role !== r) return false;
+      if (st && u.status !== st) return false;
+      return true;
+    });
+    renderTable();
+  }
+
+  function clearFilters() {
+    document.getElementById('searchKeyword').value = '';
+    document.getElementById('filterRole').value = '';
+    document.getElementById('filterStatus').value = '';
+    renderRows = ADMIN_MOCK.users.slice();
+    renderTable();
+  }
+
+  function submitNewUser(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('newUsername').value.trim();
+    const name     = document.getElementById('newName').value.trim();
+    const email    = document.getElementById('newEmail').value.trim();
+    const role     = document.getElementById('newRole').value;
+
+    if (ADMIN_MOCK.users.some((u) => u.username === username)) {
+      showToast('Username "' + username + '" already exists.', 'error');
+      return false;
+    }
+
+    const newId = Math.max.apply(null, ADMIN_MOCK.users.map((u) => u.id)) + 1;
+    ADMIN_MOCK.users.push({
+      id: newId,
+      username: username,
+      name: name,
+      email: email,
+      role: role,
+      status: 'active',
+      mfa_enabled: false,
+      last_login: '—',
+      created_at: new Date().toISOString().replace('T', ' ').slice(0, 19),
+    });
+    renderRows = ADMIN_MOCK.users.slice();
+    renderTable();
+    document.getElementById('newUserForm').reset();
+    closeModal('newUserModal');
+    showToast('✅ User created: ' + username, 'success');
+    return false;
+  }
+
+  // Initial render
+  renderTable();
+</script>
+</body>
+</html>

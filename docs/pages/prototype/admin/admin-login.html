@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+</header>
+
+<main class="login-shell">
+  <div class="login-card">
+    <h1>🛡️ <span>Admin Portal</span></h1>
+    <p class="subtitle">Pixel Pet Arena · sign in to continue</p>
+
+    <div id="errorMsg" class="error-msg" role="alert"></div>
+
+    <form id="loginForm" autocomplete="off" onsubmit="return submitLogin(event)">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          class="form-input"
+          placeholder="admin"
+          autocomplete="username"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrap">
+          <input
+            type="password"
+            id="password"
+            class="form-input"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" class="toggle-pw" aria-label="Toggle password" onclick="togglePassword()">👁</button>
+        </div>
+      </div>
+
+      <div class="form-group totp-row" id="totpRow">
+        <label for="totp">TOTP Code (6 digits)</label>
+        <input
+          type="text"
+          id="totp"
+          class="form-input mono"
+          placeholder="123456"
+          maxlength="6"
+          inputmode="numeric"
+          pattern="\d{6}"
+        />
+      </div>
+
+      <div class="form-group checkbox-row">
+        <input type="checkbox" id="remember" />
+        <label for="remember" style="margin: 0; text-transform: none; letter-spacing: 0;">Remember me on this device</label>
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
+        <span id="submitLabel">Sign in</span>
+      </button>
+    </form>
+
+    <div class="demo-hint">
+      Demo: <strong>admin</strong> / <strong>Admin@2026</strong> / TOTP: <strong>123456</strong>
+    </div>
+
+    <div class="footer">v1.0 · Admin Portal</div>
+  </div>
+</main>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  /*
+   * ⚠️ PROTOTYPE ONLY ⚠️
+   * This file is a static UI mockup for design review.
+   * - There is NO real authentication. Credentials below are dummy values
+   *   used only to drive the demo flow.
+   * - Production must implement server-side auth, TOTP verification,
+   *   rate limiting, and audit logging.
+   * - DO NOT deploy this prototype to a public origin.
+   */
+  const usernameEl = document.getElementById('username');
+  const passwordEl = document.getElementById('password');
+  const totpRow    = document.getElementById('totpRow');
+  const errorEl    = document.getElementById('errorMsg');
+
+  // Auto-show TOTP once username + password are populated
+  function maybeRevealTotp() {
+    if (usernameEl.value.trim().length > 0 && passwordEl.value.trim().length > 0) {
+      totpRow.classList.add('show');
+    } else {
+      totpRow.classList.remove('show');
+    }
+  }
+  usernameEl.addEventListener('input', maybeRevealTotp);
+  passwordEl.addEventListener('input', maybeRevealTotp);
+
+  function togglePassword() {
+    if (passwordEl.type === 'password') {
+      passwordEl.type = 'text';
+    } else {
+      passwordEl.type = 'password';
+    }
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.add('show');
+  }
+
+  function clearError() {
+    errorEl.textContent = '';
+    errorEl.classList.remove('show');
+  }
+
+  function submitLogin(e) {
+    e.preventDefault();
+    clearError();
+
+    const u  = usernameEl.value.trim();
+    const p  = passwordEl.value;
+    const t  = document.getElementById('totp').value.trim();
+
+    if (!u || !p) {
+      showError('Username and password are required.');
+      return false;
+    }
+
+    // Demo credential check (loose — for prototype only)
+    const isValidUser = (u === 'admin' && p === 'Admin@2026');
+    const totpVisible = totpRow.classList.contains('show');
+    const isValidTotp = !totpVisible || t === '123456';
+
+    const btn   = document.getElementById('submitBtn');
+    const label = document.getElementById('submitLabel');
+    btn.disabled = true;
+    // Build spinner safely (no innerHTML)
+    label.textContent = '';
+    const spin = document.createElement('span');
+    spin.className = 'spinner';
+    label.appendChild(spin);
+    label.appendChild(document.createTextNode(' Signing in…'));
+
+    setTimeout(() => {
+      if (isValidUser && isValidTotp) {
+        window.location.href = 'admin-dashboard.html';
+      } else {
+        btn.disabled = false;
+        label.textContent = 'Sign in';
+        if (!isValidUser) showError('Invalid username or password.');
+        else if (!isValidTotp) showError('Invalid TOTP code. Try 123456 (demo).');
+      }
+    }, 600);
+
+    return false;
+  }
+</script>
+</body>
+</html>

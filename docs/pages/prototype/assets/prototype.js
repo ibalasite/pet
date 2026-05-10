@@ -1,1134 +1,1292 @@
-/* =========================================================
-   PIXEL PET ARENA — Prototype JavaScript
-   ========================================================= */
-(function () {
-  'use strict';
+/* ============================================================
+   Pixel Pet Arena — Prototype Router + 10 screen renders
+   ============================================================ */
 
-  /* ── Helpers ─────────────────────────────────────────── */
-  function $ (sel) { return document.querySelector(sel); }
-  function $$ (sel) { return Array.from(document.querySelectorAll(sel)); }
+/* ----- DOM helpers ----- */
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  /** Escape a string for safe insertion into HTML markup. */
-  function esc (str) {
-    return String(str == null ? '' : str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
+
+const formatDate = (iso) => {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('zh-TW', { dateStyle: 'short', timeStyle: 'short' });
+  } catch (e) {
+    return iso;
+  }
+};
+
+const daysAgo = (iso) => {
+  if (!iso) return Infinity;
+  const ms = Date.now() - new Date(iso).getTime();
+  return ms / (1000 * 60 * 60 * 24);
+};
+
+/* ----- Toast ----- */
+function toast(msg, type = 'success') {
+  const c = $('#toast-container');
+  if (!c) return;
+  const el = document.createElement('div');
+  el.className = `toast toast--${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'fadeIn 200ms reverse';
+    setTimeout(() => { try { el.remove(); } catch (e) { /* ignore */ } }, 220);
+  }, 3000);
+}
+
+/* ----- ID sanitizer for inline JS contexts -----
+   All MOCK ids are UUIDs or short slugs; whitelist alphanumeric+dash to prevent
+   any chance of breaking out of a single-quoted JS string in onclick. */
+function safeJSId(s) {
+  return String(s || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+}
+
+/* ----- Pet sprite HTML helper -----
+   Note: defensive escaping. Although all callers are internal, we whitelist
+   ids/classes to a safe charset to prevent any chance of HTML injection if
+   pet data is ever loaded from an external source in the future. */
+const SAFE_ID_RE = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
+const SAFE_RARITY = new Set(['COMMON', 'RARE', 'EPIC', 'LEGENDARY']);
+
+function petCanvasHTML(pet, opts = {}) {
+  if (!pet) return '<div class="pet-canvas"></div>';
+  const size = opts.size || 'normal';
+  const sizeCls =
+    size === 'large' ? 'pet-canvas--large' :
+    size === 'small' ? 'pet-canvas--small' :
+    size === 'thumb' ? 'pet-canvas--thumb' : '';
+  const rarity = String(pet.rarity || '').toUpperCase();
+  const rarityCls = SAFE_RARITY.has(rarity) ? `pet-canvas--${rarity.toLowerCase()}` : '';
+  const neglectCls = opts.neglect ? 'pet-canvas--neglect' : '';
+  const animCls = (opts.animClass && SAFE_ID_RE.test(opts.animClass)) ? opts.animClass : '';
+  // Use data-action instead of inline onclick. The mount step wires the listener.
+  const action = (opts.onClick && SAFE_ID_RE.test(opts.onClick.replace(/\(.*\)$/, '')))
+    ? `data-action="${escapeHTML(opts.onClick)}"`
+    : '';
+  const idAttr = (opts.id && SAFE_ID_RE.test(opts.id)) ? `id="${opts.id}"` : '';
+  // pet.sprite is an emoji from a controlled SPRITE_BY_NAME map; escape defensively.
+  const sprite = escapeHTML(pet.sprite || '🐾');
+  return `
+    <div class="pet-canvas ${sizeCls} ${rarityCls} ${neglectCls}" ${idAttr} ${action} role="img" aria-label="${escapeHTML(pet.pet_name)}">
+      <div class="pet-bg-grid"></div>
+      <div class="pet-shadow"></div>
+      <div class="pet-sprite ${animCls}">${sprite}</div>
+    </div>
+  `;
+}
+
+/* ----- Rarity badge ----- */
+function rarityBadgeHTML(rarity) {
+  const r = String(rarity).toUpperCase();
+  return `<span class="rarity-badge rarity-badge--${r.toLowerCase()}">${r}</span>`;
+}
+
+/* ============================================================
+   Router
+   ============================================================ */
+class PrototypeRouter {
+  constructor() {
+    this.screens = {};
+    this.current = null;
+    this.history = [];
+    this.context = {};
+    this._timers = [];
   }
 
-  /**
-   * Create an element. inner is treated as trusted HTML only when content
-   * originates from MOCK_DATA constants or static string literals — never
-   * from user-supplied input. User-facing dynamic text is always set via
-   * textContent, not innerHTML.
-   */
-  function el (tag, cls, inner) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (inner !== undefined) e.innerHTML = inner;
-    return e;
+  register(id, renderFn, opts = {}) {
+    this.screens[id] = { id, render: renderFn, ...opts };
   }
 
-  /** Create an element whose text content is set safely (no HTML injection). */
-  function el_text (tag, cls, text) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text !== undefined) e.textContent = text;
-    return e;
-  }
-  function fmt_date (iso) {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
-  function fmt_time_ago (iso) {
-    var diff = Date.now() - new Date(iso).getTime();
-    var hours = Math.floor(diff / 36e5);
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return hours + 'h ago';
-    return Math.floor(hours / 24) + 'd ago';
-  }
-  function rarity_class (r) {
-    return 'rarity-' + (r || 'common').toLowerCase();
-  }
-  function rarity_badge_html (rarity) {
-    var symbols = { COMMON: '◆', RARE: '◈', EPIC: '◉', LEGENDARY: '★' };
-    return '<span class="rarity-badge ' + rarity_class(rarity) + '">' +
-           (symbols[rarity] || '◆') + ' ' + rarity + '</span>';
-  }
-  function pet_by_id (id) {
-    return window.MOCK_DATA.pets.find(function (p) { return p.id === id; }) || window.MOCK_DATA.pets[0];
-  }
-  function current_pet () {
-    return pet_by_id(window.MOCK_DATA.currentPetId);
+  navigate(id, ctx = {}) {
+    if (!this.screens[id]) {
+      console.warn('Unknown screen', id);
+      return;
+    }
+    if (this.current === id) return;
+    this._clearTimers();
+    // Push {id, ctx} pairs so back() can restore the exact context the previous screen was rendered with.
+    if (this.current) this.history.push({ id: this.current, ctx: this.context });
+    this.current = id;
+    this.context = ctx;
+
+    const def = this.screens[id];
+    if (location.hash !== '#' + id) {
+      history.replaceState(null, '', '#' + id);
+    }
+
+    const root = $('#proto-content');
+    root.innerHTML = def.render(ctx);
+    $('#breadcrumb').textContent = def.title || id;
+
+    if (def.onMount) def.onMount(ctx);
+    if (window.audioEngine && window.audioEngine.unlocked) {
+      window.audioEngine.playSFX('SFX-002-pet-tap-click');
+    }
+    // PF-012: hide audio-unlock chip once audio context is unlocked
+    const ub = document.getElementById('audio-unlock-btn');
+    if (ub && window.audioEngine && window.audioEngine.unlocked) {
+      ub.style.display = 'none';
+    }
+    this.updateBGMForScreen(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* ── Audio Simulation ────────────────────────────────── */
-  var audioEnabled = true;
-  function play_sfx (id, label) {
-    if (!audioEnabled) return;
-    console.log('[AUDIO] SFX %s: %s', id, label);
-    var ind = $('#audio-indicator');
-    if (ind) {
-      ind.textContent = '♪ ' + label;
-      ind.classList.add('visible');
-      clearTimeout(ind._t);
-      ind._t = setTimeout(function () { ind.classList.remove('visible'); }, 1800);
+  back() {
+    if (this.history.length === 0) {
+      this.navigate('screen-01');
+      return;
+    }
+    const prev = this.history.pop();
+    if (!prev || prev.id === this.current) return;
+    this._clearTimers();
+    const { id: prevId, ctx: prevCtx } = prev;
+    this.current = prevId;
+    this.context = prevCtx || {};
+    const def = this.screens[prevId];
+    if (!def) { this.navigate('screen-01'); return; }
+    const root = $('#proto-content');
+    root.innerHTML = def.render(this.context);
+    $('#breadcrumb').textContent = def.title || prevId;
+    if (def.onMount) def.onMount(this.context);
+    this.updateBGMForScreen(prevId);
+    history.replaceState(null, '', '#' + prevId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  registerTimer(id) { this._timers.push(id); }
+  _clearTimers() {
+    // Both clearTimeout and clearInterval accept the same numeric ID type;
+    // run both unconditionally so it handles either kind without short-circuit logic bugs.
+    this._timers.forEach((t) => {
+      try { clearTimeout(t); } catch (e) { /* ignore */ }
+      try { clearInterval(t); } catch (e) { /* ignore */ }
+    });
+    this._timers = [];
+  }
+
+  updateBGMForScreen(id) {
+    if (!window.audioEngine || !window.audioEngine.unlocked) return;
+    const ARENA = ['screen-05', 'screen-06'];
+    const TRAINER = ['screen-03', 'screen-04'];
+    if (ARENA.includes(id)) {
+      window.audioEngine.startBGM('BGM-001');
+    } else if (TRAINER.includes(id)) {
+      window.audioEngine.startBGM('BGM-002');
+    } else {
+      window.audioEngine.stopBGM();
     }
   }
-  function play_bgm (id, label) {
-    console.log('[AUDIO] BGM %s: %s  ▶ playing', id, label);
-  }
 
-  /* ── Email validation ────────────────────────────────── */
-  /** Basic structural email check — not a user-input sanitizer, just UX guard. */
-  function is_valid_email (val) {
-    return typeof val === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
+  init() {
+    const initial = (location.hash || '').slice(1) || 'screen-01';
+    this.navigate(initial);
   }
+}
+const router = new PrototypeRouter();
+window.router = router;
 
-  /* ── Toast ───────────────────────────────────────────── */
-  function toast (msg, type) {
-    type = type || 'info';
-    var container = $('#toast-container');
-    if (!container) return;
-    // Use textContent — msg must never be rendered as HTML to avoid XSS.
-    var t = el_text('div', 'toast ' + type, msg);
-    container.appendChild(t);
-    setTimeout(function () {
-      t.classList.add('exit');
-      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 250);
-    }, 3000);
-  }
+/* ============================================================
+   Flow map
+   ============================================================ */
+function showFlowMap() {
+  const grid = $('#screen-grid');
+  if (!grid) return;
+  const tiles = Object.keys(router.screens).map((id) => {
+    const s = router.screens[id];
+    const safeId = safeJSId(id);
+    return `<div class="screen-tile" tabindex="0" role="button" onclick="router.navigate('${safeId}'); hideFlowMap();" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();router.navigate('${safeId}');hideFlowMap();}">
+      <div class="tile-id">${escapeHTML(safeId)}</div>
+      <div class="tile-name">${escapeHTML(s.title || '')}</div>
+    </div>`;
+  }).join('');
+  grid.innerHTML = tiles;
+  $('#flow-map-modal').hidden = false;
+}
+function hideFlowMap() {
+  $('#flow-map-modal').hidden = true;
+}
+window.showFlowMap = showFlowMap;
+window.hideFlowMap = hideFlowMap;
 
-  /* ── Particle Burst ──────────────────────────────────── */
-  function particle_burst (x, y) {
-    var canvas = $('#fx-canvas');
-    if (!canvas) return;
-    var colors = ['#fdcb6e', '#ffd700', '#fff', '#ffec8b', '#ffa500'];
-    var angles = [];
-    for (var i = 0; i < 24; i++) { angles.push(i * (360 / 24)); }
-    angles.forEach(function (deg, i) {
-      var p = el('div', 'particle');
-      var dist = 60 + Math.random() * 60;
-      var rad = deg * (Math.PI / 180);
-      var tx = Math.cos(rad) * dist + 'px';
-      var ty = Math.sin(rad) * dist + 'px';
-      p.style.cssText = [
-        'left:' + (x - 4) + 'px',
-        'top:' + (y - 4) + 'px',
-        'background:' + colors[i % colors.length],
-        '--tx:' + tx,
-        '--ty:' + ty,
-        'animation-delay:' + (i * 15) + 'ms',
-        'animation-duration:' + (700 + Math.random() * 300) + 'ms',
-      ].join(';');
-      canvas.appendChild(p);
-      setTimeout(function () { if (p.parentNode) p.parentNode.removeChild(p); }, 1200);
+/* ============================================================
+   Screen 01 — Landing Page
+   ============================================================ */
+function renderScreen01() {
+  const M = window.MOCK;
+  const pet = M.currentPet;
+  return `
+    <section class="screen" id="landing">
+      <div class="hero">
+        ${petCanvasHTML(pet, { size: 'large', id: 'landing-pet' })}
+        <h1>Pixel Pet Arena</h1>
+        <p class="tagline">It only takes a second to fall in love with this pet.</p>
+        <div class="social-proof">
+          <span class="pulse-dot"></span>
+          <span>${M.metrics.claimed_today.toLocaleString()} pets claimed today</span>
+        </div>
+        <div class="mt-4">
+          ${rarityBadgeHTML(pet.rarity)}
+        </div>
+        <div class="mt-6">
+          <button class="btn btn-ghost" onclick="router.navigate('screen-07')">🏆 View Leaderboard</button>
+        </div>
+        <p class="card-meta" style="opacity:0.6; font-size:0.75rem; margin-top:8px;">Demo: ClaimCTA 在 3 秒內顯現（規格為 30 秒）</p>
+      </div>
+      <div id="claim-cta-slot"></div>
+    </section>
+  `;
+}
+
+function onMountScreen01() {
+  // Click pet for hop
+  const pet = $('#landing-pet');
+  if (pet) {
+    pet.addEventListener('click', () => {
+      const sprite = pet.querySelector('.pet-sprite');
+      sprite.classList.remove('pet-anim-hop');
+      void sprite.offsetWidth;
+      sprite.classList.add('pet-anim-hop');
+      window.audioEngine.playSFX('SFX-001-pet-tap-pop');
     });
   }
+  // Reveal Claim CTA after 3s (spec is 30s, condensed for prototype)
+  const t = setTimeout(() => {
+    const slot = $('#claim-cta-slot');
+    if (!slot) return;
+    slot.innerHTML = `
+      <div class="claim-cta-floating">
+        <button class="btn btn-large" onclick="router.navigate('screen-02')">
+          ✨ Claim This Pet →
+        </button>
+      </div>
+    `;
+  }, 3000);
+  router.registerTimer(t);
+}
 
-  /* ── Stat Float-Up ───────────────────────────────────── */
-  function stat_float (text, x, y) {
-    var f = el('div', 'stat-float', text);
-    f.style.left = x + 'px';
-    f.style.top  = y + 'px';
-    document.body.appendChild(f);
-    setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 1300);
+/* ============================================================
+   Screen 02 — Claim Pet (3-step wizard)
+   ============================================================ */
+const ClaimState = { step: 1, email: '', code: '' };
+function renderScreen02() {
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <h1>Claim Your Pet</h1>
+      </div>
+      <div class="card" style="max-width: 560px; margin: 0 auto;">
+        <div class="wizard-steps">
+          <div class="wizard-step ${ClaimState.step >= 1 ? (ClaimState.step > 1 ? 'wizard-step--done' : 'wizard-step--active') : ''}">1</div>
+          <div class="wizard-line"></div>
+          <div class="wizard-step ${ClaimState.step >= 2 ? (ClaimState.step > 2 ? 'wizard-step--done' : 'wizard-step--active') : ''}">2</div>
+          <div class="wizard-line"></div>
+          <div class="wizard-step ${ClaimState.step >= 3 ? 'wizard-step--active' : ''}">3</div>
+        </div>
+        <div id="claim-step-body">${renderClaimStep()}</div>
+      </div>
+    </section>
+  `;
+}
+
+function renderClaimStep() {
+  if (ClaimState.step === 1) {
+    return `
+      <h3 class="card-title">Step 1 · Email</h3>
+      <p class="text-secondary">We'll send a 6-digit code to your email. No password required.</p>
+      <div class="form-field">
+        <label for="claim-email">Email address</label>
+        <input id="claim-email" type="email" class="form-input" placeholder="you@example.com" value="${escapeHTML(ClaimState.email)}">
+      </div>
+      <button class="btn w-full" onclick="claimSendCode()">📧 Send code</button>
+      <p class="card-meta mt-3">Demo: any valid email works. The code is shown on the next step.</p>
+    `;
   }
-
-  /* ── Pet Pixel Sprite (CSS art) ──────────────────────── */
-  function build_pet_sprite (pet) {
-    var colors = {
-      COMMON:    { body: '#8a9bb0', eye: '#4a5568', glow: '#b2bec3' },
-      RARE:      { body: '#1eb8b4', eye: '#006b68', glow: '#4ecdc4' },
-      EPIC:      { body: '#7c6fe0', eye: '#3d2fa0', glow: '#a29bfe' },
-      LEGENDARY: { body: '#e8a520', eye: '#8b5e00', glow: '#fdcb6e' },
-    };
-    var c = colors[pet.rarity] || colors.COMMON;
-    // Build a pixel-art-style SVG sprite
-    return '<svg width="64" height="64" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">' +
-      // Body
-      '<rect x="4" y="5" width="8" height="7" fill="' + c.body + '"/>' +
-      // Ears
-      '<rect x="3" y="3" width="2" height="3" fill="' + c.body + '"/>' +
-      '<rect x="11" y="3" width="2" height="3" fill="' + c.body + '"/>' +
-      // Head
-      '<rect x="3" y="4" width="10" height="5" fill="' + c.body + '"/>' +
-      // Eyes
-      '<rect x="5" y="5" width="2" height="2" fill="' + c.eye + '"/>' +
-      '<rect x="9" y="5" width="2" height="2" fill="' + c.eye + '"/>' +
-      // Eye shine
-      '<rect x="6" y="5" width="1" height="1" fill="#fff"/>' +
-      '<rect x="10" y="5" width="1" height="1" fill="#fff"/>' +
-      // Nose
-      '<rect x="7" y="7" width="2" height="1" fill="' + c.eye + '"/>' +
-      // Legs
-      '<rect x="5" y="12" width="2" height="2" fill="' + c.body + '"/>' +
-      '<rect x="9" y="12" width="2" height="2" fill="' + c.body + '"/>' +
-      // Tail
-      '<rect x="12" y="9" width="2" height="1" fill="' + c.body + '"/>' +
-      '<rect x="13" y="8" width="1" height="1" fill="' + c.body + '"/>' +
-      // Glow outline (legendary / epic)
-      ((pet.rarity === 'LEGENDARY' || pet.rarity === 'EPIC') ?
-        '<rect x="3" y="4" width="10" height="5" fill="none" stroke="' + c.glow + '" stroke-width="0.5" opacity="0.5"/>' : '') +
-    '</svg>';
+  if (ClaimState.step === 2) {
+    const codeStr = ClaimState.code.padEnd(6, ' ');
+    return `
+      <h3 class="card-title">Step 2 · Enter the 6-digit code</h3>
+      <p class="text-secondary">Code sent to <strong class="text-accent">${escapeHTML(ClaimState.email || 'you@example.com')}</strong></p>
+      <div class="banner banner--warning"><span>⏱</span><span>Code expires in <span id="otp-countdown">5:00</span></span></div>
+      <div id="code-digits" class="code-digits">
+        ${[0,1,2,3,4,5].map(i => `
+          <input class="code-digit" maxlength="1" inputmode="numeric" data-idx="${i}" value="${escapeHTML(codeStr[i] === ' ' ? '' : codeStr[i])}">
+        `).join('')}
+      </div>
+      <p class="card-meta text-center">Demo code: <strong class="text-accent">123456</strong></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="ClaimState.step=1; refreshClaimStep();">← Back</button>
+        <button class="btn" onclick="claimVerifyCode()">Verify</button>
+      </div>
+    `;
   }
-
-  function build_pet_canvas_html (pet, size) {
-    size = size || 200;
-    var small = size < 100;
-    var sprite = build_pet_sprite(pet);
-    if (small) {
-      return '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">' + sprite + '</div>';
-    }
-    return '<div class="pet-sprite"><div class="pet-body">' + sprite + '</div></div>' +
-           '<div class="pet-shadow"></div>' +
-           '<div class="pet-grid-overlay"></div>' +
-           '<div class="pet-tap-hint">TAP PET</div>';
-  }
-
-  /* ── Router ──────────────────────────────────────────── */
-  var Router = (function () {
-    var current = null;
-    var history_stack = [];
-    var SCREEN_META = {
-      'screen-landing':       { label: 'LANDING',        desc: 'Entry — Claim a pet or view leaderboard' },
-      'screen-claim':         { label: 'CLAIM PET',      desc: '3-step wizard: Email → OTP → URL reveal' },
-      'screen-pet':           { label: 'MY PET',         desc: 'Pet status, stats, food, actions' },
-      'screen-training':      { label: 'TRAINING',       desc: 'Sprint / Lift / Endurance daily training' },
-      'screen-arena':         { label: 'ARENA LOBBY',    desc: 'RACE or SUMO matchmaking' },
-      'screen-arena-result':  { label: 'BATTLE RESULT',  desc: 'Win/Loss result + stats comparison' },
-      'screen-leaderboard':   { label: 'LEADERBOARD',    desc: 'Top 100 pets by arena score' },
-      'screen-battle-records':{ label: 'BATTLE RECORDS', desc: 'Your pet\'s battle history' },
-      'screen-marketplace':   { label: 'MARKETPLACE',    desc: 'Feature-gated pet trading (DAU > 1000)' },
-      'screen-gdpr':          { label: 'GDPR',           desc: 'Data rights self-service form' },
-    };
-
-    function go (id, opts) {
-      opts = opts || {};
-      if (current && current !== id) { history_stack.push(current); }
-      current = id;
-
-      // Hide all screens
-      $$('.screen').forEach(function (s) { s.classList.remove('active'); });
-
-      // Render
-      var renderer = RENDERERS[id];
-      if (renderer) { renderer(opts); }
-
-      // Activate
-      var scr = $('#' + id);
-      if (scr) { scr.classList.add('active'); scr.scrollTop = 0; }
-
-      // Breadcrumb
-      var bc = $('#breadcrumb');
-      if (bc && SCREEN_META[id]) { bc.textContent = SCREEN_META[id].label; }
-
-      // BGM
-      if (id === 'screen-pet')   { play_bgm('BGM-002', 'pet-theme'); }
-      if (id === 'screen-arena') { play_bgm('BGM-001', 'arena-battle'); }
-    }
-
-    function back () {
-      if (history_stack.length) { go(history_stack.pop()); }
-      else { go('screen-landing'); }
-    }
-
-    function get_meta () { return SCREEN_META; }
-    function get_current () { return current; }
-
-    return { go: go, back: back, get_meta: get_meta, get_current: get_current };
-  })();
-
-  /* ── Screen Renderers ────────────────────────────────── */
-  var RENDERERS = {};
-
-  /* ── screen-landing ─────────────────────────────────── */
-  RENDERERS['screen-landing'] = function () {
-    var c = $('#screen-landing');
-    if (!c) return;
-    var pet = window.MOCK_DATA.pets[Math.floor(Math.random() * 3)]; // vary the demo pet
-    c.innerHTML =
-      '<div class="game-navbar">' +
-        '<span class="logo">PIXEL PET<br>ARENA</span>' +
-        '<div class="nav-links">' +
-          '<span class="nav-link" data-nav="screen-leaderboard">LEADERBOARD</span>' +
-          '<span class="nav-link" data-nav="screen-gdpr">GDPR</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="screen-content">' +
-        '<h1 class="hero-title">PIXEL<br>PET<br>ARENA</h1>' +
-        '<p class="hero-subtitle">Claim. Train. Battle.<br>Only one can be champion.</p>' +
-
-        '<div style="display:flex;justify-content:center;margin-bottom:24px;">' +
-          '<div class="pet-canvas-mock" id="landing-pet-canvas" style="cursor:pointer;" tabindex="0" aria-label="Demo pet — click to tap">' +
-            build_pet_canvas_html(pet) +
-          '</div>' +
-        '</div>' +
-
-        '<div class="rarity-hint-row">' +
-          '<span class="rarity-hint-item rarity-common">◆ COMMON</span>' +
-          '<span class="rarity-hint-item rarity-rare">◈ RARE</span>' +
-          '<span class="rarity-hint-item rarity-epic">◉ EPIC</span>' +
-          '<span class="rarity-hint-item rarity-legendary">★ LEGENDARY</span>' +
-        '</div>' +
-
-        '<div class="stats-counter">' +
-          '<div class="counter-item"><span class="counter-value">847</span><span class="counter-label">PETS CLAIMED</span></div>' +
-          '<div class="counter-item"><span class="counter-value">2,341</span><span class="counter-label">BATTLES FOUGHT</span></div>' +
-          '<div class="counter-item"><span class="counter-value">12</span><span class="counter-label">LEGENDARY</span></div>' +
-        '</div>' +
-
-        '<button class="btn btn-primary btn-full btn-lg mb-2" data-nav="screen-claim">CLAIM YOUR PET</button>' +
-        '<button class="btn btn-ghost btn-full" data-nav="screen-leaderboard">VIEW LEADERBOARD</button>' +
-
-        '<p class="muted text-center mt-2" style="font-size:11px;">Already claimed? <span class="nav-link" style="color:var(--color-primary);cursor:pointer;" data-nav="screen-pet">Go to my pet →</span></p>' +
-      '</div>';
-
-    var canvas = c.querySelector('#landing-pet-canvas');
-    if (canvas) {
-      canvas.addEventListener('click', function () {
-        play_sfx('SFX-001', 'pet-tap-pop');
-        canvas.style.transform = 'scale(0.95)';
-        setTimeout(function () { canvas.style.transform = ''; }, 120);
-      });
-    }
-    wire_nav(c);
-  };
-
-  /* ── screen-claim ────────────────────────────────────── */
-  RENDERERS['screen-claim'] = function () {
-    var c = $('#screen-claim');
-    if (!c) return;
-    var step = 1;
-
-    function render_claim () {
-      c.innerHTML =
-        '<div class="game-navbar">' +
-          '<span class="logo">PIXEL PET<br>ARENA</span>' +
-        '</div>' +
-        '<div class="screen-content">' +
-          '<div class="claim-header">' +
-            '<p class="claim-title">CLAIM YOUR PET</p>' +
-            '<p class="claim-subtitle">One email = one permanent pet. Choose wisely.</p>' +
-          '</div>' +
-          '<div class="step-dots">' +
-            '<div class="step-dot ' + (step >= 1 ? 'active' : '') + (step > 1 ? ' done' : '') + '" title="Step 1: Email"></div>' +
-            '<div class="step-dot ' + (step >= 2 ? 'active' : '') + (step > 2 ? ' done' : '') + '" title="Step 2: Verify"></div>' +
-            '<div class="step-dot ' + (step >= 3 ? 'active' : '') + '" title="Step 3: Reveal"></div>' +
-          '</div>' +
-
-          // Step 1
-          '<div class="step-panel ' + (step === 1 ? 'active' : '') + '" id="claim-step-1">' +
-            '<div class="card">' +
-              '<div class="card-header">STEP 1 — YOUR EMAIL</div>' +
-              '<div class="form-group">' +
-                '<label class="form-label" for="claim-email">EMAIL ADDRESS</label>' +
-                '<input class="form-input" id="claim-email" type="email" placeholder="you@example.com" />' +
-              '</div>' +
-              '<button class="btn btn-primary btn-full" id="claim-email-btn">SEND MAGIC LINK</button>' +
-            '</div>' +
-          '</div>' +
-
-          // Step 2
-          '<div class="step-panel ' + (step === 2 ? 'active' : '') + '" id="claim-step-2">' +
-            '<div class="card">' +
-              '<div class="card-header">STEP 2 — VERIFY OTP</div>' +
-              '<p class="muted mb-2" style="font-size:12px;">Enter the 6-digit code sent to your email.</p>' +
-              '<div class="otp-inputs mb-2">' +
-                [1,2,3,4,5,6].map(function(i){ return '<input class="otp-digit" maxlength="1" type="text" id="otp-' + i + '" inputmode="numeric" />'; }).join('') +
-              '</div>' +
-              '<button class="btn btn-primary btn-full" id="claim-otp-btn">VERIFY CODE</button>' +
-            '</div>' +
-          '</div>' +
-
-          // Step 3
-          '<div class="step-panel ' + (step === 3 ? 'active' : '') + '" id="claim-step-3">' +
-            '<div class="card">' +
-              '<div class="card-header">STEP 3 — YOUR PET IS READY!</div>' +
-              '<div class="rarity-reveal mb-2 text-center">' +
-                rarity_badge_html('RARE') +
-              '</div>' +
-              '<div style="display:flex;justify-content:center;margin-bottom:16px;">' +
-                '<div class="pet-canvas-mock" style="width:140px;height:140px;">' +
-                  build_pet_canvas_html(window.MOCK_DATA.pets[0], 140) +
-                '</div>' +
-              '</div>' +
-              '<p class="sub-title text-center">Your permanent pet URL:</p>' +
-              '<div class="url-reveal-box mb-2" id="pet-url-box">https://pixelpetarena.io/pet/pet-001-teal-spark-8472938471</div>' +
-              '<div style="display:flex;gap:8px;">' +
-                '<button class="btn btn-secondary" id="copy-url-btn" style="flex:1">COPY LINK</button>' +
-                '<button class="btn btn-primary" data-nav="screen-pet" style="flex:1">GO TO MY PET →</button>' +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-
-          '<div class="mt-2 text-center">' +
-            '<button class="btn btn-ghost btn-sm" data-nav="screen-landing">← BACK TO HOME</button>' +
-          '</div>' +
-        '</div>';
-
-      // Step 1 handler
-      var emailBtn = c.querySelector('#claim-email-btn');
-      if (emailBtn) {
-        emailBtn.addEventListener('click', function () {
-          var email = c.querySelector('#claim-email');
-          if (!email || !is_valid_email(email.value)) { toast('Enter a valid email address', 'error'); return; }
-          play_sfx('SFX-008', 'claim-success');
-          toast('Magic link sent! Check your inbox ✓', 'success');
-          step = 2;
-          render_claim();
-        });
-      }
-
-      // OTP auto-advance
-      var otpDigits = c.querySelectorAll('.otp-digit');
-      otpDigits.forEach(function (digit, idx) {
-        digit.addEventListener('input', function () {
-          if (digit.value.length === 1 && idx < otpDigits.length - 1) {
-            otpDigits[idx + 1].focus();
-          }
-        });
-      });
-
-      // Step 2 handler
-      var otpBtn = c.querySelector('#claim-otp-btn');
-      if (otpBtn) {
-        otpBtn.addEventListener('click', function () {
-          step = 3;
-          play_sfx('SFX-008', 'claim-success');
-          render_claim();
-        });
-      }
-
-      // Copy URL
-      var copyBtn = c.querySelector('#copy-url-btn');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', function () {
-          var urlBox = c.querySelector('#pet-url-box');
-          if (urlBox && navigator.clipboard) {
-            navigator.clipboard.writeText(urlBox.textContent);
-            toast('Pet URL copied!', 'success');
-          }
-        });
-      }
-
-      wire_nav(c);
-    }
-
-    render_claim();
-  };
-
-  /* ── screen-pet ──────────────────────────────────────── */
-  RENDERERS['screen-pet'] = function () {
-    var c = $('#screen-pet');
-    if (!c) return;
-    var pet = current_pet();
-
-    c.innerHTML =
-      '<div class="game-navbar">' +
-        '<span class="logo">PIXEL PET<br>ARENA</span>' +
-        '<div class="nav-links">' +
-          '<span class="nav-link active" data-nav="screen-pet">PET</span>' +
-          '<span class="nav-link" data-nav="screen-arena">ARENA</span>' +
-          '<span class="nav-link" data-nav="screen-leaderboard">SCORES</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="screen-content">' +
-
-        '<div class="pet-page-top">' +
-          '<div class="pet-canvas-mock" id="pet-canvas-main" tabindex="0" aria-label="Your pet — click to interact">' +
-            build_pet_canvas_html(pet) +
-          '</div>' +
-          '<div class="pet-page-info">' +
-            '<div class="pet-name-display">' + pet.pet_name + '</div>' +
-            '<div class="pet-level">LVL ' + pet.level + '</div>' +
-            rarity_badge_html(pet.rarity) +
-            '<div class="mt-1 muted" style="font-size:11px;">Last trained: ' + fmt_time_ago(pet.last_trained_at) + '</div>' +
-            '<div class="mt-1" style="font-family:var(--font-pixel);font-size:7px;color:var(--color-accent);">SCORE: ' + pet.arena_score + '</div>' +
-          '</div>' +
-        '</div>' +
-
-        '<div class="card mb-2">' +
-          '<div class="card-header">STATS</div>' +
-          '<div class="stats-panel">' +
-            stat_bar_html('SPEED',    'speed',    pet.stat_speed) +
-            stat_bar_html('STRENGTH', 'strength', pet.stat_strength) +
-            stat_bar_html('STAMINA',  'stamina',  pet.stat_stamina) +
-          '</div>' +
-        '</div>' +
-
-        '<div class="card mb-2">' +
-          '<div class="card-header">FOOD INVENTORY</div>' +
-          '<div class="food-grid">' +
-            window.MOCK_DATA.food.slice(0, 3).map(food_item_html).join('') +
-          '</div>' +
-        '</div>' +
-
-        '<div class="pet-action-grid">' +
-          '<button class="btn btn-primary" data-nav="screen-training">⚡ TRAIN</button>' +
-          '<button class="btn btn-accent" data-nav="screen-arena">⚔ BATTLE</button>' +
-          '<button class="btn btn-ghost btn-sm" data-nav="screen-battle-records">RECORDS</button>' +
-          '<button class="btn btn-ghost btn-sm" data-nav="screen-marketplace">MARKET</button>' +
-        '</div>' +
-
-      '</div>';
-
-    var petCanvas = c.querySelector('#pet-canvas-main');
-    if (petCanvas) {
-      petCanvas.addEventListener('click', function (e) {
-        play_sfx('SFX-001', 'pet-tap-pop');
-        particle_burst(e.clientX, e.clientY);
-        petCanvas.style.borderColor = 'var(--color-accent)';
-        setTimeout(function () { petCanvas.style.borderColor = ''; }, 400);
-      });
-    }
-    wire_nav(c);
-  };
-
-  /* ── screen-training ─────────────────────────────────── */
-  RENDERERS['screen-training'] = function () {
-    var c = $('#screen-training');
-    if (!c) return;
-    var pet = current_pet();
-    var trained = { speed: false, strength: false, stamina: false };
-
-    function render_training () {
-      c.innerHTML =
-        '<div class="game-navbar">' +
-          '<span class="logo">PIXEL PET<br>ARENA</span>' +
-        '</div>' +
-        '<div class="screen-content">' +
-          '<h2 class="section-title">TRAINING</h2>' +
-
-          '<div class="daily-timer">' +
-            '<div class="timer-label">DAILY RESET IN</div>' +
-            '<div class="timer-value" id="train-timer">14:32:08</div>' +
-          '</div>' +
-
-          '<p class="muted mb-2" style="font-size:12px;">Each exercise may be used once per day. Stats accumulate over time.</p>' +
-
-          '<div class="training-cards">' +
-            training_card_html('sprint',    '🏃', 'SPRINT',    'A quick burst of speed training.',   'Speed', 3,    trained.speed,    pet.stat_speed) +
-            training_card_html('lift',      '🏋', 'LIFT',      'Heavy resistance builds power.',      'Strength', 4, trained.strength, pet.stat_strength) +
-            training_card_html('endurance', '🫁', 'ENDURANCE', 'Long-distance endurance run.',        'Stamina', 5,  trained.stamina,  pet.stat_stamina) +
-          '</div>' +
-
-          '<div class="mt-3">' +
-            '<button class="btn btn-ghost btn-full" data-nav="screen-pet">← BACK TO PET</button>' +
-          '</div>' +
-        '</div>';
-
-      // Wire training cards
-      c.querySelectorAll('.training-card').forEach(function (card) {
-        card.addEventListener('click', function (e) {
-          var stat = card.dataset.stat;
-          var bonus = parseInt(card.dataset.bonus, 10);
-          var name = card.dataset.name;
-          if (trained[stat]) return;
-          trained[stat] = true;
-          card.classList.add('used');
-
-          // Float-up indicator
-          var rect = card.getBoundingClientRect();
-          stat_float('+' + bonus + ' ' + name.toUpperCase(), rect.left + rect.width / 2 - 30, rect.top - 8);
-
-          toast(name.toUpperCase() + ' TRAINING COMPLETE! +' + bonus + ' ' + name, 'success');
-          play_sfx('SFX-001', 'training-done');
-        });
-      });
-
-      // Countdown timer — both the interval ID and remaining seconds are stored
-      // on the stable container `c` so re-renders (which replace innerHTML and
-      // orphan the old timerEl node) preserve state and never leak intervals.
-      if (c._timerInterval) {
-        clearInterval(c._timerInterval);
-        c._timerInterval = null;
-      }
-      // Initialise secs only on the very first render; subsequent renders
-      // (e.g. after a training card is clicked) resume from the saved value.
-      if (c._timerSecs === undefined) {
-        c._timerSecs = 14 * 3600 + 32 * 60 + 8;
-      }
-      var timerEl = c.querySelector('#train-timer');
-      if (timerEl) {
-        // Paint current value immediately so the display is never stale.
-        var _h0 = Math.floor(c._timerSecs / 3600);
-        var _m0 = Math.floor((c._timerSecs % 3600) / 60);
-        var _s0 = c._timerSecs % 60;
-        timerEl.textContent = pad2(_h0) + ':' + pad2(_m0) + ':' + pad2(_s0);
-
-        if (c._timerSecs > 0) {
-          c._timerInterval = setInterval(function () {
-            var liveEl = c.querySelector('#train-timer');
-            if (!liveEl) { clearInterval(c._timerInterval); c._timerInterval = null; return; }
-            c._timerSecs = Math.max(0, c._timerSecs - 1);
-            var h = Math.floor(c._timerSecs / 3600);
-            var m = Math.floor((c._timerSecs % 3600) / 60);
-            var s = c._timerSecs % 60;
-            liveEl.textContent = pad2(h) + ':' + pad2(m) + ':' + pad2(s);
-            if (c._timerSecs === 0) { clearInterval(c._timerInterval); c._timerInterval = null; }
-          }, 1000);
-        }
-      }
-
-      wire_nav(c);
-    }
-    render_training();
-  };
-
-  /* ── screen-arena ────────────────────────────────────── */
-  RENDERERS['screen-arena'] = function () {
-    var c = $('#screen-arena');
-    if (!c) return;
-    var pet = current_pet();
-    var activeTab = 'RACE';
-    var matchmaking = false;
-
-    function render_arena () {
-      c.innerHTML =
-        '<div class="game-navbar">' +
-          '<span class="logo">PIXEL PET<br>ARENA</span>' +
-          '<div class="nav-links">' +
-            '<span class="nav-link" data-nav="screen-pet">PET</span>' +
-            '<span class="nav-link active">ARENA</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="screen-content">' +
-          '<h2 class="section-title">ARENA LOBBY</h2>' +
-
-          '<div class="tab-bar">' +
-            '<button class="tab-btn ' + (activeTab === 'RACE' ? 'active' : '') + '" data-tab="RACE">⚡ RACE</button>' +
-            '<button class="tab-btn ' + (activeTab === 'SUMO' ? 'active' : '') + '" data-tab="SUMO">🏆 SUMO</button>' +
-          '</div>' +
-
-          (activeTab === 'SUMO' ?
-            '<div class="coming-soon-overlay">' +
-              '<div class="cs-title">COMING SOON</div>' +
-              '<p class="muted">Sumo mode launches when<br>arena score exceeds 5,000.</p>' +
-            '</div>' :
-            '<div class="pre-battle-panel">' +
-              '<div class="my-pet-preview">' +
-                '<div class="preview-pet-box">' + build_pet_sprite(pet) + '</div>' +
-                '<div class="preview-pet-info">' +
-                  '<div class="preview-pet-name">' + pet.pet_name + '</div>' +
-                  '<div class="preview-stats">' +
-                    'SPD ' + pet.stat_speed + '  STR ' + pet.stat_strength + '  STA ' + pet.stat_stamina +
-                  '</div>' +
-                  rarity_badge_html(pet.rarity) +
-                '</div>' +
-              '</div>' +
-
-              (matchmaking ?
-                '<div class="matchmaking-status">' +
-                  '<div class="matchmaking-spinner"></div>' +
-                  '<div class="matchmaking-label">FINDING OPPONENT...</div>' +
-                '</div>' :
-                '<button class="btn btn-accent btn-full btn-lg" id="find-match-btn">⚔ FIND MATCH</button>') +
-            '</div>'
-          ) +
-
-          '<div class="mt-3">' +
-            '<button class="btn btn-ghost btn-full btn-sm" data-nav="screen-pet">← BACK TO PET</button>' +
-          '</div>' +
-        '</div>';
-
-      // Tab switching
-      c.querySelectorAll('.tab-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          activeTab = btn.dataset.tab;
-          render_arena();
-        });
-      });
-
-      // Matchmaking
-      var findBtn = c.querySelector('#find-match-btn');
-      if (findBtn) {
-        findBtn.addEventListener('click', function () {
-          play_sfx('SFX-005', 'arena-start');
-          matchmaking = true;
-          render_arena();
-          setTimeout(function () {
-            toast('Opponent found: Crimson Fang (EPIC)', 'success');
-            Router.go('screen-arena-result', { outcome: 'WIN' });
-          }, 2000);
-        });
-      }
-
-      wire_nav(c);
-    }
-    render_arena();
-  };
-
-  /* ── screen-arena-result ─────────────────────────────── */
-  RENDERERS['screen-arena-result'] = function (opts) {
-    var c = $('#screen-arena-result');
-    if (!c) return;
-    var outcome = (opts && opts.outcome) || 'WIN';
-    var pet = current_pet();
-    var opponent = window.MOCK_DATA.pets[4]; // Void Stalker
-
-    c.innerHTML =
-      '<div class="game-navbar">' +
-        '<span class="logo">PIXEL PET<br>ARENA</span>' +
-      '</div>' +
-      '<div class="screen-content">' +
-        '<div class="battle-result-card ' + outcome.toLowerCase() + '">' +
-          '<div class="result-title ' + outcome.toLowerCase() + '">' + (outcome === 'WIN' ? 'VICTORY!' : 'DEFEAT') + '</div>' +
-          '<div class="muted mb-2" style="font-size:12px;">' + (outcome === 'WIN' ? 'Earned +5 arena points' : 'Better luck next time') + '</div>' +
-
-          '<div class="stat-comparison">' +
-            '<div>' +
-              '<div class="stat-comp-label">YOUR PET</div>' +
-              '<div style="display:flex;justify-content:center;margin:8px 0;">' + build_pet_sprite(pet) + '</div>' +
-              '<div style="font-family:var(--font-pixel);font-size:6px;color:var(--color-secondary);text-align:center;">' + pet.pet_name + '</div>' +
-            '</div>' +
-            '<div class="stat-comp-label" style="font-size:16px;">VS</div>' +
-            '<div>' +
-              '<div class="stat-comp-label">OPPONENT</div>' +
-              '<div style="display:flex;justify-content:center;margin:8px 0;">' + build_pet_sprite(opponent) + '</div>' +
-              '<div style="font-family:var(--font-pixel);font-size:6px;color:var(--color-error);text-align:center;">' + opponent.pet_name + '</div>' +
-            '</div>' +
-          '</div>' +
-
-          '<div class="card mb-2" style="background:#0d0d1a;">' +
-            '<div class="card-header">STAT BREAKDOWN</div>' +
-            '<div class="stat-comp-values">' +
-              stat_comparison_row('SPEED',    pet.stat_speed,    opponent.stat_speed) +
-              stat_comparison_row('STRENGTH', pet.stat_strength, opponent.stat_strength) +
-              stat_comparison_row('STAMINA',  pet.stat_stamina,  opponent.stat_stamina) +
-            '</div>' +
-          '</div>' +
-
-          (outcome === 'WIN' ? '<div style="font-family:var(--font-pixel);font-size:8px;color:var(--color-accent);text-align:center;margin-bottom:12px;">+5 ARENA SCORE</div>' : '') +
-          '<button class="btn btn-ghost btn-sm btn-full" id="share-battle-btn">📤 SHARE RESULT</button>' +
-        '</div>' +
-
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">' +
-          '<button class="btn btn-primary" data-nav="screen-arena">PLAY AGAIN</button>' +
-          '<button class="btn btn-ghost" data-nav="screen-leaderboard">LEADERBOARD</button>' +
-        '</div>' +
-        '<div class="mt-1">' +
-          '<button class="btn btn-ghost btn-full btn-sm" data-nav="screen-pet">← BACK TO PET</button>' +
-        '</div>' +
-      '</div>';
-
-    // Trigger particles on WIN
-    if (outcome === 'WIN') {
-      play_sfx('SFX-006', 'arena-victory');
-      setTimeout(function () {
-        var card = c.querySelector('.battle-result-card');
-        if (card) {
-          var rect = card.getBoundingClientRect();
-          var cx = rect.left + rect.width / 2;
-          var cy = rect.top + rect.height / 3;
-          particle_burst(cx, cy);
-          setTimeout(function () { particle_burst(cx - 40, cy + 20); }, 200);
-          setTimeout(function () { particle_burst(cx + 40, cy + 20); }, 350);
-        }
-      }, 200);
-    }
-
-    var shareBtn = c.querySelector('#share-battle-btn');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', function () {
-        toast('Battle result copied to clipboard!', 'success');
-      });
-    }
-
-    wire_nav(c);
-  };
-
-  /* ── screen-leaderboard ──────────────────────────────── */
-  RENDERERS['screen-leaderboard'] = function () {
-    var c = $('#screen-leaderboard');
-    if (!c) return;
-    var activeFilter = 'ALL';
-    var lb = window.MOCK_DATA.leaderboard;
-
-    function render_lb () {
-      var filtered = activeFilter === 'ALL' ? lb : lb.filter(function (r) { return r.rarity === activeFilter; });
-
-      c.innerHTML =
-        '<div class="game-navbar">' +
-          '<span class="logo">PIXEL PET<br>ARENA</span>' +
-          '<div class="nav-links">' +
-            '<span class="nav-link" data-nav="screen-pet">MY PET</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="screen-content">' +
-          '<h2 class="section-title">LEADERBOARD</h2>' +
-
-          '<div class="filter-bar">' +
-            ['ALL','COMMON','RARE','EPIC','LEGENDARY'].map(function (f) {
-              return '<button class="filter-btn ' + (activeFilter === f ? 'active' : '') + '" data-filter="' + f + '">' + f + '</button>';
-            }).join('') +
-          '</div>' +
-
-          '<div class="card" style="padding:0;overflow:hidden;">' +
-            '<table class="lb-table">' +
-              '<thead><tr>' +
-                '<th>#</th><th>PET</th><th>LVL</th><th>SCORE</th><th>WIN%</th>' +
-              '</tr></thead>' +
-              '<tbody>' +
-                (filtered.length ?
-                  filtered.map(lb_row_html).join('') :
-                  '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--color-text-secondary);font-family:var(--font-pixel);font-size:7px;">NO PETS FOR THIS RARITY</td></tr>'
-                ) +
-              '</tbody>' +
-            '</table>' +
-          '</div>' +
-
-          '<div class="mt-2">' +
-            '<button class="btn btn-ghost btn-full btn-sm" data-nav="screen-battle-records">VIEW BATTLE RECORDS</button>' +
-          '</div>' +
-        '</div>';
-
-      c.querySelectorAll('.filter-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          activeFilter = btn.dataset.filter;
-          render_lb();
-        });
-      });
-
-      wire_nav(c);
-    }
-    render_lb();
-  };
-
-  /* ── screen-battle-records ───────────────────────────── */
-  RENDERERS['screen-battle-records'] = function () {
-    var c = $('#screen-battle-records');
-    if (!c) return;
-    var pet = current_pet();
-    var records = window.MOCK_DATA.battleRecords;
-
-    c.innerHTML =
-      '<div class="game-navbar">' +
-        '<span class="logo">PIXEL PET<br>ARENA</span>' +
-      '</div>' +
-      '<div class="screen-content">' +
-        '<h2 class="section-title">BATTLE RECORDS</h2>' +
-
-        '<div class="pet-summary-card">' +
-          '<div class="pet-summary-avatar">' + pet.emoji + '</div>' +
-          '<div class="pet-summary-details">' +
-            '<div class="pet-summary-name">' + pet.pet_name + '</div>' +
-            rarity_badge_html(pet.rarity) +
-            '<div class="pet-summary-stats mt-1">' +
-              'LVL ' + pet.level + '  •  SCORE ' + pet.arena_score + '<br>' +
-              'WIN RATE: ' + Math.round(pet.win_rate * 100) + '%' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-
-        '<div class="card" style="padding:0;overflow:hidden;">' +
-          '<table class="battle-table">' +
-            '<thead><tr>' +
-              '<th>DATE</th><th>MODE</th><th>OPPONENT</th><th>RESULT</th><th>ΔPTS</th>' +
-            '</tr></thead>' +
-            '<tbody>' +
-              records.map(battle_record_row_html).join('') +
-            '</tbody>' +
-          '</table>' +
-        '</div>' +
-
-        '<div style="display:flex;gap:8px;margin-top:16px;">' +
-          '<button class="btn btn-ghost btn-sm" id="share-records-btn" style="flex:1">📤 SHARE</button>' +
-          '<button class="btn btn-ghost btn-sm" data-nav="screen-leaderboard" style="flex:1">LEADERBOARD →</button>' +
-        '</div>' +
-      '</div>';
-
-    var shareBtn = c.querySelector('#share-records-btn');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', function () {
-        toast('Battle record URL copied!', 'success');
-      });
-    }
-
-    wire_nav(c);
-  };
-
-  /* ── screen-marketplace ──────────────────────────────── */
-  RENDERERS['screen-marketplace'] = function () {
-    var c = $('#screen-marketplace');
-    if (!c) return;
-
-    c.innerHTML =
-      '<div class="game-navbar">' +
-        '<span class="logo">PIXEL PET<br>ARENA</span>' +
-      '</div>' +
-      '<div class="screen-content">' +
-        '<h2 class="section-title">MARKETPLACE</h2>' +
-
-        '<div class="feature-gate-banner">' +
-          '<span class="gate-icon">🏗️</span>' +
-          '<div class="gate-title">UNDER CONSTRUCTION</div>' +
-          '<p class="gate-desc">The Pixel Pet Marketplace is a feature-gated module.<br>Trading unlocks when the arena community reaches 1,000 daily active pets.</p>' +
-
-          '<div class="gate-progress">' +
-            '<div class="gate-progress-label">DAILY ACTIVE PETS</div>' +
-            '<div class="gate-bar"><div class="gate-bar-fill"></div></div>' +
-            '<div class="gate-count">847 / 1,000</div>' +
-          '</div>' +
-
-          '<div class="card mt-2" style="text-align:left;">' +
-            '<div class="card-header">FEATURE FLAG STATUS</div>' +
-            flag_row_html('marketplace_enabled',  false) +
-            flag_row_html('listing_create',       false) +
-            flag_row_html('listing_browse',       false) +
-            flag_row_html('dao_enabled',          false) +
-          '</div>' +
-        '</div>' +
-
-        '<button class="btn btn-ghost btn-full" data-nav="screen-pet">← BACK TO MY PET</button>' +
-      '</div>';
-
-    wire_nav(c);
-  };
-
-  /* ── screen-gdpr ─────────────────────────────────────── */
-  RENDERERS['screen-gdpr'] = function () {
-    var c = $('#screen-gdpr');
-    if (!c) return;
-
-    c.innerHTML =
-      '<div class="game-navbar">' +
-        '<span class="logo">PIXEL PET<br>ARENA</span>' +
-      '</div>' +
-      '<div class="screen-content">' +
-        '<h2 class="section-title">DATA & PRIVACY</h2>' +
-
-        '<div class="gdpr-notice">' +
-          'Under GDPR / CCPA you have rights over your personal data. Use this form to submit a request. We process requests within 30 days.' +
-        '</div>' +
-
-        '<div class="card" id="gdpr-form-card">' +
-          '<div class="card-header">SUBMIT REQUEST</div>' +
-          '<div class="form-group">' +
-            '<label class="form-label" for="gdpr-type">REQUEST TYPE</label>' +
-            '<select class="form-select" id="gdpr-type">' +
-              '<option value="">— Select —</option>' +
-              '<option value="erasure">Right to Erasure (Delete my data)</option>' +
-              '<option value="data_access">Data Access / Export</option>' +
-              '<option value="restrict_processing">Restrict Processing</option>' +
-              '<option value="object_leaderboard">Object to Leaderboard Listing</option>' +
-              '<option value="rectification">Rectification (Correct my data)</option>' +
-            '</select>' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label class="form-label" for="gdpr-email">ACCOUNT EMAIL</label>' +
-            '<input class="form-input" id="gdpr-email" type="email" placeholder="you@example.com" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label class="form-label" for="gdpr-notes">ADDITIONAL NOTES (optional)</label>' +
-            '<textarea class="form-input" id="gdpr-notes" rows="3" placeholder="Provide any relevant details…" style="resize:vertical;min-height:72px;"></textarea>' +
-          '</div>' +
-          '<button class="btn btn-primary btn-full" id="gdpr-submit-btn">SUBMIT REQUEST</button>' +
-        '</div>' +
-
-        '<div class="gdpr-form-submitted" id="gdpr-success">' +
-          '<span class="check">✓</span>' +
-          '<div class="msg">REQUEST SUBMITTED<br><br>Reference ID: GDPR-2026-00847<br><br>We\'ll respond within 30 days.</div>' +
-          '<button class="btn btn-ghost btn-sm mt-2" data-nav="screen-pet">← BACK TO MY PET</button>' +
-        '</div>' +
-
-        '<div class="mt-2">' +
-          '<button class="btn btn-ghost btn-full btn-sm" data-nav="screen-pet">← BACK TO MY PET</button>' +
-        '</div>' +
-      '</div>';
-
-    var submitBtn = c.querySelector('#gdpr-submit-btn');
-    if (submitBtn) {
-      submitBtn.addEventListener('click', function () {
-        var type  = c.querySelector('#gdpr-type');
-        var email = c.querySelector('#gdpr-email');
-        if (!type || !type.value) { toast('Please select a request type', 'error'); return; }
-        if (!email || !is_valid_email(email.value)) { toast('Enter a valid email address', 'error'); return; }
-        c.querySelector('#gdpr-form-card').style.display = 'none';
-        c.querySelector('#gdpr-success').style.display   = 'block';
-        toast('GDPR request submitted!', 'success');
-      });
-    }
-
-    wire_nav(c);
-  };
-
-  /* ── Component Helpers ───────────────────────────────── */
-  function stat_bar_html (label, cls, value) {
-    return '<div class="stat-row">' +
-      '<span class="stat-label">' + label + '</span>' +
-      '<div class="stat-bar"><div class="stat-bar-fill ' + cls + '" style="width:' + value + '%"></div></div>' +
-      '<span class="stat-value">' + value + '</span>' +
-    '</div>';
-  }
-
-  function food_item_html (food) {
-    var name = food.food_type.replace(/_/g, ' ').toUpperCase();
-    return '<div class="food-item">' +
-      '<span class="food-icon">' + food.emoji + '</span>' +
-      '<span class="food-name">' + name + '</span>' +
-      '<span class="food-buff">+' + food.magnitude + ' ' + food.buff_stat.toUpperCase() + (food.is_permanent ? ' ∞' : '') + '</span>' +
-    '</div>';
-  }
-
-  function training_card_html (id, icon, name, desc, statName, bonus, used, currentVal) {
-    return '<div class="training-card ' + (used ? 'used' : '') + '" data-stat="' + id + '" data-bonus="' + bonus + '" data-name="' + statName + '">' +
-      '<div class="training-icon">' + icon + '</div>' +
-      '<div class="training-info">' +
-        '<div class="training-name">' + name + '</div>' +
-        '<div class="training-desc">' + desc + '</div>' +
-        '<div class="training-bonus">+' + bonus + ' ' + statName.toUpperCase() + (used ? ' ✓ DONE' : '') + '</div>' +
-      '</div>' +
-      '<div style="font-family:var(--font-pixel);font-size:9px;color:var(--color-text-secondary);flex-shrink:0;">' + currentVal + '</div>' +
-    '</div>';
-  }
-
-  function lb_row_html (row) {
-    var rankCls = row.rank === 1 ? 'top1' : (row.rank === 2 ? 'top2' : (row.rank === 3 ? 'top3' : ''));
-    return '<tr>' +
-      '<td><span class="lb-rank ' + rankCls + '">' + (row.rank === 1 ? '★' : row.rank) + '</span></td>' +
-      '<td>' +
-        '<span class="lb-pet-name">' + row.pet_name + '</span><br>' +
-        rarity_badge_html(row.rarity) +
-      '</td>' +
-      '<td style="font-family:var(--font-pixel);font-size:7px;">' + row.level + '</td>' +
-      '<td><span class="lb-score">' + row.arena_score + '</span></td>' +
-      '<td><span class="lb-winrate">' + Math.round(row.win_rate * 100) + '%</span></td>' +
-    '</tr>';
-  }
-
-  function battle_record_row_html (rec) {
-    var win = rec.outcome === 'WIN';
-    return '<tr>' +
-      '<td style="font-size:11px;white-space:nowrap;">' + fmt_date(rec.date) + '</td>' +
-      '<td style="font-family:var(--font-pixel);font-size:6px;color:var(--color-text-secondary);">' + rec.mode + '</td>' +
-      '<td>' +
-        '<span style="font-size:12px;font-weight:600;">' + rec.opponent_name + '</span><br>' +
-        rarity_badge_html(rec.opponent_rarity) +
-      '</td>' +
-      '<td><span class="outcome-badge outcome-' + rec.outcome.toLowerCase() + '">' + rec.outcome + '</span></td>' +
-      '<td>' +
-        (win ?
-          '<span class="stat-delta-pos">+' + rec.stat_delta + '</span>' :
-          '<span class="stat-delta-neg">—</span>') +
-      '</td>' +
-    '</tr>';
-  }
-
-  function stat_comparison_row (label, mine, theirs) {
-    var winner = mine >= theirs ? 'mine' : 'theirs';
-    return '<div class="stat-comp-row">' +
-      '<span class="mine' + (winner === 'mine' ? '" style="color:var(--color-accent)' : '') + '">' + mine + '</span>' +
-      '<span class="vs-mid" style="color:var(--color-text-secondary);font-size:10px;">' + label + '</span>' +
-      '<span class="theirs' + (winner === 'theirs' ? '" style="color:var(--color-warning)' : '') + '">' + theirs + '</span>' +
-    '</div>';
-  }
-
-  function flag_row_html (name, enabled) {
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--color-surface-overlay);">' +
-      '<span style="font-size:12px;font-family:var(--font-ui);color:var(--color-text-secondary);">' + name + '</span>' +
-      '<span style="font-family:var(--font-pixel);font-size:6px;padding:3px 6px;border:1px solid currentColor;color:' + (enabled ? 'var(--color-success)' : 'var(--color-error)') + ';">' +
-        (enabled ? 'ON' : 'OFF') +
-      '</span>' +
-    '</div>';
-  }
-
-  /* ── Flow Map Modal ──────────────────────────────────── */
-  function build_flow_map () {
-    var meta  = Router.get_meta();
-    var modal = $('#flow-modal');
-    if (!modal) return;
-    var grid  = modal.querySelector('.flow-screen-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    Object.keys(meta).forEach(function (id) {
-      var m = meta[id];
-      var card = el('div', 'flow-screen-card');
-      card.innerHTML =
-        (id === 'screen-landing' ? '<span class="flow-entry-badge">ENTRY</span><br>' : '') +
-        '<div class="flow-card-id">' + id + '</div>' +
-        '<div class="flow-card-name">' + m.label + '</div>' +
-        '<div class="flow-card-desc">' + m.desc + '</div>';
-      card.addEventListener('click', function () {
-        close_flow_modal();
-        Router.go(id);
-      });
-      grid.appendChild(card);
+  // Step 3
+  const pet = window.MOCK.currentPet;
+  return `
+    <h3 class="card-title">Step 3 · Welcome!</h3>
+    <div class="text-center" style="padding: var(--space-4) 0;">
+      ${petCanvasHTML(pet, { size: 'normal', id: 'claim-pet-reveal' })}
+      <h2 class="mt-4 text-accent">${escapeHTML(pet.pet_name)}</h2>
+      <div class="mt-2">${rarityBadgeHTML(pet.rarity)}</div>
+    </div>
+    <div class="banner banner--success">
+      <span>🏠</span>
+      <span>Your pet's home is at <code class="text-accent">/pet/${pet.id.slice(0,8)}</code></span>
+    </div>
+    <button class="btn w-full" onclick="router.navigate('screen-03')">Visit Now →</button>
+  `;
+}
+
+function refreshClaimStep() {
+  const root = $('#claim-step-body');
+  if (!root) return;
+  // Re-render the wizard steps dots:
+  const stepDots = $$('#proto-content .wizard-step');
+  if (stepDots.length) {
+    stepDots.forEach((el, idx) => {
+      const stepNum = idx + 1;
+      el.classList.remove('wizard-step--active', 'wizard-step--done');
+      if (stepNum < ClaimState.step) el.classList.add('wizard-step--done');
+      else if (stepNum === ClaimState.step) el.classList.add('wizard-step--active');
     });
   }
+  root.innerHTML = renderClaimStep();
+  if (ClaimState.step === 2) bindCodeDigits();
+}
 
-  function open_flow_modal () {
-    build_flow_map();
-    var modal = $('#flow-modal');
-    if (modal) { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function claimSendCode() {
+  const email = ($('#claim-email').value || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    toast('Please enter a valid email', 'error');
+    window.audioEngine.playSFX('SFX-invalid');
+    return;
   }
-  function close_flow_modal () {
-    var modal = $('#flow-modal');
-    if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
-  }
+  ClaimState.email = email;
+  ClaimState.step = 2;
+  refreshClaimStep();
+  startOtpCountdown();
+  window.audioEngine.playSFX('SFX-009-claim-success');
+  toast('Code sent. Check your email.');
+}
 
-  /* ── Wire nav links ──────────────────────────────────── */
-  function wire_nav (root) {
-    root.querySelectorAll('[data-nav]').forEach(function (el) {
-      el.addEventListener('click', function () {
-        Router.go(el.dataset.nav);
-      });
+let otpInterval = null;
+function startOtpCountdown() {
+  if (otpInterval) clearInterval(otpInterval);
+  let s = 5 * 60;
+  const tick = () => {
+    const el = $('#otp-countdown');
+    if (!el) { clearInterval(otpInterval); return; }
+    const m = Math.floor(s / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    el.textContent = `${m}:${ss}`;
+    if (s <= 0) { clearInterval(otpInterval); el.textContent = 'expired'; }
+    s--;
+  };
+  tick();
+  otpInterval = setInterval(tick, 1000);
+}
+
+function bindCodeDigits() {
+  const inputs = $$('.code-digit');
+  inputs.forEach((inp, i) => {
+    inp.addEventListener('input', (ev) => {
+      const v = ev.target.value.replace(/\D/g, '').slice(0, 1);
+      ev.target.value = v;
+      ClaimState.code = inputs.map(x => x.value).join('');
+      if (v && i < inputs.length - 1) inputs[i + 1].focus();
     });
-  }
+    inp.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Backspace' && !ev.target.value && i > 0) inputs[i - 1].focus();
+    });
+  });
+  if (inputs[0]) inputs[0].focus();
+}
 
-  /* ── Utility ─────────────────────────────────────────── */
-  function pad2 (n) { return n < 10 ? '0' + n : '' + n; }
-
-  /* ── Init ────────────────────────────────────────────── */
-  function init () {
-    // Proto nav back button
-    var backBtn = $('#proto-back-btn');
-    if (backBtn) { backBtn.addEventListener('click', function () { Router.back(); }); }
-
-    // Flow map button
-    var flowBtn = $('#flow-map-btn');
-    if (flowBtn) { flowBtn.addEventListener('click', open_flow_modal); }
-
-    // Flow map close
-    var flowClose = $('#flow-modal-close');
-    if (flowClose) { flowClose.addEventListener('click', close_flow_modal); }
-
-    // Audio toggle
-    var audioBtn = $('#audio-toggle-btn');
-    if (audioBtn) {
-      audioBtn.addEventListener('click', function () {
-        audioEnabled = !audioEnabled;
-        audioBtn.textContent = audioEnabled ? '🔊' : '🔇';
-        toast(audioEnabled ? 'Audio ON' : 'Audio OFF', 'info');
-      });
+function claimVerifyCode() {
+  const code = ClaimState.code;
+  if (code !== window.MOCK.otp_code) {
+    const wrap = $('#code-digits');
+    if (wrap) {
+      wrap.classList.add('is-invalid');
+      window.fxEngine.shakeElement(wrap, 'normal', 300);
+      setTimeout(() => wrap.classList.remove('is-invalid'), 600);
     }
-
-    // Audio banner dismiss
-    var audioBanner = $('#audio-banner');
-    var audioBannerBtn = $('#audio-banner-btn');
-    if (audioBannerBtn && audioBanner) {
-      audioBannerBtn.addEventListener('click', function () {
-        audioBanner.style.display = 'none';
-        audioEnabled = true;
-        toast('Audio unlocked!', 'success');
-      });
-    }
-
-    // Dismiss audio banner on desktop
-    var isMobile = /Mobi|Android/i.test(navigator.userAgent);
-    if (!isMobile && audioBanner) { audioBanner.style.display = 'none'; }
-
-    // Route to landing
-    Router.go('screen-landing');
+    window.audioEngine.playSFX('SFX-invalid');
+    toast('Invalid code. Try ' + window.MOCK.otp_code, 'error');
+    return;
   }
+  ClaimState.step = 3;
+  refreshClaimStep();
+  window.audioEngine.playSFX('SFX-009-claim-success');
+  setTimeout(() => {
+    window.fxEngine.emitBurstAt($('#claim-pet-reveal'), { count: 18, char: '★' });
+  }, 80);
+  // anim-20-rarity-reveal: spring-scale on the RarityBadge inside the success step
+  requestAnimationFrame(() => {
+    const badge = document.querySelector('#claim-step-body .rarity-badge');
+    if (badge) {
+      badge.classList.remove('rarity-badge--reveal');
+      void badge.offsetWidth; // force reflow so animation restarts
+      badge.classList.add('rarity-badge--reveal');
+    }
+  });
+}
+window.claimSendCode = claimSendCode;
+window.claimVerifyCode = claimVerifyCode;
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+/* ============================================================
+   Screen 03 — My Pet
+   ============================================================ */
+function renderScreen03() {
+  const M = window.MOCK;
+  const pet = M.currentPet;
+  const neglected = daysAgo(pet.last_trained_at) > 3;
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <div>
+          <h1>${escapeHTML(pet.pet_name)}</h1>
+          <p class="card-meta">Owner ${escapeHTML(pet.masked_email)} · Seed ${pet.seed}</p>
+        </div>
+        <div class="flex gap-3">
+          ${rarityBadgeHTML(pet.rarity)}
+          <span class="streak-badge">🔥 Day ${M.metrics.training_streak} streak</span>
+        </div>
+      </div>
+
+      ${neglected ? `<div class="banner banner--warning"><span>😴</span><span>Your pet looks neglected. Last trained ${Math.floor(daysAgo(pet.last_trained_at))} days ago.</span></div>` : ''}
+
+      <div class="grid-pet-layout">
+        <div class="card pet-info">
+          ${petCanvasHTML(pet, { size: 'normal', id: 'mypet-canvas', onClick: 'onPetCanvasClick()' })}
+          <div class="pet-name">${escapeHTML(pet.pet_name)}</div>
+          <div class="pet-level">Lv.${pet.level} · ${pet.total_training_actions} training actions</div>
+          <div class="card-meta">Last trained: ${formatDate(pet.last_trained_at)}</div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Stats</h3>
+          ${statBarHTML('speed', 'Speed', pet.stat_speed)}
+          ${statBarHTML('strength', 'Strength', pet.stat_strength)}
+          ${statBarHTML('stamina', 'Stamina', pet.stat_stamina)}
+          <div class="mt-6">
+            <h3 class="card-title">Quick actions</h3>
+            <div class="flex gap-3" style="flex-wrap:wrap;">
+              <button class="btn" onclick="router.navigate('screen-04')">🏋️ Train</button>
+              <button class="btn btn-success" onclick="router.navigate('screen-05')">⚔️ Enter Arena</button>
+              <button class="btn btn-secondary" onclick="router.navigate('screen-08', { petId: '${safeJSId(pet.id)}' })">📜 Battle Records</button>
+              <button class="btn btn-secondary" onclick="router.navigate('screen-09')">🛒 Marketplace</button>
+              <button class="btn btn-ghost" onclick="router.navigate('screen-10')">🛡️ GDPR</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Food Inventory</h3>
+          <div class="food-list">
+            ${M.food.map(f => `
+              <div class="food-item">
+                <span class="food-icon">${f.icon}</span>
+                <div class="food-item__info">
+                  <div class="food-item__name">${escapeHTML(f.name)}</div>
+                  <div class="food-item__buff">+${f.magnitude} ${f.buff_stat} · ${f.duration_hours}h · x${f.owned}</div>
+                </div>
+                <button class="btn btn-sm" ${f.owned <= 0 ? 'disabled' : ''} onclick="useFood('${safeJSId(f.id)}')">Use</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function statBarHTML(key, label, value) {
+  return `
+    <div class="stat-bar">
+      <div class="stat-bar__label stat-bar__label--${key}">
+        <strong>${label}</strong>
+        <span class="stat-bar__value" data-stat="${key}">${value}</span>
+      </div>
+      <div class="stat-bar__track">
+        <div class="stat-bar__fill stat-bar__fill--${key}" style="width: ${Math.min(100, value)}%;"></div>
+      </div>
+    </div>
+  `;
+}
+
+function onPetCanvasClick() {
+  const canvas = $('#mypet-canvas');
+  if (!canvas) return;
+  const sprite = canvas.querySelector('.pet-sprite');
+  sprite.classList.remove('pet-anim-hop');
+  void sprite.offsetWidth;
+  sprite.classList.add('pet-anim-hop');
+  window.audioEngine.playSFX('SFX-001-pet-tap-pop');
+}
+window.onPetCanvasClick = onPetCanvasClick;
+
+function useFood(foodId) {
+  const M = window.MOCK;
+  const f = M.food.find(x => x.id === foodId);
+  if (!f || f.owned <= 0) return;
+  f.owned -= 1;
+  // Apply buff to current pet
+  const pet = M.currentPet;
+  if (f.buff_stat === 'all') {
+    pet.stat_speed = Math.min(99, pet.stat_speed + f.magnitude);
+    pet.stat_strength = Math.min(99, pet.stat_strength + f.magnitude);
+    pet.stat_stamina = Math.min(99, pet.stat_stamina + f.magnitude);
   } else {
-    init();
+    const k = 'stat_' + f.buff_stat;
+    pet[k] = Math.min(99, (pet[k] || 0) + f.magnitude);
   }
+  window.audioEngine.playSFX('SFX-012-food-buff');
+  // Pet eat animation
+  const sprite = $('#mypet-canvas .pet-sprite');
+  if (sprite) {
+    sprite.classList.remove('pet-anim-eat');
+    void sprite.offsetWidth;
+    sprite.classList.add('pet-anim-eat');
+  }
+  toast(`+${f.magnitude} ${f.buff_stat} buff applied!`);
+  // Re-render screen after a moment
+  setTimeout(() => router.navigate('screen-03'), 600);
+}
+window.useFood = useFood;
 
-  // Expose router for debugging
-  window.PixelPetRouter = Router;
-})();
+/* ============================================================
+   Screen 04 — Training
+   ============================================================ */
+function renderScreen04() {
+  const M = window.MOCK;
+  const pet = M.currentPet;
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <div>
+          <h1>Training</h1>
+          <p class="card-meta">Pick an action. Each gives +1 stat. Daily reset in <span id="train-reset-countdown">--:--:--</span></p>
+        </div>
+        <div class="flex gap-3">
+          <span class="streak-badge">🔥 Day ${M.metrics.training_streak} streak</span>
+          <button class="btn btn-ghost btn-sm" onclick="router.navigate('screen-03')">← Back to My Pet</button>
+        </div>
+      </div>
+
+      <div class="grid-pet-layout">
+        <div class="card pet-info">
+          ${petCanvasHTML(pet, { size: 'normal', id: 'training-pet-canvas' })}
+          <div class="pet-name">${escapeHTML(pet.pet_name)}</div>
+          <div class="pet-level">Lv.${pet.level}</div>
+          <div class="mt-3">
+            ${statBarHTML('speed', 'Speed', pet.stat_speed)}
+            ${statBarHTML('strength', 'Strength', pet.stat_strength)}
+            ${statBarHTML('stamina', 'Stamina', pet.stat_stamina)}
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 2;">
+          <h3 class="card-title">Daily Actions</h3>
+          <div class="training-grid">
+            ${trainingCardHTML('run', '🏃', 'Run', 'speed')}
+            ${trainingCardHTML('lift', '💪', 'Lift', 'strength')}
+            ${trainingCardHTML('rest', '🧘', 'Endure', 'stamina')}
+          </div>
+          <p class="card-meta mt-4">Each action grants +1 to its corresponding stat. Resets every 24 hours.</p>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function trainingCardHTML(id, icon, label, stat) {
+  return `
+    <div class="training-card" tabindex="0" role="button" onclick="doTrain('${safeJSId(id)}', '${safeJSId(stat)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();doTrain('${safeJSId(id)}', '${safeJSId(stat)}');}">
+      <div class="training-icon">${escapeHTML(icon)}</div>
+      <h3>${escapeHTML(label)}</h3>
+      <div class="training-stat-target">+1 ${escapeHTML(stat.toUpperCase())}</div>
+      <div class="training-cooldown" id="cool-${safeJSId(id)}">Ready</div>
+    </div>
+  `;
+}
+
+function onMountScreen04() {
+  // Daily reset countdown to next midnight
+  startResetCountdown();
+}
+
+let resetInterval = null;
+function startResetCountdown() {
+  if (resetInterval) clearInterval(resetInterval);
+  const tick = () => {
+    const el = $('#train-reset-countdown');
+    if (!el) { clearInterval(resetInterval); return; }
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24, 0, 0, 0);
+    const ms = next - now;
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  };
+  tick();
+  resetInterval = setInterval(tick, 1000);
+}
+
+function doTrain(actionId, stat) {
+  const M = window.MOCK;
+  const pet = M.currentPet;
+  window.audioEngine.playSFX('SFX-003-training-start');
+
+  setTimeout(() => {
+    pet['stat_' + stat] = Math.min(99, pet['stat_' + stat] + 1);
+    pet.total_training_actions += 1;
+    pet.last_trained_at = new Date().toISOString();
+
+    // Level-up calculation: 1 level per 10 training actions
+    const oldLevel = pet.level;
+    const newLevel = Math.floor(pet.total_training_actions / 10) + 1;
+    const leveledUp = newLevel > oldLevel;
+    if (leveledUp) pet.level = newLevel;
+
+    window.audioEngine.playSFX('SFX-004-training-success');
+    setTimeout(() => window.audioEngine.playSFX('SFX-005-stat-ding'), 120);
+
+    // Update stat bar
+    const valEl = document.querySelector(`[data-stat="${stat}"]`);
+    if (valEl) valEl.textContent = pet['stat_' + stat];
+    const fillEl = document.querySelector(`.stat-bar__fill--${stat}`);
+    if (fillEl) fillEl.style.width = Math.min(100, pet['stat_' + stat]) + '%';
+
+    // Pet flex animation
+    const sprite = $('#training-pet-canvas .pet-sprite');
+    if (sprite) {
+      sprite.classList.remove('pet-anim-flex');
+      void sprite.offsetWidth;
+      sprite.classList.add('pet-anim-flex');
+    }
+
+    // +1 floater on pet canvas
+    window.fxEngine.spawnFloater($('#training-pet-canvas'), `+1 ${stat.toUpperCase()}`);
+    // Confetti burst
+    window.fxEngine.emitBurstAt($('#training-pet-canvas'), { count: 10, char: '+', size: 4 });
+
+    toast(`+1 ${stat} training applied!`);
+
+    // anim-15-levelup-burst: triggered when level threshold crossed
+    if (leveledUp) {
+      const canvas = document.querySelector('#training-pet-canvas');
+      if (canvas && window.fxEngine) {
+        const r = canvas.getBoundingClientRect();
+        window.fxEngine.emitBurst(r.left + r.width / 2, r.top + r.height / 2, {
+          count: 32, char: '✨',
+          colors: ['#fdcb6e', '#a29bfe', '#7cb4e8', '#00b894'],
+          speed: 6, life: 1500
+        });
+      }
+      if (window.audioEngine) window.audioEngine.playSFX('SFX-007-arena-victory');
+      // Re-render any pet-level labels currently on screen
+      document.querySelectorAll('.pet-level').forEach((el) => {
+        if (el.textContent && el.textContent.includes('Lv.')) {
+          el.textContent = el.textContent.replace(/Lv\.\d+/, 'Lv.' + pet.level);
+        }
+      });
+      toast(`🎉 Level ${pet.level} reached!`, 'success');
+    }
+  }, 220);
+}
+window.doTrain = doTrain;
+
+/* ============================================================
+   Screen 05 — Arena Lobby
+   ============================================================ */
+const ArenaState = { mode: 'RACE', matching: false };
+function renderScreen05() {
+  const M = window.MOCK;
+  const pet = M.currentPet;
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <h1>Arena</h1>
+        <button class="btn btn-ghost btn-sm" onclick="router.navigate('screen-03')">← Back</button>
+      </div>
+
+      <div id="rate-limit-slot"></div>
+
+      <div class="card mb-4">
+        <h3 class="card-title">Choose Battle Mode</h3>
+        <div class="mode-grid">
+          <div class="mode-card ${ArenaState.mode === 'RACE' ? 'is-selected' : ''}" id="mode-race" tabindex="0" role="button" onclick="selectMode('RACE')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMode('RACE');}">
+            <div class="mode-icon">🏃</div>
+            <h2>RACE</h2>
+            <p class="text-secondary">Speed × Stamina</p>
+          </div>
+          <div class="mode-card ${ArenaState.mode === 'SUMO' ? 'is-selected' : ''}" id="mode-sumo" tabindex="0" role="button" onclick="selectMode('SUMO')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMode('SUMO');}">
+            <div class="mode-icon">🤼</div>
+            <h2>SUMO</h2>
+            <p class="text-secondary">Strength × Stamina</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Pre-Battle</h3>
+          <div class="text-center">
+            ${petCanvasHTML(pet, { size: 'normal' })}
+            <div class="pet-name">${escapeHTML(pet.pet_name)}</div>
+            <div class="card-meta">Lv.${pet.level} · ${rarityBadgeHTML(pet.rarity)}</div>
+          </div>
+          <div class="mt-4">
+            ${statBarHTML('speed', 'Speed', pet.stat_speed)}
+            ${statBarHTML('strength', 'Strength', pet.stat_strength)}
+            ${statBarHTML('stamina', 'Stamina', pet.stat_stamina)}
+          </div>
+          <div class="mt-3">
+            <h3 class="card-title">Active Buffs</h3>
+            <div class="card-meta">No active buffs · use food in <a href="#screen-03" onclick="router.navigate('screen-03'); return false;">My Pet</a></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Matchmaking</h3>
+          <p class="text-secondary">We'll match you with another player around your arena score (${pet.arena_score}).</p>
+          <div class="mt-4 text-center">
+            <button id="find-match-btn" class="btn btn-large btn-success" onclick="findMatch()">⚡ Find Match</button>
+          </div>
+          <div id="matching-status" class="mt-4 text-center"></div>
+        </div>
+      </div>
+
+      <div id="ai-offer-modal" class="modal-overlay" hidden>
+        <div class="modal-card">
+          <h2>No human opponent yet</h2>
+          <p>Would you like to match with an AI opponent for a quick battle?</p>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="dismissAIOffer()">Keep waiting</button>
+            <button class="btn" onclick="acceptAIOffer()">Match an AI →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function selectMode(mode) {
+  ArenaState.mode = mode;
+  $('#mode-race').classList.toggle('is-selected', mode === 'RACE');
+  $('#mode-sumo').classList.toggle('is-selected', mode === 'SUMO');
+  window.audioEngine.playSFX('SFX-002-pet-tap-click');
+}
+window.selectMode = selectMode;
+
+let aiOfferTimer = null;
+function findMatch() {
+  if (ArenaState.matching) return;
+  ArenaState.matching = true;
+  window.audioEngine.playSFX('SFX-006-arena-start');
+  $('#find-match-btn').disabled = true;
+  $('#matching-status').innerHTML = `
+    <div class="banner banner--info"><span>🔍</span><span>Searching for opponent...</span></div>
+  `;
+  // After 3s show AI offer modal — register with router so navigating away clears it.
+  // Null-guard inside callback handles late-firing case if clear happens between fire and callback.
+  aiOfferTimer = setTimeout(() => {
+    const m = $('#ai-offer-modal');
+    if (m) m.hidden = false;
+  }, 3000);
+  router.registerTimer(aiOfferTimer);
+}
+window.findMatch = findMatch;
+
+function dismissAIOffer() {
+  $('#ai-offer-modal').hidden = true;
+  $('#matching-status').innerHTML = `<div class="banner banner--warning"><span>⏳</span><span>Still searching... try again or accept AI match.</span></div>`;
+  ArenaState.matching = false;
+  $('#find-match-btn').disabled = false;
+  if (aiOfferTimer) clearTimeout(aiOfferTimer);
+}
+function acceptAIOffer() {
+  $('#ai-offer-modal').hidden = true;
+  $('#matching-status').innerHTML = `<div class="banner banner--success"><span>✅</span><span>Matched! Battle starting...</span></div>`;
+  // Countdown 3-2-1 then go to result
+  showCountdown(() => {
+    router.navigate('screen-06', { battleId: 'b1111111-1111-4111-8111-111111111111' });
+  });
+}
+window.dismissAIOffer = dismissAIOffer;
+window.acceptAIOffer = acceptAIOffer;
+
+function showCountdown(done) {
+  const root = $('#proto-content');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal-card text-center"><h1 id="countdown-num" style="font-size:5rem;color:var(--accent);margin:0;">3</h1></div>`;
+  document.body.appendChild(overlay);
+  let n = 3;
+  const tick = () => {
+    n--;
+    if (n <= 0) {
+      try { overlay.remove(); } catch (e) { /* ignore */ }
+      done();
+      return;
+    }
+    const el = overlay.querySelector('#countdown-num');
+    if (el) {
+      el.textContent = n;
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'scalePop 600ms cubic-bezier(0.16, 1, 0.3, 1)';
+    }
+    setTimeout(tick, 800);
+  };
+  setTimeout(tick, 800);
+}
+
+/* ============================================================
+   Screen 06 — Battle Result
+   ============================================================ */
+function renderScreen06(ctx) {
+  const M = window.MOCK;
+  const battleId = ctx.battleId || 'b1111111-1111-4111-8111-111111111111';
+  const battle = M.battles.find(b => b.id === battleId) || M.battles[0];
+  const myPet = M.pets.find(p => p.pet_name === (battle.winner === M.currentPet.pet_name ? battle.winner : (battle.pet_a === M.currentPet.pet_name ? battle.pet_a : battle.pet_b))) || M.currentPet;
+  const oppName = battle.pet_a === myPet.pet_name ? battle.pet_b : battle.pet_a;
+  const opponent = M.pets.find(p => p.pet_name === oppName) || { pet_name: oppName, sprite: '🤖', rarity: 'COMMON', stat_speed: 60, stat_strength: 55, stat_stamina: 58, level: 8 };
+  const isWin = battle.winner === myPet.pet_name;
+
+  return `
+    <section class="screen">
+      <div class="battle-result-banner ${isWin ? '' : 'is-loss'}" id="battle-banner">
+        <h1>${isWin ? '🏆 VICTORY!' : '💀 DEFEAT'}</h1>
+        <p class="text-secondary mt-3">${escapeHTML(battle.mode)} · ${battle.duration_seconds}s · ${formatDate(battle.completed_at)}</p>
+      </div>
+
+      <div class="card mb-4">
+        <h3 class="card-title">Stat Comparison</h3>
+        <div class="stat-comparison">
+          <div class="combatant-card card ${isWin ? 'is-winner' : 'is-loser'}">
+            ${petCanvasHTML(myPet, { size: 'small' })}
+            <div class="pet-name mt-3">${escapeHTML(myPet.pet_name)}</div>
+            <div>${rarityBadgeHTML(myPet.rarity)}</div>
+            <div class="mt-3">
+              <div>SPD ${myPet.stat_speed}</div>
+              <div>STR ${myPet.stat_strength}</div>
+              <div>STA ${myPet.stat_stamina}</div>
+              ${battle.stat_delta_a > 0 ? `<div class="text-success mt-2">+${battle.stat_delta_a} score</div>` : ''}
+            </div>
+          </div>
+          <div class="vs">VS</div>
+          <div class="combatant-card card ${!isWin ? 'is-winner' : 'is-loser'}">
+            ${petCanvasHTML(opponent, { size: 'small' })}
+            <div class="pet-name mt-3">${escapeHTML(opponent.pet_name)}</div>
+            <div>${rarityBadgeHTML(opponent.rarity)}</div>
+            <div class="mt-3">
+              <div>SPD ${opponent.stat_speed}</div>
+              <div>STR ${opponent.stat_strength}</div>
+              <div>STA ${opponent.stat_stamina}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3" style="flex-wrap:wrap;justify-content:center;">
+        <button class="btn" id="share-battle-btn" onclick="shareBattle('${safeJSId(battle.id)}')">🔗 Share Battle</button>
+        <button class="btn btn-success" onclick="router.navigate('screen-05')">⚔️ Battle Again</button>
+        <button class="btn btn-secondary" onclick="router.navigate('screen-07')">🏆 Leaderboard</button>
+        <button class="btn btn-ghost" onclick="router.navigate('screen-03')">← Back to Pet</button>
+      </div>
+    </section>
+  `;
+}
+
+function onMountScreen06(ctx) {
+  const M = window.MOCK;
+  const battleId = ctx.battleId || 'b1111111-1111-4111-8111-111111111111';
+  const battle = M.battles.find(b => b.id === battleId) || M.battles[0];
+  const isWin = battle.winner === M.currentPet.pet_name;
+  setTimeout(() => {
+    if (isWin) {
+      window.audioEngine.playSFX('SFX-007-arena-victory');
+      window.fxEngine.emitBurstAt($('#battle-banner'), { count: 28, char: '★', colors: ['#fdcb6e', '#a29bfe', '#00b894', '#7cb4e8'], speed: 6, life: 1500 });
+    } else {
+      window.audioEngine.playSFX('SFX-008-arena-defeat');
+    }
+  }, 200);
+}
+
+function shareBattle(battleId) {
+  const url = `${location.origin}${location.pathname}#screen-06?battle=${battleId}`;
+  window.fxEngine.emitBurstAt($('#share-battle-btn'), { count: 8, char: '✦' });
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => toast('Battle URL copied to clipboard!'));
+  } else {
+    toast('Share URL: ' + url);
+  }
+}
+window.shareBattle = shareBattle;
+
+/* ============================================================
+   Screen 07 — Leaderboard
+   ============================================================ */
+const LeaderboardState = { filter: 'ALL' };
+function renderScreen07() {
+  const M = window.MOCK;
+  const filter = LeaderboardState.filter;
+  const rows = filter === 'ALL'
+    ? M.leaderboard
+    : M.leaderboard.filter(p => p.rarity === filter);
+
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <h1>Leaderboard</h1>
+        <button class="btn btn-ghost btn-sm" onclick="router.navigate('screen-03')">← Back</button>
+      </div>
+
+      <div class="chips">
+        ${['ALL','COMMON','RARE','EPIC','LEGENDARY'].map(r => `
+          <span class="chip chip--${safeJSId(r.toLowerCase())} ${filter === r ? 'is-active' : ''}" tabindex="0" role="button" onclick="filterLeaderboard('${safeJSId(r)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterLeaderboard('${safeJSId(r)}');}">${escapeHTML(r)}</span>
+        `).join('')}
+      </div>
+
+      ${(() => {
+        const me = M.leaderboard.find(p => p.id === M.currentPet.id);
+        return me ? `
+          <div class="banner banner--success">
+            <span>👑</span>
+            <span>Your pet <strong>${escapeHTML(me.pet_name)}</strong> is ranked <strong class="text-accent">#${me.rank}</strong> out of ${M.leaderboard.length}.</span>
+          </div>
+        ` : '';
+      })()}
+
+      <table class="proto-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Pet</th>
+            <th>Name</th>
+            <th>Rarity</th>
+            <th>Score</th>
+            <th>W / L</th>
+            <th>Win %</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(p => `
+            <tr class="${p.id === M.currentPet.id ? 'is-owner' : ''}" onclick="router.navigate('screen-08', { petId: '${safeJSId(p.id)}' })">
+              <td class="rank-cell">#${p.rank}</td>
+              <td>${petCanvasHTML(p, { size: 'thumb' })}</td>
+              <td><strong>${escapeHTML(p.pet_name)}</strong><div class="card-meta">Lv.${p.level}</div></td>
+              <td>${rarityBadgeHTML(p.rarity)}</td>
+              <td><strong class="text-accent">${p.arena_score}</strong></td>
+              <td>${p.wins} / ${p.losses}</td>
+              <td>${p.win_rate}%</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </section>
+  `;
+}
+
+function filterLeaderboard(r) {
+  if (window.audioEngine) window.audioEngine.playSFX('SFX-002-pet-tap-click');
+  LeaderboardState.filter = r;
+  // Re-render the leaderboard directly (router.navigate would no-op since
+  // current === target screen, so we update DOM manually).
+  $('#proto-content').innerHTML = renderScreen07();
+}
+window.filterLeaderboard = filterLeaderboard;
+
+/* ============================================================
+   Screen 08 — Battle Records
+   ============================================================ */
+function renderScreen08(ctx) {
+  const M = window.MOCK;
+  const petId = ctx.petId || M.currentPet.id;
+  const pet = M.pets.find(p => p.id === petId) || M.currentPet;
+  const myBattles = M.battles.filter(b => b.pet_a === pet.pet_name || b.pet_b === pet.pet_name);
+
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <h1>Battle Records</h1>
+        <div class="flex gap-3">
+          <button class="btn btn-sm" onclick="sharePage()">🔗 Share Page</button>
+          <button class="btn btn-ghost btn-sm" onclick="router.navigate('screen-03')">← Back</button>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="grid-2">
+          <div class="text-center">
+            ${petCanvasHTML(pet, { size: 'normal' })}
+          </div>
+          <div>
+            <h2>${escapeHTML(pet.pet_name)}</h2>
+            <div>${rarityBadgeHTML(pet.rarity)} · Lv.${pet.level}</div>
+            <div class="mt-3">
+              <div>Owner: ${escapeHTML(pet.masked_email || '—')}</div>
+              <div>Arena score: <strong class="text-accent">${pet.arena_score}</strong></div>
+              <div>Record: ${pet.wins}W · ${pet.losses}L</div>
+              <div>Last trained: ${formatDate(pet.last_trained_at)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <table class="proto-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Mode</th>
+            <th>Opponent</th>
+            <th>Result</th>
+            <th>Duration</th>
+            <th>Score Δ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${myBattles.length === 0 ? `<tr><td colspan="6" class="text-center text-secondary" style="padding: var(--space-12);">No battles yet. <a href="#screen-05" onclick="router.navigate('screen-05'); return false;">Enter the arena →</a></td></tr>` : myBattles.map(b => {
+            const isWin = b.winner === pet.pet_name;
+            const opp = b.pet_a === pet.pet_name ? b.pet_b : b.pet_a;
+            return `
+              <tr>
+                <td>${formatDate(b.completed_at)}</td>
+                <td><strong>${escapeHTML(b.mode)}</strong></td>
+                <td>${escapeHTML(opp)} ${b.is_ai_opponent ? '<span class="card-meta">(AI)</span>' : ''}</td>
+                <td>${isWin ? '<span class="text-success"><strong>WIN</strong></span>' : '<span class="text-error"><strong>LOSS</strong></span>'}</td>
+                <td>${b.duration_seconds}s</td>
+                <td>${isWin ? `<span class="text-accent">+${b.stat_delta_a}</span>` : '0'}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </section>
+  `;
+}
+
+function sharePage() {
+  const url = location.href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => toast('Page URL copied!'));
+  } else {
+    toast('Share URL: ' + url);
+  }
+}
+window.sharePage = sharePage;
+
+/* ============================================================
+   Screen 09 — Marketplace
+   ============================================================ */
+function renderScreen09() {
+  const M = window.MOCK;
+  const unlocked = M.metrics.dau >= M.metrics.marketplace_unlock_dau;
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <h1>Marketplace</h1>
+        <button class="btn btn-ghost btn-sm" onclick="router.navigate('screen-03')">← Back</button>
+      </div>
+
+      ${!unlocked ? `
+        <div class="banner banner--warning">
+          <span>🔒</span>
+          <span>Marketplace unlocks when DAU > ${M.metrics.marketplace_unlock_dau.toLocaleString()} (currently ${M.metrics.dau.toLocaleString()}). Preview only — trades disabled.</span>
+        </div>
+      ` : ''}
+
+      <div class="card mb-4">
+        <h3 class="card-title">Featured Listings</h3>
+        <div class="marketplace-grid">
+          ${M.marketplace_listings.map(l => `
+            <div class="listing-card">
+              ${petCanvasHTML({ pet_name: l.pet_name, rarity: l.rarity, sprite: l.sprite }, { size: 'small' })}
+              <div class="pet-name mt-3">${escapeHTML(l.pet_name)}</div>
+              <div>${rarityBadgeHTML(l.rarity)}</div>
+              <div class="listing-price">${l.price_credits.toLocaleString()} 💎</div>
+              <div class="listing-meta">${l.looking_for ? 'Wants: ' + escapeHTML(l.looking_for) : 'Open offer'}</div>
+              <button class="btn ${unlocked ? '' : 'btn-ghost'} mt-3" ${unlocked ? '' : 'disabled'} onclick="openTradeModal('${safeJSId(l.id)}')">${unlocked ? 'Trade' : 'Locked'}</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Anti-flip Rules</h3>
+        <ul style="line-height:1.8;">
+          <li>5% trade fee (paid to platform)</li>
+          <li>7-day cooldown before listed pet can be traded again</li>
+          <li>Atomic ownership transfer (escrow)</li>
+        </ul>
+      </div>
+
+      <div id="trade-modal" class="modal-overlay" hidden>
+        <div class="modal-card">
+          <h2>Confirm Trade</h2>
+          <div id="trade-modal-body"></div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function openTradeModal(listingId) {
+  const M = window.MOCK;
+  const l = M.marketplace_listings.find(x => x.id === listingId);
+  if (!l) return;
+  const fee = Math.round(l.price_credits * 0.05);
+  $('#trade-modal-body').innerHTML = `
+    <p>Trade for <strong>${escapeHTML(l.pet_name)}</strong> (${l.rarity})?</p>
+    <div class="banner banner--warning"><span>💰</span><span>Price: ${l.price_credits.toLocaleString()} · Fee (5%): ${fee.toLocaleString()}</span></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="$('#trade-modal').hidden = true;">Cancel</button>
+      <button class="btn btn-success" onclick="confirmTrade('${safeJSId(listingId)}')">Confirm Trade</button>
+    </div>
+  `;
+  $('#trade-modal').hidden = false;
+}
+function confirmTrade(listingId) {
+  $('#trade-modal').hidden = true;
+  toast('Trade submitted (demo only).');
+  window.audioEngine.playSFX('SFX-009-claim-success');
+}
+window.openTradeModal = openTradeModal;
+window.confirmTrade = confirmTrade;
+
+/* ============================================================
+   Screen 10 — GDPR Self-Service
+   ============================================================ */
+function renderScreen10() {
+  const M = window.MOCK;
+  return `
+    <section class="screen">
+      <div class="screen-title">
+        <h1>GDPR Self-Service</h1>
+        <button class="btn btn-ghost btn-sm" onclick="router.navigate('screen-03')">← Back</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Submit a Request</h3>
+          <div class="form-field">
+            <label for="gdpr-type">Request type</label>
+            <select id="gdpr-type" class="form-select">
+              <option value="ERASURE">ERASURE — Delete my data (Right to be forgotten)</option>
+              <option value="ACCESS">ACCESS — Export my data</option>
+              <option value="RESTRICT">RESTRICT — Restrict processing</option>
+              <option value="OBJECT">OBJECT — Remove from leaderboard</option>
+              <option value="RECTIFY">RECTIFY — Correct my data</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="gdpr-email">Verified email</label>
+            <input id="gdpr-email" type="email" class="form-input" value="${escapeHTML(M.currentPet.masked_email)}" disabled>
+          </div>
+          <div class="form-field">
+            <label for="gdpr-reason">Reason (optional)</label>
+            <textarea id="gdpr-reason" class="form-textarea" placeholder="Briefly describe your request..."></textarea>
+          </div>
+          <button class="btn btn-success w-full" onclick="submitGdpr()">Submit Request</button>
+          <p class="card-meta mt-3">SLA: 7 days. You'll receive an email confirmation.</p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Existing Requests</h3>
+          <table class="proto-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th>SLA Deadline</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${M.gdpr_requests.map(r => `
+                <tr>
+                  <td><code>${escapeHTML(r.id)}</code></td>
+                  <td><strong>${escapeHTML(r.request_type)}</strong></td>
+                  <td>${formatDate(r.submitted_at)}</td>
+                  <td><span class="status-pill status-pill--${r.status.toLowerCase()}">${escapeHTML(r.status)}</span></td>
+                  <td>${formatDate(r.sla_deadline)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function submitGdpr() {
+  const type = $('#gdpr-type').value;
+  const M = window.MOCK;
+  const newReq = {
+    id: 'gdpr-' + String(M.gdpr_requests.length + 1).padStart(3, '0'),
+    request_type: type,
+    status: 'PENDING',
+    sla_deadline: new Date(Date.now() + 7 * 86400000).toISOString(),
+    submitted_at: new Date().toISOString(),
+  };
+  M.gdpr_requests.unshift(newReq);
+  toast('✅ Request submitted. SLA: 7 days');
+  window.audioEngine.playSFX('SFX-009-claim-success');
+  setTimeout(() => router.navigate('screen-10'), 400);
+}
+window.submitGdpr = submitGdpr;
+
+/* ============================================================
+   Register all screens
+   ============================================================ */
+router.register('screen-01', renderScreen01, { title: '01 · Landing', onMount: onMountScreen01 });
+router.register('screen-02', renderScreen02, { title: '02 · Claim Pet' });
+router.register('screen-03', renderScreen03, { title: '03 · My Pet' });
+router.register('screen-04', renderScreen04, { title: '04 · Training', onMount: onMountScreen04 });
+router.register('screen-05', renderScreen05, { title: '05 · Arena' });
+router.register('screen-06', renderScreen06, { title: '06 · Battle Result', onMount: onMountScreen06 });
+router.register('screen-07', renderScreen07, { title: '07 · Leaderboard' });
+router.register('screen-08', renderScreen08, { title: '08 · Battle Records' });
+router.register('screen-09', renderScreen09, { title: '09 · Marketplace' });
+router.register('screen-10', renderScreen10, { title: '10 · GDPR' });
+
+/* ============================================================
+   Boot
+   ============================================================ */
+// Whitelist of click-action handler names that data-action can dispatch to.
+// Anything outside this list is ignored — prevents arbitrary fn lookup via DOM.
+const SAFE_ACTIONS = {
+  onPetCanvasClick: () => onPetCanvasClick(),
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  window.fxEngine.init();
+  router.init();
+  // Hash change support
+  window.addEventListener('hashchange', () => {
+    const id = location.hash.slice(1);
+    if (id && id !== router.current && router.screens[id]) {
+      router.navigate(id);
+    }
+  });
+  // Delegated click for elements with data-action (replaces inline onclick).
+  document.addEventListener('click', (ev) => {
+    const target = ev.target.closest('[data-action]');
+    if (!target) return;
+    const raw = target.getAttribute('data-action') || '';
+    // Strip any (args) suffix; we only support zero-arg whitelisted handlers here.
+    const fnName = raw.replace(/\(.*\)$/, '').trim();
+    const fn = SAFE_ACTIONS[fnName];
+    if (typeof fn === 'function') fn();
+  });
+});

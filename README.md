@@ -421,7 +421,14 @@ The full documentation suite is generated into a static HTML site in `docs/pages
 | BDD (server) | [features/](features/) | [bdd-server.html](docs/pages/bdd-server.html) | Gherkin server feature files |
 | BDD (client / E2E) | [features/client/](features/client/) | [bdd-client.html](docs/pages/bdd-client.html) | Playwright E2E feature files |
 | Test Plan | [docs/test-plan.md](docs/test-plan.md) | [test-plan.html](docs/pages/test-plan.html) | Test strategy, coverage matrix, RTM |
-| Prototype | (interactive) | [prototype/index.html](docs/pages/prototype/index.html) | Clickable HTML prototype + animations |
+
+### Interactive Demos
+
+| Demo | Link | Description |
+|------|------|-------------|
+| 📱 UI Prototype | [docs/pages/prototype/index.html](docs/pages/prototype/index.html) | 10 player-facing screens (Landing → Claim → My Pet → Training → Arena → Battle Result → Leaderboard → Battle Records → Marketplace → GDPR) with hash-routing, mock data, Web Audio synth, and 28 P0/P1 animations |
+| 🔌 API Explorer | [docs/pages/prototype/api-explorer/index.html](docs/pages/prototype/api-explorer/index.html) | Postman-style explorer for all 53 endpoints across 16 groups; chip-quick-select for enum params, request body presets, copy-as-cURL, hash deep-links, and JavaScript mock responses (no backend required) |
+| 🛡️ Admin Portal Prototype | [docs/pages/prototype/admin/admin-login.html](docs/pages/prototype/admin/admin-login.html) | 5-page Admin Portal walkthrough — Login (admin / Admin@2026 / TOTP 123456) → Dashboard → Users → Roles → Audit Log; covers RBAC (5 roles, 30 permissions), GDPR queue, suspicious-pet review, and CSV-exportable immutable audit trail |
 
 Regenerate the HTML site:
 
