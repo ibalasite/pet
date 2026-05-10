@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user">System Admin (super_admin)</span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">Logout</button>
+  </div>
+</header>
+
+<nav class="admin-sidebar">
+  <div class="sidebar-brand">🛡️ Admin Portal</div>
+  <ul class="sidebar-nav">
+    <li class="nav-item active"><a href="admin-dashboard.html">📊 Dashboard</a></li>
+    <li class="nav-item"><a href="admin-users.html">👥 Users</a></li>
+    <li class="nav-item"><a href="admin-roles.html">🗝️ Roles</a></li>
+    <li class="nav-item"><a href="admin-audit-log.html">📜 Audit Log</a></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>🐾 Pet Moderation</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>🏆 Leaderboard</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>⚙️ Runtime Config</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>📧 Email Monitor</span></li>
+    <li class="nav-item disabled" title="Coming Soon"><span>📈 Analytics</span></li>
+  </ul>
+</nav>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">📊 Control Panel</h1>
+    <span class="page-subtitle" id="lastRefresh">Last refresh: —</span>
+  </div>
+
+  <!-- Stats grid -->
+  <section class="stats-grid" id="statsGrid"></section>
+
+  <!-- Quick actions -->
+  <section class="two-col">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">📋 GDPR Queue</h2>
+        <a href="#" class="panel-link" onclick="showToast('Demo: GDPR queue page is part of Coming Soon module.', 'warning'); return false;">View all →</a>
+      </div>
+      <div class="action-panel">
+        <div class="big-num" id="gdprPending">—</div>
+        <div>
+          <div class="label">Pending requests</div>
+          <div class="text-dim" style="font-size: 11px;">Oldest: 2026-05-09 · 2 days remaining of 30</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">📧 Email Health</h2>
+        <a href="#" class="panel-link" onclick="showToast('Demo: Email Monitor page is part of Coming Soon module.', 'warning'); return false;">View report →</a>
+      </div>
+      <div class="action-panel">
+        <div class="big-num text-success" id="bounceRate">—</div>
+        <div>
+          <div class="label">7-day bounce rate</div>
+          <div class="text-dim" style="font-size: 11px;">Threshold: ≤ 2% · status: healthy</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent admin actions -->
+  <section class="panel">
+    <div class="panel-header">
+      <h2 class="panel-title">📜 Recent admin actions</h2>
+      <a href="admin-audit-log.html" class="panel-link">Full audit log →</a>
+    </div>
+    <table class="data-table" id="recentAuditTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Operator</th>
+          <th>Action</th>
+          <th>Target</th>
+          <th>Timestamp</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Recent suspicious pets -->
+  <section class="panel">
+    <div class="panel-header">
+      <h2 class="panel-title">🐾 Recent suspicious pets</h2>
+      <a href="#" class="panel-link" onclick="showToast('Demo: Pet Moderation page is part of Coming Soon module.', 'warning'); return false;">View all →</a>
+    </div>
+    <div class="pet-list" id="suspiciousPetList"></div>
+  </section>
+</main>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  /* === Render stats cards === */
+  function renderStats() {
+    const s = ADMIN_MOCK.stats;
+    const cards = [
+      {
+        title: 'Admin Users',
+        number: s.total_users,
+        sub: s.active_users + ' active · ' + s.locked_users + ' locked',
+        trend: 'flat',
+        trendLabel: '— stable',
+      },
+      {
+        title: 'Roles',
+        number: s.total_roles,
+        sub: '5 system roles · 0 custom',
+        trend: 'flat',
+        trendLabel: '— stable',
+      },
+      {
+        title: 'Audit events today',
+        number: s.audit_today,
+        sub: s.audit_month + ' this month',
+        trend: 'up',
+        trendLabel: '↑ +2 vs avg',
+      },
+      {
+        title: 'Suspicious pets',
+        number: s.suspicious_pets_today,
+        sub: 'Flagged today · queue depth ' + s.suspicious_pets_today,
+        trend: 'up',
+        trendLabel: '↑ +1 vs yesterday',
+      },
+    ];
+
+    const grid = document.getElementById('statsGrid');
+    grid.textContent = '';
+    cards.forEach((c) => {
+      const card = document.createElement('div');
+      card.className = 'stats-card';
+      const t = document.createElement('div'); t.className = 'stat-title'; t.textContent = c.title;
+      const n = document.createElement('div'); n.className = 'stat-number'; n.textContent = c.number;
+      const sub = document.createElement('div'); sub.className = 'text-dim'; sub.style.fontSize = '12px'; sub.style.marginBottom = '8px'; sub.textContent = c.sub;
+      const trend = document.createElement('span'); trend.className = 'stat-trend trend-' + c.trend; trend.textContent = c.trendLabel;
+      card.appendChild(t);
+      card.appendChild(n);
+      card.appendChild(sub);
+      card.appendChild(trend);
+      grid.appendChild(card);
+    });
+
+    document.getElementById('lastRefresh').textContent = 'Last refresh: ' + s.last_refresh;
+    document.getElementById('gdprPending').textContent = s.gdpr_pending;
+    document.getElementById('bounceRate').textContent = s.email_bounce_rate.toFixed(1) + '%';
+  }
+
+  /* === Recent audit (top 6) === */
+  function renderRecentAudit() {
+    const tbody = document.querySelector('#recentAuditTable tbody');
+    tbody.textContent = '';
+    ADMIN_MOCK.auditLogs.slice(0, 6).forEach((row) => {
+      const tr = document.createElement('tr');
+      tr.appendChild(td(row.id, 'mono'));
+      tr.appendChild(td(row.operator_name + ' (' + row.operator + ')'));
+      tr.appendChild(td(row.action, 'mono'));
+      tr.appendChild(td(row.target));
+      tr.appendChild(td(row.ts, 'mono'));
+      const resCell = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'status-badge ' + (row.result === 'success' ? 'success' : 'failed');
+      badge.textContent = row.result;
+      resCell.appendChild(badge);
+      tr.appendChild(resCell);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function td(text, cls) {
+    const el = document.createElement('td');
+    if (cls) el.className = cls;
+    el.textContent = text;
+    return el;
+  }
+
+  /* === Suspicious pets widget === */
+  function renderSuspiciousPets() {
+    const list = document.getElementById('suspiciousPetList');
+    list.textContent = '';
+    const flagged = ADMIN_MOCK.pets.filter((p) => p.status === 'flagged').slice(0, 3);
+
+    flagged.forEach((p) => {
+      const row = document.createElement('div');
+      row.className = 'pet-row';
+
+      const emoji = document.createElement('div');
+      emoji.className = 'pet-emoji';
+      emoji.textContent = p.emoji;
+
+      const meta = document.createElement('div');
+      meta.className = 'pet-meta';
+      const name = document.createElement('div');
+      name.className = 'pet-name';
+      name.textContent = '#' + p.id + ' ' + p.name + '  · owner ' + p.owner;
+      const reason = document.createElement('div');
+      reason.className = 'pet-reason';
+      reason.textContent = 'Flagged ' + p.flagged_at + ' · ' + p.flagged_reason;
+      meta.appendChild(name);
+      meta.appendChild(reason);
+
+      const actions = document.createElement('div');
+      actions.className = 'action-cell';
+
+      const review = document.createElement('button');
+      review.className = 'icon-btn';
+      review.textContent = 'Review';
+      review.addEventListener('click', () => showToast('Reviewing pet #' + p.id + '…'));
+
+      const ban = document.createElement('button');
+      ban.className = 'icon-btn danger';
+      ban.textContent = 'Ban';
+      ban.addEventListener('click', () => showToast('🚫 Pet #' + p.id + ' banned.', 'success'));
+
+      const dismiss = document.createElement('button');
+      dismiss.className = 'icon-btn success';
+      dismiss.textContent = 'Dismiss';
+      dismiss.addEventListener('click', () => showToast('Pet #' + p.id + ' flag dismissed.', 'success'));
+
+      actions.appendChild(review);
+      actions.appendChild(ban);
+      actions.appendChild(dismiss);
+
+      row.appendChild(emoji);
+      row.appendChild(meta);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+
+    if (flagged.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'text-dim';
+      empty.textContent = 'No suspicious pets in queue. 🎉';
+      list.appendChild(empty);
+    }
+  }
+
+  renderStats();
+  renderRecentAudit();
+  renderSuspiciousPets();
+</script>
+</body>
+</html>

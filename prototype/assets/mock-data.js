@@ -1,72 +1,97 @@
-/* =========================================================
-   PIXEL PET ARENA — Mock Data
-   window.MOCK_DATA is available globally after this script loads
-   ========================================================= */
+/* ============================================================
+   Mock data 1:1 from prototype-spec.yaml mock_data.
+   Exposed as window.MOCK
+   ============================================================ */
 (function () {
-  'use strict';
+  // Sprite emojis assigned by rarity for visual variety
+  const SPRITE_BY_NAME = {
+    'Crimson Phoenix': '🔥',
+    'Azure Whisper':   '🐉',
+    'Mossy Cub':       '🐻',
+    'Sandbar Pip':     '🦊',
+    'Onyx Sprinter':   '🐺',
+    'Twilight Tuft':   '🦉',
+    'Pebble Pup':      '🐶',
+    'Solar Drake':     '☀️',
+    'Cobalt Dasher':   '⚡',
+    'Ember Whisker':   '🐱',
+    'AI Opponent':     '🤖',
+  };
 
-  var pets = [
-    { id: 'pet-001', seed: 8472938471, rarity: 'RARE',      pet_name: 'Teal Spark',    stat_speed: 42, stat_strength: 31, stat_stamina: 55, level: 7,  last_trained_at: '2026-05-04T10:23:00Z', arena_score: 2470, win_rate: 0.58, emoji: '🌊' },
-    { id: 'pet-002', seed: 1234567890, rarity: 'LEGENDARY',  pet_name: 'Golden Flare',  stat_speed: 88, stat_strength: 79, stat_stamina: 91, level: 22, last_trained_at: '2026-05-05T06:00:00Z', arena_score: 4150, win_rate: 0.83, emoji: '🔥' },
-    { id: 'pet-003', seed: 9876543210, rarity: 'EPIC',       pet_name: 'Purple Storm',  stat_speed: 63, stat_strength: 71, stat_stamina: 58, level: 14, last_trained_at: '2026-05-03T20:00:00Z', arena_score: 3210, win_rate: 0.71, emoji: '⚡' },
-    { id: 'pet-004', seed: 1111111111, rarity: 'COMMON',     pet_name: 'Grey Pebble',   stat_speed: 18, stat_strength: 22, stat_stamina: 25, level: 3,  last_trained_at: '2026-05-01T08:00:00Z', arena_score: 940,  win_rate: 0.32, emoji: '🪨' },
-    { id: 'pet-005', seed: 5555555555, rarity: 'EPIC',       pet_name: 'Void Stalker',  stat_speed: 71, stat_strength: 68, stat_stamina: 74, level: 18, last_trained_at: '2026-05-05T09:00:00Z', arena_score: 3820, win_rate: 0.76, emoji: '🌑' },
-    { id: 'pet-006', seed: 2222222222, rarity: 'RARE',       pet_name: 'Aqua Drifter',  stat_speed: 49, stat_strength: 38, stat_stamina: 62, level: 9,  last_trained_at: '2026-05-04T16:00:00Z', arena_score: 2150, win_rate: 0.54, emoji: '💧' },
-    { id: 'pet-007', seed: 3333333333, rarity: 'COMMON',     pet_name: 'Dusty Mole',    stat_speed: 12, stat_strength: 28, stat_stamina: 19, level: 2,  last_trained_at: '2026-04-30T12:00:00Z', arena_score: 610,  win_rate: 0.21, emoji: '🐾' },
-    { id: 'pet-008', seed: 4444444444, rarity: 'EPIC',       pet_name: 'Crimson Fang',  stat_speed: 77, stat_strength: 82, stat_stamina: 65, level: 20, last_trained_at: '2026-05-05T07:30:00Z', arena_score: 3640, win_rate: 0.73, emoji: '🦷' },
-    { id: 'pet-009', seed: 6666666666, rarity: 'RARE',       pet_name: 'Silver Wisp',   stat_speed: 55, stat_strength: 44, stat_stamina: 48, level: 11, last_trained_at: '2026-05-03T11:00:00Z', arena_score: 2630, win_rate: 0.62, emoji: '✨' },
-    { id: 'pet-010', seed: 7777777777, rarity: 'LEGENDARY',  pet_name: 'Neon Phantom',  stat_speed: 93, stat_strength: 85, stat_stamina: 97, level: 28, last_trained_at: '2026-05-05T10:00:00Z', arena_score: 4780, win_rate: 0.91, emoji: '👻' },
+  const pets = [
+    { id: '11111111-1111-4111-8111-111111111111', seed: 9876543210, rarity: 'LEGENDARY', pet_name: 'Crimson Phoenix',  stat_speed: 87, stat_strength: 64, stat_stamina: 72, level: 15, total_training_actions: 145, last_trained_at: '2026-05-10T08:32:00Z', masked_email: 'to***@yahooinc.com', arena_score: 2450, wins: 32, losses: 8 },
+    { id: '22222222-2222-4222-8222-222222222222', seed: 1234567890, rarity: 'EPIC',      pet_name: 'Azure Whisper',   stat_speed: 71, stat_strength: 58, stat_stamina: 60, level: 11, total_training_actions: 102, last_trained_at: '2026-05-10T07:11:00Z', masked_email: 'ja***@gmail.com',    arena_score: 1980, wins: 22, losses: 9 },
+    { id: '33333333-3333-4333-8333-333333333333', seed: 1357924680, rarity: 'RARE',      pet_name: 'Mossy Cub',       stat_speed: 55, stat_strength: 49, stat_stamina: 52, level: 7,  total_training_actions: 64,  last_trained_at: '2026-05-09T22:08:00Z', masked_email: 'el***@example.com', arena_score: 1450, wins: 14, losses: 10 },
+    { id: '44444444-4444-4444-8444-444444444444', seed: 2468135790, rarity: 'COMMON',    pet_name: 'Sandbar Pip',     stat_speed: 38, stat_strength: 32, stat_stamina: 41, level: 3,  total_training_actions: 28,  last_trained_at: '2026-05-08T15:30:00Z', masked_email: 'jo***@example.com', arena_score: 870,  wins: 6,  losses: 9 },
+    { id: '55555555-5555-4555-8555-555555555555', seed: 9192939495, rarity: 'EPIC',      pet_name: 'Onyx Sprinter',   stat_speed: 81, stat_strength: 51, stat_stamina: 55, level: 9,  total_training_actions: 88,  last_trained_at: '2026-05-09T19:45:00Z', masked_email: 'le***@yahoo.com',   arena_score: 2080, wins: 24, losses: 7 },
+    { id: '66666666-6666-4666-8666-666666666666', seed: 1112131415, rarity: 'RARE',      pet_name: 'Twilight Tuft',   stat_speed: 60, stat_strength: 44, stat_stamina: 50, level: 5,  total_training_actions: 47,  last_trained_at: '2026-05-09T11:00:00Z', masked_email: 'ke***@example.com', arena_score: 1340, wins: 12, losses: 11 },
+    { id: '77777777-7777-4777-8777-777777777777', seed: 8081828384, rarity: 'COMMON',    pet_name: 'Pebble Pup',      stat_speed: 33, stat_strength: 35, stat_stamina: 39, level: 2,  total_training_actions: 19,  last_trained_at: '2026-05-07T10:30:00Z', masked_email: 'an***@example.com', arena_score: 690,  wins: 4,  losses: 8 },
+    { id: '88888888-8888-4888-8888-888888888888', seed: 5051525354, rarity: 'LEGENDARY', pet_name: 'Solar Drake',     stat_speed: 92, stat_strength: 78, stat_stamina: 81, level: 20, total_training_actions: 192, last_trained_at: '2026-05-11T05:00:00Z', masked_email: 'ya***@yahoo.com',   arena_score: 2780, wins: 41, losses: 6 },
+    { id: '99999999-9999-4999-8999-999999999999', seed: 6061626364, rarity: 'EPIC',      pet_name: 'Cobalt Dasher',   stat_speed: 76, stat_strength: 53, stat_stamina: 57, level: 10, total_training_actions: 95,  last_trained_at: '2026-05-10T13:25:00Z', masked_email: 'ko***@gmail.com',   arena_score: 1850, wins: 19, losses: 9 },
+    { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', seed: 7071727374, rarity: 'RARE',      pet_name: 'Ember Whisker',   stat_speed: 58, stat_strength: 52, stat_stamina: 48, level: 8,  total_training_actions: 71,  last_trained_at: '2026-05-09T16:42:00Z', masked_email: 'mi***@example.com', arena_score: 1280, wins: 11, losses: 10 },
+  ].map(p => Object.assign(p, { sprite: SPRITE_BY_NAME[p.pet_name] || '🐾' }));
+
+  const battles = [
+    { id: 'b1111111-1111-4111-8111-111111111111', pet_a: 'Crimson Phoenix', pet_b: 'Onyx Sprinter',  mode: 'RACE', winner: 'Crimson Phoenix', duration_seconds: 12, completed_at: '2026-05-11T09:45:00Z', is_ai_opponent: false, stat_delta_a: 5, stat_delta_b: 0 },
+    { id: 'b2222222-2222-4222-8222-222222222222', pet_a: 'Crimson Phoenix', pet_b: 'Twilight Tuft',  mode: 'SUMO', winner: 'Crimson Phoenix', duration_seconds: 18, completed_at: '2026-05-10T18:22:00Z', is_ai_opponent: false, stat_delta_a: 3, stat_delta_b: 0 },
+    { id: 'b3333333-3333-4333-8333-333333333333', pet_a: 'Azure Whisper',  pet_b: 'Crimson Phoenix', mode: 'RACE', winner: 'Azure Whisper',   duration_seconds: 14, completed_at: '2026-05-10T11:10:00Z', is_ai_opponent: false, stat_delta_a: 4, stat_delta_b: 0 },
+    { id: 'b4444444-4444-4444-8444-444444444444', pet_a: 'Solar Drake',    pet_b: 'Cobalt Dasher',   mode: 'RACE', winner: 'Solar Drake',     duration_seconds: 11, completed_at: '2026-05-11T05:30:00Z', is_ai_opponent: false, stat_delta_a: 6, stat_delta_b: 0 },
+    { id: 'b5555555-5555-4555-8555-555555555555', pet_a: 'Mossy Cub',      pet_b: 'Pebble Pup',      mode: 'SUMO', winner: 'Mossy Cub',       duration_seconds: 22, completed_at: '2026-05-09T20:15:00Z', is_ai_opponent: false, stat_delta_a: 2, stat_delta_b: 0 },
+    { id: 'b6666666-6666-4666-8666-666666666666', pet_a: 'Crimson Phoenix', pet_b: 'AI Opponent',    mode: 'RACE', winner: 'Crimson Phoenix', duration_seconds: 13, completed_at: '2026-05-09T14:08:00Z', is_ai_opponent: true,  stat_delta_a: 4, stat_delta_b: 0 },
   ];
 
-  var leaderboard = [
-    { rank: 1,  pet_id: 'pet-010', pet_name: 'Neon Phantom',  rarity: 'LEGENDARY', level: 28, arena_score: 4780, win_rate: 0.91 },
-    { rank: 2,  pet_id: 'pet-002', pet_name: 'Golden Flare',  rarity: 'LEGENDARY', level: 22, arena_score: 4150, win_rate: 0.83 },
-    { rank: 3,  pet_id: 'pet-005', pet_name: 'Void Stalker',  rarity: 'EPIC',      level: 18, arena_score: 3820, win_rate: 0.76 },
-    { rank: 4,  pet_id: 'pet-008', pet_name: 'Crimson Fang',  rarity: 'EPIC',      level: 20, arena_score: 3640, win_rate: 0.73 },
-    { rank: 5,  pet_id: 'pet-003', pet_name: 'Purple Storm',  rarity: 'EPIC',      level: 14, arena_score: 3210, win_rate: 0.71 },
-    { rank: 6,  pet_id: 'pet-009', pet_name: 'Silver Wisp',   rarity: 'RARE',      level: 11, arena_score: 2630, win_rate: 0.62 },
-    { rank: 7,  pet_id: 'pet-001', pet_name: 'Teal Spark',    rarity: 'RARE',      level: 7,  arena_score: 2470, win_rate: 0.58 },
-    { rank: 8,  pet_id: 'pet-006', pet_name: 'Aqua Drifter',  rarity: 'RARE',      level: 9,  arena_score: 2150, win_rate: 0.54 },
-    { rank: 9,  pet_id: 'pet-004', pet_name: 'Grey Pebble',   rarity: 'COMMON',    level: 3,  arena_score: 940,  win_rate: 0.32 },
-    { rank: 10, pet_id: 'pet-007', pet_name: 'Dusty Mole',    rarity: 'COMMON',    level: 2,  arena_score: 610,  win_rate: 0.21 },
+  const food = [
+    { id: 'speed_berry',     name: 'Speed Berry',     buff_stat: 'speed',    magnitude: 5, duration_hours: 24, owned: 3, icon: '🫐' },
+    { id: 'muscle_jerky',    name: 'Muscle Jerky',    buff_stat: 'strength', magnitude: 5, duration_hours: 24, owned: 2, icon: '🥩' },
+    { id: 'endurance_root',  name: 'Endurance Root',  buff_stat: 'stamina',  magnitude: 5, duration_hours: 24, owned: 4, icon: '🥕' },
+    { id: 'rainbow_truffle', name: 'Rainbow Truffle', buff_stat: 'all',      magnitude: 3, duration_hours: 12, owned: 1, icon: '🍄' },
   ];
 
-  var battleRecords = [
-    { match_id: 'm1',  date: '2026-05-04T14:30:00Z', mode: 'RACE', opponent_name: 'Golden Flare',  opponent_rarity: 'LEGENDARY', outcome: 'WIN',  stat_delta: 5 },
-    { match_id: 'm2',  date: '2026-05-03T18:00:00Z', mode: 'RACE', opponent_name: 'Void Stalker',  opponent_rarity: 'EPIC',      outcome: 'LOSS', stat_delta: 0 },
-    { match_id: 'm3',  date: '2026-05-02T11:00:00Z', mode: 'RACE', opponent_name: 'Purple Storm',  opponent_rarity: 'EPIC',      outcome: 'WIN',  stat_delta: 3 },
-    { match_id: 'm4',  date: '2026-05-01T20:30:00Z', mode: 'RACE', opponent_name: 'Aqua Drifter',  opponent_rarity: 'RARE',      outcome: 'WIN',  stat_delta: 2 },
-    { match_id: 'm5',  date: '2026-04-30T09:00:00Z', mode: 'RACE', opponent_name: 'Silver Wisp',   opponent_rarity: 'RARE',      outcome: 'LOSS', stat_delta: 0 },
-    { match_id: 'm6',  date: '2026-04-29T15:00:00Z', mode: 'RACE', opponent_name: 'Crimson Fang',  opponent_rarity: 'EPIC',      outcome: 'LOSS', stat_delta: 0 },
-    { match_id: 'm7',  date: '2026-04-28T12:00:00Z', mode: 'RACE', opponent_name: 'Grey Pebble',   opponent_rarity: 'COMMON',    outcome: 'WIN',  stat_delta: 1 },
-    { match_id: 'm8',  date: '2026-04-27T18:45:00Z', mode: 'RACE', opponent_name: 'Dusty Mole',    opponent_rarity: 'COMMON',    outcome: 'WIN',  stat_delta: 1 },
-    { match_id: 'm9',  date: '2026-04-26T10:20:00Z', mode: 'RACE', opponent_name: 'Neon Phantom',  opponent_rarity: 'LEGENDARY', outcome: 'LOSS', stat_delta: 0 },
-    { match_id: 'm10', date: '2026-04-25T22:00:00Z', mode: 'RACE', opponent_name: 'Aqua Drifter',  opponent_rarity: 'RARE',      outcome: 'WIN',  stat_delta: 2 },
+  const marketplace_listings = [
+    { id: 'ml-001', pet_name: 'Onyx Sprinter',  rarity: 'EPIC',      price_credits: 3500, listed_at: '2026-05-08T11:00:00Z', looking_for: 'Epic+ pet with stamina >= 70' },
+    { id: 'ml-002', pet_name: 'Twilight Tuft',  rarity: 'RARE',      price_credits: 1200, listed_at: '2026-05-09T14:30:00Z', looking_for: 'Common with high speed' },
+    { id: 'ml-003', pet_name: 'Solar Drake',    rarity: 'LEGENDARY', price_credits: 9800, listed_at: '2026-05-10T09:00:00Z', looking_for: null },
+  ].map(l => {
+    const p = pets.find(x => x.pet_name === l.pet_name);
+    return Object.assign({}, l, { sprite: p ? p.sprite : '🐾' });
+  });
+
+  const gdpr_requests = [
+    { id: 'gdpr-001', request_type: 'ERASURE',   status: 'PENDING',   sla_deadline: '2026-05-18T08:00:00Z', submitted_at: '2026-05-11T08:00:00Z' },
+    { id: 'gdpr-002', request_type: 'ACCESS',    status: 'COMPLETED', sla_deadline: '2026-05-15T10:00:00Z', submitted_at: '2026-05-08T10:00:00Z', completed_at: '2026-05-09T11:30:00Z' },
   ];
 
-  var food = [
-    { id: 'f1', food_type: 'speed_berry',     buff_stat: 'speed',    magnitude: 5, is_permanent: false, expires_at: '2026-05-06T10:23:00Z', emoji: '🫐' },
-    { id: 'f2', food_type: 'power_mushroom',  buff_stat: 'strength', magnitude: 3, is_permanent: false, expires_at: '2026-05-07T08:00:00Z', emoji: '🍄' },
-    { id: 'f3', food_type: 'stamina_root',    buff_stat: 'stamina',  magnitude: 8, is_permanent: true,  expires_at: null,                   emoji: '🌿' },
-    { id: 'f4', food_type: 'turbo_seed',      buff_stat: 'speed',    magnitude: 10, is_permanent: false, expires_at: '2026-05-08T00:00:00Z', emoji: '🌱' },
-    { id: 'f5', food_type: 'iron_bark',       buff_stat: 'strength', magnitude: 6, is_permanent: false, expires_at: '2026-05-09T12:00:00Z', emoji: '🪵' },
-    { id: 'f6', food_type: 'crystal_water',   buff_stat: 'stamina',  magnitude: 4, is_permanent: false, expires_at: '2026-05-06T20:00:00Z', emoji: '💎' },
-  ];
+  // Rank-sorted leaderboard (descending arena_score)
+  const leaderboard = [...pets]
+    .sort((a, b) => b.arena_score - a.arena_score)
+    .map((p, idx) => {
+      const totalBattles = (p.wins + p.losses) || 1; // guard against divide-by-zero for fresh pets
+      return Object.assign({}, p, {
+        rank: idx + 1,
+        win_rate: ((p.wins / totalBattles) * 100).toFixed(1),
+      });
+    });
 
-  var marketplaceListings = [
-    { id: 'ml-001', pet_id: 'pet-007', pet_name: 'Dusty Mole',   rarity: 'COMMON',    price_coins: 500,  seller: 'player_xyz', listed_at: '2026-05-04T10:00:00Z' },
-    { id: 'ml-002', pet_id: 'pet-009', pet_name: 'Silver Wisp',  rarity: 'RARE',      price_coins: 2400, seller: 'player_abc', listed_at: '2026-05-04T12:00:00Z' },
-    { id: 'ml-003', pet_id: 'pet-006', pet_name: 'Aqua Drifter', rarity: 'RARE',      price_coins: 2000, seller: 'player_mno', listed_at: '2026-05-03T18:00:00Z' },
-    { id: 'ml-004', pet_id: 'pet-003', pet_name: 'Purple Storm', rarity: 'EPIC',      price_coins: 5500, seller: 'player_rst', listed_at: '2026-05-02T09:00:00Z' },
-    { id: 'ml-005', pet_id: 'pet-008', pet_name: 'Crimson Fang', rarity: 'EPIC',      price_coins: 6200, seller: 'player_uvw', listed_at: '2026-05-01T20:00:00Z' },
-  ];
+  // Default current pet = Crimson Phoenix (the LEGENDARY first pet)
+  const currentPet = pets[0];
 
-  window.MOCK_DATA = {
-    pets: pets,
-    leaderboard: leaderboard,
-    battleRecords: battleRecords,
-    food: food,
-    marketplaceListings: marketplaceListings,
-    currentPetId: 'pet-001',
+  window.MOCK = {
+    pets,
+    battles,
+    food,
+    marketplace_listings,
+    gdpr_requests,
+    leaderboard,
+    currentPet,
+    // simulated metrics
+    metrics: {
+      claimed_today: 12453,
+      dau: 800,
+      marketplace_unlock_dau: 1000,
+      training_streak: 7,
+    },
+    // Claim-flow demo OTP. NOT a real secret — this is a static UI prototype with no backend
+    // and no real auth. The "code" is shown plainly inline in screen-02 for the demo wizard.
+    otp_code: '123456', // nosec - mock-only demo value, no security boundary
   };
 })();

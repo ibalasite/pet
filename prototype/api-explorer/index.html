@@ -1,1172 +1,2310 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Explorer — Pixel Pet Arena</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pixel Pet Arena · API Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #2d9ef5;
+    --primary-dim: #1d6fb8;
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #334155;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-mute: #64748b;
+    --border: #334155;
+    --border-light: #475569;
 
-:root {
-  --bg: #1a1a2e;
-  --surface: #242444;
-  --surface-hover: #2d2d5a;
-  --primary: #6c5ce7;
-  --accent: #fdcb6e;
-  --text: #e8e8f0;
-  --muted: #6c6c9a;
-  --success: #00b894;
-  --error: #e87c7c;
-  --warning: #e8a87c;
-  --shadow: 4px 4px 0 #0d0d1a;
-  --border: 1px solid #3a3a5c;
-  --sidebar-w: 260px;
-  --navbar-h: 56px;
+    --m-get: #10b981;
+    --m-post: #3b82f6;
+    --m-put: #f59e0b;
+    --m-patch: #a855f7;
+    --m-delete: #ef4444;
 
-  --group-claim: #0ea5e9;
-  --group-pets: #6c5ce7;
-  --group-arena: #e87c7c;
-  --group-leaderboard: #00b894;
-  --group-marketplace: #fdcb6e;
-  --group-health: #b2bec3;
-}
+    --radius: 6px;
+    --radius-sm: 3px;
+    --transition: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  overflow: hidden;
-  font-size: 14px;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ─── NAVBAR ─── */
-.navbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--navbar-h);
-  background: var(--surface);
-  border-bottom: 2px solid #3a3a5c;
-  box-shadow: 0 4px 0 #0d0d1a;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 20px;
-  z-index: 100;
-}
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
 
-.navbar-title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
-  color: var(--accent);
-  text-shadow: 2px 2px 0 #0d0d1a;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
+  code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
 
-.navbar-title span { color: var(--primary); }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
 
-.navbar-spacer { flex: 1; }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+  }
 
-.auth-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
+  input, textarea, select {
+    font-family: inherit;
+    font-size: 13px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    outline: none;
+    transition: border-color var(--transition);
+  }
 
-.auth-group label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  color: var(--muted);
-  white-space: nowrap;
-}
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--primary);
+  }
 
-.token-input {
-  background: var(--bg);
-  border: 2px solid #3a3a5c;
-  color: var(--text);
-  font-family: 'Inter', monospace;
-  font-size: 12px;
-  padding: 6px 10px;
-  width: 260px;
-  outline: none;
-}
-.token-input:focus { border-color: var(--primary); }
-.token-input::placeholder { color: var(--muted); }
+  /* ===== Top Nav ===== */
+  .topnav {
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    flex-shrink: 0;
+  }
 
-.auto-attach {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.auto-attach input[type=checkbox] {
-  width: 14px;
-  height: 14px;
-  accent-color: var(--primary);
-  cursor: pointer;
-}
-.auto-attach span {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  color: var(--muted);
-}
+  .topnav .back-link {
+    color: var(--text-dim);
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition), color var(--transition);
+  }
+  .topnav .back-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
 
-.nav-link {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  color: var(--muted);
-  text-decoration: none;
-  padding: 6px 10px;
-  border: 2px solid #3a3a5c;
-  transition: all 0.1s;
-  white-space: nowrap;
-}
-.nav-link:hover {
-  border-color: var(--primary);
-  color: var(--text);
-  background: var(--surface-hover);
-}
+  .topnav .title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    letter-spacing: 0.2px;
+  }
+  .topnav .title .accent { color: var(--primary); }
 
-/* ─── LAYOUT ─── */
-.app-body {
-  display: flex;
-  height: 100vh;
-  padding-top: var(--navbar-h);
-}
+  .topnav .spacer { flex: 1; }
 
-/* ─── SIDEBAR ─── */
-.sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
-  background: var(--surface);
-  border-right: 2px solid #3a3a5c;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
+  .auth-panel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px 6px 4px 12px;
+  }
+  .auth-panel label.auth-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    user-select: none;
+  }
+  .auth-panel input[type="checkbox"] { accent-color: var(--primary); cursor: pointer; }
+  .auth-panel input[type="text"] {
+    background: transparent;
+    border: none;
+    width: 240px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  .auth-panel input[type="text"]:focus { outline: none; }
 
-.sidebar::-webkit-scrollbar { width: 4px; }
-.sidebar::-webkit-scrollbar-track { background: var(--bg); }
-.sidebar::-webkit-scrollbar-thumb { background: #3a3a5c; }
+  /* ===== Layout ===== */
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    height: calc(100vh - 56px);
+    overflow: hidden;
+  }
 
-.search-wrap {
-  padding: 12px;
-  border-bottom: 2px solid #3a3a5c;
-  position: sticky;
-  top: 0;
-  background: var(--surface);
-  z-index: 10;
-}
+  /* ===== Sidebar ===== */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 14px 12px 24px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
 
-.search-input {
-  width: 100%;
-  background: var(--bg);
-  border: 2px solid #3a3a5c;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  padding: 8px 10px 8px 28px;
-  outline: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%236c6c9a' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.44 1.406a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: 8px center;
-}
-.search-input:focus { border-color: var(--primary); }
-.search-input::placeholder { color: var(--muted); }
+  .search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px;
+  }
 
-.group-section { border-bottom: 1px solid #3a3a5c; }
+  .group {
+    border-left: 4px solid var(--gc, var(--primary));
+    padding-left: 10px;
+  }
+  .group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 6px 0;
+    user-select: none;
+  }
+  .group-header:hover .group-name { color: var(--text); }
+  .group-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    transition: color var(--transition);
+  }
+  .group-count {
+    font-size: 11px;
+    color: var(--text-mute);
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .group-toggle {
+    color: var(--text-mute);
+    font-size: 10px;
+    margin-left: 6px;
+    transition: transform var(--transition);
+  }
+  .group.collapsed .group-toggle { transform: rotate(-90deg); }
+  .group.collapsed .endpoints { display: none; }
 
-.group-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.1s;
-}
-.group-header:hover { background: var(--surface-hover); }
+  .endpoints {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 4px;
+  }
 
-.group-dot {
-  width: 8px;
-  height: 8px;
-  flex-shrink: 0;
-}
+  .endpoint-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition);
+    min-width: 0;
+  }
+  .endpoint-row:hover { background: var(--surface-2); }
+  .endpoint-row.active {
+    background: rgba(45, 158, 245, 0.15);
+    box-shadow: inset 2px 0 0 var(--primary);
+  }
+  .endpoint-row.active .endpoint-path { color: var(--text); }
 
-.group-name {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  flex: 1;
-}
+  .method-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    min-width: 56px;
+    text-align: center;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    letter-spacing: 0.4px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .method-badge.GET    { background: var(--m-get); }
+  .method-badge.POST   { background: var(--m-post); }
+  .method-badge.PUT    { background: var(--m-put); }
+  .method-badge.PATCH  { background: var(--m-patch); }
+  .method-badge.DELETE { background: var(--m-delete); }
 
-.group-count {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 6px;
-  color: var(--muted);
-  background: var(--bg);
-  padding: 2px 5px;
-  border: 1px solid #3a3a5c;
-}
+  .endpoint-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
 
-.group-chevron {
-  font-size: 8px;
-  color: var(--muted);
-  transition: transform 0.2s;
-}
-.group-section.collapsed .group-chevron { transform: rotate(-90deg); }
-.group-section.collapsed .group-endpoints { display: none; }
+  /* ===== Main Panel ===== */
+  .main-panel {
+    overflow-y: auto;
+    padding: 28px 32px 64px 32px;
+  }
 
-.endpoint-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px 7px 20px;
-  cursor: pointer;
-  transition: background 0.1s;
-  border-left: 3px solid transparent;
-}
-.endpoint-item:hover { background: var(--surface-hover); }
-.endpoint-item.active {
-  background: var(--surface-hover);
-  border-left-color: var(--primary);
-}
-.endpoint-item.hidden { display: none; }
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-mute);
+    text-align: center;
+    padding: 40px;
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state h2 { font-size: 18px; color: var(--text-dim); margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; max-width: 400px; }
 
-.method-badge {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 6px;
-  padding: 3px 5px;
-  flex-shrink: 0;
-  min-width: 44px;
-  text-align: center;
-}
-.badge-GET { background: var(--success); color: #0d0d1a; }
-.badge-POST { background: var(--primary); color: #fff; }
-.badge-PUT { background: var(--warning); color: #0d0d1a; }
-.badge-PATCH { background: var(--accent); color: #0d0d1a; }
-.badge-DELETE { background: var(--error); color: #fff; }
+  .ep-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .ep-header .method-badge {
+    min-width: 70px;
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  .ep-header .ep-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 500;
+  }
 
-.endpoint-path {
-  font-family: 'Inter', monospace;
-  font-size: 11px;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .ep-summary {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .ep-description {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    max-width: 920px;
+    line-height: 1.6;
+  }
 
-/* ─── MAIN PANEL ─── */
-.main-panel {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+  .section {
+    margin-bottom: 24px;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-.main-panel::-webkit-scrollbar { width: 6px; }
-.main-panel::-webkit-scrollbar-track { background: var(--bg); }
-.main-panel::-webkit-scrollbar-thumb { background: #3a3a5c; }
+  .params-table {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px 16px;
+  }
+  .param-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 80px;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border);
+    align-items: start;
+  }
+  .param-row:last-child { border-bottom: none; }
 
-/* ─── WELCOME ─── */
-.welcome-state {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  text-align: center;
-}
+  .param-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .param-name .required { color: var(--error); margin-left: 2px; }
+  .param-name .ploc {
+    font-size: 10px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    padding: 1px 6px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-weight: 500;
+  }
+  .param-name .ploc.path { background: rgba(168, 85, 247, 0.2); color: #c4b5fd; }
+  .param-name .ploc.query { background: rgba(45, 158, 245, 0.18); color: #93c5fd; }
+  .param-desc {
+    font-size: 12px;
+    color: var(--text-mute);
+    margin-top: 2px;
+    font-family: inherit;
+    font-weight: 400;
+    display: block;
+    width: 100%;
+  }
 
-.welcome-logo {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 32px;
-  text-shadow: 4px 4px 0 #0d0d1a;
-}
+  .param-input-wrapper { display: flex; flex-direction: column; gap: 6px; }
+  .param-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
 
-.welcome-msg {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  line-height: 2;
-}
+  .chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    padding: 3px 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text-dim);
+    transition: all var(--transition);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .chip:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  .chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
 
-.welcome-stats {
-  display: flex;
-  gap: 16px;
-}
+  .param-type {
+    font-size: 11px;
+    color: var(--text-mute);
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+    padding-top: 8px;
+  }
 
-.stat-chip {
-  background: var(--surface);
-  border: 2px solid #3a3a5c;
-  box-shadow: var(--shadow);
-  padding: 8px 14px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  color: var(--accent);
-}
+  /* ===== Body / Presets ===== */
+  .body-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .preset-select {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .body-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px;
+    border-radius: var(--radius);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 160px;
+    tab-size: 2;
+  }
+  .body-textarea:focus { border-color: var(--primary); outline: none; }
 
-/* ─── ENDPOINT DETAIL ─── */
-.endpoint-detail { display: none; flex-direction: column; gap: 20px; }
-.endpoint-detail.visible { display: flex; }
+  /* ===== Action Bar ===== */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin: 24px 0;
+    align-items: center;
+  }
+  .btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--primary-dim); }
+  .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--border-light); }
 
-.endpoint-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
+  /* ===== Response Panel ===== */
+  .response-section { margin-top: 20px; }
+  .response-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .status-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: white;
+  }
+  .status-badge.s2xx { background: var(--success); }
+  .status-badge.s4xx { background: var(--warning); }
+  .status-badge.s401, .status-badge.s403 { background: var(--error); }
+  .status-badge.s5xx { background: var(--error); }
+  .response-time {
+    font-size: 12px;
+    color: var(--text-mute);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .response-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
 
-.endpoint-header .method-badge {
-  font-size: 8px;
-  padding: 5px 8px;
-}
+  .response-panel {
+    background: #0a0f1c;
+    padding: 16px;
+    border-radius: var(--radius);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    max-height: 600px;
+    overflow: auto;
+    white-space: pre;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
 
-.endpoint-title-path {
-  font-family: 'Inter', monospace;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-}
+  /* JSON syntax */
+  .j-key { color: #93c5fd; }
+  .j-str { color: #86efac; }
+  .j-num { color: #fbbf24; }
+  .j-bool { color: #f472b6; }
+  .j-null { color: #94a3b8; }
 
-.endpoint-summary {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
-  color: var(--muted);
-  margin-left: auto;
-}
+  /* ===== Spinner ===== */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 700ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-.endpoint-desc {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-  padding: 12px;
-  background: var(--surface);
-  border-left: 3px solid var(--primary);
-}
+  /* ===== Modal ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-title { font-size: 16px; font-weight: 600; }
+  .modal-close {
+    color: var(--text-mute);
+    font-size: 22px;
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body {
+    background: #0a0f1c;
+    padding: 16px;
+    border-radius: var(--radius);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    overflow: auto;
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text);
+    border: 1px solid var(--border);
+    line-height: 1.6;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--success);
+    color: white;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 200ms, transform 200ms;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
 
-/* ─── SECTION CARD ─── */
-.section-card {
-  background: var(--surface);
-  border: 1px solid #3a3a5c;
-  box-shadow: var(--shadow);
-}
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
 
-.section-title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
-  color: var(--accent);
-  padding: 12px 16px;
-  border-bottom: 1px solid #3a3a5c;
-  background: #1e1e3a;
-}
-
-.section-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
-.param-row {
-  display: grid;
-  grid-template-columns: 120px 80px 1fr;
-  align-items: center;
-  gap: 10px;
-}
-
-.param-name {
-  font-family: 'Inter', monospace;
-  font-size: 13px;
-  color: var(--text);
-}
-.param-name .req { color: var(--error); margin-left: 2px; }
-.param-type {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 6px;
-  color: var(--muted);
-  background: var(--bg);
-  padding: 3px 6px;
-  border: 1px solid #3a3a5c;
-  text-align: center;
-}
-
-.param-input {
-  background: var(--bg);
-  border: 2px solid #3a3a5c;
-  color: var(--text);
-  font-family: 'Inter', monospace;
-  font-size: 12px;
-  padding: 7px 10px;
-  outline: none;
-  width: 100%;
-}
-.param-input:focus { border-color: var(--primary); }
-.param-input::placeholder { color: var(--muted); }
-
-.body-textarea {
-  background: var(--bg);
-  border: 2px solid #3a3a5c;
-  color: var(--accent);
-  font-family: 'Inter', monospace;
-  font-size: 12px;
-  padding: 12px;
-  outline: none;
-  width: 100%;
-  min-height: 140px;
-  resize: vertical;
-  line-height: 1.6;
-}
-.body-textarea:focus { border-color: var(--primary); }
-
-/* ─── TRY IT BUTTON ─── */
-.try-btn {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: transform 0.1s, box-shadow 0.1s;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  align-self: flex-start;
-}
-.try-btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #0d0d1a; }
-.try-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #0d0d1a; }
-.try-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-.spinner {
-  width: 12px; height: 12px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  display: none;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading .spinner { display: block; }
-.loading .btn-label { display: none; }
-
-/* ─── RESPONSE ─── */
-.response-section {
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-}
-.response-section.visible { display: flex; }
-
-.response-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.status-badge {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
-  padding: 6px 12px;
-  box-shadow: var(--shadow);
-}
-.status-2xx { background: var(--success); color: #0d0d1a; }
-.status-4xx { background: var(--error); color: #fff; }
-.status-5xx { background: var(--warning); color: #0d0d1a; }
-
-.response-time {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  color: var(--muted);
-}
-
-.response-body {
-  background: #0f0f1e;
-  border: 2px solid #3a3a5c;
-  padding: 16px;
-  overflow-x: auto;
-  max-height: 400px;
-  overflow-y: auto;
-}
-.response-body pre {
-  font-family: 'Inter', monospace;
-  font-size: 12px;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-/* JSON Syntax Highlighting */
-.json-key { color: #74b9ff; }
-.json-string { color: #55efc4; }
-.json-number { color: var(--accent); }
-.json-bool { color: var(--primary); }
-.json-null { color: var(--muted); }
-
-/* ─── AUTH BADGE ─── */
-.auth-required-badge {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  padding: 4px 8px;
-  background: #3a2a00;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-}
-
-/* ─── SCROLLBAR GLOBAL ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: #3a3a5c; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { max-height: 280px; }
+    .auth-panel input[type="text"] { width: 140px; }
+    .topnav { padding: 8px 12px; gap: 10px; flex-wrap: wrap; height: auto; }
+    .param-row { grid-template-columns: 1fr; gap: 6px; }
+    .param-type { text-align: left; padding-top: 0; }
+    .main-panel { padding: 20px 16px 48px 16px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ─── NAVBAR ─── -->
-<nav class="navbar">
-  <div class="navbar-title">PIXEL PET ARENA — <span>API Explorer</span></div>
-  <div class="navbar-spacer"></div>
-  <div class="auth-group">
-    <label>TOKEN</label>
-    <input type="text" class="token-input" id="tokenInput" placeholder="Bearer &lt;your_petToken&gt;">
-    <label class="auto-attach">
-      <input type="checkbox" id="autoAttach" checked>
-      <span>Auto-attach</span>
+<!-- Top Nav -->
+<nav class="topnav">
+  <a class="back-link" href="../../index.html">&larr; 文件站</a>
+  <div class="title"><span class="accent">Pixel Pet Arena</span> · API Explorer</div>
+  <div class="spacer"></div>
+  <div class="auth-panel" title="Authorization 設定">
+    <label class="auth-toggle">
+      <input type="checkbox" id="auth-toggle" />
+      <span>Bearer</span>
     </label>
+    <input type="text" id="auth-token" placeholder="<petToken>" autocomplete="off" spellcheck="false" />
   </div>
-  <a href="../index.html" class="nav-link">← Prototype</a>
-  ← Docs Site
 </nav>
 
-<!-- ─── APP BODY ─── -->
-<div class="app-body">
+<!-- Main Layout -->
+<div class="layout">
 
-  <!-- ─── SIDEBAR ─── -->
   <aside class="sidebar">
-    <div class="search-wrap">
-      <input type="text" class="search-input" id="searchInput" placeholder="Search endpoints… (/)">
-    </div>
-    <div id="sidebarGroups"></div>
+    <input type="text" class="search-input" id="search" placeholder="搜尋 path / method / summary…" />
+    <div id="groups-container"></div>
   </aside>
 
-  <!-- ─── MAIN PANEL ─── -->
-  <main class="main-panel" id="mainPanel">
-
-    <!-- Welcome State -->
-    <div class="welcome-state" id="welcomeState">
-      <div class="welcome-logo">🐾</div>
-      <div class="welcome-msg">← Select an endpoint to explore</div>
-      <div class="welcome-stats">
-        <div class="stat-chip">26 endpoints</div>
-        <div class="stat-chip">6 groups</div>
-        <div class="stat-chip">Mock mode</div>
+  <main class="main-panel">
+    <div id="endpoint-detail">
+      <div class="empty-state">
+        <div class="icon">⌁</div>
+        <h2>選擇左側端點開始探索</h2>
+        <p>共 <strong id="ep-count">—</strong> 個 API 端點，分布於 <strong id="grp-count">—</strong> 個群組。<br/>所有回應皆為 mock，本工具僅做互動展示。</p>
       </div>
     </div>
-
-    <!-- Endpoint Detail -->
-    <div class="endpoint-detail" id="endpointDetail">
-      <div class="endpoint-header" id="detailHeader"></div>
-      <div class="endpoint-desc" id="detailDesc"></div>
-      <div id="detailParams"></div>
-      <div id="detailBody"></div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <button class="try-btn" id="tryBtn" onclick="executeRequest()">
-          <div class="spinner" id="spinner"></div>
-          <span class="btn-label">▶ Try It</span>
-        </button>
-        <div id="authBadgeWrap"></div>
-      </div>
-      <div class="response-section" id="responseSection">
-        <div class="response-meta">
-          <div class="status-badge" id="statusBadge"></div>
-          <div class="response-time" id="responseTime"></div>
-        </div>
-        <div class="section-card">
-          <div class="section-title">RESPONSE BODY</div>
-          <div class="response-body">
-            <pre id="responseBody"></pre>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
+
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast">Copied!</div>
+
 <script>
-// ─── API DEFINITION ───────────────────────────────────────────────────────────
+"use strict";
 
-const API_GROUPS = [
-  {
-    id: 'claim',
-    name: 'Claim Flow',
-    color: '#0ea5e9',
-    endpoints: [
-      {
-        id: 'claim-initiate',
-        method: 'POST',
-        path: '/api/v1/claim',
-        summary: 'Initiate email claim',
-        description: 'Start the claim flow for a pet. Sends an OTP code to the provided email address.',
-        auth: false,
-        pathParams: [],
-        queryParams: [],
-        body: JSON.stringify({ email: 'trainer@example.com', petId: 'pet-001', ageConfirmed: true }, null, 2),
-        responses: {
-          200: { success: true, data: { claimId: 'claim-abc123', expiresAt: '2026-05-05T23:59:59Z' } },
-          400: { success: false, error: { code: 'ALREADY_CLAIMED', message: 'This pet has already been claimed.' } }
+/* =====================================================================
+ * SPEC — generated from docs/.gendoc-tmp/api-explorer-spec.yaml
+ * ===================================================================== */
+const SPEC = {
+  project_name: "Pixel Pet Arena",
+  base_url: "https://api.pixel-pet-arena.com",
+  auth: { type: "bearer", header: "Authorization", placeholder: "Bearer <petToken>" },
+  groups: [
+    {
+      id: "claim", name: "Claim Flow", color: "#2d9ef5",
+      endpoints: [
+        {
+          id: "claim-initiate", method: "POST", path: "/api/v1/claim",
+          summary: "Initiate email claim",
+          description: "Sends a 6-digit OTP to the player's email and binds it to a specific unclaimed pet. Rate-limited to 5 attempts per hour per email.",
+          params: [],
+          request_body: {
+            email: "player@example.com",
+            petId: "550e8400-e29b-41d4-a716-446655440000",
+            ageConfirmed: true
+          },
+          responses: [
+            { code: 200, description: "Claim initiated, OTP sent", example: { success: true, data: { claimId: "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f", expiresAt: "2026-05-03T12:15:00Z" }, error: null } },
+            { code: 400, description: "驗證失敗 / 已被認領 / 未確認年齡", example: { success: false, data: null, error: { code: "ALREADY_CLAIMED", message: "Pet is already owned by another player.", details: {} } } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given petId.", details: {} } } },
+            { code: 429, description: "超過頻率限制", example: { success: false, data: null, error: { code: "RATE_LIMIT_EXCEEDED", message: "Hourly claim attempt limit exceeded.", details: {} } } }
+          ],
+          mock_entity: "claim_identities", auth_required: false
+        },
+        {
+          id: "claim-verify", method: "POST", path: "/api/v1/claim/verify",
+          summary: "Verify OTP & issue pet token",
+          description: "Verifies the 6-digit OTP and on success issues the pet access token. Token transmitted ONLY once. 10 attempts per session.",
+          params: [],
+          request_body: { claimId: "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f", code: "482917" },
+          responses: [
+            { code: 200, description: "驗證成功，回傳 pet token", example: { success: true, data: { petToken: "dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t", petId: "550e8400-e29b-41d4-a716-446655440000", petUrl: "https://pixel-pet-arena.com/pet/550e8400-e29b-41d4-a716-446655440000?token=dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t" }, error: null } },
+            { code: 400, description: "驗證碼錯誤 / 過期", example: { success: false, data: null, error: { code: "INVALID_CODE", message: "Submitted OTP code does not match.", details: {} } } },
+            { code: 429, description: "嘗試次數已達上限", example: { success: false, data: null, error: { code: "MAX_ATTEMPTS_REACHED", message: "10-attempt session limit reached.", details: {} } } }
+          ],
+          mock_entity: "claim_codes", auth_required: false
+        },
+        {
+          id: "claim-recover", method: "POST", path: "/api/v1/claim/recover",
+          summary: "Recover lost pet token",
+          description: "Sends a recovery OTP to the email for a previously claimed pet. Always returns HTTP 200 to prevent account enumeration.",
+          params: [],
+          request_body: { email: "player@example.com", petId: "550e8400-e29b-41d4-a716-446655440000" },
+          responses: [
+            { code: 200, description: "永遠 HTTP 200（反枚舉）", example: { success: true, data: { claimId: "9a1b2c3d-4e5f-6789-abcd-ef0123456789", expiresAt: "2026-05-03T12:15:00Z" }, error: null } },
+            { code: 400, description: "Email 或 petId 格式錯誤", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Malformed email or petId.", details: {} } } }
+          ],
+          mock_entity: "claim_identities", auth_required: false
         }
-      },
-      {
-        id: 'claim-verify',
-        method: 'POST',
-        path: '/api/v1/claim/verify',
-        summary: 'Verify OTP code',
-        description: 'Submit the 6-digit OTP sent by email to complete the claim and receive a petToken.',
-        auth: false,
-        pathParams: [],
-        queryParams: [],
-        body: JSON.stringify({ claimId: 'claim-abc123', otpCode: '483921' }, null, 2),
-        responses: {
-          200: { success: true, data: { petToken: 'eyJhbGciOiJIUzI1NiJ9.demo-token', petId: 'pet-001', petUrl: 'https://pixelpetarena.com/pet/pet-001', expiresAt: null } },
-          400: { success: false, error: { code: 'INVALID_OTP_CODE', message: 'The OTP code is incorrect or has expired.' } },
-          429: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many attempts. Try again in 60 seconds.' } }
+      ]
+    },
+    {
+      id: "pet", name: "Pet Management", color: "#22c55e",
+      endpoints: [
+        {
+          id: "get-random-pet", method: "GET", path: "/api/v1/pets/random",
+          summary: "Generate a new unclaimed pet",
+          description: "Generates a new unclaimed random pet for guest display. No authentication required. Reserved 24 hours before cleanup.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功生成新寵物", example: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440000", seed: 7381923847561029, rarity: "RARE", petName: "Crimson Vexor", stats: { speed: 10, strength: 10, stamina: 10, level: 1 }, generationMeta: { body: "lizard", head: "horned", colorPalette: "crimson_gold", accessory: "cape", rarityTrait: "shimmering_scales", pattern: "diagonal_stripe" }, reservedUntil: "2026-05-04T12:00:00Z" }, error: null } },
+            { code: 500, description: "內部錯誤", example: { success: false, data: null, error: { code: "INTERNAL_SERVER_ERROR", message: "Unexpected error.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: false
+        },
+        {
+          id: "get-pet-by-id", method: "GET", path: "/api/v1/pets/:petId",
+          summary: "Fetch pet public data",
+          description: "Fetches public pet data. Optional auth — returns isOwner=true if token matches.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440000", seed: 7381923847561029, rarity: "RARE", petName: "Crimson Vexor", stats: { speed: 34, strength: 28, stamina: 41, level: 7 }, isOwner: true, claimedAt: "2026-04-15T09:32:00Z", isNeglected: false }, error: null } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: false
+        },
+        {
+          id: "get-pet-stats", method: "GET", path: "/api/v1/pets/:petId/stats",
+          summary: "Get full stats panel & training history",
+          description: "Returns full stats panel including training history summary and active food buffs.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440000", stats: { speed: 34, strength: 28, stamina: 41, level: 7 }, totalTrainingActions: 72, trainingActionsToday: 1, actionsRemainingToday: 2, lastTrainedAt: "2026-05-02T18:45:00Z", isNeglected: false, activeFoodBuffs: [ { stat: "speed", magnitude: 5, isPermanent: false, expiresAt: "2026-05-04T18:45:00Z" } ] }, error: null } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: false
+        },
+        {
+          id: "train-pet", method: "POST", path: "/api/v1/pets/:petId/train",
+          summary: "Train a stat (+1 to +3)",
+          description: "Performs one training action on the authenticated pet, incrementing one stat by 1–3 points. Max 3 actions/day per pet.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID (must match owner token)", enum: [] }
+          ],
+          request_body: { trainingType: "RUN" },
+          enums: { trainingType: ["RUN", "LIFT", "MEDITATE", "SPRINT", "ENDURANCE"] },
+          responses: [
+            { code: 200, description: "訓練成功", example: { success: true, data: { updatedStats: { speed: 36, strength: 28, stamina: 41, level: 7 }, statDelta: 2, actionsRemainingToday: 1 }, error: null } },
+            { code: 400, description: "訓練上限 / 數值已滿", example: { success: false, data: null, error: { code: "TRAINING_LIMIT_REACHED", message: "All 3 daily training actions already used.", details: {} } } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid token.", details: {} } } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "training_logs", auth_required: true
+        },
+        {
+          id: "feed-pet", method: "POST", path: "/api/v1/pets/:petId/feed",
+          summary: "Apply food buff",
+          description: "Applies a food buff to the authenticated player's pet, granting a temporary or permanent stat increase.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: { buffType: "protein_shake", stat: "strength", magnitude: 5, isPermanent: false },
+          enums: { buffType: ["protein_shake", "energy_drink", "vitamins", "feast"], stat: ["speed", "strength", "stamina"] },
+          responses: [
+            { code: 200, description: "餵食成功", example: { success: true, data: { updatedStats: { speed: 34, strength: 33, stamina: 41 }, buffApplied: { stat: "strength", magnitude: 5, isPermanent: false, expiresAt: "2026-05-04T18:45:00Z" } }, error: null } },
+            { code: 400, description: "magnitude 或 buffType 範圍錯誤 / 數值已滿", example: { success: false, data: null, error: { code: "STAT_AT_MAXIMUM", message: "Target stat is already at 100.", details: {} } } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid token.", details: {} } } }
+          ],
+          mock_entity: "food_buffs", auth_required: true
         }
-      },
-      {
-        id: 'claim-status',
-        method: 'GET',
-        path: '/api/v1/claim/:claimId/status',
-        summary: 'Get claim session status',
-        description: 'Poll the status of an active claim session. Useful for UI polling during OTP entry.',
-        auth: false,
-        pathParams: [{ name: 'claimId', type: 'string', placeholder: 'claim-abc123', required: true }],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { success: true, data: { claimId: 'claim-abc123', status: 'pending', attemptsLeft: 4 } }
+      ]
+    },
+    {
+      id: "arena", name: "Arena & Battles", color: "#f59e0b",
+      endpoints: [
+        {
+          id: "arena-enter", method: "POST", path: "/api/v1/arena/enter",
+          summary: "Enter matchmaking queue",
+          description: "Enters pet into matchmaking queue. HTTP long-poll waits up to 30 seconds. If acceptAI=true, AI opponent is used after timeout. Default rate: 10 battles/hour per pet.",
+          params: [],
+          request_body: { petId: "550e8400-e29b-41d4-a716-446655440000", mode: "RACE", acceptAI: true },
+          enums: { mode: ["RACE", "DUEL", "ENDURANCE"] },
+          responses: [
+            { code: 200, description: "對戰結束", example: { success: true, data: { matchId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", result: "WIN", opponentPetId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", isAiOpponent: false, statDelta: 3, newLeaderboardScore: 142.7 }, error: null } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid token.", details: {} } } },
+            { code: 403, description: "Pet 已封禁", example: { success: false, data: null, error: { code: "PET_BANNED", message: "Pet is banned.", details: {} } } },
+            { code: 408, description: "Matchmaking 超時", example: { success: false, data: null, error: { code: "MATCHMAKING_TIMEOUT", message: "No opponent found within 30 seconds. Try again or enable AI opponent.", details: {} } } },
+            { code: 429, description: "超過每小時對戰限制", example: { success: false, data: null, error: { code: "RATE_LIMIT_EXCEEDED", message: "Hourly battle limit exceeded.", details: {} } } }
+          ],
+          mock_entity: "arena_matches", auth_required: true
+        },
+        {
+          id: "arena-match-detail", method: "GET", path: "/api/v1/arena/match/:matchId",
+          summary: "Fetch match record",
+          description: "Fetches the full record of a completed arena match including battle log for deterministic replay.",
+          params: [
+            { name: "matchId", in: "path", type: "string (UUID)", required: true, description: "Arena match ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { matchId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", mode: "RACE", petA: { petId: "550e8400-e29b-41d4-a716-446655440000", petName: "Crimson Vexor", rarity: "RARE", level: 7 }, petB: { petId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", petName: "Azure Stomper", rarity: "COMMON", level: 4 }, winnerId: "550e8400-e29b-41d4-a716-446655440000", battleLog: [ { event: "start", tick: 0 }, { event: "speed_check", petA: 36, petB: 28, tick: 1 }, { event: "finish", winnerId: "550e8400-e29b-41d4-a716-446655440000", tick: 12 } ], completedAt: "2026-05-03T11:42:00Z" }, error: null } },
+            { code: 404, description: "Match 不存在", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No match with the given matchId.", details: {} } } }
+          ],
+          mock_entity: "arena_matches", auth_required: false
+        },
+        {
+          id: "arena-history", method: "GET", path: "/api/v1/arena/history/:petId",
+          summary: "Last 20 battles for a pet",
+          description: "Returns the last 20 arena battles for a pet. Public endpoint. Authoritative source for Open Graph metadata.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440000", battles: [ { matchId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", mode: "RACE", opponentPetId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", isAiOpponent: false, result: "WIN", completedAt: "2026-05-03T11:42:00Z" } ], summary: { wins: 12, losses: 5, winRate: 0.706 } }, error: null } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "arena_matches", auth_required: false
         }
-      }
-    ]
-  },
-  {
-    id: 'pets',
-    name: 'Pets',
-    color: '#6c5ce7',
-    endpoints: [
-      {
-        id: 'pet-get',
-        method: 'GET',
-        path: '/api/v1/pets/:petId',
-        summary: 'Get pet by ID',
-        description: 'Retrieve full pet metadata including stats, level, training history, and generation traits.',
-        auth: false,
-        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { success: true, data: { id: 'pet-001', seed: 'A9F2B3', rarity: 'RARE', pet_name: 'Teal Spark', stat_speed: 42, stat_strength: 31, stat_stamina: 55, level: 7, total_training_actions: 72, last_trained_at: '2026-05-04T18:22:00Z', claimed_at: '2026-04-01T10:00:00Z', is_banned: false, generation_meta: { body: 'round', head: 'pointed', color_palette: 'blue-yellow', accessory: 'hat', rarity_trait: 'glow_rare' } } },
-          403: { success: false, error: { code: 'PET_BANNED', message: 'This pet has been banned from the arena.' } },
-          404: { success: false, error: { code: 'PET_NOT_FOUND', message: 'No pet found with that ID.' } }
+      ]
+    },
+    {
+      id: "leaderboard", name: "Leaderboard", color: "#14b8a6",
+      endpoints: [
+        {
+          id: "leaderboard-global", method: "GET", path: "/api/v1/leaderboard",
+          summary: "Global leaderboard top 100",
+          description: "Returns the global leaderboard top 100 from Redis sorted set. Update lag ≤ 30 seconds.",
+          params: [
+            { name: "rarity", in: "query", type: "string", required: false, default: "", description: "Filter by rarity", enum: ["COMMON", "RARE", "EPIC", "LEGENDARY"] },
+            { name: "page", in: "query", type: "integer", required: false, default: "1", description: "Page number (1-based)", enum: [] },
+            { name: "limit", in: "query", type: "integer", required: false, default: "100", description: "Results per page (max 100)", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { entries: [], lastUpdated: "2026-05-03T11:41:30Z" }, error: null, meta: { total: 100, page: 1, limit: 100 } } },
+            { code: 400, description: "rarity / page / limit 無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Invalid rarity value or non-integer page/limit.", details: {} } } }
+          ],
+          mock_entity: "leaderboard_snapshots", auth_required: false
+        },
+        {
+          id: "leaderboard-rank", method: "GET", path: "/api/v1/leaderboard/rank/:petId",
+          summary: "Get pet's leaderboard rank",
+          description: "Returns the leaderboard rank of a specific pet. Returns rank=null if not on leaderboard.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440000", rank: 42, score: 87.4 }, error: null } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "leaderboard_snapshots", auth_required: false
         }
-      },
-      {
-        id: 'pet-food',
-        method: 'GET',
-        path: '/api/v1/pets/:petId/food',
-        summary: 'Get food inventory',
-        description: 'Returns the current food inventory for a pet. Requires authentication as the pet owner.',
-        auth: true,
-        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { success: true, data: [{ id: 'food-001', food_type: 'speed_berry', buff_stat: 'speed', magnitude: 5, is_permanent: false, expires_at: '2026-05-06T00:00:00Z' }, { id: 'food-002', food_type: 'strength_nut', buff_stat: 'strength', magnitude: 3, is_permanent: true, expires_at: null }] },
-          401: { success: false, error: { code: 'UNAUTHORIZED', message: 'A valid pet token is required.' } }
+      ]
+    },
+    {
+      id: "gdpr", name: "GDPR Self-Service", color: "#8b5cf6",
+      endpoints: [
+        {
+          id: "gdpr-request", method: "POST", path: "/api/v1/gdpr/request",
+          summary: "Submit a GDPR request",
+          description: "Submits a GDPR request (erasure, data access, restrict processing, object leaderboard, rectification). Async — returns jobId.",
+          params: [],
+          request_body: { type: "erasure" },
+          enums: { type: ["erasure", "data_access", "restrict_processing", "object_leaderboard", "rectification"] },
+          responses: [
+            { code: 202, description: "請求已收到並排程", example: { success: true, data: { jobId: "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8", message: "Your GDPR request has been received and will be processed within the applicable SLA." }, error: null } },
+            { code: 400, description: "type 無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid type value.", details: {} } } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token.", details: {} } } }
+          ],
+          mock_entity: "gdpr_requests", auth_required: true
+        },
+        {
+          id: "gdpr-status", method: "GET", path: "/api/v1/gdpr/request/status",
+          summary: "Check GDPR request status",
+          description: "Checks the status of a specific GDPR request. Server validates that authenticating pet token's claim_identity_id matches request's identity.",
+          params: [
+            { name: "jobId", in: "query", type: "string (UUID)", required: true, default: "", description: "The jobId returned by POST /api/v1/gdpr/request", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { jobId: "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8", requestType: "erasure", status: "processing", submittedAt: "2026-05-01T09:00:00Z", completedAt: null }, error: null } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token.", details: {} } } },
+            { code: 403, description: "身份不符", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated pet's claim_identity_id does not match the request's identity.", details: {} } } },
+            { code: 404, description: "請求不存在", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No GDPR request with the given jobId.", details: {} } } }
+          ],
+          mock_entity: "gdpr_requests", auth_required: true
         }
-      },
-      {
-        id: 'pet-feed',
-        method: 'POST',
-        path: '/api/v1/pets/:petId/feed',
-        summary: 'Apply food buff',
-        description: 'Apply a food item from the pet\'s inventory. Returns updated stats after consumption.',
-        auth: true,
-        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
-        queryParams: [],
-        body: JSON.stringify({ foodId: 'food-001' }, null, 2),
-        responses: {
-          200: { success: true, data: { stat_speed: 47, food_applied: 'speed_berry' } },
-          400: { success: false, error: { code: 'FOOD_ALREADY_CONSUMED', message: 'This food item has already been used.' } },
-          404: { success: false, error: { code: 'FOOD_NOT_FOUND', message: 'Food item not found in inventory.' } }
+      ]
+    },
+    {
+      id: "marketplace", name: "Marketplace (FF_MARKETPLACE)", color: "#ec4899",
+      endpoints: [
+        {
+          id: "marketplace-listings", method: "GET", path: "/api/v1/marketplace/listings",
+          summary: "Browse active listings",
+          description: "Browse active marketplace listings. Public. Feature-flagged behind FF_MARKETPLACE.",
+          params: [
+            { name: "page", in: "query", type: "integer", required: false, default: "1", description: "Page number", enum: [] },
+            { name: "limit", in: "query", type: "integer", required: false, default: "20", description: "Results per page", enum: [] },
+            { name: "sortBy", in: "query", type: "string", required: false, default: "price", description: "Sort field", enum: ["price", "rarity", "level"] },
+            { name: "order", in: "query", type: "string", required: false, default: "asc", description: "Sort order", enum: ["asc", "desc"] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { listings: [] }, error: null, meta: { total: 12, page: 1, limit: 20 } } },
+            { code: 403, description: "Marketplace 功能尚未開啟", example: { success: false, data: null, error: { code: "FEATURE_DISABLED", message: "FF_MARKETPLACE feature flag is off.", details: {} } } }
+          ],
+          mock_entity: "marketplace_listings", auth_required: false
+        },
+        {
+          id: "marketplace-create-listing", method: "POST", path: "/api/v1/marketplace/listings",
+          summary: "Create a new listing",
+          description: "Create a new marketplace listing. Min price formula: (pet_level * 100) + (rarity_multiplier * 500). Anti-flip: 7-day cooldown post-purchase.",
+          params: [],
+          request_body: { petId: "550e8400-e29b-41d4-a716-446655440000", price: 1700 },
+          responses: [
+            { code: 201, description: "成功建立", example: { success: true, data: { listingId: "l1a2b3c4-d5e6-7890-abcd-ef1234567890", petId: "550e8400-e29b-41d4-a716-446655440000", price: 1700, listedAt: "2026-05-03T12:00:00Z" }, error: null } },
+            { code: 400, description: "價格低於最小值或 anti-flip 啟動", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Price below minimum or anti-flip protection active.", details: {} } } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token.", details: {} } } },
+            { code: 403, description: "Feature 已停用 / 非擁有者", example: { success: false, data: null, error: { code: "FEATURE_DISABLED", message: "FF_MARKETPLACE feature flag is off.", details: {} } } }
+          ],
+          mock_entity: "marketplace_listings", auth_required: true
+        },
+        {
+          id: "marketplace-cancel-listing", method: "DELETE", path: "/api/v1/marketplace/listings/:listingId",
+          summary: "Cancel an active listing",
+          description: "Cancel an active listing. Only the listing's owner may cancel.",
+          params: [
+            { name: "listingId", in: "path", type: "string (UUID)", required: true, description: "Listing ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功取消", example: { success: true, data: { listingId: "l1a2b3c4-d5e6-7890-abcd-ef1234567890", cancelled: true }, error: null } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token.", details: {} } } },
+            { code: 403, description: "非擁有者", example: { success: false, data: null, error: { code: "NOT_OWNER", message: "Token does not own the relevant pet.", details: {} } } },
+            { code: 404, description: "Listing 不存在", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "Listing not found.", details: {} } } }
+          ],
+          mock_entity: "marketplace_listings", auth_required: true
+        },
+        {
+          id: "marketplace-buy-listing", method: "POST", path: "/api/v1/marketplace/listings/:listingId/buy",
+          summary: "Purchase a listing (5% fee)",
+          description: "Purchase a listing. 5% platform fee deducted from seller's proceeds and credited to platform.",
+          params: [
+            { name: "listingId", in: "path", type: "string (UUID)", required: true, description: "Listing ID", enum: [] }
+          ],
+          request_body: {},
+          responses: [
+            { code: 200, description: "成功購買", example: { success: true, data: { transactionId: "t1a2b3c4-d5e6-7890-abcd-ef1234567890", listingId: "l1a2b3c4-d5e6-7890-abcd-ef1234567890", price: 1700, platformFee: 85, sellerProceeds: 1615, completedAt: "2026-05-03T12:05:00Z" }, error: null } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token.", details: {} } } },
+            { code: 404, description: "Listing 不存在", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "Listing not found.", details: {} } } }
+          ],
+          mock_entity: "marketplace_transactions", auth_required: true
+        },
+        {
+          id: "marketplace-history", method: "GET", path: "/api/v1/marketplace/history/:petId",
+          summary: "Trade history for a pet (private)",
+          description: "Returns trade history for a pet. Private — only the pet's current owner can view (commercial-in-confidence).",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440000", transactions: [ { transactionId: "t1a2b3c4-d5e6-7890-abcd-ef1234567890", price: 1700, platformFee: 85, completedAt: "2026-05-03T12:05:00Z" } ] }, error: null } },
+            { code: 401, description: "未授權", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token.", details: {} } } },
+            { code: 403, description: "非擁有者", example: { success: false, data: null, error: { code: "NOT_OWNER", message: "Token does not own the relevant pet.", details: {} } } }
+          ],
+          mock_entity: "marketplace_transactions", auth_required: true
         }
-      },
-      {
-        id: 'pet-train',
-        method: 'POST',
-        path: '/api/v1/pets/:petId/train',
-        summary: 'Train pet',
-        description: 'Submit a training action. Each action costs one training slot (max 3/day). Resets at midnight UTC.',
-        auth: true,
-        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
-        queryParams: [],
-        body: JSON.stringify({ action: 'sprint' }, null, 2),
-        responses: {
-          200: { success: true, data: { stat_speed: 45, actions_remaining: 2, next_reset: '2026-05-06T00:00:00Z' } },
-          400: { success: false, error: { code: 'TRAINING_LIMIT_REACHED', message: 'No training actions remaining today.' } },
-          403: { success: false, error: { code: 'UNAUTHORIZED', message: 'You do not own this pet.' } }
+      ]
+    },
+    {
+      id: "health", name: "Health", color: "#64748b",
+      endpoints: [
+        {
+          id: "health-check", method: "GET", path: "/health",
+          summary: "Platform health check",
+          description: "Returns platform health status. Minimal response body for load balancers / uptime monitors.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "Healthy", example: { status: "healthy", checks: { database: "ok", redis: "ok" }, timestamp: "2026-05-03T12:00:00Z" } },
+            { code: 503, description: "Degraded / down", example: { status: "degraded", checks: { database: "ok", redis: "unavailable" }, timestamp: "2026-05-03T12:00:00Z" } }
+          ],
+          mock_entity: null, auth_required: false
         }
-      }
-    ]
-  },
-  {
-    id: 'arena',
-    name: 'Arena',
-    color: '#e87c7c',
-    endpoints: [
-      {
-        id: 'arena-battle',
-        method: 'POST',
-        path: '/api/v1/arena/battle',
-        summary: 'Start battle',
-        description: 'Queue a pet for a battle. Optionally challenge a specific pet by ID. Matchmaking may take up to 30 seconds.',
-        auth: true,
-        pathParams: [],
-        queryParams: [],
-        body: JSON.stringify({ mode: 'RACE', challengePetId: 'pet-002' }, null, 2),
-        responses: {
-          200: { success: true, data: { battleId: 'match-001', status: 'queued' } },
-          400: { success: false, error: { code: 'ARENA_RATE_LIMIT', message: 'You can only queue one battle at a time.' } },
-          503: { success: false, error: { code: 'MATCHMAKING_UNAVAILABLE', message: 'Arena matchmaking is temporarily offline.' } }
+      ]
+    },
+    {
+      id: "admin-auth", name: "Admin: Authentication", color: "#dc2626",
+      endpoints: [
+        {
+          id: "admin-login", method: "POST", path: "/admin/api/auth/login",
+          summary: "Admin login (username + password + TOTP)",
+          description: "Authenticates an admin with username, password, and TOTP. Sets session cookie. 4h inactivity / 8h absolute timeout.",
+          params: [],
+          request_body: { username: "moderator_alice", password: "correct-horse-battery-staple", totpCode: "482917" },
+          responses: [
+            { code: 200, description: "登入成功", example: { success: true, data: { adminId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", role: "moderator", sessionExpiresAt: "2026-05-03T16:00:00Z" }, error: null } },
+            { code: 401, description: "帳密錯誤", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Invalid username or password.", details: {} } } },
+            { code: 403, description: "帳號鎖定 / 需先註冊 TOTP", example: { success: false, data: null, error: { code: "TOTP_SETUP_REQUIRED", message: "First login; TOTP not yet enrolled.", details: { setupToken: "<jwt>" } } } },
+            { code: 429, description: "IP 預先驗證超過頻率", example: { success: false, data: null, error: { code: "RATE_LIMIT_EXCEEDED", message: "IP pre-auth rate limit exceeded.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: false
+        },
+        {
+          id: "admin-totp-setup", method: "POST", path: "/admin/api/auth/totp/setup",
+          summary: "Complete TOTP enrollment",
+          description: "Completes TOTP enrollment for first-time admin login. Requires the short-lived setupToken from login response.",
+          params: [],
+          request_body: { setupToken: "<signed JWT from login 403 error.details.setupToken>", password: "correct-horse-battery-staple" },
+          responses: [
+            { code: 200, description: "成功，回傳 QR URI 與 backup codes", example: { success: true, data: { otpAuthUrl: "otpauth://totp/pixel-pet-arena:moderator_alice?secret=BASE32SECRET&issuer=pixel-pet-arena", backupCodes: ["A1B2C3D4E5","F6G7H8I9J0","K1L2M3N4O5","P6Q7R8S9T0","U1V2W3X4Y5","Z6A7B8C9D0","E1F2G3H4I5","J6K7L8M9N0","O1P2Q3R4S5","T6U7V8W9X0"] }, error: null } },
+            { code: 400, description: "請求格式錯誤", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid fields.", details: {} } } },
+            { code: 401, description: "setupToken 無效或過期", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "setupToken is missing, invalid, or expired.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: false
+        },
+        {
+          id: "admin-logout", method: "POST", path: "/admin/api/auth/logout",
+          summary: "Admin logout",
+          description: "Invalidates the current admin session. Writes audit log entry.",
+          params: [], request_body: {},
+          responses: [
+            { code: 200, description: "登出成功", example: { success: true, data: {}, error: null } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: true
+        },
+        {
+          id: "admin-totp-verify", method: "POST", path: "/admin/api/auth/totp/verify",
+          summary: "Verify TOTP (step-up auth)",
+          description: "Verifies a TOTP code against the current admin's secret. Used for step-up authentication before sensitive operations.",
+          params: [],
+          request_body: { totpCode: "482917" },
+          responses: [
+            { code: 200, description: "驗證成功", example: { success: true, data: { verified: true }, error: null } },
+            { code: 400, description: "totpCode 格式錯誤", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid totpCode field.", details: {} } } },
+            { code: 401, description: "Session 無效或 TOTP 不符", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing/invalid or TOTP code does not match.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: true
         }
-      },
-      {
-        id: 'arena-result',
-        method: 'GET',
-        path: '/api/v1/arena/battles/:battleId',
-        summary: 'Get battle result',
-        description: 'Retrieve the full result and stat deltas for a completed battle.',
-        auth: false,
-        pathParams: [{ name: 'battleId', type: 'string', placeholder: 'match-001', required: true }],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { success: true, data: { id: 'match-001', pet_a_id: 'pet-001', pet_b_id: 'pet-002', is_ai_opponent: false, mode: 'RACE', winner_pet_id: 'pet-001', stat_delta_a: 5, stat_delta_b: 0, duration_seconds: 9, completed_at: '2026-05-05T14:22:00Z', is_flagged: false } },
-          404: { success: false, error: { code: 'BATTLE_NOT_FOUND', message: 'No battle found with that ID.' } }
+      ]
+    },
+    {
+      id: "admin-roles", name: "Admin: Role Management", color: "#b91c1c",
+      endpoints: [
+        {
+          id: "admin-roles-list", method: "GET", path: "/admin/api/roles",
+          summary: "List admin users (Super Admin)",
+          description: "Lists all admin users and their roles. Super Admin only.",
+          params: [
+            { name: "page", in: "query", type: "integer", required: false, default: "1", description: "Page number", enum: [] },
+            { name: "limit", in: "query", type: "integer", required: false, default: "20", description: "Results per page", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { admins: [] }, error: null, meta: { total: 3, page: 1, limit: 20 } } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: true
+        },
+        {
+          id: "admin-roles-create", method: "POST", path: "/admin/api/roles",
+          summary: "Create a new admin account",
+          description: "Creates a new admin account. Super Admin only.",
+          params: [],
+          request_body: { username: "new_moderator", role: "moderator", temporaryPassword: "temp-password-123" },
+          enums: { role: ["super_admin", "moderator", "support"] },
+          responses: [
+            { code: 201, description: "成功建立", example: { success: true, data: { adminId: "c3d4e5f6-a7b8-9012-cdef-ab3456789012", username: "new_moderator", role: "moderator", auditLogId: "12344" }, error: null } },
+            { code: 400, description: "請求驗證失敗", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid fields.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } },
+            { code: 409, description: "Username 已存在", example: { success: false, data: null, error: { code: "CONFLICT", message: "Username already exists.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: true
+        },
+        {
+          id: "admin-roles-deactivate", method: "DELETE", path: "/admin/api/roles/:adminId",
+          summary: "Soft-deactivate admin account",
+          description: "Soft-deactivates an admin account (sets deactivated_at). Login is immediately blocked.",
+          params: [
+            { name: "adminId", in: "path", type: "string (UUID)", required: true, description: "Admin ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功停用", example: { success: true, data: { auditLogId: "12345" }, error: null } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } },
+            { code: 404, description: "找不到 admin", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No admin account with the given adminId.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: true
+        },
+        {
+          id: "admin-roles-totp-reset", method: "POST", path: "/admin/api/roles/:adminId/totp/reset",
+          summary: "Reset admin TOTP",
+          description: "Resets TOTP for an admin account, forcing re-enrollment on next login.",
+          params: [
+            { name: "adminId", in: "path", type: "string (UUID)", required: true, description: "Admin ID", enum: [] }
+          ],
+          request_body: {},
+          responses: [
+            { code: 200, description: "成功重置", example: { success: true, data: { auditLogId: "12346" }, error: null } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } },
+            { code: 404, description: "找不到 admin", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No admin account with the given adminId.", details: {} } } }
+          ],
+          mock_entity: "admin_users", auth_required: true
         }
-      },
-      {
-        id: 'arena-history',
-        method: 'GET',
-        path: '/api/v1/arena/history/:petId',
-        summary: 'Get battle history',
-        description: 'Returns a paginated list of all battles for a given pet.',
-        auth: false,
-        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { success: true, data: [{ match_id: 'match-001', date: '2026-05-05T14:22:00Z', mode: 'RACE', opponent_name: 'Ember Claw', opponent_rarity: 'COMMON', outcome: 'WIN', stat_delta: 5 }, { match_id: 'match-000', date: '2026-05-04T09:10:00Z', mode: 'SUMO', opponent_name: 'Bolt Runner', opponent_rarity: 'UNCOMMON', outcome: 'LOSS', stat_delta: -2 }], total: 20 }
+      ]
+    },
+    {
+      id: "admin-pets", name: "Admin: Pet Management", color: "#a855f7",
+      endpoints: [
+        {
+          id: "admin-pets-list", method: "GET", path: "/admin/api/pets",
+          summary: "List pets with search & filter",
+          description: "Lists pets. Supports up to 1M records with ≤ 2s response time. Search by exact UUID or SHA-256 email hash only.",
+          params: [
+            { name: "page", in: "query", type: "integer", required: false, default: "1", description: "Page number", enum: [] },
+            { name: "limit", in: "query", type: "integer", required: false, default: "20", description: "Results per page", enum: [] },
+            { name: "search", in: "query", type: "string", required: false, default: "", description: "Exact pet UUID or exact SHA-256 email hash", enum: [] },
+            { name: "rarity", in: "query", type: "string", required: false, default: "", description: "Filter by rarity", enum: ["COMMON", "RARE", "EPIC", "LEGENDARY"] },
+            { name: "isBanned", in: "query", type: "boolean", required: false, default: "", description: "Filter by ban status", enum: ["true", "false"] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { pets: [] }, error: null, meta: { total: 1500, page: 1, limit: 20 } } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: true
+        },
+        {
+          id: "admin-pet-detail", method: "GET", path: "/admin/api/pets/:petId",
+          summary: "Pet detail (admin view)",
+          description: "Returns full pet details including owner info, ban history, and last 20 battle records.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440000", ownerEmailMasked: "p***@example.com", rarity: "RARE", petName: "Crimson Vexor", stats: { speed: 34, strength: 28, stamina: 41, level: 7 }, claimedAt: "2026-04-15T09:32:00Z", isBanned: false, bannedReason: null, bannedAt: null, generationMeta: { body: "lizard", head: "horned", colorPalette: "crimson_gold", accessory: "cape", rarityTrait: "shimmering_scales", pattern: "diagonal_stripe" }, recentBattles: [] }, error: null } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: true
+        },
+        {
+          id: "admin-pet-update", method: "PUT", path: "/admin/api/pets/:petId",
+          summary: "Update pet admin fields (Super Admin)",
+          description: "Updates administrative fields on a pet (e.g. correcting petName after content moderation).",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: { petName: "Crimson Vexor" },
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { auditLogId: "12347" }, error: null } },
+            { code: 400, description: "Body schema 錯誤", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Request body fails schema validation.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: true
+        },
+        {
+          id: "admin-pet-ban", method: "POST", path: "/admin/api/pets/:petId/ban",
+          summary: "Ban a pet",
+          description: "Bans a pet. Removed from public leaderboard within 5 minutes. Banned pets get PET_BANNED on arena entry.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: { reason: "Automated bot behavior detected: 52 battles in 60-minute window" },
+          responses: [
+            { code: 200, description: "成功封禁", example: { success: true, data: { auditLogId: "12348" }, error: null } },
+            { code: 400, description: "reason 缺少或無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid reason field.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is below moderator.", details: {} } } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: true
+        },
+        {
+          id: "admin-pet-unban", method: "POST", path: "/admin/api/pets/:petId/unban",
+          summary: "Unban a pet",
+          description: "Lifts a ban from a pet. Pet is restored to leaderboard if eligible.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: { reason: "Manual review confirmed legitimate play" },
+          responses: [
+            { code: 200, description: "成功解禁", example: { success: true, data: { auditLogId: "12349" }, error: null } },
+            { code: 400, description: "reason 無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid reason field.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is below moderator.", details: {} } } },
+            { code: 404, description: "Pet 不存在", example: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet with the given petId exists.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: true
         }
-      }
-    ]
-  },
-  {
-    id: 'leaderboard',
-    name: 'Leaderboard',
-    color: '#00b894',
-    endpoints: [
-      {
-        id: 'lb-top',
-        method: 'GET',
-        path: '/api/v1/leaderboard',
-        summary: 'Get top 100',
-        description: 'Returns the current top 100 pets ranked by arena score. Results are cached for 5 minutes.',
-        auth: false,
-        pathParams: [],
-        queryParams: [
-          { name: 'rarity', type: 'string', placeholder: 'RARE (filter)', required: false },
-          { name: 'limit', type: 'number', placeholder: '100 (default)', required: false },
-          { name: 'offset', type: 'number', placeholder: '0', required: false }
-        ],
-        body: null,
-        responses: {
-          200: { success: true, data: [{ rank: 1, pet_id: 'pet-001', pet_name: 'Teal Spark', rarity: 'RARE', level: 7, arena_score: 2470, win_rate: 0.74 }, { rank: 2, pet_id: 'pet-099', pet_name: 'Nova Fang', rarity: 'LEGENDARY', level: 12, arena_score: 2398, win_rate: 0.71 }], total: 847, cached_at: '2026-05-05T14:55:00Z' }
+      ]
+    },
+    {
+      id: "admin-arena", name: "Admin: Arena & Battle Mgmt", color: "#7c3aed",
+      endpoints: [
+        {
+          id: "admin-battles-list", method: "GET", path: "/admin/api/battles",
+          summary: "List arena battles",
+          description: "Lists arena battles with optional filters.",
+          params: [
+            { name: "page", in: "query", type: "integer", required: false, default: "1", description: "Page number", enum: [] },
+            { name: "limit", in: "query", type: "integer", required: false, default: "20", description: "Results per page", enum: [] },
+            { name: "from", in: "query", type: "string (ISO 8601)", required: false, default: "", description: "Start of date range", enum: [] },
+            { name: "to", in: "query", type: "string (ISO 8601)", required: false, default: "", description: "End of date range", enum: [] },
+            { name: "petId", in: "query", type: "string (UUID)", required: false, default: "", description: "Filter battles involving a specific pet", enum: [] },
+            { name: "flagged", in: "query", type: "boolean", required: false, default: "", description: "Filter to flagged battles only", enum: ["true", "false"] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { battles: [] }, error: null, meta: { total: 8420, page: 1, limit: 20 } } },
+            { code: 400, description: "filter 參數無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Malformed from/to or invalid filter.", details: {} } } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } }
+          ],
+          mock_entity: "arena_matches", auth_required: true
+        },
+        {
+          id: "admin-suspicious-pets", method: "GET", path: "/admin/api/suspicious",
+          summary: "Pets flagged by bot detection",
+          description: "Lists pets with > 50 battles in 60-minute rolling window (bot detection threshold).",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { suspiciousPets: [ { petId: "550e8400-e29b-41d4-a716-446655440000", battlesLastHour: 52, winRate: 0.98, flagCount: 3, lastFlaggedAt: "2026-05-03T11:30:00Z" } ] }, error: null } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is below moderator.", details: {} } } }
+          ],
+          mock_entity: "pets", auth_required: true
+        },
+        {
+          id: "admin-battle-flag", method: "POST", path: "/admin/api/battles/:matchId/flag",
+          summary: "Flag a battle as suspicious",
+          description: "Flags a battle record as suspicious.",
+          params: [
+            { name: "matchId", in: "path", type: "string (UUID)", required: true, description: "Match ID", enum: [] }
+          ],
+          request_body: { reason: "Abnormally fast victory; possible stat manipulation" },
+          responses: [
+            { code: 200, description: "成功標記", example: { success: true, data: { auditLogId: "12350" }, error: null } },
+            { code: 400, description: "reason 缺失或無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid reason field.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is below moderator.", details: {} } } },
+            { code: 404, description: "Match 不存在", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No match with the given matchId.", details: {} } } }
+          ],
+          mock_entity: "arena_matches", auth_required: true
+        },
+        {
+          id: "admin-battle-unflag", method: "DELETE", path: "/admin/api/battles/:matchId/flag",
+          summary: "Remove flag from a battle",
+          description: "Removes a flag from a battle record. Body required (reason).",
+          params: [
+            { name: "matchId", in: "path", type: "string (UUID)", required: true, description: "Match ID", enum: [] }
+          ],
+          request_body: { reason: "Manual review confirmed legitimate outcome" },
+          responses: [
+            { code: 200, description: "成功移除", example: { success: true, data: { auditLogId: "12351" }, error: null } },
+            { code: 400, description: "reason 缺失或無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid reason field.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is below moderator.", details: {} } } },
+            { code: 404, description: "Match 不存在", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No match with the given matchId.", details: {} } } }
+          ],
+          mock_entity: "arena_matches", auth_required: true
         }
-      },
-      {
-        id: 'lb-pet',
-        method: 'GET',
-        path: '/api/v1/leaderboard/pet/:petId',
-        summary: 'Get pet rank',
-        description: 'Look up the current rank and percentile for a specific pet.',
-        auth: false,
-        pathParams: [{ name: 'petId', type: 'string', placeholder: 'pet-001', required: true }],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { success: true, data: { rank: 4, percentile: 0.9952, pet_name: 'Teal Spark', arena_score: 2470 } },
-          404: { success: false, error: { code: 'PET_NOT_RANKED', message: 'This pet does not appear on the leaderboard yet.' } }
+      ]
+    },
+    {
+      id: "admin-leaderboard", name: "Admin: Leaderboard", color: "#9333ea",
+      endpoints: [
+        {
+          id: "admin-leaderboard-top500", method: "GET", path: "/admin/api/leaderboard",
+          summary: "Top 500 (admin view, hard cap)",
+          description: "Top 500 pets with suspicious-flag annotations. Hard-capped — no pagination.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { entries: [], lastUpdated: "2026-05-03T11:41:30Z" }, error: null } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } }
+          ],
+          mock_entity: "leaderboard_snapshots", auth_required: true
+        },
+        {
+          id: "admin-leaderboard-remove", method: "DELETE", path: "/admin/api/leaderboard/:petId",
+          summary: "Remove pet from leaderboard",
+          description: "Removes a specific pet from the Redis sorted set. Ban itself must be applied separately.",
+          params: [
+            { name: "petId", in: "path", type: "string (UUID)", required: true, description: "Pet ID", enum: [] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功移除", example: { success: true, data: { auditLogId: "12352" }, error: null } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is below moderator.", details: {} } } },
+            { code: 404, description: "Pet 不在排行榜上", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No pet with the given petId on the leaderboard.", details: {} } } }
+          ],
+          mock_entity: "leaderboard_snapshots", auth_required: true
         }
-      }
-    ]
-  },
-  {
-    id: 'marketplace',
-    name: 'Marketplace',
-    color: '#fdcb6e',
-    endpoints: [
-      {
-        id: 'market-listings',
-        method: 'GET',
-        path: '/api/v1/marketplace/listings',
-        summary: 'Get listings',
-        description: 'Browse active marketplace listings. Feature requires DAU > 1000 to be enabled.',
-        auth: false,
-        pathParams: [],
-        queryParams: [
-          { name: 'rarity', type: 'string', placeholder: 'RARE', required: false },
-          { name: 'sort', type: 'string', placeholder: 'price|recent', required: false },
-          { name: 'limit', type: 'number', placeholder: '20', required: false },
-          { name: 'offset', type: 'number', placeholder: '0', required: false }
-        ],
-        body: null,
-        responses: {
-          200: { success: true, data: [{ id: 'listing-001', pet_id: 'pet-042', pet_name: 'Storm Wisp', rarity: 'RARE', level: 7, price_credits: 1700, status: 'active', listed_at: '2026-05-04T12:00:00Z' }], total: 23 },
-          503: { success: false, error: { code: 'FEATURE_DISABLED', message: 'Marketplace requires DAU > 1000.' } }
+      ]
+    },
+    {
+      id: "admin-config", name: "Admin: Configuration", color: "#9333ea",
+      endpoints: [
+        {
+          id: "admin-config-runtime-get", method: "GET", path: "/admin/api/config/runtime",
+          summary: "Get runtime config",
+          description: "Returns current runtime configuration values. Effects within 5 minutes of change.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { arenaRateLimitBattlesPerHour: 10, arenaMatchmakingTimeoutSeconds: 30, rarityWeights: { common: 60, rare: 25, epic: 12, legendary: 3 } }, error: null } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
+        },
+        {
+          id: "admin-config-runtime-update", method: "PUT", path: "/admin/api/config/runtime",
+          summary: "Update runtime config",
+          description: "Updates runtime config. Validated against CONSTANTS-defined ranges.",
+          params: [],
+          request_body: { arenaRateLimitBattlesPerHour: 15, arenaMatchmakingTimeoutSeconds: 30, rarityWeights: { common: 55, rare: 28, epic: 13, legendary: 4 } },
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: {}, error: null } },
+            { code: 400, description: "超出範圍 / 權重總和不為 100", example: { success: false, data: null, error: { code: "OUT_OF_RANGE", message: "Parameter exceeds CONSTANTS-defined tunable range.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
+        },
+        {
+          id: "admin-config-economy-get", method: "GET", path: "/admin/api/config/economy",
+          summary: "Get economy config",
+          description: "Returns current economy configuration values.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { foodBuffMultiplierMin: 0.5, foodBuffMultiplierMax: 5.0, arenaEntryCostFoodCreditsDefault: 0, arenaEntryCostFoodCreditsMax: 10, arenaEntryCooldownMinMinutes: 0, arenaEntryCooldownMaxMinutes: 60 }, error: null } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
+        },
+        {
+          id: "admin-config-economy-update", method: "PUT", path: "/admin/api/config/economy",
+          summary: "Update economy config",
+          description: "Updates economy configuration parameters.",
+          params: [],
+          request_body: { foodBuffMultiplierMin: 0.5, foodBuffMultiplierMax: 3.0, arenaEntryCostFoodCreditsDefault: 2, arenaEntryCooldownMaxMinutes: 30 },
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: {}, error: null } },
+            { code: 400, description: "超出範圍 / schema 失敗", example: { success: false, data: null, error: { code: "OUT_OF_RANGE", message: "Parameter exceeds CONSTANTS-defined tunable range.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
+        },
+        {
+          id: "admin-config-flags-get", method: "GET", path: "/admin/api/config/flags",
+          summary: "Get feature flags",
+          description: "Returns current feature flag states.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { flags: [ { flag: "FF_MARKETPLACE", enabled: false, description: "Phase 3 pet trading marketplace" }, { flag: "FF_BATTLE_RECORDS", enabled: true, description: "Public shareable battle records page" } ] }, error: null } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
+        },
+        {
+          id: "admin-config-flag-update", method: "PUT", path: "/admin/api/config/flags/:flag",
+          summary: "Toggle a feature flag",
+          description: "Enables or disables a feature flag.",
+          params: [
+            { name: "flag", in: "path", type: "string", required: true, description: "Feature flag name", enum: ["FF_MARKETPLACE", "FF_BATTLE_RECORDS"] }
+          ],
+          request_body: { enabled: true },
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { flag: "FF_MARKETPLACE", enabled: true, auditLogId: "12353" }, error: null } },
+            { code: 400, description: "enabled 缺失或無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid enabled field.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } },
+            { code: 404, description: "找不到 flag", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No feature flag with the given flag name.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
         }
-      },
-      {
-        id: 'market-create',
-        method: 'POST',
-        path: '/api/v1/marketplace/listings',
-        summary: 'Create listing',
-        description: 'List your pet for trade or sale on the marketplace. Feature flag must be enabled.',
-        auth: true,
-        pathParams: [],
-        queryParams: [],
-        body: JSON.stringify({ petId: 'pet-001', price_credits: 1700, looking_for: 'LEGENDARY' }, null, 2),
-        responses: {
-          201: { success: true, data: { id: 'listing-099', status: 'active' } },
-          503: { success: false, error: { code: 'FEATURE_DISABLED', message: 'Marketplace requires DAU > 1000.' } }
+      ]
+    },
+    {
+      id: "admin-gdpr", name: "Admin: GDPR Queue", color: "#be185d",
+      endpoints: [
+        {
+          id: "admin-gdpr-list", method: "GET", path: "/admin/api/gdpr",
+          summary: "List GDPR requests",
+          description: "Lists all GDPR requests with optional status and type filtering. Super Admin only.",
+          params: [
+            { name: "page", in: "query", type: "integer", required: false, default: "1", description: "Page number", enum: [] },
+            { name: "limit", in: "query", type: "integer", required: false, default: "20", description: "Results per page", enum: [] },
+            { name: "status", in: "query", type: "string", required: false, default: "", description: "Filter by status", enum: ["pending", "processing", "completed", "failed"] },
+            { name: "type", in: "query", type: "string", required: false, default: "", description: "Filter by request type", enum: ["erasure", "data_access", "restrict_processing", "object_leaderboard", "rectification"] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { requests: [] }, error: null, meta: { total: 8, page: 1, limit: 20 } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: "gdpr_requests", auth_required: true
+        },
+        {
+          id: "admin-gdpr-delete", method: "POST", path: "/admin/api/gdpr/delete",
+          summary: "Initiate admin erasure (support ticket)",
+          description: "Initiates an admin-triggered erasure request. Email hash converted to SHA-256 within 24h, compliant within 7 days.",
+          params: [],
+          request_body: { emailHash: "sha256hexhashofemailaddress", reason: "User support request #SUP-2026-0042" },
+          responses: [
+            { code: 202, description: "已排程", example: { success: true, data: { requestId: "d4e5f6a7-b8c9-0123-defa-bc4567890123", estimatedCompletion: "2026-05-10T09:00:00Z" }, error: null } },
+            { code: 400, description: "emailHash / reason 無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid emailHash or reason field.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: "gdpr_requests", auth_required: true
+        },
+        {
+          id: "admin-gdpr-update", method: "PATCH", path: "/admin/api/gdpr/:requestId",
+          summary: "Update non-erasure GDPR request status",
+          description: "Updates status of non-erasure GDPR requests (data_access, restrict_processing, object_leaderboard, rectification).",
+          params: [
+            { name: "requestId", in: "path", type: "string (UUID)", required: true, description: "GDPR request ID", enum: [] }
+          ],
+          request_body: { status: "completed", adminNotes: "Data package emailed to subject within 30-day SLA." },
+          enums: { status: ["pending", "processing", "completed", "failed"] },
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { requestId: "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8", status: "completed", updatedAt: "2026-05-03T12:00:00Z" }, error: null } },
+            { code: 400, description: "Schema 錯誤 / requestType 為 erasure", example: { success: false, data: null, error: { code: "WRONG_REQUEST_TYPE", message: "Target requestType is erasure — must use POST /admin/api/gdpr/delete.", details: {} } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } },
+            { code: 404, description: "找不到請求", example: { success: false, data: null, error: { code: "NOT_FOUND", message: "No GDPR request with the given requestId.", details: {} } } }
+          ],
+          mock_entity: "gdpr_requests", auth_required: true
         }
-      }
-    ]
-  },
-  {
-    id: 'health',
-    name: 'Health',
-    color: '#b2bec3',
-    endpoints: [
-      {
-        id: 'health-check',
-        method: 'GET',
-        path: '/health',
-        summary: 'Health check',
-        description: 'Verify that the API and its dependencies (database, Redis) are healthy.',
-        auth: false,
-        pathParams: [],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { status: 'ok', version: '1.0.0', uptime: 86400, db: 'connected', redis: 'connected' }
+      ]
+    },
+    {
+      id: "admin-audit", name: "Admin: Audit Log", color: "#475569",
+      endpoints: [
+        {
+          id: "admin-audit-list", method: "GET", path: "/admin/api/audit",
+          summary: "Search audit log",
+          description: "Returns audit log entries. Search any 12-month window in ≤ 3s. Retention: 2 years.",
+          params: [
+            { name: "page", in: "query", type: "integer", required: false, default: "1", description: "Page number", enum: [] },
+            { name: "limit", in: "query", type: "integer", required: false, default: "50", description: "Results per page", enum: [] },
+            { name: "from", in: "query", type: "string (ISO 8601)", required: false, default: "", description: "Start of date range", enum: [] },
+            { name: "to", in: "query", type: "string (ISO 8601)", required: false, default: "", description: "End of date range", enum: [] },
+            { name: "actorId", in: "query", type: "string (UUID)", required: false, default: "", description: "Filter by admin account ID", enum: [] },
+            { name: "action", in: "query", type: "string", required: false, default: "", description: "Filter by action type", enum: ["pet.ban", "pet.unban", "pet.update", "config.runtime", "config.economy", "config.flag", "battle.flag", "battle.unflag", "leaderboard.remove", "auth.login", "auth.logout", "role.create", "role.deactivate", "role.totp_reset", "gdpr.delete", "gdpr.update"] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { entries: [] }, error: null, meta: { total: 2841, page: 1, limit: 50 } } },
+            { code: 403, description: "權限不足", example: { success: false, data: null, error: { code: "FORBIDDEN", message: "Authenticated admin role is not super_admin.", details: {} } } }
+          ],
+          mock_entity: "audit_logs", auth_required: true
         }
-      },
-      {
-        id: 'auth-me',
-        method: 'GET',
-        path: '/api/v1/auth/me',
-        summary: 'Verify token / get user',
-        description: 'Validate the current Bearer token and return the associated pet identity.',
-        auth: true,
-        pathParams: [],
-        queryParams: [],
-        body: null,
-        responses: {
-          200: { success: true, data: { pet_id: 'pet-001', email: 'p***@example.com', role: 'player' } },
-          401: { success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid or expired token.' } }
+      ]
+    },
+    {
+      id: "admin-monitor", name: "Admin: Dashboard & Monitoring", color: "#0ea5e9",
+      endpoints: [
+        {
+          id: "admin-dashboard", method: "GET", path: "/admin/api/dashboard",
+          summary: "Real-time platform health summary",
+          description: "Returns real-time summary of platform health. Page load target ≤ 3 seconds.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { claimedPetsToday: 42, activeBattlesToday: 187, pendingGdprRequests: 3, dailyActiveUsers: 1250, errorRateLast5Min: 0.004, emailDeliveryRate: 0.991, systemStatus: "healthy" }, error: null } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
+        },
+        {
+          id: "admin-analytics", method: "GET", path: "/admin/api/analytics",
+          summary: "Product analytics time-series",
+          description: "Returns product analytics time-series data.",
+          params: [
+            { name: "from", in: "query", type: "string (ISO 8601)", required: true, default: "", description: "Start date (required)", enum: [] },
+            { name: "to", in: "query", type: "string (ISO 8601)", required: true, default: "", description: "End date (required)", enum: [] },
+            { name: "metric", in: "query", type: "string", required: false, default: "dau", description: "Metric type", enum: ["dau", "claims", "arena_battles", "leaderboard_uvs"] }
+          ],
+          request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { metric: "dau", dataPoints: [ { date: "2026-05-01", value: 1180 }, { date: "2026-05-02", value: 1250 } ], summary: { total: 2430, average: 1215, peak: 1250 } }, error: null } },
+            { code: 400, description: "from/to 缺失或 metric 無效", example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Missing or invalid from/to or unrecognised metric value.", details: {} } } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
+        },
+        {
+          id: "admin-email-monitor", method: "GET", path: "/admin/api/email/monitor",
+          summary: "Email delivery health",
+          description: "Returns email delivery health metrics from SendGrid webhook logs. Failover after 3 consecutive failures.",
+          params: [], request_body: null,
+          responses: [
+            { code: 200, description: "成功", example: { success: true, data: { emailsSentLast24h: 312, deliverySuccessRate: 0.991, bounceRate: 0.006, spamComplaintRate: 0.0008, failoverActive: false }, error: null } },
+            { code: 401, description: "Session 無效", example: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session missing or invalid.", details: {} } } }
+          ],
+          mock_entity: null, auth_required: true
         }
-      }
-    ]
-  }
-];
+      ]
+    }
+  ]
+};
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
+/* =====================================================================
+ * MOCK_DB — realistic seed data per entity (≥3 entries each)
+ * ===================================================================== */
+const MOCK_DB = {
+  pets: [
+    { id: "550e8400-e29b-41d4-a716-446655440000", seed: 7381923847561029, rarity: "RARE", petName: "Crimson Vexor", stats: { speed: 34, strength: 28, stamina: 41, level: 7 }, generationMeta: { body: "lizard", head: "horned", colorPalette: "crimson_gold", accessory: "cape", rarityTrait: "shimmering_scales", pattern: "diagonal_stripe" }, isOwner: true, claimedAt: "2026-04-15T09:32:00Z", isNeglected: false, isBanned: false, ownerEmailMasked: "p***@example.com", battlesPlayed: 17, winRate: 0.706, createdAt: "2026-04-15T09:32:00Z" },
+    { id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", seed: 1029384756102938, rarity: "COMMON", petName: "Azure Stomper", stats: { speed: 18, strength: 22, stamina: 19, level: 4 }, generationMeta: { body: "rodent", head: "round", colorPalette: "azure_silver", accessory: "scarf", rarityTrait: null, pattern: "spotted" }, isOwner: false, claimedAt: "2026-04-20T14:11:00Z", isNeglected: false, isBanned: false, ownerEmailMasked: "a***@example.com", battlesPlayed: 9, winRate: 0.444, createdAt: "2026-04-20T14:11:00Z" },
+    { id: "f47ac10b-58cc-4372-a567-0e02b2c3d479", seed: 9182736455647382, rarity: "EPIC", petName: "Verdant Phantom", stats: { speed: 51, strength: 47, stamina: 55, level: 11 }, generationMeta: { body: "feline", head: "ears", colorPalette: "emerald_violet", accessory: "wings", rarityTrait: "iridescent_glow", pattern: "marbled" }, isOwner: false, claimedAt: "2026-03-18T08:45:00Z", isNeglected: false, isBanned: false, ownerEmailMasked: "v***@example.com", battlesPlayed: 42, winRate: 0.785, createdAt: "2026-03-18T08:45:00Z" },
+    { id: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", seed: 5467382910293847, rarity: "LEGENDARY", petName: "Solar Tempest", stats: { speed: 78, strength: 82, stamina: 88, level: 18 }, generationMeta: { body: "dragon", head: "crowned", colorPalette: "solar_obsidian", accessory: "halo", rarityTrait: "celestial_aura", pattern: "starburst" }, isOwner: false, claimedAt: "2026-02-05T12:00:00Z", isNeglected: false, isBanned: false, ownerEmailMasked: "s***@example.com", battlesPlayed: 89, winRate: 0.876, createdAt: "2026-02-05T12:00:00Z" },
+    { id: "2bb83c5d-e8f7-4a6b-cd09-4f73b2c0e5a3", seed: 3847562910384756, rarity: "COMMON", petName: "Rusty Bouncer", stats: { speed: 15, strength: 12, stamina: 14, level: 2 }, generationMeta: { body: "amphibian", head: "smooth", colorPalette: "rust_copper", accessory: null, rarityTrait: null, pattern: "solid" }, isOwner: false, claimedAt: "2026-04-28T19:20:00Z", isNeglected: true, isBanned: false, ownerEmailMasked: "r***@example.com", battlesPlayed: 3, winRate: 0.333, createdAt: "2026-04-28T19:20:00Z" }
+  ],
+  claim_identities: [
+    { id: "c1a2b3c4-d5e6-4789-abcd-ef0123456789", emailHash: "sha256:8e6f1c2d3a...", petId: "550e8400-e29b-41d4-a716-446655440000", verifiedAt: "2026-04-15T09:32:00Z" },
+    { id: "c2b3c4d5-e6f7-489a-bcde-f01234567890", emailHash: "sha256:9d5e2b3c4a...", petId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", verifiedAt: "2026-04-20T14:11:00Z" },
+    { id: "c3c4d5e6-f7a8-49ab-cdef-012345678901", emailHash: "sha256:7c4d3e2f5b...", petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", verifiedAt: "2026-03-18T08:45:00Z" }
+  ],
+  arena_matches: [
+    { matchId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", petAId: "550e8400-e29b-41d4-a716-446655440000", petBId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", winnerId: "550e8400-e29b-41d4-a716-446655440000", outcome: "WIN", duration: 9, mode: "RACE", isFlagged: false, completedAt: "2026-05-03T11:42:00Z" },
+    { matchId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", petAId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", petBId: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", winnerId: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", outcome: "LOSS", duration: 14, mode: "DUEL", isFlagged: false, completedAt: "2026-05-03T10:18:00Z" },
+    { matchId: "c3d4e5f6-a7b8-9012-cdef-ab3456789012", petAId: "550e8400-e29b-41d4-a716-446655440000", petBId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", winnerId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", outcome: "LOSS", duration: 11, mode: "ENDURANCE", isFlagged: true, completedAt: "2026-05-02T16:55:00Z" },
+    { matchId: "d4e5f6a7-b8c9-0123-defa-bc4567890123", petAId: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", petBId: "2bb83c5d-e8f7-4a6b-cd09-4f73b2c0e5a3", winnerId: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", outcome: "WIN", duration: 7, mode: "RACE", isFlagged: false, completedAt: "2026-05-02T09:33:00Z" },
+    { matchId: "e5f6a7b8-c9d0-1234-efab-cd5678901234", petAId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", petBId: "2bb83c5d-e8f7-4a6b-cd09-4f73b2c0e5a3", winnerId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", outcome: "WIN", duration: 12, mode: "DUEL", isFlagged: false, completedAt: "2026-05-01T18:07:00Z" }
+  ],
+  leaderboard_snapshots: [
+    { rank: 1, petId: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", petName: "Solar Tempest", rarity: "LEGENDARY", level: 18, score: 412.8, winRate: 0.876, battlesLastHour: 4, isSuspicious: false, isBanned: false },
+    { rank: 2, petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", petName: "Verdant Phantom", rarity: "EPIC", level: 11, score: 287.4, winRate: 0.785, battlesLastHour: 6, isSuspicious: false, isBanned: false },
+    { rank: 3, petId: "550e8400-e29b-41d4-a716-446655440000", petName: "Crimson Vexor", rarity: "RARE", level: 7, score: 142.7, winRate: 0.706, battlesLastHour: 12, isSuspicious: false, isBanned: false },
+    { rank: 4, petId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", petName: "Azure Stomper", rarity: "COMMON", level: 4, score: 87.4, winRate: 0.444, battlesLastHour: 2, isSuspicious: false, isBanned: false },
+    { rank: 5, petId: "9c8b7a6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d", petName: "Sable Whisper", rarity: "EPIC", level: 9, score: 211.3, winRate: 0.62, battlesLastHour: 5, isSuspicious: false, isBanned: false },
+    { rank: 6, petId: "8d7c6b5a-4f3e-2d1c-0b9a-8e7f6d5c4b3a", petName: "Topaz Drifter", rarity: "RARE", level: 6, score: 119.6, winRate: 0.591, battlesLastHour: 3, isSuspicious: false, isBanned: false },
+    { rank: 7, petId: "7e6d5c4b-3f2e-1d0c-9b8a-7f6e5d4c3b2a", petName: "Slate Vanguard", rarity: "COMMON", level: 3, score: 64.2, winRate: 0.417, battlesLastHour: 1, isSuspicious: false, isBanned: false },
+    { rank: 8, petId: "6f5e4d3c-2b1a-0f9e-8d7c-6e5d4c3b2a19", petName: "Amber Striker", rarity: "RARE", level: 8, score: 156.8, winRate: 0.71, battlesLastHour: 7, isSuspicious: false, isBanned: false },
+    { rank: 9, petId: "5d4c3b2a-1f0e-9d8c-7b6a-5d4c3b2a1908", petName: "Onyx Whirlwind", rarity: "EPIC", level: 10, score: 244.1, winRate: 0.808, battlesLastHour: 9, isSuspicious: true, isBanned: false },
+    { rank: 10, petId: "4c3b2a19-0f9e-8d7c-6b5a-4c3b2a190817", petName: "Pearl Glimmer", rarity: "COMMON", level: 5, score: 98.7, winRate: 0.5, battlesLastHour: 2, isSuspicious: false, isBanned: false }
+  ],
+  training_logs: [
+    { id: "t1a2b3c4-d5e6-4789-abcd-ef0123456789", petId: "550e8400-e29b-41d4-a716-446655440000", trainingType: "RUN", statDelta: 2, performedAt: "2026-05-03T08:30:00Z" },
+    { id: "t2b3c4d5-e6f7-489a-bcde-f01234567890", petId: "550e8400-e29b-41d4-a716-446655440000", trainingType: "LIFT", statDelta: 1, performedAt: "2026-05-02T14:15:00Z" },
+    { id: "t3c4d5e6-f7a8-49ab-cdef-012345678901", petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", trainingType: "ENDURANCE", statDelta: 3, performedAt: "2026-05-02T11:00:00Z" },
+    { id: "t4d5e6f7-a8b9-4abc-def0-123456789012", petId: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", trainingType: "MEDITATE", statDelta: 2, performedAt: "2026-05-01T20:45:00Z" },
+    { id: "t5e6f7a8-b9ca-4bcd-ef01-234567890123", petId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", trainingType: "SPRINT", statDelta: 1, performedAt: "2026-05-01T18:30:00Z" }
+  ],
+  food_buffs: [
+    { id: "f1a2b3c4-d5e6-4789-abcd-ef0123456789", petId: "550e8400-e29b-41d4-a716-446655440000", buffType: "protein_shake", stat: "strength", magnitude: 5, isPermanent: false, expiresAt: "2026-05-04T18:45:00Z" },
+    { id: "f2b3c4d5-e6f7-489a-bcde-f01234567890", petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", buffType: "energy_drink", stat: "speed", magnitude: 7, isPermanent: false, expiresAt: "2026-05-03T22:00:00Z" },
+    { id: "f3c4d5e6-f7a8-49ab-cdef-012345678901", petId: "1aa92b6c-d9e8-4f7c-bb09-3e62a1b9d4f2", buffType: "vitamins", stat: "stamina", magnitude: 3, isPermanent: true, expiresAt: null },
+    { id: "f4d5e6f7-a8b9-4abc-def0-123456789012", petId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", buffType: "feast", stat: "strength", magnitude: 4, isPermanent: false, expiresAt: "2026-05-04T08:00:00Z" }
+  ],
+  marketplace_listings: [
+    { listingId: "l1a2b3c4-d5e6-7890-abcd-ef1234567890", petId: "550e8400-e29b-41d4-a716-446655440000", petName: "Crimson Vexor", rarity: "RARE", level: 7, price: 1700, listedAt: "2026-05-02T10:00:00Z" },
+    { listingId: "l2b3c4d5-e6f7-8901-bcde-fa2345678901", petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", petName: "Verdant Phantom", rarity: "EPIC", level: 11, price: 8800, listedAt: "2026-05-01T15:30:00Z" },
+    { listingId: "l3c4d5e6-f7a8-9012-cdef-ab3456789012", petId: "8d7c6b5a-4f3e-2d1c-0b9a-8e7f6d5c4b3a", petName: "Topaz Drifter", rarity: "RARE", level: 6, price: 1100, listedAt: "2026-05-03T09:15:00Z" }
+  ],
+  marketplace_transactions: [
+    { transactionId: "t1a2b3c4-d5e6-7890-abcd-ef1234567890", listingId: "l1a2b3c4-d5e6-7890-abcd-ef1234567890", petId: "550e8400-e29b-41d4-a716-446655440000", price: 1700, platformFee: 85, sellerProceeds: 1615, completedAt: "2026-05-03T12:05:00Z" },
+    { transactionId: "t2b3c4d5-e6f7-8901-bcde-fa2345678901", listingId: "l2b3c4d5-e6f7-8901-bcde-fa2345678901", petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", price: 8800, platformFee: 440, sellerProceeds: 8360, completedAt: "2026-04-29T17:22:00Z" },
+    { transactionId: "t3c4d5e6-f7a8-9012-cdef-ab3456789012", listingId: "l4d5e6f7-a8b9-0123-defa-bc4567890123", petId: "9c8b7a6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d", price: 4200, platformFee: 210, sellerProceeds: 3990, completedAt: "2026-04-25T11:08:00Z" }
+  ],
+  admin_users: [
+    { adminId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", username: "super_root", role: "super_admin", lastLoginAt: "2026-05-03T07:30:00Z", deactivatedAt: null },
+    { adminId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", username: "moderator_alice", role: "moderator", lastLoginAt: "2026-05-02T09:00:00Z", deactivatedAt: null },
+    { adminId: "c3d4e5f6-a7b8-9012-cdef-ab3456789012", username: "support_bob", role: "support", lastLoginAt: "2026-05-01T13:45:00Z", deactivatedAt: null }
+  ],
+  audit_logs: [
+    { id: "987654", adminId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", adminUsername: "moderator_alice", action: "pet.ban", targetType: "pet", targetId: "550e8400-e29b-41d4-a716-446655440000", detail: { reason: "Bot behavior detected" }, createdAt: "2026-05-03T11:45:00Z" },
+    { id: "987653", adminId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", adminUsername: "super_root", action: "config.runtime", targetType: "config", targetId: "arena", detail: { field: "arenaRateLimitBattlesPerHour", from: 10, to: 15 }, createdAt: "2026-05-03T11:00:00Z" },
+    { id: "987652", adminId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", adminUsername: "moderator_alice", action: "battle.flag", targetType: "match", targetId: "c3d4e5f6-a7b8-9012-cdef-ab3456789012", detail: { reason: "Stat manipulation suspected" }, createdAt: "2026-05-03T10:35:00Z" },
+    { id: "987651", adminId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", adminUsername: "super_root", action: "role.create", targetType: "admin", targetId: "c3d4e5f6-a7b8-9012-cdef-ab3456789012", detail: { username: "support_bob", role: "support" }, createdAt: "2026-05-01T13:40:00Z" },
+    { id: "987650", adminId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", adminUsername: "moderator_alice", action: "auth.login", targetType: "session", targetId: "sess-2026050209", detail: { ip: "192.0.2.10" }, createdAt: "2026-05-02T09:00:00Z" },
+    { id: "987649", adminId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", adminUsername: "super_root", action: "gdpr.delete", targetType: "gdpr_request", targetId: "d4e5f6a7-b8c9-0123-defa-bc4567890123", detail: { reason: "Support ticket #SUP-2026-0042" }, createdAt: "2026-05-01T11:20:00Z" },
+    { id: "987648", adminId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", adminUsername: "moderator_alice", action: "pet.unban", targetType: "pet", targetId: "8d7c6b5a-4f3e-2d1c-0b9a-8e7f6d5c4b3a", detail: { reason: "Manual review confirmed legitimate play" }, createdAt: "2026-04-30T16:00:00Z" },
+    { id: "987647", adminId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", adminUsername: "super_root", action: "config.flag", targetType: "feature_flag", targetId: "FF_BATTLE_RECORDS", detail: { enabled: true }, createdAt: "2026-04-29T08:10:00Z" },
+    { id: "987646", adminId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", adminUsername: "moderator_alice", action: "leaderboard.remove", targetType: "pet", targetId: "5d4c3b2a-1f0e-9d8c-7b6a-5d4c3b2a1908", detail: { reason: "Banned" }, createdAt: "2026-04-28T19:55:00Z" },
+    { id: "987645", adminId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", adminUsername: "super_root", action: "role.totp_reset", targetType: "admin", targetId: "b2c3d4e5-f6a7-8901-bcde-fa2345678901", detail: { reason: "Lost device" }, createdAt: "2026-04-25T10:00:00Z" }
+  ],
+  gdpr_requests: [
+    { requestId: "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8", jobId: "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8", requestType: "erasure", status: "processing", submittedAt: "2026-05-01T09:00:00Z", completedAt: null, adminNotes: null },
+    { requestId: "4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f90", jobId: "4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f90", requestType: "data_access", status: "completed", submittedAt: "2026-04-28T10:30:00Z", completedAt: "2026-04-28T16:45:00Z", adminNotes: "Data package emailed within SLA." },
+    { requestId: "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9012", jobId: "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9012", requestType: "rectification", status: "pending", submittedAt: "2026-05-02T15:20:00Z", completedAt: null, adminNotes: null },
+    { requestId: "6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f901234", jobId: "6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f901234", requestType: "restrict_processing", status: "completed", submittedAt: "2026-04-20T08:00:00Z", completedAt: "2026-04-22T11:30:00Z", adminNotes: "Processing restricted." },
+    { requestId: "7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456", jobId: "7a8b9c0d-1e2f-3a4b-5c6d-7e8f90123456", requestType: "object_leaderboard", status: "failed", submittedAt: "2026-04-15T14:00:00Z", completedAt: "2026-04-15T14:05:00Z", adminNotes: "Pet not on leaderboard at time of request." }
+  ]
+};
 
-let activeEndpointId = null;
-let activeEndpoint = null;
+/* =====================================================================
+ * STATE
+ * ===================================================================== */
+const STATE = {
+  currentEpId: null,
+  paramValues: {},
+  bodyValues: {},
+  lastResponse: null,
+  searchQuery: ""
+};
 
-// ─── MOCK ENGINE ─────────────────────────────────────────────────────────────
+const ALL_ENDPOINTS = SPEC.groups.flatMap(g => g.endpoints.map(e => ({ ...e, _group: g })));
 
-function intercept(endpoint, pathVars, queryVars, body, token) {
-  const errorMode = queryVars['error'] === 'true';
-  if (errorMode) {
-    return { status: 500, body: { success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Simulated server error (error=true).' } } };
-  }
-  const needsAuth = endpoint.auth;
-  const autoAttach = document.getElementById('autoAttach').checked;
-  if (needsAuth && autoAttach && !token) {
-    return { status: 401, body: { success: false, error: { code: 'UNAUTHORIZED', message: 'A valid Bearer token is required. Paste your petToken in the top bar.' } } };
-  }
+const TOKEN_KEY = "pixelpet-api-explorer-token";
+const TOKEN_TOGGLE_KEY = "pixelpet-api-explorer-auth-on";
 
-  const responses = endpoint.responses;
-  const codes = Object.keys(responses).map(Number);
-  const successCode = codes.find(c => c >= 200 && c < 300) || codes[0];
-  return { status: successCode, body: responses[successCode] };
+/* =====================================================================
+ * UTILITIES
+ * ===================================================================== */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-function simulateDelay() {
-  return new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
+function jsonHighlight(obj) {
+  const json = JSON.stringify(obj, null, 2);
+  return escapeHtml(json)
+    .replace(/(&quot;[^&]*?&quot;)(\s*:)/g, '<span class="j-key">$1</span>$2')
+    .replace(/:(\s*)(&quot;.*?&quot;)/g, ':$1<span class="j-str">$2</span>')
+    .replace(/:(\s*)(-?\d+(\.\d+)?([eE][-+]?\d+)?)/g, ':$1<span class="j-num">$2</span>')
+    .replace(/:(\s*)(true|false)/g, ':$1<span class="j-bool">$2</span>')
+    .replace(/:(\s*)(null)/g, ':$1<span class="j-null">$2</span>');
 }
 
-// ─── SIDEBAR RENDER ───────────────────────────────────────────────────────────
+function statusClass(code) {
+  if (code === 401 || code === 403) return "s401";
+  if (code >= 500) return "s5xx";
+  if (code >= 400) return "s4xx";
+  if (code >= 200 && code < 300) return "s2xx";
+  return "s2xx";
+}
 
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 1600);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function findEndpoint(epId) {
+  return ALL_ENDPOINTS.find(e => e.id === epId);
+}
+
+/* =====================================================================
+ * MOCK REQUEST ENGINE
+ * ===================================================================== */
+async function mockRequest(epId, params, body) {
+  const start = performance.now();
+  const ep = findEndpoint(epId);
+  if (!ep) {
+    return { code: 500, body: { success: false, error: { code: "INTERNAL", message: "Endpoint not found." } }, durationMs: 0, description: "" };
+  }
+
+  const delay = 200 + Math.floor(Math.random() * 200);
+  await sleep(delay);
+
+  const authOn = document.getElementById("auth-toggle").checked;
+  const token = (document.getElementById("auth-token").value || "").trim();
+  const has401 = ep.responses.find(r => r.code === 401);
+
+  // Auth gate: if endpoint requires auth and (toggle off OR token empty) → 401
+  if (ep.auth_required && has401 && (!authOn || !token)) {
+    return finishResponse(ep, has401, start);
+  }
+
+  // Parse body for validation
+  let bodyObj = null;
+  if (body && body.trim()) {
+    try {
+      bodyObj = JSON.parse(body);
+    } catch (e) {
+      const r400 = ep.responses.find(r => r.code === 400);
+      if (r400) {
+        return finishResponse(ep, {
+          ...r400,
+          example: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Request body is not valid JSON.", details: { parse_error: String(e.message) } } }
+        }, start);
+      }
+    }
+  }
+
+  // Path-id validation: missing required path param → 400
+  for (const p of ep.params) {
+    if (p.in === "path") {
+      const val = (params[p.name] || "").trim();
+      if (!val) {
+        const r400 = ep.responses.find(r => r.code === 400);
+        if (r400) return finishResponse(ep, r400, start);
+      }
+      // 404 check against MOCK_DB
+      if (ep.mock_entity && MOCK_DB[ep.mock_entity] && val) {
+        const exists = MOCK_DB[ep.mock_entity].some(item =>
+          item.id === val || item.matchId === val || item.listingId === val ||
+          item.requestId === val || item.adminId === val || item.petId === val ||
+          item.transactionId === val || item.jobId === val
+        );
+        const r404 = ep.responses.find(r => r.code === 404);
+        const looksLikeId = /^[0-9a-fA-F-]{6,}$/.test(val) || val.startsWith("FF_") || val.length > 4;
+        if (r404 && looksLikeId && !exists) {
+          // Allow flag path ID through
+          if (!(p.name === "flag" && (val === "FF_MARKETPLACE" || val === "FF_BATTLE_RECORDS"))) {
+            return finishResponse(ep, r404, start);
+          }
+        }
+      }
+    }
+  }
+
+  // Pick happy-path response
+  const happy = ep.responses.find(r => r.code >= 200 && r.code < 300) || ep.responses[0];
+
+  // List endpoints: customise pagination/filter
+  if (ep.method === "GET" && ep.mock_entity && happy.code >= 200 && happy.code < 300) {
+    const customised = customiseListResponse(ep, params, happy);
+    if (customised) return finishResponse(ep, { ...happy, example: customised }, start);
+  }
+
+  // Create/update: echo body fields
+  if ((ep.method === "POST" || ep.method === "PUT" || ep.method === "PATCH") && bodyObj && happy.code >= 200 && happy.code < 300) {
+    const merged = mergeBodyEcho(happy.example, bodyObj);
+    return finishResponse(ep, { ...happy, example: merged }, start);
+  }
+
+  return finishResponse(ep, happy, start);
+}
+
+function finishResponse(ep, resp, start) {
+  return {
+    code: resp.code,
+    body: resp.example,
+    description: resp.description || "",
+    durationMs: Math.round(performance.now() - start)
+  };
+}
+
+function customiseListResponse(ep, params, resp) {
+  const example = resp.example;
+  if (!example || typeof example !== "object" || !example.data) return null;
+  const data = example.data;
+  const arrKey = Object.keys(data).find(k => Array.isArray(data[k]));
+  if (!arrKey) return null;
+
+  const keyMap = {
+    pets: "pets", entries: "leaderboard_snapshots", listings: "marketplace_listings",
+    transactions: "marketplace_transactions", admins: "admin_users",
+    requests: "gdpr_requests", battles: "arena_matches", suspiciousPets: "pets"
+  };
+  const dbKey = keyMap[arrKey] || ep.mock_entity;
+  const source = MOCK_DB[dbKey] || data[arrKey];
+
+  let filtered = [...source];
+  if (params.rarity && filtered[0] && "rarity" in filtered[0]) {
+    filtered = filtered.filter(x => x.rarity === params.rarity);
+  }
+  if (params.isBanned === "true" || params.isBanned === "false") {
+    const banned = params.isBanned === "true";
+    if (filtered[0] && "isBanned" in filtered[0]) filtered = filtered.filter(x => x.isBanned === banned);
+  }
+  if (params.flagged === "true" || params.flagged === "false") {
+    const flagged = params.flagged === "true";
+    if (filtered[0] && "isFlagged" in filtered[0]) filtered = filtered.filter(x => x.isFlagged === flagged);
+  }
+  if (params.status && filtered[0] && "status" in filtered[0]) {
+    filtered = filtered.filter(x => x.status === params.status);
+  }
+  if (params.type && filtered[0] && "requestType" in filtered[0]) {
+    filtered = filtered.filter(x => x.requestType === params.type);
+  }
+  if (params.action && filtered[0] && "action" in filtered[0]) {
+    filtered = filtered.filter(x => x.action === params.action);
+  }
+  if (params.actorId && filtered[0] && "adminId" in filtered[0]) {
+    filtered = filtered.filter(x => x.adminId === params.actorId);
+  }
+  if (params.search && filtered[0] && "id" in filtered[0]) {
+    filtered = filtered.filter(x => x.id === params.search || (x.ownerEmailMasked && x.ownerEmailMasked.includes(params.search.slice(0, 4))));
+  }
+
+  if (params.sortBy && filtered[0] && params.sortBy in filtered[0]) {
+    const dir = params.order === "desc" ? -1 : 1;
+    filtered = [...filtered].sort((a, b) => {
+      const av = a[params.sortBy], bv = b[params.sortBy];
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }
+
+  const page = parseInt(params.page) || 1;
+  const limit = parseInt(params.limit) || (example.meta && example.meta.limit) || 20;
+  const total = filtered.length;
+  const sliced = filtered.slice((page - 1) * limit, page * limit);
+
+  const newData = { ...data, [arrKey]: sliced };
+  const result = { ...example, data: newData };
+  if (example.meta) result.meta = { ...example.meta, total, page, limit };
+  return result;
+}
+
+function mergeBodyEcho(example, body) {
+  if (!example || typeof example !== "object") return example;
+  if (!example.data || typeof example.data !== "object") return example;
+  const newData = { ...example.data };
+  for (const k of Object.keys(body)) {
+    if (k in newData) newData[k] = body[k];
+  }
+  return { ...example, data: newData };
+}
+
+/* =====================================================================
+ * SIDEBAR RENDERING
+ * ===================================================================== */
 function renderSidebar() {
-  const container = document.getElementById('sidebarGroups');
-  container.innerHTML = '';
+  const root = document.getElementById("groups-container");
+  const q = STATE.searchQuery.trim().toLowerCase();
+  let html = "";
 
-  API_GROUPS.forEach(group => {
-    const section = document.createElement('div');
-    section.className = 'group-section';
-    section.dataset.groupId = group.id;
-
-    const header = document.createElement('div');
-    header.className = 'group-header';
-    header.innerHTML = `
-      <div class="group-dot" style="background:${group.color};box-shadow:0 0 6px ${group.color}44;"></div>
-      <span class="group-name" style="color:${group.color};">${group.name}</span>
-      <span class="group-count">${group.endpoints.length}</span>
-      <span class="group-chevron">▼</span>
-    `;
-    header.addEventListener('click', () => section.classList.toggle('collapsed'));
-
-    const endpointList = document.createElement('div');
-    endpointList.className = 'group-endpoints';
-
-    group.endpoints.forEach(ep => {
-      const item = document.createElement('div');
-      item.className = 'endpoint-item';
-      item.dataset.endpointId = ep.id;
-      item.dataset.searchText = (ep.method + ' ' + ep.path + ' ' + ep.summary).toLowerCase();
-      item.innerHTML = `
-        <span class="method-badge badge-${ep.method}">${ep.method}</span>
-        <span class="endpoint-path">${ep.path}</span>
-      `;
-      item.addEventListener('click', () => selectEndpoint(ep.id));
-      endpointList.appendChild(item);
+  for (const g of SPEC.groups) {
+    const matchedEps = g.endpoints.filter(ep => {
+      if (!q) return true;
+      return ep.path.toLowerCase().includes(q) ||
+             ep.method.toLowerCase().includes(q) ||
+             ep.summary.toLowerCase().includes(q) ||
+             ep.id.toLowerCase().includes(q);
     });
+    if (matchedEps.length === 0) continue;
 
-    section.appendChild(header);
-    section.appendChild(endpointList);
-    container.appendChild(section);
-  });
-}
-
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
-
-document.getElementById('searchInput').addEventListener('input', function() {
-  const q = this.value.toLowerCase().trim();
-  document.querySelectorAll('.endpoint-item').forEach(item => {
-    const match = !q || item.dataset.searchText.includes(q);
-    item.classList.toggle('hidden', !match);
-  });
-  // auto-expand groups with matches
-  document.querySelectorAll('.group-section').forEach(section => {
-    const hasVisible = [...section.querySelectorAll('.endpoint-item')].some(i => !i.classList.contains('hidden'));
-    if (q) {
-      section.classList.toggle('collapsed', !hasVisible);
+    html += `<div class="group" data-group-id="${g.id}" style="--gc:${g.color}">`;
+    html += `<div class="group-header" onclick="toggleGroup('${g.id}')">`;
+    html += `<span class="group-name">${escapeHtml(g.name)}</span>`;
+    html += `<span><span class="group-count">${matchedEps.length}</span><span class="group-toggle">▾</span></span>`;
+    html += `</div>`;
+    html += `<div class="endpoints">`;
+    for (const ep of matchedEps) {
+      const active = ep.id === STATE.currentEpId ? "active" : "";
+      html += `<div class="endpoint-row ${active}" onclick="selectEndpoint('${ep.id}')" title="${escapeHtml(ep.summary)}">`;
+      html += `<span class="method-badge ${ep.method}">${ep.method}</span>`;
+      html += `<span class="endpoint-path">${escapeHtml(ep.path)}</span>`;
+      html += `</div>`;
     }
-  });
-});
-
-// ─── ENDPOINT SELECTION ───────────────────────────────────────────────────────
-
-function findEndpoint(id) {
-  for (const g of API_GROUPS) {
-    const ep = g.endpoints.find(e => e.id === id);
-    if (ep) return ep;
+    html += `</div></div>`;
   }
-  return null;
+  if (!html) {
+    html = `<div style="color:var(--text-mute);padding:12px;font-size:12px;">無符合的端點</div>`;
+  }
+  root.innerHTML = html;
 }
 
-function selectEndpoint(id) {
-  activeEndpointId = id;
-  activeEndpoint = findEndpoint(id);
-
-  document.querySelectorAll('.endpoint-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.endpointId === id);
-  });
-
-  document.getElementById('welcomeState').style.display = 'none';
-  const detail = document.getElementById('endpointDetail');
-  detail.classList.add('visible');
-
-  renderEndpointDetail(activeEndpoint);
-
-  // hide response
-  document.getElementById('responseSection').classList.remove('visible');
+function toggleGroup(groupId) {
+  const el = document.querySelector(`.group[data-group-id="${groupId}"]`);
+  if (el) el.classList.toggle("collapsed");
 }
 
-function renderEndpointDetail(ep) {
-  // Find group color
-  const group = API_GROUPS.find(g => g.endpoints.some(e => e.id === ep.id));
-  const color = group ? group.color : '#6c5ce7';
+/* =====================================================================
+ * ENDPOINT DETAIL RENDERING
+ * ===================================================================== */
+function selectEndpoint(epId) {
+  STATE.currentEpId = epId;
+  STATE.lastResponse = null;
+  if (location.hash !== `#endpoint-${epId}`) {
+    history.replaceState(null, "", `#endpoint-${epId}`);
+  }
+  renderSidebar();
+  renderEndpoint(epId);
+  document.querySelector(".main-panel").scrollTop = 0;
+}
 
-  // Header
-  document.getElementById('detailHeader').innerHTML = `
-    <span class="method-badge badge-${ep.method}" style="font-size:10px;padding:6px 10px;">${ep.method}</span>
-    <span class="endpoint-title-path">${ep.path}</span>
-    <span class="endpoint-summary">${ep.summary}</span>
-  `;
-
-  // Desc
-  document.getElementById('detailDesc').textContent = ep.description;
-
-  // Params
-  const paramsEl = document.getElementById('detailParams');
-  paramsEl.innerHTML = '';
-
-  if (ep.pathParams.length > 0 || ep.queryParams.length > 0) {
-    const card = document.createElement('div');
-    card.className = 'section-card';
-
-    let title = '';
-    if (ep.pathParams.length > 0 && ep.queryParams.length > 0) title = 'PARAMETERS';
-    else if (ep.pathParams.length > 0) title = 'PATH PARAMETERS';
-    else title = 'QUERY PARAMETERS';
-
-    card.innerHTML = `<div class="section-title" style="color:${color};">${title}</div>`;
-    const body = document.createElement('div');
-    body.className = 'section-body';
-
-    [...ep.pathParams.map(p => ({...p, kind: 'path'})), ...ep.queryParams.map(p => ({...p, kind: 'query'}))].forEach(p => {
-      const row = document.createElement('div');
-      row.className = 'param-row';
-      row.innerHTML = `
-        <div class="param-name">${p.name}${p.required ? '<span class="req">*</span>' : ''}</div>
-        <div class="param-type">${p.kind}</div>
-        <input type="text" class="param-input" data-param="${p.name}" data-kind="${p.kind}" placeholder="${p.placeholder}">
-      `;
-      body.appendChild(row);
-    });
-
-    card.appendChild(body);
-    paramsEl.appendChild(card);
+function renderEndpoint(epId) {
+  const ep = findEndpoint(epId);
+  const root = document.getElementById("endpoint-detail");
+  if (!ep) {
+    root.innerHTML = `<div class="empty-state"><div class="icon">⌁</div><h2>端點不存在</h2></div>`;
+    return;
   }
 
-  // Body
-  const bodyEl = document.getElementById('detailBody');
-  bodyEl.innerHTML = '';
-
-  if (ep.body !== null) {
-    const card = document.createElement('div');
-    card.className = 'section-card';
-    card.innerHTML = `<div class="section-title" style="color:${color};">REQUEST BODY</div>
-    <div class="section-body">
-      <textarea class="body-textarea" id="reqBody">${ep.body}</textarea>
-    </div>`;
-    bodyEl.appendChild(card);
-  }
-
-  // Auth badge
-  const authWrap = document.getElementById('authBadgeWrap');
-  authWrap.innerHTML = ep.auth ? '<span class="auth-required-badge">🔑 Auth Required</span>' : '';
-}
-
-// ─── EXECUTE REQUEST ──────────────────────────────────────────────────────────
-
-async function executeRequest() {
-  if (!activeEndpoint) return;
-
-  const btn = document.getElementById('tryBtn');
-  const spinner = document.getElementById('spinner');
-  btn.disabled = true;
-  btn.classList.add('loading');
-
-  const token = document.getElementById('tokenInput').value.trim();
-
-  // Gather path vars
-  const pathVars = {};
-  document.querySelectorAll('.param-input[data-kind="path"]').forEach(inp => {
-    pathVars[inp.dataset.param] = inp.value.trim();
-  });
-
-  // Gather query vars
-  const queryVars = {};
-  document.querySelectorAll('.param-input[data-kind="query"]').forEach(inp => {
-    if (inp.value.trim()) queryVars[inp.dataset.param] = inp.value.trim();
-  });
-
-  // Body
-  let bodyVal = null;
-  const bodyTA = document.getElementById('reqBody');
-  if (bodyTA) bodyVal = bodyTA.value;
-
-  const startTime = Date.now();
-  await simulateDelay();
-  const elapsed = Date.now() - startTime;
-
-  const result = intercept(activeEndpoint, pathVars, queryVars, bodyVal, token);
-
-  // Render response
-  const section = document.getElementById('responseSection');
-  section.classList.add('visible');
-
-  const statusBadge = document.getElementById('statusBadge');
-  statusBadge.textContent = result.status;
-  statusBadge.className = 'status-badge';
-  if (result.status >= 200 && result.status < 300) statusBadge.classList.add('status-2xx');
-  else if (result.status >= 400 && result.status < 500) statusBadge.classList.add('status-4xx');
-  else statusBadge.classList.add('status-5xx');
-
-  document.getElementById('responseTime').textContent = elapsed + 'ms (mock)';
-  document.getElementById('responseBody').innerHTML = syntaxHighlight(JSON.stringify(result.body, null, 2));
-
-  btn.disabled = false;
-  btn.classList.remove('loading');
-}
-
-// ─── JSON SYNTAX HIGHLIGHT ────────────────────────────────────────────────────
-
-function syntaxHighlight(json) {
-  return json
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
-      let cls = 'json-number';
-      if (/^"/.test(match)) {
-        cls = /:$/.test(match) ? 'json-key' : 'json-string';
-      } else if (/true|false/.test(match)) {
-        cls = 'json-bool';
-      } else if (/null/.test(match)) {
-        cls = 'json-null';
+  if (!STATE.paramValues[epId]) {
+    const init = {};
+    for (const p of ep.params) {
+      init[p.name] = p.default !== undefined && p.default !== "" ? p.default : "";
+    }
+    for (const p of ep.params) {
+      if (p.in === "path" && !init[p.name]) {
+        if (p.name === "petId") init[p.name] = "550e8400-e29b-41d4-a716-446655440000";
+        else if (p.name === "matchId") init[p.name] = "a1b2c3d4-e5f6-7890-abcd-ef1234567890";
+        else if (p.name === "listingId") init[p.name] = "l1a2b3c4-d5e6-7890-abcd-ef1234567890";
+        else if (p.name === "requestId") init[p.name] = "3c4d5e6f-7a8b-9c0d-e1f2-a3b4c5d6e7f8";
+        else if (p.name === "adminId") init[p.name] = "b2c3d4e5-f6a7-8901-bcde-fa2345678901";
+        else if (p.name === "flag") init[p.name] = "FF_MARKETPLACE";
       }
-      return `<span class="${cls}">${match}</span>`;
-    });
+    }
+    STATE.paramValues[epId] = init;
+  }
+  if (!(epId in STATE.bodyValues)) {
+    STATE.bodyValues[epId] = ep.request_body !== null && ep.request_body !== undefined
+      ? JSON.stringify(ep.request_body, null, 2)
+      : "";
+  }
+
+  let html = "";
+  html += `<div class="ep-header">`;
+  html += `<span class="method-badge ${ep.method}">${ep.method}</span>`;
+  html += `<span class="ep-path">${escapeHtml(ep.path)}</span>`;
+  if (ep.auth_required) {
+    html += `<span style="font-size:11px;background:rgba(239,68,68,0.15);color:#fca5a5;padding:2px 8px;border-radius:10px;">🔒 Auth Required</span>`;
+  }
+  html += `</div>`;
+  html += `<h1 class="ep-summary">${escapeHtml(ep.summary)}</h1>`;
+  html += `<p class="ep-description">${escapeHtml(ep.description)}</p>`;
+
+  if (ep.params.length > 0) {
+    html += `<section class="section">`;
+    html += `<div class="section-title">Parameters</div>`;
+    html += `<div class="params-table">`;
+    for (const p of ep.params) {
+      const val = STATE.paramValues[epId][p.name] || "";
+      html += `<div class="param-row">`;
+      html += `<div class="param-name">`;
+      html += `<span>${escapeHtml(p.name)}</span>`;
+      if (p.required) html += `<span class="required">*</span>`;
+      html += `<span class="ploc ${p.in}">${p.in}</span>`;
+      html += `<span class="param-desc">${escapeHtml(p.description || "")}</span>`;
+      html += `</div>`;
+      html += `<div class="param-input-wrapper">`;
+      const inputType = p.type && p.type.startsWith("integer") ? "number" : "text";
+      html += `<input class="param-input" type="${inputType}" data-param="${escapeHtml(p.name)}" value="${escapeHtml(val)}" placeholder="${escapeHtml(p.default || (p.in === "path" ? "(required)" : ""))}" oninput="updateParam('${epId}','${p.name}',this.value)" />`;
+      if (p.enum && p.enum.length > 0) {
+        html += `<div class="chips">`;
+        for (const v of p.enum) {
+          const active = String(val) === String(v) ? "active" : "";
+          html += `<span class="chip ${active}" onclick="setParamChip('${epId}','${p.name}','${escapeHtml(v)}')">${escapeHtml(v)}</span>`;
+        }
+        if (!p.required) {
+          html += `<span class="chip ${val === "" ? "active" : ""}" onclick="setParamChip('${epId}','${p.name}','')">(none)</span>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+      html += `<div class="param-type">${escapeHtml(p.type || "")}</div>`;
+      html += `</div>`;
+    }
+    html += `</div></section>`;
+  }
+
+  if (ep.request_body !== null && ep.request_body !== undefined) {
+    html += `<section class="section">`;
+    html += `<div class="section-title">Request Body <span style="color:var(--text-mute);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">application/json</span></div>`;
+    html += `<div class="body-controls">`;
+    html += `<label style="font-size:12px;color:var(--text-dim);">Preset:</label>`;
+    html += `<select class="preset-select" onchange="applyPreset('${epId}', this.value)">`;
+    const presets = buildPresets(ep);
+    for (const ps of presets) {
+      html += `<option value="${escapeHtml(ps.name)}">${escapeHtml(ps.label)}</option>`;
+    }
+    html += `</select>`;
+    if (ep.enums) {
+      for (const [k, vals] of Object.entries(ep.enums)) {
+        html += `<span style="font-size:11px;color:var(--text-mute);margin-left:8px;">${escapeHtml(k)}:</span>`;
+        html += `<div class="chips" style="display:inline-flex;">`;
+        for (const v of vals) {
+          html += `<span class="chip" onclick="setBodyField('${epId}','${k}','${escapeHtml(v)}')">${escapeHtml(v)}</span>`;
+        }
+        html += `</div>`;
+      }
+    }
+    html += `</div>`;
+    html += `<textarea class="body-textarea" rows="10" id="body-textarea-${epId}" oninput="updateBody('${epId}', this.value)" spellcheck="false">${escapeHtml(STATE.bodyValues[epId])}</textarea>`;
+    html += `</section>`;
+  }
+
+  html += `<div class="action-bar">`;
+  html += `<button class="btn btn-primary" id="try-btn" onclick="tryIt('${epId}')"><span id="try-label">▶ Try It</span></button>`;
+  html += `<button class="btn btn-secondary" onclick="showCurl('${epId}')">📋 Copy as cURL</button>`;
+  html += `</div>`;
+
+  html += `<section class="section response-section" id="response-section">`;
+  html += `<div class="section-title">Response</div>`;
+  html += `<div id="response-body">`;
+  html += `<div style="color:var(--text-mute);font-size:13px;padding:20px;text-align:center;background:var(--surface);border-radius:var(--radius);">尚未發送請求 — 點 <strong style="color:var(--text-dim);">Try It</strong> 開始</div>`;
+  html += `</div>`;
+
+  html += `<div class="section-title" style="margin-top:24px;">Possible Responses</div>`;
+  html += `<div style="display:flex;flex-direction:column;gap:6px;">`;
+  for (const r of ep.responses) {
+    html += `<div style="display:flex;gap:10px;align-items:center;font-size:12px;color:var(--text-dim);padding:6px 12px;background:var(--surface);border-radius:var(--radius-sm);">`;
+    html += `<span class="status-badge ${statusClass(r.code)}">${r.code}</span>`;
+    html += `<span>${escapeHtml(r.description)}</span>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+  html += `</section>`;
+
+  root.innerHTML = html;
+
+  if (STATE.lastResponse) {
+    renderResponse(STATE.lastResponse);
+  }
 }
 
-// ─── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-    e.preventDefault();
-    document.getElementById('searchInput').focus();
+function buildPresets(ep) {
+  const out = [];
+  if (ep.request_body !== null && ep.request_body !== undefined) {
+    out.push({ name: "default", label: "Default", body: ep.request_body });
   }
-  if (e.key === 'Escape') {
-    document.getElementById('searchInput').blur();
-    if (document.getElementById('endpointDetail').classList.contains('visible')) {
-      // optionally deselect
+  if (ep.id === "claim-initiate") {
+    out.push({ name: "alt-pet", label: "Alternate pet", body: { email: "alt@example.com", petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", ageConfirmed: true } });
+    out.push({ name: "missing-age", label: "Missing ageConfirmed (400)", body: { email: "player@example.com", petId: "550e8400-e29b-41d4-a716-446655440000" } });
+  }
+  if (ep.id === "train-pet") {
+    out.push({ name: "lift", label: "LIFT type", body: { trainingType: "LIFT" } });
+    out.push({ name: "endurance", label: "ENDURANCE type", body: { trainingType: "ENDURANCE" } });
+  }
+  if (ep.id === "feed-pet") {
+    out.push({ name: "permanent", label: "Permanent buff", body: { buffType: "vitamins", stat: "stamina", magnitude: 3, isPermanent: true } });
+    out.push({ name: "feast", label: "Feast (large temp)", body: { buffType: "feast", stat: "speed", magnitude: 8, isPermanent: false } });
+  }
+  if (ep.id === "arena-enter") {
+    out.push({ name: "duel", label: "DUEL mode", body: { petId: "550e8400-e29b-41d4-a716-446655440000", mode: "DUEL", acceptAI: false } });
+    out.push({ name: "endurance", label: "ENDURANCE w/ AI", body: { petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", mode: "ENDURANCE", acceptAI: true } });
+  }
+  if (ep.id === "gdpr-request") {
+    out.push({ name: "data_access", label: "Data access", body: { type: "data_access" } });
+    out.push({ name: "rectification", label: "Rectification", body: { type: "rectification" } });
+  }
+  if (ep.id === "marketplace-create-listing") {
+    out.push({ name: "epic-listing", label: "EPIC pet listing", body: { petId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", price: 8800 } });
+    out.push({ name: "low-price", label: "Below minimum (400)", body: { petId: "550e8400-e29b-41d4-a716-446655440000", price: 50 } });
+  }
+  if (ep.id === "admin-roles-create") {
+    out.push({ name: "support", label: "Create support", body: { username: "new_support", role: "support", temporaryPassword: "tempPass!2026" } });
+    out.push({ name: "super_admin", label: "Create super_admin", body: { username: "new_super", role: "super_admin", temporaryPassword: "tempPass!2026" } });
+  }
+  if (ep.id === "admin-pet-ban") {
+    out.push({ name: "manual", label: "Manual review ban", body: { reason: "Manual review confirmed multi-account abuse" } });
+  }
+  if (ep.id === "admin-config-flag-update") {
+    out.push({ name: "disable", label: "Disable flag", body: { enabled: false } });
+  }
+  return out;
+}
+
+function applyPreset(epId, presetName) {
+  const ep = findEndpoint(epId);
+  if (!ep) return;
+  const presets = buildPresets(ep);
+  const ps = presets.find(p => p.name === presetName);
+  if (!ps) return;
+  STATE.bodyValues[epId] = JSON.stringify(ps.body, null, 2);
+  const ta = document.getElementById(`body-textarea-${epId}`);
+  if (ta) ta.value = STATE.bodyValues[epId];
+}
+
+function setBodyField(epId, key, value) {
+  const ta = document.getElementById(`body-textarea-${epId}`);
+  if (!ta) return;
+  let obj;
+  try { obj = JSON.parse(ta.value); }
+  catch { obj = {}; }
+  let coerced = value;
+  if (value === "true") coerced = true;
+  else if (value === "false") coerced = false;
+  else if (/^-?\d+$/.test(value)) coerced = parseInt(value, 10);
+  else if (/^-?\d+\.\d+$/.test(value)) coerced = parseFloat(value);
+  obj[key] = coerced;
+  STATE.bodyValues[epId] = JSON.stringify(obj, null, 2);
+  ta.value = STATE.bodyValues[epId];
+}
+
+function updateBody(epId, val) {
+  STATE.bodyValues[epId] = val;
+}
+function updateParam(epId, name, val) {
+  if (!STATE.paramValues[epId]) STATE.paramValues[epId] = {};
+  STATE.paramValues[epId][name] = val;
+  const input = document.querySelector(`.main-panel input[data-param="${name}"]`);
+  if (input) {
+    const wrapper = input.parentElement;
+    const chips = wrapper.querySelectorAll(".chip");
+    chips.forEach(c => {
+      const txt = c.textContent;
+      const isNone = txt === "(none)";
+      c.classList.toggle("active", isNone ? val === "" : txt === val);
+    });
+  }
+}
+
+function setParamChip(epId, name, value) {
+  if (!STATE.paramValues[epId]) STATE.paramValues[epId] = {};
+  STATE.paramValues[epId][name] = value;
+  const input = document.querySelector(`.main-panel input[data-param="${name}"]`);
+  if (input) input.value = value;
+  const wrapper = input ? input.parentElement : null;
+  if (wrapper) {
+    const chips = wrapper.querySelectorAll(".chip");
+    chips.forEach(c => {
+      const txt = c.textContent;
+      const isNone = txt === "(none)";
+      c.classList.toggle("active", isNone ? value === "" : txt === value);
+    });
+  }
+}
+
+/* =====================================================================
+ * TRY IT / RESPONSE RENDERING
+ * ===================================================================== */
+async function tryIt(epId) {
+  const btn = document.getElementById("try-btn");
+  const label = document.getElementById("try-label");
+  if (!btn) return;
+  btn.disabled = true;
+  label.innerHTML = `<span class="spinner"></span> Sending…`;
+
+  const params = STATE.paramValues[epId] || {};
+  const body = STATE.bodyValues[epId] || "";
+
+  try {
+    const resp = await mockRequest(epId, params, body);
+    STATE.lastResponse = resp;
+    renderResponse(resp);
+  } finally {
+    btn.disabled = false;
+    label.innerHTML = `▶ Try It`;
+  }
+}
+
+function renderResponse(resp) {
+  const target = document.getElementById("response-body");
+  if (!target) return;
+  let html = "";
+  html += `<div class="response-meta">`;
+  html += `<span class="status-badge ${statusClass(resp.code)}">${resp.code}</span>`;
+  html += `<span class="response-time">⏱ ${resp.durationMs} ms</span>`;
+  html += `<span class="response-desc">${escapeHtml(resp.description)}</span>`;
+  html += `</div>`;
+  html += `<div class="response-panel">${jsonHighlight(resp.body)}</div>`;
+  target.innerHTML = html;
+}
+
+/* =====================================================================
+ * cURL BUILDER
+ * ===================================================================== */
+function buildCurl(epId) {
+  const ep = findEndpoint(epId);
+  if (!ep) return "";
+  const params = STATE.paramValues[epId] || {};
+  const body = STATE.bodyValues[epId] || "";
+
+  let path = ep.path;
+  for (const p of ep.params) {
+    if (p.in === "path") {
+      path = path.replace(":" + p.name, encodeURIComponent(params[p.name] || ""));
     }
   }
-});
+  const qs = ep.params
+    .filter(p => p.in === "query" && (params[p.name] !== undefined && params[p.name] !== ""))
+    .map(p => `${encodeURIComponent(p.name)}=${encodeURIComponent(params[p.name])}`)
+    .join("&");
+  const url = `${SPEC.base_url}${path}${qs ? "?" + qs : ""}`;
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+  const lines = [];
+  lines.push(`curl -X ${ep.method} \\`);
+  lines.push(`  '${url}' \\`);
 
-renderSidebar();
+  const authOn = document.getElementById("auth-toggle").checked;
+  const token = (document.getElementById("auth-token").value || "").trim();
+  if (authOn && token) {
+    lines.push(`  -H 'Authorization: Bearer ${token}' \\`);
+  } else if (ep.auth_required) {
+    lines.push(`  -H 'Authorization: Bearer <petToken>' \\`);
+  }
+  if (ep.request_body !== null && ep.request_body !== undefined) {
+    lines.push(`  -H 'Content-Type: application/json' \\`);
+    if (body) {
+      const flat = body.replace(/\n\s*/g, "");
+      lines.push(`  -d '${flat.replace(/'/g, "'\\''")}'`);
+    } else {
+      lines.push(`  -d '{}'`);
+    }
+  } else {
+    const last = lines.pop();
+    lines.push(last.replace(/ \\$/, ""));
+  }
+  return lines.join("\n");
+}
+
+function showCurl(epId) {
+  const curl = buildCurl(epId);
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">cURL Command</div>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+      </div>
+      <div class="modal-body" id="curl-body">${escapeHtml(curl)}</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Close</button>
+        <button class="btn btn-primary" id="curl-copy-btn">📋 Copy</button>
+      </div>
+    </div>`;
+  overlay.addEventListener("click", e => {
+    if (e.target === overlay) overlay.remove();
+  });
+  document.body.appendChild(overlay);
+  document.getElementById("curl-copy-btn").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(curl);
+      showToast("已複製到剪貼簿！");
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = curl;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); showToast("已複製到剪貼簿！"); } catch {}
+      ta.remove();
+    }
+  };
+}
+
+/* =====================================================================
+ * AUTH PANEL PERSISTENCE
+ * ===================================================================== */
+function initAuth() {
+  const tokInput = document.getElementById("auth-token");
+  const toggle = document.getElementById("auth-toggle");
+  tokInput.value = localStorage.getItem(TOKEN_KEY) || "";
+  toggle.checked = localStorage.getItem(TOKEN_TOGGLE_KEY) === "1";
+  tokInput.addEventListener("input", () => {
+    localStorage.setItem(TOKEN_KEY, tokInput.value);
+  });
+  toggle.addEventListener("change", () => {
+    localStorage.setItem(TOKEN_TOGGLE_KEY, toggle.checked ? "1" : "0");
+  });
+}
+
+/* =====================================================================
+ * SEARCH
+ * ===================================================================== */
+function initSearch() {
+  const inp = document.getElementById("search");
+  inp.addEventListener("input", () => {
+    STATE.searchQuery = inp.value;
+    renderSidebar();
+  });
+}
+
+/* =====================================================================
+ * HASH ROUTING
+ * ===================================================================== */
+function applyHash() {
+  const m = location.hash.match(/^#endpoint-(.+)$/);
+  if (m && findEndpoint(m[1])) {
+    selectEndpoint(m[1]);
+  }
+}
+
+/* =====================================================================
+ * INIT
+ * ===================================================================== */
+function init() {
+  initAuth();
+  initSearch();
+  renderSidebar();
+
+  if (location.hash && location.hash.startsWith('#endpoint-')) {
+    applyHash();
+  } else {
+    const epEl = document.getElementById('ep-count');
+    if (epEl) epEl.textContent = ALL_ENDPOINTS.length;
+    const gpEl = document.getElementById('grp-count');
+    if (gpEl) gpEl.textContent = SPEC.groups.length;
+  }
+
+  window.addEventListener("hashchange", applyHash);
+}
+
+init();
 </script>
 </body>
 </html>
