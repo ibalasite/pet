@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html" target="prototype-window">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🎮 API Explorer</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,7 +425,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#目錄">目錄</a></li><li><a class="toc__link" href="#1-architecture-overview">§1. Architecture Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-design-principles">§1.1 Design Principles</a></li><li><a class="toc__link toc__link--h3" href="#12-system-context-diagram-ascii">§1.2 System Context Diagram (ASCII)</a></li><li><a class="toc__link" href="#2-component-architecture">§2. Component Architecture</a></li><li><a class="toc__link toc__link--h3" href="#21-frontend-architecture-react--phaserjs-player-app">§2.1 Frontend Architecture (React + Phaser.js Player App)</a></li><li><a class="toc__link toc__link--h3" href="#22-admin-portal-architecture-vue-3--element-plus">§2.2 Admin Portal Architecture (Vue 3 + Element Plus)</a></li><li><a class="toc__link toc__link--h3" href="#23-backend-api-architecture-nodejs-20--fastify-4">§2.3 Backend API Architecture (Node.js 20 + Fastify 4)</a></li><li><a class="toc__link toc__link--h3" href="#24-database-architecture-postgresqlsupabase">§2.4 Database Architecture (PostgreSQL/Supabase)</a></li><li><a class="toc__link toc__link--h3" href="#25-cache-architecture-redisupstash">§2.5 Cache Architecture (Redis/Upstash)</a></li><li><a class="toc__link toc__link--h3" href="#26-email-service-architecture-sendgrid--nodemailer-fallback">§2.6 Email Service Architecture (SendGrid + Nodemailer Fallback)</a></li><li><a class="toc__link" href="#3-key-architectural-decisions">§3. Key Architectural Decisions</a></li><li><a class="toc__link toc__link--h3" href="#31-adr-001-no-user-accounts--email-otp--url-token-identity">§3.1 ADR-001: No User Accounts — Email OTP + URL Token Identity</a></li><li><a class="toc__link toc__link--h3" href="#32-adr-002-monorepo-structure">§3.2 ADR-002: Monorepo Structure</a></li><li><a class="toc__link toc__link--h3" href="#33-adr-003-react--phaserjs-for-player-app">§3.3 ADR-003: React + Phaser.js for Player App</a></li><li><a class="toc__link toc__link--h3" href="#34-adr-004-vue-3--element-plus-for-admin-portal">§3.4 ADR-004: Vue 3 + Element Plus for Admin Portal</a></li><li><a class="toc__link toc__link--h3" href="#35-adr-005-nodejsfastify-over-gofiber">§3.5 ADR-005: Node.js/Fastify over Go/Fiber</a></li><li><a class="toc__link toc__link--h3" href="#36-adr-006-postgresql--redis-dual-storage">§3.6 ADR-006: PostgreSQL + Redis Dual Storage</a></li><li><a class="toc__link toc__link--h3" href="#37-adr-007-feature-flag-strategy-ff_marketplace">§3.7 ADR-007: Feature Flag Strategy (FF_MARKETPLACE)</a></li><li><a class="toc__link" href="#4-data-flow-diagrams">§4. Data Flow Diagrams</a></li><li><a class="toc__link toc__link--h3" href="#41-pet-claim-flow">§4.1 Pet Claim Flow</a></li><li><a class="toc__link toc__link--h3" href="#42-arena-battle-flow">§4.2 Arena Battle Flow</a></li><li><a class="toc__link toc__link--h3" href="#43-leaderboard-update-flow">§4.3 Leaderboard Update Flow</a></li><li><a class="toc__link toc__link--h3" href="#44-gdpr-erasure-flow">§4.4 GDPR Erasure Flow</a></li><li><a class="toc__link" href="#5-security-architecture">§5. Security Architecture</a></li><li><a class="toc__link toc__link--h3" href="#51-authentication-and-authorization-model">§5.1 Authentication and Authorization Model</a></li><li><a class="toc__link toc__link--h3" href="#52-token-security">§5.2 Token Security</a></li><li><a class="toc__link toc__link--h3" href="#53-rate-limiting-architecture">§5.3 Rate Limiting Architecture</a></li><li><a class="toc__link toc__link--h3" href="#54-gdpr-compliance-architecture">§5.4 GDPR Compliance Architecture</a></li><li><a class="toc__link toc__link--h3" href="#55-transport-and-header-security">§5.5 Transport and Header Security</a></li><li><a class="toc__link" href="#6-scalability-and-reliability">§6. Scalability and Reliability</a></li><li><a class="toc__link toc__link--h3" href="#61-horizontal-scaling-strategy">§6.1 Horizontal Scaling Strategy</a></li><li><a class="toc__link toc__link--h3" href="#62-database-reliability-supabase">§6.2 Database Reliability (Supabase)</a></li><li><a class="toc__link toc__link--h3" href="#63-redis-reliability-upstash">§6.3 Redis Reliability (Upstash)</a></li><li><a class="toc__link toc__link--h3" href="#64-email-reliability">§6.4 Email Reliability</a></li><li><a class="toc__link" href="#7-deployment-architecture">§7. Deployment Architecture</a></li><li><a class="toc__link toc__link--h3" href="#71-infrastructure-overview">§7.1 Infrastructure Overview</a></li><li><a class="toc__link toc__link--h3" href="#72-cicd-pipeline">§7.2 CI/CD Pipeline</a></li><li><a class="toc__link toc__link--h3" href="#73-environment-strategy">§7.3 Environment Strategy</a></li><li><a class="toc__link" href="#8-cross-cutting-concerns">§8. Cross-Cutting Concerns</a></li><li><a class="toc__link toc__link--h3" href="#81-logging-and-observability">§8.1 Logging and Observability</a></li><li><a class="toc__link toc__link--h3" href="#82-error-handling-strategy">§8.2 Error Handling Strategy</a></li><li><a class="toc__link toc__link--h3" href="#83-configuration-management">§8.3 Configuration Management</a></li><li><a class="toc__link" href="#9-高可用設計">§9. 高可用設計</a></li><li><a class="toc__link" href="#10-災難恢復dr">§10. 災難恢復（DR）</a></li><li><a class="toc__link toc__link--h3" href="#101-backup-strategy">§10.1 Backup Strategy</a></li><li><a class="toc__link toc__link--h3" href="#102-recovery-procedures">§10.2 Recovery Procedures</a></li><li><a class="toc__link" href="#11-技術棧全覽">§11. 技術棧全覽</a></li><li><a class="toc__link" href="#12-observability-架構">§12. Observability 架構</a></li><li><a class="toc__link toc__link--h3" href="#121-metrics-red-method">§12.1 Metrics (RED Method)</a></li><li><a class="toc__link toc__link--h3" href="#122-logs">§12.2 Logs</a></li><li><a class="toc__link toc__link--h3" href="#123-traces">§12.3 Traces</a></li><li><a class="toc__link" href="#13-外部依賴地圖">§13. 外部依賴地圖</a></li><li><a class="toc__link" href="#14-architecture-decision-records">§14. Architecture Decision Records</a></li><li><a class="toc__link" href="#15-架構審查檢查清單">§15. 架構審查檢查清單</a></li><li><a class="toc__link toc__link--h3" href="#151-安全性">§15.1 安全性</a></li><li><a class="toc__link toc__link--h3" href="#152-可靠性">§15.2 可靠性</a></li><li><a class="toc__link toc__link--h3" href="#153-可觀察性">§15.3 可觀察性</a></li><li><a class="toc__link" href="#16-cost-optimization--finops">§16. Cost Optimization &amp;amp; FinOps</a></li><li><a class="toc__link toc__link--h3" href="#161-mvp-cost-structure-dau--5k">§16.1 MVP Cost Structure (DAU ≤ 5k)</a></li><li><a class="toc__link toc__link--h3" href="#162-cost-guardrails">§16.2 Cost Guardrails</a></li><li><a class="toc__link" href="#17-marketplace-feature-成本影響評估">§17. Marketplace Feature 成本影響評估</a></li><li><a class="toc__link" href="#18-api-gateway--service-mesh-architecture">§18. API Gateway &amp;amp; Service Mesh Architecture</a></li><li><a class="toc__link toc__link--h3" href="#181-request-flow">§18.1 Request Flow</a></li><li><a class="toc__link toc__link--h3" href="#182-future-api-gateway-post-ga">§18.2 Future API Gateway (Post-GA)</a></li><li><a class="toc__link" href="#19-admin-portal-架構">§19. Admin Portal 架構</a></li><li><a class="toc__link toc__link--h3" href="#191-admin-authentication">§19.1 Admin Authentication</a></li><li><a class="toc__link toc__link--h3" href="#192-admin-api-routes">§19.2 Admin API Routes</a></li><li><a class="toc__link toc__link--h3" href="#193-admin-data-access">§19.3 Admin Data Access</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="arch--system-architecture">ARCH — System Architecture</h1>
@@ -376,66 +468,16 @@
 <p>Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash. Raw email is never written to logs, databases, or analytics events. All five GDPR SLAs are first-class data-pipeline concerns: erasure (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 days), restrict processing (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24 hours), data access (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30 days), object leaderboard (GDPR_OBJECT_LEADERBOARD_RESPONSE_BUSINESS_DAYS = 5 business days), and rectification (GDPR_EMAIL_RECTIFICATION_RESPONSE_HOURS = 24 hours). See §5.4 for the complete SLA table.</p>
 <hr>
 <h3 id="12-system-context-diagram-ascii">§1.2 System Context Diagram (ASCII)</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;EXTERNAL ACTORS&quot;]
-  N1[&quot;Guest Player│  │ Pet Owner        │  │Competitive Player │  │Admin Operator&quot;]
-  N2[&quot;(no token)  │  │ (URL token)      │  │(token + arena)    │  │(TOTP session)&quot;]
-  N3[&quot;HTTPS            │  HTTPS                  │  HTTPS            │  HTTPS&quot;]
-  N4[&quot;▼                   ▼                         ▼                   ▼&quot;]
-  N5[&quot;CDN / Edge (Vercel)&quot;]
-  N6[&quot;Player App                   │    │  Admin Portal&quot;]
-  N7[&quot;React 18 + Phaser.js 3       │    │  Vue 3 + Element Plus&quot;]
-  N8[&quot;Vite 5 / TypeScript 5        │    │  Vite 5 / TypeScript 5&quot;]
-  N9[&quot;HTTPS                                       │ HTTPS&quot;]
-  N10[&quot;▼                                             ▼&quot;]
-  N11[&quot;API Gateway / Load Balancer (Nginx or Vercel Edge)&quot;]
-  N12[&quot;TLS termination · rate-limit header forwarding · X-Real-IP passthrough&quot;]
-  N13[&quot;REST /api/v1/*                              │ REST /admin/api/*&quot;]
-  N14[&quot;API Layer (Railway — containerized, autoscale HPA at 70% CPU)&quot;]
-  N15[&quot;Game API Server              │    │  Admin API Server&quot;]
-  N16[&quot;Node.js 20 LTS / Fastify 4  │    │  Node.js 20 LTS / Fastify 4&quot;]
-  N17[&quot;≥ 2 replicas                 │    │  1 replica (/admin ns plugin)&quot;]
-  N18[&quot;▼                                           ▼&quot;]
-  N19[&quot;PostgreSQL 15+          │            │  Redis 7+&quot;]
-  N20[&quot;(Supabase managed)      │            │  (Upstash serverless)&quot;]
-  N21[&quot;Primary writer           │            │  Leaderboard sorted set&quot;]
-  N22[&quot;+ 1 read replica         │            │  Rate-limit counters&quot;]
-  N23[&quot;Auto-failover 60s        │            │  Admin sessions&quot;]
-  N24[&quot;Daily S3 backup          │            │  Matchmaking queue&quot;]
-  N25[&quot;┘            │  Config cache (TTL 300s)&quot;]
-  N26[&quot;Token blacklist&quot;]
-  N27[&quot;▼&quot;]
-  N28[&quot;External Services&quot;]
-  N29[&quot;SendGrid v3 API (primary) │  │  Nodemailer SMTP (fallback)&quot;]
-  N30[&quot;Transactional email only  │  │  Activates after 3 consec.&quot;]
-  N31[&quot;SPF + DKIM configured     │  │  SendGrid failures&quot;]
-  N32[&quot;GitHub Actions (CI/CD)    │  │  S3-compatible (DB backups)&quot;]
-  N33[&quot;Test  Build  Deploy     │  │  Supabase automated daily&quot;]
-  N1 --&gt; N2
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N10
-  N10 --&gt; N14
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26
-  N26 --&gt; N27
-  N27 --&gt; N28
-  N29 --&gt; N30
-  N30 --&gt; N31
-  N32 --&gt; N33</pre>
+<div class="diagram-container"><pre class="mermaid">graph TD
+  N0[&quot;Guest Player&lt;br/&gt;(no token)&quot;]
+  N1[&quot;Pet Owner&lt;br/&gt;(URL token)&quot;]
+  N2[&quot;Competitive Player&lt;br/&gt;(token + arena)&quot;]
+  N3[&quot;Admin Operator&lt;br/&gt;(TOTP session)&quot;]
+  N4[&quot;CDN / Edge (Vercel)&lt;br/&gt;┌───────────────────────────────┐    ┌────────────────────────────────────────┐&lt;br/&gt;│  Player App                   │    │  Admin Portal                          │&lt;br/&gt;│  React 18 + Phaser.js 3       │    │  Vue 3 + Element Plus                  │&lt;br/&gt;│  Vite 5 / TypeScript 5        │    │  Vite 5 / TypeScript 5                 │&lt;br/&gt;└──────────────┬────────────────┘    └──────────────────────┬─────────────────┘&quot;]
+  N0 --&gt;|&quot;└─────────┼───────────────────┼────────────────────────┼───────────────────┼─────────┘&quot;| N4
+  N1 --&gt;|&quot;└─────────┼───────────────────┼────────────────────────┼───────────────────┼─────────┘&quot;| N4
+  N2 --&gt;|&quot;└─────────┼───────────────────┼────────────────────────┼───────────────────┼─────────┘&quot;| N4
+  N3 --&gt;|&quot;└─────────┼───────────────────┼────────────────────────┼───────────────────┼─────────┘&quot;| N4</pre></div>
 <hr>
 <h2 id="2-component-architecture">§2. Component Architecture</h2>
 <h3 id="21-frontend-architecture-react--phaserjs-player-app">§2.1 Frontend Architecture (React + Phaser.js Player App)</h3>
@@ -451,124 +493,48 @@
 <tr><td>Form state</td><td>React Hook Form + Zod</td><td>ClaimEmailForm, ClaimCodeForm</td></tr>
 </table>
 <p><strong>Component Hierarchy Summary</strong>:</p>
-<pre class="mermaid">graph TD
-  N0[&quot;App&quot;]
-  N1[&quot;Layout&quot;]
-  N2[&quot;NavBar (hasPetToken prop — shows/hides pet links)&quot;]
-  N3[&quot;Router (React Router v6)&quot;]
-  N4[&quot;LandingPage (/)&quot;]
-  N5[&quot;PetCanvas           Phaser.js instance (PetCanvasEngine — sole Phaser import boundary)&quot;]
-  N6[&quot;RarityHint&quot;]
-  N7[&quot;ClaimCTA&quot;]
-  N8[&quot;SocialProofCounter&quot;]
-  N9[&quot;ClaimPage (/claim)&quot;]
-  N10[&quot;ClaimFlow (3-step compound — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)&quot;]
-  N11[&quot;ClaimEmailForm&quot;]
-  N12[&quot;ClaimCodeForm&quot;]
-  N13[&quot;URLReveal&quot;]
-  N14[&quot;PetPage (/pet/:petId)&quot;]
-  N15[&quot;PetCanvas&quot;]
-  N16[&quot;RarityBadge&quot;]
-  N17[&quot;StatsPanel  StatBar ×3&quot;]
-  N18[&quot;TrainingEntry&quot;]
-  N19[&quot;FoodInventory  FoodItem ×N&quot;]
-  N20[&quot;ArenaEntry&quot;]
-  N21[&quot;NeglectedState (if last_trained_at &gt; 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)&quot;]
-  N22[&quot;TrainingPage (/pet/:petId/train)&quot;]
-  N23[&quot;TrainingActions  TrainingActionCard ×3 (TRAINING_ACTIONS_PER_DAY = 3)&quot;]
-  N24[&quot;StatChangeIndicator (visible TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s)&quot;]
-  N25[&quot;DailyResetTimer&quot;]
-  N26[&quot;TrainingStreak&quot;]
-  N27[&quot;BattleRecordsPage (/pet/:petId/records)&quot;]
-  N28[&quot;PetSummaryCard&quot;]
-  N29[&quot;BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)&quot;]
-  N30[&quot;ArenaPage (/arena)&quot;]
-  N31[&quot;ModeSelector (RACE / SUMO)&quot;]
-  N32[&quot;MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)&quot;]
-  N33[&quot;BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)&quot;]
-  N34[&quot;BattleResultPage (/arena/result/:battleId)&quot;]
-  N35[&quot;BattleResultCard (WIN/LOSS variants)&quot;]
-  N36[&quot;[OQ-E05 open: Open Graph card generation method TBD]&quot;]
-  N37[&quot;LeaderboardPage (/leaderboard)&quot;]
-  N38[&quot;RarityFilter&quot;]
-  N39[&quot;LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100)  LeaderboardRow ×100&quot;]
-  N40[&quot;OwnerRankBanner&quot;]
-  N41[&quot;MarketplacePage (/marketplace)   FF_MARKETPLACE only&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26
-  N26 --&gt; N27
-  N27 --&gt; N28
-  N28 --&gt; N29
-  N29 --&gt; N30
-  N30 --&gt; N31
-  N31 --&gt; N32
-  N32 --&gt; N33
-  N33 --&gt; N34
-  N34 --&gt; N35
-  N35 --&gt; N36
-  N36 --&gt; N37
-  N37 --&gt; N38
-  N38 --&gt; N39
-  N39 --&gt; N40
-  N40 --&gt; N41
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N18
-  N0 --&gt; N20
-  N0 --&gt; N21
-  N0 --&gt; N22
-  N0 --&gt; N24
-  N0 --&gt; N25
-  N0 --&gt; N26
-  N0 --&gt; N27
-  N0 --&gt; N28
-  N0 --&gt; N29
-  N0 --&gt; N30
-  N0 --&gt; N31
-  N0 --&gt; N32
-  N0 --&gt; N33
-  N0 --&gt; N34
-  N0 --&gt; N35
-  N0 --&gt; N36
-  N0 --&gt; N37
-  N0 --&gt; N38
-  N0 --&gt; N40</pre>
+<pre><code class="">App
+├── Layout
+│   ├── NavBar (hasPetToken prop — shows/hides pet links)
+│   └── Router (React Router v6)
+│       ├── LandingPage (/)
+│       │   ├── PetCanvas          ← Phaser.js instance (PetCanvasEngine — sole Phaser import boundary)
+│       │   ├── RarityHint
+│       │   ├── ClaimCTA
+│       │   └── SocialProofCounter
+│       ├── ClaimPage (/claim)
+│       │   └── ClaimFlow (3-step compound — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+│       │       ├── ClaimEmailForm
+│       │       ├── ClaimCodeForm
+│       │       └── URLReveal
+│       ├── PetPage (/pet/:petId)
+│       │   ├── PetCanvas
+│       │   ├── RarityBadge
+│       │   ├── StatsPanel → StatBar ×3
+│       │   ├── TrainingEntry
+│       │   ├── FoodInventory → FoodItem ×N
+│       │   ├── ArenaEntry
+│       │   └── NeglectedState (if last_trained_at &gt; 3 days — TRAINING_NEGLECT_THRESHOLD_DAYS = 3)
+│       ├── TrainingPage (/pet/:petId/train)
+│       │   ├── TrainingActions → TrainingActionCard ×3 (TRAINING_ACTIONS_PER_DAY = 3)
+│       │   ├── StatChangeIndicator (visible TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2 s)
+│       │   ├── DailyResetTimer
+│       │   └── TrainingStreak
+│       ├── BattleRecordsPage (/pet/:petId/records)
+│       │   ├── PetSummaryCard
+│       │   └── BattleHistoryTable (last 20 — ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
+│       ├── ArenaPage (/arena)
+│       │   ├── ModeSelector (RACE / SUMO)
+│       │   ├── MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)
+│       │   └── BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)
+│       ├── BattleResultPage (/arena/result/:battleId)
+│       │   ├── BattleResultCard (WIN/LOSS variants)
+│       │   └── [OQ-E05 open: Open Graph card generation method TBD]
+│       ├── LeaderboardPage (/leaderboard)
+│       │   ├── RarityFilter
+│       │   ├── LeaderboardTable (top 100 — LEADERBOARD_TOP_DISPLAY = 100) → LeaderboardRow ×100
+│       │   └── OwnerRankBanner
+│       └── MarketplacePage (/marketplace)  ← FF_MARKETPLACE only</code></pre>
 <p><strong>Pixel Art Rendering</strong>:</p>
 <ul><li>Engine: Phaser.js 3, isolated in <code>PetCanvasEngine</code> class. No other component may import Phaser directly.</li><li>Sprites: 32×32 px per frame (SPRITE_RESOLUTION_PX = 32), PNG with transparency</li><li>CSS: <code>image-rendering: pixelated</code> + <code>image-rendering: crisp-edges</code> on canvas element</li><li>FPS target: ≥ 30 FPS sustained (PET_ANIMATION_FPS_MIN = 30)</li><li>Reduced motion: <code>prefers-reduced-motion: reduce</code> → static sprite, no particles</li><li>WebGL unavailable: Canvas 2D fallback rendering with static sprite image (no animation)</li><li>Pet render on load: ≤ 2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)</li></ul>
 <p><strong>Performance Targets</strong>:</p>
@@ -1148,35 +1114,10 @@ GET /api/v1/leaderboard        │                          │               �
 <p><strong>Monthly Infrastructure Cost at DAU ≤ 5,000</strong>: $50–$200 (SERVER_COST_DAU5K_MONTHLY_MIN_USD = 50; SERVER_COST_DAU5K_MONTHLY_MAX_USD = 200). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000).</p>
 <hr>
 <h3 id="72-cicd-pipeline">§7.2 CI/CD Pipeline</h3>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;GitHub Repository&quot;]
-  N1[&quot;git push to main / pull_request&quot;]
-  N2[&quot;▼&quot;]
-  N3[&quot;GitHub Actions — test job&quot;]
-  N4[&quot;1. pnpm install (all workspaces)&quot;]
-  N5[&quot;2. pnpm run type-check (TypeScript 5 strict)&quot;]
-  N6[&quot;3. pnpm run lint (ESLint — max-lines=800, max-lines-per-function=50)&quot;]
-  N7[&quot;4. pnpm run test:unit (Vitest, min 80% coverage — UNIT_TEST_COVERAGE_MIN_PERCENT)&quot;]
-  N8[&quot;5. pnpm run test:integration (Vitest + test PostgreSQL + test Redis)&quot;]
-  N9[&quot;[tests pass]&quot;]
-  N10[&quot;GitHub Actions — build job&quot;]
-  N11[&quot;1. pnpm run build (Vite — player-app, admin-app)&quot;]
-  N12[&quot;2. docker build --target runtime (node:20-alpine multi-stage)&quot;]
-  N13[&quot;3. docker push ghcr.io/pixel-pet-arena/api:sha-{commit}&quot;]
-  N14[&quot;[build succeeds]  [on: push to main only]&quot;]
-  N15[&quot;GitHub Actions — deploy-staging job&quot;]
-  N16[&quot;1. Deploy API image to Railway (staging environment)&quot;]
-  N17[&quot;2. pnpm run db:migrate --env staging (node-pg-migrate, idempotent)&quot;]
-  N18[&quot;3. Deploy player-app build to Vercel (staging)&quot;]
-  N19[&quot;4. Deploy admin-app build to Vercel (staging)&quot;]
-  N20[&quot;5. Run Playwright smoke tests (key user flows)&quot;]
-  N21[&quot;[staging healthy]  [manual approval gate]&quot;]
-  N22[&quot;GitHub Actions — deploy-production job&quot;]
-  N23[&quot;1. Deploy API image to Railway (production)&quot;]
-  N24[&quot;2. pnpm run db:migrate --env production&quot;]
-  N25[&quot;3. Deploy player-app and admin-app to Vercel (production)&quot;]
-  N26[&quot;4. Run Playwright smoke tests (production URLs)&quot;]
-  N27[&quot;5. Notify Slack channel on success / failure&quot;]</pre>
+  N1[&quot;GitHub Actions — deploy-production job&lt;br/&gt;1. Deploy API image to Railway (production)&lt;br/&gt;2. pnpm run db:migrate --env production&lt;br/&gt;3. Deploy player-app and admin-app to Vercel (production)&lt;br/&gt;4. Run Playwright smoke tests (production URLs)&lt;br/&gt;5. Notify Slack channel on success / failure&quot;]
+  N0 --&gt;|&quot;git push to main / pull_request&quot;| N1</pre></div>
 <p><strong>Key CI Quality Gates</strong>:</p>
 <ul><li>Unit test coverage minimum 80% (UNIT_TEST_COVERAGE_MIN_PERCENT = 80)</li><li>Module line limit 800 (CODE_MODULE_MAX_LINES = 800); function line limit 50 (CODE_FUNCTION_MAX_LINES = 50) — enforced by ESLint, CI fails on violation</li><li><code>EXPLAIN ANALYZE</code> gate for any new query touching tables &gt; 10k rows</li><li>Playwright E2E visual regression at breakpoints 320, 768, 1024, 1440px</li></ul>
 <hr>

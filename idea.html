@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link active" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html" target="prototype-window">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🎮 API Explorer</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,7 +425,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#0-input-source輸入素材說明">§0 Input Source（輸入素材說明）</a></li><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#1-idea-essence核心本質">1. Idea Essence（核心本質）</a></li><li><a class="toc__link toc__link--h3" href="#11-一句話描述elevator-pitch">1.1 一句話描述（Elevator Pitch）</a></li><li><a class="toc__link toc__link--h3" href="#12-核心假說lean-hypothesis">1.2 核心假說（Lean Hypothesis）</a></li><li><a class="toc__link toc__link--h3" href="#13-成功願景success-vision">1.3 成功願景（Success Vision）</a></li><li><a class="toc__link toc__link--h3" href="#14-innovation-type-classification創新類型分類">1.4 Innovation Type Classification（創新類型分類）</a></li><li><a class="toc__link" href="#2-problem-statement問題陳述">2. Problem Statement（問題陳述）</a></li><li><a class="toc__link toc__link--h3" href="#21-現狀描述as-is-narrative">2.1 現狀描述（As-Is Narrative）</a></li><li><a class="toc__link toc__link--h3" href="#22-根本原因分析5-whys">2.2 根本原因分析（5 Whys）</a></li><li><a class="toc__link toc__link--h3" href="#23-問題規模量化估算">2.3 問題規模（量化估算）</a></li><li><a class="toc__link" href="#3-target-users目標使用者">3. Target Users（目標使用者）</a></li><li><a class="toc__link toc__link--h3" href="#31-主要使用者群q1-澄清結果">3.1 主要使用者群（Q1 澄清結果）</a></li><li><a class="toc__link toc__link--h3" href="#32-jobs-to-be-done用戶核心任務">3.2 Jobs to Be Done（用戶核心任務）</a></li><li><a class="toc__link toc__link--h3" href="#33-非目標使用者not-our-users">3.3 非目標使用者（Not Our Users）</a></li><li><a class="toc__link" href="#4-value-hypothesis價值假說">4. Value Hypothesis（價值假說）</a></li><li><a class="toc__link toc__link--h3" href="#41-核心價值主張value-proposition-canvas">4.1 核心價值主張（Value Proposition Canvas）</a></li><li><a class="toc__link toc__link--h3" href="#42-差異化定位">4.2 差異化定位</a></li><li><a class="toc__link" href="#5-mvp--learning-plan最小可行驗證計畫">5. MVP &amp;amp; Learning Plan（最小可行驗證計畫）</a></li><li><a class="toc__link toc__link--h3" href="#51-mvp-邊界定義">5.1 MVP 邊界定義</a></li><li><a class="toc__link toc__link--h3" href="#52-validation-metrics驗證指標pre-brd-階段">5.2 Validation Metrics（驗證指標，Pre-BRD 階段）</a></li><li><a class="toc__link toc__link--h3" href="#53-riskiest-assumption最高風險假設leap-of-faith">5.3 Riskiest Assumption（最高風險假設，Leap of Faith）</a></li><li><a class="toc__link" href="#6-clarification-interview-record澄清訪談記錄">6. Clarification Interview Record（澄清訪談記錄）</a></li><li><a class="toc__link toc__link--h3" href="#q1--主要使用者">Q1 — 主要使用者</a></li><li><a class="toc__link toc__link--h3" href="#q2--核心痛點">Q2 — 核心痛點</a></li><li><a class="toc__link toc__link--h3" href="#q3--技術限制或偏好">Q3 — 技術限制或偏好</a></li><li><a class="toc__link toc__link--h3" href="#q4--預估流量規模pm-expert-研究推估">Q4 — 預估流量規模（PM Expert 研究推估）</a></li><li><a class="toc__link toc__link--h3" href="#q5--其他補充說明動態追問">Q5 — 其他補充說明（動態追問）</a></li><li><a class="toc__link toc__link--h3" href="#原始-idea使用者輸入原文逐字保留">原始 IDEA（使用者輸入原文，逐字保留）</a></li><li><a class="toc__link" href="#7-market--competitive-intelligence市場與競品情報">7. Market &amp;amp; Competitive Intelligence（市場與競品情報）</a></li><li><a class="toc__link toc__link--h3" href="#71-競品--參考資源">7.1 競品 / 參考資源</a></li><li><a class="toc__link toc__link--h3" href="#72-技術生態建議">7.2 技術生態建議</a></li><li><a class="toc__link toc__link--h3" href="#73-研究來源">7.3 研究來源</a></li><li><a class="toc__link" href="#8-initial-risk-assessment初始風險評估">8. Initial Risk Assessment（初始風險評估）</a></li><li><a class="toc__link toc__link--h3" href="#81-風險矩陣">8.1 風險矩陣</a></li><li><a class="toc__link toc__link--h3" href="#82-kill-conditions專案終止條件">8.2 Kill Conditions（專案終止條件）</a></li><li><a class="toc__link toc__link--h3" href="#83-dependencies--external-risks依賴與外部風險">8.3 Dependencies &amp;amp; External Risks（依賴與外部風險）</a></li><li><a class="toc__link toc__link--h3" href="#84-pre-mortem-exercise失敗前情境模擬">8.4 Pre-mortem Exercise（失敗前情境模擬）</a></li><li><a class="toc__link" href="#9-business-potential初步商業潛力">9. Business Potential（初步商業潛力）</a></li><li><a class="toc__link toc__link--h3" href="#91-商業模式假說">9.1 商業模式假說</a></li><li><a class="toc__link toc__link--h3" href="#92-戰略對齊">9.2 戰略對齊</a></li><li><a class="toc__link" href="#10-executive-sponsorship--stakeholder-alignment執行贊助與關鍵利害關係人對齊">10. Executive Sponsorship &amp;amp; Stakeholder Alignment（執行贊助與關鍵利害關係人對齊）</a></li><li><a class="toc__link toc__link--h3" href="#101-executive-sponsor">10.1 Executive Sponsor</a></li><li><a class="toc__link toc__link--h3" href="#102-stakeholder-pre-alignment-matrix">10.2 Stakeholder Pre-alignment Matrix</a></li><li><a class="toc__link toc__link--h3" href="#103-communication-plan溝通計畫">10.3 Communication Plan（溝通計畫）</a></li><li><a class="toc__link" href="#11-idea-quality-score構想品質評分">11. IDEA Quality Score（構想品質評分）</a></li><li><a class="toc__link" href="#12-critical-assumptions關鍵假設清單">12. Critical Assumptions（關鍵假設清單）</a></li><li><a class="toc__link" href="#13-open-questions待解問題">13. Open Questions（待解問題）</a></li><li><a class="toc__link" href="#14-idea--brd-handoff-checklist">14. IDEA → BRD Handoff Checklist</a></li><li><a class="toc__link" href="#15-traceability-note溯源說明">15. Traceability Note（溯源說明）</a></li><li><a class="toc__link" href="#appendix-aresearch-raw-data研究原始資料">Appendix A：Research Raw Data（研究原始資料）</a></li><li><a class="toc__link toc__link--h3" href="#搜尋-1競品與開源專案">搜尋 1：競品與開源專案</a></li><li><a class="toc__link toc__link--h3" href="#搜尋-2技術最佳實踐">搜尋 2：技術最佳實踐</a></li><li><a class="toc__link toc__link--h3" href="#搜尋-3已知挑戰與陷阱">搜尋 3：已知挑戰與陷阱</a></li><li><a class="toc__link" href="#appendix-bdocument-history">Appendix B：Document History</a></li><li><a class="toc__link" href="#appendix-c素材清單">Appendix C：素材清單</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="idea-document-template">IDEA Document Template</h1>
@@ -794,18 +886,12 @@ Week 3：數據分析，決策：
 <h2 id="15-traceability-note溯源說明">15. Traceability Note（溯源說明）</h2>
 <p><em>此文件是需求鏈的起點，扮演「原始意圖記錄者」的角色。</em></p>
 <p><strong>向下追溯（Forward）：</strong></p>
-<pre class="mermaid">graph TD
-  N0[&quot;IDEA.md （本文件）&quot;]
-  N1[&quot;BRD.md        /gendoc brd（由 /gendoc-auto 自動生成）&quot;]
-  N2[&quot;PRD.md       /gendoc prd&quot;]
-  N3[&quot;PDD.md       /gendoc pdd&quot;]
-  N4[&quot;EDD.md       /gendoc edd&quot;]
-  N5[&quot;ARCH / API / SCHEMA / BDD  實作&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5</pre>
+<pre><code class="">IDEA.md （本文件）
+  └─► BRD.md       ← /gendoc brd（由 /gendoc-auto 自動生成）
+        └─► PRD.md      ← /gendoc prd
+              └─► PDD.md      ← /gendoc pdd
+                    └─► EDD.md      ← /gendoc edd
+                          └─► ARCH / API / SCHEMA / BDD → 實作</code></pre>
 <p><strong>素材來源追溯：</strong></p>
 <table>
 <tr><th>章節</th><th>來源素材</th><th>素材類型</th></tr>

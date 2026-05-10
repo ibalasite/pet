@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html" target="prototype-window">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🎮 API Explorer</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,7 +425,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-概述">1. 概述</a></li><li><a class="toc__link toc__link--h3" href="#11-schema-boundary-declaration">1.1 Schema Boundary Declaration</a></li><li><a class="toc__link" href="#2-通用欄位規範">2. 通用欄位規範</a></li><li><a class="toc__link toc__link--h3" href="#21-命名慣例">2.1 命名慣例</a></li><li><a class="toc__link toc__link--h3" href="#22-所有資料表必含的基礎欄位">2.2 所有資料表必含的基礎欄位</a></li><li><a class="toc__link toc__link--h3" href="#23-主鍵-id-策略">2.3 主鍵 ID 策略</a></li><li><a class="toc__link toc__link--h3" href="#24-軟刪除模式soft-delete">2.4 軟刪除模式（Soft Delete）</a></li><li><a class="toc__link" href="#3-資料表定義">3. 資料表定義</a></li><li><a class="toc__link toc__link--h3" href="#31-claim_identities--identity-bc-owns-this-table">3.1 claim_identities — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#32-pets--pet-bc-owns-this-table">3.2 pets — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#33-claim_codes--identity-bc-owns-this-table">3.3 claim_codes — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#34-arena_matches--arena-bc-owns-this-table">3.4 arena_matches — Arena BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#35-leaderboard_snapshots--leaderboard-bc-owns-this-table">3.5 leaderboard_snapshots — Leaderboard BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#36-training_logs--pet-bc-owns-this-table">3.6 training_logs — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#37-food_buffs--pet-bc-owns-this-table">3.7 food_buffs — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#38-marketplace_listings--marketplace-bc-owns-this-table">3.8 marketplace_listings — Marketplace BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#39-marketplace_transactions--marketplace-bc-owns-this-table">3.9 marketplace_transactions — Marketplace BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#310-admin_users--admin-bc-owns-this-table">3.10 admin_users — Admin BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#311-audit_logs--admin-bc-owns-this-table">3.11 audit_logs — Admin BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#312-gdpr_requests--identity-bc-owns-this-table">3.12 gdpr_requests — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#313-enums">3.13 Enums</a></li><li><a class="toc__link" href="#4-正規化規則normalization-rules">4. 正規化規則（Normalization Rules）</a></li><li><a class="toc__link toc__link--h3" href="#41-各正規化形式說明">4.1 各正規化形式說明</a></li><li><a class="toc__link toc__link--h3" href="#42-刻意反正規化intentional-denormalization">4.2 刻意反正規化（Intentional Denormalization）</a></li><li><a class="toc__link" href="#5-索引策略indexing-strategy">5. 索引策略（Indexing Strategy）</a></li><li><a class="toc__link toc__link--h3" href="#51-何時建立索引">5.1 何時建立索引</a></li><li><a class="toc__link toc__link--h3" href="#52-索引類型選用表">5.2 索引類型選用表</a></li><li><a class="toc__link toc__link--h3" href="#53-複合索引欄位順序規則">5.3 複合索引欄位順序規則</a></li><li><a class="toc__link toc__link--h3" href="#54-partial-index-應用">5.4 Partial Index 應用</a></li><li><a class="toc__link toc__link--h3" href="#55-索引膨脹index-bloat監控">5.5 索引膨脹（Index Bloat）監控</a></li><li><a class="toc__link" href="#6-稽核與合規audit--compliance">6. 稽核與合規（Audit &amp;amp; Compliance）</a></li><li><a class="toc__link toc__link--h3" href="#61-標準稽核日誌表">6.1 標準稽核日誌表</a></li><li><a class="toc__link toc__link--h3" href="#62-自動稽核-patternapplication-layer">6.2 自動稽核 Pattern（Application Layer）</a></li><li><a class="toc__link toc__link--h3" href="#63-gdpr--個資保護">6.3 GDPR / 個資保護</a></li><li><a class="toc__link" href="#7-效能設計performance-design">7. 效能設計（Performance Design）</a></li><li><a class="toc__link toc__link--h3" href="#71-查詢效能基準表">7.1 查詢效能基準表</a></li><li><a class="toc__link toc__link--h3" href="#72-n1-查詢防護">7.2 N+1 查詢防護</a></li><li><a class="toc__link toc__link--h3" href="#73-連線池大小公式">7.3 連線池大小公式</a></li><li><a class="toc__link toc__link--h3" href="#74-read-replica-路由規則">7.4 Read Replica 路由規則</a></li><li><a class="toc__link" href="#8-migration-策略migration-strategy">8. Migration 策略（Migration Strategy）</a></li><li><a class="toc__link toc__link--h3" href="#81-命名規範">8.1 命名規範</a></li><li><a class="toc__link toc__link--h3" href="#82-零停機-migration-模式expand-contract-pattern">8.2 零停機 Migration 模式（Expand-Contract Pattern）</a></li><li><a class="toc__link toc__link--h3" href="#83-大表新增欄位4-步驟無鎖流程">8.3 大表新增欄位（4 步驟無鎖流程）</a></li><li><a class="toc__link toc__link--h3" href="#84-各-migration-類型的-rollback-策略">8.4 各 Migration 類型的 Rollback 策略</a></li><li><a class="toc__link toc__link--h3" href="#85-migration-測試檢查清單">8.5 Migration 測試檢查清單</a></li><li><a class="toc__link" href="#9-資料完整性約束data-integrity-constraints">9. 資料完整性約束（Data Integrity Constraints）</a></li><li><a class="toc__link toc__link--h3" href="#91-外鍵-on-delete-行為選用">9.1 外鍵 ON DELETE 行為選用</a></li><li><a class="toc__link toc__link--h3" href="#92-check-約束範例">9.2 CHECK 約束範例</a></li><li><a class="toc__link toc__link--h3" href="#93-unique-約束-vs-unique-index">9.3 Unique 約束 vs Unique Index</a></li><li><a class="toc__link toc__link--h3" href="#94-延遲約束deferred-constraints">9.4 延遲約束（Deferred Constraints）</a></li><li><a class="toc__link toc__link--h3" href="#95-跨-bc-fk-禁止spring-modulith-hc-1">9.5 跨 BC FK 禁止（Spring Modulith HC-1）</a></li><li><a class="toc__link" href="#10-分區策略sharding--partitioning">10. 分區策略（Sharding &amp;amp; Partitioning）</a></li><li><a class="toc__link toc__link--h3" href="#101-分區策略決策矩陣">10.1 分區策略決策矩陣</a></li><li><a class="toc__link toc__link--h3" href="#102-分區鍵選擇準則">10.2 分區鍵選擇準則</a></li><li><a class="toc__link toc__link--h3" href="#103-分區範例規劃中">10.3 分區範例（規劃中）</a></li><li><a class="toc__link toc__link--h3" href="#104-跨分區查詢注意事項">10.4 跨分區查詢注意事項</a></li><li><a class="toc__link" href="#11-備份與復原backup--recovery">11. 備份與復原（Backup &amp;amp; Recovery）</a></li><li><a class="toc__link toc__link--h3" href="#111-備份策略表">11.1 備份策略表</a></li><li><a class="toc__link toc__link--h3" href="#112-point-in-time-recoverypitr設定">11.2 Point-in-Time Recovery（PITR）設定</a></li><li><a class="toc__link toc__link--h3" href="#113-備份驗證程序">11.3 備份驗證程序</a></li><li><a class="toc__link" href="#12-redis-key-schema">12. Redis Key Schema</a></li><li><a class="toc__link toc__link--h3" href="#121-rate-limit-counters">12.1 Rate Limit Counters</a></li><li><a class="toc__link toc__link--h3" href="#122-arena-matchmaking-queue">12.2 Arena Matchmaking Queue</a></li><li><a class="toc__link toc__link--h3" href="#123-session-storage">12.3 Session Storage</a></li><li><a class="toc__link toc__link--h3" href="#124-leaderboard-sorted-set">12.4 Leaderboard Sorted Set</a></li><li><a class="toc__link toc__link--h3" href="#125-config-cache">12.5 Config Cache</a></li><li><a class="toc__link" href="#13-data-retention-policy">13. Data Retention Policy</a></li><li><a class="toc__link toc__link--h3" href="#131-schema-刪除安全模式schema-deletion-safety">13.1 Schema 刪除安全模式（Schema Deletion Safety）</a></li><li><a class="toc__link" href="#14-er-diagram">14. ER Diagram</a></li><li><a class="toc__link" href="#15-資料量估算">15. 資料量估算</a></li><li><a class="toc__link" href="#16-敏感資料清單sensitive-data-inventory">16. 敏感資料清單（Sensitive Data Inventory）</a></li><li><a class="toc__link" href="#17-multi-tenancy-data-isolation-strategies">17. Multi-Tenancy Data Isolation Strategies</a></li><li><a class="toc__link" href="#18-schema-審查檢查清單">18. Schema 審查檢查清單</a></li><li><a class="toc__link toc__link--h3" href="#命名與結構">命名與結構</a></li><li><a class="toc__link toc__link--h3" href="#正規化與完整性">正規化與完整性</a></li><li><a class="toc__link toc__link--h3" href="#索引">索引</a></li><li><a class="toc__link toc__link--h3" href="#安全與合規">安全與合規</a></li><li><a class="toc__link toc__link--h3" href="#效能">效能</a></li><li><a class="toc__link toc__link--h3" href="#migration">Migration</a></li><li><a class="toc__link toc__link--h3" href="#稽核與監控">稽核與監控</a></li><li><a class="toc__link toc__link--h3" href="#ha--replication--read-write-split必查">HA / Replication / Read-Write Split（必查）</a></li><li><a class="toc__link toc__link--h3" href="#bounded-context-隔離spring-modulith-hc-1必查">Bounded Context 隔離（Spring Modulith HC-1，必查）</a></li><li><a class="toc__link" href="#19-indexes--performance-notescross-reference">19. Indexes &amp;amp; Performance Notes（Cross-Reference）</a></li><li><a class="toc__link toc__link--h3" href="#191-partial-indexes-總覽">19.1 Partial Indexes 總覽</a></li><li><a class="toc__link toc__link--h3" href="#192-composite-indexes">19.2 Composite Indexes</a></li><li><a class="toc__link toc__link--h3" href="#193-single-column-support-indexes">19.3 Single-Column Support Indexes</a></li><li><a class="toc__link toc__link--h3" href="#194-hot-path-query-patterns">19.4 Hot-Path Query Patterns</a></li><li><a class="toc__link" href="#20-database-observability--health-monitoring">20. Database Observability &amp;amp; Health Monitoring</a></li><li><a class="toc__link toc__link--h3" href="#201-關鍵監控查詢">20.1 關鍵監控查詢</a></li><li><a class="toc__link toc__link--h3" href="#202-alerting-thresholds">20.2 Alerting Thresholds</a></li><li><a class="toc__link toc__link--h3" href="#203-replica-lag-監控與降級">20.3 Replica Lag 監控與降級</a></li><li><a class="toc__link toc__link--h3" href="#204-health-check-端點">20.4 Health Check 端點</a></li><li><a class="toc__link toc__link--h3" href="#205-datadog-dashboard-配置">20.5 Datadog Dashboard 配置</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="schema--database-schema-design-document">SCHEMA — Database Schema Design Document</h1>
