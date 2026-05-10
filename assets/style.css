@@ -33,7 +33,7 @@
   /* 尺寸：sidebar 固定，content 填滿剩餘空間，無最大寬度上限（4K 友好） */
   --nav-h: 56px;
   --sidebar-w: 260px;
-  --content-pad-h: 3rem;  /* 內容左右 padding */
+  --content-pad-h: 3rem;
 }
 
 @media (min-width: 1440px) {
@@ -243,7 +243,7 @@ body {
 
 .doc-content {
   padding: 2.5rem var(--content-pad-h);
-  width: 100%;          /* 填滿 1fr，隨螢幕自動擴展，不設 max-width */
+  width: 100%;
   background: transparent;
 }
 
@@ -363,13 +363,6 @@ body {
   border-color: var(--accent);
   box-shadow: 0 2px 8px rgba(45,158,245,0.15);
 }
-/* PUML SVG: 不被 inline width/height 鎖死，讓容器控制寬度避免左右空白 */
-.diagram-container--puml svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-}
 
 /* Lightbox */
 .lightbox {
@@ -399,63 +392,6 @@ body {
   color: white;
   cursor: pointer;
   line-height: 1;
-  z-index: 1010;
-}
-/* Lightbox zoom container — wrap content for transform */
-.lightbox__zoom-content {
-  width: 95vw;
-  height: 90vh;
-  overflow: hidden;
-  position: relative;
-  background: var(--content-bg);
-  border-radius: 8px;
-  cursor: grab;
-}
-.lightbox__zoom-content.dragging { cursor: grabbing; }
-.lightbox__zoom-content > * {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: 0 0;
-  user-select: none;
-  -webkit-user-select: none;
-}
-/* Operation hint — top center */
-.lightbox__hint {
-  position: absolute;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.6);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  z-index: 1010;
-  pointer-events: none;
-}
-/* Zoom controls — bottom center */
-.lightbox__controls {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  z-index: 1010;
-}
-.lightbox__controls button {
-  background: rgba(0,0,0,0.6);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 4px;
-  width: 2.5rem;
-  height: 2.5rem;
-  font-size: 1.25rem;
-  cursor: pointer;
-}
-.lightbox__controls button:hover {
-  background: rgba(255,255,255,0.2);
 }
 
 /* Index grid */
@@ -494,7 +430,7 @@ body {
   .doc-content { padding: 1.5rem 1rem; }
   .search-input { width: 140px; }
   .doc-page-banner { padding: 1.5rem 1rem 1rem; }
-  .nav-gh-link { display: none; }  /* 小螢幕隱藏，省空間 */
+  .nav-gh-link { display: none; }
 }
 
 /* ─── Badge Fallback ─────────────────────────── */
