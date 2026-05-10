@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html" target="prototype-window">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🎮 API Explorer</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,7 +425,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-client-overview">§1 Client Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-engine--framework-summary">§1.1 Engine / Framework Summary</a></li><li><a class="toc__link toc__link--h3" href="#12-selection-rationale">§1.2 Selection Rationale</a></li><li><a class="toc__link toc__link--h3" href="#13-backend-integration">§1.3 Backend Integration</a></li><li><a class="toc__link" href="#2-project-structure">§2 Project Structure</a></li><li><a class="toc__link toc__link--h3" href="#21-directory-structure">§2.1 Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#22-naming-conventions">§2.2 Naming Conventions</a></li><li><a class="toc__link" href="#3-page--view-structure">§3 Page / View Structure</a></li><li><a class="toc__link toc__link--h3" href="#31-page-list">§3.1 Page List</a></li><li><a class="toc__link toc__link--h3" href="#32-component-tree-structure">§3.2 Component Tree Structure</a></li><li><a class="toc__link toc__link--h3" href="#33-page-transition-logic">§3.3 Page Transition Logic</a></li><li><a class="toc__link" href="#4-asset-pipeline">§4 Asset Pipeline</a></li><li><a class="toc__link toc__link--h3" href="#41-asset-directory-structure">§4.1 Asset Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#42-asset-naming-conventions">§4.2 Asset Naming Conventions</a></li><li><a class="toc__link toc__link--h3" href="#43-asset-loading-strategy">§4.3 Asset Loading Strategy</a></li><li><a class="toc__link toc__link--h3" href="#44-asset-budget">§4.4 Asset Budget</a></li><li><a class="toc__link" href="#5-animation-integration">§5 Animation Integration</a></li><li><a class="toc__link toc__link--h3" href="#51-animation-list">§5.1 Animation List</a></li><li><a class="toc__link toc__link--h3" href="#52-animation-trigger-map">§5.2 Animation Trigger Map</a></li><li><a class="toc__link toc__link--h3" href="#53-animation-state-machine">§5.3 Animation State Machine</a></li><li><a class="toc__link toc__link--h3" href="#54-animation-performance-rules">§5.4 Animation Performance Rules</a></li><li><a class="toc__link" href="#6-audio-integration">§6 Audio Integration</a></li><li><a class="toc__link toc__link--h3" href="#61-audio-list-phase-2--planned">§6.1 Audio List (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#62-audio-trigger-map-phase-2--planned">§6.2 Audio Trigger Map (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#63-audio-manager-architecture-phase-2--planned">§6.3 Audio Manager Architecture (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#64-audio-performance-rules-phase-2--planned">§6.4 Audio Performance Rules (Phase 2 — Planned)</a></li><li><a class="toc__link" href="#7-visual-effects-integration">§7 Visual Effects Integration</a></li><li><a class="toc__link toc__link--h3" href="#71-vfx-list">§7.1 VFX List</a></li><li><a class="toc__link toc__link--h3" href="#72-vfx-trigger-map">§7.2 VFX Trigger Map</a></li><li><a class="toc__link toc__link--h3" href="#73-vfx-performance-rules">§7.3 VFX Performance Rules</a></li><li><a class="toc__link" href="#8-ui-flow-state-machine">§8 UI Flow State Machine</a></li><li><a class="toc__link toc__link--h3" href="#81-ui-state-list">§8.1 UI State List</a></li><li><a class="toc__link toc__link--h3" href="#82-state-transition-rules">§8.2 State Transition Rules</a></li><li><a class="toc__link toc__link--h3" href="#83-loading--error--network-state-handling">§8.3 Loading / Error / Network State Handling</a></li><li><a class="toc__link" href="#9-api-integration">§9 API Integration</a></li><li><a class="toc__link toc__link--h3" href="#91-api-call-list">§9.1 API Call List</a></li><li><a class="toc__link toc__link--h3" href="#92-state-synchronisation-strategy">§9.2 State Synchronisation Strategy</a></li><li><a class="toc__link toc__link--h3" href="#93-offline--weak-network-handling">§9.3 Offline / Weak Network Handling</a></li><li><a class="toc__link" href="#10-performance-budget">§10 Performance Budget</a></li><li><a class="toc__link toc__link--h3" href="#101-rendering-performance">§10.1 Rendering Performance</a></li><li><a class="toc__link toc__link--h3" href="#102-memory-budget">§10.2 Memory Budget</a></li><li><a class="toc__link toc__link--h3" href="#103-bundle-budget">§10.3 Bundle Budget</a></li><li><a class="toc__link toc__link--h3" href="#104-code-splitting-configuration">§10.4 Code Splitting Configuration</a></li><li><a class="toc__link" href="#11-test-specification">§11 Test Specification</a></li><li><a class="toc__link toc__link--h3" href="#111-unit-test-scope">§11.1 Unit Test Scope</a></li><li><a class="toc__link toc__link--h3" href="#112-integration-test-scenarios">§11.2 Integration Test Scenarios</a></li><li><a class="toc__link toc__link--h3" href="#113-e2e-test-scenarios-playwright">§11.3 E2E Test Scenarios (Playwright)</a></li><li><a class="toc__link toc__link--h3" href="#114-performance-test-conditions">§11.4 Performance Test Conditions</a></li><li><a class="toc__link" href="#12-local-development-workflow">§12 Local Development Workflow</a></li><li><a class="toc__link toc__link--h3" href="#121-prerequisites">§12.1 Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#122-setup">§12.2 Setup</a></li><li><a class="toc__link toc__link--h3" href="#123-development-server">§12.3 Development Server</a></li><li><a class="toc__link toc__link--h3" href="#124-unit-tests">§12.4 Unit Tests</a></li><li><a class="toc__link toc__link--h3" href="#125-e2e-tests-playwright">§12.5 E2E Tests (Playwright)</a></li><li><a class="toc__link toc__link--h3" href="#126-build">§12.6 Build</a></li><li><a class="toc__link toc__link--h3" href="#127-type-checking">§12.7 Type Checking</a></li><li><a class="toc__link" href="#13-known-limitations-and-technical-debt">§13 Known Limitations and Technical Debt</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="client_impl--client-implementation-specification">CLIENT_IMPL — Client Implementation Specification</h1>
@@ -394,309 +486,121 @@
 <hr>
 <h2 id="2-project-structure">§2 Project Structure</h2>
 <h3 id="21-directory-structure">§2.1 Directory Structure</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;pixel-pet-arena/                          monorepo root&quot;]
-  N1[&quot;package.json                          pnpm workspace root&quot;]
-  N2[&quot;pnpm-workspace.yaml&quot;]
-  N3[&quot;packages/&quot;]
-  N4[&quot;shared/                           Zod schemas, domain types, constants bridge&quot;]
-  N5[&quot;src/&quot;]
-  N6[&quot;schemas/                  Shared Zod schemas (Pet, ArenaMatch, etc.)&quot;]
-  N7[&quot;types/                    Shared TypeScript interfaces&quot;]
-  N8[&quot;constants.ts              Re-exported typed constants from constants.json&quot;]
-  N9[&quot;package.json&quot;]
-  N10[&quot;apps/&quot;]
-  N11[&quot;api/                              Node.js / Fastify game + admin API&quot;]
-  N12[&quot;admin/                            Vue 3 + Element Plus (separate build — not in scope here)&quot;]
-  N13[&quot;player/                           React 18 + Phaser.js player application&quot;]
-  N14[&quot;index.html&quot;]
-  N15[&quot;vite.config.ts&quot;]
-  N16[&quot;tsconfig.json&quot;]
-  N17[&quot;vitest.config.ts&quot;]
-  N18[&quot;playwright.config.ts&quot;]
-  N19[&quot;main.tsx                  React root; QueryClient + router providers&quot;]
-  N20[&quot;App.tsx                   createBrowserRouter + Layout wrapper&quot;]
-  N21[&quot;constants.ts              Re-exports from packages/shared/constants.ts&quot;]
-  N22[&quot;components/&quot;]
-  N23[&quot;layout/&quot;]
-  N24[&quot;Layout.tsx        Header + Outlet wrapper&quot;]
-  N25[&quot;NavBar.tsx        Visibility driven by hasPetToken prop&quot;]
-  N26[&quot;landing/&quot;]
-  N27[&quot;LandingPage.tsx&quot;]
-  N28[&quot;ClaimCTA.tsx&quot;]
-  N29[&quot;RarityHint.tsx&quot;]
-  N30[&quot;SocialProofCounter.tsx&quot;]
-  N31[&quot;claim/&quot;]
-  N32[&quot;ClaimPage.tsx&quot;]
-  N33[&quot;ClaimFlow.tsx     Compound, max 3 steps (EMAIL_CLAIM_FLOW_STEPS_MAX = 3)&quot;]
-  N34[&quot;ClaimEmailForm.tsx&quot;]
-  N35[&quot;ClaimCodeForm.tsx&quot;]
-  N36[&quot;ExpiryWarning.tsx&quot;]
-  N37[&quot;URLReveal.tsx&quot;]
-  N38[&quot;pet/&quot;]
-  N39[&quot;PetPage.tsx&quot;]
-  N40[&quot;RarityBadge.tsx&quot;]
-  N41[&quot;StatsPanel.tsx&quot;]
-  N42[&quot;StatBar.tsx&quot;]
-  N43[&quot;TrainingEntry.tsx&quot;]
-  N44[&quot;FoodInventory.tsx&quot;]
-  N45[&quot;FoodItem.tsx&quot;]
-  N46[&quot;ArenaEntry.tsx&quot;]
-  N47[&quot;NeglectedState.tsx&quot;]
-  N48[&quot;training/&quot;]
-  N49[&quot;TrainingPage.tsx&quot;]
-  N50[&quot;TrainingActions.tsx&quot;]
-  N51[&quot;TrainingActionCard.tsx&quot;]
-  N52[&quot;StatChangeIndicator.tsx&quot;]
-  N53[&quot;DailyResetTimer.tsx&quot;]
-  N54[&quot;TrainingStreak.tsx&quot;]
-  N55[&quot;arena/&quot;]
-  N56[&quot;ArenaPage.tsx&quot;]
-  N57[&quot;ArenaScene.tsx    React host for Phaser arena scene&quot;]
-  N58[&quot;ModeSelector.tsx&quot;]
-  N59[&quot;PreBattlePanel.tsx&quot;]
-  N60[&quot;MatchmakingStatus.tsx&quot;]
-  N61[&quot;AIOfferModal.tsx&quot;]
-  N62[&quot;RateLimitBanner.tsx&quot;]
-  N63[&quot;BattleResultPage.tsx&quot;]
-  N64[&quot;BattleResultCard.tsx&quot;]
-  N65[&quot;StatComparison.tsx&quot;]
-  N66[&quot;ShareBattleButton.tsx&quot;]
-  N67[&quot;leaderboard/&quot;]
-  N68[&quot;LeaderboardPage.tsx&quot;]
-  N69[&quot;LeaderboardTable.tsx&quot;]
-  N70[&quot;LeaderboardRow.tsx&quot;]
-  N71[&quot;RarityFilter.tsx&quot;]
-  N72[&quot;OwnerRankBanner.tsx&quot;]
-  N73[&quot;records/&quot;]
-  N74[&quot;BattleRecordsPage.tsx&quot;]
-  N75[&quot;PetSummaryCard.tsx&quot;]
-  N76[&quot;BattleHistoryTable.tsx&quot;]
-  N77[&quot;gdpr/&quot;]
-  N78[&quot;GdprPage.tsx&quot;]
-  N79[&quot;GdprRequestForm.tsx&quot;]
-  N80[&quot;GdprStatusBanner.tsx&quot;]
-  N81[&quot;marketplace/          FF_MARKETPLACE only&quot;]
-  N82[&quot;MarketplacePage.tsx&quot;]
-  N83[&quot;canvas/&quot;]
-  N84[&quot;PetCanvas.tsx     React host div; manages Phaser lifecycle&quot;]
-  N85[&quot;PetCanvasEngine.ts   SOLE Phaser import boundary&quot;]
-  N86[&quot;hooks/&quot;]
-  N87[&quot;usePet.ts             TanStack Query: GET /api/v1/pets/:petId&quot;]
-  N88[&quot;useLeaderboard.ts     TanStack Query + refetchInterval: 30_000&quot;]
-  N89[&quot;useArenaHistory.ts&quot;]
-  N90[&quot;useTraining.ts        Mutation: POST /api/v1/pets/:petId/train&quot;]
-  N91[&quot;useFeed.ts            Mutation: POST /api/v1/pets/:petId/feed&quot;]
-  N92[&quot;useClaim.ts           Mutations: POST /api/v1/claim + /verify&quot;]
-  N93[&quot;useReducedMotion.ts   window.matchMedia prefers-reduced-motion&quot;]
-  N94[&quot;usePetToken.ts        localStorage read/write helpers&quot;]
-  N95[&quot;store/&quot;]
-  N96[&quot;useAppStore.ts        Zustand: arena slice, claim slice, toast slice&quot;]
-  N97[&quot;lib/&quot;]
-  N98[&quot;apiClient.ts          Axios instance; Bearer token interceptor&quot;]
-  N99[&quot;tokenStorage.ts       getPetToken / setPetToken / clearPetToken&quot;]
-  N100[&quot;petGeneration.ts      seed  AttributeVector (deterministic, 6 dims)&quot;]
-  N101[&quot;spriteLoader.ts       Phaser preload helper utilities&quot;]
-  N102[&quot;schemas/&quot;]
-  N103[&quot;pet.ts                Zod schema: PetResponse&quot;]
-  N104[&quot;claim.ts              Zod schema: ClaimResponse, VerifyResponse&quot;]
-  N105[&quot;arena.ts              Zod schema: ArenaEnterResponse&quot;]
-  N106[&quot;leaderboard.ts        Zod schema: LeaderboardResponse&quot;]
-  N107[&quot;styles/&quot;]
-  N108[&quot;tokens.css            CSS custom properties (design tokens from VDD §6)&quot;]
-  N109[&quot;typography.css        Press Start 2P + Inter font declarations&quot;]
-  N110[&quot;rarity.css            Rarity tier animations (legendary-shimmer, epic-shimmer)&quot;]
-  N111[&quot;global.css            Reset + base element styles&quot;]
-  N112[&quot;types/&quot;]
-  N113[&quot;index.ts              Shared TypeScript types for player app&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N5
-  N5 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26
-  N26 --&gt; N27
-  N27 --&gt; N28
-  N28 --&gt; N29
-  N29 --&gt; N30
-  N30 --&gt; N31
-  N31 --&gt; N32
-  N32 --&gt; N33
-  N33 --&gt; N34
-  N34 --&gt; N35
-  N35 --&gt; N36
-  N36 --&gt; N37
-  N37 --&gt; N38
-  N38 --&gt; N39
-  N39 --&gt; N40
-  N40 --&gt; N41
-  N41 --&gt; N42
-  N42 --&gt; N43
-  N43 --&gt; N44
-  N44 --&gt; N45
-  N45 --&gt; N46
-  N46 --&gt; N47
-  N47 --&gt; N48
-  N48 --&gt; N49
-  N49 --&gt; N50
-  N50 --&gt; N51
-  N51 --&gt; N52
-  N52 --&gt; N53
-  N53 --&gt; N54
-  N54 --&gt; N55
-  N55 --&gt; N56
-  N56 --&gt; N57
-  N57 --&gt; N58
-  N58 --&gt; N59
-  N59 --&gt; N60
-  N60 --&gt; N61
-  N61 --&gt; N62
-  N62 --&gt; N63
-  N63 --&gt; N64
-  N64 --&gt; N65
-  N65 --&gt; N66
-  N66 --&gt; N67
-  N67 --&gt; N68
-  N68 --&gt; N69
-  N69 --&gt; N70
-  N70 --&gt; N71
-  N71 --&gt; N72
-  N72 --&gt; N73
-  N73 --&gt; N74
-  N74 --&gt; N75
-  N75 --&gt; N76
-  N76 --&gt; N77
-  N77 --&gt; N78
-  N78 --&gt; N79
-  N79 --&gt; N80
-  N80 --&gt; N81
-  N81 --&gt; N82
-  N82 --&gt; N83
-  N83 --&gt; N84
-  N84 --&gt; N85
-  N85 --&gt; N86
-  N86 --&gt; N87
-  N87 --&gt; N88
-  N88 --&gt; N89
-  N89 --&gt; N90
-  N90 --&gt; N91
-  N91 --&gt; N92
-  N92 --&gt; N93
-  N93 --&gt; N94
-  N94 --&gt; N95
-  N95 --&gt; N96
-  N96 --&gt; N97
-  N97 --&gt; N98
-  N98 --&gt; N99
-  N99 --&gt; N100
-  N100 --&gt; N101
-  N101 --&gt; N102
-  N102 --&gt; N103
-  N103 --&gt; N104
-  N104 --&gt; N105
-  N105 --&gt; N106
-  N106 --&gt; N107
-  N107 --&gt; N108
-  N108 --&gt; N109
-  N109 --&gt; N110
-  N110 --&gt; N111
-  N111 --&gt; N112
-  N112 --&gt; N113
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N5
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N22
-  N0 --&gt; N23
-  N0 --&gt; N26
-  N0 --&gt; N27
-  N0 --&gt; N28
-  N0 --&gt; N29
-  N0 --&gt; N30
-  N0 --&gt; N31
-  N0 --&gt; N32
-  N0 --&gt; N34
-  N0 --&gt; N35
-  N0 --&gt; N36
-  N0 --&gt; N37
-  N0 --&gt; N38
-  N0 --&gt; N39
-  N0 --&gt; N40
-  N0 --&gt; N41
-  N0 --&gt; N42
-  N0 --&gt; N43
-  N0 --&gt; N44
-  N0 --&gt; N45
-  N0 --&gt; N46
-  N0 --&gt; N47
-  N0 --&gt; N48
-  N0 --&gt; N49
-  N0 --&gt; N50
-  N0 --&gt; N51
-  N0 --&gt; N52
-  N0 --&gt; N53
-  N0 --&gt; N54
-  N0 --&gt; N55
-  N0 --&gt; N56
-  N0 --&gt; N58
-  N0 --&gt; N59
-  N0 --&gt; N60
-  N0 --&gt; N61
-  N0 --&gt; N62
-  N0 --&gt; N63
-  N0 --&gt; N64
-  N0 --&gt; N65
-  N0 --&gt; N66
-  N0 --&gt; N67
-  N0 --&gt; N68
-  N0 --&gt; N69
-  N0 --&gt; N70
-  N0 --&gt; N71
-  N0 --&gt; N72
-  N0 --&gt; N73
-  N0 --&gt; N74
-  N0 --&gt; N75
-  N0 --&gt; N76
-  N0 --&gt; N77
-  N0 --&gt; N78
-  N0 --&gt; N79
-  N0 --&gt; N80
-  N0 --&gt; N82
-  N0 --&gt; N83
-  N0 --&gt; N86
-  N0 --&gt; N89
-  N0 --&gt; N95
-  N0 --&gt; N97
-  N0 --&gt; N102
-  N0 --&gt; N107
-  N0 --&gt; N112</pre>
+<pre><code class="">pixel-pet-arena/                         ← monorepo root
+├── package.json                         ← pnpm workspace root
+├── pnpm-workspace.yaml
+├── packages/
+│   └── shared/                          ← Zod schemas, domain types, constants bridge
+│       ├── src/
+│       │   ├── schemas/                 ← Shared Zod schemas (Pet, ArenaMatch, etc.)
+│       │   ├── types/                   ← Shared TypeScript interfaces
+│       │   └── constants.ts             ← Re-exported typed constants from constants.json
+│       └── package.json
+└── apps/
+    ├── api/                             ← Node.js / Fastify game + admin API
+    ├── admin/                           ← Vue 3 + Element Plus (separate build — not in scope here)
+    └── player/                          ← React 18 + Phaser.js player application
+        ├── index.html
+        ├── vite.config.ts
+        ├── tsconfig.json
+        ├── vitest.config.ts
+        ├── playwright.config.ts
+        └── src/
+            ├── main.tsx                 ← React root; QueryClient + router providers
+            ├── App.tsx                  ← createBrowserRouter + Layout wrapper
+            ├── constants.ts             ← Re-exports from packages/shared/constants.ts
+            ├── components/
+            │   ├── layout/
+            │   │   ├── Layout.tsx       ← Header + Outlet wrapper
+            │   │   └── NavBar.tsx       ← Visibility driven by hasPetToken prop
+            │   ├── landing/
+            │   │   ├── LandingPage.tsx
+            │   │   ├── ClaimCTA.tsx
+            │   │   ├── RarityHint.tsx
+            │   │   └── SocialProofCounter.tsx
+            │   ├── claim/
+            │   │   ├── ClaimPage.tsx
+            │   │   ├── ClaimFlow.tsx    ← Compound, max 3 steps (EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+            │   │   ├── ClaimEmailForm.tsx
+            │   │   ├── ClaimCodeForm.tsx
+            │   │   ├── ExpiryWarning.tsx
+            │   │   └── URLReveal.tsx
+            │   ├── pet/
+            │   │   ├── PetPage.tsx
+            │   │   ├── RarityBadge.tsx
+            │   │   ├── StatsPanel.tsx
+            │   │   ├── StatBar.tsx
+            │   │   ├── TrainingEntry.tsx
+            │   │   ├── FoodInventory.tsx
+            │   │   ├── FoodItem.tsx
+            │   │   ├── ArenaEntry.tsx
+            │   │   └── NeglectedState.tsx
+            │   ├── training/
+            │   │   ├── TrainingPage.tsx
+            │   │   ├── TrainingActions.tsx
+            │   │   ├── TrainingActionCard.tsx
+            │   │   ├── StatChangeIndicator.tsx
+            │   │   ├── DailyResetTimer.tsx
+            │   │   └── TrainingStreak.tsx
+            │   ├── arena/
+            │   │   ├── ArenaPage.tsx
+            │   │   ├── ArenaScene.tsx   ← React host for Phaser arena scene
+            │   │   ├── ModeSelector.tsx
+            │   │   ├── PreBattlePanel.tsx
+            │   │   ├── MatchmakingStatus.tsx
+            │   │   ├── AIOfferModal.tsx
+            │   │   ├── RateLimitBanner.tsx
+            │   │   ├── BattleResultPage.tsx
+            │   │   ├── BattleResultCard.tsx
+            │   │   ├── StatComparison.tsx
+            │   │   └── ShareBattleButton.tsx
+            │   ├── leaderboard/
+            │   │   ├── LeaderboardPage.tsx
+            │   │   ├── LeaderboardTable.tsx
+            │   │   ├── LeaderboardRow.tsx
+            │   │   ├── RarityFilter.tsx
+            │   │   └── OwnerRankBanner.tsx
+            │   ├── records/
+            │   │   ├── BattleRecordsPage.tsx
+            │   │   ├── PetSummaryCard.tsx
+            │   │   └── BattleHistoryTable.tsx
+            │   ├── gdpr/
+            │   │   ├── GdprPage.tsx
+            │   │   ├── GdprRequestForm.tsx
+            │   │   └── GdprStatusBanner.tsx
+            │   ├── marketplace/         ← FF_MARKETPLACE only
+            │   │   └── MarketplacePage.tsx
+            │   └── canvas/
+            │       ├── PetCanvas.tsx    ← React host div; manages Phaser lifecycle
+            │       └── PetCanvasEngine.ts  ← SOLE Phaser import boundary
+            ├── hooks/
+            │   ├── usePet.ts            ← TanStack Query: GET /api/v1/pets/:petId
+            │   ├── useLeaderboard.ts    ← TanStack Query + refetchInterval: 30_000
+            │   ├── useArenaHistory.ts
+            │   ├── useTraining.ts       ← Mutation: POST /api/v1/pets/:petId/train
+            │   ├── useFeed.ts           ← Mutation: POST /api/v1/pets/:petId/feed
+            │   ├── useClaim.ts          ← Mutations: POST /api/v1/claim + /verify
+            │   ├── useReducedMotion.ts  ← window.matchMedia prefers-reduced-motion
+            │   └── usePetToken.ts       ← localStorage read/write helpers
+            ├── store/
+            │   └── useAppStore.ts       ← Zustand: arena slice, claim slice, toast slice
+            ├── lib/
+            │   ├── apiClient.ts         ← Axios instance; Bearer token interceptor
+            │   ├── tokenStorage.ts      ← getPetToken / setPetToken / clearPetToken
+            │   ├── petGeneration.ts     ← seed → AttributeVector (deterministic, 6 dims)
+            │   └── spriteLoader.ts      ← Phaser preload helper utilities
+            ├── schemas/
+            │   ├── pet.ts               ← Zod schema: PetResponse
+            │   ├── claim.ts             ← Zod schema: ClaimResponse, VerifyResponse
+            │   ├── arena.ts             ← Zod schema: ArenaEnterResponse
+            │   └── leaderboard.ts       ← Zod schema: LeaderboardResponse
+            ├── styles/
+            │   ├── tokens.css           ← CSS custom properties (design tokens from VDD §6)
+            │   ├── typography.css       ← Press Start 2P + Inter font declarations
+            │   ├── rarity.css           ← Rarity tier animations (legendary-shimmer, epic-shimmer)
+            │   └── global.css           ← Reset + base element styles
+            └── types/
+                └── index.ts             ← Shared TypeScript types for player app</code></pre>
 <h3 id="22-naming-conventions">§2.2 Naming Conventions</h3>
 <table>
 <tr><th>Type</th><th>Convention</th><th>Example</th></tr>
@@ -728,190 +632,80 @@
 <tr><td>P-10</td><td><code>/marketplace</code></td><td><code>MarketplacePage</code></td><td>Browse/list/buy — <code>FF_MARKETPLACE</code> only</td><td>Optional</td></tr>
 </table>
 <h3 id="32-component-tree-structure">§3.2 Component Tree Structure</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;&lt;App&gt;  (App.tsx — createBrowserRouter, React Router v6)&quot;]
-  N1[&quot;&lt;Layout&gt;  (Layout.tsx)&quot;]
-  N2[&quot;&lt;header&quot;]
-  N3[&quot;&lt;NavBar hasPetToken={boolean}&quot;]
-  N4[&quot;Logo (Press Start 2P wordmark)&quot;]
-  N5[&quot;&lt;nav aria-label=&#x27;Main navigation&#x27;&quot;]
-  N6[&quot;Link: Leaderboard&quot;]
-  N7[&quot;Link: Arena (hasPetToken only)&quot;]
-  N8[&quot;Link: My Pet (hasPetToken only)&quot;]
-  N9[&quot;ClaimCTA (no token) | PetAvatarLink (has token)&quot;]
-  N10[&quot;&lt;main&quot;]
-  N11[&quot;&lt;Outlet /&gt;   React Router renders page chunk here&quot;]
-  N12[&quot;&lt;LandingPage&gt;  [/]&quot;]
-  N13[&quot;&lt;PetCanvas seed rarity interactive /&gt;    Phaser instance via PetCanvasEngine&quot;]
-  N14[&quot;&lt;RarityHint /&quot;]
-  N15[&quot;&lt;ClaimCTA /&quot;]
-  N16[&quot;&lt;SocialProofCounter /&quot;]
-  N17[&quot;&lt;ClaimPage&gt;  [/claim]&quot;]
-  N18[&quot;&lt;ClaimFlow&gt;  (3 steps — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)&quot;]
-  N19[&quot;step=&#x27;email&#x27;   &lt;ClaimEmailForm /&gt;  + &lt;ExpiryWarning /&quot;]
-  N20[&quot;step=&#x27;code&#x27;    &lt;ClaimCodeForm /&gt;   + &lt;ExpiryWarning minutesRemaining /&quot;]
-  N21[&quot;step=&#x27;reveal&#x27;  &lt;URLReveal petUrl petToken /&quot;]
-  N22[&quot;&lt;PetPage&gt;  [/pet/:petId]&quot;]
-  N23[&quot;&lt;PetCanvas seed rarity /&quot;]
-  N24[&quot;&lt;RarityBadge rarity /&quot;]
-  N25[&quot;&lt;StatsPanel&quot;]
-  N26[&quot;&lt;StatBar stat=&#x27;speed&#x27; value max /&quot;]
-  N27[&quot;&lt;StatBar stat=&#x27;strength&#x27; value max /&quot;]
-  N28[&quot;&lt;StatBar stat=&#x27;stamina&#x27; value max /&quot;]
-  N29[&quot;&lt;TrainingEntry /&gt;       (owner only — links to /pet/:petId/train)&quot;]
-  N30[&quot;&lt;FoodInventory&quot;]
-  N31[&quot;&lt;FoodItem /&gt; × N&quot;]
-  N32[&quot;&lt;ArenaEntry battlesRemaining /&quot;]
-  N33[&quot;&lt;NeglectedState /&gt;      (conditional: last_trained_at &gt; TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)&quot;]
-  N34[&quot;&lt;TrainingPage&gt;  [/pet/:petId/train]&quot;]
-  N35[&quot;&lt;TrainingActions&quot;]
-  N36[&quot;&lt;TrainingActionCard type stat value remaining /&gt; × 3&quot;]
-  N37[&quot;&lt;StatChangeIndicator delta stat /&gt;   (visible 2 s — TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2)&quot;]
-  N38[&quot;&lt;DailyResetTimer /&gt;    (aria-live=&#x27;polite&#x27;, throttled announcements)&quot;]
-  N39[&quot;&lt;TrainingStreak /&quot;]
-  N40[&quot;&lt;BattleRecordsPage&gt;  [/pet/:petId/records]&quot;]
-  N41[&quot;&lt;PetSummaryCard /&quot;]
-  N42[&quot;&lt;BattleHistoryTable battles={last20} /&gt;   (ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)&quot;]
-  N43[&quot;&lt;ArenaPage&gt;  [/arena]&quot;]
-  N44[&quot;&lt;RateLimitBanner /&gt;    (role=&#x27;alert&#x27; — shown on 429)&quot;]
-  N45[&quot;&lt;ModeSelector mode onChange /&gt;   (RACE | SUMO)&quot;]
-  N46[&quot;&lt;PreBattlePanel /&quot;]
-  N47[&quot;&lt;MatchmakingStatus /&gt;  (aria-live=&#x27;polite&#x27; aria-busy=&#x27;true&#x27;)&quot;]
-  N48[&quot;&lt;AIOfferModal /&gt;       (role=&#x27;dialog&#x27; aria-modal focus trap — after 30 s timeout)&quot;]
-  N49[&quot;&lt;ArenaScene /&gt;          Phaser battle animation scene (dynamically loaded)&quot;]
-  N50[&quot;&lt;BattleResultPage&gt;  [/arena/result/:matchId]&quot;]
-  N51[&quot;&lt;BattleResultCard result=&#x27;WIN&#x27;|&#x27;LOSS&#x27; /&quot;]
-  N52[&quot;&lt;StatComparison /&quot;]
-  N53[&quot;&lt;ShareBattleButton /&quot;]
-  N54[&quot;ActionButtons (Play Again / View Leaderboard)&quot;]
-  N55[&quot;&lt;LeaderboardPage&gt;  [/leaderboard]&quot;]
-  N56[&quot;&lt;RarityFilter /&gt;       (URL state: ?rarity=EPIC)&quot;]
-  N57[&quot;&lt;LeaderboardTable&quot;]
-  N58[&quot;&lt;LeaderboardRow /&gt; × 100   (LEADERBOARD_TOP_DISPLAY = 100)&quot;]
-  N59[&quot;&lt;OwnerRankBanner /&gt;    (role=&#x27;status&#x27; — if pet token present)&quot;]
-  N60[&quot;&lt;GdprPage&gt;  [/gdpr]   (route loader: redirects to / if no token)&quot;]
-  N61[&quot;&lt;GdprRequestForm types=[erasure|data_access|...] /&quot;]
-  N62[&quot;&lt;GdprStatusBanner jobId status /&gt;   (polls GET /api/v1/gdpr/request/status)&quot;]
-  N63[&quot;&lt;MarketplacePage&gt;  [/marketplace]   (FF_MARKETPLACE only)&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26
-  N26 --&gt; N27
-  N27 --&gt; N28
-  N28 --&gt; N29
-  N29 --&gt; N30
-  N30 --&gt; N31
-  N31 --&gt; N32
-  N32 --&gt; N33
-  N33 --&gt; N34
-  N34 --&gt; N35
-  N35 --&gt; N36
-  N36 --&gt; N37
-  N37 --&gt; N38
-  N38 --&gt; N39
-  N39 --&gt; N40
-  N40 --&gt; N41
-  N41 --&gt; N42
-  N42 --&gt; N43
-  N43 --&gt; N44
-  N44 --&gt; N45
-  N45 --&gt; N46
-  N46 --&gt; N47
-  N47 --&gt; N48
-  N48 --&gt; N49
-  N49 --&gt; N50
-  N50 --&gt; N51
-  N51 --&gt; N52
-  N52 --&gt; N53
-  N53 --&gt; N54
-  N54 --&gt; N55
-  N55 --&gt; N56
-  N56 --&gt; N57
-  N57 --&gt; N58
-  N58 --&gt; N59
-  N59 --&gt; N60
-  N60 --&gt; N61
-  N61 --&gt; N62
-  N62 --&gt; N63
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N12
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N22
-  N0 --&gt; N23
-  N0 --&gt; N24
-  N0 --&gt; N25
-  N0 --&gt; N26
-  N0 --&gt; N27
-  N0 --&gt; N28
-  N0 --&gt; N29
-  N0 --&gt; N30
-  N0 --&gt; N31
-  N0 --&gt; N32
-  N0 --&gt; N33
-  N0 --&gt; N34
-  N0 --&gt; N35
-  N0 --&gt; N36
-  N0 --&gt; N37
-  N0 --&gt; N38
-  N0 --&gt; N39
-  N0 --&gt; N40
-  N0 --&gt; N41
-  N0 --&gt; N42
-  N0 --&gt; N43
-  N0 --&gt; N44
-  N0 --&gt; N45
-  N0 --&gt; N46
-  N0 --&gt; N47
-  N0 --&gt; N48
-  N0 --&gt; N50
-  N0 --&gt; N51
-  N0 --&gt; N52
-  N0 --&gt; N53
-  N0 --&gt; N54
-  N0 --&gt; N55
-  N0 --&gt; N56
-  N0 --&gt; N57
-  N0 --&gt; N58
-  N0 --&gt; N59
-  N0 --&gt; N60
-  N0 --&gt; N61
-  N0 --&gt; N62
-  N0 --&gt; N63</pre>
+<pre><code class="">&lt;App&gt;  (App.tsx — createBrowserRouter, React Router v6)
+└── &lt;Layout&gt;  (Layout.tsx)
+    ├── &lt;header&gt;
+    │   └── &lt;NavBar hasPetToken={boolean}&gt;
+    │         ├── Logo (Press Start 2P wordmark)
+    │         ├── &lt;nav aria-label=&quot;Main navigation&quot;&gt;
+    │         │   ├── Link: Leaderboard
+    │         │   ├── Link: Arena (hasPetToken only)
+    │         │   └── Link: My Pet (hasPetToken only)
+    │         └── ClaimCTA (no token) | PetAvatarLink (has token)
+    └── &lt;main&gt;
+        └── &lt;Outlet /&gt;  ← React Router renders page chunk here
+            │
+            ├── &lt;LandingPage&gt;  [/]
+            │   ├── &lt;PetCanvas seed rarity interactive /&gt;   ← Phaser instance via PetCanvasEngine
+            │   ├── &lt;RarityHint /&gt;
+            │   ├── &lt;ClaimCTA /&gt;
+            │   └── &lt;SocialProofCounter /&gt;
+            │
+            ├── &lt;ClaimPage&gt;  [/claim]
+            │   └── &lt;ClaimFlow&gt;  (3 steps — EMAIL_CLAIM_FLOW_STEPS_MAX = 3)
+            │       ├── step=&quot;email&quot;  → &lt;ClaimEmailForm /&gt;  + &lt;ExpiryWarning /&gt;
+            │       ├── step=&quot;code&quot;   → &lt;ClaimCodeForm /&gt;   + &lt;ExpiryWarning minutesRemaining /&gt;
+            │       └── step=&quot;reveal&quot; → &lt;URLReveal petUrl petToken /&gt;
+            │
+            ├── &lt;PetPage&gt;  [/pet/:petId]
+            │   ├── &lt;PetCanvas seed rarity /&gt;
+            │   ├── &lt;RarityBadge rarity /&gt;
+            │   ├── &lt;StatsPanel&gt;
+            │   │   ├── &lt;StatBar stat=&quot;speed&quot; value max /&gt;
+            │   │   ├── &lt;StatBar stat=&quot;strength&quot; value max /&gt;
+            │   │   └── &lt;StatBar stat=&quot;stamina&quot; value max /&gt;
+            │   ├── &lt;TrainingEntry /&gt;       (owner only — links to /pet/:petId/train)
+            │   ├── &lt;FoodInventory&gt;
+            │   │   └── &lt;FoodItem /&gt; × N
+            │   ├── &lt;ArenaEntry battlesRemaining /&gt;
+            │   └── &lt;NeglectedState /&gt;      (conditional: last_trained_at &gt; TRAINING_NEGLECT_THRESHOLD_DAYS = 3 days)
+            │
+            ├── &lt;TrainingPage&gt;  [/pet/:petId/train]
+            │   ├── &lt;TrainingActions&gt;
+            │   │   └── &lt;TrainingActionCard type stat value remaining /&gt; × 3
+            │   ├── &lt;StatChangeIndicator delta stat /&gt;   (visible 2 s — TRAINING_STAT_DISPLAY_DURATION_SECONDS = 2)
+            │   ├── &lt;DailyResetTimer /&gt;    (aria-live=&quot;polite&quot;, throttled announcements)
+            │   └── &lt;TrainingStreak /&gt;
+            │
+            ├── &lt;BattleRecordsPage&gt;  [/pet/:petId/records]
+            │   ├── &lt;PetSummaryCard /&gt;
+            │   └── &lt;BattleHistoryTable battles={last20} /&gt;   (ARENA_BATTLE_RECORDS_DISPLAY_COUNT = 20)
+            │
+            ├── &lt;ArenaPage&gt;  [/arena]
+            │   ├── &lt;RateLimitBanner /&gt;    (role=&quot;alert&quot; — shown on 429)
+            │   ├── &lt;ModeSelector mode onChange /&gt;   (RACE | SUMO)
+            │   ├── &lt;PreBattlePanel /&gt;
+            │   ├── &lt;MatchmakingStatus /&gt;  (aria-live=&quot;polite&quot; aria-busy=&quot;true&quot;)
+            │   ├── &lt;AIOfferModal /&gt;       (role=&quot;dialog&quot; aria-modal focus trap — after 30 s timeout)
+            │   └── &lt;ArenaScene /&gt;         ← Phaser battle animation scene (dynamically loaded)
+            │
+            ├── &lt;BattleResultPage&gt;  [/arena/result/:matchId]
+            │   ├── &lt;BattleResultCard result=&quot;WIN&quot;|&quot;LOSS&quot; /&gt;
+            │   ├── &lt;StatComparison /&gt;
+            │   ├── &lt;ShareBattleButton /&gt;
+            │   └── ActionButtons (Play Again / View Leaderboard)
+            │
+            ├── &lt;LeaderboardPage&gt;  [/leaderboard]
+            │   ├── &lt;RarityFilter /&gt;       (URL state: ?rarity=EPIC)
+            │   ├── &lt;LeaderboardTable&gt;
+            │   │   └── &lt;LeaderboardRow /&gt; × 100   (LEADERBOARD_TOP_DISPLAY = 100)
+            │   └── &lt;OwnerRankBanner /&gt;    (role=&quot;status&quot; — if pet token present)
+            │
+            ├── &lt;GdprPage&gt;  [/gdpr]   (route loader: redirects to / if no token)
+            │   ├── &lt;GdprRequestForm types=[erasure|data_access|...] /&gt;
+            │   └── &lt;GdprStatusBanner jobId status /&gt;   (polls GET /api/v1/gdpr/request/status)
+            │
+            └── &lt;MarketplacePage&gt;  [/marketplace]   (FF_MARKETPLACE only)</code></pre>
 <h3 id="33-page-transition-logic">§3.3 Page Transition Logic</h3>
 <table>
 <tr><th>From</th><th>To</th><th>Trigger</th><th>Transition</th></tr>
@@ -928,23 +722,17 @@
 <hr>
 <h2 id="4-asset-pipeline">§4 Asset Pipeline</h2>
 <h3 id="41-asset-directory-structure">§4.1 Asset Directory Structure</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;apps/player/src/&quot;]
-  N1[&quot;assets/&quot;]
-  N2[&quot;images/&quot;]
-  N3[&quot;ui/                       Non-sprite UI images (logos, icons)&quot;]
-  N4[&quot;logo.png&quot;]
-  N5[&quot;backgrounds/&quot;]
-  N6[&quot;bg_arena_race.png     16×8px tile, repeating pattern&quot;]
-  N7[&quot;bg_arena_sumo.png&quot;]
-  N8[&quot;fonts/                        Local font fallbacks (optional; primary from Google Fonts)&quot;]
-  N9[&quot;sprites/                      Served from /public/sprites/ for Phaser dynamic load&quot;]
-  N10[&quot;pet-{seed}-sheet.png      Generated sprite sheets; 32×32 px per frame&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N2
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N7</pre>
+<pre><code class="">apps/player/src/
+└── assets/
+    ├── images/
+    │   ├── ui/                      ← Non-sprite UI images (logos, icons)
+    │   │   └── logo.png
+    │   └── backgrounds/
+    │       ├── bg_arena_race.png    ← 16×8px tile, repeating pattern
+    │       └── bg_arena_sumo.png
+    ├── fonts/                       ← Local font fallbacks (optional; primary from Google Fonts)
+    └── sprites/                     ← Served from /public/sprites/ for Phaser dynamic load
+        └── pet-{seed}-sheet.png     ← Generated sprite sheets; 32×32 px per frame</code></pre>
 <p>Sprite sheets are served from Vercel&#x27;s CDN <code>/public/sprites/</code> directory and are loaded dynamically by Phaser&#x27;s <code>this.load.spritesheet()</code> call — they are never bundled into the Vite output.</p>
 <h3 id="42-asset-naming-conventions">§4.2 Asset Naming Conventions</h3>
 <table>

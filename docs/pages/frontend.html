@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html" target="prototype-window">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🎮 API Explorer</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,7 +425,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#1-overview">1. Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-two-app-architecture">1.1 Two-App Architecture</a></li><li><a class="toc__link toc__link--h3" href="#12-tech-stack-summary">1.2 Tech Stack Summary</a></li><li><a class="toc__link toc__link--h3" href="#13-build-tooling">1.3 Build Tooling</a></li><li><a class="toc__link" href="#2-player-app-architecture">2. Player App Architecture</a></li><li><a class="toc__link toc__link--h3" href="#21-directory-structure">2.1 Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#22-react-component-tree-top-level">2.2 React Component Tree (Top Level)</a></li><li><a class="toc__link toc__link--h3" href="#23-phaserjs-integration-pattern">2.3 Phaser.js Integration Pattern</a></li><li><a class="toc__link toc__link--h3" href="#24-state-management">2.4 State Management</a></li><li><a class="toc__link toc__link--h3" href="#25-routing">2.5 Routing</a></li><li><a class="toc__link toc__link--h3" href="#26-api-client-layer">2.6 API Client Layer</a></li><li><a class="toc__link" href="#3-admin-portal-architecture">3. Admin Portal Architecture</a></li><li><a class="toc__link toc__link--h3" href="#31-directory-structure">3.1 Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#32-vue-3-component-tree">3.2 Vue 3 Component Tree</a></li><li><a class="toc__link toc__link--h3" href="#33-element-plus-usage">3.3 Element Plus Usage</a></li><li><a class="toc__link toc__link--h3" href="#34-state-management-pinia">3.4 State Management (Pinia)</a></li><li><a class="toc__link toc__link--h3" href="#35-routing-vue-router">3.5 Routing (Vue Router)</a></li><li><a class="toc__link toc__link--h3" href="#36-api-client-admin">3.6 API Client (Admin)</a></li><li><a class="toc__link" href="#4-pixel-art-rendering">4. Pixel Art Rendering</a></li><li><a class="toc__link toc__link--h3" href="#41-phaserjs-sprite-loading">4.1 Phaser.js Sprite Loading</a></li><li><a class="toc__link toc__link--h3" href="#42-sprite-resolution">4.2 Sprite Resolution</a></li><li><a class="toc__link toc__link--h3" href="#43-animation">4.3 Animation</a></li><li><a class="toc__link toc__link--h3" href="#44-sprite-generation-from-seed">4.4 Sprite Generation from Seed</a></li><li><a class="toc__link toc__link--h3" href="#45-canvas-vs-dom-rendering-decisions">4.5 Canvas vs DOM Rendering Decisions</a></li><li><a class="toc__link" href="#5-key-ui-flows">5. Key UI Flows</a></li><li><a class="toc__link toc__link--h3" href="#51-pet-claim-flow-email--otp--token-storage">5.1 Pet Claim Flow (Email → OTP → Token Storage)</a></li><li><a class="toc__link toc__link--h3" href="#52-token-recovery-flow-lost-url-recovery">5.2 Token Recovery Flow (Lost URL Recovery)</a></li><li><a class="toc__link toc__link--h3" href="#53-training-interaction">5.3 Training Interaction</a></li><li><a class="toc__link toc__link--h3" href="#54-feed-interaction">5.4 Feed Interaction</a></li><li><a class="toc__link toc__link--h3" href="#55-arena-battle-flow">5.5 Arena Battle Flow</a></li><li><a class="toc__link toc__link--h3" href="#56-marketplace-browse--list--buy-ff_marketplace">5.6 Marketplace Browse / List / Buy (FF_MARKETPLACE)</a></li><li><a class="toc__link toc__link--h3" href="#57-leaderboard-view">5.7 Leaderboard View</a></li><li><a class="toc__link toc__link--h3" href="#58-gdpr-self-service-flow-player">5.8 GDPR Self-Service Flow (Player)</a></li><li><a class="toc__link toc__link--h3" href="#59-admin-login-totp">5.9 Admin Login (TOTP)</a></li><li><a class="toc__link" href="#6-performance-budget">6. Performance Budget</a></li><li><a class="toc__link toc__link--h3" href="#61-core-web-vitals-targets">6.1 Core Web Vitals Targets</a></li><li><a class="toc__link toc__link--h3" href="#62-rendering-slos">6.2 Rendering SLOs</a></li><li><a class="toc__link toc__link--h3" href="#63-bundle-budgets">6.3 Bundle Budgets</a></li><li><a class="toc__link toc__link--h3" href="#64-code-splitting-strategy">6.4 Code Splitting Strategy</a></li><li><a class="toc__link toc__link--h3" href="#65-additional-performance-rules">6.5 Additional Performance Rules</a></li><li><a class="toc__link" href="#7-accessibility">7. Accessibility</a></li><li><a class="toc__link toc__link--h3" href="#71-standard">7.1 Standard</a></li><li><a class="toc__link toc__link--h3" href="#72-contrast-ratios">7.2 Contrast Ratios</a></li><li><a class="toc__link toc__link--h3" href="#73-claim-code-expiry-warning">7.3 Claim Code Expiry Warning</a></li><li><a class="toc__link toc__link--h3" href="#74-keyboard-navigation">7.4 Keyboard Navigation</a></li><li><a class="toc__link toc__link--h3" href="#75-motion-and-reduced-motion">7.5 Motion and Reduced Motion</a></li><li><a class="toc__link toc__link--h3" href="#76-semantic-html">7.6 Semantic HTML</a></li><li><a class="toc__link toc__link--h3" href="#77-aria-roles-in-dynamic-regions">7.7 ARIA Roles in Dynamic Regions</a></li><li><a class="toc__link" href="#8-security">8. Security</a></li><li><a class="toc__link toc__link--h3" href="#81-token-storage">8.1 Token Storage</a></li><li><a class="toc__link toc__link--h3" href="#82-admin-session-security">8.2 Admin Session Security</a></li><li><a class="toc__link toc__link--h3" href="#83-content-security-policy">8.3 Content Security Policy</a></li><li><a class="toc__link toc__link--h3" href="#84-xss-prevention">8.4 XSS Prevention</a></li><li><a class="toc__link toc__link--h3" href="#85-token-validation">8.5 Token Validation</a></li><li><a class="toc__link toc__link--h3" href="#86-admin-specific-security-frontend">8.6 Admin-Specific Security (Frontend)</a></li><li><a class="toc__link" href="#9-testing">9. Testing</a></li><li><a class="toc__link toc__link--h3" href="#91-player-app">9.1 Player App</a></li><li><a class="toc__link toc__link--h3" href="#92-admin-portal">9.2 Admin Portal</a></li><li><a class="toc__link toc__link--h3" href="#93-visual-regression">9.3 Visual Regression</a></li><li><a class="toc__link" href="#10-player-app-features--bdd-scenario-mapping">10. Player App Features → BDD Scenario Mapping</a></li><li><a class="toc__link toc__link--h3" href="#101-feature-file-organization">10.1 Feature File Organization</a></li><li><a class="toc__link toc__link--h3" href="#102-uncovered-areas">10.2 Uncovered Areas</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="frontendmd--pixel-pet-arena">FRONTEND.md — pixel-pet-arena</h1>
@@ -384,439 +476,154 @@
 <hr>
 <h2 id="2-player-app-architecture">2. Player App Architecture</h2>
 <h3 id="21-directory-structure">2.1 Directory Structure</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;apps/player/&quot;]
-  N1[&quot;index.html&quot;]
-  N2[&quot;vite.config.ts&quot;]
-  N3[&quot;tsconfig.json&quot;]
-  N4[&quot;src/&quot;]
-  N5[&quot;main.tsx                    # Entry point; React root&quot;]
-  N6[&quot;App.tsx                     # Router + Layout wrapper&quot;]
-  N7[&quot;components/&quot;]
-  N8[&quot;layout/&quot;]
-  N9[&quot;NavBar.tsx&quot;]
-  N10[&quot;Layout.tsx&quot;]
-  N11[&quot;landing/&quot;]
-  N12[&quot;LandingPage.tsx&quot;]
-  N13[&quot;ClaimCTA.tsx&quot;]
-  N14[&quot;RarityHint.tsx&quot;]
-  N15[&quot;SocialProofCounter.tsx&quot;]
-  N16[&quot;claim/&quot;]
-  N17[&quot;ClaimPage.tsx&quot;]
-  N18[&quot;ClaimFlow.tsx&quot;]
-  N19[&quot;ClaimEmailForm.tsx&quot;]
-  N20[&quot;ClaimCodeForm.tsx&quot;]
-  N21[&quot;ExpiryWarning.tsx&quot;]
-  N22[&quot;URLReveal.tsx&quot;]
-  N23[&quot;pet/&quot;]
-  N24[&quot;PetPage.tsx&quot;]
-  N25[&quot;RarityBadge.tsx&quot;]
-  N26[&quot;StatsPanel.tsx&quot;]
-  N27[&quot;StatBar.tsx&quot;]
-  N28[&quot;TrainingEntry.tsx&quot;]
-  N29[&quot;FoodInventory.tsx&quot;]
-  N30[&quot;FoodItem.tsx&quot;]
-  N31[&quot;ArenaEntry.tsx&quot;]
-  N32[&quot;NeglectedState.tsx&quot;]
-  N33[&quot;training/&quot;]
-  N34[&quot;TrainingPage.tsx&quot;]
-  N35[&quot;TrainingActions.tsx&quot;]
-  N36[&quot;TrainingActionCard.tsx&quot;]
-  N37[&quot;StatChangeIndicator.tsx&quot;]
-  N38[&quot;DailyResetTimer.tsx&quot;]
-  N39[&quot;TrainingStreak.tsx&quot;]
-  N40[&quot;arena/&quot;]
-  N41[&quot;ArenaPage.tsx&quot;]
-  N42[&quot;ArenaScene.tsx          # Phaser.js battle animation scene&quot;]
-  N43[&quot;ModeSelector.tsx&quot;]
-  N44[&quot;PreBattlePanel.tsx&quot;]
-  N45[&quot;MatchmakingStatus.tsx&quot;]
-  N46[&quot;AIOfferModal.tsx&quot;]
-  N47[&quot;RateLimitBanner.tsx&quot;]
-  N48[&quot;BattleResultPage.tsx&quot;]
-  N49[&quot;BattleResultCard.tsx&quot;]
-  N50[&quot;StatComparison.tsx&quot;]
-  N51[&quot;ShareBattleButton.tsx&quot;]
-  N52[&quot;leaderboard/&quot;]
-  N53[&quot;LeaderboardPage.tsx&quot;]
-  N54[&quot;LeaderboardTable.tsx&quot;]
-  N55[&quot;LeaderboardRow.tsx&quot;]
-  N56[&quot;RarityFilter.tsx&quot;]
-  N57[&quot;OwnerRankBanner.tsx&quot;]
-  N58[&quot;records/&quot;]
-  N59[&quot;BattleRecordsPage.tsx&quot;]
-  N60[&quot;PetSummaryCard.tsx&quot;]
-  N61[&quot;BattleHistoryTable.tsx&quot;]
-  N62[&quot;gdpr/&quot;]
-  N63[&quot;GdprPage.tsx&quot;]
-  N64[&quot;GdprRequestForm.tsx&quot;]
-  N65[&quot;GdprStatusBanner.tsx&quot;]
-  N66[&quot;marketplace/               # FF_MARKETPLACE only&quot;]
-  N67[&quot;MarketplacePage.tsx&quot;]
-  N68[&quot;canvas/&quot;]
-  N69[&quot;PetCanvas.tsx          # React host for Phaser instance&quot;]
-  N70[&quot;PetCanvasEngine.ts     # Phaser.js lifecycle manager&quot;]
-  N71[&quot;hooks/&quot;]
-  N72[&quot;usePet.ts&quot;]
-  N73[&quot;useLeaderboard.ts&quot;]
-  N74[&quot;useArenaHistory.ts&quot;]
-  N75[&quot;useTraining.ts&quot;]
-  N76[&quot;useFeed.ts&quot;]
-  N77[&quot;useClaim.ts&quot;]
-  N78[&quot;useReducedMotion.ts&quot;]
-  N79[&quot;usePetToken.ts&quot;]
-  N80[&quot;store/&quot;]
-  N81[&quot;useAppStore.ts             # Zustand store (slices: arena, claim, toast)&quot;]
-  N82[&quot;lib/&quot;]
-  N83[&quot;apiClient.ts               # Axios/fetch wrapper with token attachment&quot;]
-  N84[&quot;tokenStorage.ts            # localStorage read/write for pet_access_token&quot;]
-  N85[&quot;petGeneration.ts           # Seed  attribute vector (deterministic)&quot;]
-  N86[&quot;spriteLoader.ts            # Phaser preload helpers&quot;]
-  N87[&quot;schemas/&quot;]
-  N88[&quot;pet.ts                     # Zod schemas for pet API responses&quot;]
-  N89[&quot;claim.ts&quot;]
-  N90[&quot;arena.ts&quot;]
-  N91[&quot;leaderboard.ts&quot;]
-  N92[&quot;styles/&quot;]
-  N93[&quot;tokens.css                 # CSS custom properties (design tokens)&quot;]
-  N94[&quot;typography.css&quot;]
-  N95[&quot;rarity.css                 # Rarity tier animations and borders&quot;]
-  N96[&quot;global.css&quot;]
-  N97[&quot;constants.ts                   # Re-exports of constants.json values as typed TS consts&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26
-  N26 --&gt; N27
-  N27 --&gt; N28
-  N28 --&gt; N29
-  N29 --&gt; N30
-  N30 --&gt; N31
-  N31 --&gt; N32
-  N32 --&gt; N33
-  N33 --&gt; N34
-  N34 --&gt; N35
-  N35 --&gt; N36
-  N36 --&gt; N37
-  N37 --&gt; N38
-  N38 --&gt; N39
-  N39 --&gt; N40
-  N40 --&gt; N41
-  N41 --&gt; N42
-  N42 --&gt; N43
-  N43 --&gt; N44
-  N44 --&gt; N45
-  N45 --&gt; N46
-  N46 --&gt; N47
-  N47 --&gt; N48
-  N48 --&gt; N49
-  N49 --&gt; N50
-  N50 --&gt; N51
-  N51 --&gt; N52
-  N52 --&gt; N53
-  N53 --&gt; N54
-  N54 --&gt; N55
-  N55 --&gt; N56
-  N56 --&gt; N57
-  N57 --&gt; N58
-  N58 --&gt; N59
-  N59 --&gt; N60
-  N60 --&gt; N61
-  N61 --&gt; N62
-  N62 --&gt; N63
-  N63 --&gt; N64
-  N64 --&gt; N65
-  N65 --&gt; N66
-  N66 --&gt; N67
-  N67 --&gt; N68
-  N68 --&gt; N69
-  N69 --&gt; N70
-  N70 --&gt; N71
-  N71 --&gt; N72
-  N72 --&gt; N73
-  N73 --&gt; N74
-  N74 --&gt; N75
-  N75 --&gt; N76
-  N76 --&gt; N77
-  N77 --&gt; N78
-  N78 --&gt; N79
-  N79 --&gt; N80
-  N80 --&gt; N81
-  N81 --&gt; N82
-  N82 --&gt; N83
-  N83 --&gt; N84
-  N84 --&gt; N85
-  N85 --&gt; N86
-  N86 --&gt; N87
-  N87 --&gt; N88
-  N88 --&gt; N89
-  N89 --&gt; N90
-  N90 --&gt; N91
-  N91 --&gt; N92
-  N92 --&gt; N93
-  N93 --&gt; N94
-  N94 --&gt; N95
-  N95 --&gt; N96
-  N96 --&gt; N97
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N19
-  N0 --&gt; N20
-  N0 --&gt; N21
-  N0 --&gt; N22
-  N0 --&gt; N23
-  N0 --&gt; N24
-  N0 --&gt; N25
-  N0 --&gt; N26
-  N0 --&gt; N27
-  N0 --&gt; N28
-  N0 --&gt; N29
-  N0 --&gt; N30
-  N0 --&gt; N31
-  N0 --&gt; N32
-  N0 --&gt; N33
-  N0 --&gt; N34
-  N0 --&gt; N35
-  N0 --&gt; N36
-  N0 --&gt; N37
-  N0 --&gt; N38
-  N0 --&gt; N39
-  N0 --&gt; N40
-  N0 --&gt; N41
-  N0 --&gt; N42
-  N0 --&gt; N43
-  N0 --&gt; N44
-  N0 --&gt; N45
-  N0 --&gt; N46
-  N0 --&gt; N47
-  N0 --&gt; N48
-  N0 --&gt; N49
-  N0 --&gt; N50
-  N0 --&gt; N51
-  N0 --&gt; N52
-  N0 --&gt; N53
-  N0 --&gt; N54
-  N0 --&gt; N55
-  N0 --&gt; N56
-  N0 --&gt; N57
-  N0 --&gt; N58
-  N0 --&gt; N59
-  N0 --&gt; N60
-  N0 --&gt; N61
-  N0 --&gt; N62
-  N0 --&gt; N63
-  N0 --&gt; N64
-  N0 --&gt; N65
-  N0 --&gt; N66
-  N0 --&gt; N67
-  N0 --&gt; N68
-  N0 --&gt; N69
-  N0 --&gt; N70
-  N0 --&gt; N71
-  N0 --&gt; N72
-  N0 --&gt; N73
-  N0 --&gt; N74
-  N0 --&gt; N75
-  N0 --&gt; N76
-  N0 --&gt; N77
-  N0 --&gt; N78
-  N0 --&gt; N79
-  N0 --&gt; N80
-  N0 --&gt; N81
-  N0 --&gt; N82
-  N0 --&gt; N83
-  N0 --&gt; N84
-  N0 --&gt; N86
-  N0 --&gt; N87
-  N0 --&gt; N88
-  N0 --&gt; N89
-  N0 --&gt; N90
-  N0 --&gt; N91
-  N0 --&gt; N92
-  N0 --&gt; N93
-  N0 --&gt; N94
-  N0 --&gt; N95
-  N0 --&gt; N96
-  N0 --&gt; N97</pre>
+<pre><code class="">apps/player/
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+├── src/
+│   ├── main.tsx                    # Entry point; React root
+│   ├── App.tsx                     # Router + Layout wrapper
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── NavBar.tsx
+│   │   │   └── Layout.tsx
+│   │   ├── landing/
+│   │   │   ├── LandingPage.tsx
+│   │   │   ├── ClaimCTA.tsx
+│   │   │   ├── RarityHint.tsx
+│   │   │   └── SocialProofCounter.tsx
+│   │   ├── claim/
+│   │   │   ├── ClaimPage.tsx
+│   │   │   ├── ClaimFlow.tsx
+│   │   │   ├── ClaimEmailForm.tsx
+│   │   │   ├── ClaimCodeForm.tsx
+│   │   │   ├── ExpiryWarning.tsx
+│   │   │   └── URLReveal.tsx
+│   │   ├── pet/
+│   │   │   ├── PetPage.tsx
+│   │   │   ├── RarityBadge.tsx
+│   │   │   ├── StatsPanel.tsx
+│   │   │   ├── StatBar.tsx
+│   │   │   ├── TrainingEntry.tsx
+│   │   │   ├── FoodInventory.tsx
+│   │   │   ├── FoodItem.tsx
+│   │   │   ├── ArenaEntry.tsx
+│   │   │   └── NeglectedState.tsx
+│   │   ├── training/
+│   │   │   ├── TrainingPage.tsx
+│   │   │   ├── TrainingActions.tsx
+│   │   │   ├── TrainingActionCard.tsx
+│   │   │   ├── StatChangeIndicator.tsx
+│   │   │   ├── DailyResetTimer.tsx
+│   │   │   └── TrainingStreak.tsx
+│   │   ├── arena/
+│   │   │   ├── ArenaPage.tsx
+│   │   │   ├── ArenaScene.tsx          # Phaser.js battle animation scene
+│   │   │   ├── ModeSelector.tsx
+│   │   │   ├── PreBattlePanel.tsx
+│   │   │   ├── MatchmakingStatus.tsx
+│   │   │   ├── AIOfferModal.tsx
+│   │   │   ├── RateLimitBanner.tsx
+│   │   │   ├── BattleResultPage.tsx
+│   │   │   ├── BattleResultCard.tsx
+│   │   │   ├── StatComparison.tsx
+│   │   │   └── ShareBattleButton.tsx
+│   │   ├── leaderboard/
+│   │   │   ├── LeaderboardPage.tsx
+│   │   │   ├── LeaderboardTable.tsx
+│   │   │   ├── LeaderboardRow.tsx
+│   │   │   ├── RarityFilter.tsx
+│   │   │   └── OwnerRankBanner.tsx
+│   │   ├── records/
+│   │   │   ├── BattleRecordsPage.tsx
+│   │   │   ├── PetSummaryCard.tsx
+│   │   │   └── BattleHistoryTable.tsx
+│   │   ├── gdpr/
+│   │   │   ├── GdprPage.tsx
+│   │   │   ├── GdprRequestForm.tsx
+│   │   │   └── GdprStatusBanner.tsx
+│   │   ├── marketplace/               # FF_MARKETPLACE only
+│   │   │   └── MarketplacePage.tsx
+│   │   └── canvas/
+│   │       ├── PetCanvas.tsx          # React host for Phaser instance
+│   │       └── PetCanvasEngine.ts     # Phaser.js lifecycle manager
+│   ├── hooks/
+│   │   ├── usePet.ts
+│   │   ├── useLeaderboard.ts
+│   │   ├── useArenaHistory.ts
+│   │   ├── useTraining.ts
+│   │   ├── useFeed.ts
+│   │   ├── useClaim.ts
+│   │   ├── useReducedMotion.ts
+│   │   └── usePetToken.ts
+│   ├── store/
+│   │   └── useAppStore.ts             # Zustand store (slices: arena, claim, toast)
+│   ├── lib/
+│   │   ├── apiClient.ts               # Axios/fetch wrapper with token attachment
+│   │   ├── tokenStorage.ts            # localStorage read/write for pet_access_token
+│   │   ├── petGeneration.ts           # Seed → attribute vector (deterministic)
+│   │   └── spriteLoader.ts            # Phaser preload helpers
+│   ├── schemas/
+│   │   ├── pet.ts                     # Zod schemas for pet API responses
+│   │   ├── claim.ts
+│   │   ├── arena.ts
+│   │   └── leaderboard.ts
+│   ├── styles/
+│   │   ├── tokens.css                 # CSS custom properties (design tokens)
+│   │   ├── typography.css
+│   │   ├── rarity.css                 # Rarity tier animations and borders
+│   │   └── global.css
+│   └── constants.ts                   # Re-exports of constants.json values as typed TS consts</code></pre>
 <h3 id="22-react-component-tree-top-level">2.2 React Component Tree (Top Level)</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;App&quot;]
-  N1[&quot;Layout&quot;]
-  N2[&quot;NavBar                          (hasPetToken prop drives &#x27;My Pet&#x27; visibility)&quot;]
-  N3[&quot;Router (React Router v6)&quot;]
-  N4[&quot;LandingPage             /&quot;]
-  N5[&quot;PetCanvas           (Phaser.js instance via PetCanvasEngine)&quot;]
-  N6[&quot;RarityHint&quot;]
-  N7[&quot;ClaimCTA&quot;]
-  N8[&quot;SocialProofCounter&quot;]
-  N9[&quot;ClaimPage               /claim&quot;]
-  N10[&quot;ClaimFlow           (compound, max 3 steps — email_claim_flow_steps_max = 3)&quot;]
-  N11[&quot;ClaimEmailForm&quot;]
-  N12[&quot;ClaimCodeForm&quot;]
-  N13[&quot;URLReveal&quot;]
-  N14[&quot;PetPage                 /pet/:petId&quot;]
-  N15[&quot;PetCanvas&quot;]
-  N16[&quot;RarityBadge&quot;]
-  N17[&quot;StatsPanel  StatBar × 3&quot;]
-  N18[&quot;TrainingEntry&quot;]
-  N19[&quot;FoodInventory  FoodItem × N&quot;]
-  N20[&quot;ArenaEntry&quot;]
-  N21[&quot;NeglectedState      (conditional — training_neglect_threshold_days = 3)&quot;]
-  N22[&quot;TrainingPage            /pet/:petId/train&quot;]
-  N23[&quot;TrainingActions  TrainingActionCard × 3&quot;]
-  N24[&quot;StatChangeIndicator (visible 2s — training_stat_display_duration_seconds = 2)&quot;]
-  N25[&quot;DailyResetTimer&quot;]
-  N26[&quot;TrainingStreak&quot;]
-  N27[&quot;BattleRecordsPage       /pet/:petId/records&quot;]
-  N28[&quot;PetSummaryCard&quot;]
-  N29[&quot;BattleHistoryTable  (last 20 — arena_battle_records_display_count = 20)&quot;]
-  N30[&quot;ArenaPage               /arena&quot;]
-  N31[&quot;ModeSelector        (RACE / SUMO)&quot;]
-  N32[&quot;PreBattlePanel&quot;]
-  N33[&quot;MatchmakingStatus&quot;]
-  N34[&quot;AIOfferModal        (offered after arena_matchmaking_timeout_seconds = 30)&quot;]
-  N35[&quot;RateLimitBanner&quot;]
-  N36[&quot;BattleResultPage        /arena/result/:matchId&quot;]
-  N37[&quot;BattleResultCard    (WIN / LOSS variants)&quot;]
-  N38[&quot;StatComparison&quot;]
-  N39[&quot;ShareBattleButton&quot;]
-  N40[&quot;ActionButtons&quot;]
-  N41[&quot;LeaderboardPage         /leaderboard&quot;]
-  N42[&quot;RarityFilter&quot;]
-  N43[&quot;LeaderboardTable  LeaderboardRow × 100  (leaderboard_top_display = 100)&quot;]
-  N44[&quot;OwnerRankBanner     (if pet token present)&quot;]
-  N45[&quot;GdprPage                /gdpr        (owner auth required)&quot;]
-  N46[&quot;GdprRequestForm     (type selector: erasure / data_access / restrict_processing / object_leaderboard / rectification)&quot;]
-  N47[&quot;GdprStatusBanner    (polls GET /api/v1/gdpr/request/status by jobId)&quot;]
-  N48[&quot;MarketplacePage         /marketplace  (FF_MARKETPLACE only)&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26
-  N26 --&gt; N27
-  N27 --&gt; N28
-  N28 --&gt; N29
-  N29 --&gt; N30
-  N30 --&gt; N31
-  N31 --&gt; N32
-  N32 --&gt; N33
-  N33 --&gt; N34
-  N34 --&gt; N35
-  N35 --&gt; N36
-  N36 --&gt; N37
-  N37 --&gt; N38
-  N38 --&gt; N39
-  N39 --&gt; N40
-  N40 --&gt; N41
-  N41 --&gt; N42
-  N42 --&gt; N43
-  N43 --&gt; N44
-  N44 --&gt; N45
-  N45 --&gt; N46
-  N46 --&gt; N47
-  N47 --&gt; N48
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N18
-  N0 --&gt; N20
-  N0 --&gt; N21
-  N0 --&gt; N22
-  N0 --&gt; N24
-  N0 --&gt; N25
-  N0 --&gt; N26
-  N0 --&gt; N27
-  N0 --&gt; N28
-  N0 --&gt; N29
-  N0 --&gt; N30
-  N0 --&gt; N31
-  N0 --&gt; N32
-  N0 --&gt; N33
-  N0 --&gt; N34
-  N0 --&gt; N35
-  N0 --&gt; N36
-  N0 --&gt; N37
-  N0 --&gt; N38
-  N0 --&gt; N39
-  N0 --&gt; N40
-  N0 --&gt; N41
-  N0 --&gt; N42
-  N0 --&gt; N44
-  N0 --&gt; N45
-  N0 --&gt; N46
-  N0 --&gt; N47
-  N0 --&gt; N48</pre>
+<pre><code class="">App
+├── Layout
+│   ├── NavBar                          (hasPetToken prop drives &quot;My Pet&quot; visibility)
+│   └── Router (React Router v6)
+│       ├── LandingPage             /
+│       │   ├── PetCanvas           (Phaser.js instance via PetCanvasEngine)
+│       │   ├── RarityHint
+│       │   ├── ClaimCTA
+│       │   └── SocialProofCounter
+│       ├── ClaimPage               /claim
+│       │   └── ClaimFlow           (compound, max 3 steps — email_claim_flow_steps_max = 3)
+│       │       ├── ClaimEmailForm
+│       │       ├── ClaimCodeForm
+│       │       └── URLReveal
+│       ├── PetPage                 /pet/:petId
+│       │   ├── PetCanvas
+│       │   ├── RarityBadge
+│       │   ├── StatsPanel → StatBar × 3
+│       │   ├── TrainingEntry
+│       │   ├── FoodInventory → FoodItem × N
+│       │   ├── ArenaEntry
+│       │   └── NeglectedState      (conditional — training_neglect_threshold_days = 3)
+│       ├── TrainingPage            /pet/:petId/train
+│       │   ├── TrainingActions → TrainingActionCard × 3
+│       │   ├── StatChangeIndicator (visible 2s — training_stat_display_duration_seconds = 2)
+│       │   ├── DailyResetTimer
+│       │   └── TrainingStreak
+│       ├── BattleRecordsPage       /pet/:petId/records
+│       │   ├── PetSummaryCard
+│       │   └── BattleHistoryTable  (last 20 — arena_battle_records_display_count = 20)
+│       ├── ArenaPage               /arena
+│       │   ├── ModeSelector        (RACE / SUMO)
+│       │   ├── PreBattlePanel
+│       │   ├── MatchmakingStatus
+│       │   ├── AIOfferModal        (offered after arena_matchmaking_timeout_seconds = 30)
+│       │   └── RateLimitBanner
+│       ├── BattleResultPage        /arena/result/:matchId
+│       │   ├── BattleResultCard    (WIN / LOSS variants)
+│       │   ├── StatComparison
+│       │   ├── ShareBattleButton
+│       │   └── ActionButtons
+│       ├── LeaderboardPage         /leaderboard
+│       │   ├── RarityFilter
+│       │   ├── LeaderboardTable → LeaderboardRow × 100  (leaderboard_top_display = 100)
+│       │   └── OwnerRankBanner     (if pet token present)
+│       ├── GdprPage                /gdpr        (owner auth required)
+│       │   ├── GdprRequestForm     (type selector: erasure / data_access / restrict_processing / object_leaderboard / rectification)
+│       │   └── GdprStatusBanner    (polls GET /api/v1/gdpr/request/status by jobId)
+│       └── MarketplacePage         /marketplace  (FF_MARKETPLACE only)</code></pre>
 <h3 id="23-phaserjs-integration-pattern">2.3 Phaser.js Integration Pattern</h3>
 <p>Phaser.js is integrated as a side-effectful singleton managed inside a dedicated <code>PetCanvasEngine</code> class. No component other than <code>src/components/canvas/PetCanvas.tsx</code> may import Phaser directly.</p>
 <p><strong>Pattern: React host + Phaser canvas</strong></p>
@@ -1006,157 +813,82 @@ export function clearPetToken(): void {
 <hr>
 <h2 id="3-admin-portal-architecture">3. Admin Portal Architecture</h2>
 <h3 id="31-directory-structure">3.1 Directory Structure</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;apps/admin/&quot;]
-  N1[&quot;index.html&quot;]
-  N2[&quot;vite.config.ts&quot;]
-  N3[&quot;tsconfig.json&quot;]
-  N4[&quot;src/&quot;]
-  N5[&quot;main.ts                     # Vue app entry&quot;]
-  N6[&quot;App.vue                     # Root component + router-view&quot;]
-  N7[&quot;components/&quot;]
-  N8[&quot;layout/&quot;]
-  N9[&quot;AdminLayout.vue&quot;]
-  N10[&quot;AdminSidebar.vue&quot;]
-  N11[&quot;AdminNavbar.vue&quot;]
-  N12[&quot;dashboard/&quot;]
-  N13[&quot;DashboardPage.vue&quot;]
-  N14[&quot;pets/&quot;]
-  N15[&quot;PetListPage.vue&quot;]
-  N16[&quot;PetSearchBar.vue&quot;]
-  N17[&quot;PetBanModal.vue&quot;]
-  N18[&quot;leaderboard/&quot;]
-  N19[&quot;AdminLeaderboardPage.vue&quot;]
-  N20[&quot;SuspiciousFlagBadge.vue&quot;]
-  N21[&quot;battles/&quot;]
-  N22[&quot;BattleListPage.vue&quot;]
-  N23[&quot;BattleFlagModal.vue&quot;]
-  N24[&quot;suspicious/&quot;]
-  N25[&quot;SuspiciousActivityPage.vue&quot;]
-  N26[&quot;gdpr/&quot;]
-  N27[&quot;GdprQueuePage.vue&quot;]
-  N28[&quot;GdprRequestRow.vue&quot;]
-  N29[&quot;config/&quot;]
-  N30[&quot;RuntimeConfigPage.vue&quot;]
-  N31[&quot;EconomyConfigPage.vue&quot;]
-  N32[&quot;FlagsConfigPage.vue&quot;]
-  N33[&quot;email/&quot;]
-  N34[&quot;EmailMonitorPage.vue&quot;]
-  N35[&quot;analytics/&quot;]
-  N36[&quot;AnalyticsPage.vue&quot;]
-  N37[&quot;MetricChart.vue&quot;]
-  N38[&quot;audit/&quot;]
-  N39[&quot;AuditLogPage.vue&quot;]
-  N40[&quot;roles/&quot;]
-  N41[&quot;RolesPage.vue&quot;]
-  N42[&quot;CreateAdminModal.vue&quot;]
-  N43[&quot;auth/&quot;]
-  N44[&quot;LoginPage.vue&quot;]
-  N45[&quot;TotpSetupPage.vue&quot;]
-  N46[&quot;stores/&quot;]
-  N47[&quot;useAdminAuthStore.ts    # Pinia: session state, role&quot;]
-  N48[&quot;usePetStore.ts          # Pinia: admin pet list cache&quot;]
-  N49[&quot;useConfigStore.ts       # Pinia: runtime + economy + feature flags config cache&quot;]
-  N50[&quot;lib/&quot;]
-  N51[&quot;adminApiClient.ts       # Axios with session cookie; CSRF handling&quot;]
-  N52[&quot;formatters.ts           # Date, number, rarity formatting&quot;]
-  N53[&quot;router/&quot;]
-  N54[&quot;index.ts                # Vue Router route definitions&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N19
-  N0 --&gt; N20
-  N0 --&gt; N21
-  N0 --&gt; N22
-  N0 --&gt; N23
-  N0 --&gt; N24
-  N0 --&gt; N25
-  N0 --&gt; N26
-  N0 --&gt; N27
-  N0 --&gt; N28
-  N0 --&gt; N29
-  N0 --&gt; N30
-  N0 --&gt; N31
-  N0 --&gt; N32
-  N0 --&gt; N33
-  N0 --&gt; N34
-  N0 --&gt; N35
-  N0 --&gt; N36
-  N0 --&gt; N37
-  N0 --&gt; N38
-  N0 --&gt; N39
-  N0 --&gt; N40
-  N0 --&gt; N41
-  N0 --&gt; N42
-  N0 --&gt; N43
-  N0 --&gt; N44
-  N0 --&gt; N45
-  N0 --&gt; N46
-  N0 --&gt; N47
-  N0 --&gt; N48
-  N0 --&gt; N49
-  N0 --&gt; N50
-  N0 --&gt; N51
-  N0 --&gt; N52
-  N0 --&gt; N53
-  N0 --&gt; N54</pre>
+<pre><code class="">apps/admin/
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+├── src/
+│   ├── main.ts                     # Vue app entry
+│   ├── App.vue                     # Root component + router-view
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AdminLayout.vue
+│   │   │   ├── AdminSidebar.vue
+│   │   │   └── AdminNavbar.vue
+│   │   ├── dashboard/
+│   │   │   └── DashboardPage.vue
+│   │   ├── pets/
+│   │   │   ├── PetListPage.vue
+│   │   │   ├── PetSearchBar.vue
+│   │   │   └── PetBanModal.vue
+│   │   ├── leaderboard/
+│   │   │   ├── AdminLeaderboardPage.vue
+│   │   │   └── SuspiciousFlagBadge.vue
+│   │   ├── battles/
+│   │   │   ├── BattleListPage.vue
+│   │   │   └── BattleFlagModal.vue
+│   │   ├── suspicious/
+│   │   │   └── SuspiciousActivityPage.vue
+│   │   ├── gdpr/
+│   │   │   ├── GdprQueuePage.vue
+│   │   │   └── GdprRequestRow.vue
+│   │   ├── config/
+│   │   │   ├── RuntimeConfigPage.vue
+│   │   │   ├── EconomyConfigPage.vue
+│   │   │   └── FlagsConfigPage.vue
+│   │   ├── email/
+│   │   │   └── EmailMonitorPage.vue
+│   │   ├── analytics/
+│   │   │   ├── AnalyticsPage.vue
+│   │   │   └── MetricChart.vue
+│   │   ├── audit/
+│   │   │   └── AuditLogPage.vue
+│   │   ├── roles/
+│   │   │   ├── RolesPage.vue
+│   │   │   └── CreateAdminModal.vue
+│   │   └── auth/
+│   │       ├── LoginPage.vue
+│   │       └── TotpSetupPage.vue
+│   ├── stores/
+│   │   ├── useAdminAuthStore.ts    # Pinia: session state, role
+│   │   ├── usePetStore.ts          # Pinia: admin pet list cache
+│   │   └── useConfigStore.ts       # Pinia: runtime + economy + feature flags config cache
+│   ├── lib/
+│   │   ├── adminApiClient.ts       # Axios with session cookie; CSRF handling
+│   │   └── formatters.ts           # Date, number, rarity formatting
+│   └── router/
+│       └── index.ts                # Vue Router route definitions</code></pre>
 <h3 id="32-vue-3-component-tree">3.2 Vue 3 Component Tree</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;App.vue&quot;]
-  N1[&quot;LoginPage.vue               /admin/login&quot;]
-  N2[&quot;TotpSetupPage.vue       /admin/totp-setup   (first-login flow)&quot;]
-  N3[&quot;AdminLayout.vue             /admin/**&quot;]
-  N4[&quot;AdminSidebar.vue&quot;]
-  N5[&quot;AdminNavbar.vue&quot;]
-  N6[&quot;&lt;router-view&quot;]
-  N7[&quot;DashboardPage.vue       /admin/dashboard&quot;]
-  N8[&quot;PetListPage.vue         /admin/pets&quot;]
-  N9[&quot;AdminLeaderboardPage.vue /admin/leaderboard&quot;]
-  N10[&quot;BattleListPage.vue      /admin/battles&quot;]
-  N11[&quot;SuspiciousActivityPage.vue /admin/suspicious&quot;]
-  N12[&quot;GdprQueuePage.vue       /admin/gdpr&quot;]
-  N13[&quot;RuntimeConfigPage.vue   /admin/config/runtime&quot;]
-  N14[&quot;EconomyConfigPage.vue   /admin/config/economy&quot;]
-  N15[&quot;FlagsConfigPage.vue     /admin/config/flags&quot;]
-  N16[&quot;EmailMonitorPage.vue    /admin/email&quot;]
-  N17[&quot;AnalyticsPage.vue       /admin/analytics&quot;]
-  N18[&quot;AuditLogPage.vue        /admin/audit&quot;]
-  N19[&quot;RolesPage.vue           /admin/roles&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N19</pre>
+<pre><code class="">App.vue
+├── LoginPage.vue               /admin/login
+│   └── TotpSetupPage.vue       /admin/totp-setup   (first-login flow)
+└── AdminLayout.vue             /admin/**
+    ├── AdminSidebar.vue
+    ├── AdminNavbar.vue
+    └── &lt;router-view&gt;
+        ├── DashboardPage.vue       /admin/dashboard
+        ├── PetListPage.vue         /admin/pets
+        ├── AdminLeaderboardPage.vue /admin/leaderboard
+        ├── BattleListPage.vue      /admin/battles
+        ├── SuspiciousActivityPage.vue /admin/suspicious
+        ├── GdprQueuePage.vue       /admin/gdpr
+        ├── RuntimeConfigPage.vue   /admin/config/runtime
+        ├── EconomyConfigPage.vue   /admin/config/economy
+        ├── FlagsConfigPage.vue     /admin/config/flags
+        ├── EmailMonitorPage.vue    /admin/email
+        ├── AnalyticsPage.vue       /admin/analytics
+        ├── AuditLogPage.vue        /admin/audit
+        └── RolesPage.vue           /admin/roles</code></pre>
 <h3 id="33-element-plus-usage">3.3 Element Plus Usage</h3>
 <p>Element Plus is registered globally in <code>main.ts</code>. Key components used per module:</p>
 <table>
@@ -1360,293 +1092,111 @@ export function buildAttributeVector(seed: bigint): AttributeVector {
 <h2 id="5-key-ui-flows">5. Key UI Flows</h2>
 <h3 id="51-pet-claim-flow-email--otp--token-storage">5.1 Pet Claim Flow (Email → OTP → Token Storage)</h3>
 <p>The claim flow is a 3-step compound component (<code>email_claim_flow_steps_max = 3</code>).</p>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;Guest on LandingPage&quot;]
   N1[&quot;clicks ClaimCTA&quot;]
   N2[&quot;ClaimPage renders ClaimFlow&quot;]
   N3[&quot;Step 1: ClaimEmailForm&quot;]
-  N4[&quot;User enters email + checks COPPA age confirmation&quot;]
-  N5[&quot;POST /api/v1/claim  { email, petId, ageConfirmed: true }&quot;]
-  N6[&quot;{ claimId, expiresAt }&quot;]
-  N7[&quot;Rate limit: auth_rate_limit_claim_attempts_per_hour = 5&quot;]
-  N8[&quot;Step 2: ClaimCodeForm&quot;]
-  N9[&quot;User enters 6-digit OTP (claim_code_digits = 6)&quot;]
-  N10[&quot;ExpiryWarning shown when ≤ a11y_claim_code_warning_before_expiry_minutes = 2 min remain&quot;]
-  N11[&quot;POST /api/v1/claim/verify  { claimId, code }&quot;]
-  N12[&quot;{ petToken, petId, petUrl }&quot;]
-  N13[&quot;Code expires after claim_code_expiry_minutes = 15 min&quot;]
-  N14[&quot;Rate limit: auth_rate_limit_code_entry_attempts_per_session = 10&quot;]
-  N15[&quot;Step 3: URLReveal&quot;]
-  N16[&quot;petToken  setPetToken(petToken)  [localStorage]&quot;]
-  N17[&quot;petUrl displayed with copy button&quot;]
-  N18[&quot;navigate to /pet/:petId&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18</pre>
+  N4[&quot;Step 2: ClaimCodeForm&quot;]
+  N5[&quot;Step 3: URLReveal&quot;]
+  N6[&quot;petToken  setPetToken(petToken)  [localStorage]&quot;]
+  N7[&quot;petUrl displayed with copy button&quot;]
+  N8[&quot;navigate to /pet/:petId&quot;]
+  N3 --&gt;|&quot;User enters email + checks COPPA age confirmation → POST /api/v1/claim  { email, petId, ageConfirmed: true } ← { claimId, expiresAt } Rate limit: auth_rate_limit_claim_attempts_per_hour = 5&quot;| N4
+  N4 --&gt;|&quot;User enters 6-digit OTP (claim_code_digits = 6) ExpiryWarning shown when ≤ a11y_claim_code_warning_before_expiry_minutes = 2 min remain → POST /api/v1/claim/verify  { claimId, code } ← { petToken, petId, petUrl } Code expires after claim_code_expiry_minutes = 15 min Rate limit: auth_rate_limit_code_entry_attempts_per_session = 10&quot;| N5</pre></div>
 <p><strong>Error states handled in UI</strong>:</p>
 <ul><li><code>ALREADY_CLAIMED</code> (HTTP 400): &quot;This pet is already owned.&quot;</li><li><code>CODE_EXPIRED</code> (HTTP 400): &quot;Claim code has expired. Please request a new one.&quot; + re-request button</li><li><code>INVALID_CODE</code> (HTTP 400): Red shake animation on digit boxes + error message</li><li><code>VALIDATION_ERROR</code> (HTTP 400): Inline field error shown (malformed email, invalid UUID for <code>petId</code>)</li><li><code>AGE_CONFIRMATION_REQUIRED</code> (HTTP 400): Checkbox re-highlighted with error message &quot;Age confirmation required&quot;</li><li><code>PET_NOT_FOUND</code> (HTTP 404): &quot;Pet not found. Please reload and try again.&quot;</li><li><code>MAX_ATTEMPTS_REACHED</code> (HTTP 429): All inputs disabled after reaching the 10-attempt session limit (<code>auth_rate_limit_code_entry_attempts_per_session = 10</code>); <code>Retry-After</code> countdown shown</li><li><code>RATE_LIMIT_EXCEEDED</code> (HTTP 429): Email claim rate limit reached; <code>claim_email_retry_cooldown_seconds = 60</code> second cooldown countdown shown</li></ul>
 <h3 id="52-token-recovery-flow-lost-url-recovery">5.2 Token Recovery Flow (Lost URL Recovery)</h3>
 <p>Players who have lost their bookmarked pet URL may recover access via the recovery flow. Recovery is triggered from the LandingPage via a &quot;Forgot Your Pet?&quot; link or from the ClaimPage.</p>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;Guest on LandingPage or ClaimPage&quot;]
   N1[&quot;clicks &#x27;Forgot Your Pet?&#x27; or recovery link&quot;]
   N2[&quot;TokenRecoveryPage /claim/recover&quot;]
   N3[&quot;Step 1: RecoveryEmailForm&quot;]
-  N4[&quot;User enters email + petId (pet ID displayed on the original pet page if still available)&quot;]
-  N5[&quot;POST /api/v1/claim/recover  { email, petId }&quot;]
-  N6[&quot;{ claimId, expiresAt }&quot;]
-  N7[&quot;Note: Returns HTTP 200 regardless of email/petId match to prevent account enumeration (AC-004-2)&quot;]
-  N8[&quot;Rate limit: same auth_rate_limit_claim_attempts_per_hour = 5 as initial claim&quot;]
-  N9[&quot;Step 2: RecoveryCodeForm&quot;]
-  N10[&quot;User enters 6-digit OTP sent to registered email&quot;]
-  N11[&quot;POST /api/v1/claim/verify  { claimId, code }&quot;]
-  N12[&quot;{ petToken, petId, petUrl }&quot;]
-  N13[&quot;Code expires after claim_code_expiry_minutes = 15 min&quot;]
-  N14[&quot;Step 3: URLReveal&quot;]
-  N15[&quot;petToken  setPetToken(petToken)  [localStorage]&quot;]
-  N16[&quot;Old token immediately invalidated via Redis blacklist (token:blacklist:{old_hash}, TTL 72h)&quot;]
-  N17[&quot;petUrl displayed with copy button&quot;]
-  N18[&quot;navigate to /pet/:petId&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18</pre>
+  N4[&quot;Step 2: RecoveryCodeForm&quot;]
+  N5[&quot;Step 3: URLReveal&quot;]
+  N6[&quot;petToken  setPetToken(petToken)  [localStorage]&quot;]
+  N7[&quot;Old token immediately invalidated via Redis blacklist (token:blacklist:{old_hash}, TTL 72h)&quot;]
+  N8[&quot;petUrl displayed with copy button&quot;]
+  N9[&quot;navigate to /pet/:petId&quot;]
+  N3 --&gt;|&quot;User enters email + petId (pet ID displayed on the original pet page if still available) → POST /api/v1/claim/recover  { email, petId } ← { claimId, expiresAt } Note: Returns HTTP 200 regardless of email/petId match to prevent account enumeration (AC-004-2) Rate limit: same auth_rate_limit_claim_attempts_per_hour = 5 as initial claim&quot;| N4
+  N4 --&gt;|&quot;User enters 6-digit OTP sent to registered email → POST /api/v1/claim/verify  { claimId, code } ← { petToken, petId, petUrl } Code expires after claim_code_expiry_minutes = 15 min&quot;| N5</pre></div>
 <p><strong>State Management:</strong></p>
 <ul><li>Zustand store (<code>recoverySlice</code>): tracks <code>claimId</code>, <code>email</code>, <code>petId</code>, <code>recoveryStep</code>, <code>recoveryAttempts</code></li><li>On success, Zustand <code>petSlice.setPetToken()</code> is called to update localStorage</li><li>Old token automatically blacklisted on server; no client-side token invalidation needed</li></ul>
 <p><strong>Error states handled in UI:</strong></p>
 <ul><li><code>CODE_EXPIRED</code> (HTTP 400): &quot;Recovery code has expired. Please request a new one.&quot; + re-request button</li><li><code>INVALID_CODE</code> (HTTP 400): Red shake animation on digit boxes + error message</li><li><code>MAX_ATTEMPTS_REACHED</code> (HTTP 429): All inputs disabled after reaching the 10-attempt limit</li><li><code>RATE_LIMIT_EXCEEDED</code> (HTTP 429): Email recovery rate limit reached; countdown shown</li><li><code>EMAIL_NOT_FOUND</code> (HTTP 400): No pet found for this email/petId combination (returned as HTTP 200 with claimId but OTP code delivery fails silently to prevent enumeration)</li></ul>
 <p><strong>Component diagram:</strong></p>
-<pre class="mermaid">graph TD
-  N0[&quot;TokenRecoveryPage&quot;]
-  N1[&quot;RecoveryEmailForm&quot;]
-  N2[&quot;EmailInput&quot;]
-  N3[&quot;PetIdInput (optional if pet ID is known)&quot;]
-  N4[&quot;RecoverButton&quot;]
-  N5[&quot;RecoveryCodeForm (shown after email submission)&quot;]
-  N6[&quot;CodeDigitInput × 6&quot;]
-  N7[&quot;ExpiryWarning (when ≤ 2 min remain)&quot;]
-  N8[&quot;ResendCodeButton&quot;]
-  N9[&quot;TokenRevealModal (shown on success)&quot;]
-  N10[&quot;PetUrlDisplay&quot;]
-  N11[&quot;CopyButton&quot;]
-  N12[&quot;NavigateToPetButton&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12</pre>
+<pre><code class="">TokenRecoveryPage
+├── RecoveryEmailForm
+│   ├── EmailInput
+│   ├── PetIdInput (optional if pet ID is known)
+│   └── RecoverButton
+├── RecoveryCodeForm (shown after email submission)
+│   ├── CodeDigitInput × 6
+│   ├── ExpiryWarning (when ≤ 2 min remain)
+│   └── ResendCodeButton
+└── TokenRevealModal (shown on success)
+    ├── PetUrlDisplay
+    ├── CopyButton
+    └── NavigateToPetButton</code></pre>
 <p><strong>Related AC:</strong> AC-004-2 (player can request new access link), AC-004-3 (link sent within 60s)</p>
 <h3 id="53-training-interaction">5.3 Training Interaction</h3>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;PetPage (owner authenticated via Bearer token)&quot;]
   N1[&quot;clicks TrainingEntry&quot;]
   N2[&quot;TrainingPage /pet/:petId/train&quot;]
   N3[&quot;TrainingActions shows 3 action cards (RUN / STRENGTH / STAMINA)&quot;]
-  N4[&quot;Each card shows current stat value and trains-remaining count&quot;]
-  N5[&quot;training_actions_per_day = 3 actions per UTC day&quot;]
-  N6[&quot;User clicks &#x27;Train&#x27; on a card&quot;]
-  N7[&quot;POST /api/v1/pets/:petId/train  { trainingType: &#x27;RUN&#x27; | &#x27;STRENGTH&#x27; | &#x27;STAMINA&#x27; }&quot;]
-  N8[&quot;{ updatedStats, statDelta, actionsRemainingToday }&quot;]
-  N9[&quot;On success:&quot;]
-  N10[&quot;StatChangeIndicator appears: &#x27;+X Speed&#x27; floats up, visible for&quot;]
-  N11[&quot;training_stat_display_duration_seconds = 2 seconds&quot;]
-  N12[&quot;Stat bars animate to new values&quot;]
-  N13[&quot;usePet cache is invalidated  PetPage re-fetches&quot;]
-  N14[&quot;Error states:&quot;]
-  N15[&quot;HTTP 400 VALIDATION_ERROR  toast: &#x27;Invalid training type. Please try again.&#x27;&quot;]
-  N16[&quot;HTTP 400 TRAINING_LIMIT_REACHED  all action cards disabled; DailyResetTimer shown&quot;]
-  N17[&quot;HTTP 400 STAT_AT_MAXIMUM  toast: &#x27;Stat is already at maximum (pet_stat_max = 100)&#x27;; card remains&quot;]
-  N18[&quot;enabled for other stats not yet at max&quot;]
-  N19[&quot;HTTP 401  handled globally: clearPetToken() + redirect to /&quot;]
-  N20[&quot;HTTP 403 NOT_OWNER  toast: &#x27;You do not own this pet.&#x27; (should not occur in normal flow)&quot;]
-  N21[&quot;HTTP 404 PET_NOT_FOUND  toast: &#x27;Pet not found. Please reload and try again.&#x27; (should not occur in normal flow)&quot;]
-  N22[&quot;Exhausted (actionsRemainingToday = 0):&quot;]
-  N23[&quot;DailyResetTimer shows countdown to UTC 00:00 reset&quot;]
-  N24[&quot;All action cards disabled&quot;]
-  N25[&quot;Neglect check: if last_trained_at &gt; training_neglect_threshold_days = 3 days ago&quot;]
-  N26[&quot;NeglectedState overlay renders on PetCanvas&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26</pre>
+  N4[&quot;User clicks &#x27;Train&#x27; on a card&quot;]
+  N5[&quot;On success:&quot;]
+  N6[&quot;Error states:&quot;]
+  N7[&quot;Exhausted (actionsRemainingToday = 0):&quot;]
+  N8[&quot;DailyResetTimer shows countdown to UTC 00:00 reset&quot;]
+  N9[&quot;All action cards disabled&quot;]
+  N10[&quot;Neglect check: if last_trained_at &gt; training_neglect_threshold_days = 3 days ago&quot;]
+  N11[&quot;NeglectedState overlay renders on PetCanvas&quot;]
+  N3 --&gt;|&quot;Each card shows current stat value and trains-remaining count training_actions_per_day = 3 actions per UTC day&quot;| N4
+  N4 --&gt;|&quot;&#x27;→ POST /api/v1/pets/:petId/train  { trainingType: &#x27;RUN&#x27; &quot;| &#x27;STRENGTH&#x27; |&quot; &#x27;STAMINA&#x27; } ← { updatedStats, statDelta, actionsRemainingToday }&#x27;&quot;| N5
+  N5 --&gt;|&quot;StatChangeIndicator appears: &#x27;+X Speed&#x27; floats up, visible for training_stat_display_duration_seconds = 2 seconds Stat bars animate to new values usePet cache is invalidated → PetPage re-fetches&quot;| N6
+  N6 --&gt;|&quot;HTTP 400 VALIDATION_ERROR → toast: &#x27;Invalid training type. Please try again.&#x27; HTTP 400 TRAINING_LIMIT_REACHED → all action cards disabled; DailyResetTimer shown HTTP 400 STAT_AT_MAXIMUM → toast: &#x27;Stat is already at maximum (pet_stat_max = 100)&#x27;; card remains enabled for other stats not yet at max HTTP 401 → handled globally: clearPetToken() + redirect to / HTTP 403 NOT_OWNER → toast: &#x27;You do not own this pet.&#x27; (should not occur in normal flow) HTTP 404 PET_NOT_FOUND → toast: &#x27;Pet not found. Please reload and try again.&#x27; (should not occur in normal flow)&quot;| N7</pre></div>
 <h3 id="54-feed-interaction">5.4 Feed Interaction</h3>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;PetPage (owner authenticated via Bearer token)&quot;]
   N1[&quot;selects FoodItem in FoodInventory&quot;]
   N2[&quot;User taps/clicks food item in FoodInventory&quot;]
-  N3[&quot;FoodItem shows stat targeted, magnitude, and buff duration&quot;]
-  N4[&quot;POST /api/v1/pets/:petId/feed&quot;]
-  N5[&quot;{ buffType, stat, magnitude, isPermanent }&quot;]
-  N6[&quot;{ updatedStats, buffApplied }&quot;]
-  N7[&quot;updatedStats: { speed, strength, stamina }  (level excluded — level is training-derived)&quot;]
-  N8[&quot;buffApplied: { stat, magnitude, isPermanent, expiresAt }&quot;]
-  N9[&quot;expiresAt is null when isPermanent is true&quot;]
-  N10[&quot;On success:&quot;]
-  N11[&quot;Stat bar for the targeted stat animates to new value&quot;]
-  N12[&quot;If temporary buff: buff badge appears on stat bar with remaining duration&quot;]
-  N13[&quot;usePet cache is invalidated  PetPage re-fetches&quot;]
-  N14[&quot;Error states:&quot;]
-  N15[&quot;HTTP 400 STAT_AT_MAXIMUM  toast: &#x27;Stat is already at maximum (pet_stat_max = 100)&#x27;&quot;]
-  N16[&quot;HTTP 400 VALIDATION_ERROR  inline error (magnitude or buffType out of configured range)&quot;]
-  N17[&quot;HTTP 401  handled globally: clearPetToken() + redirect to /&quot;]
-  N18[&quot;HTTP 403 NOT_OWNER  toast: &#x27;You do not own this pet.&#x27; (should not occur in normal flow)&quot;]
-  N19[&quot;HTTP 404 PET_NOT_FOUND  toast: &#x27;Pet not found. Please reload and try again.&#x27; (should not occur in normal flow)&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19</pre>
+  N3[&quot;On success:&quot;]
+  N4[&quot;Error states:&quot;]
+  N5[&quot;HTTP 400 STAT_AT_MAXIMUM  toast: &#x27;Stat is already at maximum (pet_stat_max = 100)&#x27;&quot;]
+  N6[&quot;HTTP 400 VALIDATION_ERROR  inline error (magnitude or buffType out of configured range)&quot;]
+  N7[&quot;HTTP 401  handled globally: clearPetToken() + redirect to /&quot;]
+  N8[&quot;HTTP 403 NOT_OWNER  toast: &#x27;You do not own this pet.&#x27; (should not occur in normal flow)&quot;]
+  N9[&quot;HTTP 404 PET_NOT_FOUND  toast: &#x27;Pet not found. Please reload and try again.&#x27; (should not occur in normal flow)&quot;]
+  N2 --&gt;|&quot;FoodItem shows stat targeted, magnitude, and buff duration → POST /api/v1/pets/:petId/feed { buffType, stat, magnitude, isPermanent } ← { updatedStats, buffApplied } updatedStats: { speed, strength, stamina }  (level excluded — level is training-derived) buffApplied: { stat, magnitude, isPermanent, expiresAt } expiresAt is null when isPermanent is true&quot;| N3
+  N3 --&gt;|&quot;Stat bar for the targeted stat animates to new value If temporary buff: buff badge appears on stat bar with remaining duration usePet cache is invalidated → PetPage re-fetches&quot;| N4</pre></div>
 <h3 id="55-arena-battle-flow">5.5 Arena Battle Flow</h3>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;PetPage&quot;]
   N1[&quot;clicks ArenaEntry (battles remaining &gt; 0)&quot;]
   N2[&quot;ArenaPage /arena&quot;]
   N3[&quot;A1: Rate limit check (client-side from Zustand store — state set on prior HTTP 429 response)&quot;]
-  N4[&quot;If arena rate limit reached: RateLimitBanner shown; flow blocked&quot;]
-  N5[&quot;arena_rate_limit_battles_per_hour_default = 10&quot;]
-  N6[&quot;A2: ModeSelector — user picks RACE or SUMO&quot;]
-  N7[&quot;A3: User clicks &#x27;Enter Arena&#x27;&quot;]
-  N8[&quot;POST /api/v1/arena/enter  { petId, mode, acceptAI?: boolean }&quot;]
-  N9[&quot;Long-poll: server waits up to arena_matchmaking_timeout_seconds = 30s&quot;]
-  N10[&quot;MatchmakingStatus shows &#x27;Finding opponent...&#x27; with animated dots&quot;]
-  N11[&quot;HTTP 400 VALIDATION_ERROR  toast: &#x27;Invalid arena mode.&#x27; (should not occur in normal flow)&quot;]
-  N12[&quot;HTTP 401  handled globally: clearPetToken() + redirect to /&quot;]
-  N13[&quot;HTTP 403 NOT_OWNER  toast: &#x27;You do not own this pet.&#x27; (should not occur in normal flow)&quot;]
-  N14[&quot;HTTP 403 PET_BANNED  show ban notice; arena entry blocked&quot;]
-  N15[&quot;HTTP 404 PET_NOT_FOUND  toast: &#x27;Pet not found. Please reload and try again.&#x27; (should not occur in normal flow)&quot;]
-  N16[&quot;HTTP 429 RATE_LIMIT_EXCEEDED  RateLimitBanner shown; Retry-After countdown displayed&quot;]
-  N17[&quot;A4a: Opponent found (&lt; 30s)&quot;]
-  N18[&quot;3-2-1 pixel countdown animation&quot;]
-  N19[&quot;ArenaScene (Phaser.js) renders battle animation&quot;]
-  N20[&quot;Duration: arena_match_duration_min_seconds = 5s to&quot;]
-  N21[&quot;arena_match_duration_max_seconds = 15s&quot;]
-  N22[&quot;{ matchId, result, opponentPetId, isAiOpponent, statDelta, newLeaderboardScore }&quot;]
-  N23[&quot;A4b: No opponent (30s timeout), acceptAI omitted or false&quot;]
-  N24[&quot;HTTP 408 MATCHMAKING_TIMEOUT&quot;]
-  N25[&quot;Battle rate-limit counter NOT incremented on timeout&quot;]
-  N26[&quot;&#x27;No opponent found&#x27; message with retry option&quot;]
-  N27[&quot;A4c: No opponent, user accepts AIOfferModal&quot;]
-  N28[&quot;POST /api/v1/arena/enter  { ..., acceptAI: true }&quot;]
-  N29[&quot;AI opponent result&quot;]
-  N30[&quot;A5: navigate to /arena/result/:matchId&quot;]
-  N31[&quot;BattleResultPage shows WIN/LOSS card&quot;]
-  N32[&quot;ShareBattleButton copies public URL&quot;]
-  N33[&quot;Leaderboard score updated within leaderboard_update_lag_max_seconds = 30s&quot;]
-  N34[&quot;Error states:&quot;]
-  N35[&quot;HTTP 400 VALIDATION_ERROR  toast: &#x27;Invalid request. Please try again.&#x27;&quot;]
-  N36[&quot;HTTP 401 UNAUTHORIZED  clearPetToken() + redirect to /&quot;]
-  N37[&quot;HTTP 403 NOT_OWNER  toast: &#x27;You do not own this pet.&#x27;&quot;]
-  N38[&quot;HTTP 429 RATE_LIMIT_EXCEEDED  show cooldown timer (arena_rate_limit_battles_per_hour_default = 10 battles/hour)&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22
-  N22 --&gt; N23
-  N23 --&gt; N24
-  N24 --&gt; N25
-  N25 --&gt; N26
-  N26 --&gt; N27
-  N27 --&gt; N28
-  N28 --&gt; N29
-  N29 --&gt; N30
-  N30 --&gt; N31
-  N31 --&gt; N32
-  N32 --&gt; N33
-  N33 --&gt; N34
-  N34 --&gt; N35
-  N35 --&gt; N36
-  N36 --&gt; N37
-  N37 --&gt; N38</pre>
+  N4[&quot;A2: ModeSelector — user picks RACE or SUMO&quot;]
+  N5[&quot;A3: User clicks &#x27;Enter Arena&#x27;&quot;]
+  N6[&quot;A4a: Opponent found (&lt; 30s)&quot;]
+  N7[&quot;A4b: No opponent (30s timeout), acceptAI omitted or false&quot;]
+  N8[&quot;A4c: No opponent, user accepts AIOfferModal&quot;]
+  N9[&quot;A5: navigate to /arena/result/:matchId&quot;]
+  N10[&quot;BattleResultPage shows WIN/LOSS card&quot;]
+  N11[&quot;ShareBattleButton copies public URL&quot;]
+  N12[&quot;Leaderboard score updated within leaderboard_update_lag_max_seconds = 30s&quot;]
+  N13[&quot;Error states:&quot;]
+  N14[&quot;HTTP 400 VALIDATION_ERROR  toast: &#x27;Invalid request. Please try again.&#x27;&quot;]
+  N15[&quot;HTTP 401 UNAUTHORIZED  clearPetToken() + redirect to /&quot;]
+  N16[&quot;HTTP 403 NOT_OWNER  toast: &#x27;You do not own this pet.&#x27;&quot;]
+  N17[&quot;HTTP 429 RATE_LIMIT_EXCEEDED  show cooldown timer (arena_rate_limit_battles_per_hour_default = 10 battles/hour)&quot;]
+  N3 --&gt;|&quot;If arena rate limit reached: RateLimitBanner shown; flow blocked arena_rate_limit_battles_per_hour_default = 10&quot;| N4
+  N5 --&gt;|&quot;→ POST /api/v1/arena/enter  { petId, mode, acceptAI?: boolean } Long-poll: server waits up to arena_matchmaking_timeout_seconds = 30s MatchmakingStatus shows &#x27;Finding opponent...&#x27; with animated dots HTTP 400 VALIDATION_ERROR → toast: &#x27;Invalid arena mode.&#x27; (should not occur in normal flow) HTTP 401 → handled globally: clearPetToken() + redirect to / HTTP 403 NOT_OWNER → toast: &#x27;You do not own this pet.&#x27; (should not occur in normal flow) HTTP 403 PET_BANNED → show ban notice; arena entry blocked HTTP 404 PET_NOT_FOUND → toast: &#x27;Pet not found. Please reload and try again.&#x27; (should not occur in normal flow) HTTP 429 RATE_LIMIT_EXCEEDED → RateLimitBanner shown; Retry-After countdown displayed&quot;| N6
+  N6 --&gt;|&quot;3-2-1 pixel countdown animation ArenaScene (Phaser.js) renders battle animation Duration: arena_match_duration_min_seconds = 5s to arena_match_duration_max_seconds = 15s ← { matchId, result, opponentPetId, isAiOpponent, statDelta, newLeaderboardScore }&quot;| N7
+  N7 --&gt;|&quot;HTTP 408 MATCHMAKING_TIMEOUT Battle rate-limit counter NOT incremented on timeout &#x27;No opponent found&#x27; message with retry option&quot;| N8
+  N8 --&gt;|&quot;→ POST /api/v1/arena/enter  { ..., acceptAI: true } ← AI opponent result&quot;| N9</pre></div>
 <h3 id="56-marketplace-browse--list--buy-ff_marketplace">5.6 Marketplace Browse / List / Buy (FF_MARKETPLACE)</h3>
 <p>This flow is only active when the <code>FF_MARKETPLACE</code> feature flag is <code>true</code>.</p>
 <pre><code class="">MarketplacePage /marketplace
@@ -1697,52 +1247,19 @@ export function buildAttributeVector(seed: bigint): AttributeVector {
   └─ LeaderboardRow click → /pet/:petId/records
        BattleHistoryTable shows last arena_battle_records_display_count = 20 battles</code></pre>
 <h3 id="58-gdpr-self-service-flow-player">5.8 GDPR Self-Service Flow (Player)</h3>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;PetPage (owner authenticated via Bearer token)&quot;]
   N1[&quot;clicks &#x27;Data Rights&#x27; / GDPR link&quot;]
   N2[&quot;GdprPage /gdpr&quot;]
   N3[&quot;GdprRequestForm&quot;]
-  N4[&quot;Type selector (radio / dropdown):&quot;]
-  N5[&quot;erasure | data_access | restrict_processing | object_leaderboard | rectification&quot;]
-  N6[&quot;POST /api/v1/gdpr/request  { type: &#x27;erasure&#x27; | ... }   (auth: Bearer token)&quot;]
-  N7[&quot;{ jobId, message }  HTTP 202 Accepted&quot;]
-  N8[&quot;jobId stored in component state; GdprStatusBanner activates&quot;]
-  N9[&quot;GdprStatusBanner (after submission)&quot;]
-  N10[&quot;Polls GET /api/v1/gdpr/request/status?jobId=&lt;jobId&gt;  (auth: Bearer token)&quot;]
-  N11[&quot;Displays current status: pending | processing | completed | failed&quot;]
-  N12[&quot;SLA copy displayed per request type:&quot;]
-  N13[&quot;erasure  &#x27;Processed within 7 days (gdpr_email_deletion_window_days = 7)&#x27;&quot;]
-  N14[&quot;data_access / portability  &#x27;Processed within 30 days (gdpr_data_access_response_days = 30; gdpr_data_portability_response_days = 30)&#x27;&quot;]
-  N15[&quot;restrict_processing  &#x27;Processed within 24 hours (gdpr_restrict_processing_response_hours = 24)&#x27;&quot;]
-  N16[&quot;object_leaderboard  &#x27;Processed within 5 business days (gdpr_object_leaderboard_response_business_days = 5)&#x27;&quot;]
-  N17[&quot;rectification  &#x27;Processed within 24 hours (gdpr_email_rectification_response_hours = 24)&#x27;&quot;]
-  N18[&quot;Error states:&quot;]
-  N19[&quot;HTTP 400 VALIDATION_ERROR  inline form error: &#x27;Please select a valid request type.&#x27;&quot;]
-  N20[&quot;HTTP 401  redirect to / (token cleared)&quot;]
-  N21[&quot;HTTP 403 FORBIDDEN  &#x27;Your account is not authorized to view this request.&#x27;&quot;]
-  N22[&quot;HTTP 404 NOT_FOUND  &#x27;Request not found.&#x27;&quot;]
-  N0 --&gt; N1
-  N1 --&gt; N2
-  N2 --&gt; N3
-  N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7
-  N7 --&gt; N8
-  N8 --&gt; N9
-  N9 --&gt; N10
-  N10 --&gt; N11
-  N11 --&gt; N12
-  N12 --&gt; N13
-  N13 --&gt; N14
-  N14 --&gt; N15
-  N15 --&gt; N16
-  N16 --&gt; N17
-  N17 --&gt; N18
-  N18 --&gt; N19
-  N19 --&gt; N20
-  N20 --&gt; N21
-  N21 --&gt; N22</pre>
+  N4[&quot;GdprStatusBanner (after submission)&quot;]
+  N5[&quot;Error states:&quot;]
+  N6[&quot;HTTP 400 VALIDATION_ERROR  inline form error: &#x27;Please select a valid request type.&#x27;&quot;]
+  N7[&quot;HTTP 401  redirect to / (token cleared)&quot;]
+  N8[&quot;HTTP 403 FORBIDDEN  &#x27;Your account is not authorized to view this request.&#x27;&quot;]
+  N9[&quot;HTTP 404 NOT_FOUND  &#x27;Request not found.&#x27;&quot;]
+  N3 --&gt;|&quot;&#x27;Type selector (radio / dropdown): erasure &quot;| data_access | restrict_processing | object_leaderboard |&quot; rectification → POST /api/v1/gdpr/request  { type: &#x27;erasure&#x27; &quot;| ... }   (auth: Bearer token) ← { jobId, message }  HTTP 202 Accepted jobId stored in component state; GdprStatusBanner activates&quot;| N4
+  N4 --&gt;|&quot;&#x27;Polls GET /api/v1/gdpr/request/status?jobId=&lt;jobId&gt;  (auth: Bearer token) Displays current status: pending &quot;| processing | completed | failed SLA copy displayed per request type: erasure → &#x27;Processed within 7 days (gdpr_email_deletion_window_days = 7)&#x27; data_access / portability → &#x27;Processed within 30 days (gdpr_data_access_response_days = 30; gdpr_data_portability_response_days = 30)&#x27; restrict_processing → &#x27;Processed within 24 hours (gdpr_restrict_processing_response_hours = 24)&#x27; object_leaderboard → &#x27;Processed within 5 business days (gdpr_object_leaderboard_response_business_days = 5)&#x27; rectification → &#x27;Processed within 24 hours (gdpr_email_rectification_response_hours = 24)&#x27;&quot;| N5</pre></div>
 <h3 id="59-admin-login-totp">5.9 Admin Login (TOTP)</h3>
 <pre><code class="">AdminLoginPage /admin/login
   │

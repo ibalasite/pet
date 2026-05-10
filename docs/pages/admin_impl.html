@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html" target="prototype-window">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🎮 API Explorer</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,7 +425,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-admin-portal-overview">§1 Admin Portal Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-system-purpose">§1.1 System Purpose</a></li><li><a class="toc__link toc__link--h3" href="#12-design-principles">§1.2 Design Principles</a></li><li><a class="toc__link toc__link--h3" href="#13-user-roles-from-edd-37--arch-51">§1.3 User Roles (from EDD §3.7 + ARCH §5.1)</a></li><li><a class="toc__link" href="#2-technology-stack-decisions">§2 Technology Stack Decisions</a></li><li><a class="toc__link toc__link--h3" href="#21-framework-selection">§2.1 Framework Selection</a></li><li><a class="toc__link toc__link--h3" href="#22-dependency-version-manifest">§2.2 Dependency Version Manifest</a></li><li><a class="toc__link" href="#3-directory-structure">§3 Directory Structure</a></li><li><a class="toc__link" href="#4-routing-design">§4 Routing Design</a></li><li><a class="toc__link toc__link--h3" href="#41-route-table">§4.1 Route Table</a></li><li><a class="toc__link toc__link--h3" href="#42-route-guards">§4.2 Route Guards</a></li><li><a class="toc__link toc__link--h3" href="#43-dynamic-sidebar-generation-strategy">§4.3 Dynamic Sidebar Generation Strategy</a></li><li><a class="toc__link" href="#5-rbac-implementation">§5 RBAC Implementation</a></li><li><a class="toc__link toc__link--h3" href="#51-role-definitions-from-edd-37--arch-51--schema-admin_role_enum">§5.1 Role Definitions (from EDD §3.7 + ARCH §5.1 + SCHEMA admin_role_enum)</a></li><li><a class="toc__link toc__link--h3" href="#52-permission-guard-implementation">§5.2 Permission Guard Implementation</a></li><li><a class="toc__link toc__link--h3" href="#53-dynamic-menu-strategy">§5.3 Dynamic Menu Strategy</a></li><li><a class="toc__link toc__link--h3" href="#54-session-management">§5.4 Session Management</a></li><li><a class="toc__link" href="#6-layout-system">§6 Layout System</a></li><li><a class="toc__link toc__link--h3" href="#61-main-layout-structure">§6.1 Main Layout Structure</a></li><li><a class="toc__link toc__link--h3" href="#62-sidebar-specification">§6.2 Sidebar Specification</a></li><li><a class="toc__link" href="#7-page-specifications">§7 Page Specifications</a></li><li><a class="toc__link toc__link--h3" href="#71-login-page-adminlogin">§7.1 Login Page (/admin/login)</a></li><li><a class="toc__link toc__link--h3" href="#72-dashboard-admindashboard">§7.2 Dashboard (/admin/dashboard)</a></li><li><a class="toc__link toc__link--h3" href="#73-pet-management--list-adminpets">§7.3 Pet Management — List (/admin/pets)</a></li><li><a class="toc__link toc__link--h3" href="#74-pet-management--detail-adminpetspetid">§7.4 Pet Management — Detail (/admin/pets/:petId)</a></li><li><a class="toc__link toc__link--h3" href="#75-battle-records-adminbattles">§7.5 Battle Records (/admin/battles)</a></li><li><a class="toc__link toc__link--h3" href="#76-suspicious-activity-adminsuspicious">§7.6 Suspicious Activity (/admin/suspicious)</a></li><li><a class="toc__link toc__link--h3" href="#77-leaderboard-management-adminleaderboard">§7.7 Leaderboard Management (/admin/leaderboard)</a></li><li><a class="toc__link toc__link--h3" href="#78-analytics-adminanalytics">§7.8 Analytics (/admin/analytics)</a></li><li><a class="toc__link toc__link--h3" href="#79-email-monitor-adminemail">§7.9 Email Monitor (/admin/email)</a></li><li><a class="toc__link toc__link--h3" href="#710-runtime-config-adminconfigruntime">§7.10 Runtime Config (/admin/config/runtime)</a></li><li><a class="toc__link toc__link--h3" href="#711-economy-config-adminconfigeconomy">§7.11 Economy Config (/admin/config/economy)</a></li><li><a class="toc__link toc__link--h3" href="#712-feature-flags-adminconfigflags">§7.12 Feature Flags (/admin/config/flags)</a></li><li><a class="toc__link toc__link--h3" href="#713-gdpr-queue-admingdpr">§7.13 GDPR Queue (/admin/gdpr)</a></li><li><a class="toc__link toc__link--h3" href="#714-role-management-adminroles">§7.14 Role Management (/admin/roles)</a></li><li><a class="toc__link toc__link--h3" href="#715-audit-log-adminaudit">§7.15 Audit Log (/admin/audit)</a></li><li><a class="toc__link" href="#8-api-integration">§8 API Integration</a></li><li><a class="toc__link toc__link--h3" href="#81-axios-configuration">§8.1 Axios Configuration</a></li><li><a class="toc__link toc__link--h3" href="#82-csrf-protection">§8.2 CSRF Protection</a></li><li><a class="toc__link toc__link--h3" href="#83-admin-session-handling">§8.3 Admin Session Handling</a></li><li><a class="toc__link toc__link--h3" href="#84-api-endpoint-mapping-all-adminapi-routes-from-apimd-6">§8.4 API Endpoint Mapping (all /admin/api/* routes from API.md §6)</a></li><li><a class="toc__link" href="#9-pinia-store-architecture">§9 Pinia Store Architecture</a></li><li><a class="toc__link toc__link--h3" href="#91-store-summary">§9.1 Store Summary</a></li><li><a class="toc__link toc__link--h3" href="#92-authstore--key-logic">§9.2 authStore — Key Logic</a></li><li><a class="toc__link toc__link--h3" href="#93-permissionstore--key-logic">§9.3 permissionStore — Key Logic</a></li><li><a class="toc__link toc__link--h3" href="#94-configstore--key-logic">§9.4 configStore — Key Logic</a></li><li><a class="toc__link" href="#10-element-plus-component-standards">§10 Element Plus Component Standards</a></li><li><a class="toc__link toc__link--h3" href="#101-table-component-standard-universal">§10.1 Table Component Standard (Universal)</a></li><li><a class="toc__link toc__link--h3" href="#102-form-component-standard">§10.2 Form Component Standard</a></li><li><a class="toc__link toc__link--h3" href="#103-dangerous-action-confirmation-elmessagebox">§10.3 Dangerous Action Confirmation (ElMessageBox)</a></li><li><a class="toc__link toc__link--h3" href="#104-global-message-notification-standards">§10.4 Global Message Notification Standards</a></li><li><a class="toc__link" href="#11-shared-component-specifications">§11 Shared Component Specifications</a></li><li><a class="toc__link toc__link--h3" href="#111-searchabletable-component">§11.1 SearchableTable Component</a></li><li><a class="toc__link toc__link--h3" href="#112-auditlogdetail-component">§11.2 AuditLogDetail Component</a></li><li><a class="toc__link" href="#12-chart-integration">§12 Chart Integration</a></li><li><a class="toc__link" href="#13-internationalization-i18n">§13 Internationalization (i18n)</a></li><li><a class="toc__link" href="#14-performance">§14 Performance</a></li><li><a class="toc__link toc__link--h3" href="#141-route-level-lazy-loading">§14.1 Route-Level Lazy Loading</a></li><li><a class="toc__link toc__link--h3" href="#142-bundle-analysis">§14.2 Bundle Analysis</a></li><li><a class="toc__link toc__link--h3" href="#143-performance-targets">§14.3 Performance Targets</a></li><li><a class="toc__link toc__link--h3" href="#144-element-plus-on-demand-import-configuration">§14.4 Element Plus On-Demand Import Configuration</a></li><li><a class="toc__link" href="#15-deployment-configuration">§15 Deployment Configuration</a></li><li><a class="toc__link toc__link--h3" href="#151-vite-configuration-build--dev-proxy">§15.1 Vite Configuration (Build + Dev Proxy)</a></li><li><a class="toc__link toc__link--h3" href="#152-environment-variables">§15.2 Environment Variables</a></li><li><a class="toc__link toc__link--h3" href="#153-nginx-routing-configuration">§15.3 Nginx Routing Configuration</a></li><li><a class="toc__link" href="#16-security-hardening">§16 Security Hardening</a></li><li><a class="toc__link toc__link--h3" href="#161-authentication-security">§16.1 Authentication Security</a></li><li><a class="toc__link toc__link--h3" href="#162-session-security">§16.2 Session Security</a></li><li><a class="toc__link toc__link--h3" href="#163-rbac-security">§16.3 RBAC Security</a></li><li><a class="toc__link toc__link--h3" href="#164-audit-trail">§16.4 Audit Trail</a></li><li><a class="toc__link" href="#17-pre-delivery-checklist">§17 Pre-Delivery Checklist</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="admin_impl--admin-portal-implementation-specification">ADMIN_IMPL — Admin Portal Implementation Specification</h1>
@@ -419,117 +511,93 @@
 }</code></pre>
 <hr>
 <h2 id="3-directory-structure">§3 Directory Structure</h2>
-<pre class="mermaid">graph TD
-  N0[&quot;packages/admin-app/                    Admin Portal root (pnpm workspace)&quot;]
-  N1[&quot;src/&quot;]
-  N2[&quot;api/                           API call wrappers (maps to API.md /admin/api/* routes)&quot;]
-  N3[&quot;http.ts                    Axios instance + interceptors (session handling)&quot;]
-  N4[&quot;auth.ts                    login / logout / totp/setup / totp/verify&quot;]
-  N5[&quot;pets.ts                    GET /pets, GET /pets/:id, ban, unban&quot;]
-  N6[&quot;battles.ts                 GET /battles, GET /suspicious, flag, unflag&quot;]
-  N7[&quot;leaderboard.ts             GET /leaderboard, DELETE /leaderboard/:petId&quot;]
-  N8[&quot;config.ts                  GET/PUT /config/runtime, /economy, /flags&quot;]
-  N9[&quot;gdpr.ts                    GET /gdpr, POST /gdpr/delete, PATCH /gdpr/:id&quot;]
-  N10[&quot;audit.ts                   GET /admin/api/audit&quot;]
-  N11[&quot;roles.ts                   GET/POST /roles, DELETE /roles/:id, TOTP reset&quot;]
-  N12[&quot;analytics.ts               GET /analytics, GET /dashboard, GET /email/monitor&quot;]
-  N13[&quot;types.ts                   API response types (synchronized with packages/shared)&quot;]
-  N14[&quot;components/&quot;]
-  N15[&quot;common/                    Shared components&quot;]
-  N16[&quot;SearchableTable.vue    Table + Pagination + Search bar composite component&quot;]
-  N17[&quot;ConfirmDialog.vue      ElMessageBox wrapper (dangerous action confirmation)&quot;]
-  N18[&quot;AuditLogDetail.vue     Audit log detail Drawer&quot;]
-  N19[&quot;StatusBadge.vue        Status badge (banned / active / pending)&quot;]
-  N20[&quot;business/                  Domain-specific components&quot;]
-  N21[&quot;PetBanForm.vue         Ban/unban Dialog (reason field, max 500 chars)&quot;]
-  N22[&quot;BattleFlagForm.vue     Flag battle Dialog&quot;]
-  N23[&quot;GdprStatusForm.vue     GDPR status update Dialog&quot;]
-  N24[&quot;composables/                   Reusable logic (Vue Composition API)&quot;]
-  N25[&quot;usePermission.ts           hasPermission() + v-permission directive&quot;]
-  N26[&quot;usePagination.ts           Pagination state management&quot;]
-  N27[&quot;useTable.ts                Table loading / error / data three-state pattern&quot;]
-  N28[&quot;useSessionTimer.ts         4h inactivity + 8h absolute expiry monitoring&quot;]
-  N29[&quot;layouts/&quot;]
-  N30[&quot;AdminLayout.vue            HeaderBar + SidebarMenu + Content main layout&quot;]
-  N31[&quot;router/&quot;]
-  N32[&quot;index.ts                   Route definitions + createRouter&quot;]
-  N33[&quot;guards.ts                  beforeEach route guards (session + role validation)&quot;]
-  N34[&quot;routes.ts                  Route list (includes meta.permission)&quot;]
-  N35[&quot;stores/                        Pinia stores&quot;]
-  N36[&quot;auth.ts                    session + adminUser + login/logout&quot;]
-  N37[&quot;permission.ts              role + hasPermission() + menuTree&quot;]
-  N38[&quot;config.ts                  runtime config + economy config frontend cache&quot;]
-  N39[&quot;types/                         TypeScript type definitions&quot;]
-  N40[&quot;admin.ts                   AdminUser, AuditLogEntry, GdprRequest&quot;]
-  N41[&quot;pet.ts                     Pet, BanStatus, ModerationReason&quot;]
-  N42[&quot;config.ts                  RuntimeConfig, EconomyConfig, FeatureFlag&quot;]
-  N43[&quot;api.ts                     ApiEnvelope, PagedResponse, Meta&quot;]
-  N44[&quot;utils/                         Utility functions&quot;]
-  N45[&quot;format.ts                  Date format, email mask, reason truncate&quot;]
-  N46[&quot;session.ts                 Session expiry calculation utilities&quot;]
-  N47[&quot;styles/                        Styles&quot;]
-  N48[&quot;variables.css              CSS Custom Properties (color / spacing tokens)&quot;]
-  N49[&quot;global.css                 Reset + Element Plus theme overrides&quot;]
-  N50[&quot;views/&quot;]
-  N51[&quot;auth/&quot;]
-  N52[&quot;LoginView.vue          Login form (username + password + TOTP)&quot;]
-  N53[&quot;TotpSetupView.vue      First-login TOTP setup page&quot;]
-  N54[&quot;dashboard/&quot;]
-  N55[&quot;DashboardView.vue      KPI cards + system status&quot;]
-  N56[&quot;pets/&quot;]
-  N57[&quot;PetListView.vue        Pet list (search / filter / ban actions)&quot;]
-  N58[&quot;PetDetailView.vue      Pet detail (ban history + stats + battles)&quot;]
-  N59[&quot;battles/&quot;]
-  N60[&quot;BattleListView.vue     Battle records list (flag/unflag)&quot;]
-  N61[&quot;SuspiciousView.vue     Suspicious activity list&quot;]
-  N62[&quot;leaderboard/&quot;]
-  N63[&quot;LeaderboardView.vue    Top 500 admin view (suspicious flags)&quot;]
-  N64[&quot;analytics/&quot;]
-  N65[&quot;AnalyticsView.vue      Time-series charts (DAU / claims / battles)&quot;]
-  N66[&quot;EmailMonitorView.vue   Email delivery rate monitoring&quot;]
-  N67[&quot;config/&quot;]
-  N68[&quot;RuntimeConfigView.vue  Arena rate limit / rarity weights&quot;]
-  N69[&quot;EconomyConfigView.vue  Food buff multiplier / arena entry cost&quot;]
-  N70[&quot;FeatureFlagsView.vue   Feature flag management (FF_MARKETPLACE, etc.)&quot;]
-  N71[&quot;gdpr/&quot;]
-  N72[&quot;GdprQueueView.vue      GDPR request queue (status filter / update)&quot;]
-  N73[&quot;roles/&quot;]
-  N74[&quot;RoleManagementView.vue  Admin account list (create / deactivate / TOTP reset)&quot;]
-  N75[&quot;audit/&quot;]
-  N76[&quot;AuditLogView.vue       Audit log (actor / action / time range filter)&quot;]
-  N77[&quot;errors/&quot;]
-  N78[&quot;403View.vue            Forbidden page&quot;]
-  N79[&quot;404View.vue            Not found page&quot;]
-  N80[&quot;public/&quot;]
-  N81[&quot;favicon.ico&quot;]
-  N82[&quot;.env.development&quot;]
-  N83[&quot;.env.production&quot;]
-  N84[&quot;vite.config.ts&quot;]
-  N85[&quot;tsconfig.json&quot;]
-  N86[&quot;package.json&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N14
-  N0 --&gt; N29
-  N0 --&gt; N31
-  N0 --&gt; N50
-  N0 --&gt; N51
-  N0 --&gt; N54
-  N0 --&gt; N56
-  N0 --&gt; N59
-  N0 --&gt; N62
-  N0 --&gt; N64
-  N0 --&gt; N67
-  N0 --&gt; N71
-  N0 --&gt; N73
-  N0 --&gt; N75
-  N0 --&gt; N77
-  N0 --&gt; N80
-  N0 --&gt; N81
-  N0 --&gt; N82
-  N0 --&gt; N83
-  N0 --&gt; N84
-  N0 --&gt; N85
-  N0 --&gt; N86</pre>
+<pre><code class="">packages/admin-app/                   ← Admin Portal root (pnpm workspace)
+├── src/
+│   ├── api/                          ← API call wrappers (maps to API.md /admin/api/* routes)
+│   │   ├── http.ts                   ← Axios instance + interceptors (session handling)
+│   │   ├── auth.ts                   ← login / logout / totp/setup / totp/verify
+│   │   ├── pets.ts                   ← GET /pets, GET /pets/:id, ban, unban
+│   │   ├── battles.ts                ← GET /battles, GET /suspicious, flag, unflag
+│   │   ├── leaderboard.ts            ← GET /leaderboard, DELETE /leaderboard/:petId
+│   │   ├── config.ts                 ← GET/PUT /config/runtime, /economy, /flags
+│   │   ├── gdpr.ts                   ← GET /gdpr, POST /gdpr/delete, PATCH /gdpr/:id
+│   │   ├── audit.ts                  ← GET /admin/api/audit
+│   │   ├── roles.ts                  ← GET/POST /roles, DELETE /roles/:id, TOTP reset
+│   │   ├── analytics.ts              ← GET /analytics, GET /dashboard, GET /email/monitor
+│   │   └── types.ts                  ← API response types (synchronized with packages/shared)
+│   ├── components/
+│   │   ├── common/                   ← Shared components
+│   │   │   ├── SearchableTable.vue   ← Table + Pagination + Search bar composite component
+│   │   │   ├── ConfirmDialog.vue     ← ElMessageBox wrapper (dangerous action confirmation)
+│   │   │   ├── AuditLogDetail.vue    ← Audit log detail Drawer
+│   │   │   └── StatusBadge.vue       ← Status badge (banned / active / pending)
+│   │   └── business/                 ← Domain-specific components
+│   │       ├── PetBanForm.vue        ← Ban/unban Dialog (reason field, max 500 chars)
+│   │       ├── BattleFlagForm.vue    ← Flag battle Dialog
+│   │       └── GdprStatusForm.vue    ← GDPR status update Dialog
+│   ├── composables/                  ← Reusable logic (Vue Composition API)
+│   │   ├── usePermission.ts          ← hasPermission() + v-permission directive
+│   │   ├── usePagination.ts          ← Pagination state management
+│   │   ├── useTable.ts               ← Table loading / error / data three-state pattern
+│   │   └── useSessionTimer.ts        ← 4h inactivity + 8h absolute expiry monitoring
+│   ├── layouts/
+│   │   └── AdminLayout.vue           ← HeaderBar + SidebarMenu + Content main layout
+│   ├── router/
+│   │   ├── index.ts                  ← Route definitions + createRouter
+│   │   ├── guards.ts                 ← beforeEach route guards (session + role validation)
+│   │   └── routes.ts                 ← Route list (includes meta.permission)
+│   ├── stores/                       ← Pinia stores
+│   │   ├── auth.ts                   ← session + adminUser + login/logout
+│   │   ├── permission.ts             ← role + hasPermission() + menuTree
+│   │   └── config.ts                 ← runtime config + economy config frontend cache
+│   ├── types/                        ← TypeScript type definitions
+│   │   ├── admin.ts                  ← AdminUser, AuditLogEntry, GdprRequest
+│   │   ├── pet.ts                    ← Pet, BanStatus, ModerationReason
+│   │   ├── config.ts                 ← RuntimeConfig, EconomyConfig, FeatureFlag
+│   │   └── api.ts                    ← ApiEnvelope, PagedResponse, Meta
+│   ├── utils/                        ← Utility functions
+│   │   ├── format.ts                 ← Date format, email mask, reason truncate
+│   │   └── session.ts                ← Session expiry calculation utilities
+│   ├── styles/                       ← Styles
+│   │   ├── variables.css             ← CSS Custom Properties (color / spacing tokens)
+│   │   └── global.css                ← Reset + Element Plus theme overrides
+│   └── views/
+│       ├── auth/
+│       │   ├── LoginView.vue         ← Login form (username + password + TOTP)
+│       │   └── TotpSetupView.vue     ← First-login TOTP setup page
+│       ├── dashboard/
+│       │   └── DashboardView.vue     ← KPI cards + system status
+│       ├── pets/
+│       │   ├── PetListView.vue       ← Pet list (search / filter / ban actions)
+│       │   └── PetDetailView.vue     ← Pet detail (ban history + stats + battles)
+│       ├── battles/
+│       │   ├── BattleListView.vue    ← Battle records list (flag/unflag)
+│       │   └── SuspiciousView.vue    ← Suspicious activity list
+│       ├── leaderboard/
+│       │   └── LeaderboardView.vue   ← Top 500 admin view (suspicious flags)
+│       ├── analytics/
+│       │   ├── AnalyticsView.vue     ← Time-series charts (DAU / claims / battles)
+│       │   └── EmailMonitorView.vue  ← Email delivery rate monitoring
+│       ├── config/
+│       │   ├── RuntimeConfigView.vue ← Arena rate limit / rarity weights
+│       │   ├── EconomyConfigView.vue ← Food buff multiplier / arena entry cost
+│       │   └── FeatureFlagsView.vue  ← Feature flag management (FF_MARKETPLACE, etc.)
+│       ├── gdpr/
+│       │   └── GdprQueueView.vue     ← GDPR request queue (status filter / update)
+│       ├── roles/
+│       │   └── RoleManagementView.vue ← Admin account list (create / deactivate / TOTP reset)
+│       ├── audit/
+│       │   └── AuditLogView.vue      ← Audit log (actor / action / time range filter)
+│       └── errors/
+│           ├── 403View.vue           ← Forbidden page
+│           └── 404View.vue           ← Not found page
+├── public/
+│   └── favicon.ico
+├── .env.development
+├── .env.production
+├── vite.config.ts
+├── tsconfig.json
+└── package.json</code></pre>
 <hr>
 <h2 id="4-routing-design">§4 Routing Design</h2>
 <h3 id="41-route-table">§4.1 Route Table</h3>

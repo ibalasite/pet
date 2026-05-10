@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">🎮 UI Prototype</a>
+<a class="sidebar__link" href="prototype/admin/index.html" target="prototype-window">🎮 Admin Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🎮 API Explorer</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,7 +425,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#1-overview">§1. Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-animation-design-vision">§1.1 Animation Design Vision</a></li><li><a class="toc__link toc__link--h3" href="#12-technical-stack-selection">§1.2 Technical Stack Selection</a></li><li><a class="toc__link" href="#2-animation-requirements-analysis">§2. Animation Requirements Analysis</a></li><li><a class="toc__link toc__link--h3" href="#21-pet-generation--asset-mapping">§2.1 Pet Generation &amp;amp; Asset Mapping</a></li><li><a class="toc__link toc__link--h3" href="#22-animation-inventory-15-concrete-animations">§2.2 Animation Inventory (15+ Concrete Animations)</a></li><li><a class="toc__link toc__link--h3" href="#23-animation-spritesheet-planning">§2.3 Animation Spritesheet Planning</a></li><li><a class="toc__link toc__link--h3" href="#24-memory-budget">§2.4 Memory Budget</a></li><li><a class="toc__link" href="#3-sprite-asset-planning">§3. Sprite Asset Planning</a></li><li><a class="toc__link toc__link--h3" href="#31-sprite-design-specification">§3.1 Sprite Design Specification</a></li><li><a class="toc__link toc__link--h3" href="#32-asset-file-organization--naming">§3.2 Asset File Organization &amp;amp; Naming</a></li><li><a class="toc__link" href="#4-animation-engine--implementation">§4. Animation Engine &amp;amp; Implementation</a></li><li><a class="toc__link toc__link--h3" href="#41-phaserjs-integration">§4.1 Phaser.js Integration</a></li><li><a class="toc__link toc__link--h3" href="#42-animation-state-machine">§4.2 Animation State Machine</a></li><li><a class="toc__link toc__link--h3" href="#43-animation-playback-timing">§4.3 Animation Playback Timing</a></li><li><a class="toc__link toc__link--h3" href="#44-particle-effects">§4.4 Particle Effects</a></li><li><a class="toc__link" href="#5-performance--optimization">§5. Performance &amp;amp; Optimization</a></li><li><a class="toc__link toc__link--h3" href="#51-asset-loading-strategy">§5.1 Asset Loading Strategy</a></li><li><a class="toc__link toc__link--h3" href="#52-webgl-fallback">§5.2 WebGL Fallback</a></li><li><a class="toc__link toc__link--h3" href="#53-reduced-motion-support">§5.3 Reduced Motion Support</a></li><li><a class="toc__link" href="#6-cross-platform-considerations">§6. Cross-Platform Considerations</a></li><li><a class="toc__link toc__link--h3" href="#61-desktop-chrome-firefox-safari-edge">§6.1 Desktop (Chrome, Firefox, Safari, Edge)</a></li><li><a class="toc__link toc__link--h3" href="#62-mobile-ios-safari-chrome-android">§6.2 Mobile (iOS Safari, Chrome Android)</a></li><li><a class="toc__link toc__link--h3" href="#63-tablet-orientation-changes">§6.3 Tablet Orientation Changes</a></li><li><a class="toc__link" href="#7-implementation-phases">§7. Implementation Phases</a></li><li><a class="toc__link toc__link--h3" href="#71-phase-1-core-idle-animation-weeks-12">§7.1 Phase 1: Core Idle Animation (Weeks 1–2)</a></li><li><a class="toc__link toc__link--h3" href="#72-phase-2-interaction--training-animation-weeks-34">§7.2 Phase 2: Interaction &amp;amp; Training Animation (Weeks 3–4)</a></li><li><a class="toc__link toc__link--h3" href="#73-phase-3-arena-battle-animation-weeks-56">§7.3 Phase 3: Arena Battle Animation (Weeks 5–6)</a></li><li><a class="toc__link toc__link--h3" href="#74-phase-4-polish--optimization-week-7">§7.4 Phase 4: Polish &amp;amp; Optimization (Week 7)</a></li><li><a class="toc__link" href="#8-testing-strategy">§8. Testing Strategy</a></li><li><a class="toc__link toc__link--h3" href="#81-visual-regression-testing">§8.1 Visual Regression Testing</a></li><li><a class="toc__link toc__link--h3" href="#82-performance-testing">§8.2 Performance Testing</a></li><li><a class="toc__link toc__link--h3" href="#83-cross-browser-testing">§8.3 Cross-Browser Testing</a></li><li><a class="toc__link toc__link--h3" href="#84-accessibility-testing">§8.4 Accessibility Testing</a></li><li><a class="toc__link" href="#9-risk-mitigation--open-questions">§9. Risk Mitigation &amp;amp; Open Questions</a></li><li><a class="toc__link toc__link--h3" href="#91-risks">§9.1 Risks</a></li><li><a class="toc__link toc__link--h3" href="#92-open-questions">§9.2 Open Questions</a></li><li><a class="toc__link" href="#10-monitoring--observability">§10. Monitoring &amp;amp; Observability</a></li><li><a class="toc__link toc__link--h3" href="#101-animation-performance-metrics">§10.1 Animation Performance Metrics</a></li><li><a class="toc__link toc__link--h3" href="#102-error-handling">§10.2 Error Handling</a></li><li><a class="toc__link" href="#appendix-asset-file-size-budget">Appendix: Asset File Size Budget</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="anim--animation--sprite-design">ANIM — Animation &amp; Sprite Design</h1>
@@ -369,52 +461,29 @@
 <p>Each pet is uniquely generated via a 6-dimensional attribute vector (PET_GENERATION_DIMENSIONS = 6; EDD §0):</p>
 <ol><li><strong>body</strong> — frame silhouette (e.g., round, square, tall, short)</li><li><strong>head</strong> — facial feature set (e.g., pointed, round, animal-like)</li><li><strong>color_palette</strong> — primary + secondary color (e.g., blue-yellow, green-purple)</li><li><strong>accessory</strong> — optional visual augment (e.g., hat, scarf, crown)</li><li><strong>rarity_trait</strong> — visual distinctiveness (common → legendary glow)</li><li><strong>pattern</strong> — spot, stripe, or gradient overlay</li></ol>
 <p><strong>Asset Organization</strong>:</p>
-<pre class="mermaid">graph TD
-  N0[&quot;assets/sprites/&quot;]
-  N1[&quot;bodies/&quot;]
-  N2[&quot;body_round.png&quot;]
-  N3[&quot;body_square.png&quot;]
-  N4[&quot;body_tall.png&quot;]
-  N5[&quot;body_short.png&quot;]
-  N6[&quot;heads/&quot;]
-  N7[&quot;head_pointed.png&quot;]
-  N8[&quot;head_round.png&quot;]
-  N9[&quot;head_animal.png&quot;]
-  N10[&quot;accessories/&quot;]
-  N11[&quot;accessory_hat.png&quot;]
-  N12[&quot;accessory_scarf.png&quot;]
-  N13[&quot;accessory_crown.png&quot;]
-  N14[&quot;patterns/&quot;]
-  N15[&quot;pattern_spot.png&quot;]
-  N16[&quot;pattern_stripe.png&quot;]
-  N17[&quot;pattern_gradient.png&quot;]
-  N18[&quot;effects/&quot;]
-  N19[&quot;rarity_common.png  (no effect)&quot;]
-  N20[&quot;rarity_rare.png    (blue glow)&quot;]
-  N21[&quot;rarity_epic.png    (purple glow)&quot;]
-  N22[&quot;rarity_legendary.png  (gold glow)&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N19
-  N0 --&gt; N20
-  N0 --&gt; N21
-  N0 --&gt; N22</pre>
+<pre><code class="">assets/sprites/
+├── bodies/
+│   ├── body_round.png
+│   ├── body_square.png
+│   ├── body_tall.png
+│   └── body_short.png
+├── heads/
+│   ├── head_pointed.png
+│   ├── head_round.png
+│   └── head_animal.png
+├── accessories/
+│   ├── accessory_hat.png
+│   ├── accessory_scarf.png
+│   └── accessory_crown.png
+├── patterns/
+│   ├── pattern_spot.png
+│   ├── pattern_stripe.png
+│   └── pattern_gradient.png
+└── effects/
+    ├── rarity_common.png  (no effect)
+    ├── rarity_rare.png    (blue glow)
+    ├── rarity_epic.png    (purple glow)
+    └── rarity_legendary.png  (gold glow)</code></pre>
 <p><strong>Runtime Composition</strong>:</p>
 <p>At pet render time, the base body sprite (animated) is composed with:</p>
 <ol><li>Head overlay (static or looping blink animation)</li><li>Accessory (static, positioned via offsets)</li><li>Pattern overlay (static, semitransparent)</li><li>Rarity effect (glowing particle or shader effect, loops)</li></ol>
@@ -475,48 +544,27 @@ Compressed PNG: ~80–120 KB per variant (subject to color optimization)</code><
 <p><strong>Design Guidelines</strong>:</p>
 <ul><li>Iconic silhouette: pet must be recognizable at 32×32 from 1–2 meters distance</li><li>Color consistency: primary color dominates 60% of sprite; secondary 30%; accents 10%</li><li>Contrast: 4.5:1 text contrast ratio for overlaid stat numbers (A11Y_TEXT_CONTRAST_NORMAL = 4.5:1; ARCH §2.1)</li><li>Animation readability: extreme poses (leap, crouch) must differ by ≥20% pixel displacement</li></ul>
 <h3 id="32-asset-file-organization--naming">§3.2 Asset File Organization &amp; Naming</h3>
-<pre class="mermaid">graph TD
-  N0[&quot;assets/&quot;]
-  N1[&quot;sprites/&quot;]
-  N2[&quot;characters/&quot;]
-  N3[&quot;body_round_head_pointed_blue_yellow.png     (spritesheet, 768×768)&quot;]
-  N4[&quot;body_round_head_pointed_green_purple.png&quot;]
-  N5[&quot;... (144 total spritesheets)&quot;]
-  N6[&quot;legend.json  # Atlas/texture definition&quot;]
-  N7[&quot;effects/&quot;]
-  N8[&quot;particle_stars.png                          (small 16×16 particle sprite)&quot;]
-  N9[&quot;particle_sparkle.png&quot;]
-  N10[&quot;glow_blue.png                               (rarity effect glow overlay)&quot;]
-  N11[&quot;glow_purple.png&quot;]
-  N12[&quot;glow_gold.png&quot;]
-  N13[&quot;ui/&quot;]
-  N14[&quot;health_bar_bg.png&quot;]
-  N15[&quot;health_bar_fill.png&quot;]
-  N16[&quot;level_badge.png&quot;]
-  N17[&quot;stat_indicator.png&quot;]
-  N18[&quot;tile_sets/&quot;]
-  N19[&quot;arena_floor.png                             (background for battle scene)&quot;]
-  N20[&quot;sprites_manifest.json                               # Master registry of all sprite variants&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N19
-  N0 --&gt; N20</pre>
+<pre><code class="">assets/
+├── sprites/
+│   ├── characters/
+│   │   ├── body_round_head_pointed_blue_yellow.png     (spritesheet, 768×768)
+│   │   ├── body_round_head_pointed_green_purple.png
+│   │   ├── ... (144 total spritesheets)
+│   │   └── legend.json  # Atlas/texture definition
+│   ├── effects/
+│   │   ├── particle_stars.png                          (small 16×16 particle sprite)
+│   │   ├── particle_sparkle.png
+│   │   ├── glow_blue.png                               (rarity effect glow overlay)
+│   │   ├── glow_purple.png
+│   │   └── glow_gold.png
+│   ├── ui/
+│   │   ├── health_bar_bg.png
+│   │   ├── health_bar_fill.png
+│   │   ├── level_badge.png
+│   │   └── stat_indicator.png
+│   └── tile_sets/
+│       └── arena_floor.png                             (background for battle scene)
+└── sprites_manifest.json                               # Master registry of all sprite variants</code></pre>
 <p><strong>Manifest Structure</strong> (sprites_manifest.json):</p>
 <pre><code class="language-json">{
   &quot;variants&quot;: [
@@ -710,7 +758,7 @@ class PetAnimStateMachine {
 <p><strong>Critical Path Optimization</strong>:</p>
 <ol><li><strong>Initial page load</strong> (landing page, claim page): no Phaser import; static sprite fallback only</li><li><strong>Pet page load</strong>: async fetch + load spritesheet as non-blocking background task</li><li><strong>Lazy spritesheet cache</strong>: LRU cache (last 3 variants in memory)</li></ol>
 <p><strong>Loading Flow</strong>:</p>
-<pre class="mermaid">graph TD
+<div class="diagram-container"><pre class="mermaid">graph TD
   N0[&quot;User navigates to /pet/:petId&quot;]
   N1[&quot;React mounts &lt;PetCanvasEngine&quot;]
   N2[&quot;Phaser scene preload fires&quot;]
@@ -723,9 +771,7 @@ class PetAnimStateMachine {
   N1 --&gt; N2
   N2 --&gt; N3
   N3 --&gt; N4
-  N4 --&gt; N5
-  N5 --&gt; N6
-  N6 --&gt; N7</pre>
+  N6 --&gt; N7</pre></div>
 <p><strong>Cache Strategy</strong>:</p>
 <ul><li><strong>Browser cache</strong> (HTTP cache headers): 24 hours (Cache-Control: max-age=86400)</li><li><strong>IndexedDB persistent cache</strong>: Keep last 5 accessed variants (LRU eviction)</li><li><strong>Memory cache</strong>: Current scene spritesheet only</li><li><strong>CDN</strong>: Cloudflare or Vercel Edge caching for 1-hour TTL</li></ul>
 <p><strong>Expected Load Time</strong>:</p>

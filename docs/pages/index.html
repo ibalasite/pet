@@ -42,6 +42,64 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
+    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    .sidebar { position: relative; display: flex; flex-direction: column;
+      overflow: hidden; }
+    .sidebar__toggle { position: absolute; top: 6px; right: 6px;
+      background: #f1f5f9; border: 1px solid #cbd5e1;
+      padding: 2px 6px; border-radius: 4px;
+      cursor: pointer; font-size: 11px; line-height: 1;
+      color: #475569; z-index: 3; }
+    .sidebar__toggle:hover { background: #e2e8f0; }
+    .sidebar__tabs { display: flex; gap: 2px; padding: 4px 32px 0 4px;
+      border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+      flex-shrink: 0; }
+    .sidebar__tab { flex: 1; padding: 6px 8px; font-size: 12px;
+      border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; cursor: pointer; background: transparent;
+      color: #64748b; font-family: inherit; text-align: center;
+      transition: background-color 150ms, color 150ms; }
+    .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
+    .sidebar__tab.active { background: #fff; color: #1e3a8a;
+      border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
+    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+      padding: 0.5rem 0; font-size: 0.875rem; }
+    .sidebar__panel.active { display: block; }
+    /* TOC list rendering inside the toc panel */
+    .sidebar__panel .toc-list { list-style: none; padding: 0; margin: 0; }
+    .sidebar__panel .toc-list li { margin: 0; }
+    .toc__link { display: block; padding: 0.25rem 0.75rem;
+      color: #475569; text-decoration: none; font-size: 0.8125rem;
+      border-left: 2px solid transparent; margin: 1px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc__link:hover { background: #f1f5f9; color: #1e293b; }
+    .toc__link.active { background: #eff6ff; color: #1e3a8a;
+      border-left-color: #3b82f6; font-weight: 500; }
+    .toc__link--h3 { padding-left: 1.5rem; font-size: 0.78rem; color: #64748b; }
+    /* Sidebar collapsed state — keep a 32px rail visible so the toggle
+       button stays clickable; hide tabs + panels. Overrides style.css's
+       .page-wrapper.sidebar-collapsed { grid-template-columns: 0 4px 1fr; }
+       to keep the rail. */
+    .page-wrapper.sidebar-collapsed { grid-template-columns: 32px 4px 1fr; }
+    .page-wrapper.sidebar-collapsed .sidebar {
+      width: 32px; min-width: 32px;
+      visibility: visible; padding: 0; overflow: visible;
+    }
+    .page-wrapper.sidebar-collapsed .sidebar__tabs,
+    .page-wrapper.sidebar-collapsed .sidebar__panel { display: none; }
+    .page-wrapper.sidebar-collapsed .sidebar__toggle { left: 4px; right: 4px; }
+    /* RWD — auto-collapse on phones (<768px). Only kicks in when no
+       explicit `.sidebar-expanded` flag is set; tap the toggle to expand. */
+    @media (max-width: 768px) {
+      .page-wrapper:not(.sidebar-expanded) {
+        grid-template-columns: 32px 4px 1fr;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar {
+        width: 32px; min-width: 32px;
+      }
+      .page-wrapper:not(.sidebar-expanded) .sidebar__tabs,
+      .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
+    }
     /* G-Q2: lightbox cloned-diagram visibility.
        The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
@@ -95,6 +153,30 @@
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; color: #1e293b; }
     .umock__page-title { padding: 0.75rem 1rem; font-weight: 600; font-size: 1.05rem;
       background: #f8fafc; border-bottom: 1.5px solid #94a3b8; }
+    /* `.diagram-container` (assets/style.css) defaults to text-align: center
+       which is right for SVG/mermaid but wrong for umock body text. Reset
+       to start so individual umock elements decide their own alignment.
+       Also constrain width to content so umock card mirrors ASCII source
+       proportions (rather than stretching to full doc-content width). */
+    .diagram-container--umock {
+      text-align: start;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .diagram-container--umock .umock__card,
+    .diagram-container--umock .umock__page,
+    .diagram-container--umock .umock__modal {
+      width: fit-content;
+      max-width: 100%;
+    }
+    /* Outer-alignment modifiers — applied via attrs.align detected from
+       the source ASCII's leading/trailing whitespace within `│ ... │`. */
+    .umock__card-title--center, .umock__page-title--center,
+    .umock__text--center, .umock__info--center, .umock__hint--center,
+    .umock__actions--center { text-align: center; }
+    .umock__card-title--right, .umock__page-title--right,
+    .umock__text--right, .umock__info--right, .umock__hint--right,
+    .umock__actions--right { text-align: right; }
     .umock__modal { max-width: 540px; }
     .umock__modal-titlebar { display: flex; justify-content: space-between; align-items: center;
       padding: 0.75rem 1rem; background: #f1f5f9; border-bottom: 1.5px solid #94a3b8; }
@@ -122,7 +204,7 @@
     .umock__field-required { color: #dc2626; margin-left: 0.125rem; }
     .umock__input, .umock__search {
       display: block; width: 100%; padding: 0.5rem 0.625rem; font-size: 0.9rem;
-      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+      border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
       color: #475569; box-sizing: border-box;
     }
     .umock__btn { display: inline-block; padding: 0.4rem 0.9rem; margin: 0.125rem;
@@ -131,7 +213,7 @@
     .umock__btn--primary { background: #2563eb; color: #fff; }
     .umock__btn--secondary { background: #fff; color: #475569; border-color: #cbd5e1; }
     .umock__btn--danger { background: #dc2626; color: #fff; }
-    .umock__actions { padding: 0.5rem 0; text-align: right;
+    .umock__actions { padding: 0.5rem 0;
       border-top: 1px solid #f1f5f9; }
     .umock__badge { display: inline-block; padding: 0.125rem 0.5rem;
       border-radius: 999px; font-size: 0.75rem; font-weight: 500;
@@ -142,7 +224,16 @@
     .umock__hint { color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0.5rem 0; }
     .umock__info { background: #eff6ff; border-left: 3px solid #3b82f6;
       padding: 0.5rem 0.75rem; margin: 0.5rem 0; color: #1e3a8a; font-size: 0.875rem; }
-    .umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
+    /* Plain body text row in UI mock: monospace, preserve whitespace,
+       left-aligned, no background. Maps to ASCII content rows that aren't
+       semantic markers (ⓘ / helper:). */
+    .umock__text { padding: 0.125rem 1rem; margin: 0; color: #1e293b;
+      font-family: 'Menlo','Consolas','Courier New',monospace;
+      font-size: 0.85rem; white-space: pre; }
+    /* Higher specificity than `.doc-content pre` (assets/style.css) so the
+       umock dark-canvas background isn't overridden by the generic `pre`
+       rule when umock is rendered inside `.doc-content`. */
+    .doc-content pre.umock__code, pre.umock__code { background: #1e293b; color: #f1f5f9; padding: 0.75rem;
       border-radius: 4px; overflow-x: auto; font-size: 0.8rem;
       font-family: ui-monospace, "SF Mono", Consolas, monospace; }
     .umock__code code { background: none; color: inherit; padding: 0; }
@@ -151,6 +242,7 @@
       border-bottom: 1px solid #cbd5e1; }
     .umock__table th { background: #f8fafc; font-weight: 600; color: #334155;
       border-bottom: 2px solid #94a3b8; }
+    .umock__table tbody tr:hover { background: #f8fafc; }
     .umock__pagination { padding: 0.5rem 0; color: #64748b; font-size: 0.8rem; text-align: right; }
     .umock__tabs { display: flex; gap: 0.5rem; padding: 0.25rem 0; border-bottom: 1px solid #e2e8f0; }
     .umock__tab { padding: 0.375rem 0.75rem; color: #475569; font-size: 0.875rem;
@@ -190,7 +282,7 @@
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
-      <div class="sidebar__section">
+      <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
 <div class="sidebar__label">文件</div>
 <a class="sidebar__link active" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
@@ -249,13 +341,13 @@
 <details open>
 <summary>📁 prototype/</summary>
 <div class="sidebar__label sidebar__label--sub">Interactive Prototypes</div>
-<a class="sidebar__link" href="prototype/index.html">🎮 UI Prototype</a>
-<a class="sidebar__link" href="prototype/admin/index.html">🎮 Admin Prototype</a>
-<a class="sidebar__link" href="prototype/api-explorer/index.html">🎮 API Explorer</a>
+<a class="sidebar__link" href="prototype/index.html" target="prototype-window">📱 UI Prototype</a>
+<a class="sidebar__link" href="prototype/api-explorer/index.html" target="prototype-window">🔌 API Explorer</a>
+<a class="sidebar__link" href="prototype/admin/admin-login.html" target="prototype-window">🛡️ Admin Portal</a>
 <div class="sidebar__label sidebar__label--sub">規格文件</div>
-<a class="sidebar__link" href="prototype/admin-moderation-prototype.html">Admin Moderation Prototype</a>
-<a class="sidebar__link" href="prototype/arena-battle-prototype.html">Arena Battle Prototype</a>
-<a class="sidebar__link" href="prototype/pet-display-prototype.html">Pet Display Prototype</a>
+<a class="sidebar__link" href="prototype/admin-moderation-prototype.html" target="prototype-window">Admin Moderation Prototype</a>
+<a class="sidebar__link" href="prototype/arena-battle-prototype.html" target="prototype-window">Arena Battle Prototype</a>
+<a class="sidebar__link" href="prototype/pet-display-prototype.html" target="prototype-window">Pet Display Prototype</a>
 </details>
 </div>
 <div class="sidebar__section">
@@ -333,23 +425,25 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#table-of-contents">Table of Contents</a></li><li><a class="toc__link" href="#overview">Overview</a></li><li><a class="toc__link" href="#core-features">Core Features</a></li><li><a class="toc__link" href="#system-architecture">System Architecture</a></li><li><a class="toc__link" href="#tech-stack">Tech Stack</a></li><li><a class="toc__link" href="#quick-start">Quick Start</a></li><li><a class="toc__link toc__link--h3" href="#prerequisites">Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#docker-recommended">Docker (Recommended)</a></li><li><a class="toc__link toc__link--h3" href="#macos--linux-native">macOS / Linux (Native)</a></li><li><a class="toc__link toc__link--h3" href="#windows-powershell">Windows (PowerShell)</a></li><li><a class="toc__link" href="#environment-variables">Environment Variables</a></li><li><a class="toc__link" href="#api-quick-reference">API Quick Reference</a></li><li><a class="toc__link" href="#directory-structure">Directory Structure</a></li><li><a class="toc__link" href="#documentation">Documentation</a></li><li><a class="toc__link toc__link--h3" href="#interactive-demos">Interactive Demos</a></li><li><a class="toc__link" href="#testing">Testing</a></li><li><a class="toc__link toc__link--h3" href="#run-all-tests">Run All Tests</a></li><li><a class="toc__link toc__link--h3" href="#generate-coverage-report">Generate Coverage Report</a></li><li><a class="toc__link toc__link--h3" href="#individual-test-types">Individual Test Types</a></li><li><a class="toc__link toc__link--h3" href="#performance-targets">Performance Targets</a></li><li><a class="toc__link" href="#known-limitations">Known Limitations</a></li><li><a class="toc__link" href="#changelog">Changelog</a></li><li><a class="toc__link" href="#development-guide">Development Guide</a></li><li><a class="toc__link toc__link--h3" href="#branch-strategy">Branch Strategy</a></li><li><a class="toc__link toc__link--h3" href="#commit-message-format">Commit Message Format</a></li><li><a class="toc__link" href="#license">License</a></li><li><a class="toc__link" href="#security-policy">Security Policy</a></li><li><a class="toc__link toc__link--h3" href="#responsible-disclosure">Responsible Disclosure</a></li><li><a class="toc__link" href="#architecture-quick-reference">Architecture Quick Reference</a></li><li><a class="toc__link" href="#code-of-conduct">Code of Conduct</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><p>&lt;!--</p>
-<p>DOC-ID:  README-PIXEL-PET-ARENA-20260509</p>
-<p>Version: v1.2</p>
+<p>DOC-ID:  README-PIXEL-PET-ARENA-20260511</p>
+<p>Version: v1.3</p>
 <p>Status:  IN_REVIEW</p>
 <p>Author:  AI Generated (gendoc readme)</p>
-<p>Date:    2026-05-09</p>
+<p>Date:    2026-05-11</p>
 <p>Upstream docs:</p>
-<ul><li style="margin-left:2.0rem">BRD:   docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">PRD:   docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503, v1.5)</li><li style="margin-left:2.0rem">PDD:   docs/PDD.md   (PDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">EDD:   docs/EDD.md   (EDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">ARCH:  docs/ARCH.md  (ARCH-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">API:   docs/API.md   (API-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">SCHEMA: docs/SCHEMA.md</li><li style="margin-left:2.0rem">LOCAL_DEPLOY: docs/LOCAL_DEPLOY.md</li></ul>
+<ul><li style="margin-left:2.0rem">BRD:   docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">PRD:   docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503, v1.5)</li><li style="margin-left:2.0rem">PDD:   docs/PDD.md   (PDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">EDD:   docs/EDD.md   (EDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">ARCH:  docs/ARCH.md  (ARCH-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">API:   docs/API.md   (API-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">SCHEMA: docs/SCHEMA.md</li><li style="margin-left:2.0rem">LOCAL_DEPLOY: docs/LOCAL_DEPLOY.md</li><li style="margin-left:2.0rem">CICD: docs/CICD.md</li></ul>
 <p>Change log:</p>
 <p>v1.0  2026-05-05  AI Generated  Initial generated draft</p>
 <p>v1.1  2026-05-05  AI Generated  Fix GitHub repo URLs to ibalasite/pet</p>
 <p>v1.2  2026-05-09  AI Generated  Refresh from upstream — switch npm→pnpm (per LOCAL_DEPLOY),</p>
 <p>update API endpoint paths to match docs/API.md, sync features</p>
 <p>list with features/*.feature, post-HTML pipeline state</p>
+<p>v1.3  2026-05-11  AI Generated  Refresh from upstream — add Interactive Demos section</p>
+<p>(UI Prototype + API Explorer + Admin Portal)</p>
 <p>--&gt;</p>
 <h1 id="pixel-pet-arena">pixel-pet-arena</h1>
 <blockquote><p>Zero-account-barrier HTML5 browser game where players claim, train, and battle procedurally-generated pixel pets via email — no registration required.</p></blockquote>
@@ -555,132 +649,71 @@ pnpm dev</code></pre>
 <ul><li>Markdown source: <a href="api.html" target="_blank" rel="noopener">docs/API.md</a></li><li>HTML online: <a href="api.html" target="_blank" rel="noopener">docs/pages/api.html</a></li><li>Mock server: <a href="docs/blueprint/mock/" target="_blank" rel="noopener">docs/blueprint/mock/</a> (FastAPI-based stub for frontend development)</li><li>OpenAPI 3.1 contract: <a href="docs/blueprint/contracts/openapi.yaml" target="_blank" rel="noopener">docs/blueprint/contracts/openapi.yaml</a></li></ul>
 <hr>
 <h2 id="directory-structure">Directory Structure</h2>
-<pre class="mermaid">graph TD
-  N0[&quot;pixel-pet-arena/&quot;]
-  N1[&quot;.github/                    # GitHub Actions CI/CD workflows&quot;]
-  N2[&quot;workflows/&quot;]
-  N3[&quot;ci.yml              # Lint, test, build on every PR&quot;]
-  N4[&quot;deploy.yml          # Deploy to Railway + Vercel&quot;]
-  N5[&quot;apps/&quot;]
-  N6[&quot;api/                    # Fastify 4 unified API process (Game + Admin plugins)&quot;]
-  N7[&quot;src/&quot;]
-  N8[&quot;claim/          # OTP generation, email dispatch, token issuance&quot;]
-  N9[&quot;pets/           # Pet CRUD, training, feeding&quot;]
-  N10[&quot;arena/          # Matchmaking, battle engine, result recording&quot;]
-  N11[&quot;leaderboard/    # Redis sorted set reads + PostgreSQL fallback&quot;]
-  N12[&quot;admin/          # Admin plugin (mounted at /admin/api)&quot;]
-  N13[&quot;shared/         # Config, logger, Zod schemas, DB client&quot;]
-  N14[&quot;player-app/             # React 18 + Phaser.js 3 player SPA&quot;]
-  N15[&quot;game/           # Phaser.js canvas engine, sprite generator&quot;]
-  N16[&quot;claim/          # Claim flow (3-step compound component)&quot;]
-  N17[&quot;arena/          # Arena lobby, match UI&quot;]
-  N18[&quot;leaderboard/    # Leaderboard page&quot;]
-  N19[&quot;admin-app/              # Vue 3 + Element Plus admin SPA&quot;]
-  N20[&quot;packages/&quot;]
-  N21[&quot;shared-types/           # Shared TypeScript types across all apps&quot;]
-  N22[&quot;constants/              # Shared game constants from constants.json&quot;]
-  N23[&quot;docs/                       # Markdown source for all design documents&quot;]
-  N24[&quot;BRD.md                  # Business Requirements Document&quot;]
-  N25[&quot;PRD.md                  # Product Requirements Document&quot;]
-  N26[&quot;PDD.md                  # Product Design Document (UX)&quot;]
-  N27[&quot;EDD.md                  # Engineering Design Document&quot;]
-  N28[&quot;ARCH.md                 # System Architecture + ADRs&quot;]
-  N29[&quot;API.md                  # REST API reference&quot;]
-  N30[&quot;SCHEMA.md               # Database schema reference&quot;]
-  N31[&quot;CICD.md                 # CI/CD pipeline design&quot;]
-  N32[&quot;LOCAL_DEPLOY.md         # Local development deployment guide&quot;]
-  N33[&quot;test-plan.md            # Test Plan + RTM&quot;]
-  N34[&quot;diagrams/               # Generated UML (9 server + 16 frontend + 5 CI/CD + 2 modulith)&quot;]
-  N35[&quot;blueprint/              # Generated contracts (OpenAPI, JSON Schema, Pact, IaC, mock server)&quot;]
-  N36[&quot;pages/                  # Generated HTML documentation site&quot;]
-  N37[&quot;features/                   # Cucumber/Gherkin BDD feature files (server-side)&quot;]
-  N38[&quot;claim-flow.feature&quot;]
-  N39[&quot;arena-battle.feature&quot;]
-  N40[&quot;battle-records.feature&quot;]
-  N41[&quot;leaderboard.feature&quot;]
-  N42[&quot;training-food.feature&quot;]
-  N43[&quot;trading-system.feature&quot;]
-  N44[&quot;rarity-distribution.feature&quot;]
-  N45[&quot;economy-config.feature&quot;]
-  N46[&quot;admin-moderation.feature&quot;]
-  N47[&quot;admin-search-performance.feature&quot;]
-  N48[&quot;suspicious-detection.feature&quot;]
-  N49[&quot;gdpr-erasure.feature&quot;]
-  N50[&quot;client/                 # Playwright E2E feature files&quot;]
-  N51[&quot;claim-flow-ui.feature&quot;]
-  N52[&quot;pet-display.feature&quot;]
-  N53[&quot;training-ui.feature&quot;]
-  N54[&quot;food-system.feature&quot;]
-  N55[&quot;arena-ui.feature&quot;]
-  N56[&quot;leaderboard-ui.feature&quot;]
-  N57[&quot;admin-portal.feature&quot;]
-  N58[&quot;settings.feature&quot;]
-  N59[&quot;.env.example                # Annotated environment variable template&quot;]
-  N60[&quot;docker-compose.yml          # Local multi-service development stack&quot;]
-  N61[&quot;pnpm-workspace.yaml         # pnpm workspace definition&quot;]
-  N62[&quot;package.json                # Monorepo root&quot;]
-  N0 --&gt; N1
-  N0 --&gt; N2
-  N0 --&gt; N3
-  N0 --&gt; N4
-  N0 --&gt; N5
-  N0 --&gt; N6
-  N0 --&gt; N7
-  N0 --&gt; N8
-  N0 --&gt; N9
-  N0 --&gt; N10
-  N0 --&gt; N11
-  N0 --&gt; N12
-  N0 --&gt; N13
-  N0 --&gt; N14
-  N0 --&gt; N15
-  N0 --&gt; N16
-  N0 --&gt; N17
-  N0 --&gt; N18
-  N0 --&gt; N19
-  N0 --&gt; N20
-  N0 --&gt; N21
-  N0 --&gt; N22
-  N0 --&gt; N23
-  N0 --&gt; N24
-  N0 --&gt; N25
-  N0 --&gt; N26
-  N0 --&gt; N27
-  N0 --&gt; N28
-  N0 --&gt; N29
-  N0 --&gt; N30
-  N0 --&gt; N31
-  N0 --&gt; N32
-  N0 --&gt; N33
-  N0 --&gt; N34
-  N0 --&gt; N35
-  N0 --&gt; N36
-  N0 --&gt; N37
-  N0 --&gt; N38
-  N0 --&gt; N39
-  N0 --&gt; N40
-  N0 --&gt; N41
-  N0 --&gt; N42
-  N0 --&gt; N43
-  N0 --&gt; N44
-  N0 --&gt; N45
-  N0 --&gt; N46
-  N0 --&gt; N47
-  N0 --&gt; N48
-  N0 --&gt; N49
-  N0 --&gt; N50
-  N0 --&gt; N51
-  N0 --&gt; N52
-  N0 --&gt; N53
-  N0 --&gt; N54
-  N0 --&gt; N55
-  N0 --&gt; N56
-  N0 --&gt; N57
-  N0 --&gt; N58
-  N0 --&gt; N59
-  N0 --&gt; N60
-  N0 --&gt; N61
-  N0 --&gt; N62</pre>
+<pre><code class="">pixel-pet-arena/
+├── .github/                    # GitHub Actions CI/CD workflows
+│   └── workflows/
+│       ├── ci.yml              # Lint, test, build on every PR
+│       └── deploy.yml          # Deploy to Railway + Vercel
+├── apps/
+│   ├── api/                    # Fastify 4 unified API process (Game + Admin plugins)
+│   │   └── src/
+│   │       ├── claim/          # OTP generation, email dispatch, token issuance
+│   │       ├── pets/           # Pet CRUD, training, feeding
+│   │       ├── arena/          # Matchmaking, battle engine, result recording
+│   │       ├── leaderboard/    # Redis sorted set reads + PostgreSQL fallback
+│   │       ├── admin/          # Admin plugin (mounted at /admin/api)
+│   │       └── shared/         # Config, logger, Zod schemas, DB client
+│   ├── player-app/             # React 18 + Phaser.js 3 player SPA
+│   │   └── src/
+│   │       ├── game/           # Phaser.js canvas engine, sprite generator
+│   │       ├── claim/          # Claim flow (3-step compound component)
+│   │       ├── arena/          # Arena lobby, match UI
+│   │       └── leaderboard/    # Leaderboard page
+│   └── admin-app/              # Vue 3 + Element Plus admin SPA
+├── packages/
+│   ├── shared-types/           # Shared TypeScript types across all apps
+│   └── constants/              # Shared game constants from constants.json
+├── docs/                       # Markdown source for all design documents
+│   ├── BRD.md                  # Business Requirements Document
+│   ├── PRD.md                  # Product Requirements Document
+│   ├── PDD.md                  # Product Design Document (UX)
+│   ├── EDD.md                  # Engineering Design Document
+│   ├── ARCH.md                 # System Architecture + ADRs
+│   ├── API.md                  # REST API reference
+│   ├── SCHEMA.md               # Database schema reference
+│   ├── CICD.md                 # CI/CD pipeline design
+│   ├── LOCAL_DEPLOY.md         # Local development deployment guide
+│   ├── test-plan.md            # Test Plan + RTM
+│   ├── diagrams/               # Generated UML (9 server + 16 frontend + 5 CI/CD + 2 modulith)
+│   ├── blueprint/              # Generated contracts (OpenAPI, JSON Schema, Pact, IaC, mock server)
+│   └── pages/                  # Generated HTML documentation site (incl. interactive prototypes)
+├── features/                   # Cucumber/Gherkin BDD feature files (server-side)
+│   ├── claim-flow.feature
+│   ├── arena-battle.feature
+│   ├── battle-records.feature
+│   ├── leaderboard.feature
+│   ├── training-food.feature
+│   ├── trading-system.feature
+│   ├── rarity-distribution.feature
+│   ├── economy-config.feature
+│   ├── admin-moderation.feature
+│   ├── admin-search-performance.feature
+│   ├── suspicious-detection.feature
+│   ├── gdpr-erasure.feature
+│   └── client/                 # Playwright E2E feature files
+│       ├── claim-flow-ui.feature
+│       ├── pet-display.feature
+│       ├── training-ui.feature
+│       ├── food-system.feature
+│       ├── arena-ui.feature
+│       ├── battle-records.feature
+│       ├── leaderboard-ui.feature
+│       ├── admin-portal.feature
+│       └── settings.feature
+├── .env.example                # Annotated environment variable template
+├── docker-compose.yml          # Local multi-service development stack
+├── pnpm-workspace.yaml         # pnpm workspace definition
+└── package.json                # Monorepo root</code></pre>
 <hr>
 <h2 id="documentation">Documentation</h2>
 <p>The full documentation suite is generated into a static HTML site in <code>docs/pages/</code>.</p>
@@ -698,7 +731,14 @@ pnpm dev</code></pre>
 <tr><td>BDD (server)</td><td>features/</td><td><a href="bdd-server.html" target="_blank" rel="noopener">bdd-server.html</a></td><td>Gherkin server feature files</td></tr>
 <tr><td>BDD (client / E2E)</td><td>features/client/</td><td><a href="bdd-client.html" target="_blank" rel="noopener">bdd-client.html</a></td><td>Playwright E2E feature files</td></tr>
 <tr><td>Test Plan</td><td><a href="test-plan.html" target="_blank" rel="noopener">docs/test-plan.md</a></td><td><a href="test-plan.html" target="_blank" rel="noopener">test-plan.html</a></td><td>Test strategy, coverage matrix, RTM</td></tr>
-<tr><td>Prototype</td><td>(interactive)</td><td><a href="prototype/index.html" target="_blank" rel="noopener">prototype/index.html</a></td><td>Clickable HTML prototype + animations</td></tr>
+</table>
+<h3 id="interactive-demos">Interactive Demos</h3>
+<p>Three runnable, zero-backend prototypes ship with the docs site so reviewers can experience the full surface area without a local dev stack:</p>
+<table>
+<tr><th>Demo</th><th>Link</th><th>Description</th></tr>
+<tr><td>UI Prototype (Player)</td><td><a href="prototype/index.html" target="_blank" rel="noopener">docs/pages/prototype/index.html</a></td><td>10 player-facing screens (Landing → Claim → My Pet → Training → Arena → Battle Result → Leaderboard → Battle Records → Marketplace → GDPR) with hash-routing, mock data, Web Audio synth, and 28 P0/P1 animations</td></tr>
+<tr><td>API Explorer</td><td><a href="prototype/api-explorer/index.html" target="_blank" rel="noopener">docs/pages/prototype/api-explorer/index.html</a></td><td>Postman-style explorer for all 53 endpoints across 16 groups; chip quick-select for enum params, request body presets, copy-as-cURL, hash deep-links, and JavaScript mock responses (no backend required)</td></tr>
+<tr><td>Admin Portal Prototype</td><td><a href="prototype/admin/admin-login.html" target="_blank" rel="noopener">docs/pages/prototype/admin/admin-login.html</a></td><td>5-page Admin Portal walkthrough — Login (admin / Admin@2026 / TOTP 123456) → Dashboard → Users → Roles → Audit Log; covers RBAC (5 roles, 30 permissions), GDPR queue, suspicious-pet review, and 18-entry CSV-exportable immutable audit trail</td></tr>
 </table>
 <p>Regenerate the HTML site:</p>
 <pre><code class="language-bash">python3 ~/.claude/skills/gendoc/tools/bin/gen_html.py
@@ -793,7 +833,7 @@ docs(readme): refresh from upstream after ALIGN-FIX</code></pre>
 <h2 id="code-of-conduct">Code of Conduct</h2>
 <p>This project adopts the <a href="https://www.contributor-covenant.org/" target="_blank" rel="noopener">Contributor Covenant</a> v2.1 as its Code of Conduct.</p>
 <p>See CODE_OF_CONDUCT.md for the full text.</p>
-<p>For violations, contact the maintainers at <strong>conduct@pixel-pet-arena.com</strong>.</p><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">🎮 互動 Prototype</h2><div class="index-grid"><a class="index-card" href="prototype/index.html" style="border-color:#6c5ce7;background:linear-gradient(135deg,#f3f0ff 0%,#fff 100%)"><span class="index-card__icon">📱</span><span class="index-card__title">UI Prototype</span><span class="index-card__desc">10 個畫面 · 點擊試玩 · 含動畫音效</span></a><a class="index-card" href="prototype/api-explorer/index.html" style="border-color:#10b981;background:linear-gradient(135deg,#ecfdf5 0%,#fff 100%)"><span class="index-card__icon">🔌</span><span class="index-card__title">API Explorer</span><span class="index-card__desc">53 Endpoints · 16 群組 · JS Mock 試打</span></a><a class="index-card" href="prototype/admin/admin-login.html" style="border-color:#a29bfe;background:linear-gradient(135deg,#f5f3ff 0%,#fff 100%)"><span class="index-card__icon">🛡️</span><span class="index-card__title">Admin Portal</span><span class="index-card__desc">5 頁面 · RBAC · 審計日誌 · CSV 匯出</span></a></div></section><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">文件導覽</h2><div class="index-grid"><a class="index-card" href="idea.html"><span class="index-card__icon">💡</span><span class="index-card__title">構想文件 (IDEA)</span></a><a class="index-card" href="brd.html"><span class="index-card__icon">📋</span><span class="index-card__title">商業需求文件 (BRD)</span></a><a class="index-card" href="prd.html"><span class="index-card__icon">📝</span><span class="index-card__title">產品需求文件 (PRD)</span></a><a class="index-card" href="pdd.html"><span class="index-card__icon">🎨</span><span class="index-card__title">產品設計文件 (PDD)</span></a><a class="index-card" href="vdd.html"><span class="index-card__icon">🖼️</span><span class="index-card__title">視覺設計文件 (VDD)</span></a><a class="index-card" href="edd.html"><span class="index-card__icon">🏗️</span><span class="index-card__title">工程設計文件 (EDD)</span></a><a class="index-card" href="arch.html"><span class="index-card__icon">🧩</span><span class="index-card__title">架構設計</span></a><a class="index-card" href="api.html"><span class="index-card__icon">🔌</span><span class="index-card__title">API 文件</span></a><a class="index-card" href="schema.html"><span class="index-card__icon">🗄️</span><span class="index-card__title">Schema 文件</span></a><a class="index-card" href="frontend.html"><span class="index-card__icon">🖥️</span><span class="index-card__title">前端設計文件</span></a><a class="index-card" href="audio.html"><span class="index-card__icon">🔊</span><span class="index-card__title">音效設計文件</span></a><a class="index-card" href="anim.html"><span class="index-card__icon">🎬</span><span class="index-card__title">動畫特效文件</span></a><a class="index-card" href="client_impl.html"><span class="index-card__icon">🖥</span><span class="index-card__title">客戶端實作規格</span></a><a class="index-card" href="constants.html"><span class="index-card__icon">🔢</span><span class="index-card__title">業務常數文件</span></a><a class="index-card" href="test-plan.html"><span class="index-card__icon">✅</span><span class="index-card__title">測試計畫 (Test Plan)</span></a><a class="index-card" href="runbook.html"><span class="index-card__icon">📖</span><span class="index-card__title">Runbook</span></a><a class="index-card" href="local_deploy.html"><span class="index-card__icon">🚀</span><span class="index-card__title">本地部署指南</span></a><a class="index-card" href="rtm.html"><span class="index-card__icon">🗂️</span><span class="index-card__title">需求追蹤矩陣 (RTM)</span></a><a class="index-card" href="align_report.html"><span class="index-card__icon">🔍</span><span class="index-card__title">對齊報告</span></a><a class="index-card" href="admin_impl.html"><span class="index-card__icon">📄</span><span class="index-card__title">Admin Impl</span></a><a class="index-card" href="align-report.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align-Report</span></a><a class="index-card" href="align_fix_complete.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Complete</span></a><a class="index-card" href="align_fix_summary.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Summary</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Client</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Server</span></a><a class="index-card" href="cicd.html"><span class="index-card__icon">📄</span><span class="index-card__title">Cicd</span></a><a class="index-card" href="contracts.html"><span class="index-card__icon">📦</span><span class="index-card__title">機器可讀合約</span></a><a class="index-card" href="developer_guide.html"><span class="index-card__icon">📄</span><span class="index-card__title">Developer Guide</span></a><a class="index-card" href="implementation_readiness.html"><span class="index-card__icon">📄</span><span class="index-card__title">Implementation Readiness</span></a><a class="index-card" href="manifest.html"><span class="index-card__icon">📄</span><span class="index-card__title">Manifest</span></a><a class="index-card" href="resource.html"><span class="index-card__icon">📄</span><span class="index-card__title">Resource</span></a><a class="index-card" href="background-jobs.html"><span class="index-card__icon">📄</span><span class="index-card__title">Background-Jobs</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Server BDD</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Client BDD</span></a><a class="index-card" href="diagrams/activity-arena-battle.html"><span class="index-card__icon">📐</span><span class="index-card__title">UML 圖表 (42 張)</span><span class="index-card__desc">Server 26 / Frontend 16</span></a></div></section><section style="margin-top:3rem;padding:1.5rem;background:#fff;border:1px solid var(--border);border-radius:8px;"><h2 style="margin-top:0">📊 專案健康狀態</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:1rem"><div style="text-align:center;padding:1rem;background:var(--page-bg);border-radius:6px"><div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">已完成 STEP</div><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">0/20</div></div></div></section></main>
+<p>For violations, contact the maintainers at <strong>conduct@pixel-pet-arena.com</strong>.</p><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">🎮 互動 Prototype</h2><div class="index-grid"><a class="index-card" href="prototype/index.html" target="prototype-window" style="border-color:#6c5ce7;background:linear-gradient(135deg,#f3f0ff 0%,#fff 100%)"><span class="index-card__icon">📱</span><span class="index-card__title">UI Prototype</span><span class="index-card__desc">10 個畫面 · 點擊試玩 · 含動畫音效</span></a><a class="index-card" href="prototype/api-explorer/index.html" target="prototype-window" style="border-color:#10b981;background:linear-gradient(135deg,#ecfdf5 0%,#fff 100%)"><span class="index-card__icon">🔌</span><span class="index-card__title">API Explorer</span><span class="index-card__desc">53 Endpoints · 16 群組 · JS Mock 試打</span></a><a class="index-card" href="prototype/admin/admin-login.html" target="prototype-window" style="border-color:#a29bfe;background:linear-gradient(135deg,#f5f3ff 0%,#fff 100%)"><span class="index-card__icon">🛡️</span><span class="index-card__title">Admin Portal</span><span class="index-card__desc">5 頁面 · RBAC · 審計日誌 · CSV 匯出</span></a></div></section><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">文件導覽</h2><div class="index-grid"><a class="index-card" href="idea.html"><span class="index-card__icon">💡</span><span class="index-card__title">構想文件 (IDEA)</span></a><a class="index-card" href="brd.html"><span class="index-card__icon">📋</span><span class="index-card__title">商業需求文件 (BRD)</span></a><a class="index-card" href="prd.html"><span class="index-card__icon">📝</span><span class="index-card__title">產品需求文件 (PRD)</span></a><a class="index-card" href="pdd.html"><span class="index-card__icon">🎨</span><span class="index-card__title">產品設計文件 (PDD)</span></a><a class="index-card" href="vdd.html"><span class="index-card__icon">🖼️</span><span class="index-card__title">視覺設計文件 (VDD)</span></a><a class="index-card" href="edd.html"><span class="index-card__icon">🏗️</span><span class="index-card__title">工程設計文件 (EDD)</span></a><a class="index-card" href="arch.html"><span class="index-card__icon">🧩</span><span class="index-card__title">架構設計</span></a><a class="index-card" href="api.html"><span class="index-card__icon">🔌</span><span class="index-card__title">API 文件</span></a><a class="index-card" href="schema.html"><span class="index-card__icon">🗄️</span><span class="index-card__title">Schema 文件</span></a><a class="index-card" href="frontend.html"><span class="index-card__icon">🖥️</span><span class="index-card__title">前端設計文件</span></a><a class="index-card" href="audio.html"><span class="index-card__icon">🔊</span><span class="index-card__title">音效設計文件</span></a><a class="index-card" href="anim.html"><span class="index-card__icon">🎬</span><span class="index-card__title">動畫特效文件</span></a><a class="index-card" href="client_impl.html"><span class="index-card__icon">🖥</span><span class="index-card__title">客戶端實作規格</span></a><a class="index-card" href="constants.html"><span class="index-card__icon">🔢</span><span class="index-card__title">業務常數文件</span></a><a class="index-card" href="test-plan.html"><span class="index-card__icon">✅</span><span class="index-card__title">測試計畫 (Test Plan)</span></a><a class="index-card" href="runbook.html"><span class="index-card__icon">📖</span><span class="index-card__title">Runbook</span></a><a class="index-card" href="local_deploy.html"><span class="index-card__icon">🚀</span><span class="index-card__title">本地部署指南</span></a><a class="index-card" href="rtm.html"><span class="index-card__icon">🗂️</span><span class="index-card__title">需求追蹤矩陣 (RTM)</span></a><a class="index-card" href="align_report.html"><span class="index-card__icon">🔍</span><span class="index-card__title">對齊報告</span></a><a class="index-card" href="admin_impl.html"><span class="index-card__icon">📄</span><span class="index-card__title">Admin Impl</span></a><a class="index-card" href="align-report.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align-Report</span></a><a class="index-card" href="align_fix_complete.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Complete</span></a><a class="index-card" href="align_fix_summary.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Summary</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Client</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Server</span></a><a class="index-card" href="cicd.html"><span class="index-card__icon">📄</span><span class="index-card__title">Cicd</span></a><a class="index-card" href="contracts.html"><span class="index-card__icon">📦</span><span class="index-card__title">機器可讀合約</span></a><a class="index-card" href="developer_guide.html"><span class="index-card__icon">📄</span><span class="index-card__title">Developer Guide</span></a><a class="index-card" href="implementation_readiness.html"><span class="index-card__icon">📄</span><span class="index-card__title">Implementation Readiness</span></a><a class="index-card" href="manifest.html"><span class="index-card__icon">📄</span><span class="index-card__title">Manifest</span></a><a class="index-card" href="resource.html"><span class="index-card__icon">📄</span><span class="index-card__title">Resource</span></a><a class="index-card" href="background-jobs.html"><span class="index-card__icon">📄</span><span class="index-card__title">Background-Jobs</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Server BDD</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Client BDD</span></a><a class="index-card" href="diagrams/activity-arena-battle.html"><span class="index-card__icon">📐</span><span class="index-card__title">UML 圖表 (42 張)</span><span class="index-card__desc">Server 26 / Frontend 16</span></a></div></section><section style="margin-top:3rem;padding:1.5rem;background:#fff;border:1px solid var(--border);border-radius:8px;"><h2 style="margin-top:0">📊 專案健康狀態</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:1rem"><div style="text-align:center;padding:1rem;background:var(--page-bg);border-radius:6px"><div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">已完成 STEP</div><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">0/20</div></div></div></section></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

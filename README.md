@@ -1,9 +1,9 @@
 <!--
-  DOC-ID:  README-PIXEL-PET-ARENA-20260509
-  Version: v1.2
+  DOC-ID:  README-PIXEL-PET-ARENA-20260511
+  Version: v1.3
   Status:  IN_REVIEW
   Author:  AI Generated (gendoc readme)
-  Date:    2026-05-09
+  Date:    2026-05-11
   Upstream docs:
     - BRD:   docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)
     - PRD:   docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503, v1.5)
@@ -13,12 +13,15 @@
     - API:   docs/API.md   (API-PIXEL-PET-ARENA-20260503)
     - SCHEMA: docs/SCHEMA.md
     - LOCAL_DEPLOY: docs/LOCAL_DEPLOY.md
+    - CICD: docs/CICD.md
   Change log:
     v1.0  2026-05-05  AI Generated  Initial generated draft
     v1.1  2026-05-05  AI Generated  Fix GitHub repo URLs to ibalasite/pet
     v1.2  2026-05-09  AI Generated  Refresh from upstream — switch npm→pnpm (per LOCAL_DEPLOY),
                                      update API endpoint paths to match docs/API.md, sync features
                                      list with features/*.feature, post-HTML pipeline state
+    v1.3  2026-05-11  AI Generated  Refresh from upstream — add Interactive Demos section
+                                     (UI Prototype + API Explorer + Admin Portal)
 -->
 
 # pixel-pet-arena
@@ -371,7 +374,7 @@ pixel-pet-arena/
 │   ├── test-plan.md            # Test Plan + RTM
 │   ├── diagrams/               # Generated UML (9 server + 16 frontend + 5 CI/CD + 2 modulith)
 │   ├── blueprint/              # Generated contracts (OpenAPI, JSON Schema, Pact, IaC, mock server)
-│   └── pages/                  # Generated HTML documentation site
+│   └── pages/                  # Generated HTML documentation site (incl. interactive prototypes)
 ├── features/                   # Cucumber/Gherkin BDD feature files (server-side)
 │   ├── claim-flow.feature
 │   ├── arena-battle.feature
@@ -424,11 +427,13 @@ The full documentation suite is generated into a static HTML site in `docs/pages
 
 ### Interactive Demos
 
+Three runnable, zero-backend prototypes ship with the docs site so reviewers can experience the full surface area without a local dev stack:
+
 | Demo | Link | Description |
 |------|------|-------------|
-| 📱 UI Prototype | [docs/pages/prototype/index.html](docs/pages/prototype/index.html) | 10 player-facing screens (Landing → Claim → My Pet → Training → Arena → Battle Result → Leaderboard → Battle Records → Marketplace → GDPR) with hash-routing, mock data, Web Audio synth, and 28 P0/P1 animations |
-| 🔌 API Explorer | [docs/pages/prototype/api-explorer/index.html](docs/pages/prototype/api-explorer/index.html) | Postman-style explorer for all 53 endpoints across 16 groups; chip-quick-select for enum params, request body presets, copy-as-cURL, hash deep-links, and JavaScript mock responses (no backend required) |
-| 🛡️ Admin Portal Prototype | [docs/pages/prototype/admin/admin-login.html](docs/pages/prototype/admin/admin-login.html) | 5-page Admin Portal walkthrough — Login (admin / Admin@2026 / TOTP 123456) → Dashboard → Users → Roles → Audit Log; covers RBAC (5 roles, 30 permissions), GDPR queue, suspicious-pet review, and CSV-exportable immutable audit trail |
+| UI Prototype (Player) | [docs/pages/prototype/index.html](docs/pages/prototype/index.html) | 10 player-facing screens (Landing → Claim → My Pet → Training → Arena → Battle Result → Leaderboard → Battle Records → Marketplace → GDPR) with hash-routing, mock data, Web Audio synth, and 28 P0/P1 animations |
+| API Explorer | [docs/pages/prototype/api-explorer/index.html](docs/pages/prototype/api-explorer/index.html) | Postman-style explorer for all 53 endpoints across 16 groups; chip quick-select for enum params, request body presets, copy-as-cURL, hash deep-links, and JavaScript mock responses (no backend required) |
+| Admin Portal Prototype | [docs/pages/prototype/admin/admin-login.html](docs/pages/prototype/admin/admin-login.html) | 5-page Admin Portal walkthrough — Login (admin / Admin@2026 / TOTP 123456) → Dashboard → Users → Roles → Audit Log; covers RBAC (5 roles, 30 permissions), GDPR queue, suspicious-pet review, and 18-entry CSV-exportable immutable audit trail |
 
 Regenerate the HTML site:
 
