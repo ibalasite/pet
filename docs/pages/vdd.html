@@ -42,12 +42,30 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
-    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    /* ─── Q-group: header 兩層等高 56px + 白條消除 ─── */
+    .top-nav { height: 56px; padding: 0 1.5rem; border-bottom: none; }
+    .nav-breadcrumb { display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.95rem; color: #cbd5e1; }
+    .nav-breadcrumb a { color: #fff; text-decoration: none; font-weight: 600; }
+    .nav-breadcrumb a:hover { color: #60a5fa; }
+    .doc-page-banner { height: 56px; padding: 0 2rem;
+      display: flex; align-items: center; border-top: none; }
+    .banner-title { font-size: 1.25rem; font-weight: 700;
+      line-height: 1; margin: 0; }
+    /* R-group: main 上方留白縮減（從 style.css 預設 2.5rem 改 1rem，
+       讓 main content 緊接 banner，跟 sidebar 視覺對齊）*/
+    .doc-content { padding-top: 1rem; }
+
+    /* ─── N1 + Q + R: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
     /* `padding: 0` overrides style.css `.sidebar { padding: 1.5rem 0 }`.
-       Without it, tabs/panels inherit 24px top/bottom space and panel
-       flex child can't fully fill height → scrollbar truncated mid-list. */
-    .sidebar { position: relative; display: flex; flex-direction: column;
-      overflow: hidden; padding: 0; }
+       `top: 0` overrides style.css `.sidebar { top: var(--nav-h) }` —
+       N1 changed `position: sticky` → `relative` but the stale `top: 56px`
+       silently pushed sidebar 56px down → Q-group white gap.
+       R-group: `height: auto` + `overflow: visible` cancel style.css fixed
+       viewport height + scrollbar. sidebar grows with grid row to full
+       content height; page-level scroll handles overflow naturally. */
+    .sidebar { position: relative; top: 0; display: flex; flex-direction: column;
+      overflow: visible; padding: 0; height: auto; }
     .sidebar__toggle { position: absolute; top: 6px; right: 6px;
       background: #f1f5f9; border: 1px solid #cbd5e1;
       padding: 2px 6px; border-radius: 4px;
@@ -65,7 +83,7 @@
     .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
     .sidebar__tab.active { background: #fff; color: #1e3a8a;
       border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
-    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+    .sidebar__panel { display: none; flex: 1; overflow: visible;
       padding: 0.5rem 0; font-size: 0.875rem; }
     .sidebar__panel.active { display: block; }
     /* TOC list rendering inside the toc panel */
@@ -104,26 +122,26 @@
       .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
     }
     /* G-Q2: lightbox cloned-diagram visibility.
-       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       The lightbox sets `.lightbox__content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
        with `width:100%` then renders empty. Force a sensible explicit
        width so the cloned content is actually visible. */
-    .lightbox__zoom-content .diagram-container {
+    .lightbox__content .diagram-container {
       width: 80vw;
       max-width: 1400px;
       min-width: 60vw;
     }
-    .lightbox__zoom-content .diagram-container svg {
+    .lightbox__content .diagram-container svg {
       width: 100%;
       height: auto;
       max-height: 80vh;
       display: block;
     }
-    .lightbox__zoom-content .diagram-container .mermaid {
+    .lightbox__content .diagram-container .mermaid {
       width: 100%;
       max-width: none;
     }
-    .lightbox__zoom-content svg {
+    .lightbox__content svg {
       height: auto;
     }
     /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
@@ -269,7 +287,7 @@
 </head>
 <body>
   <header class="top-nav">
-    <a href="index.html" class="nav-brand">pet</a>
+    <nav class="nav-breadcrumb"><a href="index.html">pet</a> › 視覺設計文件 (VDD)</nav>
     <div class="nav-controls">
       <div class="search-wrap">
         <input class="search-input" type="search" placeholder="搜尋文件...">
@@ -280,13 +298,11 @@
     </div>
   </header>
   <div class="doc-page-banner">
-    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 視覺設計文件 (VDD)</p>
     <h1 class="banner-title">視覺設計文件 (VDD)</h1>
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
       <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
-<div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
 <a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
@@ -432,10 +448,6 @@
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="vdd--visual-design-document">VDD — Visual Design Document</h1>
-<p>&lt;!-- SDLC Requirements Engineering — Layer 3.5: Visual Design --&gt;</p>
-<p>&lt;!-- Upstream: IDEA.md, BRD.md, PRD.md, PDD.md, CONSTANTS.md --&gt;</p>
-<p>&lt;!-- Answers: What does it look like? What are the visual rules? How does it feel? --&gt;</p>
-<hr>
 <h2 id="0-document-control">§0 Document Control</h2>
 <table>
 <tr><th>Field</th><th>Content</th></tr>
@@ -694,10 +706,9 @@
 <tr><td><strong>Numeric / Stats</strong></td><td><code>--text-stat</code></td><td>Inter</td><td>Context-dependent</td><td>700</td><td>1</td><td><code>-0.01em</code></td><td>Stat values (speed/strength/stamina), leaderboard scores, countdown timers — tight for stat numbers</td></tr>
 </table>
 <h3 id="53-font-loading-strategy">§5.3 Font Loading Strategy</h3>
-<pre><code class="language-html">&lt;!-- Preload critical above-fold font only --&gt;
+<pre><code class="language-html">
 &lt;link rel=&quot;preload&quot; href=&quot;https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap&quot; as=&quot;style&quot;&gt;
 
-&lt;!-- Inter: async load, 400 and 600 weights only --&gt;
 &lt;link rel=&quot;preload&quot; href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap&quot; as=&quot;style&quot;&gt;</code></pre>
 <ul><li><code>font-display: swap</code> on both families — content renders with fallback while fonts load</li><li>Preload only <code>Press Start 2P</code> as the above-fold visible font on the landing page</li><li><code>Inter</code> 400 + 600 only — no other weights to minimize font payload</li><li>Fallback stack ensures layout stability during font swap (no CLS impact)</li></ul>
 <hr>

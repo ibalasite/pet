@@ -42,12 +42,30 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
-    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    /* ─── Q-group: header 兩層等高 56px + 白條消除 ─── */
+    .top-nav { height: 56px; padding: 0 1.5rem; border-bottom: none; }
+    .nav-breadcrumb { display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.95rem; color: #cbd5e1; }
+    .nav-breadcrumb a { color: #fff; text-decoration: none; font-weight: 600; }
+    .nav-breadcrumb a:hover { color: #60a5fa; }
+    .doc-page-banner { height: 56px; padding: 0 2rem;
+      display: flex; align-items: center; border-top: none; }
+    .banner-title { font-size: 1.25rem; font-weight: 700;
+      line-height: 1; margin: 0; }
+    /* R-group: main 上方留白縮減（從 style.css 預設 2.5rem 改 1rem，
+       讓 main content 緊接 banner，跟 sidebar 視覺對齊）*/
+    .doc-content { padding-top: 1rem; }
+
+    /* ─── N1 + Q + R: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
     /* `padding: 0` overrides style.css `.sidebar { padding: 1.5rem 0 }`.
-       Without it, tabs/panels inherit 24px top/bottom space and panel
-       flex child can't fully fill height → scrollbar truncated mid-list. */
-    .sidebar { position: relative; display: flex; flex-direction: column;
-      overflow: hidden; padding: 0; }
+       `top: 0` overrides style.css `.sidebar { top: var(--nav-h) }` —
+       N1 changed `position: sticky` → `relative` but the stale `top: 56px`
+       silently pushed sidebar 56px down → Q-group white gap.
+       R-group: `height: auto` + `overflow: visible` cancel style.css fixed
+       viewport height + scrollbar. sidebar grows with grid row to full
+       content height; page-level scroll handles overflow naturally. */
+    .sidebar { position: relative; top: 0; display: flex; flex-direction: column;
+      overflow: visible; padding: 0; height: auto; }
     .sidebar__toggle { position: absolute; top: 6px; right: 6px;
       background: #f1f5f9; border: 1px solid #cbd5e1;
       padding: 2px 6px; border-radius: 4px;
@@ -65,7 +83,7 @@
     .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
     .sidebar__tab.active { background: #fff; color: #1e3a8a;
       border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
-    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+    .sidebar__panel { display: none; flex: 1; overflow: visible;
       padding: 0.5rem 0; font-size: 0.875rem; }
     .sidebar__panel.active { display: block; }
     /* TOC list rendering inside the toc panel */
@@ -104,26 +122,26 @@
       .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
     }
     /* G-Q2: lightbox cloned-diagram visibility.
-       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       The lightbox sets `.lightbox__content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
        with `width:100%` then renders empty. Force a sensible explicit
        width so the cloned content is actually visible. */
-    .lightbox__zoom-content .diagram-container {
+    .lightbox__content .diagram-container {
       width: 80vw;
       max-width: 1400px;
       min-width: 60vw;
     }
-    .lightbox__zoom-content .diagram-container svg {
+    .lightbox__content .diagram-container svg {
       width: 100%;
       height: auto;
       max-height: 80vh;
       display: block;
     }
-    .lightbox__zoom-content .diagram-container .mermaid {
+    .lightbox__content .diagram-container .mermaid {
       width: 100%;
       max-width: none;
     }
-    .lightbox__zoom-content svg {
+    .lightbox__content svg {
       height: auto;
     }
     /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
@@ -269,7 +287,7 @@
 </head>
 <body>
   <header class="top-nav">
-    <a href="index.html" class="nav-brand">pet</a>
+    <nav class="nav-breadcrumb"><a href="index.html">pet</a> › 前端設計文件</nav>
     <div class="nav-controls">
       <div class="search-wrap">
         <input class="search-input" type="search" placeholder="搜尋文件...">
@@ -280,13 +298,11 @@
     </div>
   </header>
   <div class="doc-page-banner">
-    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 前端設計文件</p>
     <h1 class="banner-title">前端設計文件</h1>
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
       <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
-<div class="sidebar__label">文件</div>
 <a class="sidebar__link" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
 <a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
@@ -1158,7 +1174,7 @@ export function buildAttributeVector(seed: bigint): AttributeVector {
   N10[&quot;Neglect check: if last_trained_at &gt; training_neglect_threshold_days = 3 days ago&quot;]
   N11[&quot;NeglectedState overlay renders on PetCanvas&quot;]
   N3 --&gt;|&quot;Each card shows current stat value and trains-remaining count training_actions_per_day = 3 actions per UTC day&quot;| N4
-  N4 --&gt;|&quot;&#x27;→ POST /api/v1/pets/:petId/train  { trainingType: &#x27;RUN&#x27; &quot;| &#x27;STRENGTH&#x27; |&quot; &#x27;STAMINA&#x27; } ← { updatedStats, statDelta, actionsRemainingToday }&#x27;&quot;| N5
+  N4 --&gt;|&quot;→ POST /api/v1/pets/:petId/train  { trainingType: &#x27;RUN&#x27; | &#x27;STRENGTH&#x27; | &#x27;STAMINA&#x27; } ← { updatedStats, statDelta, actionsRemainingToday }&quot;| N5
   N5 --&gt;|&quot;StatChangeIndicator appears: &#x27;+X Speed&#x27; floats up, visible for training_stat_display_duration_seconds = 2 seconds Stat bars animate to new values usePet cache is invalidated → PetPage re-fetches&quot;| N6
   N6 --&gt;|&quot;HTTP 400 VALIDATION_ERROR → toast: &#x27;Invalid training type. Please try again.&#x27; HTTP 400 TRAINING_LIMIT_REACHED → all action cards disabled; DailyResetTimer shown HTTP 400 STAT_AT_MAXIMUM → toast: &#x27;Stat is already at maximum (pet_stat_max = 100)&#x27;; card remains enabled for other stats not yet at max HTTP 401 → handled globally: clearPetToken() + redirect to / HTTP 403 NOT_OWNER → toast: &#x27;You do not own this pet.&#x27; (should not occur in normal flow) HTTP 404 PET_NOT_FOUND → toast: &#x27;Pet not found. Please reload and try again.&#x27; (should not occur in normal flow)&quot;| N7</pre></div>
 <h3 id="54-feed-interaction">5.4 Feed Interaction</h3>
@@ -1261,8 +1277,8 @@ export function buildAttributeVector(seed: bigint): AttributeVector {
   N7[&quot;HTTP 401  redirect to / (token cleared)&quot;]
   N8[&quot;HTTP 403 FORBIDDEN  &#x27;Your account is not authorized to view this request.&#x27;&quot;]
   N9[&quot;HTTP 404 NOT_FOUND  &#x27;Request not found.&#x27;&quot;]
-  N3 --&gt;|&quot;&#x27;Type selector (radio / dropdown): erasure &quot;| data_access | restrict_processing | object_leaderboard |&quot; rectification → POST /api/v1/gdpr/request  { type: &#x27;erasure&#x27; &quot;| ... }   (auth: Bearer token) ← { jobId, message }  HTTP 202 Accepted jobId stored in component state; GdprStatusBanner activates&quot;| N4
-  N4 --&gt;|&quot;&#x27;Polls GET /api/v1/gdpr/request/status?jobId=&lt;jobId&gt;  (auth: Bearer token) Displays current status: pending &quot;| processing | completed | failed SLA copy displayed per request type: erasure → &#x27;Processed within 7 days (gdpr_email_deletion_window_days = 7)&#x27; data_access / portability → &#x27;Processed within 30 days (gdpr_data_access_response_days = 30; gdpr_data_portability_response_days = 30)&#x27; restrict_processing → &#x27;Processed within 24 hours (gdpr_restrict_processing_response_hours = 24)&#x27; object_leaderboard → &#x27;Processed within 5 business days (gdpr_object_leaderboard_response_business_days = 5)&#x27; rectification → &#x27;Processed within 24 hours (gdpr_email_rectification_response_hours = 24)&#x27;&quot;| N5</pre></div>
+  N3 --&gt;|&quot;Type selector (radio / dropdown): erasure | data_access | restrict_processing | object_leaderboard | rectification → POST /api/v1/gdpr/request  { type: &#x27;erasure&#x27; | ... }   (auth: Bearer token) ← { jobId, message }  HTTP 202 Accepted jobId stored in component state; GdprStatusBanner activates&quot;| N4
+  N4 --&gt;|&quot;Polls GET /api/v1/gdpr/request/status?jobId=&lt;jobId&gt;  (auth: Bearer token) Displays current status: pending | processing | completed | failed SLA copy displayed per request type: erasure → &#x27;Processed within 7 days (gdpr_email_deletion_window_days = 7)&#x27; data_access / portability → &#x27;Processed within 30 days (gdpr_data_access_response_days = 30; gdpr_data_portability_response_days = 30)&#x27; restrict_processing → &#x27;Processed within 24 hours (gdpr_restrict_processing_response_hours = 24)&#x27; object_leaderboard → &#x27;Processed within 5 business days (gdpr_object_leaderboard_response_business_days = 5)&#x27; rectification → &#x27;Processed within 24 hours (gdpr_email_rectification_response_hours = 24)&#x27;&quot;| N5</pre></div>
 <h3 id="59-admin-login-totp">5.9 Admin Login (TOTP)</h3>
 <pre><code class="">AdminLoginPage /admin/login
   │
