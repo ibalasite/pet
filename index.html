@@ -42,12 +42,30 @@
     .sidebar__section details .sidebar__label--sub ~ .sidebar__link {
       padding-left: 3.5rem;
     }
-    /* ─── N1: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
+    /* ─── Q-group: header 兩層等高 56px + 白條消除 ─── */
+    .top-nav { height: 56px; padding: 0 1.5rem; border-bottom: none; }
+    .nav-breadcrumb { display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.95rem; color: #cbd5e1; }
+    .nav-breadcrumb a { color: #fff; text-decoration: none; font-weight: 600; }
+    .nav-breadcrumb a:hover { color: #60a5fa; }
+    .doc-page-banner { height: 56px; padding: 0 2rem;
+      display: flex; align-items: center; border-top: none; }
+    .banner-title { font-size: 1.25rem; font-weight: 700;
+      line-height: 1; margin: 0; }
+    /* R-group: main 上方留白縮減（從 style.css 預設 2.5rem 改 1rem，
+       讓 main content 緊接 banner，跟 sidebar 視覺對齊）*/
+    .doc-content { padding-top: 1rem; }
+
+    /* ─── N1 + Q + R: sidebar tab switcher (📁 文件 / 📑 本頁目錄) ─── */
     /* `padding: 0` overrides style.css `.sidebar { padding: 1.5rem 0 }`.
-       Without it, tabs/panels inherit 24px top/bottom space and panel
-       flex child can't fully fill height → scrollbar truncated mid-list. */
-    .sidebar { position: relative; display: flex; flex-direction: column;
-      overflow: hidden; padding: 0; }
+       `top: 0` overrides style.css `.sidebar { top: var(--nav-h) }` —
+       N1 changed `position: sticky` → `relative` but the stale `top: 56px`
+       silently pushed sidebar 56px down → Q-group white gap.
+       R-group: `height: auto` + `overflow: visible` cancel style.css fixed
+       viewport height + scrollbar. sidebar grows with grid row to full
+       content height; page-level scroll handles overflow naturally. */
+    .sidebar { position: relative; top: 0; display: flex; flex-direction: column;
+      overflow: visible; padding: 0; height: auto; }
     .sidebar__toggle { position: absolute; top: 6px; right: 6px;
       background: #f1f5f9; border: 1px solid #cbd5e1;
       padding: 2px 6px; border-radius: 4px;
@@ -65,7 +83,7 @@
     .sidebar__tab:hover { color: #1e293b; background: #f1f5f9; }
     .sidebar__tab.active { background: #fff; color: #1e3a8a;
       border-color: #e2e8f0; font-weight: 600; margin-bottom: -1px; }
-    .sidebar__panel { display: none; flex: 1; overflow-y: auto;
+    .sidebar__panel { display: none; flex: 1; overflow: visible;
       padding: 0.5rem 0; font-size: 0.875rem; }
     .sidebar__panel.active { display: block; }
     /* TOC list rendering inside the toc panel */
@@ -104,26 +122,26 @@
       .page-wrapper:not(.sidebar-expanded) .sidebar__panel { display: none; }
     }
     /* G-Q2: lightbox cloned-diagram visibility.
-       The lightbox sets `.lightbox__zoom-content > * { position:absolute }`
+       The lightbox sets `.lightbox__content > * { position:absolute }`
        which collapses the cloned .diagram-container to 0×0; its child SVG
        with `width:100%` then renders empty. Force a sensible explicit
        width so the cloned content is actually visible. */
-    .lightbox__zoom-content .diagram-container {
+    .lightbox__content .diagram-container {
       width: 80vw;
       max-width: 1400px;
       min-width: 60vw;
     }
-    .lightbox__zoom-content .diagram-container svg {
+    .lightbox__content .diagram-container svg {
       width: 100%;
       height: auto;
       max-height: 80vh;
       display: block;
     }
-    .lightbox__zoom-content .diagram-container .mermaid {
+    .lightbox__content .diagram-container .mermaid {
       width: 100%;
       max-width: none;
     }
-    .lightbox__zoom-content svg {
+    .lightbox__content svg {
       height: auto;
     }
     /* G-Q5: prevent flex/grid child main.doc-content from expanding to its
@@ -269,7 +287,7 @@
 </head>
 <body>
   <header class="top-nav">
-    <a href="index.html" class="nav-brand">pet</a>
+    <nav class="nav-breadcrumb"><a href="index.html">pet</a> › 文件中心 <span style="margin-left:1rem"><a href="https://github.com/ibalasite/pet" target="_blank" rel="noopener" style="color:var(--banner-link)">⌥ GitHub ↗</a></span></nav>
     <div class="nav-controls">
       <div class="search-wrap">
         <input class="search-input" type="search" placeholder="搜尋文件...">
@@ -280,13 +298,11 @@
     </div>
   </header>
   <div class="doc-page-banner">
-    <p class="banner-breadcrumb"><a href="index.html">pet</a> › 文件中心 <span style="margin-left:1rem"><a href="https://github.com/ibalasite/pet" target="_blank" rel="noopener" style="color:var(--banner-link)">⌥ GitHub ↗</a></span></p>
     <h1 class="banner-title">pet 文件中心</h1>
   </div>
   <div class="page-wrapper">
     <aside class="sidebar" aria-label="文件導覽">
       <button class="sidebar__toggle" id="sidebarCollapseBtn" type="button" aria-label="收合 / 展開側欄" title="收合 / 展開">⇤</button><div class="sidebar__tabs" role="tablist"><button class="sidebar__tab active" data-tab="docs" type="button" role="tab" aria-selected="true">📁 文件</button><button class="sidebar__tab" data-tab="toc" type="button" role="tab" aria-selected="false">📑 本頁目錄</button></div><div class="sidebar__panel active" data-panel="docs" role="tabpanel"><div class="sidebar__section">
-<div class="sidebar__label">文件</div>
 <a class="sidebar__link active" href="index.html">🏠 首頁</a>
 <a class="sidebar__link" href="idea.html">💡 構想文件 (IDEA)</a>
 <a class="sidebar__link" href="brd.html">📋 商業需求文件 (BRD)</a>
@@ -431,26 +447,7 @@
 </div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#table-of-contents">Table of Contents</a></li><li><a class="toc__link" href="#overview">Overview</a></li><li><a class="toc__link" href="#core-features">Core Features</a></li><li><a class="toc__link" href="#system-architecture">System Architecture</a></li><li><a class="toc__link" href="#tech-stack">Tech Stack</a></li><li><a class="toc__link" href="#quick-start">Quick Start</a></li><li><a class="toc__link toc__link--h3" href="#prerequisites">Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#docker-recommended">Docker (Recommended)</a></li><li><a class="toc__link toc__link--h3" href="#macos--linux-native">macOS / Linux (Native)</a></li><li><a class="toc__link toc__link--h3" href="#windows-powershell">Windows (PowerShell)</a></li><li><a class="toc__link" href="#environment-variables">Environment Variables</a></li><li><a class="toc__link" href="#api-quick-reference">API Quick Reference</a></li><li><a class="toc__link" href="#directory-structure">Directory Structure</a></li><li><a class="toc__link" href="#documentation">Documentation</a></li><li><a class="toc__link toc__link--h3" href="#interactive-demos">Interactive Demos</a></li><li><a class="toc__link" href="#testing">Testing</a></li><li><a class="toc__link toc__link--h3" href="#run-all-tests">Run All Tests</a></li><li><a class="toc__link toc__link--h3" href="#generate-coverage-report">Generate Coverage Report</a></li><li><a class="toc__link toc__link--h3" href="#individual-test-types">Individual Test Types</a></li><li><a class="toc__link toc__link--h3" href="#performance-targets">Performance Targets</a></li><li><a class="toc__link" href="#known-limitations">Known Limitations</a></li><li><a class="toc__link" href="#changelog">Changelog</a></li><li><a class="toc__link" href="#development-guide">Development Guide</a></li><li><a class="toc__link toc__link--h3" href="#branch-strategy">Branch Strategy</a></li><li><a class="toc__link toc__link--h3" href="#commit-message-format">Commit Message Format</a></li><li><a class="toc__link" href="#license">License</a></li><li><a class="toc__link" href="#security-policy">Security Policy</a></li><li><a class="toc__link toc__link--h3" href="#responsible-disclosure">Responsible Disclosure</a></li><li><a class="toc__link" href="#architecture-quick-reference">Architecture Quick Reference</a></li><li><a class="toc__link" href="#code-of-conduct">Code of Conduct</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><p>&lt;!--</p>
-<p>DOC-ID:  README-PIXEL-PET-ARENA-20260511</p>
-<p>Version: v1.4</p>
-<p>Status:  IN_REVIEW</p>
-<p>Author:  AI Generated (gendoc readme)</p>
-<p>Date:    2026-05-11</p>
-<p>Upstream docs:</p>
-<ul><li style="margin-left:2.0rem">BRD:   docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">PRD:   docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503, v1.5)</li><li style="margin-left:2.0rem">PDD:   docs/PDD.md   (PDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">EDD:   docs/EDD.md   (EDD-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">ARCH:  docs/ARCH.md  (ARCH-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">API:   docs/API.md   (API-PIXEL-PET-ARENA-20260503)</li><li style="margin-left:2.0rem">SCHEMA: docs/SCHEMA.md</li><li style="margin-left:2.0rem">LOCAL_DEPLOY: docs/LOCAL_DEPLOY.md</li><li style="margin-left:2.0rem">CICD: docs/CICD.md</li></ul>
-<p>Change log:</p>
-<p>v1.0  2026-05-05  AI Generated  Initial generated draft</p>
-<p>v1.1  2026-05-05  AI Generated  Fix GitHub repo URLs to ibalasite/pet</p>
-<p>v1.2  2026-05-09  AI Generated  Refresh from upstream — switch npm→pnpm (per LOCAL_DEPLOY),</p>
-<p>update API endpoint paths to match docs/API.md, sync features</p>
-<p>list with features/*.feature, post-HTML pipeline state</p>
-<p>v1.3  2026-05-11  AI Generated  Refresh from upstream — add Interactive Demos section</p>
-<p>(UI Prototype + API Explorer + Admin Portal)</p>
-<p>v1.4  2026-05-11  AI Generated  Re-verified upstream consistency in /gendoc-gen-html</p>
-<p>full-auto cycle (BRD/PRD/PDD/EDD/ARCH/API/SCHEMA/CICD)</p>
-<p>--&gt;</p>
-<h1 id="pixel-pet-arena">pixel-pet-arena</h1>
+    <main class="doc-content"><h1 id="pixel-pet-arena">pixel-pet-arena</h1>
 <blockquote><p>Zero-account-barrier HTML5 browser game where players claim, train, and battle procedurally-generated pixel pets via email — no registration required.</p></blockquote>
 <p><a href="https://github.com/ibalasite/pet/actions/workflows/ci.yml" target="_blank" rel="noopener"><img src="https://github.com/ibalasite/pet/actions/workflows/ci.yml/badge.svg" alt="CI" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <p><a href="LICENSE" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
