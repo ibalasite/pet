@@ -14,7 +14,7 @@
 
 ### §1.1 Audio Design Goals and Strategy
 
-The pixel-pet-arena audio system is designed to enhance player engagement through contextual sound effects and optional background music, supporting a casual browser-based gaming experience. The audio strategy prioritizes:
+The pixel-pet-arena audio system is designed to enhance player engagement through contextual sound effects and optional BGM, supporting a casual browser-based gaming experience. The audio strategy prioritizes:
 
 1. **Minimal cognitive load**: Short, recognizable sound effects (≤500ms duration) that provide feedback without interrupting gameplay
 2. **Accessibility-first**: All sound effects have equivalent visual/haptic feedback; audio is entirely optional
@@ -121,14 +121,14 @@ The following game events require audio feedback per PRD §5 US-PET-001 and rela
 | **Leaderboard Rank Up** | leaderboard-rankup.mp3 | MP3 | 500 | 44.1 kHz | 16-bit | 80 KB | Ascending melody celebrating rank improvement (P2 feature) |
 | **Food Buff Applied** | food-buff.mp3 | MP3 | 200 | 44.1 kHz | 16-bit | 32 KB | Shimmering magical tone |
 
-**Total P0+P1 SFX**: 11 × ~30 KB average ≈ **330 KB** (MP3 @ 128 kbps)
+**Total P0+P1 SFX**: 12 × ~30 KB average ≈ **360 KB** (MP3 @ 128 kbps)
 
-### §3.2 Background Music (Optional P3)
+### §3.2 BGM (Background Music) (Optional P3)
 
-| Track | Type | Duration | Sample Rate | Format | File Size (MP3 128kbps) | Notes |
-|-------|------|----------|-------------|--------|------------------------|-------|
-| **Arena Battle Loop** | BGM (looping) | 45 sec | 44.1 kHz | MP3 | 90 KB | Instrumental, no vocals; loopable at 45s with seamless cut points |
-| **Trainer Mode Ambient** | BGM (looping) | 60 sec | 44.1 kHz | MP3 | 120 KB | Calming loop for training/pet management (P3 polish) |
+| Track | Type | Duration | BPM | Sample Rate | Format | File Size (MP3 128kbps) | Notes |
+|-------|------|----------|-----|-------------|--------|------------------------|-------|
+| **Arena Battle Loop** | BGM (looping) | 45 sec | 130 BPM | 44.1 kHz | MP3 | 90 KB | Instrumental, no vocals; loopable at 45s with seamless cut points |
+| **Trainer Mode Ambient** | BGM (looping) | 60 sec | 80 BPM | 44.1 kHz | MP3 | 120 KB | Calming loop for training/pet management (P3 polish) |
 
 **Total Music**: 2 × ~100 KB ≈ **210 KB**
 
@@ -136,11 +136,11 @@ The following game events require audio feedback per PRD §5 US-PET-001 and rela
 
 | Category | Count | Total Size (MP3) |
 |----------|-------|------------------|
-| SFX (P0+P1) | 11 effects | 330 KB |
+| SFX (P0+P1) | 12 effects | 360 KB |
 | Music (P3 optional) | 2 tracks | 210 KB |
-| **Total Planned** | 13 assets | **540 KB** |
+| **Total Planned** | 14 assets | **570 KB** |
 | **Total Budget Allocated** | — | **2 MB** |
-| **Headroom** | — | 1.46 MB (73% unused) |
+| **Headroom** | — | 1.43 MB (71.5% unused) |
 
 **Rationale for 2 MB budget**:
 - Phaser.js dynamically imports audio system on demand (no blocking the claim flow bundle)
@@ -327,6 +327,7 @@ User Action (click pet, complete training, win arena battle)
 | React Event | Audio Trigger | SFX File | Delay | Duration |
 |-------------|---------------|----------|-------|----------|
 | `pet:tap` | Pet interaction feedback | pet-tap-pop.mp3 | 0 ms (immediate) | 120 ms |
+| `ui:button-click` | UI button click feedback | pet-tap-click.mp3 | 0 ms (immediate) | 100 ms |
 | `training:start` | Action button clicked | training-start.mp3 | 0 ms | 150 ms |
 | `training:complete` | Stat increase confirmed | training-success.mp3 | 0 ms | 200 ms |
 | `stat:display` | "+X Speed" toast appears | stat-ding.mp3 | 100 ms (with animation) | 100 ms |
@@ -453,7 +454,7 @@ export class AudioMixer {
         onChange={(e) => setSFXVolume(Number(e.target.value) / 100)}
       />
       
-      <label htmlFor="music-volume">Music Volume</label>
+      <label htmlFor="music-volume">BGM Volume</label>
       <input 
         id="music-volume"
         type="range" 
@@ -484,6 +485,7 @@ packages/player-app/
 │       └── audio/
 │           ├── sfx/
 │           │   ├── pet-tap-pop.mp3
+│           │   ├── pet-tap-click.mp3
 │           │   ├── training-success.mp3
 │           │   ├── arena-victory.mp3
 │           │   ├── arena-defeat.mp3
@@ -611,7 +613,7 @@ export function getAudioEngine(): 'web-audio' | 'html5' | 'silent' {
 ### §8.1 MVP (Phase 1-2) Audio Scope
 
 **In Scope** (required for launch):
-- 11 × SFX (P0+P1 effects): pet-tap, training-success, arena-victory, arena-defeat, claim-success, rate-limit-warning, stat-ding, food-buff, leaderboard-rankup, arena-start, training-start
+- 12 × SFX (P0+P1 effects): pet-tap-pop, pet-tap-click, training-success, arena-victory, arena-defeat, claim-success, rate-limit-warning, stat-ding, food-buff, leaderboard-rankup, arena-start, training-start
 - Audio toggle + master volume slider
 - Cross-browser testing (Chrome, Firefox, Safari, iOS Safari, Android Chrome)
 
@@ -625,7 +627,7 @@ export function getAudioEngine(): 'web-audio' | 'html5' | 'silent' {
 
 | Deliverable | Owner | Due Date | Format |
 |-------------|-------|----------|--------|
-| 11 × SFX audio files | Audio Designer / Editor | Phase 2 | MP3, 128 kbps |
+| 12 × SFX audio files | Audio Designer / Editor | Phase 2 | MP3, 128 kbps |
 | Audio assets README | Audio Designer | Phase 2 | Markdown (attribution, licensing) |
 | Phaser audio integration code | Frontend Engineer | Phase 2 | TypeScript |
 | Audio settings UI | Frontend Engineer | Phase 2 | React + CSS |
@@ -643,23 +645,23 @@ All audio assets must include proper attribution. Template for `/public/assets/a
 
 ## Sound Effects
 
-- **pet-tap-pop.mp3** — [Creator/License]
-- **training-success.mp3** — [Creator/License]
-- **arena-victory.mp3** — [Creator/License]
+- **pet-tap-pop.mp3** — PENDING — TBD at asset acquisition
+- **training-success.mp3** — PENDING — TBD at asset acquisition
+- **arena-victory.mp3** — PENDING — TBD at asset acquisition
 - ... (all SFX)
 
 ## Music
 
-- **arena-battle-loop.mp3** — [Creator/License] (P3 optional)
-- **trainer-ambient-loop.mp3** — [Creator/License] (P3 optional)
+- **arena-battle-loop.mp3** — PENDING — TBD at asset acquisition (P3 optional)
+- **trainer-ambient-loop.mp3** — PENDING — TBD at asset acquisition (P3 optional)
 
 ## Licensing Notes
 
-All audio is licensed under [LICENSE_NAME, e.g., CC-BY-4.0, proprietary].
+All audio is licensed under PENDING — TBD before Phase 2 delivery.
 Attribution: See individual file tags.
-Restrictions: [Any usage restrictions, e.g., non-commercial, internal use only]
+Restrictions: PENDING — TBD before Phase 2 delivery.
 
-For license questions, contact: audio@pixel-pet-arena.local
+For license questions, contact: team alias TBD
 ```
 
 ---
@@ -672,6 +674,7 @@ For license questions, contact: audio@pixel-pet-arena.local
 // Event → SFX mapping (TypeScript reference)
 const AUDIO_EVENTS = {
   'pet:tap': 'pet-tap-pop',
+  'ui:button-click': 'pet-tap-click',
   'training:start': 'training-start',
   'training:complete': 'training-success',
   'stat:display': 'stat-ding',
