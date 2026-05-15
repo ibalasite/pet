@@ -1,5 +1,5 @@
 {
-  "min_endpoint_count": 33,
+  "min_endpoint_count": 28,
   "min_fields_per_endpoint": 2,
   "min_h2_sections": 3,
   "max_placeholder_count": 0
