@@ -3,7 +3,7 @@
 **DOC-ID**: RUNBOOK-PIXEL-PET-ARENA-20260504
 **Status**: ACTIVE
 **Last Updated**: 2026-05-04
-**Maintainer**: [ON-CALL-ENGINEER]
+**Maintainer**: @oncall-engineer (PagerDuty policy: pixel-pet-backend)
 
 ---
 
@@ -153,9 +153,9 @@ This section defines severity levels, SLAs, escalation paths, and first-responde
 
 | Severity | Definition | Response SLA | Escalation |
 |----------|-----------|-------------|-----------|
-| **P0** | Complete outage — all users cannot play; `GET /health` returns non-200 or is unreachable | Acknowledge within 5 min; resolve or roll back within 30 min | Page [ON-CALL-ENGINEER] immediately; escalate to [PLATFORM-LEAD] if not resolved in 15 min |
-| **P1** | Degraded performance — error rate > 1% (monitoring alert threshold) or P99 latency > 1,000 ms for any player-facing endpoint | Acknowledge within 15 min; restore to SLO within 60 min | Notify [ON-CALL-ENGINEER] via PagerDuty; loop in [DATABASE-OWNER] if DB or Redis implicated |
-| **P2** | Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works) | Acknowledge within 1 hour; resolve within 4 hours or next business day | Notify [ON-CALL-ENGINEER] via Slack `#incidents`; no escalation required unless degrading to P1 |
+| **P0** | Complete outage — all users cannot play; `GET /health` returns non-200 or is unreachable | Acknowledge within 5 min; resolve or roll back within 30 min | Page @oncall-engineer (PagerDuty policy: pixel-pet-backend) immediately; escalate to @platform-lead (Slack: #platform-engineering) if not resolved in 15 min |
+| **P1** | Degraded performance — error rate > 1% (monitoring alert threshold) or P99 latency > 1,000 ms for any player-facing endpoint | Acknowledge within 15 min; restore to SLO within 60 min | Notify @oncall-engineer (PagerDuty policy: pixel-pet-backend) via PagerDuty; loop in @db-owner (Slack: #database-ops) if DB or Redis implicated |
+| **P2** | Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works) | Acknowledge within 1 hour; resolve within 4 hours or next business day | Notify @oncall-engineer (PagerDuty policy: pixel-pet-backend) via Slack `#incidents`; no escalation required unless degrading to P1 |
 
 ### P0 — Complete Outage
 
@@ -206,6 +206,18 @@ Redis is used for rate-limiting counters and the arena matchmaking queue. When R
 **Actions:**
 
 1. Check Upstash Redis status dashboard and connection string in environment variables.
+   ```bash
+   # Test connectivity directly
+   redis-cli -u $REDIS_URL PING
+
+   # Check Upstash platform status
+   curl https://status.upstash.com/api/v2/status.json
+
+   # If running on Fly.io — test from within the host network
+   fly ssh console -a pixel-pet-api
+   # then, inside the console:
+   redis-cli -u $REDIS_URL PING
+   ```
 2. If `REDIS_URL` is correct and Upstash reports healthy, check for network/TLS issues from the backend host.
 3. If the Upstash outage is confirmed as a platform issue, open a support ticket with Upstash and set severity to P1.
 4. Do not restart the backend process for a Redis outage alone; the system is designed to degrade gracefully.
@@ -217,7 +229,17 @@ The DB connection pool minimum is 20 connections (`db_connection_pool_min_connec
 **Actions:**
 
 1. Check the observability dashboard for `db_connection_pool_utilization`. If above 80%, proceed.
-2. Identify long-running queries in Supabase dashboard (`Query Performance` tab). Kill any query running longer than 30 seconds that is blocking connections.
+2. Identify long-running queries in Supabase dashboard (`Query Performance` tab). Kill any query running longer than 30 seconds that is blocking connections. Run the following via Supabase SQL Editor or `psql $DATABASE_URL`:
+   ```sql
+   -- Identify blocking queries
+   SELECT pid, query, state, now()-query_start AS duration
+   FROM pg_stat_activity
+   WHERE state != 'idle'
+   ORDER BY duration DESC;
+
+   -- Cancel a specific query
+   SELECT pg_cancel_backend(<pid>);
+   ```
 3. Check for connection leaks: look for backend instances that have open idle connections but are not processing requests.
 4. If the backend is scaled to multiple replicas, reduce the per-instance pool size or scale back replicas temporarily.
 5. If Supabase's free-tier connection limit is the bottleneck, enable PgBouncer (Supabase → Database → Connection Pooling → Transaction mode).
@@ -234,7 +256,13 @@ Admin accounts lock after `admin_login_lockout_threshold = 10` consecutive faile
 
 **Actions (if immediate access is required):**
 
-1. Connect to the Supabase database (use the connection string from secrets manager, not from the locked-out admin's session):
+1. Confirm the lockout via Supabase SQL Editor or `psql $DATABASE_URL`:
+   ```sql
+   SELECT username, locked_until, failed_login_count
+   FROM admin_users
+   WHERE locked_until IS NOT NULL;
+   ```
+3. Connect to the Supabase database (use the connection string from secrets manager, not from the locked-out admin's session):
    ```sql
    -- Find the locked account
    SELECT id, username, locked_until
@@ -246,8 +274,8 @@ Admin accounts lock after `admin_login_lockout_threshold = 10` consecutive faile
    SET locked_until = NULL, failed_login_count = 0
    WHERE username = '<admin_username>';
    ```
-2. Log the manual unlock action in the `#admin-ops` Slack channel with timestamp, operator, and reason. Supabase audit logs will also capture the query.
-3. If the account was locked due to a suspected credential compromise rather than operator error, do not unlock until the credential has been rotated.
+4. Log the manual unlock action in the `#admin-ops` Slack channel with timestamp, operator, and reason. Supabase audit logs will also capture the query.
+5. If the account was locked due to a suspected credential compromise rather than operator error, do not unlock until the credential has been rotated.
 
 #### Bot Detection Alert Flood (> 50 battles / 60 min from one pet)
 
@@ -285,10 +313,12 @@ The platform sends transactional emails for the claim flow (OTP link and backup 
    A 401 response means the key is invalid or revoked.
 3. If the key is valid, check SendGrid status page (`status.sendgrid.com`) for an ongoing platform incident.
 4. If the failure is limited to a specific sender domain, check DNS records (SPF, DKIM, DMARC) in the Sendgrid → Settings → Sender Authentication dashboard.
-5. If SendGrid is fully down and the outage will exceed 30 minutes, assess whether to temporarily disable new pet claims to prevent a broken user experience (disable via `FF_CLAIM_FLOW` feature flag if it exists, or deploy a maintenance page for the claim endpoint).
+5. If SendGrid is fully down and the outage will exceed 30 minutes, assess whether to temporarily disable new pet claims to prevent a broken user experience (disable via `FF_EMAIL_CLAIM` feature flag if it exists, or deploy a maintenance page for the claim endpoint).
 6. Once resolved, verify delivery is restored by triggering a test claim email through the staging environment.
 
 #### Feature Flag Emergency Toggle
+
+**Triggered when:** data corruption or player-safety issue is traced to a specific feature flag, or when marketplace must be activated/deactivated upon reaching a DAU milestone.
 
 Feature flags are environment variables read at startup and cached in memory. Config changes propagate within 5 minutes (`config_cache_refresh_time_minutes = 5`).
 
@@ -352,7 +382,7 @@ Rollback is the primary recovery tool for deploy-caused regressions. Act quickly
 
 ### Database Migration Rollback
 
-> **WARNING**: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from [PLATFORM-LEAD] and a confirmed recent backup.
+> **WARNING**: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from @platform-lead (Slack: #platform-engineering) and a confirmed recent backup.
 
 **Step 0 — Verify backup before any migration rollback (mandatory):**
 
@@ -597,9 +627,9 @@ All API errors use the standard envelope defined in `docs/API.md §4.1`. Key err
 
 | Role | Contact |
 |------|---------|
-| Primary on-call engineer | [ON-CALL-ENGINEER] |
-| Platform lead (escalation) | [PLATFORM-LEAD] — escalate via PagerDuty P0 policy |
-| Database owner (Supabase issues) | [DATABASE-OWNER] — open Supabase support ticket if platform incident confirmed |
+| Primary on-call engineer | @oncall-engineer (PagerDuty policy: pixel-pet-backend) |
+| Platform lead (escalation) | @platform-lead (Slack: #platform-engineering) — escalate via PagerDuty P0 policy |
+| Database owner (Supabase issues) | @db-owner (Slack: #database-ops) — open Supabase support ticket if platform incident confirmed |
 | Upstash Redis support | https://upstash.com/support |
 | SendGrid support | https://support.sendgrid.com |
 | Railway support | https://railway.app/help |
