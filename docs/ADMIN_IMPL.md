@@ -669,6 +669,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 ```typescript
 // api/http.ts
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
@@ -695,6 +696,13 @@ http.interceptors.response.use(
       await router.push('/login')
     } else if (status === 403) {
       await router.push('/403')
+    } else if (status === 429) {
+      // Rate limit exceeded — surface Retry-After value if present
+      const retryAfter = error.response?.headers?.['retry-after']
+      const msg = retryAfter
+        ? `Rate limit exceeded. Please wait ${retryAfter} seconds before retrying.`
+        : 'Rate limit exceeded. Please try again later.'
+      ElMessage({ type: 'error', message: msg, duration: 5000 })
     }
     return Promise.reject(error)
   }
@@ -713,7 +721,7 @@ Admin sessions use server-side Redis sessions (`session:admin:{session_id}`):
 
 - **Inactivity TTL**: 14400 s (admin_session_inactivity_expiry_hours = 4) — automatically renewed by the server on each request
 - **Absolute expiry**: 28800 s (admin_session_absolute_expiry_hours = 8) — server enforces via `absExpiry` field in the session JSON
-- **Frontend monitoring**: `useSessionTimer.ts` composable starts a timer at login; shows a toast 5 minutes before inactivity expiry; forces redirect to login at absolute expiry
+- **Frontend monitoring**: `useSessionTimer.ts` composable starts a timer at login; shows a toast 5 minutes before inactivity expiry (`// 5-minute UX warning before 4h inactivity expiry — no separate constant; derived from admin_inactivity_timeout_minutes = 240`); forces redirect to login at absolute expiry
 
 ### §8.4 API Endpoint Mapping (all `/admin/api/*` routes from API.md §6)
 
@@ -1338,6 +1346,8 @@ Target: Element Plus uses automatic on-demand import (unplugin-auto-import + unp
 | Audit log search (any 12-month window) | < 3000 ms | admin_audit_log_search_response_time_seconds = 3 |
 | FCP (First Contentful Paint) | < 2000 ms | Derived from admin page load target |
 
+> **FCP deviation note**: Admin portal FCP target is relaxed to < 2000 ms (vs player app ≤ 1500 ms) consistent with the 3000 ms admin page load budget from PRD NFR-ADMIN-06. This is an intentional deviation from the project-wide FCP ≤ 1.5 s target.
+
 ### §14.4 Element Plus On-Demand Import Configuration
 
 ```typescript
@@ -1409,17 +1419,20 @@ export default defineConfig({
 |----------|-------------|-----------|
 | `VITE_API_BASE_URL` | `http://localhost:3000` | `https://api.pixel-pet-arena.com` (via Nginx proxy) |
 | `VITE_ADMIN_PATH` | `/admin` | `/admin` |
+| `ADMIN_ALLOWED_IPS` | _(empty — allowlist disabled in development)_ | Comma-separated CIDR list (e.g. `10.0.0.0/8,203.0.113.0/24`); required in production per NFR-ADMIN-07 (ARCH §5.1) |
 
 `.env.development`:
 ```
 VITE_API_BASE_URL=http://localhost:3000
 VITE_ADMIN_PATH=/admin
+# ADMIN_ALLOWED_IPS= (empty — IP allowlist disabled in development)
 ```
 
 `.env.production`:
 ```
 VITE_API_BASE_URL=https://api.pixel-pet-arena.com
 VITE_ADMIN_PATH=/admin
+ADMIN_ALLOWED_IPS=<comma-separated CIDR list>
 ```
 
 ### §15.3 Nginx Routing Configuration
@@ -1466,6 +1479,7 @@ location /admin/api/ {
 | TOTP enforcement | Every admin login requires TOTP after enrollment; `TOTP_SETUP_REQUIRED` returned on first login |
 | Account lockout | 10 consecutive failures trigger 30-minute lockout (admin_login_lockout_threshold = 10, admin_login_lockout_duration_minutes = 30) |
 | IP rate limiting | 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10, admin_login_ip_rate_limit_window_seconds = 900) |
+| IP allowlist | `ADMIN_ALLOWED_IPS` env var (CIDR list); requests outside allowlist receive 403 before credential check; required in production per NFR-ADMIN-07 (ARCH §5.1 accepted deviation: optional, default disabled) |
 | Password hashing | bcrypt, minimum work factor 12 (SCHEMA.md §2.10 comment) |
 | TOTP secret storage | AES-256-GCM encrypted in `admin_accounts.totp_secret_encrypted` |
 | Backup codes | 10 single-use codes; SHA-256 hashes stored in `totp_backup_codes_hash` array |
