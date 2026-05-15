@@ -61,7 +61,7 @@ Each application in the monorepo has its own environment file. You must copy and
 ### Clone the repository
 
 ```bash
-git clone https://github.com/<your-org>/pixel-pet-arena.git
+git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
 cd pixel-pet-arena
 ```
 
@@ -215,6 +215,67 @@ Follow these steps in order. Each step depends on the previous one completing su
    ```
 
    Each of the three services in steps 6–8 should be run in separate terminal tabs or panes so you can observe their output simultaneously.
+
+---
+
+## Docker Compose — Redis and API Services
+
+A `docker-compose.dev.yml` file is provided at the repository root for local development. It starts the Redis cache and the Fastify API together, with environment variables sourced from `apps/api/.env.local`.
+
+> **Note:** The Supabase stack is managed separately via the Supabase CLI (`supabase start`) and is not included in this Compose file. Complete Setup Steps 1–4 before starting the Compose stack.
+
+### Starting the stack
+
+```bash
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+### Starting with 2 API replicas (recommended)
+
+```bash
+docker-compose -f docker-compose.dev.yml up --scale api=2 -d
+```
+
+Running 2 API replicas in local dev mirrors the production replica count and surfaces any race conditions early.
+
+### Example `docker-compose.dev.yml`
+
+```yaml
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000-3001:3000"
+    env_file:
+      - ./apps/api/.env.local
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+```
+
+### Stopping the stack
+
+```bash
+docker-compose -f docker-compose.dev.yml down
+```
 
 ---
 
