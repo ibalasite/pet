@@ -1088,7 +1088,7 @@ The admin portal at `http://localhost:5174/admin/login` rejects your TOTP code.
 pnpm db:seed --reset-admin
 ```
 
-Save the output as described in §1.6 (Seed the database), then enter the TOTP secret manually into your authenticator app.
+Save the output as described in §1.6 (Resetting the Local Development Environment), then enter the TOTP secret manually into your authenticator app.
 
 **Cause 2 — Clock skew.** TOTP codes are time-based and valid for a 30-second window. If your system clock is more than 30 seconds out of sync, codes will be rejected. On macOS: `sudo sntp -sS time.apple.com`. On Linux: `sudo timedatectl set-ntp true`.
 
