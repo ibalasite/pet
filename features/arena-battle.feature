@@ -34,8 +34,8 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     When the matchmaking service pairs the two pets for a Sumo match
     Then a Sumo battle record is created with mode "SUMO"
     And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
-    And "sumo-token-001" is recorded as the winner because its strength stat is higher
-    And the outcome is determined solely by the raw strength stat with no random modifier applied
+    And "sumo-token-001" is recorded as the winner because its higher effective strength stat wins
+    And the outcome is determined by the higher effective strength (base strength stat plus up to ±15% seeded random modifier)
 
   @TC-SRV-ARENA-005
   Scenario: Player receives HTTP 429 when exceeding 10 battles per hour limit
