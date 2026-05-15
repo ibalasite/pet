@@ -251,7 +251,11 @@ Test fixtures are organized into four categories matching the domain model:
 
 ### 4.2 Test Data Isolation
 
-Each integration test suite runs inside a database transaction that is rolled back after the test completes, preventing state accumulation between tests. Redis keys created during tests use a test-specific namespace prefix (`test:{suite_id}:*`) and are flushed via `FLUSHDB` on the test Redis instance after each suite run.
+Each integration test suite runs inside a database transaction that is rolled back after the test completes, preventing state accumulation between tests. This ensures that no integration test can observe writes made by a sibling test running in the same suite.
+
+Redis keys created during tests use a test-specific namespace prefix (`test:{suite_id}:*`) to avoid cross-suite collisions. The test Redis instance is flushed via `FLUSHDB` after each suite run, ensuring a clean slate for the next suite even when tests fail mid-run.
+
+Fixture teardown follows a strict cleanup order that mirrors foreign-key dependency: food buff records are removed before pets, arena match records before both participants, and claim identity records last. This order prevents constraint violations during cleanup and keeps teardown deterministic.
 
 ### 4.3 Seed Data for Performance Tests
 
@@ -673,7 +677,11 @@ Coverage enforcement is a hard gate; CI fails if any threshold drops below (unit
 
 ### 7.1 E2E Framework Configuration
 
-All E2E tests use Playwright with the configuration defined in Section 3.4. Tests are organized by critical user flow and are always executed against the staging environment before production.
+All E2E tests use Playwright v1.42+ with the configuration defined in Section 3.4. Tests are organized by critical user flow and are always executed against the staging environment before production deployment.
+
+On CI, each test spec is configured with a 30-second per-test timeout and a retry policy of 2 automatic retries on failure. This balances reliability against flakiness without masking genuine regressions. Test artifacts — screenshots and video recordings — are captured automatically on failure and uploaded to the CI artifact store for post-run inspection.
+
+Local developer runs use a single retry and a 60-second timeout to allow breakpoint debugging. The `--reporter=html` flag generates a browsable HTML report in `playwright-report/` after each local run.
 
 ### 7.2 Guest Pet Interaction Flow (US-PET-001)
 
@@ -1242,7 +1250,11 @@ Visual regression snapshots are taken at 320px, 768px, 1024px, and 1440px viewpo
 
 ### 11.1 BDD Coverage Overview
 
-The minimum number of BDD scenarios is calculated as `ceil(18 × 0.8) = 15`. This plan documents 17 scenarios covering the highest-priority user stories (US-PET-001, US-AUTH-001, US-AUTH-002, US-TRAIN-001, US-ARENA-001, US-BOARD-001, US-RARITY-001, US-ADMIN-004, US-ADMIN-005). Remaining user stories are covered at the required level by unit, integration, and E2E tests. Full scenario text lives in `features/server/` and `features/client/` Gherkin files.
+The minimum number of BDD scenarios is calculated as `ceil(18 × 0.8) = 15`. This plan documents 17 scenarios covering the highest-priority user stories (US-PET-001, US-AUTH-001, US-AUTH-002, US-TRAIN-001, US-ARENA-001, US-BOARD-001, US-RARITY-001, US-ADMIN-004, US-ADMIN-005).
+
+Remaining user stories are covered at the required level by unit, integration, and E2E tests; they do not require a separate BDD scenario file unless a new behaviour emerges that is better expressed in natural language.
+
+Full scenario text lives in `features/server/` (server-side behaviours: auth, GDPR, arena logic, leaderboard) and `features/client/` (client-side behaviours: pet display, training UX, arena UX, rarity display) Gherkin files, and is executed by the Cucumber runner integrated into the CI unit-test gate.
 
 ### 11.2 Server-Side BDD Scenarios
 
@@ -1518,7 +1530,7 @@ Coverage exemptions (excluded from threshold calculation):
 
 ## 13. Test Cases
 
-This section provides a consolidated index of all test case identifiers defined in this plan, organized by test type. Full test case details are in their respective sections above.
+This section provides a consolidated index of all test case identifiers defined in this plan, organized by test type. It covers unit tests (TC-UNIT), integration tests (TC-INT), end-to-end tests (TC-E2E), performance tests (TC-PERF), security tests (TC-SEC), accessibility tests (TC-A11Y), and visual regression tests (TC-VR). Full test case details — including Given/When/Then tables, linked acceptance criteria, and file paths — are in their respective sections above.
 
 ### 13.1 Unit Test Cases (TC-UNIT-*)
 
@@ -1678,6 +1690,136 @@ This section provides a consolidated index of all test case identifiers defined 
 | TC-VR-006 | Battle records page — all 4 breakpoints | §10.5 |
 | TC-VR-007 | Legendary pet with animated border effect — 1024px, 1440px | §10.5 |
 | TC-VR-008 | Rarity badge variants (Common / Rare / Epic / Legendary) — 1024px | §10.5 |
+
+---
+
+## 14. Smoke Tests
+
+Smoke tests verify the most critical platform functions immediately after every deployment. They are lightweight, fast (target runtime under 2 minutes), and gate production promotion in the CI/CD pipeline (see §12 Gate 5 and Gate 6).
+
+The following five smoke tests run after every staging and production deployment:
+
+1. **Health check** — `GET /health` returns HTTP 200 with `status: "ok"` and reports both database and Redis connectivity as healthy within 500 ms.
+2. **Guest pet display** — The landing page loads and a pet canvas element is visible within 2 seconds; no JavaScript console errors appear.
+3. **Email claim initiation** — `POST /api/v1/claim` with a test email address returns HTTP 202 and a `claimId`; the SendGrid mock records one outbound call.
+4. **Arena entry** — `POST /api/v1/arena/enter` with a seeded test pet returns HTTP 200 or 202, confirming the matchmaking queue is accepting entries.
+5. **Leaderboard load** — `GET /api/v1/leaderboard` returns HTTP 200 with at least one ranked entry within 200 ms, confirming both Redis and the fallback path are reachable.
+
+Smoke test failures immediately halt the deploy pipeline and trigger a PagerDuty alert.
+
+---
+
+## 15. Visual Regression Testing
+
+Visual regression tests compare Playwright screenshots against committed baseline snapshots to catch unintended UI changes before they reach production. Baselines are stored in `tests/visual-regression/snapshots/` and are updated intentionally via `pnpm run test:vr --update-snapshots`.
+
+Screenshots are captured at the four standard breakpoints defined in the web testing rules: 320 px (mobile), 768 px (tablet), 1024 px (small desktop), and 1440 px (full desktop). Both light and dark themes are captured where the UI supports theme switching.
+
+The three highest-value game screens for visual regression are:
+
+- **PetCard** — The pixel sprite canvas with rarity badge, stat panel, and buff indicators. A regression here could silently break the product's core visual identity.
+- **ArenaHUD** — The battle countdown, opponent comparison panel, and result overlay. Layout shifts during a match would degrade the competitive UX.
+- **Marketplace placeholder** — When `FF_MARKETPLACE = false`, the placeholder must render correctly; any accidental exposure of beta UI would be a product risk.
+
+Pixel-diff threshold is set to 0.1% changed pixels per snapshot. Diffs above threshold fail CI and attach an annotated diff image to the pull request as an artifact.
+
+---
+
+## 16. Compliance & Privacy Tests
+
+Compliance tests verify that the platform meets its GDPR, COPPA, and CAN-SPAM obligations under automated conditions. These tests run in the integration suite and are also exercised by dedicated E2E scenarios (TC-E2E-005, TC-E2E-023).
+
+**GDPR data export and deletion flow** — A test submits a GDPR erasure request via `POST /api/v1/gdpr/request` and then polls the background job status until `email_encrypted` is confirmed NULL. The test asserts that the erasure completes within the 24-hour internal SLA (simulated by fast-forwarding the job scheduler in the test environment) and that `email_hash` is retained for anti-re-registration purposes.
+
+**COPPA age-gate** — The claim form must not be submittable without the age-confirmation checkbox checked. Automated tests assert that both the HTML `required` attribute and the server-side validation independently reject submissions where the `ageConfirmed` field is absent or false.
+
+**Email opt-out compliance** — All transactional emails sent via SendGrid must carry the correct `X-SMTPAPI` category tags and must not include marketing content. Integration tests inspect the mock transport payload for each email type and assert that no marketing category tag is present.
+
+---
+
+## 17. Resilience & Chaos Tests
+
+Resilience tests validate that the platform degrades gracefully rather than failing catastrophically when upstream dependencies become unavailable. These tests are executed on a weekly schedule against the staging environment, separate from the main CI pipeline.
+
+**Database failover** — The PostgreSQL primary container is terminated mid-request-stream. The test asserts that read traffic fails over to the replica within the 60-second autofailover SLO (TC-PERF-013) and that no uncaught exception propagates to the client during the transition window.
+
+**Redis cache miss** — Redis is taken offline after the leaderboard sorted set is populated. The test verifies that `GET /api/v1/leaderboard` returns HTTP 200 with `degraded: true` and data sourced from the `leaderboard_snapshots` PostgreSQL table (TC-INT-013).
+
+**SendGrid unavailability** — The SendGrid mock is configured to return HTTP 503 for all calls. The test verifies that the Nodemailer SMTP fallback activates after three consecutive failures (TC-INT-022) and that the claim email is eventually delivered via the fallback transport.
+
+**Feature flag toggle under load** — A k6 script applies 50 RPS to the arena entry endpoint while a background thread toggles `FF_ARENA_RACE` between `true` and `false` every 5 seconds. The test asserts that no request returns an unhandled 500 error; all requests while the flag is `false` receive a clean 503 or maintenance message.
+
+---
+
+## 18. Test Metrics & Reporting
+
+Coverage thresholds are enforced as hard CI gates on every pull request. The minimum acceptable coverage levels, aligned with the testing rules, are:
+
+- Unit test coverage: ≥ 80% for all branches, functions, lines, and statements (enforced by Vitest V8 provider — see §5.1 and §12.5).
+- Integration test pass rate: ≥ 70% of TC-INT-* cases must pass on each CI run for the staging deploy gate to open.
+- E2E test pass rate: ≥ 60% of TC-E2E-* cases must pass on the staging environment before any production promotion is approved.
+
+CI run artifacts are uploaded to the GitHub Actions artifact store and retained for 30 days. The artifact bundle for each run includes: the Vitest HTML coverage report, Playwright HTML test report, screenshots and videos for any failing E2E test, and the k6 summary JSON for scheduled performance runs.
+
+Slack failure notifications are sent to the `#qa-alerts` channel for any gate failure. PagerDuty alerts fire for: (a) nightly k6 performance regression (P99 latency threshold exceeded), (b) smoke test failure post-production-deploy, and (c) OWASP ZAP scan finding a HIGH or CRITICAL vulnerability on staging.
+
+---
+
+## 19. Observability Verification
+
+Observability verification tests confirm that the logging, metrics, and distributed tracing layers are wired correctly and produce accurate telemetry during test runs. These tests supplement the smoke tests and run as part of the post-deployment verification suite.
+
+**Log verification** — Every pino log entry produced during a standard request sequence must contain the structured fields `requestId`, `level`, `msg`, and `timestamp`. Tests assert that no raw email address, IP address, or pet access token appears in any log line (TC-SEC-011, TC-SEC-015, TC-OBS-003).
+
+**Metrics verification** — After injecting a known sequence of errors and successful requests, tests scrape the Prometheus `/metrics` endpoint and assert that `api_error_rate`, `api_request_duration_seconds`, and `leaderboard_update_lag_seconds` counters and gauges reflect the injected events accurately (TC-OBS-001, TC-OBS-002).
+
+**OpenTelemetry span assertions** — For the claim flow and arena battle flow, tests assert that parent-child span relationships are correctly propagated across the API → database → Redis call chain. Each top-level span must carry a `traceId` matching the inbound `traceparent` header, and child spans must record accurate start/end timestamps and status codes.
+
+---
+
+## 20. Risk-Based Testing Strategy
+
+The risk-based strategy assigns test intensity proportional to the likelihood and impact of failure in each module. Modules with the highest combined risk score receive the most thorough coverage and are re-tested first after any change.
+
+**Auth/JWT module (highest risk)** — A failure here could expose any user's pet to unauthorised access or allow token forgery. This module receives full unit coverage (TC-UNIT-005 through TC-UNIT-008), dedicated integration tests (TC-INT-001 through TC-INT-005), security tests (TC-SEC-001 through TC-SEC-010), and BDD scenarios. It is retested on every pull request regardless of which files changed.
+
+**Battle engine (high risk)** — A non-deterministic or biased battle outcome would undermine leaderboard integrity and player trust. The battle engine is covered by determinism unit tests (TC-UNIT-014, TC-UNIT-015), stat-interaction tests (TC-UNIT-016, TC-UNIT-017), and arena integration tests (TC-INT-009 through TC-INT-012). Randomness bounds are verified with a 1,000-sample Monte Carlo test on every CI run.
+
+**Payment / Marketplace module (medium risk, low current exposure)** — The marketplace is hidden behind `FF_MARKETPLACE = false` in production. While active payment paths are not yet live, the kill-switch behaviour is tested on every CI run (§2.3 feature flag coverage) to ensure accidental exposure cannot occur. When the flag is enabled in staging for preview, a dedicated integration test suite runs to validate listing, pricing, and transaction logic before any production exposure.
+
+---
+
+## 21. Cross-Browser & Responsive Tests
+
+Cross-browser tests verify that the game canvas, animations, and UI components render and behave correctly across all supported browser engines. Tests are executed using Playwright's multi-project configuration, which runs the same spec files against Chromium (Chrome/Edge), Firefox, and WebKit (Safari) in parallel.
+
+Key areas tested across all three browser engines:
+
+- **Game canvas rendering** — Phaser.js canvas initialisation, idle animation playback, and interaction response on click/tap events. WebKit requires explicit permission for AudioContext and pointer events on canvas elements; these are explicitly validated.
+- **CSS animation fallback** — Rarity badge border animations use CSS `@keyframes`. Firefox and Safari handle `animation-fill-mode` and `will-change` differently; tests assert that the animated border renders correctly and that reduced-motion preference is respected on all three engines.
+- **Form and keyboard behaviour** — The claim form OTP input and COPPA checkbox are tested for correct autofocus, paste support, and keyboard submission across all engines.
+
+Responsive breakpoints tested: 320 px (mobile portrait), 375 px (iPhone SE), 768 px (tablet), 1024 px (small desktop), 1440 px (full desktop), and 1920 px (wide). Each breakpoint is verified for absence of horizontal overflow, correct touch target sizing (minimum 44 px), and legible typography scaling.
+
+---
+
+## 22. Tooling & Infrastructure Summary
+
+The following test tools and versions are used in this project. All tools are installed as `devDependencies` in the workspace root `package.json` and pinned to exact versions to ensure reproducible CI builds.
+
+| Tool | Version | Purpose | CI Integration |
+|------|---------|---------|----------------|
+| Vitest | ^1.6.0 | Unit and integration test runner, V8 coverage provider | Gate 2 (unit), Gate 3 (integration) |
+| Playwright | ^1.42.0 | E2E test runner, visual regression screenshots, Lighthouse CI | Gate 5 (staging smoke + E2E) |
+| Supertest | ^7.0.0 | HTTP assertion library for Fastify integration tests | Gate 3 (integration) |
+| testcontainers | ^10.9.0 | Docker-managed PostgreSQL and Redis for integration tests | Gate 3 (integration) |
+| k6 | ^0.51.0 | Load and performance test runner | Nightly + weekly schedule |
+| axe-core | ^4.9.0 | Automated accessibility scanning via Playwright | Gate 5 (E2E) |
+| Lighthouse CI | ^0.13.0 | Core Web Vitals and bundle budget enforcement | Every PR targeting main |
+| OWASP ZAP | 2.14 | DAST security scan against staging | Nightly on main |
+| Semgrep | ^1.70.0 | Static security analysis (TypeScript ruleset) | Every PR |
+
+All tools are integrated with GitHub Actions. Coverage reports, Playwright HTML reports, and k6 summary artifacts are uploaded to the `actions/upload-artifact` store on every run and retained for 30 days.
 
 ---
 
