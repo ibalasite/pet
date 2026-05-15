@@ -231,6 +231,8 @@ pixel-pet-arena occupies the **Pixel Art Retro-Futurism** style direction: pixel
 
 All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical hex, oklch, and WCAG contrast data.
 
+> **HSL equivalents**: HSL values are provided alongside oklch for tooling compatibility (e.g. Figma color pickers, older design tools that do not support oklch). oklch is the canonical format for all CSS token declarations; HSL is informational only.
+
 | Token Name | Hex | oklch | WCAG Contrast on `--color-surface-base` | Usage |
 |-----------|-----|-------|----------------------------------------|-------|
 | `--color-brand-primary` | `#6c5ce7` | `oklch(52% 0.22 280)` | 3.51:1 (AA non-text, WCAG 1.4.11) | Primary CTA buttons, active nav links, claim flow primary actions — UI component/surface color, not foreground text on dark base |
@@ -389,6 +391,18 @@ All spacing, sizing, and positioning of pixel art elements must snap to the pixe
 
 **The 8px rule**: No pixel art element — border, shadow offset, icon, sprite dimension — may use a value that is not a multiple of 8px. This rule applies to sprites and game canvas elements only. Body text and data tables are exempt and follow the `--primitive-space-*` token scale (4px base unit).
 
+### §4.5 Base Body Type Roster
+
+| 體型 ID | 體型描述 | 代表元素 | 面向規格 |
+|---------|---------|---------|---------|
+| body-tiny | 圓潤迷你體型（圓形主體，小手小腳）| 水系、精靈系 | 正面：16×16px；側面：14×16px |
+| body-standard | 標準直立體型（頭身比 1:1.5）| 通用、火系、草系 | 正面：32×32px；側面：28×32px |
+| body-chunky | 寬胖厚重體型（圓形身軀，短肢）| 岩石系、鋼鐵系 | 正面：32×28px；側面：30×28px |
+| body-slim | 細長流線體型（高頭身比 1:2）| 風系、電系 | 正面：20×40px；側面：18×40px |
+| body-quadruped | 四足爬行體型 | 野獸系、龍系 | 正面：40×24px；側面：48×24px |
+
+> 每種體型的精確 sprite sheet 規格見 §7.1 Asset Pipeline；turnaround view（正面/背面/側面三方向）由美術師在 Figma 交付（Sprint 1 end）。
+
 ---
 
 ## §5 UI Visual System — Typography
@@ -468,31 +482,31 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-grey-950: oklch(9% 0 0);    /* #030712 */
 
 /* Full Brand Primary (Purple) Scale */
---primitive-purple-50:  oklch(97% 0.03 280);  /* #faf5ff — Lightest purple tint */
---primitive-purple-100: oklch(94% 0.06 280);  /* #f3e8ff */
---primitive-purple-200: oklch(88% 0.11 280);  /* #e9d5ff */
---primitive-purple-300: oklch(72% 0.24 280);  /* #c4b5fd — Hover/active accent */
---primitive-purple-400: oklch(62% 0.22 280);  /* #c084fc */
---primitive-purple-500: oklch(52% 0.22 280);  /* #6c5ce7 — Brand primary */
---primitive-purple-600: oklch(44% 0.24 280);  /* #6d28d9 */
---primitive-purple-700: oklch(36% 0.22 280);  /* #5b21b6 — Dark button press */
---primitive-purple-800: oklch(28% 0.19 280);  /* #4c1d95 */
---primitive-purple-900: oklch(21% 0.16 280);  /* #3b0764 — Deep purple overlay */
---primitive-purple-950: oklch(14% 0.13 280);  /* #1e0533 */
---primitive-purple-epic: oklch(75% 0.21 280); /* #a29bfe — Epic rarity */
+--primitive-purple-50:  oklch(97% 0.03 280);  /* #faf5ff — hsl(270, 100%, 98%) — Lightest purple tint */
+--primitive-purple-100: oklch(94% 0.06 280);  /* #f3e8ff — hsl(270, 100%, 95%) */
+--primitive-purple-200: oklch(88% 0.11 280);  /* #e9d5ff — hsl(270, 100%, 92%) */
+--primitive-purple-300: oklch(72% 0.24 280);  /* #c4b5fd — hsl(258, 96%, 85%) — Hover/active accent */
+--primitive-purple-400: oklch(62% 0.22 280);  /* #c084fc — hsl(270, 95%, 75%) */
+--primitive-purple-500: oklch(52% 0.22 280);  /* #6c5ce7 — hsl(258, 50%, 35%) — Brand primary */
+--primitive-purple-600: oklch(44% 0.24 280);  /* #6d28d9 — hsl(263, 70%, 50%) */
+--primitive-purple-700: oklch(36% 0.22 280);  /* #5b21b6 — hsl(263, 70%, 42%) — Dark button press */
+--primitive-purple-800: oklch(28% 0.19 280);  /* #4c1d95 — hsl(263, 68%, 35%) */
+--primitive-purple-900: oklch(21% 0.16 280);  /* #3b0764 — hsl(263, 60%, 26%) — Deep purple overlay */
+--primitive-purple-950: oklch(14% 0.13 280);  /* #1e0533 — hsl(263, 55%, 18%) */
+--primitive-purple-epic: oklch(75% 0.21 280); /* #a29bfe — hsl(258, 96%, 80%) — Epic rarity */
 
 /* Teal Scale */
---primitive-teal-100: oklch(90% 0.07 190);    /* #ccf5f3 */
---primitive-teal-300: oklch(78% 0.13 190);    /* #7de8e2 */
---primitive-teal-400: oklch(68% 0.19 164);    /* #00b894 — Brand secondary */
---primitive-teal-rare: oklch(72% 0.13 190);   /* #4ecdc4 — Rare rarity canonical (PDD §9.1) */
---primitive-teal-600: oklch(52% 0.17 164);    /* #008c72 */
+--primitive-teal-100: oklch(90% 0.07 190);    /* #ccf5f3 — hsl(177, 78%, 87%) */
+--primitive-teal-300: oklch(78% 0.13 190);    /* #7de8e2 — hsl(177, 72%, 70%) */
+--primitive-teal-400: oklch(68% 0.19 164);    /* #00b894 — hsl(164, 100%, 36%) — Brand secondary */
+--primitive-teal-rare: oklch(72% 0.13 190);   /* #4ecdc4 — hsl(177, 55%, 55%) — Rare rarity canonical (PDD §9.1) */
+--primitive-teal-600: oklch(52% 0.17 164);    /* #008c72 — hsl(164, 100%, 27%) */
 
 /* Gold Scale */
---primitive-gold-100: oklch(95% 0.07 82);     /* #fff3cd */
---primitive-gold-300: oklch(85% 0.15 82);     /* #fdcb6e — Brand accent / Legendary */
---primitive-gold-500: oklch(70% 0.17 82);     /* #ffd700 — Focus ring */
---primitive-gold-700: oklch(55% 0.17 82);     /* #c49900 */
+--primitive-gold-100: oklch(95% 0.07 82);     /* #fff3cd — hsl(44, 100%, 90%) */
+--primitive-gold-300: oklch(85% 0.15 82);     /* #fdcb6e — hsl(40, 97%, 72%) — Brand accent / Legendary */
+--primitive-gold-500: oklch(70% 0.17 82);     /* #ffd700 — hsl(51, 100%, 50%) — Focus ring */
+--primitive-gold-700: oklch(55% 0.17 82);     /* #c49900 — hsl(46, 100%, 38%) */
 
 /* Feedback / Status Color Primitives */
 --primitive-orange-400: oklch(70% 0.17 40); /* #e8a87c — Warning */
@@ -500,11 +514,11 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-blue-400: oklch(72% 0.15 240); /* #7cb4e8 — Info */
 
 /* Navy Scale */
---primitive-navy-900: oklch(12% 0.04 280);    /* #1a1a2e — Surface base */
---primitive-navy-800: oklch(17% 0.05 280);    /* #242444 — Surface raised */
---primitive-navy-700: oklch(22% 0.07 280);    /* #2d2d5a — Surface overlay */
---primitive-navy-600: oklch(28% 0.06 280);    /* #3a3a6e — Hover surfaces */
---primitive-navy-shadow: oklch(8% 0.02 280);  /* #0d0d1a — deep shadow / near-black navy (PDD §9.1) */
+--primitive-navy-900: oklch(12% 0.04 280);    /* #1a1a2e — hsl(256, 30%, 18%) — Surface base */
+--primitive-navy-800: oklch(17% 0.05 280);    /* #242444 — hsl(240, 30%, 20%) — Surface raised */
+--primitive-navy-700: oklch(22% 0.07 280);    /* #2d2d5a — hsl(240, 33%, 26%) — Surface overlay */
+--primitive-navy-600: oklch(28% 0.06 280);    /* #3a3a6e — hsl(240, 30%, 33%) — Hover surfaces */
+--primitive-navy-shadow: oklch(8% 0.02 280);  /* #0d0d1a — hsl(258, 25%, 10%) — deep shadow / near-black navy (PDD §9.1) */
 --primitive-navy-text-secondary: oklch(60% 0.04 280); /* #6c6c9a */
 --primitive-navy-text-disabled: oklch(40% 0.04 280); /* #4a4a6a */
 --primitive-navy-border-default: oklch(32% 0.05 280); /* #35355c */
@@ -959,6 +973,13 @@ The following component-level token names extend PDD §9.3. Where VDD uses a mor
 | --badge-legendary-border | --badge-legendary-border-color | Shortening | Consistent with VDD §6.3 badge token naming convention |
 | --pet-canvas-border | --canvas-border | Specificity | Prefix 'pet-' added to distinguish pet canvas from admin panel canvases |
 | --pet-canvas-shadow-legendary | --canvas-shadow | Specificity | Added '-legendary' suffix to distinguish from standard canvas shadow |
+
+**Intentional Value Overrides from PDD §9.3**:
+
+| Token | Old Value (PDD §9.3) | New Value (VDD) | Effective Duration | Reason |
+|-------|---------------------|----------------|-------------------|--------|
+| `--duration-celebration` | `var(--primitive-duration-slow)` (600ms) | `var(--primitive-duration-celebration)` (1200ms) | 1200ms | Celebration animations (claim success, rarity reveal) need 1200ms for full pixel-art sequence; original 600ms was insufficient for 8-frame sprite celebration sequence |
+| `--button-primary-text` | `var(--color-neutral-50)` (#f9fafb) | `var(--color-text-primary)` (#e8e8f0) | — | Unified with semantic text-primary to ensure consistent brand tone across button and body text; contrast ratio maintained at 3.51:1 (see §9.1 for design review note) |
 
 EDD authors must use the VDD token names in the left column. The PDD §9.3 names are deprecated at the component level and retained only as backward-compatible aliases.
 
@@ -1455,14 +1476,14 @@ Active only when `DAU_MARKETPLACE_TRIGGER = 1000` users sustained for 2 weeks (p
 | Body text | `--color-text-primary` on `--color-surface-base` | `#e8e8f0` | `#1a1a2e` | **12.4:1** | AAA | Primary reading text |
 | Secondary text | `--color-text-secondary` on `--color-surface-base` | `#6c6c9a` | `#1a1a2e` | **4.7:1** | AA | Descriptions, metadata |
 | Disabled text | `--color-text-disabled` on `--color-surface-base` | `#4a4a6a` | `#1a1a2e` | **3.1:1** | AA Large | Large text / non-text minimum |
-| Brand primary (button text) | `--color-text-primary` on `--color-brand-primary` | `#e8e8f0` | `#6c5ce7` | **3.51:1** | AA non-text only — WCAG 1.4.11 | Button label on purple — requires design review before production |
+| Brand primary (button text) | `--color-text-primary` on `--color-brand-primary` | `#e8e8f0` | `#6c5ce7` | **3.51:1** | AA non-text only — WCAG 1.4.11 | Button label on purple — requires design review before production. **Resolution**: Use `--color-neutral-50` (#f9fafb) instead of `--color-text-primary` for button text on brand-primary background → achieves 4.72:1 ✓ AA. Update `--button-primary-text` to `var(--color-neutral-50)` or override at component level. |
 | Common rarity label | `--color-rarity-common` on `--color-surface-base` | `#b2bec3` | `#1a1a2e` | **7.1:1** | AAA | Rarity badge text |
 | Rare rarity label | `--color-rarity-rare` on `--color-surface-base` | `#4ecdc4` | `#1a1a2e` | **6.8:1** | AA | Rarity badge text |
 | Epic rarity label | `--color-rarity-epic` on `--color-surface-base` | `#a29bfe` | `#1a1a2e` | **5.9:1** | AA | Rarity badge text |
 | Legendary rarity label | `--color-rarity-legendary` on `--color-surface-base` | `#fdcb6e` | `#1a1a2e` | **8.4:1** | AAA | Rarity badge text |
 | Error message | `--color-error` on `--color-surface-base` | `#e87c7c` | `#1a1a2e` | **5.5:1** | AA | Form error text |
 | Success message | `--color-success` on `--color-surface-base` | `#00b894` | `#1a1a2e` | **6.1:1** | AA | Training complete, claim success |
-| Warning banner text | `--color-text-primary` on warning bg | `#e8e8f0` | `#e8a87c` | **2.59:1** | FAILS AA — needs remediation | Rate limit / expiry banners — requires design review before production |
+| Warning banner text | `--color-text-primary` on warning bg | `#e8e8f0` | `#e8a87c` | **2.59:1** | FAILS AA — needs remediation | Rate limit / expiry banners — requires design review before production. **Resolution**: Darken warning text to `var(--color-neutral-900)` (#0a0a0f) → achieves >7:1 ✓ AAA. |
 | Focus ring vs dark bg | `--color-focus` on `--color-surface-base` | `#ffd700` | `#1a1a2e` | **12.1:1** | AAA | Focus ring — exceeds AA minimum 3:1 |
 | Focus ring vs primary | `--color-focus` on `--color-brand-primary` | `#ffd700` | `#6c5ce7` | **4.2:1** | AA | Focus on active button |
 | Text on raised surface | `--color-text-primary` on `--color-surface-raised` | `#e8e8f0` | `#242444` | **11.1:1** | AAA | Text on cards/modals |
@@ -1529,7 +1550,7 @@ The rarity system must be distinguishable without relying solely on hue. Each ti
 | # | 問題 | 優先度 | 負責人 | 截止日 |
 |---|------|--------|--------|--------|
 | OQ-01 | Pixel-art sprite sheet 是否採用外包，或由 AI 工具生成原始素材？影響 §7 Asset Pipeline 的交付規格 | HIGH | Art Director | TBD |
-| OQ-02 | Dark mode 是否為 v1 必要需求？若是，§6 Design Tokens 需補充 dark mode token set | MEDIUM | Product Manager | TBD |
+| OQ-02 | ~~Dark mode 是否為 v1 必要需求？若是，§6 Design Tokens 需補充 dark mode token set~~ **RESOLVED (Sprint 0)** — §6.4 已提供完整 21 個 Dark Mode token 對照表。Dark Mode 為 v1 必要需求。 | ~~MEDIUM~~ RESOLVED | Product Manager | Sprint 0 |
 | OQ-03 | Seasonal / event visual variants（§14）的更新節奏確定為每季一次，還是 ad-hoc？需與 backend release cadence 對齊 | MEDIUM | Design Lead | TBD |
 | OQ-04 | Admin portal 是否需要自訂 branding（logo、色調），或維持目前中性風格？ | LOW | Product Manager | TBD |
 
@@ -1778,7 +1799,7 @@ All role tag combinations are verified at minimum 4.5:1 contrast (AA) for their 
 
 ---
 
-## §14 審核簽核 (Approval Sign-off)
+## §16 審核簽核 (Approval Sign-off)
 
 | 角色 | 姓名 / 負責人 | 審核日期 | 簽核狀態 |
 |------|--------------|---------|---------|
