@@ -1060,7 +1060,7 @@ Checks the status of a specific GDPR request. The server validates that the auth
 |-----------|------|----------|-------------|
 | `jobId` | UUID | Yes | The `jobId` returned by `POST /api/v1/gdpr/request`. |
 
-> **Note**: The `jobId` field in player-facing responses is an alias for `requestId` in admin-facing endpoints. Both refer to `gdpr_requests.id` in the database schema.
+> **Note**: `jobId` here is the same identifier described under `POST /api/v1/gdpr/request` — see the alias note above.
 
 **Response (HTTP 200):**
 
