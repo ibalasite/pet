@@ -19,6 +19,8 @@ This guide covers the most common development workflows for pixel-pet-arena. Use
 4. [CI/CD Diagnosis](#4-cicd-diagnosis)
 5. [Quick Reference](#5-quick-reference)
 6. [Troubleshooting Runbook](#6-troubleshooting-runbook)
+7. [Make Targets](#7-make-targets)
+8. [Code Style & Linting](#8-code-style--linting)
 
 ---
 
@@ -859,6 +861,37 @@ pnpm --filter api test:coverage
 
 All `.env.local` files are gitignored. Copy from the corresponding `.env.example` file on first setup.
 
+#### Example `apps/api/.env.local`
+
+The following shows a complete example with placeholder values for all required variables. Replace each placeholder with the real value for your local environment.
+
+```bash
+# Database — matches the default Supabase local stack credentials
+DATABASE_URL=postgresql://postgres:password@localhost:54322/postgres
+
+# Redis — local Docker container
+REDIS_URL=redis://localhost:6379
+
+# JWT secret — used exclusively to sign the short-lived TOTP setup token during
+# first-time admin enrollment. Generate with:
+#   node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))"
+JWT_SECRET=your-256-bit-secret-here
+
+# Email encryption key — 32-byte hex string (256-bit AES-256-GCM key). Generate with:
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+EMAIL_ENCRYPTION_KEY=32-byte-hex-key-here
+
+# SendGrid API key for transactional email
+SENDGRID_API_KEY=SG.your-api-key-here
+
+# TOTP issuer name shown in authenticator apps
+ADMIN_TOTP_ISSUER=PixelPetArena
+
+# Feature flags (optional — defaults shown)
+FF_MARKETPLACE=false
+FF_ARENA_SUMO=true
+```
+
 ### 5.4 Feature Flags
 
 | Flag | Default | Where to set | Effect |
@@ -1055,10 +1088,137 @@ The admin portal at `http://localhost:5174/admin/login` rejects your TOTP code.
 pnpm db:seed --reset-admin
 ```
 
-Save the username, initial password, and TOTP secret printed to stdout, then enter the TOTP secret manually into your authenticator app.
+Save the output as described in §1.6 (Seed the database), then enter the TOTP secret manually into your authenticator app.
 
 **Cause 2 — Clock skew.** TOTP codes are time-based and valid for a 30-second window. If your system clock is more than 30 seconds out of sync, codes will be rejected. On macOS: `sudo sntp -sS time.apple.com`. On Linux: `sudo timedatectl set-ntp true`.
 
 **Cause 3 — Database was reset without re-seeding.** After `supabase db reset`, always run `pnpm db:seed` to recreate the admin account. Without it there is no admin account in the database and all TOTP attempts will return `401`.
 
 **Cause 4 — Using the wrong issuer in your authenticator app.** The issuer name for local development is set by `ADMIN_TOTP_ISSUER` in `apps/api/.env.local` (default: `pixel-pet-arena-local`). If you enrolled the token under a different issuer, delete the old entry from your authenticator app and re-scan.
+
+---
+
+## 7. Make Targets
+
+A `Makefile` is provided at the project root as a convenience wrapper. Each target delegates to the appropriate `pnpm` command so you do not need to memorise the full filter syntax for common tasks.
+
+| Target | Description | Delegates to |
+|---|---|---|
+| `dev` | Start all three dev servers concurrently (API, player, admin) | `pnpm --filter api dev`, `pnpm --filter player-app dev`, `pnpm --filter admin-app dev` |
+| `test` | Run all Vitest and Playwright tests across the monorepo | `pnpm --recursive test run` |
+| `test:unit` | Run only unit tests (no E2E) | `pnpm --recursive test run --reporter=verbose` |
+| `test:e2e` | Run only Playwright end-to-end tests | `pnpm exec playwright test` |
+| `build` | Build all packages in dependency order | `pnpm --filter @pixel-pet-arena/shared build && pnpm --filter api build && pnpm --filter player-app build && pnpm --filter admin-app build` |
+| `migrate` | Apply all pending database migrations to the local Supabase stack | `supabase migration up` |
+| `seed` | Seed the database with initial development data | `pnpm db:seed` |
+| `lint` | Run ESLint across all packages | `pnpm --recursive lint` |
+
+**Example usage:**
+
+```bash
+# Start all dev servers
+make dev
+
+# Run all tests
+make test
+
+# Run unit tests only
+make test:unit
+
+# Run E2E tests only
+make test:e2e
+
+# Production build
+make build
+
+# Apply pending migrations
+make migrate
+
+# Seed the database
+make seed
+
+# Lint all packages
+make lint
+```
+
+Each `make` target is a thin alias — if you need to pass extra flags (e.g., `--watch` or a specific test file), call the underlying `pnpm` command directly as documented in §3 (Testing Guide) and §5.2 (Key Commands).
+
+---
+
+## 8. Code Style & Linting
+
+Code style is enforced automatically on commit and in CI. The rules below describe the tooling and how to run each check manually.
+
+### 8.1 ESLint
+
+ESLint config files live alongside each app and package (e.g., `apps/api/.eslintrc.cjs`, `apps/player/.eslintrc.cjs`, `apps/admin/.eslintrc.cjs`) and extend a shared root config at `.eslintrc.base.cjs`.
+
+**Run ESLint across all packages:**
+
+```bash
+pnpm --recursive lint
+```
+
+**Auto-fix fixable issues:**
+
+```bash
+pnpm --recursive lint --fix
+```
+
+**Key project-specific rules:**
+
+- `no-console` — `console.log` and `console.debug` are errors in all packages; use the structured logger exposed on the Fastify instance (`app.log`) in the API, or remove debug logging before committing.
+- `import/order` — imports must be grouped and sorted: built-ins first, then external packages, then internal workspace imports (`@pixel-pet-arena/...`), then relative imports. Auto-fixable.
+- `@typescript-eslint/no-explicit-any` — `any` is an error; use `unknown` and narrow the type explicitly.
+
+### 8.2 Prettier
+
+Prettier config is at `.prettierrc` in the project root. All `.ts`, `.tsx`, `.vue`, `.css`, and `.json` files are formatted by Prettier.
+
+**Format a specific app:**
+
+```bash
+pnpm --filter <app> exec prettier --write .
+```
+
+For example, to format the API:
+
+```bash
+pnpm --filter api exec prettier --write .
+```
+
+**Check formatting without writing (useful in CI):**
+
+```bash
+pnpm --filter <app> exec prettier --check .
+```
+
+### 8.3 TypeScript Type Checking
+
+Type checking is separate from building. Run it to surface type errors without emitting output files:
+
+```bash
+# Type-check all packages
+pnpm --recursive exec tsc --noEmit
+
+# Type-check a single package
+pnpm --filter api exec tsc --noEmit
+```
+
+If you see errors only in CI (not locally), the CI `tsconfig` enables `--strict`. Run with the strict flag locally to match:
+
+```bash
+pnpm --filter api exec tsc --noEmit --strict
+```
+
+### 8.4 Pre-Commit Hooks
+
+[Husky](https://typicode.github.io/husky/) manages Git hooks. [lint-staged](https://github.com/okonet/lint-staged) runs Prettier and ESLint against only the files staged for commit, keeping the hook fast.
+
+The hook configuration lives in `.husky/pre-commit` and `lint-staged.config.js`. On every `git commit`:
+
+1. Prettier formats all staged `.ts`, `.tsx`, `.vue`, `.css`, and `.json` files.
+2. ESLint with `--fix` runs on all staged `.ts`, `.tsx`, and `.vue` files.
+3. The commit is blocked if ESLint reports unfixable errors.
+
+If you need to skip the hook in an emergency (e.g., a WIP commit to a personal branch), use `git commit --no-verify`. Do not use `--no-verify` on commits destined for `develop` or `main`.
