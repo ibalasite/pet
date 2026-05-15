@@ -1,9 +1,9 @@
 <!--
   DOC-ID:  README-PIXEL-PET-ARENA-20260511
-  Version: v1.6
+  Version: v1.7
   Status:  IN_REVIEW
   Author:  AI Generated (gendoc readme)
-  Date:    2026-05-11
+  Date:    2026-05-15
   Upstream docs:
     - BRD:   docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503)
     - PRD:   docs/PRD.md   (PRD-PIXEL-PET-ARENA-20260503, v1.5)
@@ -12,8 +12,11 @@
     - ARCH:  docs/ARCH.md  (ARCH-PIXEL-PET-ARENA-20260503)
     - API:   docs/API.md   (API-PIXEL-PET-ARENA-20260503)
     - SCHEMA: docs/SCHEMA.md
+    - ANIM:  docs/ANIM.md  (state machine table — align-fix)
     - LOCAL_DEPLOY: docs/LOCAL_DEPLOY.md
     - CICD: docs/CICD.md
+    - BDD-server: features/steps/ (82 scenarios, 12 step-def files — align-fix)
+    - BDD-client: features/client/steps/ (133 scenarios, 10 step-def files — align-fix)
   Change log:
     v1.0  2026-05-05  AI Generated  Initial generated draft
     v1.1  2026-05-05  AI Generated  Fix GitHub repo URLs to ibalasite/pet
@@ -30,6 +33,11 @@
     v1.6  2026-05-11  AI Generated  /gendoc-gen-html full-auto re-run — README stamp
                                      refresh + full HTML site regeneration with mermaid
                                      syntax fix loop (gen_html v3.8.0)
+    v1.7  2026-05-15  AI Generated  Post align-fix refresh — ANIM.md state machine table
+                                     (13 transitions), server BDD step stubs (82 scenarios /
+                                     12 files, features/steps/), client BDD step stubs
+                                     (133 scenarios / 10 files, features/client/steps/),
+                                     directory structure updated to include steps/ dirs
 -->
 
 # pixel-pet-arena
@@ -396,7 +404,14 @@ pixel-pet-arena/
 │   ├── admin-search-performance.feature
 │   ├── suspicious-detection.feature
 │   ├── gdpr-erasure.feature
-│   └── client/                 # Playwright E2E feature files
+│   ├── steps/                  # TypeScript step definitions (Cucumber-js, 12 files, 82 scenarios)
+│   │   ├── world.ts            # AppWorld — shared API client + state
+│   │   ├── hooks.ts            # Before/After lifecycle hooks
+│   │   ├── claim-flow.steps.ts
+│   │   ├── arena-battle.steps.ts
+│   │   ├── training-food.steps.ts
+│   │   └── ...                 # 9 more domain step files
+│   └── client/                 # Playwright E2E feature files + step definitions
 │       ├── claim-flow-ui.feature
 │       ├── pet-display.feature
 │       ├── training-ui.feature
@@ -405,7 +420,11 @@ pixel-pet-arena/
 │       ├── battle-records.feature
 │       ├── leaderboard-ui.feature
 │       ├── admin-portal.feature
-│       └── settings.feature
+│       ├── settings.feature
+│       └── steps/              # TypeScript step definitions (Playwright+Cucumber, 10 files, 133 scenarios)
+│           ├── world.ts        # ClientWorld — Browser/Page + state
+│           ├── hooks.ts        # Browser lifecycle hooks
+│           └── ...             # 10 domain step files
 ├── .env.example                # Annotated environment variable template
 ├── docker-compose.yml          # Local multi-service development stack
 ├── pnpm-workspace.yaml         # pnpm workspace definition

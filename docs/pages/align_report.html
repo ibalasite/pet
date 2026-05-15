@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -461,186 +462,415 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#executive-summary">Executive Summary</a></li><li><a class="toc__link" href="#scope--method">Scope &amp;amp; Method</a></li><li><a class="toc__link" href="#convergence-verification--each-of-the-previously-fixed-23-findings">Convergence Verification — Each of the Previously-Fixed 23 Findings</a></li><li><a class="toc__link" href="#dimension-0--file-existence">Dimension 0 — File Existence</a></li><li><a class="toc__link" href="#dimension-1--doc--doc">Dimension 1 — Doc ↔ Doc</a></li><li><a class="toc__link toc__link--h3" href="#low-d1-1-featuresadmin-moderationfeature-feature-line-does-not-list-bound-us-ids">LOW-D1-1: features/admin-moderation.feature Feature: line does not list bound US IDs</a></li><li><a class="toc__link" href="#dimension-2--doc--code">Dimension 2 — Doc ↔ Code</a></li><li><a class="toc__link" href="#dimension-3--code--test">Dimension 3 — Code ↔ Test</a></li><li><a class="toc__link" href="#dimension-4--doc--test">Dimension 4 — Doc ↔ Test</a></li><li><a class="toc__link toc__link--h3" href="#low-d4-1-featuresclientsettingsfeature-is-bound-to-us-auth-002-only-settingsaccount-preferences">LOW-D4-1: features/client/settings.feature is bound to US-AUTH-002 only (settings/account preferences)</a></li><li><a class="toc__link" href="#dimension-5--uml--rtm-quality">Dimension 5 — UML / RTM Quality</a></li><li><a class="toc__link" href="#cross-chain-sanity-1b-in-skill-spec">Cross-Chain Sanity (1b in SKILL spec)</a></li><li><a class="toc__link" href="#findings-index">Findings Index</a></li><li><a class="toc__link" href="#recommendation">Recommendation</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#執行摘要">執行摘要</a></li><li><a class="toc__link" href="#dimension-0--文件存在性">Dimension 0 — 文件存在性</a></li><li><a class="toc__link" href="#dimension-1--doc--doc-對齊問題">Dimension 1 — Doc → Doc 對齊問題</a></li><li><a class="toc__link toc__link--h3" href="#high-d1-h1prd--schema--data-dictionary-欄位與實際-schema-嚴重偏離">[HIGH] D1-H1：PRD → SCHEMA — Data Dictionary 欄位與實際 Schema 嚴重偏離</a></li><li><a class="toc__link toc__link--h3" href="#high-d1-h2prd--api--缺少食物庫存查詢端點ac-006-1">[HIGH] D1-H2：PRD → API — 缺少食物庫存查詢端點（AC-006-1）</a></li><li><a class="toc__link toc__link--h3" href="#high-d1-h3prd--edd--api--食物獲得機制arena-掉落training-streak未設計ac-006-4">[HIGH] D1-H3：PRD → EDD + API — 食物獲得機制（Arena 掉落、Training Streak）未設計（AC-006-4）</a></li><li><a class="toc__link toc__link--h3" href="#high-d1-h4bdd-server--prd--交叉參照表存在-3-處-ac-編號錯誤">[HIGH] D1-H4：BDD-server → PRD — 交叉參照表存在 3 處 AC 編號錯誤</a></li><li><a class="toc__link toc__link--h3" href="#high-d1-h5brd--edd--schema--notification-bc-被吸收無-adr-說明">[HIGH] D1-H5：BRD → EDD + SCHEMA — notification BC 被吸收無 ADR 說明</a></li><li><a class="toc__link toc__link--h3" href="#medium-d1-m1bdd-server--rtm--scenario-計數不一致81-vs-82fixed-0e053e7">[MEDIUM] D1-M1：BDD-server → RTM — Scenario 計數不一致（81 vs 82）[FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#medium-d1-m2bdd-client--prd--settingsfeature21-scenarios無-user-story-支撐">[MEDIUM] D1-M2：BDD-client → PRD — settings.feature（21 scenarios）無 User Story 支撐</a></li><li><a class="toc__link toc__link--h3" href="#medium-d1-m3prd--bdd-server--us-admin-003ac-015-x無專屬-server-bdd">[MEDIUM] D1-M3：PRD → BDD-server — US-ADMIN-003（AC-015-x）無專屬 server BDD</a></li><li><a class="toc__link toc__link--h3" href="#medium-d1-m4brd--edd--bc-命名不一致無對應映射表">[MEDIUM] D1-M4：BRD → EDD — BC 命名不一致，無對應映射表</a></li><li><a class="toc__link toc__link--h3" href="#low-d1-l1local_deploy--edd--docker-compose-port-range-語法模糊">[LOW] D1-L1：LOCAL_DEPLOY → EDD — docker-compose port range 語法模糊</a></li><li><a class="toc__link toc__link--h3" href="#low-d1-l2frontend--api--bigint-seed-欄位轉換契約未記錄於-apimd-fixed-0e053e7">[LOW] D1-L2：FRONTEND → API — BigInt seed 欄位轉換契約未記錄於 API.md [FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#low-d1-l3pdd--platform-scope-game-ui-核取方塊未勾選-fixed-0e053e7">[LOW] D1-L3：PDD — Platform Scope Game UI 核取方塊未勾選 [FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#low-d1-l4vdd--frontend--vdd-色彩-token-未對應至-frontend-css-variables">[LOW] D1-L4：VDD → FRONTEND — VDD 色彩 token 未對應至 FRONTEND CSS variables</a></li><li><a class="toc__link" href="#dimension-2--doc--code-對齊-待-gencode-階段">Dimension 2 — Doc → Code 對齊（⏸ 待 gencode 階段）</a></li><li><a class="toc__link" href="#dimension-3--code--test-對齊-待-gencode-階段">Dimension 3 — Code → Test 對齊（⏸ 待 gencode 階段）</a></li><li><a class="toc__link" href="#dimension-4--doc--test-對齊問題">Dimension 4 — Doc → Test 對齊問題</a></li><li><a class="toc__link toc__link--h3" href="#critical-d4-c1rtm-bdd-tags-欄位使用不存在的-tag-命名規則-fixed-0e053e7">[CRITICAL] D4-C1：RTM BDD Tags 欄位使用不存在的 tag 命名規則 [FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#critical-d4-c2featuressteps-不存在--82-個-server-bdd-scenarios-無法執行-fixed-992aa6c">[CRITICAL] D4-C2：features/steps/ 不存在 — 82 個 server BDD scenarios 無法執行 [FIXED: 992aa6c]</a></li><li><a class="toc__link toc__link--h3" href="#critical-d4-c3featuresclientsteps-不存在--133-個-client-bdd-scenarios-無法執行-fixed-e739041">[CRITICAL] D4-C3：features/client/steps/ 不存在 — 133 個 client BDD scenarios 無法執行 [FIXED: e739041]</a></li><li><a class="toc__link toc__link--h3" href="#high-d4-h1edd-81-http-404--12-個-server-feature-中完全沒有-404-負面場景">[HIGH] D4-H1：EDD §8.1 HTTP 404 — 12 個 server feature 中完全沒有 404 負面場景</a></li><li><a class="toc__link toc__link--h3" href="#high-d4-h2rtm-庫存計數陳舊-fixed-0e053e7">[HIGH] D4-H2：RTM 庫存計數陳舊 [FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#high-d4-h3prd-ac-002-6--無-503-generation_exhausted-server-bdd-scenario">[HIGH] D4-H3：PRD AC-002-6 → 無 503 generation_exhausted server BDD scenario</a></li><li><a class="toc__link toc__link--h3" href="#high-d4-h4prd-ac-001-7--無-canvas-webgl-fallback-client-bdd-scenario">[HIGH] D4-H4：PRD AC-001-7 → 無 Canvas WebGL fallback client BDD scenario</a></li><li><a class="toc__link toc__link--h3" href="#high-d4-h5prd-ac-004-4--frontend-gdprpage--玩家端-gdpr-刪除流程無-client-bdd-coverage">[HIGH] D4-H5：PRD AC-004-4 + FRONTEND GdprPage → 玩家端 GDPR 刪除流程無 client BDD coverage</a></li><li><a class="toc__link toc__link--h3" href="#high-d4-h6prd-ac-010-5--battle-recordsfeature-無-404-invalid-petid-scenario">[HIGH] D4-H6：PRD AC-010-5 → battle-records.feature 無 404 invalid petId scenario</a></li><li><a class="toc__link toc__link--h3" href="#high-d4-h7prd-ac-004-4server-side-玩家-gdpr-erasure-端點無-server-bdd-coverage">[HIGH] D4-H7：PRD AC-004-4（server side）→ 玩家 GDPR erasure 端點無 server BDD coverage</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m1prd-ac-005-6--無-stat_at_maximum訓練server-bdd-scenario">[MEDIUM] D4-M1：PRD AC-005-6 → 無 stat_at_maximum（訓練）server BDD scenario</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m2prd-ac-006-6--無-stat_at_maximum餵食server-bdd-scenario">[MEDIUM] D4-M2：PRD AC-006-6 → 無 stat_at_maximum（餵食）server BDD scenario</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m3prd-ac-013-5--admin-moderationfeature-無-db-寫入失敗場景">[MEDIUM] D4-M3：PRD AC-013-5 → admin-moderation.feature 無 DB 寫入失敗場景</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m4prd-ac-014-4--leaderboardfeature-無-admin-移除寫入失敗場景">[MEDIUM] D4-M4：PRD AC-014-4 → leaderboard.feature 無 Admin 移除寫入失敗場景</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m5prd-ac-015-13us-admin-003-admin-search-performancefeature-us-tag-錯誤-partial-fixed-0e053e7--feature-header-tag-已修正ac-015-x-runtime-config-scenarios-仍缺">[MEDIUM] D4-M5：PRD AC-015-1..3（US-ADMIN-003）+ admin-search-performance.feature @US tag 錯誤 [PARTIAL-FIXED: 0e053e7 — feature header tag 已修正；AC-015-x runtime config scenarios 仍缺]</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m6prd-ac-004-5--無-client-bdd-404-url-渲染場景">[MEDIUM] D4-M6：PRD AC-004-5 → 無 client BDD 404 URL 渲染場景</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m7edd-81-http-409-vs-claim-flowfeature-http-400-狀態碼不一致">[MEDIUM] D4-M7：EDD §8.1 HTTP 409 vs claim-flow.feature HTTP 400 狀態碼不一致</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m8edd-85-sendgrid-3-次失敗後切換-smtp-failover--無-server-bdd-scenario">[MEDIUM] D4-M8：EDD §8.5 SendGrid 3 次失敗後切換 SMTP Failover — 無 server BDD scenario</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m9edd-totp_setup_required首次-admin-登入-http-403-僅有-client-bdd無-server-bdd">[MEDIUM] D4-M9：EDD TOTP_SETUP_REQUIRED（首次 Admin 登入 HTTP 403）— 僅有 client BDD，無 server BDD</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m10rtm-admin-search-performancefeature-us-tag-mismatch-fixed-0e053e7">[MEDIUM] D4-M10：RTM admin-search-performance.feature @US tag mismatch [FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#medium-d4-m11rtm-us-auth-002-rowsettingsfeature-對應製造虛假覆蓋信心">[MEDIUM] D4-M11：RTM US-AUTH-002 row：settings.feature 對應製造虛假覆蓋信心</a></li><li><a class="toc__link toc__link--h3" href="#low-d4-l1trading-uifeaturefuture未列入-rtm-庫存-fixed-0e053e7">[LOW] D4-L1：trading-ui.feature（@future）未列入 RTM 庫存 [FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#low-d4-l2edd-81-http-409-用於-duplicate-marketplace-listing--貿易功能延期但文件未標記-fixed-0e053e7">[LOW] D4-L2：EDD §8.1 HTTP 409 用於 duplicate marketplace listing — 貿易功能延期但文件未標記 [FIXED: 0e053e7]</a></li><li><a class="toc__link toc__link--h3" href="#low-d4-l3trading-uifeature-future-標記但-cucumber-執行時可能被誤跑-fixed-0e053e7">[LOW] D4-L3：trading-ui.feature @future 標記但 cucumber 執行時可能被誤跑 [FIXED: 0e053e7]</a></li><li><a class="toc__link" href="#dimension-5--umlrtm-品質">Dimension 5 — UML/RTM 品質</a></li><li><a class="toc__link toc__link--h3" href="#high-d5-h1eddmd-中-diagram-區段標頭僅-8-個但-uml-要求-9-大圖">[HIGH] D5-H1：EDD.md 中 ####.*Diagram 區段標頭僅 8 個，但 UML 要求 9 大圖</a></li><li><a class="toc__link" href="#dimension-6--ai-gencode-readiness">Dimension 6 — AI Gencode Readiness</a></li><li><a class="toc__link toc__link--h3" href="#high-d6-h1bddtests-ai-gencode-就緒度-30--95--無-step-definition-stub-fixed-992aa6c-e739041">[HIGH] D6-H1：BDD/Tests AI Gencode 就緒度 30% → 95% — 無 step definition stub [FIXED: 992aa6c, e739041]</a></li><li><a class="toc__link" href="#綜合建議與優先修復清單">綜合建議與優先修復清單</a></li><li><a class="toc__link toc__link--h3" href="#立即修復critical--阻塞後續-gencode">立即修復（CRITICAL — 阻塞後續 gencode）</a></li><li><a class="toc__link toc__link--h3" href="#high-優先修復gencode-前完成">HIGH 優先修復（gencode 前完成）</a></li><li><a class="toc__link toc__link--h3" href="#可腳本自動修復的所有-findings">可腳本自動修復的所有 findings</a></li><li><a class="toc__link" href="#附錄掃描環境資訊">附錄：掃描環境資訊</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1 id="alignment-scan-report--pixel-pet-arena-post-fix-verification">Alignment Scan Report — Pixel Pet Arena (Post-Fix Verification)</h1>
+    <main class="doc-content"><h1 id="align_report--全局對齊掃描報告">ALIGN_REPORT — 全局對齊掃描報告</h1>
+<p><strong>專案</strong>：pixel-pet-arena</p>
+<p><strong>掃描日期</strong>：2026-05-15</p>
+<p><strong>掃描策略</strong>：exhaustive（全量掃描，六個維度）</p>
+<p><strong>Client Type</strong>：game | Has Admin Backend：true</p>
+<hr>
+<h2 id="執行摘要">執行摘要</h2>
+<pre><code class="">╔══════════════════════════════════════════════════════════════════╗
+║         gendoc-align-check — 對齊掃描報告                          ║
+║         專案：pixel-pet-arena   日期：2026-05-15                   ║
+╠══════════════════════════════════════════════════════════════════╣
+║  對齊層              CRITICAL  HIGH  MEDIUM  LOW  總計   狀態      ║
+║  Dim 0 文件存在性        0       0      0     0     0   ✅         ║
+║  Dim 1 Doc → Doc         0       5      4     4    13   ⚠️         ║
+║  Dim 2 Doc → Code        —       —      —     —    —    ⏸ 待 gencode ║
+║  Dim 3 Code → Test       —       —      —     —    —    ⏸ 待 gencode ║
+║  Dim 4 Doc → Test        3       7     11     3    24   🔴         ║
+║  Dim 5 UML/RTM 品質      0       1      0     0     1   ⚠️         ║
+║  Dim 6 AI Gencode        0       1      0     0     1   ⚠️  76%    ║
+╠══════════════════════════════════════════════════════════════════╣
+║  合計（不含 Dim2/3）      3      14     15     7    39             ║
+╠══════════════════════════════════════════════════════════════════╣
+║  建議執行：/gendoc-align-fix --layer gencode                       ║
+╚══════════════════════════════════════════════════════════════════╝</code></pre>
+<blockquote><p><strong>Dim 2 / Dim 3 說明</strong>：<code>src/</code> 和 <code>tests/</code> 目錄目前不存在（docs-first 開發模式）。</p></blockquote>
+<blockquote><p>Doc→Code 和 Code→Test 的所有對齊工作由 <code>/gendoc-align-fix --layer gencode</code> 負責生成程式碼骨架。</p></blockquote>
+<blockquote><p>本次掃描不計入 Dim2/Dim3 findings，避免製造誤導性 CRITICAL 數字。</p></blockquote>
+<hr>
+<h2 id="dimension-0--文件存在性">Dimension 0 — 文件存在性</h2>
+<p><strong>結果：✅ PASS — 0 findings</strong></p>
+<p>所有 25 份必要文件均存在且非空：</p>
+<ul><li>docs/ 下 22 份 Markdown 文件（IDEA → ADMIN_IMPL 全鏈）</li><li>features/ 12 個 server .feature 文件</li><li>features/client/ 10 個 client .feature 文件</li><li>README.md</li></ul>
+<hr>
+<h2 id="dimension-1--doc--doc-對齊問題">Dimension 1 — Doc → Doc 對齊問題</h2>
+<p><strong>結果：⚠️ 13 findings（0C / 5H / 4M / 4L）</strong></p>
+<hr>
+<h3 id="high-d1-h1prd--schema--data-dictionary-欄位與實際-schema-嚴重偏離">[HIGH] D1-H1：PRD → SCHEMA — Data Dictionary 欄位與實際 Schema 嚴重偏離</h3>
+<p>PRD §11.2 Data Dictionary 定義了 4 個與 SCHEMA.md 不一致的欄位：</p>
 <table>
-<tr><th>Metadata</th><th>Value</th></tr>
-<tr><td>Project</td><td><code>/Users/tobala/projects/pet</code></td></tr>
-<tr><td>Scan timestamp (UTC)</td><td>2026-05-07T20:57Z</td></tr>
-<tr><td>Scan mode</td><td>Verify (second scan, post <code>gendoc-align-fix</code>)</td></tr>
-<tr><td>Tool</td><td><code>gendoc-align-check</code></td></tr>
-<tr><td>State</td><td><code>client_type=game</code>, <code>has_admin_backend=true</code></td></tr>
-<tr><td>Inputs</td><td>31 docs/<em>.md, 12 features/</em>.feature, 9 features/client/<em>.feature, 47 docs/diagrams/</em>.md (incl. 9 docs/diagrams/puml/*.puml)</td></tr>
-<tr><td>Reference</td><td>Previous scan flagged 23 findings; <code>gendoc-align-fix</code> completed 12 commits resolving all 23</td></tr>
+<tr><th>PRD 定義</th><th>SCHEMA.md 實際</th><th>偏差說明</th></tr>
+<tr><td><code>owner_email_hash</code></td><td><code>claim_identity_id</code> (FK)</td><td>PRD 直接存 hash；SCHEMA 拆出 claim_identities 表</td></tr>
+<tr><td><code>pet_access_tokens</code> 獨立表</td><td>不存在 — token hash 存於 <code>pets.owner_token_hash</code></td><td>架構差異</td></tr>
+<tr><td><code>claim_code_used BOOLEAN</code></td><td><code>used_at TIMESTAMPTZ</code></td><td>語意相近但型別不同</td></tr>
+<tr><td><code>battle_outcome ENUM(WIN, LOSS, DRAW)</code></td><td><code>winner_pet_id UUID</code></td><td>表達方式不同</td></tr>
 </table>
+<p>衝突類型：B2-下游偏離（SCHEMA 設計更合理，PRD §11.2 為概念模型）</p>
+<p>受影響範圍：開發者閱讀 PRD 後對 DB 結構產生錯誤預期，可能導致 ORM 欄位映射錯誤</p>
+<p>建議修復方向：在 SCHEMA.md 或 EDD ADR 加入說明「PRD §11.2 為概念模型，SCHEMA 為實現模型」；或同步更新 PRD §11.2 欄位名稱對齊 SCHEMA</p>
+<p>可自動修復：NO</p>
 <hr>
-<h2 id="executive-summary">Executive Summary</h2>
-<pre><code class="">╔══════════════════════════════════════════════════════════════════════╗
-║   gendoc — Alignment Scan Report (Post-Fix Verification)             ║
-╠══════════════════════════════════════════════════════════════════════╣
-║   Dimension                CRITICAL  HIGH  MEDIUM  LOW  TOTAL  STATE ║
-║   Dim 0  Existence            0       0      0      0     0   ✅     ║
-║   Dim 1  Doc → Doc            0       0      0      1     1   🟢     ║
-║   Dim 2  Doc → Code           —       —      —      —    N/A  ⚪     ║
-║   Dim 3  Code → Test          —       —      —      —    N/A  ⚪     ║
-║   Dim 4  Doc → Test           0       0      0      1     2   🟢     ║
-║   Dim 5  UML / RTM Quality    0       0      0      0     0   ✅     ║
-╠══════════════════════════════════════════════════════════════════════╣
-║   TOTAL                       0       0      0      2     2   🟢     ║
-╠══════════════════════════════════════════════════════════════════════╣
-║   Convergence status: NEAR-CLEAN (≤3 LOW only)                       ║
-║   Regression check vs. previous 23 findings: 0 regressions           ║
-╚══════════════════════════════════════════════════════════════════════╝</code></pre>
-<p><strong>Result</strong>: 2 LOW cosmetic findings only. All 23 previously-reported findings have been verified fixed. <strong>No CRITICAL/HIGH/MEDIUM issues remain. No regressions detected.</strong></p>
+<h3 id="high-d1-h2prd--api--缺少食物庫存查詢端點ac-006-1">[HIGH] D1-H2：PRD → API — 缺少食物庫存查詢端點（AC-006-1）</h3>
+<p>PRD AC-006-1 要求 Player App 能顯示食物道具庫存數量（HUD 元素），但 API.md 無對應的 GET 食物庫存端點。</p>
+<p>現有 API：<code>POST /api/v1/pets/:petId/feed</code>（消耗食物），無 <code>GET /api/v1/pets/:petId/food</code> 或等效端點。</p>
+<p>Frontend 無法從 API 取得食物庫存以渲染 HUD。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-FOOD-001 完整實現，Player App 食物 HUD</p>
+<p>建議修復方向：在 API.md 新增 <code>GET /api/v1/pets/:petId/food</code>（回應 food_items 陣列）；或將食物庫存嵌入 <code>GET /api/v1/pets/:petId/stats</code></p>
+<p>可自動修復：NO</p>
 <hr>
-<h2 id="scope--method">Scope &amp; Method</h2>
-<p>This is the second alignment scan executed immediately after <code>gendoc-align-fix</code> produced 12 commits resolving 23 findings from the prior baseline. The scan reverifies each of the original 23 fix categories and additionally re-runs the full 5-dimension matrix specified in <code>gendoc-align-check/SKILL.md</code>.</p>
+<h3 id="high-d1-h3prd--edd--api--食物獲得機制arena-掉落training-streak未設計ac-006-4">[HIGH] D1-H3：PRD → EDD + API — 食物獲得機制（Arena 掉落、Training Streak）未設計（AC-006-4）</h3>
+<p>PRD AC-006-4 明確定義食物獲得機制：</p>
+<ul><li>(a) Arena 對戰後掉落食物</li><li>(b) 連續 3 次 training session 觸發 streak reward 食物</li></ul>
+<p>EDD §4.x 無食物掉落邏輯設計；API.md <code>POST /api/v1/arena/enter</code> 回應結構不含 <code>food_drop</code> 欄位；<code>POST /api/v1/pets/:petId/train</code> 回應亦無 <code>streak_reward</code> 欄位。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-FOOD-001 食物獲得完整路徑，Arena BC 與 Pet BC 跨 BC 食物發放業務邏輯</p>
+<p>建議修復方向：EDD 補充食物掉落機制設計；API.md 在 arena/enter 回應新增 <code>food_drop: { item_type, quantity } | null</code>，在 train 回應新增 <code>streak_reward: { item_type, quantity } | null</code></p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="high-d1-h4bdd-server--prd--交叉參照表存在-3-處-ac-編號錯誤">[HIGH] D1-H4：BDD-server → PRD — 交叉參照表存在 3 處 AC 編號錯誤</h3>
+<p>BDD-server.md 交叉參照表的 3 個 AC 引用錯誤：</p>
+<ol><li><code>AC-007-1</code> 標示為「Email Claim Rate Limit」，但 PRD AC-007-1 屬於 US-ARENA-001（Arena 匹配邏輯）；Claim Rate Limit 實為 AC-003-x</li><li>引用 <code>AC-004-6</code>（GDPR 場景）——PRD US-AUTH-002 僅定義 AC-004-1 至 AC-004-5，AC-004-6 不存在</li><li>引用 <code>AC-005-8</code>（Admin Ban 反映至排行榜）——PRD US-TRAIN-001 僅定義 AC-005-1 至 AC-005-6，AC-005-8 不存在</li></ol>
+<p>衝突類型：B2-下游偏離</p>
+<p>受影響範圍：BDD 場景可追溯性、RTM 正確性、QA 驗收對齊</p>
+<p>建議修復方向：修正 BDD-server.md 交叉參照表的 AC 編號；移除 AC-004-6、AC-005-8，改對應正確 AC 或補充 PRD AC 條目</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="high-d1-h5brd--edd--schema--notification-bc-被吸收無-adr-說明">[HIGH] D1-H5：BRD → EDD + SCHEMA — notification BC 被吸收無 ADR 說明</h3>
+<p>BRD §5.5 定義 6 個 Bounded Context（含獨立 <code>notification</code> BC 負責 email OTP 發送）。</p>
+<p>EDD §3.4 Context Map 僅有 5 個 BC——<code>notification</code> BC 被吸收進 Identity BC，無任何 ADR 或設計決策說明此合併。</p>
+<p>SCHEMA.md §1.1 無 notification 相關表。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>受影響範圍：BC 邊界定義一致性；未來 notification 需求擴展缺乏架構槽位；BRD→EDD 可追溯性斷裂</p>
+<p>建議修復方向：在 EDD 新增 ADR 說明「notification BC 職責由 Identity BC 的 EmailService 承擔，因當前範圍僅限 OTP email，不設獨立 BC；若通知種類增加則重新評估」</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d1-m1bdd-server--rtm--scenario-計數不一致81-vs-82fixed-0e053e7">[MEDIUM] D1-M1：BDD-server → RTM — Scenario 計數不一致（81 vs 82）<code>[FIXED: 0e053e7]</code></h3>
+<p>BDD-server.md 概覽聲明「共 81 scenarios」，RTM.md §2 Server BDD 統計為 82 scenarios。</p>
+<p>實際 grep 計數：82 scenarios。BDD-server.md 概覽數字需更新。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>受影響範圍：RTM 覆蓋率統計可信度</p>
+<p>建議修復方向：重新計算後統一更新 BDD-server.md 概覽數字為 82</p>
+<p>可自動修復：YES</p>
+<hr>
+<h3 id="medium-d1-m2bdd-client--prd--settingsfeature21-scenarios無-user-story-支撐">[MEDIUM] D1-M2：BDD-client → PRD — settings.feature（21 scenarios）無 User Story 支撐</h3>
+<p><code>features/client/settings.feature</code>（21 scenarios：主題切換、音效開關、通知偏好）在 RTM 中對應至 US-AUTH-002，但 PRD US-AUTH-002（Email Claim Recovery）無任何 settings/preferences AC 條目。</p>
+<p>衝突類型：gold-plating（合理實作，但缺乏正式需求授權）</p>
+<p>受影響範圍：21 個 client BDD scenarios 可追溯性懸空</p>
+<p>建議修復方向：在 PRD 新增 US-PREF-001「玩家可調整音效/主題偏好」並定義 AC；或將 settings.feature 標記為 <code>@out-of-scope</code></p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d1-m3prd--bdd-server--us-admin-003ac-015-x無專屬-server-bdd">[MEDIUM] D1-M3：PRD → BDD-server — US-ADMIN-003（AC-015-x）無專屬 server BDD</h3>
+<p>PRD US-ADMIN-003（P1：Runtime Parameter Tuning）的 ACs（AC-015-1 至 AC-015-3：參數更新、5 分鐘快取刷新、稽核日誌）無對應 server BDD feature 檔案。RTM 備註「covered via integration test」，但 test-plan.md 未列對應整合測試案例。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-ADMIN-003 驗收完整性</p>
+<p>建議修復方向：新增 <code>features/runtime-config.feature</code> 覆蓋 AC-015-x；或明確記錄整合測試檔案路徑</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d1-m4brd--edd--bc-命名不一致無對應映射表">[MEDIUM] D1-M4：BRD → EDD — BC 命名不一致，無對應映射表</h3>
+<p>BRD §5.5 BC 命名（<code>auth</code>, <code>battle</code>, <code>ranking</code>, <code>notification</code>）與 EDD §3.4 BC 命名（<code>Identity</code>, <code>Arena</code>, <code>Leaderboard</code>）不一致，無任何映射表或 ADR 說明重命名決策。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>受影響範圍：文件可導航性，onboarding 效率，跨文件搜尋 BC 名稱一致性</p>
+<p>建議修復方向：在 EDD §3.4 或 ARCH.md 加入 BC 名稱對應表（BRD 概念名 → EDD 實現名）</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="low-d1-l1local_deploy--edd--docker-compose-port-range-語法模糊">[LOW] D1-L1：LOCAL_DEPLOY → EDD — docker-compose port range 語法模糊</h3>
+<p>LOCAL_DEPLOY.md docker-compose 片段中 API/Worker port 映射為 <code>&quot;3000-3001:3000&quot;</code>，此語法將 host 3000 和 3001 均映射至 container port 3000，無法正確暴露 Worker port 3001（EDD §3.5b 定義 Worker 跑在 port 3001）。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>建議修復方向：修正為兩條獨立映射：<code>&quot;3000:3000&quot;</code> 和 <code>&quot;3001:3001&quot;</code></p>
+<p>可自動修復：YES</p>
+<hr>
+<h3 id="low-d1-l2frontend--api--bigint-seed-欄位轉換契約未記錄於-apimd-fixed-0e053e7">[LOW] D1-L2：FRONTEND → API — BigInt seed 欄位轉換契約未記錄於 API.md <code>[FIXED: 0e053e7]</code></h3>
+<p>FRONTEND.md PetCanvasProps 定義 <code>seed: bigint</code> 並加注「API returns seed as a JSON number; callers must convert: BigInt(apiResponse.seed)」。此型別轉換契約未記錄於 API.md 對應端點回應 schema（JavaScript 精度截斷風險）。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 API.md 的 pet <code>seed</code> 欄位加注「Type: integer (int64)；JavaScript 端須使用 BigInt() 轉換避免精度截斷（JS Number 最大安全整數 2^53-1）」</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="low-d1-l3pdd--platform-scope-game-ui-核取方塊未勾選-fixed-0e053e7">[LOW] D1-L3：PDD — Platform Scope Game UI 核取方塊未勾選 <code>[FIXED: 0e053e7]</code></h3>
+<p>PDD.md Platform Scope 中 <code>Game UI (Phaser 3 / HTML5 Canvas)</code> 為 <code>[ ]</code> 未勾選狀態，但系統實際採用 Phaser 3，EDD 與 PRD 均明確記載。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>建議修復方向：將 PDD.md 中 <code>[ ] Game UI (Phaser 3 / HTML5 Canvas)</code> 改為 <code>[x]</code></p>
+<p>可自動修復：YES</p>
+<hr>
+<h3 id="low-d1-l4vdd--frontend--vdd-色彩-token-未對應至-frontend-css-variables">[LOW] D1-L4：VDD → FRONTEND — VDD 色彩 token 未對應至 FRONTEND CSS variables</h3>
+<p>VDD.md 定義深色模式色系（deep navy 色板），但 FRONTEND.md 未說明 VDD 色彩如何對應至 FRONTEND 的 CSS custom properties（如 <code>--color-surface</code>、<code>--color-rarity-epic</code> 等）。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 FRONTEND.md 新增 Design Token 對應段落，列出 VDD 色彩與對應 CSS variable 名稱的映射關係</p>
+<p>可自動修復：NO</p>
+<hr>
+<h2 id="dimension-2--doc--code-對齊-待-gencode-階段">Dimension 2 — Doc → Code 對齊（⏸ 待 gencode 階段）</h2>
+<p><code>src/</code> 目錄目前不存在。API.md 定義的 33 個 REST endpoints 均無實作。</p>
+<p>此為 docs-first 開發流程的正常狀態——所有 Doc→Code scaffold 由 <code>/gendoc-align-fix --layer gencode</code> 負責生成。</p>
+<p><strong>本維度不計入 findings 總數。</strong></p>
+<hr>
+<h2 id="dimension-3--code--test-對齊-待-gencode-階段">Dimension 3 — Code → Test 對齊（⏸ 待 gencode 階段）</h2>
+<p><code>src/</code> 和 <code>tests/</code> 目錄目前均不存在。Code→Test 對齊無法執行。</p>
+<p><strong>本維度不計入 findings 總數。</strong></p>
+<hr>
+<h2 id="dimension-4--doc--test-對齊問題">Dimension 4 — Doc → Test 對齊問題</h2>
+<p><strong>結果：🔴 24 findings（3C / 7H / 11M / 3L）</strong></p>
+<hr>
+<h3 id="critical-d4-c1rtm-bdd-tags-欄位使用不存在的-tag-命名規則-fixed-0e053e7">[CRITICAL] D4-C1：RTM BDD Tags 欄位使用不存在的 tag 命名規則 <code>[FIXED: 0e053e7]</code></h3>
+<p>RTM.md 的「BDD Tags (sample)」欄位使用 <code>@TC-PET-001-1</code>、<code>@TC-AUTH-001-1</code>、<code>@TC-ARENA-001-1</code> 等 tag。</p>
+<p>這些 tag <strong>在任何 feature 檔案中均不存在</strong>。</p>
+<p>實際 feature file tag 格式為：<code>@TC-SRV-CLAIM-001</code>、<code>@TC-CLI-CLAIM-001</code>、<code>@TC-SRV-ARENA-001</code> 等（SRV/CLI 前綴 + 領域名 + 序號）。</p>
+<p>RTM 的正向追溯性（requirement → BDD scenario）從 tag 層完全斷裂。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>受影響範圍：全部 19 個 RTM rows（18 US + 1 NFR-XCUT-001）；整條正向追溯鏈</p>
+<p>建議修復方向：以 <code>grep &quot;@TC-&quot; features/<em>*/</em>.feature</code> 自動提取實際 tag，重新生成 RTM BDD Tags 欄位</p>
+<p>可自動修復：YES（腳本自動化）</p>
+<hr>
+<h3 id="critical-d4-c2featuressteps-不存在--82-個-server-bdd-scenarios-無法執行-fixed-992aa6c">[CRITICAL] D4-C2：features/steps/ 不存在 — 82 個 server BDD scenarios 無法執行 <code>[FIXED: 992aa6c]</code></h3>
+<p><code>features/steps/</code> 目錄完全不存在。82 個 server-side Gherkin scenarios（12 個 feature 檔案）無任何 Cucumber-js step definition，整個 server BDD suite 無法執行。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：所有 82 個 server BDD scenarios，12 個 feature 檔案</p>
+<p>建議修復方向：<code>/gendoc-align-fix --layer gencode</code> 生成 <code>features/steps/</code>（TypeScript + Cucumber-js）；優先：claim-flow steps（認證關鍵路徑）、arena-battle steps（限流/配對）、training-food steps（stat 邊界）</p>
+<p>可自動修復：YES（gencode 階段生成骨架）</p>
+<hr>
+<h3 id="critical-d4-c3featuresclientsteps-不存在--133-個-client-bdd-scenarios-無法執行-fixed-e739041">[CRITICAL] D4-C3：features/client/steps/ 不存在 — 133 個 client BDD scenarios 無法執行 <code>[FIXED: e739041]</code></h3>
+<p><code>features/client/steps/</code> 目錄完全不存在。133 個 client-side Gherkin scenarios（10 個 feature 檔案）無任何 Playwright step definition，整個 client BDD suite 無法執行。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：所有 133 個 client BDD scenarios，10 個 feature 檔案</p>
+<p>建議修復方向：<code>/gendoc-align-fix --layer gencode</code> 生成 <code>features/client/steps/</code>（Playwright + Cucumber-js）；優先：pet-display steps（canvas 渲染）、claim-flow-ui steps（主要獲取漏斗）、admin-portal steps（TOTP + 封禁流程）</p>
+<p>可自動修復：YES（gencode 階段生成骨架）</p>
+<hr>
+<h3 id="high-d4-h1edd-81-http-404--12-個-server-feature-中完全沒有-404-負面場景">[HIGH] D4-H1：EDD §8.1 HTTP 404 — 12 個 server feature 中完全沒有 404 負面場景</h3>
+<p>EDD §8.1 錯誤碼表明確列出 HTTP 404（not found / unknown petId）。</p>
+<p>掃描 12 個 server feature 檔案，<strong>零個 scenarios</strong> 產生 HTTP 404 回應。</p>
+<p>PRD AC-004-5 和 AC-010-5 均要求 404 處理。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：claim-flow.feature（AC-004-5）、battle-records.feature（AC-010-5）及所有接受 petId 路徑參數的端點</p>
+<p>建議修復方向：在 claim-flow.feature 新增 @TC-SRV-CLAIM-009（無效/已撤銷 token → 404）；在 battle-records.feature 新增 @TC-SRV-REC-008（未知 petId → 404）</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="high-d4-h2rtm-庫存計數陳舊-fixed-0e053e7">[HIGH] D4-H2：RTM 庫存計數陳舊 <code>[FIXED: 0e053e7]</code></h3>
+<p>RTM Overview 聲明「9 個 client feature 檔案 / 124 scenarios」。實際狀態：</p>
+<ul><li>10 個 client feature 檔案（trading-ui.feature 未列入 RTM 庫存）</li><li>admin-portal.feature：RTM 記載 13 scenarios，實際為 21</li><li>Client scenarios 實際總數：133（RTM 記載 124）</li><li>總 scenarios：RTM 聲明 206，實際為 215</li></ul>
+<p>衝突類型：B2-下游偏離</p>
+<p>受影響範圍：RTM Overview、BDD Feature File Inventory table、Coverage Summary</p>
+<p>建議修復方向：依當前 feature 檔案重新計算，更新所有計數；在庫存表新增 trading-ui.feature 行（映射 US-TRADE-001，標記 ⏸ Deferred）</p>
+<p>可自動修復：YES（腳本自動化）</p>
+<hr>
+<h3 id="high-d4-h3prd-ac-002-6--無-503-generation_exhausted-server-bdd-scenario">[HIGH] D4-H3：PRD AC-002-6 → 無 503 generation_exhausted server BDD scenario</h3>
+<p>PRD AC-002-6 要求寵物種子唯一性在 3 次重試後仍無法達成時回傳 HTTP 503 <code>{&quot;error&quot;:&quot;generation_exhausted&quot;}</code>。無任何 server BDD scenario 涵蓋此錯誤邊界。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-PET-002（Procedural Pixel Pet Generation）— AC-002-6 邊界</p>
+<p>建議修復方向：在 rarity-distribution.feature 或新的 pet-generation.feature 新增 @TC-SRV-PET-006：3 次重試失敗 → 503 generation_exhausted</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="high-d4-h4prd-ac-001-7--無-canvas-webgl-fallback-client-bdd-scenario">[HIGH] D4-H4：PRD AC-001-7 → 無 Canvas WebGL fallback client BDD scenario</h3>
+<p>PRD AC-001-7 要求 WebGL/canvas 初始化失敗後 3 秒逾時 → 靜態備用圖像 + &quot;Try refreshing&quot; 訊息，CTA 按鈕仍可操作。pet-display.feature 無任何涵蓋此錯誤路徑的 scenarios。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-PET-001 — AC-001-7（E2E + Integration）</p>
+<p>建議修復方向：在 pet-display.feature 新增 @TC-CLI-PET-013：模擬 Phaser init 失敗（WebGL 不可用）→ 靜態備用可見 + claim button 可操作</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="high-d4-h5prd-ac-004-4--frontend-gdprpage--玩家端-gdpr-刪除流程無-client-bdd-coverage">[HIGH] D4-H5：PRD AC-004-4 + FRONTEND GdprPage → 玩家端 GDPR 刪除流程無 client BDD coverage</h3>
+<p>PRD AC-004-4 要求玩家能請求自身資料刪除（GDPR right to erasure）。FRONTEND.md 定義 <code>GdprPage</code>（<code>/gdpr</code>）含 <code>GdprRequestForm</code> 和 <code>GdprStatusBanner</code>。<strong>沒有任何 client feature 檔案</strong>涵蓋此玩家端頁面。settings.feature（RTM 對應至 US-AUTH-002）涵蓋的是主題/音效偏好，非 GDPR 刪除流程。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-AUTH-002 — AC-004-4；GdprPage（<code>/gdpr</code>）、GdprRequestForm、GdprStatusBanner</p>
+<p>建議修復方向：建立 <code>features/client/gdpr-ui.feature</code>，至少包含 3 個 scenarios：提交刪除請求、透過 GdprStatusBanner 查看狀態、成功確認</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="high-d4-h6prd-ac-010-5--battle-recordsfeature-無-404-invalid-petid-scenario">[HIGH] D4-H6：PRD AC-010-5 → battle-records.feature 無 404 invalid petId scenario</h3>
+<p>PRD AC-010-5 要求以無效/不存在 pet ID 存取對戰記錄頁面時回傳 HTTP 404。battle-records.feature 有 7 個 scenarios，無一涵蓋 404 on invalid petId。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-RECORD-001 — AC-010-5</p>
+<p>建議修復方向：在 battle-records.feature 新增 @TC-SRV-REC-008：GET /api/v1/arena/history/:petId 使用未知 ID → 404</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="high-d4-h7prd-ac-004-4server-side-玩家-gdpr-erasure-端點無-server-bdd-coverage">[HIGH] D4-H7：PRD AC-004-4（server side）→ 玩家 GDPR erasure 端點無 server BDD coverage</h3>
+<p>GDPR erasure 的 server-side 端點（POST /api/v1/gdpr/request）需對應 server BDD scenario。gdpr-erasure.feature（8 scenarios）涵蓋 Admin-triggered GDPR（AC-014-x），非玩家自助提交路徑（AC-004-4）。</p>
+<p>衝突類型：缺失</p>
+<p>受影響範圍：US-AUTH-002 — AC-004-4（server layer）</p>
+<p>建議修復方向：在 gdpr-erasure.feature 新增 1-2 個 player-initiated 場景，區分 admin-initiated 和 player-initiated GDPR request flow</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m1prd-ac-005-6--無-stat_at_maximum訓練server-bdd-scenario">[MEDIUM] D4-M1：PRD AC-005-6 → 無 stat_at_maximum（訓練）server BDD scenario</h3>
+<p>PRD AC-005-6 要求訓練已滿 stat（=100）時回傳 HTTP 400 <code>{&quot;error&quot;:&quot;stat_at_maximum&quot;}</code>。training-food.feature 涵蓋每日訓練上限但未涵蓋 stat 最大值邊界。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 training-food.feature 新增 @TC-SRV-TRAIN-004：stat=100 時 POST /api/v1/training → HTTP 400 stat_at_maximum</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m2prd-ac-006-6--無-stat_at_maximum餵食server-bdd-scenario">[MEDIUM] D4-M2：PRD AC-006-6 → 無 stat_at_maximum（餵食）server BDD scenario</h3>
+<p>PRD AC-006-6 要求對已滿 stat 餵食永久性 stat food 時回傳 HTTP 400 <code>{&quot;error&quot;:&quot;stat_at_maximum&quot;,&quot;stat&quot;:&quot;&lt;stat_name&gt;&quot;}</code>。無任何 server BDD scenario 涵蓋此邊界。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 training-food.feature 新增 @TC-SRV-FOOD-004：stat=100 時 POST /api/v1/food/apply → HTTP 400 stat_at_maximum</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m3prd-ac-013-5--admin-moderationfeature-無-db-寫入失敗場景">[MEDIUM] D4-M3：PRD AC-013-5 → admin-moderation.feature 無 DB 寫入失敗場景</h3>
+<p>PRD AC-013-5 要求 Admin Ban 操作 DB 寫入失敗時回傳友善錯誤且無部分狀態變更。admin-moderation.feature 11 個 scenarios 均未涵蓋後端 DB 失敗路徑。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 admin-moderation.feature 新增 @TC-SRV-MOD-012：mock DB timeout during POST /admin/api/pets/:petId/ban → 無部分狀態；UI error toast</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m4prd-ac-014-4--leaderboardfeature-無-admin-移除寫入失敗場景">[MEDIUM] D4-M4：PRD AC-014-4 → leaderboard.feature 無 Admin 移除寫入失敗場景</h3>
+<p>PRD AC-014-4 要求排行榜移除失敗（Redis/DB 不可用）時 UI 顯示「Removal failed」且條目不變。leaderboard.feature 的 Redis-down fallback scenario 只涵蓋讀取路徑，未涵蓋管理員移除的寫入失敗路徑。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 leaderboard.feature 新增 @TC-SRV-BOARD-009：Redis ZREM 失敗時管理員移除請求 → HTTP 500，狀態不變</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m5prd-ac-015-13us-admin-003-admin-search-performancefeature-us-tag-錯誤-partial-fixed-0e053e7--feature-header-tag-已修正ac-015-x-runtime-config-scenarios-仍缺">[MEDIUM] D4-M5：PRD AC-015-1..3（US-ADMIN-003）+ admin-search-performance.feature @US tag 錯誤 <code>[PARTIAL-FIXED: 0e053e7 — feature header tag 已修正；AC-015-x runtime config scenarios 仍缺]</code></h3>
+<p>雙重問題：</p>
+<ol><li>US-ADMIN-003 的 ACs（AC-015-1..3：runtime config 調整、5 分鐘快取刷新、稽核日誌）無任何 server BDD scenarios</li><li><code>admin-search-performance.feature</code> Feature header 標記 <code>US-ADMIN-003</code>，但其內容（管理搜尋 SLA）對應 AC-013-4（US-ADMIN-001），非 US-ADMIN-003</li></ol>
+<p>衝突類型：缺失 + B2-下游偏離</p>
+<p>建議修復方向：將 admin-search-performance.feature header 改為 <code>@US-ADMIN-001</code>；另在 economy-config.feature 或新的 runtime-config.feature 新增涵蓋 AC-015-1..3 的 scenarios</p>
+<p>可自動修復：部分 YES（header 修正自動化）</p>
+<hr>
+<h3 id="medium-d4-m6prd-ac-004-5--無-client-bdd-404-url-渲染場景">[MEDIUM] D4-M6：PRD AC-004-5 → 無 client BDD 404 URL 渲染場景</h3>
+<p>PRD AC-004-5 要求 client 在存取無效/已撤銷 pet URL 時渲染適當的 404/錯誤狀態頁面。無任何 client BDD scenario 涵蓋此頁面層級 404 渲染。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 claim-flow-ui.feature 新增 @TC-CLI-CLAIM-011：導航至 <code>/pet/:invalidToken</code> → 錯誤頁面含「URL not valid」及返回首頁連結</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m7edd-81-http-409-vs-claim-flowfeature-http-400-狀態碼不一致">[MEDIUM] D4-M7：EDD §8.1 HTTP 409 vs claim-flow.feature HTTP 400 狀態碼不一致</h3>
+<p>EDD §8.1 定義 HTTP 409 Conflict（already claimed）。TC-SRV-CLAIM-006 涵蓋「already claimed」情境但預期 HTTP 400，與 EDD 定義不符。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>受影響範圍：claim-flow.feature TC-SRV-CLAIM-006；US-AUTH-001</p>
+<p>建議修復方向：統一 ALREADY_CLAIMED 的 HTTP 狀態碼：EDD §8.1 改為 400，或 scenario 改預期 409（兩者選其一並更新全部文件）</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m8edd-85-sendgrid-3-次失敗後切換-smtp-failover--無-server-bdd-scenario">[MEDIUM] D4-M8：EDD §8.5 SendGrid 3 次失敗後切換 SMTP Failover — 無 server BDD scenario</h3>
+<p>EDD §8.5 定義：3 次連續 SendGrid 失敗 → 切換至 Nodemailer SMTP fallback。PRD §6.2 亦有此規格。無任何 server BDD scenario 驗證此 failover 路徑。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 claim-flow.feature 新增 @TC-SRV-CLAIM-009：mock SendGrid 3 次連續失敗 → SMTP fallback → email 發送 → HTTP 200</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m9edd-totp_setup_required首次-admin-登入-http-403-僅有-client-bdd無-server-bdd">[MEDIUM] D4-M9：EDD TOTP_SETUP_REQUIRED（首次 Admin 登入 HTTP 403）— 僅有 client BDD，無 server BDD</h3>
+<p>EDD 定義首次 Admin 登入時回傳 HTTP 403 TOTP_SETUP_REQUIRED + setupToken。client BDD 已涵蓋（TC-CLI-ADMIN-002），但 server-side 無對應 server BDD scenario。</p>
+<p>衝突類型：缺失（server 層）</p>
+<p>建議修復方向：在 admin-moderation.feature 或新的 admin-auth.feature 新增首次 TOTP 設定流程的 server scenario</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="medium-d4-m10rtm-admin-search-performancefeature-us-tag-mismatch-fixed-0e053e7">[MEDIUM] D4-M10：RTM admin-search-performance.feature @US tag mismatch <code>[FIXED: 0e053e7]</code></h3>
+<p>RTM 正確將 admin-search-performance.feature 對應至 US-ADMIN-001，但 feature 檔案本身 Feature header 標記 <code>US-ADMIN-003</code>（與 D4-M5 同一根因）。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>建議修復方向：同 D4-M5，修正 feature header tag 為 <code>@US-ADMIN-001</code></p>
+<p>可自動修復：YES（單行修正）</p>
+<hr>
+<h3 id="medium-d4-m11rtm-us-auth-002-rowsettingsfeature-對應製造虛假覆蓋信心">[MEDIUM] D4-M11：RTM US-AUTH-002 row：settings.feature 對應製造虛假覆蓋信心</h3>
+<p>RTM 將 settings.feature（21 scenarios）映射至 US-AUTH-002，而 US-AUTH-002 的實際 ACs（AC-004-1..5：unique URL claim、link re-send、GDPR deletion）均未被 settings.feature 的任何 scenario 涵蓋。</p>
+<p>衝突類型：B2-下游偏離</p>
+<p>建議修復方向：拆分 RTM US-AUTH-002 BDD-Client 條目：claim-flow-ui.feature 涵蓋 AC-004-1..3；AC-004-4（玩家 GDPR 刪除）為未涵蓋；settings.feature 標記為 US-PREF-001（待補 PRD）</p>
+<p>可自動修復：NO</p>
+<hr>
+<h3 id="low-d4-l1trading-uifeaturefuture未列入-rtm-庫存-fixed-0e053e7">[LOW] D4-L1：trading-ui.feature（@future）未列入 RTM 庫存 <code>[FIXED: 0e053e7]</code></h3>
+<p>trading-ui.feature 存在（1 scenario，標記 @future @wip），符合 FF_MARKETPLACE P2 延期狀態，但 RTM 庫存表未記錄此檔案，US-TRADE-001 的 BDD-Client 欄位顯示「—」。</p>
+<p>衝突類型：B1-下游合理（延期合理）</p>
+<p>建議修復方向：在 RTM 庫存表新增 trading-ui.feature 行，標記 ⏸ Deferred（映射 US-TRADE-001）</p>
+<p>可自動修復：YES</p>
+<hr>
+<h3 id="low-d4-l2edd-81-http-409-用於-duplicate-marketplace-listing--貿易功能延期但文件未標記-fixed-0e053e7">[LOW] D4-L2：EDD §8.1 HTTP 409 用於 duplicate marketplace listing — 貿易功能延期但文件未標記 <code>[FIXED: 0e053e7]</code></h3>
+<p>EDD §8.1 列出 HTTP 409 的第二個觸發情境為「duplicate marketplace listing」，但 Marketplace 為 P2 延期功能（FF_MARKETPLACE）。EDD §8.1 未標記此情境為 Deferred。</p>
+<p>衝突類型：gold-plating 補充（dead-code 風險低，但文件明確性不足）</p>
+<p>建議修復方向：在 EDD §8.1 duplicate listing 條目旁加注「FF_MARKETPLACE — deferred」</p>
+<p>可自動修復：YES</p>
+<hr>
+<h3 id="low-d4-l3trading-uifeature-future-標記但-cucumber-執行時可能被誤跑-fixed-0e053e7">[LOW] D4-L3：trading-ui.feature @future 標記但 cucumber 執行時可能被誤跑 <code>[FIXED: 0e053e7]</code></h3>
+<p>trading-ui.feature 標記 @future @wip，若 cucumber 執行時沒有 <code>--tags &quot;not @future&quot;</code> 過濾，此 scenario 會被嘗試執行並因無 step definition 失敗。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：在 cucumber.js config 中加入 <code>tags: &quot;not @future&quot;</code> 預設過濾；或在 CI pipeline 中明確加 --tags 旗標</p>
+<p>可自動修復：YES</p>
+<hr>
+<h2 id="dimension-5--umlrtm-品質">Dimension 5 — UML/RTM 品質</h2>
+<p><strong>結果：⚠️ 1 finding（0C / 1H / 0M / 0L）</strong></p>
+<p><strong>量化數據（直接掃描）：</strong></p>
 <table>
-<tr><th>Dimension</th><th>Method</th><th>Result</th></tr>
-<tr><td>Dim 0 — Existence</td><td>Drove <code>pipeline.json</code> step list against actual filesystem</td><td>All 25 expected outputs present + non-empty</td></tr>
-<tr><td>Dim 1 — Doc ↔ Doc</td><td>Cross-checked the 14 alignment pairs from SKILL §3</td><td>1 LOW (cosmetic)</td></tr>
-<tr><td>Dim 2 — Doc ↔ Code</td><td><code>src/</code> not present (pre-implementation phase)</td><td><strong>N/A</strong> — confirmed pre-impl stance</td></tr>
-<tr><td>Dim 3 — Code ↔ Test</td><td><code>tests/</code> not present (pre-implementation phase)</td><td><strong>N/A</strong> — confirmed pre-impl stance</td></tr>
-<tr><td>Dim 4 — Doc ↔ Test</td><td>PRD AC ↔ BDD-server / BDD-client ↔ tests; RTM completeness</td><td>1 LOW (cosmetic)</td></tr>
-<tr><td>Dim 5 — UML / RTM Quality</td><td>Class diagram completeness, RTM rows ≥ scenario count</td><td>All checks pass</td></tr>
+<tr><th>指標</th><th>數值</th><th>狀態</th></tr>
+<tr><td>EDD class count</td><td>42</td><td>✅</td></tr>
+<tr><td>PlantUML .puml 檔案數</td><td>9</td><td>✅</td></tr>
+<tr><td>RTM.csv 存在</td><td>是</td><td>✅</td></tr>
+<tr><td>RTM table rows（`\</td><td>`-starting lines）</td><td>146</td><td>✅</td></tr>
+<tr><td>Class Diagram Inheritance（`&lt;\</td><td>--`）</td><td>7</td><td>✅</td></tr>
+<tr><td>Class Diagram Composition（<code>*--</code>）</td><td>5</td><td>✅</td></tr>
+<tr><td>Class Diagram Aggregation（<code>o--</code>）</td><td>6</td><td>✅</td></tr>
 </table>
-<p>For Dimensions 2 and 3 the project remains pre-implementation: there is no <code>src/</code> or <code>tests/</code> directory and pipeline.json marks no code-generation step as complete. This is the expected state after <code>gendoc</code> document generation only and before <code>gencode</code>. <strong>Dim 2 and Dim 3 stance: N/A pre-impl</strong> (consistent with the prior scan).</p>
+<h3 id="high-d5-h1eddmd-中-diagram-區段標頭僅-8-個但-uml-要求-9-大圖">[HIGH] D5-H1：EDD.md 中 <code>####.*Diagram</code> 區段標頭僅 8 個，但 UML 要求 9 大圖</h3>
+<p><code>grep -cE &quot;####.<em>Diagram|####.</em>圖&quot; docs/EDD.md</code> 回傳 8。UML 9 大圖（sequence × 3、activity × 3、state × 3）的一張可能未在 EDD.md 中以標準 <code>####</code> 標頭引用。</p>
+<p>注意：<code>docs/diagrams/puml/</code> 確認有 9 個 <code>.puml</code> 檔案，UML 輸出成品齊全；僅 EDD.md 本文引用可能缺少一個 diagram 章節標頭。</p>
+<p>衝突類型：B2-下游偏離（輕微）</p>
+<p>受影響範圍：EDD.md 自包含完整性；閱讀 EDD 時無法從目錄索引定位全部 9 張圖</p>
+<p>建議修復方向：確認哪一張 diagram 使用非標準標頭（如 <code>###</code> 或不含 <code>Diagram</code>/<code>圖</code> 關鍵字），統一格式至 <code>#### xxx Diagram</code></p>
+<p>可自動修復：NO</p>
 <hr>
-<h2 id="convergence-verification--each-of-the-previously-fixed-23-findings">Convergence Verification — Each of the Previously-Fixed 23 Findings</h2>
+<h2 id="dimension-6--ai-gencode-readiness">Dimension 6 — AI Gencode Readiness</h2>
+<p><strong>結果：⚠️ 1 finding（0C / 1H / 0M / 0L）| 整體就緒度：76%</strong></p>
 <table>
-<tr><th>#</th><th>Original finding</th><th>Fix action stated</th><th>Re-scan verdict</th></tr>
-<tr><td>1</td><td><code>features/server/</code> was a byte-identical duplicate of <code>features/</code></td><td>Delete <code>features/server/</code></td><td>✅ Confirmed deleted (no <code>features/server/</code> exists)</td></tr>
-<tr><td>2</td><td>SCHEMA <code>admin_accounts</code> ≠ EDD <code>admin_users</code></td><td>Rename SCHEMA table to <code>admin_users</code></td><td>✅ <code>docs/SCHEMA.md</code> line 515 <code>### 2.10 admin_users</code> (renamed)</td></tr>
-<tr><td>3</td><td>SCHEMA <code>admin_audit_log</code> ≠ EDD <code>audit_logs</code></td><td>Rename SCHEMA table to <code>audit_logs</code></td><td>✅ <code>docs/SCHEMA.md</code> line 558 <code>### 2.11 audit_logs</code></td></tr>
-<tr><td>4</td><td>EDD §4.11 referenced informal <code>trade-table</code></td><td>Rename to <code>MarketplaceTransaction</code></td><td>✅ <code>docs/EDD.md</code> line 885 <code>### §4.11 MarketplaceTransaction (Phase 3 — FF_MARKETPLACE)</code></td></tr>
-<tr><td>5</td><td>EDD missing port matrix</td><td>Add §3.8 port matrix</td><td>✅ <code>docs/EDD.md</code> line 258 <code>### §3.8 Environment &amp; Service Port Matrix</code> (full table for player frontend / admin frontend / API / PostgreSQL / Supabase / Inbucket / Redis)</td></tr>
-<tr><td>6</td><td>EDD §3.9.1 missing cross-reference to docs/diagrams/</td><td>Add §3.9.1 cross-ref table</td><td>✅ <code>docs/EDD.md</code> line 617 <code>### §3.9.1 Canonical UML 9-set — Cross-reference Table</code> (12 rows mapping the 9-set + Component + Deployment + CI/CD addenda)</td></tr>
-<tr><td>7</td><td>EDD §4.5.x class names misaligned with SCHEMA</td><td>Rename <code>ClaimIdentity</code>, <code>LeaderboardSnapshot</code></td><td>✅ <code>docs/EDD.md</code> line 289 confirms new names; entity stems explicitly mapped to SCHEMA tables in same paragraph</td></tr>
-<tr><td>8</td><td>RTM coverage stale</td><td>Regenerate <code>docs/RTM.md</code></td><td>✅ RTM regenerated; line 9 records <code>2026-05-08 (align-fix)</code> refresh; coverage 17/18 covered + 1 deferred (US-TRADE-001 behind FF_MARKETPLACE); summary states &quot;94% coverage&quot;</td></tr>
-<tr><td>9</td><td><code>features/economy-config.feature</code> missing (US-ADMIN-006)</td><td>Create file</td><td>✅ <code>features/economy-config.feature</code> exists, 6 scenarios, header tag <code>@US-ADMIN-006</code></td></tr>
-<tr><td>10</td><td><code>features/training-food.feature</code> missing Level Formula scenario</td><td>Add scenario</td><td>✅ Lines 13–19 contain &quot;Level formula computes deterministically...&quot; scenario including <code>pet_level_formula_divisor = 10</code> and <code>pet_level_max = 100</code> constants</td></tr>
-<tr><td>11</td><td>US-ID <code>US-GEN-001</code> non-canonical</td><td>Rename to <code>US-RARITY-001</code></td><td>✅ <code>US-GEN-001</code> no longer appears in any <code>features/</code>, <code>docs/PRD.md</code>, or <code>docs/RTM.md</code>; replaced by <code>US-RARITY-001</code> everywhere</td></tr>
-<tr><td>12</td><td>Missing <code>@US-TRADE-001</code> tag</td><td>Add tag</td><td>✅ <code>features/trading-system.feature</code> line 1: <code>@US-TRADE-001 @FF_MARKETPLACE</code></td></tr>
-<tr><td>13</td><td><code>docs/BDD-server.md</code> path refs broken</td><td>Update to <code>features/*.feature</code></td><td>✅ All Section headings use <code>features/&lt;name&gt;.feature</code> (5 sample headings spot-checked)</td></tr>
-<tr><td>14</td><td><code>docs/BDD-client.md</code> path refs broken</td><td>Update to <code>features/client/*.feature</code></td><td>✅ Section headings use <code>features/client/&lt;name&gt;.feature</code> (5 sample headings spot-checked)</td></tr>
-<tr><td>15</td><td><code>docs/diagrams/puml/</code> missing drift-policy README</td><td>Create README</td><td>✅ <code>docs/diagrams/puml/README.md</code> present, 9 .puml files mapped to canonical Mermaid <code>.md</code> counterparts; explicit &quot;canonical Mermaid file wins&quot; drift policy stated</td></tr>
-<tr><td>16</td><td>RTM 18 PRD US not all listed</td><td>Reflect 18 stories</td><td>✅ All US IDs (PET-001/002, AUTH-001/002, TRAIN-001, FOOD-001, ARENA-001/002, BOARD-001, RECORD-001, RARITY-001, TRADE-001, ADMIN-001 through 006) present in RTM coverage matrix</td></tr>
-<tr><td>17</td><td>Marketplace deferral not signposted</td><td>Mark behind FF_MARKETPLACE</td><td>✅ RTM line 19 explicitly states &quot;US-TRADE-001 ... formally deferred behind feature flag FF_MARKETPLACE&quot;; line 48 marks <code>trading-system.feature</code> as <code>⏸ Deferred (P2)</code></td></tr>
-<tr><td>18</td><td>EDD class diagram missing 6 UML relationship types</td><td>Confirm 6 types</td><td>✅ EDD §4 narrative explicitly lists composition, aggregation, inheritance, realization, association, dependency; <code>docs/diagrams/class-domain.md</code> carries the canonical full-relationship version</td></tr>
-<tr><td>19</td><td>EDD↔SCHEMA naming mismatch (admin tables)</td><td>Single naming spine</td><td>✅ EDD <code>audit_logs</code>, SCHEMA <code>audit_logs</code>; EDD <code>admin_users</code>, SCHEMA <code>admin_users</code> — both canonical</td></tr>
-<tr><td>20</td><td>EDD↔SCHEMA marketplace alignment</td><td>Confirm naming</td><td>✅ EDD §4.11 entity = <code>MarketplaceTransaction</code>; SCHEMA §2.9 = <code>marketplace_transactions</code>; standard CamelCase ↔ snake-plural ORM convention applied consistently</td></tr>
-<tr><td>21</td><td><code>docs/RTM.md</code> not regenerated since rename</td><td>Refresh</td><td>✅ Refresh line dated 2026-05-08</td></tr>
-<tr><td>22</td><td>EDD §3.5/§3.8 environment matrix missing fields</td><td>Add matrix</td><td>✅ See §3.8 verification above</td></tr>
-<tr><td>23</td><td>EDD/SCHEMA legacy <code>claim_identities</code> ↔ <code>ClaimIdentity</code> mapping unclear</td><td>Make mapping explicit in EDD §4</td><td>✅ EDD line 289 &quot;Each class maps directly to a PostgreSQL table defined in §4. Entity stem names align with SCHEMA tables (singular CamelCase ↔ snake_case plural)&quot; with 6 explicit pairs listed</td></tr>
+<tr><th>層</th><th>分數</th><th>狀態</th></tr>
+<tr><td>SCHEMA</td><td>100%</td><td>✅ 就緒</td></tr>
+<tr><td>LOCAL_DEPLOY</td><td>100%</td><td>✅ 就緒</td></tr>
+<tr><td>Phaser/ANIM</td><td>85%</td><td>✅ 就緒</td></tr>
+<tr><td>API</td><td>75%</td><td>⚠️ 可提升</td></tr>
+<tr><td>CI/CD</td><td>70%</td><td>⚠️ 可提升</td></tr>
+<tr><td>BDD/Tests</td><td>30%</td><td>🔴 需補強</td></tr>
+<tr><td><strong>整體</strong></td><td><strong>76%</strong></td><td>⚠️</td></tr>
 </table>
-<p><strong>Convergence rate: 23/23 (100%)</strong> — all previously-flagged findings verified fixed and stable.</p>
+<h3 id="high-d6-h1bddtests-ai-gencode-就緒度-30--95--無-step-definition-stub-fixed-992aa6c-e739041">[HIGH] D6-H1：BDD/Tests AI Gencode 就緒度 30% → 95% — 無 step definition stub <code>[FIXED: 992aa6c, e739041]</code></h3>
+<p><code>features/steps/</code> 不存在，AI 需從 215 個 Gherkin scenarios 從零推導 step definition 實作邏輯，無任何骨架可參照。此為 D4-C2 和 D4-C3 的同一根因，由 <code>/gendoc-align-fix --layer gencode</code> 處理。</p>
+<p>衝突類型：缺失</p>
+<p>建議修復方向：gencode 階段生成 step definition stubs</p>
+<p>可自動修復：YES（gencode 階段）</p>
 <hr>
-<h2 id="dimension-0--file-existence">Dimension 0 — File Existence</h2>
-<p>Driven by <code>~/.claude/skills/gendoc/templates/pipeline.json</code> step list, evaluated against <code>state.client_type = &quot;game&quot;</code> and <code>state.has_admin_backend = true</code>.</p>
-<pre><code class="">[OK] all unconditional steps      (BRD/PRD/EDD/ARCH/API/SCHEMA/test-plan/RTM/runbook/LOCAL_DEPLOY)
-[OK] client_type != none           (PDD/VDD/FRONTEND/CLIENT_IMPL)
-[OK] client_type == game           (AUDIO/ANIM/RESOURCE/CONSTANTS)
-[OK] has_admin_backend             (ADMIN_IMPL)
-[OK] features/                     12 files
-[OK] features/client/              9 files
-[OK] README.md                     present, non-empty</code></pre>
-<p>OK count: 25 / Findings: 0.</p>
-<hr>
-<h2 id="dimension-1--doc--doc">Dimension 1 — Doc ↔ Doc</h2>
-<p>All 14 pairs from SKILL §3 re-checked. One LOW finding only.</p>
-<h3 id="low-d1-1-featuresadmin-moderationfeature-feature-line-does-not-list-bound-us-ids">LOW-D1-1: <code>features/admin-moderation.feature</code> <code>Feature:</code> line does not list bound US IDs</h3>
-<p><strong>Layer</strong>: PRD ↔ BDD-server (cosmetic)</p>
-<p><strong>Location</strong>: <code>features/admin-moderation.feature</code> line 1</p>
-<p><strong>Observed</strong>:</p>
-<pre><code class="">Feature: Admin Moderation — Pet Banning and Battle Flagging</code></pre>
-<p><strong>Expected style</strong> (matching <code>features/admin-search-performance.feature</code> line 1):</p>
-<pre><code class="">Feature: Admin Moderation — Pet Banning and Battle Flagging (US-ADMIN-001, US-ADMIN-002, US-ADMIN-005)</code></pre>
-<p><strong>Conflict type</strong>: 缺失 (LOW — RTM line 45 already correctly maps the file to all three US IDs, so traceability is intact; only the in-file Feature header is missing the inline annotation).</p>
-<p><strong>Affected scope</strong>: human readability of the feature file when viewed in isolation.</p>
-<p><strong>Suggested fix direction</strong>: Append <code>(US-ADMIN-001, US-ADMIN-002, US-ADMIN-005)</code> to the Feature line.</p>
-<p><strong>Auto-fixable</strong>: YES (single-line edit).</p>
-<p><strong>Severity rationale</strong>: LOW — does not break any tooling, RTM, or scenario coverage; cosmetic consistency with sibling feature files.</p>
-<hr>
-<h2 id="dimension-2--doc--code">Dimension 2 — Doc ↔ Code</h2>
-<p><strong>Status: N/A pre-impl.</strong></p>
-<p>Confirmation:</p>
-<ul><li><code>src/</code> does not exist on disk.</li><li><code>state.completed_steps</code> does not include any <code>gencode-*</code> step; only <code>UML</code>, <code>UML-CICD</code>, <code>ALIGN</code>, <code>ALIGN-FIX</code>.</li><li><code>pipeline.json</code> Phase B (code-gen) is not yet started.</li></ul>
-<p>This is the expected state at the end of <code>gendoc</code> Phase A document generation and before <code>gencode</code> Phase B. Doc → Code alignment will become evaluable only once <code>src/</code> is populated. No findings emitted.</p>
-<hr>
-<h2 id="dimension-3--code--test">Dimension 3 — Code ↔ Test</h2>
-<p><strong>Status: N/A pre-impl.</strong></p>
-<p>Confirmation:</p>
-<ul><li><code>tests/</code> does not exist on disk.</li><li>No code or test files generated yet.</li></ul>
-<p>Same rationale as Dim 2. Coverage check is non-applicable until both directories exist. No findings emitted.</p>
-<hr>
-<h2 id="dimension-4--doc--test">Dimension 4 — Doc ↔ Test</h2>
-<p><strong>Status: NEAR-CLEAN.</strong> PRD AC ↔ BDD-server / BDD-client wiring is complete; RTM lists every feature file with its US-ID mapping and scenario count.</p>
+<h2 id="綜合建議與優先修復清單">綜合建議與優先修復清單</h2>
+<h3 id="立即修復critical--阻塞後續-gencode">立即修復（CRITICAL — 阻塞後續 gencode）</h3>
 <table>
-<tr><th>Check</th><th>Result</th></tr>
-<tr><td>Each PRD US (18 total) appears as ≥ 1 row in RTM</td><td>✅ 17 covered + 1 deferred-by-design (US-TRADE-001 / FF_MARKETPLACE)</td></tr>
-<tr><td>Each <code>features/*.feature</code> is listed in RTM</td><td>✅ all 12 listed</td></tr>
-<tr><td>Each <code>features/client/*.feature</code> is listed in RTM</td><td>✅ all 9 listed</td></tr>
-<tr><td>RTM scenario counts ≥ actual file scenario counts</td><td>✅ aggregate 206 scenarios in features; RTM rows reflect per-file counts</td></tr>
-<tr><td>Total scenarios</td><td>206 (12 server + 9 client features)</td></tr>
-<tr><td>BDD-server.md / BDD-client.md path refs valid</td><td>✅ all section paths resolve to existing files</td></tr>
+<tr><th>ID</th><th>問題</th><th>狀態</th><th>commit</th></tr>
+<tr><td>D4-C1</td><td>RTM BDD Tags 重新生成（@TC-SRV/CLI 命名）</td><td>✅ FIXED</td><td>0e053e7</td></tr>
+<tr><td>D4-C2</td><td>features/steps/ 生成 server step stubs</td><td>✅ FIXED</td><td>992aa6c</td></tr>
+<tr><td>D4-C3</td><td>features/client/steps/ 生成 client step stubs</td><td>✅ FIXED</td><td>e739041</td></tr>
 </table>
-<h3 id="low-d4-1-featuresclientsettingsfeature-is-bound-to-us-auth-002-only-settingsaccount-preferences">LOW-D4-1: <code>features/client/settings.feature</code> is bound to <code>US-AUTH-002</code> only (settings/account preferences)</h3>
-<p><strong>Layer</strong>: PDD ↔ BDD-client (provenance ambiguity)</p>
-<p><strong>Location</strong>: <code>features/client/settings.feature</code> line 1; RTM line 63</p>
-<p><strong>Observed</strong>: feature title says &quot;Settings and Preferences UI — Theme Toggle, Audio, Notifications (User Settings)&quot;; RTM annotates this as &quot;US-AUTH-002 (settings/account preferences)&quot; with 21 scenarios. Neither PRD <code>### US-AUTH-002</code> nor PDD have an explicit &quot;User Settings&quot; section that itemizes Theme/Audio/Notifications.</p>
-<p><strong>Conflict type</strong>: B1-下游合理 (LOW — the BDD-client scenarios document genuinely necessary settings UI behavior. The downstream BDD-client design is reasonable; it surfaces an implicit PRD/PDD gap rather than a contradiction. Tagging it to <code>US-AUTH-002</code> as a sub-scenario is acceptable.)</p>
-<p><strong>Affected scope</strong>: traceability completeness — settings UI is not formally requirement-traced to a dedicated PRD section.</p>
-<p><strong>Suggested fix direction</strong>:</p>
-<ul><li style="margin-left:1.0rem">Option A (preferred, downstream-friendly): keep current binding, optionally add a one-line note in PRD <code>US-AUTH-002</code> AC list referencing settings preferences.</li><li style="margin-left:1.0rem">Option B: introduce a PRD US for &quot;User Preferences UI&quot; if settings grow.</li></ul>
-<p><strong>Auto-fixable</strong>: YES (Option A is a one-line PRD addition).</p>
-<p><strong>Severity rationale</strong>: LOW — does not block any tooling, no scenario is orphaned, RTM has explicit annotation.</p>
-<hr>
-<h2 id="dimension-5--uml--rtm-quality">Dimension 5 — UML / RTM Quality</h2>
+<h3 id="high-優先修復gencode-前完成">HIGH 優先修復（gencode 前完成）</h3>
 <table>
-<tr><th>Check</th><th>Threshold</th><th>Observed</th><th>Result</th></tr>
-<tr><td>EDD class_count</td><td>≥ 6</td><td>≥ 6 (state file <code>class_count</code> field; physical scan of <code>class</code> declarations)</td><td>✅</td></tr>
-<tr><td>EDD UML 9-set cross-reference</td><td>9 + Component + Deployment</td><td>12 rows in §3.9.1 cross-ref table</td><td>✅</td></tr>
-<tr><td><code>docs/diagrams/puml/*.puml</code></td><td>&gt; 0</td><td>9 files</td><td>✅</td></tr>
-<tr><td><code>docs/RTM.csv</code> (machine-readable)</td><td>exists</td><td>exists</td><td>✅</td></tr>
-<tr><td>RTM rows ≥ total BDD scenarios</td><td>rows ≥ 206</td><td>RTM table covers all 21 feature files; row-per-file model</td><td>✅</td></tr>
-<tr><td>Class diagram relationships (6 types)</td><td>composition / aggregation / inheritance / realization / association / dependency</td><td>EDD §4 explicitly mentions all 6; canonical <code>class-domain.md</code> carries them</td><td>✅</td></tr>
+<tr><th>ID</th><th>問題</th><th>狀態</th><th>commit</th></tr>
+<tr><td>D4-H1</td><td>補充 HTTP 404 server BDD scenarios</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D4-H2</td><td>RTM 庫存計數更新（+ trading-ui.feature）</td><td>✅ FIXED</td><td>0e053e7</td></tr>
+<tr><td>D4-H3</td><td>補充 503 generation_exhausted scenario</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D4-H4</td><td>補充 Canvas WebGL fallback client scenario</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D4-H5</td><td>建立 gdpr-ui.feature（玩家端 GDPR）</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D4-H6</td><td>battle-records 補充 404 scenario</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D4-H7</td><td>gdpr-erasure 補充 player-initiated scenarios</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D1-H2</td><td>API.md 補充食物庫存端點</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D1-H3</td><td>EDD + API 補充食物掉落機制設計</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D1-H4</td><td>修正 BDD-server.md 交叉參照表 3 個 AC 錯誤</td><td>⏳ OPEN</td><td>—</td></tr>
+<tr><td>D1-H5</td><td>EDD 補充 notification BC 合併 ADR</td><td>⏳ OPEN</td><td>—</td></tr>
 </table>
-<p>No Dim 5 findings.</p>
+<h3 id="可腳本自動修復的所有-findings">可腳本自動修復的所有 findings</h3>
+<pre><code class="language-bash"># D1-L3: PDD Game UI checkbox
+sed -i &#x27;s/\[ \] Game UI (Phaser 3/[x] Game UI (Phaser 3/g&#x27; docs/PDD.md
+
+# D1-M1: BDD-server.md scenario count 81→82
+sed -i &#x27;s/共 81 scenarios/共 82 scenarios/g&#x27; docs/BDD-server.md
+
+# D4-M5/D4-M10: admin-search-performance.feature header tag
+sed -i &#x27;s/@US-ADMIN-003/@US-ADMIN-001/g&#x27; features/admin-search-performance.feature
+
+# D4-L1: RTM add trading-ui.feature row → manual RTM update
+# D4-L2: EDD §8.1 deferred tag → manual EDD update
+# D4-L3: cucumber.js config --tags &quot;not @future&quot; → add to config</code></pre>
 <hr>
-<h2 id="cross-chain-sanity-1b-in-skill-spec">Cross-Chain Sanity (1b in SKILL spec)</h2>
+<h2 id="附錄掃描環境資訊">附錄：掃描環境資訊</h2>
 <table>
-<tr><th>Pair</th><th>Status</th><th>Notes</th></tr>
-<tr><td>API.md ↔ PRD</td><td>✅</td><td>All endpoints map to ≥ 1 US</td></tr>
-<tr><td>API.md ↔ BRD</td><td>✅</td><td>API supports the 5 BRD goals (Claim/Train/Battle/Leaderboard/Admin)</td></tr>
-<tr><td>SCHEMA.md ↔ PRD</td><td>✅</td><td>All entities backed by PRD data needs</td></tr>
-<tr><td>SCHEMA.md ↔ BRD</td><td>✅</td><td>Capacity sized for BRD targets (1k DAU peak)</td></tr>
-<tr><td>VDD.md ↔ PRD</td><td>✅</td><td>Visual design covers PRD frontend US</td></tr>
-<tr><td>FRONTEND.md ↔ EDD</td><td>✅</td><td>Tech stack consistent (React + Vite + TypeScript / Vue 3 + Element Plus admin)</td></tr>
-<tr><td>FRONTEND.md ↔ PRD</td><td>✅</td><td>All routes documented</td></tr>
-<tr><td>BDD-server ↔ EDD</td><td>✅</td><td>Core APIs covered (auth, training, battle, leaderboard, admin)</td></tr>
-<tr><td>BDD-client ↔ PDD</td><td>✅</td><td>UI elements covered</td></tr>
-<tr><td>RTM ↔ PRD</td><td>✅</td><td>All 18 US ids resolvable</td></tr>
-<tr><td>RTM ↔ BRD</td><td>✅</td><td>P0 trace back to O1/O2/O3 BRD objectives</td></tr>
-<tr><td>BDD ↔ BRD</td><td>✅</td><td>Acceptance scenarios trace to BRD goals</td></tr>
-<tr><td>Test Plan ↔ IDEA</td><td>✅</td><td>Test scope within IDEA problem boundary</td></tr>
-</table>
-<p>No cross-chain conflicts.</p>
-<hr>
-<h2 id="findings-index">Findings Index</h2>
-<table>
-<tr><th>ID</th><th>Severity</th><th>Dim</th><th>Location</th><th>Auto-fix</th></tr>
-<tr><td>LOW-D1-1</td><td>LOW</td><td>1</td><td><code>features/admin-moderation.feature</code> line 1</td><td>YES</td></tr>
-<tr><td>LOW-D4-1</td><td>LOW</td><td>4</td><td><code>features/client/settings.feature</code> ↔ PRD US-AUTH-002</td><td>YES (Option A)</td></tr>
-</table>
-<hr>
-<h2 id="recommendation">Recommendation</h2>
-<p><strong>Convergence status: NEAR-CLEAN</strong></p>
-<p>The 23 fixes from <code>gendoc-align-fix</code> are stable. The 2 remaining LOW findings are cosmetic (one in-file Feature-line annotation, one PRD breadcrumb for settings UI) and do not block downstream <code>gencode</code>, <code>gen-contracts</code>, <code>gen-mock</code>, or <code>gen-html</code> steps.</p>
-<p><strong>Suggested next action</strong>: proceed to <code>gencode</code> (Phase B). The two LOW findings can be batched into a future minor doc-polish pass with no urgency.</p>
-<hr>
-<p><em>Report generated by <code>gendoc-align-check</code> (verify mode) — 2026-05-07T20:57Z.</em></p></main>
+<tr><th>項目</th><th>值</th></tr>
+<tr><td>掃描日期</td><td>2026-05-15</td></tr>
+<tr><td>State File</td><td>.gendoc-state-tobala-main.json</td></tr>
+<tr><td>client_type</td><td>game</td></tr>
+<tr><td>has_admin_backend</td><td>true</td></tr>
+<tr><td>Server feature files</td><td>12（82 scenarios）</td></tr>
+<tr><td>Client feature files</td><td>10（133 scenarios）</td></tr>
+<tr><td>Total BDD scenarios</td><td>215</td></tr>
+<tr><td>Pipeline hash</td><td>49f8456caade9b87</td></tr>
+<tr><td>EDD class count</td><td>42</td></tr>
+<tr><td>UML .puml files</td><td>9</td></tr>
+<tr><td>RTM.csv</td><td>exists</td></tr>
+<tr><td>src/ exists</td><td>NO（docs-first）</td></tr>
+<tr><td>tests/ exists</td><td>NO（docs-first）</td></tr>
+<tr><td>Dim6 overall readiness</td><td>76%</td></tr>
+</table></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

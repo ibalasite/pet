@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -470,6 +471,7 @@
   I want to ban disruptive pets and flag suspicious battles
   So that the game environment remains fair and enjoyable
 
+  @TC-SRV-MOD-001
   Scenario: Moderator bans pet with reason
     Given a pet with is_banned = false
     And a moderator_alice with role = &#x27;moderator&#x27;
@@ -486,6 +488,7 @@
       | target_id | pet_id |
       | detail | {&quot;reason&quot;: &quot;...&quot;, &quot;previous_is_banned&quot;: false} |
 
+  @TC-SRV-MOD-002
   Scenario: Banned pet removed from leaderboard within SLA
     Given a pet currently ranked 15th on the leaderboard
     When POST /admin/api/pets/:petId/ban is called
@@ -495,6 +498,7 @@
       | GET /api/v1/leaderboard | pet is not in top 100 |
       | pet appearance | pet is removed from results |
 
+  @TC-SRV-MOD-003
   Scenario: Banned pet blocked from arena entry
     Given a pet with is_banned = true
     And the pet owner with a valid petToken
@@ -503,6 +507,7 @@
     And the matchmaking entry is NOT created
     And error message is &quot;This pet has been banned from the arena&quot;
 
+  @TC-SRV-MOD-004
   Scenario: Moderator unbans pet
     Given a pet with is_banned = true and a ban reason on file
     When POST /admin/api/pets/:petId/unban is called with reason = &quot;Manual review confirmed legitimate play&quot;
@@ -512,6 +517,7 @@
     And pets.banned_at is NOT reset (immutable for audit)
     And an audit_log entry is created with action = &quot;pet.unban&quot;
 
+  @TC-SRV-MOD-005
   Scenario: Unban requires moderator role
     Given a read_only admin user
     When POST /admin/api/pets/:petId/unban is called
@@ -519,6 +525,7 @@
     And error message is &quot;Your role does not have permission for this action&quot;
     And the ban status is NOT changed
 
+  @TC-SRV-MOD-006
   Scenario: Flag suspicious battle with reason
     Given a completed arena_match with matchId &quot;match-uuid-001&quot;
     And a moderator with role = &#x27;moderator&#x27;
@@ -528,6 +535,7 @@
     And arena_matches.flagged_at is set to current timestamp
     And an audit_log entry is created with action = &quot;arena_match.flag&quot;
 
+  @TC-SRV-MOD-007
   Scenario: Unflag battle
     Given a flagged battle with is_flagged = true
     When DELETE /admin/api/battles/:matchId/flag is called with reason = &quot;Manual review confirmed legitimate outcome&quot;
@@ -536,6 +544,7 @@
     And arena_matches.flagged_at is cleared (set to NULL)
     And an audit_log entry is created with action = &quot;arena_match.unflag&quot;
 
+  @TC-SRV-MOD-008
   Scenario: Only moderator+ can flag battles
     Given a read_only admin user
     And a battle to flag
@@ -543,6 +552,7 @@
     Then the system returns HTTP 403 with error code FORBIDDEN
     And the battle remains unflagged
 
+  @TC-SRV-MOD-009
   Scenario: Admin can view flagged battles list
     Given 25 flagged battles and 100 unflagged battles in the database
     When GET /admin/api/battles?flagged=true is called
@@ -552,6 +562,7 @@
       | meta.total | 25 |
     And each battle includes: matchId, petAId, petBId, winnerId, is_flagged
 
+  @TC-SRV-MOD-010
   Scenario: Ban reason stored with character limit
     Given a moderator with a 600-character ban reason (exceeds 500-char limit)
     When POST /admin/api/pets/:petId/ban is called
@@ -559,6 +570,7 @@
     And error message indicates &quot;Reason must not exceed 500 characters&quot;
     And no ban is applied
 
+  @TC-SRV-MOD-011
   Scenario: Audit log captures all ban/unban/flag operations
     Given a moderator performs: ban pet_A, flag battle_B, unban pet_C
     When GET /admin/api/audit?limit=10 is called
@@ -569,11 +581,12 @@
       | pet.unban | moderator.id | pet | pet_C.id | {...} |
 </code></pre>
 <h2 id="admin-search-performancefeature">admin-search-performance.feature</h2>
-<pre><code class="language-gherkin">Feature: Admin Search Performance SLA (US-ADMIN-003)
+<pre><code class="language-gherkin">Feature: Admin Search Performance SLA (US-ADMIN-001)
   As an admin
   I want to search through pet records quickly
   So that moderation tasks complete within reasonable time
 
+  @TC-SRV-SRCH-001
   Scenario: Search returns results within 2 seconds for 1 million pet records
     Given the database contains 1,000,000 pet records
     And search index on (owner_email, pet_name, status) is active
@@ -588,6 +601,7 @@
     And pagination cursor is provided for additional results
     And search logs query time, result count, and index hit rate for monitoring
 
+  @TC-SRV-SRCH-002
   Scenario: Search performance consistent across query patterns
     Given the admin search index is active
     When multiple search queries are executed:
@@ -599,6 +613,7 @@
     Then all queries return within the specified time envelope
     And P95 latency remains consistent across the test run
 
+  @TC-SRV-SRCH-003
   Scenario: Search does not cause table-level locks
     Given concurrent search queries are running (admin1 searches, admin2 searches)
     When both searches are executed simultaneously
@@ -607,6 +622,7 @@
     And no &quot;table is locked&quot; errors are returned
     And query logs show no lock contention
 
+  @TC-SRV-SRCH-004
   Scenario: Search with no results returns quickly
     Given a query that matches zero pets (e.g., rarity=NONEXISTENT)
     When the query is executed
@@ -614,6 +630,7 @@
     And an empty result set is returned
     And error message indicates &quot;No results found&quot; (not a database error)
 
+  @TC-SRV-SRCH-005
   Scenario: Search index hit rate is monitored
     Given the admin performs 100 searches over a 5-minute period
     When the search log is analyzed
@@ -621,6 +638,7 @@
     And any index scans (sequential table scans) are logged as warnings
     And DBA is alerted if hit_rate drops below 90%
 
+  @TC-SRV-SRCH-006
   Scenario: Large result sets paginated efficiently
     Given a search returns 5000 matching records
     When the first page (50 records) is requested
@@ -632,6 +650,7 @@
 <h2 id="arena-battlefeature">arena-battle.feature</h2>
 <pre><code class="language-gherkin">Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
 
+  @TC-SRV-ARENA-001
   Scenario: Two pets match and complete a Race battle
     Given pet &quot;alpha-token-abc&quot; and pet &quot;beta-token-xyz&quot; are both in the matchmaking queue
     And both pets have valid speed stats recorded in the database
@@ -641,6 +660,7 @@
     And the pet with the higher effective speed (base stat plus up to ±15% random modifier) is recorded as the winner
     And both pets receive updated win/loss counts in their profiles
 
+  @TC-SRV-ARENA-002
   Scenario: AI fallback when no real opponent is available after timeout
     Given pet &quot;alpha-token-abc&quot; has entered the matchmaking queue via POST /api/v1/arena/enter and is the only pet present
     And (arena_matchmaking_timeout_seconds = 30) seconds pass without a second pet joining
@@ -649,6 +669,7 @@
     And the battle record includes is_ai_opponent = true
     And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
 
+  @TC-SRV-ARENA-003
   Scenario: Arena rate limit prevents excessive battles per hour
     Given pet &quot;alpha-token-abc&quot; has already completed (arena_rate_limit_battles_per_hour_default = 10) battles within the current hour
     When pet &quot;alpha-token-abc&quot; attempts to enter the matchmaking queue via POST /api/v1/arena/enter
@@ -656,6 +677,7 @@
     And the response body contains error code &quot;RATE_LIMIT_EXCEEDED&quot;
     And pet &quot;alpha-token-abc&quot; is not added to the matchmaking queue
 
+  @TC-SRV-ARENA-004
   Scenario: Sumo mode resolves outcome using strength stat instead of speed
     Given pet &quot;sumo-token-001&quot; with strength 85 and speed 40 is queued for a Sumo battle
     And pet &quot;sumo-token-002&quot; with strength 60 and speed 90 is queued for a Sumo battle
@@ -665,6 +687,7 @@
     And &quot;sumo-token-001&quot; is recorded as the winner because its strength stat is higher
     And the outcome is determined solely by the raw strength stat with no random modifier applied
 
+  @TC-SRV-ARENA-005
   Scenario: Player receives HTTP 429 when exceeding 10 battles per hour limit
     Given a player has played 10 battles in the current hour
     When the player attempts to start another battle via POST /api/v1/arena/enter
@@ -674,6 +697,7 @@
     And the client displays a countdown timer showing remaining wait time
     And the countdown is accurate within ±5 seconds
 
+  @TC-SRV-ARENA-006
   Scenario: Battle outcome is deterministic with same seed
     Given petA (stat_speed = 50) and petB (stat_speed = 45) battle with fixed random_seed = 12345
     When the battle is calculated twice independently
@@ -681,6 +705,7 @@
     And battleLog event sequences are identical
     And the outcome can be replayed deterministically for viewing
 
+  @TC-SRV-ARENA-007
   Scenario: Arena entry with authentication failures
     Given a request to POST /api/v1/arena/enter WITHOUT authentication header
     When the request is submitted
@@ -690,6 +715,7 @@
 <h2 id="battle-recordsfeature">battle-records.feature</h2>
 <pre><code class="language-gherkin">Feature: Battle Records API and History (US-RECORD-001)
 
+  @TC-SRV-REC-001
   Scenario: Battle records page returns last 20 battles with pagination
     Given a player has 45 public battle records
     When the player requests GET /api/v1/arena/history/:petId
@@ -698,6 +724,7 @@
     And each battle record includes: match_id, opponent_pet_id, result (WIN/LOSS), reward, timestamp
     And the response structure includes meta.total = 45 and meta.hasMore = true
 
+  @TC-SRV-REC-002
   Scenario: Battle records page with fewer than 20 records shows all records
     Given a player has 8 public battle records
     When the player requests GET /api/v1/arena/history/:petId
@@ -705,6 +732,7 @@
     And the response indicates &quot;hasMore&quot;: false or no pagination cursor
     And total_count = 8
 
+  @TC-SRV-REC-003
   Scenario: Battle records pagination cursor for next batch
     Given a player has 45 battle records
     And the first page returned 20 records with pagination_cursor = &quot;offset_20&quot;
@@ -713,6 +741,7 @@
     And a new pagination_cursor is provided for the next batch
     And the response includes meta.hasMore = true
 
+  @TC-SRV-REC-004
   Scenario: Open Graph meta tags are correctly generated for a battle record
     Given a battle was fought between Pet A (Rare, 12 wins) and Pet B (Common, 3 wins)
     When the battle record page is rendered as a social share link
@@ -726,6 +755,7 @@
     And all OG URLs are absolute and properly encoded
     And og:image points to a valid image URL with correct dimensions (1200x630 recommended)
 
+  @TC-SRV-REC-005
   Scenario: Battle record details include all required fields
     Given a battle record from GET /api/v1/arena/history/:petId
     When the response is parsed
@@ -742,6 +772,7 @@
       | mode | RACE\|SUMO | required |
     And no sensitive fields (opponent owner email) are exposed
 
+  @TC-SRV-REC-006
   Scenario: Battle records endpoint enforces public access without authentication
     Given a battle record for a pet with public_battles = true
     When GET /api/v1/arena/history/:petId is called WITHOUT Authorization header
@@ -749,6 +780,7 @@
     And the battle records are visible to any visitor
     And no authentication is required
 
+  @TC-SRV-REC-007
   Scenario: AI opponent battles are marked in battle records
     Given a battle record where opponent is an AI-generated pet
     When GET /api/v1/arena/history/:petId is called
@@ -762,6 +794,7 @@
   I want to claim a randomly generated pet with my email address
   So that I can access the pet across devices and sessions
 
+  @TC-SRV-CLAIM-001
   Scenario: Guest successfully claims a pet via email OTP happy path
     Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
     And the guest has already requested an OTP via POST /api/v1/claim/request and received a (claim_code_digits = 6)-digit code at &quot;player@example.com&quot;
@@ -769,6 +802,7 @@
     Then the server links the email to the pet token and responds with HTTP 200
     And the pets record has owner_token_hash populated and the claim_codes record has used_at set
 
+  @TC-SRV-CLAIM-002
   Scenario: Claim code expires after the configured window
     Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
     And the server issued a (claim_code_digits = 6)-digit OTP to &quot;player@example.com&quot;
@@ -776,6 +810,7 @@
     Then the server responds with HTTP 400
     And the response body contains error code &quot;CODE_EXPIRED&quot;
 
+  @TC-SRV-CLAIM-003
   Scenario: Claim rate limit blocks requests after the hourly threshold
     Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
     And the guest has already requested (auth_rate_limit_claim_attempts_per_hour = 5) OTP codes within the current hour
@@ -784,6 +819,7 @@
     And the response body contains error code &quot;RATE_LIMIT_EXCEEDED&quot;
     And the Retry-After header is present
 
+  @TC-SRV-CLAIM-004
   Scenario: One-time claim code cannot be reused after first verification
     Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
     And the server issued a (claim_code_digits = 6)-digit OTP to &quot;player@example.com&quot;
@@ -792,18 +828,21 @@
     Then the server responds with HTTP 400
     And the response body contains error code &quot;INVALID_CODE&quot;
 
+  @TC-SRV-CLAIM-005
   Scenario: Claim initiation requires age confirmation
     Given a guest with an unclaimed pet
     When the guest submits a claim request with email &quot;player@example.com&quot; and ageConfirmed = false
     Then the system returns HTTP 400 with error code AGE_CONFIRMATION_REQUIRED
     And the pet remains unclaimed
 
+  @TC-SRV-CLAIM-006
   Scenario: Pet already claimed by another player prevents re-claim
     Given a pet that is already claimed (owner_token_hash is set, claimed_at is set)
     When a guest submits a new claim request with a different email
     Then the system returns HTTP 400 with error code ALREADY_CLAIMED
     And the existing owner&#x27;s token remains valid
 
+  @TC-SRV-CLAIM-007
   Scenario: Claim code entry enforces fail-closed rate limit on Redis unavailability
     Given Redis is unavailable (connection refused or timeout)
     When a POST /api/v1/claim/verify request is submitted with a code
@@ -812,6 +851,7 @@
     And an alert is logged for Redis connectivity failure
     And no session is created
 
+  @TC-SRV-CLAIM-008
   Scenario: Email enumeration prevention — timing attack defense with ±50ms variance
     Given a test harness makes 100 claim requests with valid pet IDs at time series T_valid[]
     And the harness makes 100 claim requests with invalid pet IDs at time series T_invalid[]
@@ -833,6 +873,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     Given a Super Admin &quot;alice&quot; is authenticated with role = &#x27;super_admin&#x27;
     And the admin portal session is active and within the 4-hour inactivity window
 
+  @TC-SRV-ECO-001
   Scenario: Super Admin edits economy parameters within allowed ranges (AC-018-1)
     Given the Game Economy Configuration module is open
     When the Super Admin submits PUT /admin/api/config/economy with payload:
@@ -849,6 +890,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
       | arena_entry_cooldown_minutes   | integer 0–60     |
       | arena_entry_cost_credits       | integer 0–10     |
 
+  @TC-SRV-ECO-002
   Scenario: Out-of-range edit rejected with VALIDATION_ERROR (AC-018-1)
     Given the Game Economy Configuration module is open
     When the Super Admin submits PUT /admin/api/config/economy with food_buff_speed_multiplier = 9.9
@@ -857,6 +899,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     And no audit_log entry is created
     And no config_economy row is updated
 
+  @TC-SRV-ECO-003
   Scenario: Configuration change requires preview confirmation (AC-018-2)
     Given a pending change of arena_entry_cost_credits from 0 to 5
     When the Super Admin requests POST /admin/api/config/economy/preview with the change set
@@ -866,6 +909,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     And no value is persisted until POST /admin/api/config/economy/confirm is called with the preview token
     And confirmation token expires after 5 minutes
 
+  @TC-SRV-ECO-004
   Scenario: Saved configuration takes effect within 5 minutes via cache refresh (AC-018-3)
     Given the Super Admin saves a confirmed change setting arena_entry_cooldown_minutes = 30
     When the API server receives the next /api/v1/arena/enter request after 5 minutes (config_cache_refresh_max_minutes)
@@ -873,6 +917,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     And subsequent rate-limit checks use the new 30-minute cooldown
     And no in-flight battles are interrupted by the change
 
+  @TC-SRV-ECO-005
   Scenario: Audit log captures full change context for every economy edit (AC-018-4)
     Given the Super Admin &quot;alice&quot; saves food_buff_strength_multiplier from 1.0 to 2.0
     When GET /admin/api/audit?action=config.economy&amp;limit=1 is called
@@ -885,6 +930,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
       | detail       | {&quot;previous_value&quot;: 1.0, &quot;new_value&quot;: 2.0}          |
     And the audit row is append-only (no UPDATE or DELETE permitted)
 
+  @TC-SRV-ECO-006
   Scenario: Non-Super-Admin role is forbidden from editing economy parameters
     Given a moderator &quot;bob&quot; with role = &#x27;moderator&#x27;
     When bob calls PUT /admin/api/config/economy with any payload
@@ -895,12 +941,14 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
 <h2 id="gdpr-erasurefeature">gdpr-erasure.feature</h2>
 <pre><code class="language-gherkin">Feature: GDPR Data Erasure (US-AUTH-002, US-ADMIN-004)
 
+  @TC-SRV-GDPR-001
   Scenario: Player requests email erasure and email_encrypted is nulled within the SLA
     Given a pet owner with pet token &quot;owner-token-gdpr&quot; has a linked email &quot;erasure@example.com&quot; stored in email_encrypted
     When the owner submits a GDPR erasure request to POST /api/v1/gdpr/request with body { &quot;type&quot;: &quot;erasure&quot; }
     Then the server enqueues an erasure job and responds with HTTP 202
     And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column is set to NULL
 
+  @TC-SRV-GDPR-002
   Scenario: Super admin processes GDPR deletion via the admin portal
     Given a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
     And a GDPR deletion request exists for pet token &quot;owner-token-gdpr-admin&quot;
@@ -909,6 +957,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column for &quot;owner-token-gdpr-admin&quot; is set to NULL
     And an entry is written to admin_audit_log with action &quot;GDPR_DELETE&quot; and the admin_id and ip_address_hash populated
 
+  @TC-SRV-GDPR-003
   Scenario: GDPR email deletion completes within internal SLA and reports within external SLA
     Given a player requests account deletion via email
     When the GDPR request is processed
@@ -919,6 +968,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
       - Deleted (claim codes, session tokens)
       - Archived (audit logs for fraud detection, encrypted and no longer linked to player)
 
+  @TC-SRV-GDPR-004
   Scenario: Player submits GDPR erasure request
     Given a pet owner with a claimed pet and linked claim_identity_id
     And a valid petToken for the pet
@@ -926,12 +976,14 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     Then the system returns HTTP 202 with jobId and &quot;Your GDPR request has been received...&quot; message
     And a gdpr_requests row is created with status = &#x27;pending&#x27;
 
+  @TC-SRV-GDPR-005
   Scenario: GDPR-erased email cannot be re-registered immediately
     Given an email &quot;erased@example.com&quot; that has been GDPR-deleted
     And the email_hash is retained in claim_identities
     When a new claim attempt is submitted with email = &quot;erased@example.com&quot;
     Then the system rejects the claim request
 
+  @TC-SRV-GDPR-006
   Scenario: Erased pet displays with pseudonymous owner
     Given a pet whose owner email has been erased
     And the pet still has an arena history with visible battles
@@ -939,12 +991,14 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     Then the pet data is returned (not deleted)
     And owner email is not displayed
 
+  @TC-SRV-GDPR-007
   Scenario: Player checks GDPR request status
     Given a submitted GDPR erasure request with jobId = &quot;job-uuid-001&quot;
     And the player&#x27;s petToken that initiated the request
     When GET /api/v1/gdpr/request/status?jobId=job-uuid-001 is called
     Then the system returns HTTP 200 with status, submittedAt, and completedAt fields
 
+  @TC-SRV-GDPR-008
   Scenario: GDPR request status transitions
     Given a GDPR erasure request initially in &#x27;pending&#x27; status
     When the background job begins processing
@@ -955,6 +1009,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
 <h2 id="leaderboardfeature">leaderboard.feature</h2>
 <pre><code class="language-gherkin">Feature: Global Leaderboard (US-BOARD-001, US-ADMIN-002)
 
+  @TC-SRV-BOARD-001
   Scenario: Leaderboard falls back to PostgreSQL snapshot when Redis is unavailable
     Given the Redis Upstash instance is unreachable
     And a PostgreSQL snapshot of leaderboard scores exists from the last sync
@@ -962,6 +1017,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     Then the server responds with HTTP 200 using the PostgreSQL snapshot data
     And the response body contains &quot;degraded&quot;: true
 
+  @TC-SRV-BOARD-002
   Scenario: Leaderboard score is updated within the configured lag window after a battle
     Given pet &quot;fast-pet-token&quot; completes a Race battle and wins
     And the win increments the battles_won counter on pet &quot;fast-pet-token&quot; in the pets table
@@ -969,6 +1025,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     Then the updated score for &quot;fast-pet-token&quot; is visible in GET /api/v1/leaderboard within (leaderboard_update_lag_max_seconds = 30) seconds
     And &quot;fast-pet-token&quot; appears at the correct rank position
 
+  @TC-SRV-BOARD-003
   Scenario: Admin ban removes pet from leaderboard within the reflection time
     Given pet &quot;cheating-pet-token&quot; currently holds rank 3 on the leaderboard
     And a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
@@ -977,6 +1034,7 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     And within (leaderboard_ban_reflection_time_minutes = 5) minutes the pet no longer appears in GET /api/v1/leaderboard responses
     And an entry is written to admin_audit_log with action &quot;BAN&quot; and detail containing the moderation reason
 
+  @TC-SRV-BOARD-004
   Scenario: Leaderboard displays top 100 pets publicly
     Given 200 pets with varying leaderboard scores in Redis leaderboard:global sorted set
     When GET /api/v1/leaderboard with page=1, limit=100 is called without authentication
@@ -985,22 +1043,26 @@ Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMI
     And entries are sorted by score descending (highest rank first)
     And meta fields include total leaderboard size, page number, and limit
 
+  @TC-SRV-BOARD-005
   Scenario: Leaderboard filterable by rarity tier
     Given the leaderboard contains pets of all rarity tiers (COMMON, RARE, EPIC, LEGENDARY)
     When GET /api/v1/leaderboard?rarity=EPIC is called
     Then only EPIC-rarity pets are returned in the entries array
     And meta.total reflects the filtered count
 
+  @TC-SRV-BOARD-006
   Scenario: Leaderboard score calculation from formula
     Given a pet with win_rate = 0.75, battles_played = 40, level = 5
     When arena_score is calculated using: win_rate × battles_played × level_multiplier(5)
     Then this score is used for leaderboard ranking
 
+  @TC-SRV-BOARD-007
   Scenario: Pet rank query for individual pet
     Given a pet with petId &quot;pet-uuid-005&quot; ranked 42nd on the leaderboard
     When GET /api/v1/leaderboard/rank/pet-uuid-005 is called without authentication
     Then the system returns HTTP 200 with rank = 42 and the calculated_score_value
 
+  @TC-SRV-BOARD-008
   Scenario: Erased GDPR pet removed from leaderboard
     Given a pet belonging to a user who submitted GDPR erasure request
     And the pet is currently ranked on the leaderboard
@@ -1015,6 +1077,7 @@ Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
   I want to verify that pet rarity follows the specified probability distribution
   So that players get a balanced experience without gaming the system
 
+  @TC-SRV-RARITY-001
   Scenario: Pet generation follows 60-25-12-3 rarity distribution
     Given a test harness generates 10000 pets
     When the generation completes
@@ -1027,6 +1090,7 @@ Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
     And the chi-square test (α=0.05) confirms distribution is not statistically biased
     And no single rarity bucket deviates more than 2 percentage points from target
 
+  @TC-SRV-RARITY-002
   Scenario: Individual rarity probabilities sum to 100%
     Given the rarity weights are defined as:
       | Rarity    | Weight |
@@ -1038,6 +1102,7 @@ Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
     Then the total equals 1.00 (100%)
     And no negative or inverted weights are present
 
+  @TC-SRV-RARITY-003
   Scenario: Rarity seed determinism with same random seed
     Given a pet generation request with random_seed = 12345
     When the pet is generated and rarity is determined
@@ -1045,12 +1110,14 @@ Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
     Then both pets have the SAME rarity value
     And the rarity determination is reproducible
 
+  @TC-SRV-RARITY-004
   Scenario: Rarity distribution holds across population samples
     Given multiple samples of 5000 pets each
     When the rarity distribution is calculated for each sample
     Then each sample distribution remains within the acceptable bounds
     And no sample exhibits statistical anomalies (e.g., all Legendary)
 
+  @TC-SRV-RARITY-005
   Scenario: Legendary rarity cap enforcement
     Given a large batch of 50000 pets is generated
     When the rarity distribution is calculated
@@ -1061,6 +1128,7 @@ Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
 <h2 id="suspicious-detectionfeature">suspicious-detection.feature</h2>
 <pre><code class="language-gherkin">Feature: Suspicious Battle Detection (US-ADMIN-005)
 
+  @TC-SRV-SUSP-001
   Scenario: Pet is auto-flagged SUSPICIOUS after exceeding the battle threshold in the detection window
     Given pet &quot;spammer-token-001&quot; has completed more than (bot_detection_battles_threshold = 50) battles within the last (bot_detection_window_minutes = 60) minutes
     When the background detection job evaluates battle counts for all active pets
@@ -1068,6 +1136,7 @@ Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
     And a moderation alert is created in the admin review queue for &quot;spammer-token-001&quot;
     And no automatic ban is applied — the pet remains able to battle until a moderator acts
 
+  @TC-SRV-SUSP-002
   Scenario: Moderator reviews a SUSPICIOUS pet and submits an arena ban with a reason
     Given a moderator is authenticated with a valid httpOnly SameSite=Strict admin session cookie
     And pet &quot;spammer-token-001&quot; has status &quot;SUSPICIOUS&quot; in the moderation queue
@@ -1077,6 +1146,7 @@ Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
     And an entry is written to admin_audit_log with action &quot;BAN&quot;, admin_id, ip_address_hash, and the reason in the detail JSONB column
     And the server responds with HTTP 200
 
+  @TC-SRV-SUSP-003
   Scenario: Banned pet cannot enter future arena matches
     Given pet &quot;banned-token-002&quot; has status &quot;BANNED&quot; in the database
     When &quot;banned-token-002&quot; attempts to join the matchmaking queue via POST /api/v1/arena/enter
@@ -1091,6 +1161,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
   I want to list my pet for sale in the marketplace
   So that I can trade pets with other players
 
+  @TC-SRV-TRADE-001
   Scenario: Feature flag controls marketplace access
     Given FF_MARKETPLACE = false (feature disabled)
     When POST /api/v1/marketplace/listings is called with a valid petToken
@@ -1100,6 +1171,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And the same request is resubmitted
     Then the system returns HTTP 201 with created listing
 
+  @TC-SRV-TRADE-002
   Scenario: Create marketplace listing with price validation
     Given a pet owned by player A with petToken_A
     And pet stats: level = 5, rarity = RARE
@@ -1113,6 +1185,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
       | listed_at | ISO-8601 timestamp |
     And marketplace_listings row is created in PostgreSQL
 
+  @TC-SRV-TRADE-003
   Scenario: Listing price below minimum rejected
     Given a pet with minimum required price = 1500 credits
     When POST /api/v1/marketplace/listings is called with price_credits = 1400
@@ -1120,6 +1193,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And error message indicates minimum price requirement
     And no listing is created
 
+  @TC-SRV-TRADE-004
   Scenario: Anti-flip protection prevents rapid re-listing
     Given a pet sold in marketplace_transactions 3 days ago (within 7-day anti-flip window)
     And the same pet is owned by a new buyer (marketplace_trade_antiflip_protection_days = 7)
@@ -1128,6 +1202,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And error message is &quot;This pet cannot be re-listed within 7 days of purchase&quot;
     And no new listing is created
 
+  @TC-SRV-TRADE-005
   Scenario: Purchase listing transfers ownership and applies platform fee
     Given an active listing with price_credits = 1000 owned by seller_A
     And buyer_B with a valid petToken and sufficient credits
@@ -1148,6 +1223,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And seller_A receives 950 credits (1000 - 50 fee)
     And buyer_B receives ownership of the pet
 
+  @TC-SRV-TRADE-006
   Scenario: Cancel active listing
     Given an active listing created by player_A
     When DELETE /api/v1/marketplace/listings/:listingId is called with player_A&#x27;s petToken
@@ -1156,6 +1232,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And marketplace_listings.completed_at is set to NOW()
     And the pet remains owned by player_A
 
+  @TC-SRV-TRADE-007
   Scenario: Only listing owner can cancel
     Given an active listing owned by player_A with listingId &quot;list-001&quot;
     And player_B with a different petToken
@@ -1163,12 +1240,14 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     Then the system returns HTTP 403 with error code NOT_OWNER
     And the listing remains active
 
+  @TC-SRV-TRADE-008
   Scenario: Purchase endpoint requires buyer authentication
     Given an active listing
     When POST /api/v1/marketplace/listings/:listingId/buy is called WITHOUT authentication
     Then the system returns HTTP 401 with error code UNAUTHORIZED
     And the listing is not marked as sold
 
+  @TC-SRV-TRADE-009
   Scenario: Browse marketplace listings
     Given 50 active marketplace listings with varying prices and rarities
     When GET /api/v1/marketplace/listings?page=1&amp;limit=20&amp;sortBy=price&amp;order=asc is called
@@ -1180,6 +1259,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And listings are sorted by price ascending (lowest to highest)
     And each listing includes pet summary: petId, rarity, level, owner name (masked)
 
+  @TC-SRV-TRADE-010
   Scenario: Trade history private to pet owner
     Given a pet with completed sale in marketplace_transactions
     And the pet is now owned by a new buyer
@@ -1193,6 +1273,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
 <h2 id="training-foodfeature">training-food.feature</h2>
 <pre><code class="language-gherkin">Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
 
+  @TC-SRV-TRAIN-001
   Scenario: Training action increments a stat within bounds and enforces the daily action cap
     Given pet &quot;trainee-token-001&quot; has used 0 training actions today
     When the owner submits a training request via POST /api/v1/training with body { &quot;training_type&quot;: &quot;STRENGTH&quot; } for &quot;trainee-token-001&quot;
@@ -1203,6 +1284,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     When the owner submits a fourth POST /api/v1/training request for &quot;trainee-token-001&quot; on the same day
     Then the server responds with HTTP 400 and error code &quot;TRAINING_LIMIT_REACHED&quot;
 
+  @TC-SRV-TRAIN-002
   Scenario: Level formula computes deterministically from accumulated stat sum
     Given pet &quot;leveler-token-001&quot; has a stat triplet (speed=20, strength=10, stamina=5) summing to 35 stat points
     When the level computation runs for &quot;leveler-token-001&quot;
@@ -1211,6 +1293,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     Then pet.level equals MIN(FLOOR(1050 / 10), pet_level_max = 100) = 100
     And the level value never exceeds (pet_level_max = 100)
 
+  @TC-SRV-TRAIN-003
   Scenario: Temporary food buff applies bonus stat during an arena battle and expires after duration
     Given pet &quot;buffed-pet-token&quot; has a base speed stat of 50
     And a food buff of (food_buff_example_temp_amount_stat_points = 5) speed points has been applied to &quot;buffed-pet-token&quot; via POST /api/v1/food/apply with the food_buffs row recording expires_at (food_buff_example_temp_duration_hours = 24) hours from now

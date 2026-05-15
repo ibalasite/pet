@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -461,13 +462,13 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#platform-scope-declaration平台範圍宣告">Platform Scope Declaration（平台範圍宣告）</a></li><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-design-brief">§1 Design Brief</a></li><li><a class="toc__link toc__link--h3" href="#11-design-goals">§1.1 Design Goals</a></li><li><a class="toc__link toc__link--h3" href="#12-prd-requirement-mapping">§1.2 PRD Requirement Mapping</a></li><li><a class="toc__link toc__link--h3" href="#13-design-principles">§1.3 Design Principles</a></li><li><a class="toc__link" href="#2-user-research-summary">§2 User Research Summary</a></li><li><a class="toc__link toc__link--h3" href="#20-user-personas">§2.0 User Personas</a></li><li><a class="toc__link toc__link--h3" href="#24-user-journey-map">§2.4 User Journey Map</a></li><li><a class="toc__link toc__link--h3" href="#25-jobs-to-be-done-jtbd">§2.5 Jobs to Be Done (JTBD)</a></li><li><a class="toc__link toc__link--h3" href="#26-service-blueprint">§2.6 Service Blueprint</a></li><li><a class="toc__link" href="#3-information-architecture">§3 Information Architecture</a></li><li><a class="toc__link toc__link--h3" href="#31-sitemap">§3.1 Sitemap</a></li><li><a class="toc__link toc__link--h3" href="#32-navigation-patterns">§3.2 Navigation Patterns</a></li><li><a class="toc__link toc__link--h3" href="#33-content-priority-fz-pattern-analysis">§3.3 Content Priority (F/Z Pattern Analysis)</a></li><li><a class="toc__link" href="#4-user-flows">§4 User Flows</a></li><li><a class="toc__link toc__link--h3" href="#41-happy-path-claim-pet--train--battle--leaderboard">§4.1 Happy Path: Claim Pet → Train → Battle → Leaderboard</a></li><li><a class="toc__link toc__link--h3" href="#42-alternative-flows">§4.2 Alternative Flows</a></li><li><a class="toc__link toc__link--h3" href="#43-error-flows">§4.3 Error Flows</a></li><li><a class="toc__link" href="#5-screen-specifications">§5 Screen Specifications</a></li><li><a class="toc__link toc__link--h3" href="#51-landing-page--route">5.1 Landing Page — Route: /</a></li><li><a class="toc__link toc__link--h3" href="#52-claim-pet-page--route-claim">5.2 Claim Pet Page — Route: /claim</a></li><li><a class="toc__link toc__link--h3" href="#53-my-pet-page--route-petpetid">5.3 My Pet Page — Route: /pet/:petId</a></li><li><a class="toc__link toc__link--h3" href="#54-training-page--route-petpetidtrain">5.4 Training Page — Route: /pet/:petId/train</a></li><li><a class="toc__link toc__link--h3" href="#55-arena-page--route-arena">5.5 Arena Page — Route: /arena</a></li><li><a class="toc__link toc__link--h3" href="#56-battle-result-page--route-arenaresultbattleid">5.6 Battle Result Page — Route: /arena/result/:battleId</a></li><li><a class="toc__link toc__link--h3" href="#57-leaderboard-page--route-leaderboard">5.7 Leaderboard Page — Route: /leaderboard</a></li><li><a class="toc__link toc__link--h3" href="#58-battle-records-page--route-petpetidrecords">5.8 Battle Records Page — Route: /pet/:petId/records</a></li><li><a class="toc__link toc__link--h3" href="#59-marketplace-page--route-marketplace-behind-ff_marketplace">5.9 Marketplace Page — Route: /marketplace (behind FF_MARKETPLACE)</a></li><li><a class="toc__link toc__link--h3" href="#510-admin-portal--route-admin-separate-auth-domain">5.10 Admin Portal — Route: /admin (separate auth domain)</a></li><li><a class="toc__link" href="#6-interaction-design">§6 Interaction Design</a></li><li><a class="toc__link toc__link--h3" href="#61-interaction-principles">§6.1 Interaction Principles</a></li><li><a class="toc__link toc__link--h3" href="#611-motion-design-spec">§6.1.1 Motion Design Spec</a></li><li><a class="toc__link toc__link--h3" href="#62-feedback-mechanisms-three-timing-tiers">§6.2 Feedback Mechanisms (Three Timing Tiers)</a></li><li><a class="toc__link toc__link--h3" href="#63-empty-state-design">§6.3 Empty State Design</a></li><li><a class="toc__link toc__link--h3" href="#64-loading-states">§6.4 Loading States</a></li><li><a class="toc__link toc__link--h3" href="#65-micro-interaction-catalog">§6.5 Micro-interaction Catalog</a></li><li><a class="toc__link toc__link--h3" href="#66-gesture--touch-design-mobile-browser">§6.6 Gesture &amp;amp; Touch Design (Mobile Browser)</a></li><li><a class="toc__link toc__link--h3" href="#67-haptic-feedback-design">§6.7 Haptic Feedback Design</a></li><li><a class="toc__link" href="#7-responsive--adaptive-design">§7 Responsive &amp;amp; Adaptive Design</a></li><li><a class="toc__link toc__link--h3" href="#71-breakpoints">§7.1 Breakpoints</a></li><li><a class="toc__link toc__link--h3" href="#72-component-behavior-matrix">§7.2 Component Behavior Matrix</a></li><li><a class="toc__link toc__link--h3" href="#73-mobile-first-declaration">§7.3 Mobile-First Declaration</a></li><li><a class="toc__link" href="#8-accessibility-specifications">§8 Accessibility Specifications</a></li><li><a class="toc__link toc__link--h3" href="#83-keyboard-navigation">§8.3 Keyboard Navigation</a></li><li><a class="toc__link toc__link--h3" href="#84-wcag-21-aa-compliance-matrix">§8.4 WCAG 2.1 AA Compliance Matrix</a></li><li><a class="toc__link" href="#9-design-system-reference">§9 Design System Reference</a></li><li><a class="toc__link toc__link--h3" href="#91-color-palette">§9.1 Color Palette</a></li><li><a class="toc__link toc__link--h3" href="#92-typography">§9.2 Typography</a></li><li><a class="toc__link toc__link--h3" href="#93-design-token-three-layer-architecture">§9.3 Design Token Three-Layer Architecture</a></li><li><a class="toc__link toc__link--h3" href="#94-dark-mode-token-mapping">§9.4 Dark Mode Token Mapping</a></li><li><a class="toc__link toc__link--h3" href="#95-web-clean-architecture-diagram">§9.5 Web Clean Architecture Diagram</a></li><li><a class="toc__link toc__link--h3" href="#951-component-class-diagram">§9.5.1 Component Class Diagram</a></li><li><a class="toc__link" href="#95-client-類別圖class-diagram">§9.5 Client 類別圖（Class Diagram）</a></li><li><a class="toc__link toc__link--h3" href="#951-web-前端-class-diagram概覽">§9.5.1 Web 前端 Class Diagram（概覽）</a></li><li><a class="toc__link" href="#10-copy--content-design">§10 Copy &amp;amp; Content Design</a></li><li><a class="toc__link toc__link--h3" href="#101-tone-of-voice">§10.1 Tone of Voice</a></li><li><a class="toc__link toc__link--h3" href="#102-key-copy-list">§10.2 Key Copy List</a></li><li><a class="toc__link toc__link--h3" href="#103-i18n-string-list">§10.3 i18n String List</a></li><li><a class="toc__link" href="#11-prototype--validation-plan">§11 Prototype &amp;amp; Validation Plan</a></li><li><a class="toc__link toc__link--h3" href="#111-prototype-links">§11.1 Prototype Links</a></li><li><a class="toc__link toc__link--h3" href="#112-design-validation-plan">§11.2 Design Validation Plan</a></li><li><a class="toc__link" href="#12-open-design-questions">§12 Open Design Questions</a></li><li><a class="toc__link" href="#13-engineering-handoff-specification">§13 Engineering Handoff Specification</a></li><li><a class="toc__link toc__link--h3" href="#131-figma-handoff-checklist">§13.1 Figma Handoff Checklist</a></li><li><a class="toc__link toc__link--h3" href="#132-usability-testing-protocol">§13.2 Usability Testing Protocol</a></li><li><a class="toc__link toc__link--h3" href="#133-ab-test-design-template--ab-001-claim-page-rarity-reveal-optimization">§13.3 A/B Test Design Template — AB-001 (Claim Page Rarity Reveal Optimization)</a></li><li><a class="toc__link toc__link--h3" href="#134-state-management-approach">§13.4 State Management Approach</a></li><li><a class="toc__link toc__link--h3" href="#135-api-integration-points">§13.5 API Integration Points</a></li><li><a class="toc__link" href="#14-references">§14 References</a></li><li><a class="toc__link" href="#15-admin-portal-product-design">§15 Admin Portal Product Design</a></li><li><a class="toc__link toc__link--h3" href="#151-admin-portal-positioning">§15.1 Admin Portal Positioning</a></li><li><a class="toc__link toc__link--h3" href="#152-admin-information-architecture">§15.2 Admin Information Architecture</a></li><li><a class="toc__link toc__link--h3" href="#153-core-page-wireframe-descriptions">§15.3 Core Page Wireframe Descriptions</a></li><li><a class="toc__link toc__link--h3" href="#154-admin-ux-design-decisions">§15.4 Admin UX Design Decisions</a></li><li><a class="toc__link" href="#16-approval-sign-off">§16 Approval Sign-off</a></li><li><a class="toc__link" href="#appendix">Appendix</a></li><li><a class="toc__link toc__link--h3" href="#a-bdd--acceptance-criteria-links">A. BDD / Acceptance Criteria Links</a></li><li><a class="toc__link toc__link--h3" href="#b-screen-inventory">B. Screen Inventory</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#platform-scope-declaration平台範圍宣告">Platform Scope Declaration（平台範圍宣告）</a></li><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-design-brief">§1 Design Brief</a></li><li><a class="toc__link toc__link--h3" href="#11-design-goals">§1.1 Design Goals</a></li><li><a class="toc__link toc__link--h3" href="#12-prd-requirement-mapping">§1.2 PRD Requirement Mapping</a></li><li><a class="toc__link toc__link--h3" href="#13-design-principles">§1.3 Design Principles</a></li><li><a class="toc__link" href="#2-user-research-summary">§2 User Research Summary</a></li><li><a class="toc__link toc__link--h3" href="#20-user-personas">§2.0 User Personas</a></li><li><a class="toc__link toc__link--h3" href="#24-user-journey-map">§2.4 User Journey Map</a></li><li><a class="toc__link toc__link--h3" href="#25-jobs-to-be-done-jtbd">§2.5 Jobs to Be Done (JTBD)</a></li><li><a class="toc__link toc__link--h3" href="#26-service-blueprint">§2.6 Service Blueprint</a></li><li><a class="toc__link" href="#3-information-architecture">§3 Information Architecture</a></li><li><a class="toc__link toc__link--h3" href="#31-sitemap">§3.1 Sitemap</a></li><li><a class="toc__link toc__link--h3" href="#32-navigation-patterns">§3.2 Navigation Patterns</a></li><li><a class="toc__link toc__link--h3" href="#33-content-priority-fz-pattern-analysis">§3.3 Content Priority (F/Z Pattern Analysis)</a></li><li><a class="toc__link" href="#4-user-flows">§4 User Flows</a></li><li><a class="toc__link toc__link--h3" href="#41-happy-path-claim-pet--train--battle--leaderboard">§4.1 Happy Path: Claim Pet → Train → Battle → Leaderboard</a></li><li><a class="toc__link toc__link--h3" href="#42-alternative-flows">§4.2 Alternative Flows</a></li><li><a class="toc__link toc__link--h3" href="#43-error-flows">§4.3 Error Flows</a></li><li><a class="toc__link" href="#5-screen-specifications">§5 Screen Specifications</a></li><li><a class="toc__link toc__link--h3" href="#51-landing-page--route">5.1 Landing Page — Route: /</a></li><li><a class="toc__link toc__link--h3" href="#52-claim-pet-page--route-claim">5.2 Claim Pet Page — Route: /claim</a></li><li><a class="toc__link toc__link--h3" href="#53-my-pet-page--route-petpetid">5.3 My Pet Page — Route: /pet/:petId</a></li><li><a class="toc__link toc__link--h3" href="#54-training-page--route-petpetidtrain">5.4 Training Page — Route: /pet/:petId/train</a></li><li><a class="toc__link toc__link--h3" href="#55-arena-page--route-arena">5.5 Arena Page — Route: /arena</a></li><li><a class="toc__link toc__link--h3" href="#56-battle-result-page--route-arenaresultbattleid">5.6 Battle Result Page — Route: /arena/result/:battleId</a></li><li><a class="toc__link toc__link--h3" href="#57-leaderboard-page--route-leaderboard">5.7 Leaderboard Page — Route: /leaderboard</a></li><li><a class="toc__link toc__link--h3" href="#58-battle-records-page--route-petpetidrecords">5.8 Battle Records Page — Route: /pet/:petId/records</a></li><li><a class="toc__link toc__link--h3" href="#59-marketplace-page--route-marketplace-behind-ff_marketplace">5.9 Marketplace Page — Route: /marketplace (behind FF_MARKETPLACE)</a></li><li><a class="toc__link toc__link--h3" href="#510-admin-portal--route-admin-separate-auth-domain">5.10 Admin Portal — Route: /admin (separate auth domain)</a></li><li><a class="toc__link" href="#6-interaction-design">§6 Interaction Design</a></li><li><a class="toc__link toc__link--h3" href="#61-interaction-principles">§6.1 Interaction Principles</a></li><li><a class="toc__link toc__link--h3" href="#611-motion-design-spec">§6.1.1 Motion Design Spec</a></li><li><a class="toc__link toc__link--h3" href="#62-feedback-mechanisms-three-timing-tiers">§6.2 Feedback Mechanisms (Three Timing Tiers)</a></li><li><a class="toc__link toc__link--h3" href="#63-empty-state-design">§6.3 Empty State Design</a></li><li><a class="toc__link toc__link--h3" href="#64-loading-states">§6.4 Loading States</a></li><li><a class="toc__link toc__link--h3" href="#65-micro-interaction-catalog">§6.5 Micro-interaction Catalog</a></li><li><a class="toc__link toc__link--h3" href="#66-gesture--touch-design-mobile-browser">§6.6 Gesture &amp;amp; Touch Design (Mobile Browser)</a></li><li><a class="toc__link toc__link--h3" href="#67-haptic-feedback-design">§6.7 Haptic Feedback Design</a></li><li><a class="toc__link" href="#7-responsive--adaptive-design">§7 Responsive &amp;amp; Adaptive Design</a></li><li><a class="toc__link toc__link--h3" href="#71-breakpoints">§7.1 Breakpoints</a></li><li><a class="toc__link toc__link--h3" href="#72-component-behavior-matrix">§7.2 Component Behavior Matrix</a></li><li><a class="toc__link toc__link--h3" href="#73-mobile-first-declaration">§7.3 Mobile-First Declaration</a></li><li><a class="toc__link" href="#8-accessibility-specifications">§8 Accessibility Specifications</a></li><li><a class="toc__link toc__link--h3" href="#81-keyboard-navigation">§8.1 Keyboard Navigation</a></li><li><a class="toc__link toc__link--h3" href="#82-screen-reader-support">§8.2 Screen Reader Support</a></li><li><a class="toc__link toc__link--h3" href="#83-keyboard-navigation-flows">§8.3 Keyboard Navigation Flows</a></li><li><a class="toc__link toc__link--h3" href="#84-wcag-21-aa-compliance-matrix">§8.4 WCAG 2.1 AA Compliance Matrix</a></li><li><a class="toc__link" href="#9-design-system-reference">§9 Design System Reference</a></li><li><a class="toc__link toc__link--h3" href="#91-color-palette">§9.1 Color Palette</a></li><li><a class="toc__link toc__link--h3" href="#92-typography">§9.2 Typography</a></li><li><a class="toc__link toc__link--h3" href="#93-design-token-three-layer-architecture">§9.3 Design Token Three-Layer Architecture</a></li><li><a class="toc__link toc__link--h3" href="#94-dark-mode-token-mapping">§9.4 Dark Mode Token Mapping</a></li><li><a class="toc__link toc__link--h3" href="#95-web-clean-architecture-diagram">§9.5 Web Clean Architecture Diagram</a></li><li><a class="toc__link toc__link--h3" href="#951-component-class-diagram">§9.5.1 Component Class Diagram</a></li><li><a class="toc__link" href="#10-copy--content-design">§10 Copy &amp;amp; Content Design</a></li><li><a class="toc__link toc__link--h3" href="#101-tone-of-voice">§10.1 Tone of Voice</a></li><li><a class="toc__link toc__link--h3" href="#102-key-copy-list">§10.2 Key Copy List</a></li><li><a class="toc__link toc__link--h3" href="#103-i18n-string-list">§10.3 i18n String List</a></li><li><a class="toc__link" href="#11-prototype--validation-plan">§11 Prototype &amp;amp; Validation Plan</a></li><li><a class="toc__link toc__link--h3" href="#111-prototype-links">§11.1 Prototype Links</a></li><li><a class="toc__link toc__link--h3" href="#112-design-validation-plan">§11.2 Design Validation Plan</a></li><li><a class="toc__link" href="#12-open-design-questions">§12 Open Design Questions</a></li><li><a class="toc__link" href="#13-engineering-handoff-specification">§13 Engineering Handoff Specification</a></li><li><a class="toc__link toc__link--h3" href="#131-figma-handoff-checklist">§13.1 Figma Handoff Checklist</a></li><li><a class="toc__link toc__link--h3" href="#132-usability-testing-protocol">§13.2 Usability Testing Protocol</a></li><li><a class="toc__link toc__link--h3" href="#133-ab-test-design-template--ab-001-claim-page-rarity-reveal-optimization">§13.3 A/B Test Design Template — AB-001 (Claim Page Rarity Reveal Optimization)</a></li><li><a class="toc__link toc__link--h3" href="#134-state-management-approach">§13.4 State Management Approach</a></li><li><a class="toc__link toc__link--h3" href="#135-api-integration-points">§13.5 API Integration Points</a></li><li><a class="toc__link" href="#14-references">§14 References</a></li><li><a class="toc__link" href="#15-admin-portal-product-design">§15 Admin Portal Product Design</a></li><li><a class="toc__link toc__link--h3" href="#151-admin-portal-positioning">§15.1 Admin Portal Positioning</a></li><li><a class="toc__link toc__link--h3" href="#152-admin-information-architecture">§15.2 Admin Information Architecture</a></li><li><a class="toc__link toc__link--h3" href="#153-core-page-wireframe-descriptions">§15.3 Core Page Wireframe Descriptions</a></li><li><a class="toc__link toc__link--h3" href="#1531-admin-component-state-matrices">§15.3.1 Admin Component State Matrices</a></li><li><a class="toc__link toc__link--h3" href="#1532-admin-screen-interaction-specifications">§15.3.2 Admin Screen Interaction Specifications</a></li><li><a class="toc__link toc__link--h3" href="#154-admin-ux-design-decisions">§15.4 Admin UX Design Decisions</a></li><li><a class="toc__link" href="#16-approval-sign-off">§16 Approval Sign-off</a></li><li><a class="toc__link" href="#appendix">Appendix</a></li><li><a class="toc__link toc__link--h3" href="#a-bdd--acceptance-criteria-links">A. BDD / Acceptance Criteria Links</a></li><li><a class="toc__link toc__link--h3" href="#b-screen-inventory">B. Screen Inventory</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="pdd--product-design-document">PDD — Product Design Document</h1>
 <hr>
 <h2 id="platform-scope-declaration平台範圍宣告">Platform Scope Declaration（平台範圍宣告）</h2>
-<ul><li style="list-style:none"><input type="checkbox" checked disabled> Web（Browser）</li><li style="list-style:none"><input type="checkbox" disabled> iOS Native</li><li style="list-style:none"><input type="checkbox" disabled> Android Native</li><li style="list-style:none"><input type="checkbox" disabled> Desktop App（Electron / macOS / Windows）</li><li style="list-style:none"><input type="checkbox" disabled> Game UI（Phaser 3 / HTML5 Canvas）</li><li style="list-style:none"><input type="checkbox" disabled> Embedded / Kiosk</li></ul>
+<ul><li style="list-style:none"><input type="checkbox" checked disabled> Web（Browser）</li><li style="list-style:none"><input type="checkbox" disabled> iOS Native</li><li style="list-style:none"><input type="checkbox" disabled> Android Native</li><li style="list-style:none"><input type="checkbox" disabled> Desktop App（Electron / macOS / Windows）</li><li style="list-style:none"><input type="checkbox" checked disabled> Game UI（Phaser 3 / HTML5 Canvas）</li><li style="list-style:none"><input type="checkbox" disabled> Embedded / Kiosk</li></ul>
 <hr>
 <h2 id="document-control">Document Control</h2>
 <table>
@@ -487,6 +488,7 @@
 </table>
 <hr>
 <h2 id="change-log">Change Log</h2>
+<p>This log records all revisions to this Product Design Document, including scope, author, and a brief summary of each change cycle.</p>
 <table>
 <tr><th>Version</th><th>Date</th><th>Author</th><th>Summary</th></tr>
 <tr><td>1.0</td><td>2026-05-03</td><td>AI Generated (gendoc pdd)</td><td>Initial draft generated from PRD-PIXEL-PET-ARENA-20260503</td></tr>
@@ -501,17 +503,25 @@
 <ol><li><strong>Accessible by default</strong>: WCAG 2.1 AA compliance, <code>prefers-reduced-motion</code> support, and minimum 44×44px touch targets must be non-negotiable constraints woven into the design system from the first token, not retrofitted at the end.</li></ol>
 <h3 id="12-prd-requirement-mapping">§1.2 PRD Requirement Mapping</h3>
 <table>
-<tr><th>Epic / US Cluster</th><th>PRD Reference</th><th>PDD Section</th></tr>
-<tr><td>Pet Generation &amp; Display (EPIC-PET)</td><td>§5 US-PET-001, US-PET-002</td><td>§5.1 Landing Page, §5.2 Claim Pet Page, §6.5 Micro-interactions</td></tr>
-<tr><td>Authentication &amp; Identity (EPIC-AUTH)</td><td>§5 US-AUTH-001, US-AUTH-002</td><td>§5.2 Claim Pet Page, §4.1 Happy Path Flow, §4.3 Error Flows</td></tr>
-<tr><td>Training &amp; Feeding System (EPIC-TRAINING)</td><td>§5 US-TRAIN-001, US-FOOD-001</td><td>§5.3 My Pet Page, §5.4 Training Page, §6.5 Micro-interactions</td></tr>
-<tr><td>Arena Battle System (EPIC-ARENA)</td><td>§5 US-ARENA-001, US-ARENA-002</td><td>§5.5 Arena Page, §5.6 Battle Result Page, §4.1 Happy Path Flow</td></tr>
-<tr><td>Rankings, Records &amp; Rarity (EPIC-RANKING)</td><td>§5 US-BOARD-001, US-RECORD-001, US-RARITY-001</td><td>§5.7 Leaderboard Page, §5.8 Battle Records Page, §9.1 Color Palette</td></tr>
-<tr><td>Pet Trading Marketplace (EPIC-MARKETPLACE)</td><td>§5 US-TRADE-001</td><td>§5.9 Marketplace Page (behind FF_MARKETPLACE)</td></tr>
-<tr><td>Admin &amp; Moderation Portal (EPIC-ADMIN)</td><td>§5 US-ADMIN-001–006, §19</td><td>§15 Admin Portal Product Design</td></tr>
-<tr><td>Non-functional: Accessibility</td><td>§7.7 NFR-A11Y-01–04, §18</td><td>§8 Accessibility Specifications</td></tr>
-<tr><td>Non-functional: Performance</td><td>§7.1 NFR-PERF-01–10</td><td>§14 References, §7 Responsive Design</td></tr>
-<tr><td>Non-functional: i18n</td><td>§7.6 NFR-I18N-01–04</td><td>§10.3 i18n String List</td></tr>
+<tr><th>US-ID</th><th>US Title</th><th>Screens Covered</th><th>Primary Screen</th></tr>
+<tr><td>US-PET-001</td><td>Animated pixel pet generation and display</td><td>§5.1 Landing Page, §6.5 Micro-interactions</td><td>§5.1 Landing Page</td></tr>
+<tr><td>US-PET-002</td><td>Pet rarity tiers and visual differentiation</td><td>§5.1 Landing Page, §5.3 My Pet Page, §5.7 Leaderboard Page, §9.1 Color Palette</td><td>§5.3 My Pet Page</td></tr>
+<tr><td>US-AUTH-001</td><td>Email-based claim flow with 6-digit code</td><td>§5.2 Claim Pet Page, §4.1 Happy Path Flow, §4.3 Error Flows, §10.2</td><td>§5.2 Claim Pet Page</td></tr>
+<tr><td>US-AUTH-002</td><td>Pet URL token access and session persistence</td><td>§5.3 My Pet Page, §4.2 Alternative Flows, §4.3 Error Flows</td><td>§5.3 My Pet Page</td></tr>
+<tr><td>US-TRAIN-001</td><td>Daily training actions with stat increments</td><td>§5.4 Training Page, §6.5 (MI-03, MI-04, MI-12)</td><td>§5.4 Training Page</td></tr>
+<tr><td>US-FOOD-001</td><td>Food inventory and stat buff system</td><td>§5.3 My Pet Page (FoodInventory), §6.5 (MI-10)</td><td>§5.3 My Pet Page</td></tr>
+<tr><td>US-ARENA-001</td><td>Arena battle matchmaking and animation</td><td>§5.5 Arena Page, §5.6 Battle Result Page, §4.1 Happy Path Flow, §6.5 (MI-07, MI-08)</td><td>§5.5 Arena Page</td></tr>
+<tr><td>US-ARENA-002</td><td>Arena mode selection (Race, Sumo)</td><td>§5.5 Arena Page (ModeSelector), §6.5 MI-battle-start</td><td>§5.5 Arena Page</td></tr>
+<tr><td>US-BOARD-001</td><td>Global leaderboard with top 100 ranking</td><td>§5.7 Leaderboard Page, §3.3 Content Priority</td><td>§5.7 Leaderboard Page</td></tr>
+<tr><td>US-RECORD-001</td><td>Battle records and shareable pet profile</td><td>§5.8 Battle Records Page, §5.6 Battle Result Page, §10.2</td><td>§5.8 Battle Records Page</td></tr>
+<tr><td>US-RARITY-001</td><td>Rarity visual language across all surfaces</td><td>§9.1 Color Palette, §5.3 RarityBadge, §5.7 RarityFilter</td><td>§9.1 Color Palette</td></tr>
+<tr><td>US-TRADE-001</td><td>Pet trading marketplace</td><td>§5.9 Marketplace Page, §4.2 Alternative Flows</td><td>§5.9 Marketplace Page</td></tr>
+<tr><td>US-ADMIN-001</td><td>Admin pet management (ban/flag/search)</td><td>§15.3 Pet Management, §15.4 UX Decisions</td><td>§15.3 Pet Management</td></tr>
+<tr><td>US-ADMIN-002</td><td>Admin leaderboard moderation with auto-flag</td><td>§15.3 Leaderboard Management, §15.4 UX Decisions</td><td>§15.3 Leaderboard Management</td></tr>
+<tr><td>US-ADMIN-003</td><td>Runtime parameter tuning (rate limits, rarity weights)</td><td>§15.3 Arena Rate Config, §15.4 UX Decisions</td><td>§15.3 Arena Rate Config</td></tr>
+<tr><td>US-ADMIN-004</td><td>GDPR data deletion processing</td><td>§15.3 User Management, §15.4 UX Decisions</td><td>§15.3 User Management</td></tr>
+<tr><td>US-ADMIN-005</td><td>Suspicious battle detection</td><td>§15.3 Leaderboard Management, §15.4 UX Decisions</td><td>§15.3 Leaderboard Management</td></tr>
+<tr><td>US-ADMIN-006</td><td>Game Economy Configuration (food buff multipliers, arena entry cost/cooldown)</td><td>§15.3 Economy Config, §15.4 UX Decisions</td><td>§15.3 Economy Config</td></tr>
 </table>
 <h3 id="13-design-principles">§1.3 Design Principles</h3>
 <p><strong>Principle 1 — Pixel Art Purity</strong></p>
@@ -969,7 +979,7 @@
 </table>
 <hr>
 <h3 id="510-admin-portal--route-admin-separate-auth-domain">5.10 Admin Portal — Route: <code>/admin</code> (separate auth domain)</h3>
-<p>Covered fully in §15 Admin Portal Product Design.</p>
+<p>The Admin Portal is a separate authenticated web application at <code>/admin</code> serving platform operators. It is covered fully in §15 Admin Portal Product Design, including role-based access, screen specifications, state matrices, and UX decisions.</p>
 <hr>
 <h2 id="6-interaction-design">§6 Interaction Design</h2>
 <h3 id="61-interaction-principles">§6.1 Interaction Principles</h3>
@@ -1052,13 +1062,13 @@
 <h2 id="7-responsive--adaptive-design">§7 Responsive &amp; Adaptive Design</h2>
 <h3 id="71-breakpoints">§7.1 Breakpoints</h3>
 <table>
-<tr><th>Breakpoint Name</th><th>Width</th><th>Description</th></tr>
-<tr><td><code>xs</code></td><td>320px</td><td>Smallest mobile (iPhone SE)</td></tr>
-<tr><td><code>sm</code></td><td>375px</td><td>Standard mobile (iPhone 14)</td></tr>
-<tr><td><code>md</code></td><td>768px</td><td>Tablet / large mobile landscape</td></tr>
-<tr><td><code>lg</code></td><td>1024px</td><td>Small desktop / tablet landscape</td></tr>
-<tr><td><code>xl</code></td><td>1440px</td><td>Standard desktop</td></tr>
-<tr><td><code>2xl</code></td><td>1920px</td><td>Large / ultrawide desktop</td></tr>
+<tr><th>Breakpoint Name</th><th>Width</th><th>Description</th><th>Layout Strategy</th></tr>
+<tr><td><code>xs</code></td><td>320px</td><td>Smallest mobile (iPhone SE)</td><td>Single column; full-width components; bottom navigation bar; stacked stats and training cards</td></tr>
+<tr><td><code>sm</code></td><td>375px</td><td>Standard mobile (iPhone 14)</td><td>Single column; slightly wider cards; 1.5 training cards visible for carousel hint</td></tr>
+<tr><td><code>md</code></td><td>768px</td><td>Tablet / large mobile landscape</td><td>2-column grid for training actions and food inventory; centered modals (480px max-width); side panel collapsed</td></tr>
+<tr><td><code>lg</code></td><td>1024px</td><td>Small desktop / tablet landscape</td><td>3-column layout for training actions; horizontal nav bar visible; side panel collapses to icon-only in admin</td></tr>
+<tr><td><code>xl</code></td><td>1440px</td><td>Standard desktop</td><td>3-column content grid; side panel fully visible in admin; pet canvas and stats panel side-by-side</td></tr>
+<tr><td><code>2xl</code></td><td>1920px</td><td>Large / ultrawide desktop</td><td>Max-width containers centered (1200px for content, 1440px outer); no additional layout change from xl</td></tr>
 </table>
 <h3 id="72-component-behavior-matrix">§7.2 Component Behavior Matrix</h3>
 <table>
@@ -1098,7 +1108,11 @@
 }</code></pre>
 <hr>
 <h2 id="8-accessibility-specifications">§8 Accessibility Specifications</h2>
-<h3 id="83-keyboard-navigation">§8.3 Keyboard Navigation</h3>
+<h3 id="81-keyboard-navigation">§8.1 Keyboard Navigation</h3>
+<p>All interactive elements in pixel-pet-arena must be fully operable using only a keyboard. Because the product is a competitive game, keyboard navigation must be fast and low-friction — not just technically conformant. Tab order follows natural document flow on every page. No keyboard trap exists outside of intentional modal focus traps (which all close via Escape). Focus management after async operations — form submission, training action, arena entry — must move focus to the result or status region so that keyboard-only players receive the same feedback as pointer users. The pixel-art game canvas registers keyboard events for pet interaction (Enter or Space activates the canvas interaction equivalent of a click). Arrow keys navigate within ARIA tablist components such as the RarityFilter. All custom components that behave as buttons or links must respond to Enter and Space per ARIA Authoring Practices Guide patterns.</p>
+<h3 id="82-screen-reader-support">§8.2 Screen Reader Support</h3>
+<p>pixel-pet-arena provides first-class screen reader support across VoiceOver (macOS Safari), NVDA (Windows Chrome), and TalkBack (Android Chrome). Every page has a descriptive <code>&lt;title&gt;</code> and a logical heading hierarchy starting at <code>&lt;h1&gt;</code>. The Phaser.js game canvas exposes an accessible text alternative via <code>aria-label</code> that describes the current pet (species, rarity, level) and updates when the pet state changes. All live regions — matchmaking status, countdown timers, training result announcements, claim code expiry warnings — use <code>aria-live=&quot;polite&quot;</code> or <code>role=&quot;alert&quot;</code> as appropriate. Stat change indicators (&quot;+X Speed&quot;) announce via a visually-hidden <code>aria-live</code> region so screen reader users receive the same stat feedback as sighted users. Decorative animations and sparkle effects are marked <code>aria-hidden=&quot;true&quot;</code>. The leaderboard table uses proper <code>&lt;th scope=&quot;col&quot;&gt;</code> headers and <code>&lt;caption&gt;</code> elements. All modals follow the ARIA dialog pattern with focus trap and Escape-to-close.</p>
+<h3 id="83-keyboard-navigation-flows">§8.3 Keyboard Navigation Flows</h3>
 <p>All player-facing P0 flows must be fully operable via keyboard alone. The following named flows document the required key sequences, components involved, and expected outcomes. These flows must pass manual keyboard-only walkthrough as part of Phase 3 validation (§11.2).</p>
 <table>
 <tr><th>#</th><th>Flow Name</th><th>Page / Component</th><th>Key Sequence</th><th>Expected Outcome</th></tr>
@@ -1190,6 +1204,7 @@
 </table>
 <p><strong>Font loading strategy</strong>: <code>font-display: swap</code> for both fonts. Preload only <code>Press Start 2P</code> (the above-fold font). <code>Inter</code> loads async via <code>&lt;link rel=&quot;preload&quot; as=&quot;font&quot;&gt;</code> for the 400 and 600 weights only. Fallback stack for Press Start 2P: <code>&#x27;Courier New&#x27;, monospace</code>.</p>
 <h3 id="93-design-token-three-layer-architecture">§9.3 Design Token Three-Layer Architecture</h3>
+<blockquote><p><strong>Note</strong>: VDD §6 is the authoritative source for all design tokens. In case of conflict between values listed here and VDD §6, VDD §6 takes precedence. See <a href="vdd.html#6-design-tokens--three-layer-architecture" target="_blank" rel="noopener">docs/VDD.md §6</a> for canonical token values.</p></blockquote>
 <p><strong>Layer 1 — Primitive Tokens</strong> (raw values, no semantic meaning):</p>
 <pre><code class="language-css">/* Primitive: Color */
 --primitive-purple-500: oklch(52% 0.24 280);
@@ -1217,6 +1232,11 @@
 --primitive-shadow-md: 4px 4px 0px var(--color-neutral-900);
 --primitive-shadow-lg: 6px 6px 0px var(--color-neutral-900);
 
+/* Primitive: Radius (pixel-art aesthetic — sharp by default, minimal rounding) */
+--primitive-radius-none: 0px;    /* Pixel art: ALL game UI elements — buttons, badges, stat bars */
+--primitive-radius-sm: 2px;      /* Minor softening on input fields only */
+--primitive-radius-full: 9999px; /* Pill shapes (rarity filter tabs) */
+
 /* Primitive: Easing */
 --primitive-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 --primitive-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -1237,6 +1257,11 @@
 --space-section: clamp(4rem, 3rem + 5vw, 10rem);
 --space-section-inner: var(--primitive-space-12); /* 48px — inner section padding */
 
+/* Semantic: Radius */
+--radius-sharp: var(--primitive-radius-none);  /* 0px — primary pixel-art UI elements */
+--radius-input: var(--primitive-radius-sm);    /* 2px — form inputs, tooltips */
+--radius-pill: var(--primitive-radius-full);   /* 9999px — pill shapes (rarity filter tabs) */
+
 /* Semantic: Duration */
 --duration-interaction: var(--primitive-duration-fast);
 --duration-transition: var(--primitive-duration-normal);
@@ -1251,7 +1276,7 @@
 --button-primary-bg: var(--color-brand-primary);
 --button-primary-text: var(--color-neutral-50);
 --button-primary-hover-bg: color-mix(in oklch, var(--color-brand-primary), white 15%);
---button-border-radius: 0px; /* Pixel art: sharp corners */
+--button-border-radius: var(--primitive-radius-none); /* Pixel art: sharp corners */
 --button-border: 2px solid var(--color-neutral-900);
 --button-shadow: 4px 4px 0px var(--color-neutral-900); /* Pixel-art drop shadow */
 
@@ -1361,43 +1386,6 @@ AdminDataTable (shared admin component)
 ├── props: columns[], rows[], onSort, onFilter, pagination
 ├── children: AdminTableRow[]
 └── features: bulk select, CSV export, search</code></pre>
-<hr>
-<h2 id="95-client-類別圖class-diagram">§9.5 Client 類別圖（Class Diagram）</h2>
-<blockquote><p>本節定義 <strong>Client 端（前端 Web）</strong> 的程式結構，依照 Clean Architecture 原則分層。</p></blockquote>
-<blockquote><p>每一層只依賴它下方的層，絕對不跨層溝通。</p></blockquote>
-<h3 id="951-web-前端-class-diagram概覽">§9.5.1 Web 前端 Class Diagram（概覽）</h3>
-<pre><code class="">Presentation Layer
-  ├── PageRouter（路由管理）
-  ├── PetCanvasView（Canvas 渲染）
-  ├── ArenaView（戰鬥畫面）
-  ├── LeaderboardView（排行榜）
-  └── AdminPortalView（管理後台）
-
-Application Layer
-  ├── PetUseCase（生成、訓練、食物 buff）
-  ├── ArenaUseCase（配對、戰鬥結果）
-  ├── AuthUseCase（Claim Code 流程）
-  └── TradeUseCase（交易，FF_MARKETPLACE）
-
-Domain Layer
-  ├── Pet（entity: id, rarity, stats, level）
-  ├── Battle（entity: outcome, timestamp, random_modifier）
-  ├── ClaimToken（entity: code, expiry）
-  └── LeaderboardEntry（entity: rank, score）
-
-Infrastructure Layer
-  ├── ApiClient（REST calls to backend）
-  ├── CanvasRenderer（Phaser 3 / HTML5 Canvas）
-  └── LocalStorageAdapter（token cache）</code></pre>
-<table>
-<tr><th>Class</th><th>Layer</th><th>主要職責</th><th>對應 PRD</th></tr>
-<tr><td>PageRouter</td><td>Presentation</td><td>URL routing, SPA navigation</td><td>US-PET-001</td></tr>
-<tr><td>PetCanvasView</td><td>Presentation</td><td>Canvas pet rendering ≥ 30 FPS</td><td>US-PET-001 AC-001-1</td></tr>
-<tr><td>ArenaView</td><td>Presentation</td><td>Battle animation 5–15s</td><td>US-ARENA-001 AC-007-3</td></tr>
-<tr><td>PetUseCase</td><td>Application</td><td>Training, food buff logic</td><td>US-TRAIN-001, US-FOOD-001</td></tr>
-<tr><td>ArenaUseCase</td><td>Application</td><td>Matchmaking, outcome calculation</td><td>US-ARENA-001, US-ARENA-002</td></tr>
-<tr><td>ApiClient</td><td>Infrastructure</td><td>All REST calls, error handling</td><td>API.md</td></tr>
-</table>
 <hr>
 <h2 id="10-copy--content-design">§10 Copy &amp; Content Design</h2>
 <h3 id="101-tone-of-voice">§10.1 Tone of Voice</h3>
@@ -1737,6 +1725,165 @@ admin.login.submit: &quot;Sign In&quot;</code></pre>
 <p>Two-section form (separated clearly to avoid scope confusion with Economy Config). Section 1 — Rate Limit: &quot;Max battles per hour per pet&quot; — numeric input with slider, range 1-50, current value prominently displayed, default indicator. Section 2 — Rarity Weights: Four percentage inputs (Common, Rare, Epic, Legendary) with a live &quot;Total: X%&quot; display that turns red if sum ≠ 100%. Both sections have a &quot;Preview Changes&quot; button that shows a diff of current vs. proposed values before saving. &quot;Apply Changes&quot; button writes to config cache (effective within 5 minutes, shown as notice). Audit log notice: &quot;This change will be recorded in the Audit Log.&quot;</p>
 <p><strong>8. Game Economy Config (<code>/admin/config/economy</code>)</strong></p>
 <p>Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary buff multiplier (0.5x-5.0x) (FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5× / ADMIN_MAX = 5.0×) and permanent buff multiplier (0.5x-5.0x) with current values displayed. Section 2 — Arena Entry Cooldown: Numeric input, range 0-60 minutes (ARENA_ENTRY_COOLDOWN_ADMIN_MIN = 0 / MAX = 60 min), default 0. Section 3 — Arena Entry Cost: Numeric input, range 0-10 food credits, default 0. All three sections include example calculations showing the player-facing effect (e.g., &quot;At 2.0x multiplier, Speed Berry gives +10 Speed instead of +5&quot;). Change preview modal before applying. 5-minute cache refresh notice.</p>
+<p><strong>9. Pet Management (<code>/admin/pets</code>)</strong></p>
+<p>Full-page view for moderators to search, review, and act on pets platform-wide. Key UI elements: search bar (by pet ID or email fragment), paginated table with columns — Pet ID, rarity badge, owner (masked email), ban status, battle count, and row action buttons. Each row exposes &quot;Ban Pet&quot; (danger style, requires reason text ≤ 500 chars) and &quot;Flag for Review&quot; (amber ghost button). Banning a pet is recorded in the Audit Log. A Suspicious Activity sub-tab surfaces pets auto-flagged by bot-detection logic for moderator triage. Primary user actions: search pets, ban a pet with reason, flag for review, dismiss flag. Relevant US IDs: US-ADMIN-001, US-ADMIN-005.</p>
+<p><strong>10. Battle Records (<code>/admin/battles</code>)</strong></p>
+<p>Read-oriented screen for reviewing individual battle events across the platform. Key UI elements: search/filter bar (pet ID, date range, suspicious-only toggle), paginated table with columns — Timestamp, Pet A ID, Pet B ID, Arena Mode, Outcome, and Suspicious badge (amber, shown when bot-detection threshold exceeded). Clicking a row opens an inline detail panel showing full battle parameters, rarity tiers of both combatants, and moderator action buttons (Flag Battle, Dismiss Flag) with mandatory reason field. CSV export available for Super Admin. No record editing. Primary user actions: search battles, filter suspicious, open detail, flag or dismiss. Relevant US IDs: US-ADMIN-005, US-RECORD-001.</p>
+<p><strong>11. Email Delivery Monitor (<code>/admin/email</code>)</strong></p>
+<p>Operational health screen for tracking transactional email delivery to players. Key UI elements: three gauge/metric cards at top — Delivery Rate (green ≥ 95%, amber 90–95%, red &lt; 90%), Bounce Rate (red if &gt; 5%), Spam Complaint Rate (red if &gt; 0.1%). Below: paginated Failed Delivery table with columns — Recipient (masked), Timestamp, Failure Reason, Status, and per-row &quot;Manual Resend&quot; ghost button (disabled if resend already attempted within 24 h). All metrics show last-refresh timestamp. Primary user actions: monitor health gauges, identify failed deliveries, trigger manual resend. Relevant US IDs: US-AUTH-001 (access link delivery), platform NFR-REL email SLA.</p>
+<p><strong>12. Analytics Dashboard (<code>/admin/analytics</code>)</strong></p>
+<p>Data overview screen for analysts and super admins to track platform KPIs. Key UI elements: DAP (Daily Active Pets) metric card with 7-day sparkline and day-over-day delta; Claim Conversion Funnel chart (Visitors → Pet Interactions → Claim Started → Claim Completed) with percentage labels at each step; Arena Battles time-series line chart (daily resolution, current day highlighted); Day-7 Retention Cohort table (week-of-claim cohorts, cohort size, Day-7 return %, color-coded by retention tier). All charts are read-only display components — no editing or export from this screen. Primary user actions: review KPI trends, identify retention drop-offs, assess funnel performance. Relevant US IDs: US-BOARD-001, US-RARITY-001, US-ARENA-001.</p>
+<h3 id="1531-admin-component-state-matrices">§15.3.1 Admin Component State Matrices</h3>
+<p><strong>Admin Dashboard (<code>/admin/dashboard</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>MetricCard</code> (DAP, Battles/hr, Conversion)</td><td>Displays current metric value with label and trend arrow; dark surface card with pixel-art border</td><td>Border brightens slightly; cursor pointer</td><td>Card scale(0.98); border deepens to <code>--color-brand-primary-dark</code></td><td>Visible focus ring on card</td><td>Greyed out if data unavailable</td><td>Skeleton shimmer replacing metric value</td><td>Red border with error icon; &quot;Data unavailable&quot; message</td></tr>
+<tr><td><code>SuspiciousQueueBadge</code></td><td>Amber count badge with &quot;Review&quot; CTA; pulsing if count &gt; 0</td><td>Badge brightens; tooltip shows oldest queued item timestamp</td><td>Button scale(0.97); background deepens</td><td>Focus ring on &quot;Review&quot; button</td><td>Hidden if no suspicious items</td><td>Spinner while count fetches</td><td>Badge shows &quot;—&quot; if count fetch fails</td></tr>
+<tr><td><code>GDPRQueueBadge</code></td><td>Count badge; red if any item &lt; 48h remaining before SLA breach</td><td>Badge brightens; tooltip shows next SLA deadline</td><td>Button scale(0.97)</td><td>Focus ring on badge</td><td>N/A</td><td>Spinner while count fetches</td><td>&quot;—&quot; if fetch fails</td></tr>
+<tr><td><code>RecentAuditLogTable</code></td><td>Last 10 audit entries in compact table; read-only</td><td>Row highlights on hover</td><td>Row scale(0.99)</td><td>Row focusable; Enter navigates to full audit log</td><td>N/A</td><td>Skeleton rows while loading</td><td>&quot;Failed to load audit log&quot; message</td></tr>
+</table>
+<p><strong>User Management (<code>/admin/users</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>UserSearchBar</code></td><td>Empty input with placeholder &quot;Search by email or pet ID&quot;</td><td>Input border brightens</td><td>N/A</td><td>Visible pixel-art border focus ring</td><td>N/A</td><td>N/A</td><td>Red border with inline error for invalid input</td></tr>
+<tr><td><code>UserTableRow</code></td><td>Masked email, pet count, account status badge, GDPR status, registered date, action buttons</td><td>Row background shifts; action buttons become visible</td><td>Row scale(0.99)</td><td>Row focusable; Enter expands row</td><td>&quot;Delete User Data&quot; button disabled for non-Super-Admin roles</td><td>Spinner on row when action pending</td><td>Error toast for failed action</td></tr>
+<tr><td><code>ResendAccessLinkButton</code></td><td>Ghost style button with envelope icon</td><td>Button brightens</td><td>scale(0.97); border deepens</td><td>Visible focus ring</td><td>Disabled if user has no claimed pet</td><td>Pixel-art spinner; pointer-events: none; aria-busy=&quot;true&quot;</td><td>Error toast: &quot;Failed to resend access link&quot;</td></tr>
+<tr><td><code>DeleteUserDataButton</code></td><td>Danger style; red border; only visible for Super Admin</td><td>Button brightens with red glow</td><td>scale(0.97); background deepens to error color</td><td>Visible focus ring</td><td>Disabled for non-Super-Admin roles</td><td>Spinner; pointer-events: none</td><td>Error toast: &quot;GDPR deletion failed — retry or escalate&quot;</td></tr>
+</table>
+<p><strong>Pet Management (<code>/admin/pets</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>PetSearchBar</code></td><td>Empty input with placeholder &quot;Search by pet ID or email fragment&quot;</td><td>Border brightens</td><td>N/A</td><td>Pixel-art border focus ring</td><td>N/A</td><td>N/A</td><td>Red border with inline validation error</td></tr>
+<tr><td><code>PetTableRow</code></td><td>Pet ID, rarity badge, owner (masked), ban status, battle count; row actions visible</td><td>Row background brightens; action buttons highlight</td><td>Row scale(0.99)</td><td>Row focusable via keyboard</td><td>Actions disabled if viewing own admin account pets</td><td>Spinner overlay on row during action</td><td>Error toast for failed ban or flag action</td></tr>
+<tr><td><code>BanPetButton</code></td><td>Danger style with &quot;Ban&quot; label</td><td>Button brightens with red glow</td><td>scale(0.97); background deepens to error red</td><td>Focus ring visible</td><td>Disabled if pet already banned</td><td>Spinner; aria-busy=&quot;true&quot;; pointer-events: none</td><td>Error toast: &quot;Ban failed — please retry&quot;</td></tr>
+<tr><td><code>FlagForReviewButton</code></td><td>Amber ghost button with flag icon</td><td>Button brightens</td><td>scale(0.97)</td><td>Focus ring visible</td><td>Disabled if pet already flagged</td><td>Spinner; pointer-events: none</td><td>Error toast: &quot;Flag action failed&quot;</td></tr>
+<tr><td><code>ReasonTextField</code> (ban/flag)</td><td>Empty textarea; required field indicator</td><td>Border brightens on hover</td><td>N/A</td><td>Pixel-art border focus ring</td><td>N/A</td><td>N/A</td><td>Red border with &quot;Reason is required&quot; inline error</td></tr>
+</table>
+<p><strong>Leaderboard Management (<code>/admin/leaderboard</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>LeaderboardAdminTable</code></td><td>Top 500 rows with Rank, Pet ID, Rarity, Score, Suspicious flag column</td><td>Row highlights; suspicious rows glow amber</td><td>Row scale(0.99)</td><td>Row focusable; Enter opens action panel</td><td>N/A</td><td>Skeleton rows while fetching</td><td>&quot;Failed to load leaderboard&quot; message</td></tr>
+<tr><td><code>SuspiciousActionPanel</code></td><td>Right-side panel: battle timeline, bot-pattern score, 3 action buttons</td><td>Button brightens on hover</td><td>Button scale(0.97)</td><td>Each button has focus ring; tab order: Dismiss → Temp Remove → Permanent Ban</td><td>All buttons disabled until reason textarea has content</td><td>Spinner on active action button</td><td>Error toast for failed action</td></tr>
+<tr><td><code>DismissFlagButton</code></td><td>Ghost button, green border</td><td>Brightens</td><td>scale(0.97)</td><td>Focus ring</td><td>Disabled if no reason entered</td><td>Spinner; aria-busy=&quot;true&quot;</td><td>Error toast</td></tr>
+<tr><td><code>TempRemoveButton</code></td><td>Amber ghost button</td><td>Brightens with amber glow</td><td>scale(0.97); amber deepens</td><td>Focus ring</td><td>Disabled if no reason entered</td><td>Spinner; aria-busy=&quot;true&quot;</td><td>Error toast</td></tr>
+<tr><td><code>PermanentBanButton</code></td><td>Danger button, red border</td><td>Brightens with red glow</td><td>scale(0.97); red deepens</td><td>Focus ring</td><td>Disabled if no reason entered</td><td>Spinner; aria-busy=&quot;true&quot;</td><td>Error toast: &quot;Ban failed — retry or contact engineering&quot;</td></tr>
+</table>
+<p><strong>Arena Rate Config (<code>/admin/config/runtime</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>MaxBattlesInput</code> (numeric + slider)</td><td>Shows current value (1–50) with default indicator; pixel-art numeric input</td><td>Border brightens; slider thumb brightens</td><td>scale(0.98); border deepens</td><td>Visible focus ring on input and slider thumb</td><td>N/A</td><td>N/A</td><td>Red border with inline error if value out of range (1–50)</td></tr>
+<tr><td><code>RarityWeightInputGroup</code> (4 inputs)</td><td>Four percentage inputs (Common, Rare, Epic, Legendary); live &quot;Total: X%&quot; indicator below</td><td>Each input border brightens</td><td>scale(0.98) on active input</td><td>Focus ring on each input</td><td>N/A</td><td>N/A</td><td>&quot;Total&quot; indicator turns red if sum ≠ 100%; inline error per field if out of valid range</td></tr>
+<tr><td><code>PreviewChangesButton</code></td><td>Ghost button; active once any value changed from current</td><td>Brightens</td><td>scale(0.97); border deepens</td><td>Focus ring</td><td>Disabled if no pending changes</td><td>Spinner</td><td>N/A</td></tr>
+<tr><td><code>ApplyChangesButton</code> (in preview modal)</td><td>Primary button; only enabled after preview shown</td><td>Brightens</td><td>scale(0.97); background deepens</td><td>Focus ring</td><td>Disabled until preview reviewed</td><td>Spinner; aria-busy=&quot;true&quot;; pointer-events: none</td><td>Error toast: &quot;Config update failed — please retry&quot;</td></tr>
+</table>
+<p><strong>Economy Config (<code>/admin/config/economy</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>FoodBuffSlider</code> (temp + permanent, 0.5–5.0×)</td><td>Shows current multiplier value; example calculation rendered below each slider</td><td>Slider thumb brightens; example recalculates</td><td>scale(0.98) on active thumb</td><td>Focus ring on slider thumb</td><td>N/A</td><td>N/A</td><td>Red highlight if value is outside 0.5–5.0× range</td></tr>
+<tr><td><code>ArenaCooldownInput</code> (0–60 min)</td><td>Numeric input showing current cooldown in minutes</td><td>Border brightens</td><td>scale(0.98)</td><td>Focus ring</td><td>N/A</td><td>N/A</td><td>Red border with inline error if value out of 0–60 range</td></tr>
+<tr><td><code>ArenaEntryCostInput</code> (0–10 credits)</td><td>Numeric input showing current cost</td><td>Border brightens</td><td>scale(0.98)</td><td>Focus ring</td><td>N/A</td><td>N/A</td><td>Red border with inline error if value out of 0–10 range</td></tr>
+<tr><td><code>EconomyPreviewModal</code></td><td>Shows current vs. proposed values side-by-side diff; &quot;Apply Changes&quot; + &quot;Cancel&quot; buttons</td><td>Buttons brighten</td><td>scale(0.97) on each button</td><td>Focus ring; tab order: Cancel → Apply</td><td>&quot;Apply&quot; disabled while loading</td><td>Spinner on Apply button</td><td>Error toast on failed write</td></tr>
+</table>
+<p><strong>Role Management (<code>/admin/roles</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>AdminAccountListRow</code></td><td>Username, role badge, last login timestamp, active/inactive status badge</td><td>Row background shifts; detail panel preview shows on right</td><td>Row scale(0.99)</td><td>Row focusable; Enter opens detail panel</td><td>N/A</td><td>N/A</td><td>Error toast if account data fails to load</td></tr>
+<tr><td><code>RoleSelector</code> (dropdown)</td><td>Shows current role (Super Admin / Moderator / Analyst / Support Agent) as badge</td><td>Border brightens; dropdown caret animates</td><td>scale(0.98)</td><td>Focus ring on select element</td><td>Disabled if current user lacks Super Admin role</td><td>N/A</td><td>Error toast if role save fails</td></tr>
+<tr><td><code>ActiveToggle</code></td><td>Shows current active/inactive state; color-coded (green active, grey inactive)</td><td>Toggle thumb brightens</td><td>Toggle animates slide</td><td>Focus ring on toggle</td><td>Disabled for own account (cannot deactivate self)</td><td>Spinner overlay</td><td>Error toast: &quot;Toggle failed — please retry&quot;</td></tr>
+<tr><td><code>CreateAdminButton</code></td><td>Primary button; always visible for Super Admin</td><td>Brightens</td><td>scale(0.97); background deepens</td><td>Focus ring</td><td>Disabled for non-Super-Admin roles</td><td>N/A</td><td>N/A</td></tr>
+<tr><td><code>DeactivateButton</code></td><td>Danger ghost button; visible in account detail panel</td><td>Brightens with red glow</td><td>scale(0.97)</td><td>Focus ring</td><td>Disabled for own account</td><td>Spinner; aria-busy=&quot;true&quot;</td><td>Error toast: &quot;Deactivation failed&quot;</td></tr>
+</table>
+<p><strong>Battle Records (<code>/admin/battles</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>BattleRecordsTable</code></td><td>Paginated table: timestamp, pet IDs, arena mode, outcome, suspicious badge if flagged</td><td>Row highlights; suspicious rows glow amber</td><td>Row scale(0.99)</td><td>Row focusable; Enter opens battle detail</td><td>N/A</td><td>Skeleton rows while fetching</td><td>&quot;Failed to load battle records&quot; message with retry button</td></tr>
+<tr><td><code>BattleRecordsSearchBar</code></td><td>Empty input with placeholder &quot;Search by pet ID or date range&quot;</td><td>Border brightens</td><td>N/A</td><td>Pixel-art focus ring</td><td>N/A</td><td>Spinner while debouncing</td><td>Red border with inline error for invalid input</td></tr>
+<tr><td><code>SuspiciousBadge</code> (on flagged rows)</td><td>Amber badge with &quot;SUSPICIOUS&quot; label</td><td>Badge brightens; tooltip shows detection reason</td><td>N/A</td><td>N/A (badge not interactive)</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+</table>
+<p><strong>Audit Log (<code>/admin/audit</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>AuditLogTable</code></td><td>Paginated read-only table: timestamp, actor ID, action type badge (color-coded), target, summary, expand toggle</td><td>Row highlights; cursor pointer</td><td>Row scale(0.99)</td><td>Row focusable; Enter expands detail row</td><td>No edit/delete/bulk-select controls (immutability enforced)</td><td>Skeleton rows while fetching</td><td>&quot;Failed to load audit log&quot; message with retry button</td></tr>
+<tr><td><code>AuditFilters</code> (date range, actor, action type)</td><td>Collapsed filter bar with current active filter indicators</td><td>Each filter input border brightens</td><td>N/A</td><td>Focus ring on each filter control</td><td>N/A</td><td>Spinner while filter results load</td><td>Error toast if filter query fails</td></tr>
+<tr><td><code>CSVExportButton</code></td><td>Ghost button with download icon (Super Admin only)</td><td>Brightens</td><td>scale(0.97)</td><td>Focus ring</td><td>Disabled for non-Super-Admin roles</td><td>Spinner; aria-busy=&quot;true&quot;; pointer-events: none</td><td>Error toast: &quot;Export failed — please retry&quot;</td></tr>
+<tr><td><code>ReadOnlyBadge</code></td><td>&quot;Read Only&quot; badge in header with lock icon; always visible</td><td>No interaction state</td><td>N/A</td><td>N/A (decorative)</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+</table>
+<p><strong>Email Delivery Monitor (<code>/admin/email</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>DeliveryRateGauge</code></td><td>Circular gauge showing delivery rate %; green ≥ 95%, amber 90–95%, red &lt; 90%</td><td>Tooltip shows exact value and date range</td><td>N/A</td><td>N/A (display only)</td><td>N/A</td><td>Skeleton shimmer</td><td>&quot;Data unavailable&quot; with last-known timestamp</td></tr>
+<tr><td><code>BounceRateIndicator</code></td><td>Metric display with trend arrow; red if &gt; 5%</td><td>Tooltip shows bounce count</td><td>N/A</td><td>N/A</td><td>N/A</td><td>Skeleton shimmer</td><td>&quot;Data unavailable&quot;</td></tr>
+<tr><td><code>SpamComplaintIndicator</code></td><td>Metric display; red if &gt; 0.1%</td><td>Tooltip shows complaint count</td><td>N/A</td><td>N/A</td><td>N/A</td><td>Skeleton shimmer</td><td>&quot;Data unavailable&quot;</td></tr>
+<tr><td><code>FailedDeliveryTable</code></td><td>Paginated table of failed deliveries: recipient (masked), timestamp, failure reason, status</td><td>Row highlights</td><td>Row scale(0.99)</td><td>Row focusable</td><td>N/A</td><td>Skeleton rows while loading</td><td>&quot;Failed to load delivery records&quot;</td></tr>
+<tr><td><code>ManualResendButton</code> (per row)</td><td>Ghost button with envelope icon</td><td>Brightens</td><td>scale(0.97)</td><td>Focus ring</td><td>Disabled if resend already attempted within 24h</td><td>Spinner; aria-busy=&quot;true&quot;</td><td>Error toast: &quot;Resend failed — contact SendGrid support&quot;</td></tr>
+</table>
+<p><strong>Analytics Dashboard (<code>/admin/analytics</code>)</strong></p>
+<table>
+<tr><th>Component</th><th>Default</th><th>Hover</th><th>Active</th><th>Focus</th><th>Disabled</th><th>Loading</th><th>Error</th></tr>
+<tr><td><code>DAPMetricCard</code></td><td>Daily Active Pets count with 7-day sparkline; today vs. yesterday delta</td><td>Border brightens</td><td>N/A</td><td>N/A (display only)</td><td>N/A</td><td>Skeleton shimmer replacing value and sparkline</td><td>Red border with &quot;Data unavailable&quot;</td></tr>
+<tr><td><code>ClaimConversionFunnelChart</code></td><td>Stacked bar/funnel: Visitors → Pet Interactions → Claim Started → Claim Completed; conversion percentages at each step</td><td>Tooltip on hover showing exact counts and rates</td><td>N/A</td><td>N/A (display only)</td><td>N/A</td><td>Skeleton shimmer</td><td>&quot;Conversion data unavailable&quot;</td></tr>
+<tr><td><code>ArenaBattlesChart</code></td><td>Daily battles time-series line chart; current day highlighted</td><td>Tooltip on data points showing exact count</td><td>N/A</td><td>N/A (display only)</td><td>N/A</td><td>Skeleton shimmer</td><td>&quot;Battle data unavailable&quot;</td></tr>
+<tr><td><code>Day7RetentionCohortTable</code></td><td>Cohort table: week of claim, cohort size, Day-7 return %; color-coded by retention tier (green ≥ 20%, amber 10–20%, red &lt; 10%)</td><td>Row highlights</td><td>N/A</td><td>N/A (read-only)</td><td>N/A</td><td>Skeleton rows</td><td>&quot;Retention data unavailable&quot;</td></tr>
+</table>
+<h3 id="1532-admin-screen-interaction-specifications">§15.3.2 Admin Screen Interaction Specifications</h3>
+<p><strong>Admin Dashboard Interactions</strong></p>
+<table>
+<tr><th>Interaction Trigger</th><th>Action</th><th>Animation/Transition</th><th>Duration</th><th>Visual Feedback</th></tr>
+<tr><td>Page loads</td><td>Metric cards animate in with stagger</td><td>ease-out-expo stagger (100ms per card)</td><td>300ms total</td><td>Cards slide in from bottom (translateY 12px → 0)</td></tr>
+<tr><td>&quot;Review&quot; CTA on SuspiciousQueueBadge clicked</td><td>Navigates to <code>/admin/leaderboard</code> with suspicious filter pre-applied</td><td>scale(0.97) press + page transition</td><td>200ms press + 300ms transition</td><td>Button presses in; page slides</td></tr>
+<tr><td>&quot;Process&quot; CTA on GDPRQueueBadge clicked</td><td>Navigates to <code>/admin/users</code> with GDPR queue tab active</td><td>scale(0.97) press + page transition</td><td>200ms + 300ms</td><td>Button presses in; GDPR tab is pre-selected</td></tr>
+<tr><td>Audit log row clicked</td><td>Navigates to full <code>/admin/audit</code> with that entry highlighted</td><td>Row scale(0.99) + page transition</td><td>150ms + 300ms</td><td>Row briefly highlights amber before navigation</td></tr>
+</table>
+<p><strong>User Management Interactions</strong></p>
+<table>
+<tr><th>Interaction Trigger</th><th>Action</th><th>Animation/Transition</th><th>Duration</th><th>Visual Feedback</th></tr>
+<tr><td>Admin types in search bar</td><td>Table rows filter in real-time (debounced 300ms)</td><td>Rows fade out/in</td><td>ease-out-expo 200ms</td><td>Spinner appears in search bar while debounce fires</td></tr>
+<tr><td>&quot;Delete User Data&quot; button clicked</td><td>Confirmation dialog slides in from bottom with GDPR workflow detail</td><td>ease-out-expo translateY 60px → 0</td><td>300ms</td><td>Focus traps in dialog; background dims with overlay</td></tr>
+<tr><td>Deletion confirmed</td><td>Button enters loading state; success toast on completion; row updates GDPR status badge</td><td>scale(0.97) + spinner + toast slide-in</td><td>200ms + async</td><td>&quot;GDPR Deletion Queued&quot; success toast appears bottom-right</td></tr>
+<tr><td>&quot;Resend Access Link&quot; clicked</td><td>Button enters loading state; success toast on success</td><td>scale(0.97) + spinner</td><td>200ms + async</td><td>Toast: &quot;Access link sent to {masked email}&quot;</td></tr>
+</table>
+<p><strong>Pet Management Interactions</strong></p>
+<table>
+<tr><th>Interaction Trigger</th><th>Action</th><th>Animation/Transition</th><th>Duration</th><th>Visual Feedback</th></tr>
+<tr><td>Admin searches for pet</td><td>Table filters with debounce 300ms; skeleton shown during fetch</td><td>Rows fade out/in (ease-out-expo)</td><td>200ms</td><td>Spinner in search bar during debounce</td></tr>
+<tr><td>&quot;Ban&quot; button clicked</td><td>Reason text field expands below row (accordion reveal); &quot;Confirm Ban&quot; button activates</td><td>ease-out-expo accordion open</td><td>200ms</td><td>Reason field slides down; Confirm button activates once text entered</td></tr>
+<tr><td>Ban confirmed</td><td>Button loading state; row updates to &quot;BANNED&quot; status badge in red</td><td>scale(0.97) + spinner + badge color change</td><td>200ms + async</td><td>Row status badge transitions to red &quot;BANNED&quot;</td></tr>
+<tr><td>Pet row expanded</td><td>Pet detail panel opens on right side showing stats, battle history, owner info</td><td>ease-out-expo slide from right (translateX 40px → 0)</td><td>250ms</td><td>Panel overlays table partially; focus moves to panel</td></tr>
+</table>
+<p><strong>Leaderboard Management Interactions</strong></p>
+<table>
+<tr><th>Interaction Trigger</th><th>Action</th><th>Animation/Transition</th><th>Duration</th><th>Visual Feedback</th></tr>
+<tr><td>Suspicious row clicked</td><td>Right-side action panel slides in with battle timeline and action buttons</td><td>ease-out-expo translateX 40px → 0</td><td>250ms</td><td>Panel slides in; background row highlighted amber</td></tr>
+<tr><td>&quot;Dismiss Flag&quot; confirmed</td><td>Action panel closes; row suspicious badge removed</td><td>ease-out-expo panel slide out</td><td>200ms</td><td>Amber badge fades out; row returns to normal background</td></tr>
+<tr><td>&quot;Temporary Remove&quot; confirmed</td><td>Action panel closes; row moves to &quot;Removed&quot; section with amber badge</td><td>Panel slide out + row re-sort animation</td><td>200ms + 300ms re-sort</td><td>Row animates to removed section; status badge changes</td></tr>
+<tr><td>&quot;Permanent Ban&quot; confirmed</td><td>Action panel closes; row disappears from leaderboard</td><td>Panel slide out + row fade-out (opacity 1 → 0)</td><td>200ms + 400ms fade</td><td>Row fades out with red flash; toast confirms action</td></tr>
+<tr><td>Bulk select &quot;Clear Flags&quot;</td><td>Selected rows&#x27; suspicious badges clear simultaneously</td><td>Simultaneous badge fade-out</td><td>300ms</td><td>All selected badges fade; checkboxes deselect</td></tr>
+</table>
+<p><strong>Arena Rate Config Interactions</strong></p>
+<table>
+<tr><th>Interaction Trigger</th><th>Action</th><th>Animation/Transition</th><th>Duration</th><th>Visual Feedback</th></tr>
+<tr><td>Admin changes MaxBattlesInput or RarityWeightInput</td><td>Input highlights; &quot;Preview Changes&quot; button activates</td><td>Input border brightens (ease-out-expo)</td><td>150ms</td><td>Border color shifts to <code>--color-brand-primary</code>; Preview button changes from ghost to active</td></tr>
+<tr><td>RarityWeight values don&#x27;t sum to 100%</td><td>&quot;Total: X%&quot; indicator turns red; &quot;Preview Changes&quot; button remains disabled</td><td>Color transition on Total indicator</td><td>150ms</td><td>Red total label with &quot;Must equal 100%&quot; inline message</td></tr>
+<tr><td>&quot;Preview Changes&quot; clicked</td><td>Preview modal slides up from bottom; diff showing current vs. proposed values</td><td>ease-out-expo translateY 60px → 0</td><td>300ms</td><td>Focus traps in modal; background dims; diff rows highlight changed fields in amber</td></tr>
+<tr><td>&quot;Apply Changes&quot; confirmed in modal</td><td>Button enters loading state; modal closes on success; audit log notice appears as toast</td><td>scale(0.97) + spinner + ease-out-expo modal slide-down + toast slide-in</td><td>200ms + async</td><td>&quot;Config updated — effective within 5 minutes&quot; success toast bottom-right</td></tr>
+</table>
+<p><strong>Economy Config Interactions</strong></p>
+<table>
+<tr><th>Interaction Trigger</th><th>Action</th><th>Animation/Transition</th><th>Duration</th><th>Visual Feedback</th></tr>
+<tr><td>Admin moves FoodBuffSlider</td><td>Example calculation below slider recalculates in real-time</td><td>Smooth value update (no animation — instant)</td><td>Instant</td><td>Example text updates (e.g., &quot;Speed Berry gives +10 Speed at 2.0×&quot;)</td></tr>
+<tr><td>Admin changes ArenaCooldownInput or ArenaEntryCostInput</td><td>Input highlights; example calculation updates</td><td>Input border brightens</td><td>150ms</td><td>Border shifts to <code>--color-brand-primary</code>; example row updates</td></tr>
+<tr><td>&quot;Preview Changes&quot; clicked</td><td>Preview modal slides up; three-section diff</td><td>ease-out-expo translateY 60px → 0</td><td>300ms</td><td>Focus traps; each changed field shown with old → new values; amber highlight on changed rows</td></tr>
+<tr><td>&quot;Apply Changes&quot; confirmed</td><td>Loading state; cache refresh notice; modal closes</td><td>scale(0.97) + spinner + modal slide-down + toast</td><td>200ms + async</td><td>&quot;Economy config updated — effective within 5 minutes&quot; toast bottom-right</td></tr>
+</table>
+<p><strong>Role Management Interactions</strong></p>
+<table>
+<tr><th>Interaction Trigger</th><th>Action</th><th>Animation/Transition</th><th>Duration</th><th>Visual Feedback</th></tr>
+<tr><td>Admin account row clicked</td><td>Right-side detail panel slides in with role selector, toggle, and Save button</td><td>ease-out-expo translateX 40px → 0</td><td>250ms</td><td>Panel slides in; selected row highlighted with <code>--color-brand-primary</code> left border</td></tr>
+<tr><td>Role changed in detail panel</td><td>&quot;Save Changes&quot; button activates; role badge in list row updates optimistically</td><td>Badge color transition</td><td>150ms</td><td>New role badge color previews in detail panel</td></tr>
+<tr><td>&quot;Save Changes&quot; clicked</td><td>Button enters loading state; success toast on completion; row role badge updates</td><td>scale(0.97) + spinner + toast slide-in</td><td>200ms + async</td><td>&quot;Role updated&quot; success toast; row badge transitions to new role color</td></tr>
+<tr><td>&quot;Create New Admin&quot; clicked</td><td>Modal slides up from bottom with form fields</td><td>ease-out-expo translateY 60px → 0</td><td>300ms</td><td>Focus traps in modal; background dims</td></tr>
+<tr><td>&quot;Deactivate&quot; clicked</td><td>Confirmation dialog with warning text; &quot;Confirm Deactivate&quot; button</td><td>Confirmation dialog fade-in</td><td>200ms</td><td>Warning icon; red-bordered confirm button; background dims</td></tr>
+</table>
 <h3 id="154-admin-ux-design-decisions">§15.4 Admin UX Design Decisions</h3>
 <ol><li><strong>Audit log is read-only, immutable by design</strong>: No edit or delete controls exist in the audit log UI — not even for Super Admins. The UI visually signals immutability with a &quot;lock&quot; icon in the header, a &quot;Read Only&quot; badge, and the absence of any row action buttons. Rationale: Audit integrity is a GDPR Article 30 compliance requirement; making deletion technically impossible at the UI layer eliminates the temptation to cover tracks.</li></ol>
 <ol><li><strong>Configuration changes require a preview and confirm step</strong>: Any change to runtime parameters (rate limits, rarity weights) or game economy parameters (food buff multipliers, arena costs) must go through a two-step flow: (1) Preview showing current vs. proposed values side-by-side in a diff view; (2) Explicit &quot;Apply Changes&quot; button with an audit log notice. Rationale: Mis-configured rate limits or rarity weights can damage the game economy instantly; the confirm step forces operators to review the impact before committing.</li></ol>
@@ -1757,8 +1904,8 @@ admin.login.submit: &quot;Sign In&quot;</code></pre>
 <h3 id="a-bdd--acceptance-criteria-links">A. BDD / Acceptance Criteria Links</h3>
 <table>
 <tr><th>PRD User Story</th><th>Acceptance Criteria (AC#s)</th><th>Design Sections</th></tr>
-<tr><td>US-PET-001</td><td>AC-001-1 through AC-001-6</td><td>§5.1, §6.1.1, §8.4</td></tr>
-<tr><td>US-PET-002</td><td>AC-002-1 through AC-002-5</td><td>§9.1 (Rarity Colors), §9.2</td></tr>
+<tr><td>US-PET-001</td><td>AC-001-1 through AC-001-7</td><td>§5.1, §6.1.1, §8.4</td></tr>
+<tr><td>US-PET-002</td><td>AC-002-1 through AC-002-6</td><td>§9.1 (Rarity Colors), §9.2</td></tr>
 <tr><td>US-AUTH-001</td><td>AC-003-1 through AC-003-8</td><td>§5.2, §4.1, §4.3, §10.2</td></tr>
 <tr><td>US-AUTH-002</td><td>AC-004-1 through AC-004-5</td><td>§5.3, §4.2, §4.3</td></tr>
 <tr><td>US-TRAIN-001</td><td>AC-005-1 through AC-005-6</td><td>§5.4, §6.5 (MI-03, MI-04, MI-12)</td></tr>
@@ -1767,13 +1914,14 @@ admin.login.submit: &quot;Sign In&quot;</code></pre>
 <tr><td>US-ARENA-002</td><td>AC-008-1 through AC-008-4</td><td>§5.5 ModeSelector, §6.5 MI-battle-start</td></tr>
 <tr><td>US-BOARD-001</td><td>AC-009-1 through AC-009-6</td><td>§5.7, §3.3</td></tr>
 <tr><td>US-RECORD-001</td><td>AC-010-1 through AC-010-6</td><td>§5.8, §10.2</td></tr>
-<tr><td>US-RARITY-001 / US-PET-002 rarity</td><td>AC-002-5</td><td>§9.1 Rarity Colors, §5.3 RarityBadge, §5.7 RarityFilter</td></tr>
-<tr><td>US-ADMIN-001</td><td>AC-013-1 through AC-013-4</td><td>§15.3 (Pet Management)</td></tr>
-<tr><td>US-ADMIN-002</td><td>AC-014-1 through AC-014-3</td><td>§15.3 Leaderboard Management, §15.4</td></tr>
+<tr><td>US-RARITY-001</td><td>AC-011-1 through AC-011-4</td><td>§9.1 Color Palette, §5.3 RarityBadge, §5.7 RarityFilter</td></tr>
+<tr><td>US-TRADE-001</td><td>AC-012-1 through AC-012-5</td><td>§5.9 Marketplace Page, §4.2 Alternative Flows</td></tr>
+<tr><td>US-ADMIN-001</td><td>AC-013-1 through AC-013-5</td><td>§15.3 (Pet Management)</td></tr>
+<tr><td>US-ADMIN-002</td><td>AC-014-1 through AC-014-4</td><td>§15.3 Leaderboard Management, §15.4</td></tr>
 <tr><td>US-ADMIN-003</td><td>AC-015-1 through AC-015-3</td><td>§15.3 Arena Rate Config, §15.4</td></tr>
 <tr><td>US-ADMIN-004</td><td>AC-016-1 through AC-016-4</td><td>§15.3 (User Management), §15.4</td></tr>
 <tr><td>US-ADMIN-005</td><td>AC-017-1 through AC-017-4</td><td>§15.3 (Leaderboard Management), §15.4</td></tr>
-<tr><td>US-ADMIN-006</td><td>AC-018-1 through AC-018-3</td><td>§15.3 (Economy Config), §15.4</td></tr>
+<tr><td>US-ADMIN-006</td><td>AC-018-1 through AC-018-4</td><td>§15.3 (Economy Config), §15.4</td></tr>
 </table>
 <h3 id="b-screen-inventory">B. Screen Inventory</h3>
 <table>

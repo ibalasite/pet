@@ -12,7 +12,7 @@
   "brd.html": {
     "url": "brd.html",
     "title": "商業需求文件 (BRD)",
-    "excerpt": "BRD — Business Requirements Document\nDocument Control\n\n欄位內容\nDOC-IDBRD-PIXEL-PET-ARENA-20260503\n專案名稱pixel-pet-arena\n文件版本v1.0\n狀態DRAFT\n作者AI Generated (ge"
+    "excerpt": "BRD — Business Requirements Document\nDocument Control\n\n欄位內容\nDOC-IDBRD-PIXEL-PET-ARENA-20260503\n專案名稱pixel-pet-arena\n文件版本v1.2\n狀態DRAFT\n作者AI Generated (ge"
   },
   "prd.html": {
     "url": "prd.html",
@@ -82,7 +82,7 @@
   "runbook.html": {
     "url": "runbook.html",
     "title": "Runbook",
-    "excerpt": "Runbook — pixel-pet-arena\nDOC-ID: RUNBOOK-PIXEL-PET-ARENA-20260504\nStatus: ACTIVE\nLast Updated: 2026-05-04\nMaintainer: [ON-CALL-ENGINEER]\n\nTable of Co"
+    "excerpt": "Runbook — pixel-pet-arena\nDOC-ID: RUNBOOK-PIXEL-PET-ARENA-20260504\nStatus: ACTIVE\nLast Updated: 2026-05-04\nMaintainer: @oncall-engineer (PagerDuty pol"
   },
   "local_deploy.html": {
     "url": "local_deploy.html",
@@ -92,12 +92,12 @@
   "rtm.html": {
     "url": "rtm.html",
     "title": "需求追蹤矩陣 (RTM)",
-    "excerpt": "Requirement Traceability Matrix\n\nDOC-IDRTM-PIXEL-PET-001\nProjectpixel-pet-arena\nDate2026-05-08\nVersion1.1.0\nLast refresh2026-05-08 (align-fix: regener"
+    "excerpt": "Requirement Traceability Matrix\n\nDOC-IDRTM-PIXEL-PET-001\nProjectpixel-pet-arena\nDate2026-05-08\nVersion1.1.0\nLast refresh2026-05-15 (align-fix gencode:"
   },
   "align_report.html": {
     "url": "align_report.html",
     "title": "對齊報告",
-    "excerpt": "Alignment Scan Report — Pixel Pet Arena (Post-Fix Verification)\n\nMetadataValue\nProject/Users/tobala/projects/pet\nScan timestamp (UTC)2026-05-07T20:57Z"
+    "excerpt": "ALIGN_REPORT — 全局對齊掃描報告\n專案：pixel-pet-arena\n掃描日期：2026-05-15\n掃描策略：exhaustive（全量掃描，六個維度）\nClient Type：game | Has Admin Backend：true\n\n執行摘要\n╔═══════════════"
   },
   "admin_impl.html": {
     "url": "admin_impl.html",
@@ -144,6 +144,11 @@
     "title": "Developer Guide",
     "excerpt": "Developer Guide — pixel-pet-arena\nDOC-ID: DEVGUIDE-PIXEL-PET-ARENA-20260504\nStatus: ACTIVE\nLast Updated: 2026-05-04\nAudience: Engineers working day-to"
   },
+  "dryrun_dev_feedback.html": {
+    "url": "dryrun_dev_feedback.html",
+    "title": "Dryrun Dev Feedback",
+    "excerpt": "DRYRUN DEV FEEDBACK — Quantitative Anchor Discrepancy Report\n本文件由 DRYRUN Review Loop 生成，記錄 Track A vs Track B 不一致的量化錨點，供 dryrun_core.py 修復參考。\n\n§1 Revi"
+  },
   "implementation_readiness.html": {
     "url": "implementation_readiness.html",
     "title": "Implementation Readiness",
@@ -152,7 +157,7 @@
   "manifest.html": {
     "url": "manifest.html",
     "title": "Manifest",
-    "excerpt": "MANIFEST — gendoc Pipeline Execution Plan\nProject: pixel-pet-arena\nGenerated: 2026-05-03\nPipeline Version: 3.0\nStatus: ✅ COMPLETE\n\n§1 Baseline Metrics"
+    "excerpt": "MANIFEST — Pipeline Execution Manifest\nDocument Control\n\n欄位內容\nGenerated Date2026-05-15\nPipeline Version4.0\nEDD Versionv1.0.0\nClient Typegame\nHas Admin"
   },
   "resource.html": {
     "url": "resource.html",

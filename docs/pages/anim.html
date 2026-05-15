@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -474,6 +475,7 @@
 <p><strong>Upstream</strong>: EDD-PIXEL-PET-ARENA-20260503, ARCH-PIXEL-PET-ARENA-20260503, PRD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503</p>
 <hr>
 <h2 id="1-overview">§1. Overview</h2>
+<p>This section establishes the animation design vision, technical stack choices, and performance targets that govern all sprite work in pixel-pet-arena.</p>
 <h3 id="11-animation-design-vision">§1.1 Animation Design Vision</h3>
 <p>pixel-pet-arena delivers a retro-pixel aesthetic with smooth, performant sprite animation across all major browsers. The animation system is built on <strong>Phaser.js 3</strong> (v3.55.2 or later), isolated within the <code>PetCanvasEngine</code> React component. Animation runtime targets ≥30 FPS sustained on desktop and modern mobile browsers (ARCH §2.1, EDD §1; PET_ANIMATION_FPS_MIN = 30).</p>
 <p>The pet animation system must support:</p>
@@ -493,6 +495,7 @@
 <ul><li>FPS: ≥30 sustained (PET_ANIMATION_FPS_MIN = 30; ARCH §2.1)</li><li>Pet canvas render on page load: ≤2 seconds (PET_RENDER_ON_LOAD_SECONDS = 2)</li><li>Pet interaction response: ≤200 ms (PET_INTERACTION_RESPONSE_MS = 200; ARCH §8.1)</li><li>WebGL unavailable fallback: static sprite, no animation</li><li>Reduced motion mode: static sprite per <code>prefers-reduced-motion: reduce</code> (ARCH §2.1)</li></ul>
 <hr>
 <h2 id="2-animation-requirements-analysis">§2. Animation Requirements Analysis</h2>
+<p>This section catalogs every required animation, maps each to its spritesheet placement, and establishes the memory budget needed to support them at runtime.</p>
 <h3 id="21-pet-generation--asset-mapping">§2.1 Pet Generation &amp; Asset Mapping</h3>
 <p>Each pet is uniquely generated via a 6-dimensional attribute vector (PET_GENERATION_DIMENSIONS = 6; EDD §0):</p>
 <ol><li><strong>body</strong> — frame silhouette (e.g., round, square, tall, short)</li><li><strong>head</strong> — facial feature set (e.g., pointed, round, animal-like)</li><li><strong>color_palette</strong> — primary + secondary color (e.g., blue-yellow, green-purple)</li><li><strong>accessory</strong> — optional visual augment (e.g., hat, scarf, crown)</li><li><strong>rarity_trait</strong> — visual distinctiveness (common → legendary glow)</li><li><strong>pattern</strong> — spot, stripe, or gradient overlay</li></ol>
@@ -543,8 +546,9 @@
 <tr><td><code>anim_battle_lose</code></td><td>4 frames</td><td>600</td><td>No</td><td>Battle match lost</td><td>Defeat pose (slump, disappointment)</td></tr>
 <tr><td><code>anim_levelup_burst</code></td><td>12 frames</td><td>1200</td><td>No</td><td>Pet levels up</td><td>Particle explosion effect with stat highlight</td></tr>
 <tr><td><code>anim_neglect_desaturate</code></td><td>1 frame</td><td>—</td><td>No</td><td>Triggered when last_trained_at &gt; 3 days</td><td>Desaturated shader applied (no frame anim)</td></tr>
+<tr><td><code>anim_stat_buff_glow</code></td><td>3 frames</td><td>400</td><td>No</td><td>Food buff applied</td><td>Glow/flash overlay on pet; plays once on buff activation</td></tr>
 </table>
-<p><strong>Total Frame Count</strong>: ~70 frames across all 15 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).</p>
+<p><strong>Total Frame Count</strong>: ~74 frames across all 17 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).</p>
 <h3 id="23-animation-spritesheet-planning">§2.3 Animation Spritesheet Planning</h3>
 <p><strong>Strategy</strong>: Combine all character animations into a single <strong>character spritesheet</strong> per pet generation variant (body × head combination).</p>
 <p><strong>Spritesheet Grid</strong> (example for one body/head combo):</p>
@@ -554,9 +558,10 @@ Row 2:  [anim_interact_head_turn frames 0-1]      [anim_train_flex frames 0-4]  
 Row 3:  [anim_battle_entry frames 0-3]            [anim_battle_idle frames 0-1]        [anim_battle_attack frames 0-4]
 Row 4:  [anim_battle_hit frames 0-2]              [anim_battle_win frames 0-5]         [anim_battle_lose frames 0-3]
 Row 5:  [anim_levelup_burst frames 0-11 (2×width)]
+Row 6:  [anim_stat_buff_glow frames 0-2]              [anim_neglect_desaturate frame 0]
 
-Total grid: ~6 rows × 4 columns (with frame packing) = 24 visible tiles → 96 frames total
-Physical size: 32px × 24 cells = 768 × 768 px spritesheet per variant
+Total grid: ~7 rows × 4 columns (with frame packing) = ~74 used frames → ~74 frames total (remaining cells are blank padding to fill the spritesheet grid)
+Physical size: 32px × 28 cells = 896 × 768 px spritesheet per variant
 Compressed PNG: ~80–120 KB per variant (subject to color optimization)</code></pre>
 <p><strong>Variant Count Estimate</strong>:</p>
 <ul><li>Body types: 4 (EDD provisional — open question OQ-E01 on final count)</li><li>Head types: 3</li><li>Unique body/head combos: 4 × 3 = 12 base variants</li><li>Color palette variations: 8–16 (adjustable)</li><li><strong>Estimated total variants</strong>: 12 × 12 = 144 spritesheet variants</li></ul>
@@ -572,6 +577,7 @@ Compressed PNG: ~80–120 KB per variant (subject to color optimization)</code><
 <p><strong>Total Runtime Memory</strong>: ~25–30 MB at steady state (conservative; mobile target is 128+ MB modern phones)</p>
 <hr>
 <h2 id="3-sprite-asset-planning">§3. Sprite Asset Planning</h2>
+<p>This section defines the pixel constraints, file naming conventions, and folder structure that artists and engineers must follow when producing sprite assets.</p>
 <h3 id="31-sprite-design-specification">§3.1 Sprite Design Specification</h3>
 <p><strong>Canvas Size</strong>: 32×32 pixels (SPRITE_RESOLUTION_PX = 32)</p>
 <ul><li><strong>Safe area</strong>: 24×24 px center; 4 px margin on all sides for antialiasing and animation movement</li><li><strong>Color depth</strong>: 8-bit indexed (256 colors) for 2:1 file size advantage over 32-bit RGBA where possible</li><li><strong>Transparency</strong>: Per-pixel alpha channel (PNG transparency)</li></ul>
@@ -624,6 +630,7 @@ Compressed PNG: ~80–120 KB per variant (subject to color optimization)</code><
 }</code></pre>
 <hr>
 <h2 id="4-animation-engine--implementation">§4. Animation Engine &amp; Implementation</h2>
+<p>This section covers the Phaser.js integration pattern, the per-pet animation state machine, frame timing calculations, and particle effect design.</p>
 <h3 id="41-phaserjs-integration">§4.1 Phaser.js Integration</h3>
 <p><strong>PetCanvasEngine Component</strong> (React wrapper):</p>
 <pre><code class="language-typescript">// src/components/PetCanvasEngine/PetCanvasEngine.tsx
@@ -702,7 +709,24 @@ function updatePetScene(this: Phaser.Scene) {
 }</code></pre>
 <p><strong>Architectural Rule</strong> (ARCH §2.1): Only <code>PetCanvasEngine</code> may import Phaser. No other component, hook, or utility may reference Phaser directly. Communication between Phaser scenes and React state uses an event emitter bridge.</p>
 <h3 id="42-animation-state-machine">§4.2 Animation State Machine</h3>
-<p>Each pet sprite maintains a state machine for animation sequencing:</p>
+<p>Each pet sprite maintains a state machine for animation sequencing.</p>
+<p><strong>Transition Table</strong> (generated by gendoc-align-fix gencode for AI codegen readiness):</p>
+<table>
+<tr><th>From State</th><th>Trigger</th><th>To State</th><th>Guard Condition</th><th>Duration</th></tr>
+<tr><td><code>idle</code></td><td><code>onClick</code></td><td><code>interacting</code></td><td>—</td><td>300ms then → <code>idle</code></td></tr>
+<tr><td><code>idle</code></td><td><code>trainStart</code></td><td><code>training</code></td><td>training AC not exhausted</td><td>600ms then → <code>idle_happy</code></td></tr>
+<tr><td><code>idle</code></td><td><code>battleStart</code></td><td><code>battle</code></td><td>arena session exists</td><td>varies</td></tr>
+<tr><td><code>idle</code></td><td><code>levelUp</code></td><td><code>levelup</code></td><td>new level achieved</td><td>800ms then → <code>idle_happy</code></td></tr>
+<tr><td><code>idle</code></td><td><code>neglect</code></td><td><code>neglected</code></td><td><code>trained_at</code> &gt; 24h</td><td>persistent</td></tr>
+<tr><td><code>interacting</code></td><td><code>animationEnd</code></td><td><code>idle</code></td><td>300ms elapsed</td><td>—</td></tr>
+<tr><td><code>training</code></td><td><code>animationEnd</code></td><td><code>idle_happy</code></td><td>600ms elapsed</td><td>—</td></tr>
+<tr><td><code>idle_happy</code></td><td><code>loopEnd×3</code></td><td><code>idle</code></td><td>3 loops completed</td><td>—</td></tr>
+<tr><td><code>battle</code></td><td><code>battleEntry</code></td><td><code>battle</code> (active)</td><td>—</td><td>loop: <code>IDLE ↔ ATTACK/HIT</code></td></tr>
+<tr><td><code>battle</code> (active)</td><td><code>battleEnd</code> (win)</td><td><code>battle_win</code></td><td>outcome = WIN</td><td>400ms then → <code>idle_happy</code></td></tr>
+<tr><td><code>battle</code> (active)</td><td><code>battleEnd</code> (lose)</td><td><code>battle_lose</code></td><td>outcome = LOSE</td><td>400ms then → <code>idle</code></td></tr>
+<tr><td><code>levelup</code></td><td><code>animationEnd</code></td><td><code>idle_happy</code></td><td>800ms elapsed</td><td>—</td></tr>
+<tr><td><code>neglected</code></td><td><code>trainStart</code></td><td><code>interacting</code></td><td>any training action</td><td>—</td></tr>
+</table>
 <pre><code class="">State: IDLE
   ├─ Idle anim (loops indefinitely)
   └─ On input → INTERACTING
@@ -790,6 +814,7 @@ class PetAnimStateMachine {
 <ul><li>Rarity-tier-dependent glow effect applied as post-process shader</li><li>Common (no glow) | Rare (blue) | Epic (purple) | Legendary (gold)</li><li>Shader parameterized by rarity; updates when pet rarity changes</li><li>Alpha pulse: 0.7 → 1.0 → 0.7 over 2 seconds, loops</li></ul>
 <hr>
 <h2 id="5-performance--optimization">§5. Performance &amp; Optimization</h2>
+<p>This section describes the spritesheet loading pipeline, WebGL fallback behavior, and reduced-motion support that keep the animation system within its performance budget.</p>
 <h3 id="51-asset-loading-strategy">§5.1 Asset Loading Strategy</h3>
 <p><strong>Critical Path Optimization</strong>:</p>
 <ol><li><strong>Initial page load</strong> (landing page, claim page): no Phaser import; static sprite fallback only</li><li><strong>Pet page load</strong>: async fetch + load spritesheet as non-blocking background task</li><li><strong>Lazy spritesheet cache</strong>: LRU cache (last 3 variants in memory)</li></ol>
@@ -831,6 +856,7 @@ if (prefersReducedMotion) {
 }</code></pre>
 <hr>
 <h2 id="6-cross-platform-considerations">§6. Cross-Platform Considerations</h2>
+<p>This section documents the expected animation behavior and any required adaptations across desktop browsers, mobile devices, and changing tablet orientations.</p>
 <h3 id="61-desktop-chrome-firefox-safari-edge">§6.1 Desktop (Chrome, Firefox, Safari, Edge)</h3>
 <p><strong>Target</strong>: 60 FPS, modern WebGL</p>
 <ul><li>Spritesheet size: full 768×768 px, 32-bit RGBA</li><li>Animation frame rate: native 200 ms per frame (typical)</li><li>Performance: ✓ No issues expected</li></ul>
@@ -847,6 +873,7 @@ if (prefersReducedMotion) {
 <ul><li>Phaser canvas resizes via <code>scale</code> plugin (Phaser.Scale.RESIZE)</li><li>Sprite position maintained (center of canvas)</li><li>All animations continue playing without interruption</li><li>No state loss</li></ul>
 <hr>
 <h2 id="7-implementation-phases">§7. Implementation Phases</h2>
+<p>This section breaks animation delivery into four sequential phases, each with concrete deliverables and asset size milestones.</p>
 <h3 id="71-phase-1-core-idle-animation-weeks-12">§7.1 Phase 1: Core Idle Animation (Weeks 1–2)</h3>
 <p><strong>Deliverables</strong>:</p>
 <ul><li>4 body/head variants designed and spritesheet created</li><li><code>anim_idle_default</code> and <code>anim_idle_sleep</code> implemented in Phaser</li><li>State machine for IDLE → INTERACTING transition</li><li>Landing page pet preview with idle loop</li><li>Performance verified: ≥30 FPS on target devices</li></ul>
@@ -864,6 +891,7 @@ if (prefersReducedMotion) {
 <ul><li>Spritesheet caching implementation (IndexedDB + HTTP cache)</li><li>Performance profiling and optimization (target ≥30 FPS maintained)</li><li>Cross-platform testing (desktop + mobile + tablet)</li><li>Reduced motion compliance verification</li><li>WebGL fallback testing</li></ul>
 <hr>
 <h2 id="8-testing-strategy">§8. Testing Strategy</h2>
+<p>This section specifies the visual regression, performance, cross-browser, and accessibility test cases required to validate the animation system before each phase ships.</p>
 <h3 id="81-visual-regression-testing">§8.1 Visual Regression Testing</h3>
 <p><strong>Tool</strong>: Playwright visual regression snapshots at breakpoints: 320, 768, 1024, 1440 px (WEB TESTING RULES, priority 1)</p>
 <p><strong>Test Cases</strong>:</p>
@@ -902,6 +930,7 @@ if (prefersReducedMotion) {
 </table>
 <hr>
 <h2 id="9-risk-mitigation--open-questions">§9. Risk Mitigation &amp; Open Questions</h2>
+<p>This section lists the known technical risks with their mitigations, and the open questions that require a decision before implementation can be finalized.</p>
 <h3 id="91-risks">§9.1 Risks</h3>
 <table>
 <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
@@ -919,6 +948,7 @@ if (prefersReducedMotion) {
 <ul><li>Current: Spawn synthetic AI pet with random seed; render same spritesheet logic</li><li>Question: Do we animate the AI pet with same 15-animation set, or use simplified 3-animation subset?</li><li>Decision required: Balance realism (full animation) vs. performance (simplified)</li><li>Acceptance: Benchmark with 20 concurrent pets on-screen; confirm ≥30 FPS maintained</li></ul>
 <hr>
 <h2 id="10-monitoring--observability">§10. Monitoring &amp; Observability</h2>
+<p>This section defines the runtime metrics, error fallback chains, and structured-logging events used to track animation health in production.</p>
 <h3 id="101-animation-performance-metrics">§10.1 Animation Performance Metrics</h3>
 <table>
 <tr><th>Metric</th><th>Target</th><th>Constant</th><th>Monitoring</th></tr>

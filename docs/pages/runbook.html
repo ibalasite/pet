@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -468,7 +469,7 @@
 <p><strong>DOC-ID</strong>: RUNBOOK-PIXEL-PET-ARENA-20260504</p>
 <p><strong>Status</strong>: ACTIVE</p>
 <p><strong>Last Updated</strong>: 2026-05-04</p>
-<p><strong>Maintainer</strong>: [ON-CALL-ENGINEER]</p>
+<p><strong>Maintainer</strong>: @oncall-engineer (PagerDuty policy: pixel-pet-backend)</p>
 <hr>
 <h2 id="table-of-contents">Table of Contents</h2>
 <p>This runbook covers the full operational lifecycle for the pixel-pet-arena stack. Sections are ordered from routine operations to emergency response:</p>
@@ -539,13 +540,13 @@
 <ul><li>Railway: rolling deploy is the default; old instances drain existing connections while new instances accept new ones.</li><li>Fly.io: <code>fly deploy</code> performs a rolling replacement by default with health check gating. Set <code>[deploy] strategy = &quot;rolling&quot;</code> in <code>fly.toml</code> to be explicit.</li><li>Database migrations that are additive (add column, add index, add table) are safe to run before the deploy. Destructive migrations (drop column, rename) must be staged across two deploys: first deploy ignores the old column in code, second deploy drops it.</li><li>CDN deploys for frontend and admin portal are atomic; new assets are hashed by Vite so old and new versions can coexist in cache during the cutover window.</li></ul>
 <hr>
 <h2 id="incident-response">Incident Response</h2>
-<p>This section defines severity levels, SLAs, escalation paths, and first-responder playbooks for common failure scenarios.</p>
+<p>This section defines severity levels, SLAs, escalation paths, and first-responder playbooks for common failure scenarios in the pixel-pet-arena production environment. Each playbook provides step-by-step diagnostic commands and repair actions to restore service within the defined SLA window.</p>
 <h3 id="severity-matrix">Severity Matrix</h3>
 <table>
 <tr><th>Severity</th><th>Definition</th><th>Response SLA</th><th>Escalation</th></tr>
-<tr><td><strong>P0</strong></td><td>Complete outage — all users cannot play; <code>GET /health</code> returns non-200 or is unreachable</td><td>Acknowledge within 5 min; resolve or roll back within 30 min</td><td>Page [ON-CALL-ENGINEER] immediately; escalate to [PLATFORM-LEAD] if not resolved in 15 min</td></tr>
-<tr><td><strong>P1</strong></td><td>Degraded performance — error rate &gt; 1% (monitoring alert threshold) or P99 latency &gt; 1,000 ms for any player-facing endpoint</td><td>Acknowledge within 15 min; restore to SLO within 60 min</td><td>Notify [ON-CALL-ENGINEER] via PagerDuty; loop in [DATABASE-OWNER] if DB or Redis implicated</td></tr>
-<tr><td><strong>P2</strong></td><td>Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works)</td><td>Acknowledge within 1 hour; resolve within 4 hours or next business day</td><td>Notify [ON-CALL-ENGINEER] via Slack <code>#incidents</code>; no escalation required unless degrading to P1</td></tr>
+<tr><td><strong>P0</strong></td><td>Complete outage — all users cannot play; <code>GET /health</code> returns non-200 or is unreachable</td><td>Acknowledge within 5 min; resolve or roll back within 30 min</td><td>Page @oncall-engineer (PagerDuty policy: pixel-pet-backend) immediately; escalate to @platform-lead (Slack: #platform-engineering) if not resolved in 15 min</td></tr>
+<tr><td><strong>P1</strong></td><td>Degraded performance — error rate &gt; 1% (monitoring alert threshold) or P99 latency &gt; 1,000 ms for any player-facing endpoint</td><td>Acknowledge within 15 min; restore to SLO within 60 min</td><td>Notify @oncall-engineer (PagerDuty policy: pixel-pet-backend) via PagerDuty; loop in @db-owner (Slack: #database-ops) if DB or Redis implicated</td></tr>
+<tr><td><strong>P2</strong></td><td>Minor issue — single feature broken, workaround available (e.g. arena battles fail but training works)</td><td>Acknowledge within 1 hour; resolve within 4 hours or next business day</td><td>Notify @oncall-engineer (PagerDuty policy: pixel-pet-backend) via Slack <code>#incidents</code>; no escalation required unless degrading to P1</td></tr>
 </table>
 <h3 id="p0--complete-outage">P0 — Complete Outage</h3>
 <p><strong>First responder actions (in order):</strong></p>
@@ -563,16 +564,44 @@
 <p>Redis is used for rate-limiting counters and the arena matchmaking queue. When Redis is unavailable:</p>
 <ul><li><strong>Leaderboard</strong>: The frontend displays a stale-data banner (reads fall back to the last successful PostgreSQL snapshot). The player-facing banner appears at <code>leaderboard_update_lag_max = 30</code> seconds. The ops alert fires at <code>observability_leaderboard_lag_alert = 60</code> seconds. The 30–60 second window where players see the banner but no ops alert has fired is intentional — minor Redis blips that resolve within a minute should not page on-call. If the banner persists beyond 60 seconds, the ops alert fires and action is required.</li><li><strong>Arena rate limiting</strong>: Arena battle rate limits are <strong>fail-open</strong> — if Redis is unavailable, rate limits are not enforced. This is an accepted risk designed to keep gameplay running; the failure is logged as an alert.</li><li><strong>OTP code entry rate limiting</strong>: This is <strong>fail-closed</strong> — code entry is blocked when Redis is down to prevent brute-force bypass.</li><li><strong>Matchmaking queue</strong>: Arena enter requests will time out after <code>arena_matchmaking_timeout = 30</code> seconds and fall back to an AI opponent.</li></ul>
 <p><strong>Actions:</strong></p>
-<ol><li>Check Upstash Redis status dashboard and connection string in environment variables.</li><li>If <code>REDIS_URL</code> is correct and Upstash reports healthy, check for network/TLS issues from the backend host.</li><li>If the Upstash outage is confirmed as a platform issue, open a support ticket with Upstash and set severity to P1.</li><li>Do not restart the backend process for a Redis outage alone; the system is designed to degrade gracefully.</li></ol>
+<ol><li>Check Upstash Redis status dashboard and connection string in environment variables.</li></ol>
+<pre><code class="language-bash">   # Test connectivity directly
+   redis-cli -u $REDIS_URL PING
+
+   # Check Upstash platform status
+   curl https://status.upstash.com/api/v2/status.json
+
+   # If running on Fly.io — test from within the host network
+   fly ssh console -a pixel-pet-api
+   # then, inside the console:
+   redis-cli -u $REDIS_URL PING</code></pre>
+<ol><li>If <code>REDIS_URL</code> is correct and Upstash reports healthy, check for network/TLS issues from the backend host.</li><li>If the Upstash outage is confirmed as a platform issue, open a support ticket with Upstash and set severity to P1.</li><li>Do not restart the backend process for a Redis outage alone; the system is designed to degrade gracefully.</li></ol>
 <h4 id="database-connection-pool-exhausted">Database Connection Pool Exhausted</h4>
 <p>The DB connection pool minimum is 20 connections (<code>db_connection_pool_min_connections = 20</code>). Alert fires at 80% pool utilization.</p>
 <p><strong>Actions:</strong></p>
-<ol><li>Check the observability dashboard for <code>db_connection_pool_utilization</code>. If above 80%, proceed.</li><li>Identify long-running queries in Supabase dashboard (<code>Query Performance</code> tab). Kill any query running longer than 30 seconds that is blocking connections.</li><li>Check for connection leaks: look for backend instances that have open idle connections but are not processing requests.</li><li>If the backend is scaled to multiple replicas, reduce the per-instance pool size or scale back replicas temporarily.</li><li>If Supabase&#x27;s free-tier connection limit is the bottleneck, enable PgBouncer (Supabase → Database → Connection Pooling → Transaction mode).</li><li>After connection count normalizes, monitor for 10 minutes before clearing the incident.</li></ol>
+<ol><li>Check the observability dashboard for <code>db_connection_pool_utilization</code>. If above 80%, proceed.</li><li>Identify long-running queries in Supabase dashboard (<code>Query Performance</code> tab). Kill any query running longer than 30 seconds that is blocking connections. Run the following via Supabase SQL Editor or <code>psql $DATABASE_URL</code>:</li></ol>
+<pre><code class="language-sql">   -- Identify blocking queries
+   SELECT pid, query, state, now()-query_start AS duration
+   FROM pg_stat_activity
+   WHERE state != &#x27;idle&#x27;
+   ORDER BY duration DESC;
+
+   -- Cancel a specific query
+   SELECT pg_cancel_backend(&lt;pid&gt;);</code></pre>
+<ol><li>Check for connection leaks: look for backend instances that have open idle connections but are not processing requests.</li><li>If the backend is scaled to multiple replicas, reduce the per-instance pool size or scale back replicas temporarily.</li><li>If Supabase&#x27;s free-tier connection limit is the bottleneck, enable PgBouncer (Supabase → Database → Connection Pooling → Transaction mode).</li><li>After connection count normalizes, monitor for 10 minutes before clearing the incident.</li></ol>
 <h4 id="admin-portal-locked-out">Admin Portal Locked Out</h4>
 <p>Admin accounts lock after <code>admin_login_lockout_threshold = 10</code> consecutive failed login attempts. The lockout duration is 30 minutes (<code>admin_login_lockout_duration_minutes = 30</code>).</p>
 <p><strong>Actions (if waiting 30 minutes is acceptable):</strong></p>
 <ol><li>Wait for the lockout to expire automatically (30-minute window).</li><li>Advise the locked-out admin to ensure their TOTP code is from the correct time-synced authenticator app.</li></ol>
 <p><strong>Actions (if immediate access is required):</strong></p>
+<ol><li>Confirm the lockout via Supabase SQL Editor or <code>psql $DATABASE_URL</code>:</li></ol>
+<pre><code class="language-sql">   SELECT username, locked_until, failed_login_count
+   FROM admin_users
+   WHERE locked_until IS NOT NULL;</code></pre>
+<ol><li>Obtain the locked admin username from the incident report or PagerDuty alert, and confirm the account exists:</li></ol>
+<pre><code class="language-sql">   SELECT username, locked_until, failed_login_count
+   FROM admin_users
+   WHERE username = &#x27;&lt;username&gt;&#x27;;</code></pre>
 <ol><li>Connect to the Supabase database (use the connection string from secrets manager, not from the locked-out admin&#x27;s session):</li></ol>
 <pre><code class="language-sql">   -- Find the locked account
    SELECT id, username, locked_until
@@ -601,8 +630,9 @@
 <pre><code class="language-bash">   curl -X GET &quot;https://api.sendgrid.com/v3/user/profile&quot; \
      -H &quot;Authorization: Bearer $SENDGRID_API_KEY&quot;</code></pre>
 <p>A 401 response means the key is invalid or revoked.</p>
-<ol><li>If the key is valid, check SendGrid status page (<code>status.sendgrid.com</code>) for an ongoing platform incident.</li><li>If the failure is limited to a specific sender domain, check DNS records (SPF, DKIM, DMARC) in the Sendgrid → Settings → Sender Authentication dashboard.</li><li>If SendGrid is fully down and the outage will exceed 30 minutes, assess whether to temporarily disable new pet claims to prevent a broken user experience (disable via <code>FF_CLAIM_FLOW</code> feature flag if it exists, or deploy a maintenance page for the claim endpoint).</li><li>Once resolved, verify delivery is restored by triggering a test claim email through the staging environment.</li></ol>
+<ol><li>If the key is valid, check SendGrid status page (<code>status.sendgrid.com</code>) for an ongoing platform incident.</li><li>If the failure is limited to a specific sender domain, check DNS records (SPF, DKIM, DMARC) in the Sendgrid → Settings → Sender Authentication dashboard.</li><li>If SendGrid is fully down and the outage will exceed 30 minutes, assess whether to temporarily disable new pet claims to prevent a broken user experience (disable via <code>FF_EMAIL_CLAIM</code> feature flag if it exists, or deploy a maintenance page for the claim endpoint).</li><li>Once resolved, verify delivery is restored by triggering a test claim email through the staging environment.</li></ol>
 <h4 id="feature-flag-emergency-toggle">Feature Flag Emergency Toggle</h4>
+<p><strong>Triggered when:</strong> data corruption or player-safety issue is traced to a specific feature flag, or when marketplace must be activated/deactivated upon reaching a DAU milestone.</p>
 <p>Feature flags are environment variables read at startup and cached in memory. Config changes propagate within 5 minutes (<code>config_cache_refresh_time_minutes = 5</code>).</p>
 <p><strong>To disable FF_ARENA_SUMO (e.g. sumo battles causing data corruption):</strong></p>
 <p>Option A — Runtime config (preferred, no restart required, takes effect within 5 min):</p>
@@ -640,7 +670,7 @@ curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
    done</code></pre>
 <ol><li>Run the post-deployment smoke tests (see <a href="#deployment">Deployment</a>). Confirm all 7 checks pass.</li><li>Open a GitHub issue documenting what went wrong, the rollback action taken, and the incident timeline.</li></ol>
 <h3 id="database-migration-rollback">Database Migration Rollback</h3>
-<blockquote><p><strong>WARNING</strong>: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from [PLATFORM-LEAD] and a confirmed recent backup.</p></blockquote>
+<blockquote><p><strong>WARNING</strong>: Database rollbacks are potentially destructive and irreversible. A migration rollback that drops columns or tables will permanently delete data written after the migration ran. Never execute a down-migration in production without explicit written approval from @platform-lead (Slack: #platform-engineering) and a confirmed recent backup.</p></blockquote>
 <p><strong>Step 0 — Verify backup before any migration rollback (mandatory):</strong></p>
 <ol><li>Navigate to Supabase → Dashboard → Database → Backups.</li><li>Confirm the most recent automated backup timestamp is within the last 24 hours.</li><li>If the latest backup is stale or missing, trigger a manual backup: Supabase dashboard → Database → Backups → <code>Create backup</code> before proceeding.</li><li>Record the backup ID in the <code>#incidents</code> thread.</li></ol>
 <p><strong>Safe rollback (additive migrations only):</strong></p>
@@ -679,7 +709,7 @@ curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
 <p>In all forward-fix cases, acknowledge the incident, communicate the fix ETA, and deploy the corrected build through the normal CI pipeline.</p>
 <hr>
 <h2 id="health-checks-and-monitoring">Health Checks and Monitoring</h2>
-<p>The <code>/health</code> endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating.</p>
+<p>The <code>/health</code> endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating. This section covers the response schema, expected subsystem statuses, and the alerting thresholds used by on-call monitoring.</p>
 <h3 id="health-response-schema"><code>/health</code> Response Schema</h3>
 <p>The endpoint must respond within <code>health_check_response_time = 500</code> ms.</p>
 <p><strong>Healthy response (HTTP 200):</strong></p>
@@ -768,7 +798,7 @@ curl -X PUT https://api.pixel-pet-arena.com/admin/api/config/runtime \
     note: &quot;Spike may indicate UTC 00:00 reset bug (limits not resetting) or exploit attempt&quot;</code></pre>
 <hr>
 <h2 id="on-call-quick-reference">On-Call Quick Reference</h2>
-<p>A compact reference card for the first responder. Full API documentation is in <code>docs/API.md</code>.</p>
+<p>A compact reference card for the first responder during active incidents. Covers critical endpoints, key environment variables, common diagnostic commands, and escalation contacts. Full API documentation is in <code>docs/API.md</code>; full incident playbooks are in the Incident Response section above.</p>
 <h3 id="critical-endpoints">Critical Endpoints</h3>
 <table>
 <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
@@ -810,9 +840,9 @@ PORT                  # Default 3000; set by platform automatically</code></pre>
 <h3 id="contact-list">Contact List</h3>
 <table>
 <tr><th>Role</th><th>Contact</th></tr>
-<tr><td>Primary on-call engineer</td><td>[ON-CALL-ENGINEER]</td></tr>
-<tr><td>Platform lead (escalation)</td><td>[PLATFORM-LEAD] — escalate via PagerDuty P0 policy</td></tr>
-<tr><td>Database owner (Supabase issues)</td><td>[DATABASE-OWNER] — open Supabase support ticket if platform incident confirmed</td></tr>
+<tr><td>Primary on-call engineer</td><td>@oncall-engineer (PagerDuty policy: pixel-pet-backend)</td></tr>
+<tr><td>Platform lead (escalation)</td><td>@platform-lead (Slack: #platform-engineering) — escalate via PagerDuty P0 policy</td></tr>
+<tr><td>Database owner (Supabase issues)</td><td>@db-owner (Slack: #database-ops) — open Supabase support ticket if platform incident confirmed</td></tr>
 <tr><td>Upstash Redis support</td><td>https://upstash.com/support</td></tr>
 <tr><td>SendGrid support</td><td>https://support.sendgrid.com</td></tr>
 <tr><td>Railway support</td><td>https://railway.app/help</td></tr>
