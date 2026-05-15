@@ -86,6 +86,8 @@
 | ARENA_ENTRY_COOLDOWN_ADMIN_MAX | 60 | minutes | PRD §19.4 US-ADMIN-006 AC-018-1 | Admin-tunable upper bound |
 | ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT | 0 | credits | PRD §19.4 US-ADMIN-006 AC-018-1 | Default arena entry cost |
 | ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX | 10 | credits | PRD §19.4 US-ADMIN-006 AC-018-1 | Admin-tunable upper bound |
+| PET_RESERVATION_TTL | 24 | hours | [BRD §系統要求] | Pet claim reservation TTL |
+| SPRITE_RESOLUTION | 32 | px | [EDD §4.1 Asset Pipeline] | Pixel sprite canvas resolution |
 
 ---
 
@@ -164,14 +166,14 @@
 | Availability | 99.9% | monthly | PRD §7.3 NFR-AVAIL-01 | Maximum 43.8 minutes downtime per month |
 | P99 API Latency (read endpoints) | < 200 | ms at 100 RPS | PRD §7.1 NFR-PERF-01 | All read endpoints |
 | P99 API Latency (write endpoints) | < 500 | ms at 100 RPS | PRD §7.1 NFR-PERF-02 | Training, arena entry write endpoints |
-| First Contentful Paint (FCP) | < 1.5 | seconds | PRD §7.1 NFR-PERF-03 | Lighthouse / Core Web Vitals |
-| Largest Contentful Paint (LCP) | < 2.5 | seconds | PRD §7.1 NFR-PERF-04 | Core Web Vitals |
-| Cumulative Layout Shift (CLS) | < 0.1 | score | PRD §7.1 NFR-PERF-05 | Core Web Vitals |
-| Interaction to Next Paint (INP) | < 200 | ms | PRD §7.1 NFR-PERF-06 | Core Web Vitals |
-| Pet Animation Frame Rate | ≥ 30 | FPS sustained | PRD §7.1 NFR-PERF-07 | Mid-range devices |
-| Arena Battle Result E2E | < 2 | seconds | PRD §7.1 NFR-PERF-08 | Calculation + storage |
-| Leaderboard Update Lag | ≤ 30 | seconds | PRD §7.1 NFR-PERF-09 | From battle completion |
-| Email Delivery (P90) | ≤ 60 | seconds | PRD §7.1 NFR-PERF-10 | Claim password email |
+| First Contentful Paint (FCP) | < 1.5 | seconds | PRD §7.1 NFR-PERF-04 | Lighthouse / Core Web Vitals |
+| Largest Contentful Paint (LCP) | < 2.5 | seconds | PRD §7.1 NFR-PERF-05 | Core Web Vitals |
+| Cumulative Layout Shift (CLS) | < 0.1 | score | PRD §7.1 NFR-PERF-06 | Core Web Vitals |
+| Interaction to Next Paint (INP) | < 200 | ms | PRD §7.1 NFR-PERF-07 | Core Web Vitals |
+| Pet Animation Frame Rate | ≥ 30 | FPS sustained | PRD §7.1 NFR-PERF-08 | Mid-range devices |
+| Arena Battle Result E2E | < 2 | seconds | PRD §7.1 NFR-PERF-09 | Calculation + storage |
+| Leaderboard Update Lag | ≤ 30 | seconds | PRD §7.1 NFR-PERF-10 | From battle completion |
+| Email Delivery (P90) | ≤ 60 | seconds | PRD §7.1 NFR-PERF-11 | Claim password email |
 | Error Rate | < 1% | of requests / 5 min | PRD §7.8 NFR-OBS-03 | Alert trigger threshold |
 | Observability P99 Alert | > 1000 | ms / 5 min | PRD §7.8 NFR-OBS-04 | Alert threshold |
 | Email Delivery Failure Rate | < 2% | / 30 min | PRD §7.8 NFR-OBS-05; PRD §9.2 guardrails | SendGrid failure rate alert |
@@ -208,6 +210,10 @@
 | Email re-send on delivery failure | 3 | retries | PRD §6.2 error flow | Retry queue over 15 minutes |
 | Email re-send retry duration | 15 | minutes | PRD §6.2 error flow | Total retry window for failed delivery |
 | Admin portal requests per admin | 100 | per minute | PRD §19.6 NFR-ADMIN-04 | Separately rate-limited from player API |
+| Admin login lockout threshold | 10 | failed attempts | PRD §7.2 NFR-SEC-05 | Admin login lockout after N failed attempts |
+| Admin login lockout duration | 30 | minutes | PRD §7.2 NFR-SEC-05 | Admin login lockout duration |
+| Admin login IP rate limit attempts | 10 | attempts | PRD §7.2 NFR-SEC-06 | Admin login IP rate limit attempts per window |
+| Admin login IP rate limit window | 900 | seconds | PRD §7.2 NFR-SEC-06 | Admin login IP rate limit window (15 min) |
 
 ---
 
@@ -278,6 +284,7 @@
 | PEAK_OPERATION_RPS | 500 | RPS | PRD §7.1 capacity targets | Viral event peak |
 | PEAK_CONCURRENT_USERS | 2000 | PCU | PRD §7.1 capacity targets; PRD §13 glossary | Peak Concurrent Users during arena events |
 | DB_CONNECTION_POOL_MIN_CONNECTIONS | 20 | connections | PRD §7.1 capacity targets | PostgreSQL connection pool minimum |
+| DB_CONNECTION_POOL_MAX_CONNECTIONS | 50 | connections | PRD §7.1 NFR-PERF-01 | DB connection pool maximum connections |
 | DAU_12_MONTH_TARGET | 2000 | DAU | BRD §3.1 O3; PRD §9.1 DAP targets | 12-month DAU success objective; intentionally equal to NORMAL_OPERATION_DAU_MIN — represents the infrastructure sizing target |
 | CLAIMED_PETS_6_WEEK_TARGET | 500 | pets | BRD §7.2; BRD §3.5 | 6-week total claimed pets target |
 | MONTHLY_GMV_TARGET | 10000 | USD | BRD §3.1 O5 | Marketplace monthly GMV target at 12 months |
