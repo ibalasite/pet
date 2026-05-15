@@ -36,6 +36,13 @@
 8. [Pagination](#8-pagination)
 9. [Changelog / Versioning](#9-changelog--versioning)
 10. [Health Check](#10-health-check)
+11. [API Paradigm Decision](#11-api-paradigm-decision)
+12. [OpenAPI 3.1 Specification (Excerpt)](#12-openapi-31-specification-excerpt)
+13. [API Versioning & Deprecation Policy](#13-api-versioning--deprecation-policy)
+14. [Client SDK & Code Generation](#14-client-sdk--code-generation)
+15. [Security Headers & CORS](#15-security-headers--cors)
+16. [API Changelog](#16-api-changelog)
+17. [API Observability & SLO](#17-api-observability--slo)
 
 ---
 
@@ -2768,3 +2775,382 @@ Returns platform health status. Required by PRD NFR-AVAIL-06.
 ```
 
 `status` values: `healthy` (all checks pass), `degraded` (partial failure), `down` (critical failure).
+
+---
+
+## 11. API Paradigm Decision
+
+### 11.1 REST vs GraphQL vs gRPC
+
+| 維度 | REST (HTTP/JSON) | GraphQL | gRPC |
+|------|-----------------|---------|------|
+| 適用場景 | Public CRUD API、Browser client、Admin portal | 複雜關聯查詢、客戶端定義資料形狀 | 微服務 RPC、高吞吐低延遲 |
+| 優點 | 成熟生態、CDN 快取、易除錯、Swagger/OpenAPI 工具鏈完整 | 避免 over-fetch/under-fetch、schema 自文件 | 強型別、bi-directional streaming、低 overhead |
+| 缺點 | Over/under-fetch 問題 | N+1 問題（需 DataLoader）、學習曲線 | 需 HTTP/2、瀏覽器支援受限、二進位難除錯 |
+| 瀏覽器支援 | ✅ 原生 | ✅ 需 client library | ⚠️ 需 grpc-web proxy |
+| 快取 | ✅ HTTP Cache + CDN | ❌ POST-only 難快取 | ❌ 需自行實作 |
+
+### 11.2 決策：REST (HTTP/JSON) + WebSocket
+
+**選擇 REST + WebSocket**，理由：
+
+1. **客戶端相容性**：Phaser 3 browser game + React Player UI + Vue 3 Admin Portal 皆以瀏覽器為主，REST 無需額外 proxy 或 client bundle。
+2. **工具鏈完整**：Fastify 4 + Zod + OpenAPI 3.1 整合成熟；Swagger UI 自動產生互動文件。
+3. **預期流量模式**：Player API 主要為 CRUD（Claim/Train/Battle），Admin Portal 為資料密集 CRUD + 篩選，REST pagination 語意清晰。
+4. **500 RPS 投影負載**：Node.js Fastify 在此負載下 REST 已足夠，不需 gRPC 的低 overhead 優化。
+5. **Real-time**：Arena 對戰進度與訓練動畫透過 WebSocket 推送，REST + WS 混合即可覆蓋所有場景。
+
+**不選 GraphQL**：查詢複雜度低，P0 功能無大量關聯查詢；Admin Portal 資料為扁平 CRUD，GraphQL 的靈活性帶來不必要的複雜度。
+
+**不選 gRPC**：純瀏覽器架構，grpc-web proxy 增加運維成本；MVP 預算 $40,000 內維持單一協議降低複雜度。
+
+---
+
+## 12. OpenAPI 3.1 Specification (Excerpt)
+
+> 完整規格由 `pnpm run gen:openapi` 自動產生至 `docs/openapi.yaml`。以下為關鍵 path 節錄。
+
+```yaml
+openapi: 3.1.0
+info:
+  title: Pixel Pet Arena API
+  version: 1.1.0
+  description: >
+    REST API for Pixel Pet Arena — Player endpoints (/api/v1/) and Admin endpoints (/admin/api/).
+    Authentication: Bearer token (Player) | Redis session cookie (Admin + TOTP MFA).
+servers:
+  - url: https://api.pixel-pet-arena.com
+    description: Production
+  - url: http://localhost:3000
+    description: Local development
+
+components:
+  securitySchemes:
+    PetAccessToken:
+      type: http
+      scheme: bearer
+      description: SHA-256 hashed 32-byte random token issued at claim
+    AdminSession:
+      type: apiKey
+      in: cookie
+      name: admin_session
+      description: Redis-backed httpOnly session cookie (TOTP MFA required)
+
+  schemas:
+    ErrorEnvelope:
+      type: object
+      required: [success, error]
+      properties:
+        success: { type: boolean, example: false }
+        error:
+          type: object
+          properties:
+            code: { type: string, example: RATE_LIMIT_EXCEEDED }
+            message: { type: string }
+    PetPublic:
+      type: object
+      properties:
+        petId: { type: string, format: uuid }
+        petName: { type: string }
+        rarity: { type: string, enum: [common, rare, epic, legendary] }
+        level: { type: integer, minimum: 1, maximum: 100 }
+        stats:
+          type: object
+          properties:
+            speed: { type: integer }
+            strength: { type: integer }
+            stamina: { type: integer }
+
+paths:
+  /api/v1/claim:
+    post:
+      summary: Initiate pet claim by email
+      tags: [Claim]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: Claim code sent to email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/pets/{petId}:
+    get:
+      summary: Get pet details
+      tags: [Pets]
+      security: [{ PetAccessToken: [] }]
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Pet details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetPublic' }
+        '404':
+          description: Pet not found
+
+  /api/v1/arena/enter:
+    post:
+      summary: Enter arena matchmaking
+      tags: [Arena]
+      security: [{ PetAccessToken: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [petId, battleType]
+              properties:
+                petId: { type: string, format: uuid }
+                battleType: { type: string, enum: [race, sumo] }
+      responses:
+        '200':
+          description: Match started or queued
+        '429':
+          description: Battle rate limit (10/hr default)
+
+  /admin/api/auth/login:
+    post:
+      summary: Admin login (Step 1 of 2 — password)
+      tags: [Admin Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: Password OK — TOTP required next
+        '403':
+          description: TOTP_SETUP_REQUIRED (first login)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code: { type: string, example: TOTP_SETUP_REQUIRED }
+                      setupToken: { type: string }
+        '401':
+          description: Invalid credentials
+        '423':
+          description: Account locked (10 failures → 30min lockout)
+
+  /health:
+    get:
+      summary: Health check
+      tags: [System]
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+```
+
+---
+
+## 13. API Versioning & Deprecation Policy
+
+### 13.1 Versioning Strategy
+
+- **URI path versioning**: `/api/v1/`, `/api/v2/`, `/admin/api/` (admin API does not use version prefix — breaking changes use feature flags)
+- **Current version**: v1 (Player API), no version (Admin API)
+- **Compatibility promise**: Non-breaking additive changes (new optional fields, new endpoints) released without version bump
+
+### 13.2 Deprecation Process
+
+| Phase | Duration | Action |
+|-------|----------|--------|
+| Soft deprecation | 3 months | `Sunset` header added to responses; docs updated |
+| Hard deprecation | 6 months | Endpoint returns HTTP 410 Gone with migration guide |
+| Removal | After 6 months | Endpoint removed |
+
+### 13.3 Breaking Change Definition
+
+Breaking changes require a new API version:
+- Removing or renaming fields in responses
+- Changing field types
+- Removing endpoints
+- Changing authentication requirements
+- Changing pagination semantics
+
+---
+
+## 14. Client SDK & Code Generation
+
+### 14.1 OpenAPI Code Generation
+
+```bash
+# Generate TypeScript client (Player App)
+pnpm run gen:openapi           # → docs/openapi.yaml
+pnpm run gen:client:ts         # → packages/client-sdk/src/
+
+# Generate types for Admin Portal
+pnpm run gen:client:vue        # → packages/admin-sdk/src/
+```
+
+### 14.2 SDK Structure
+
+```
+packages/
+├── client-sdk/         # Player API TypeScript client (auto-generated)
+│   ├── src/
+│   │   ├── api/       # Generated API methods
+│   │   └── types/     # Generated TypeScript types
+│   └── package.json
+└── admin-sdk/          # Admin API Vue composables (auto-generated)
+    └── src/
+```
+
+### 14.3 Authentication in SDK
+
+```typescript
+// Player SDK usage
+import { createPetClient } from '@pixel-pet-arena/client-sdk'
+
+const client = createPetClient({
+  baseUrl: 'https://api.pixel-pet-arena.com',
+  token: petAccessToken,
+})
+
+const pet = await client.pets.get(petId)
+const match = await client.arena.enter({ petId, battleType: 'race' })
+```
+
+---
+
+## 15. Security Headers & CORS
+
+### 15.1 Security Headers
+
+All responses include:
+
+```
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{RANDOM}'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+```
+
+### 15.2 CORS Policy
+
+| Origin | Allowed Methods | Credentials |
+|--------|----------------|-------------|
+| `https://pixel-pet-arena.com` | GET, POST, PUT, PATCH, DELETE | Yes (Player) |
+| `https://admin.pixel-pet-arena.com` | GET, POST, PUT, PATCH, DELETE | Yes (Admin session) |
+| `http://localhost:5173` (dev) | All | Yes |
+| `http://localhost:5174` (admin dev) | All | Yes |
+
+---
+
+## 16. API Changelog
+
+### v1.1 — 2026-05-16
+
+| Change | Type | Endpoint |
+|--------|------|----------|
+| Added §11 API Paradigm Decision | Docs | — |
+| Added §12 OpenAPI 3.1 YAML excerpt | Docs | — |
+| Added §17 API Observability & SLO | Docs | — |
+| TOTP setup flow documented | Enhancement | POST /admin/api/auth/totp/setup |
+| Account lockout behavior documented | Enhancement | POST /admin/api/auth/login |
+
+### v1.0 — 2026-05-03
+
+Initial release covering all Player API (/api/v1/) and Admin API (/admin/api/) endpoints.
+
+---
+
+## 17. API Observability & SLO
+
+### 17.1 SLO Targets
+
+| SLO 指標 | 目標值 | 測量方式 | 告警閾值 |
+|---------|--------|---------|---------|
+| Availability | ≥ 99.9% monthly | Synthetic probe every 60s | < 99.5% over 5min |
+| P95 Response Time | < 300ms | APM histogram | P95 > 500ms over 5min |
+| P99 Response Time | < 500ms | APM histogram | P99 > 1000ms over 5min |
+| Error Rate (5xx) | < 0.1% | HTTP status codes / total | > 1% over 5min |
+| Arena WS Connection | ≥ 99.5% | WebSocket ping-pong | < 99% over 5min |
+
+### 17.2 Error Budget
+
+Monthly error budget (Availability SLO 99.9%):
+- Available seconds per month: 30d × 24h × 3600s = 2,592,000s
+- Error budget: 2,592,000 × 0.001 = **2,592 seconds (~43 minutes)**
+- Policy: If error budget < 10% remaining → freeze non-critical deployments
+
+### 17.3 SLI Definitions
+
+| SLI | Definition | Tool |
+|-----|-----------|------|
+| Availability | (Total requests − 5xx errors) / Total requests | Fastify metrics plugin |
+| Latency P95/P99 | Response time histogram percentile | OpenTelemetry + Prometheus |
+| Error Rate | HTTP 5xx / total requests per minute | Prometheus alert rules |
+
+### 17.4 Monitoring Stack
+
+```
+APM:          OpenTelemetry SDK → Grafana Tempo (traces)
+Metrics:      prom-client → Prometheus → Grafana dashboards
+Logs:         Pino JSON → Loki → Grafana
+Synthetic:    Uptime Robot → /health every 60s
+Alerting:     Grafana Alerts → PagerDuty (P0/P1) | Slack (P2)
+```
+
+### 17.5 Per-Endpoint SLO Tiers
+
+| Tier | Endpoints | P95 Target |
+|------|-----------|-----------|
+| P0 Critical | POST /api/v1/claim, POST /api/v1/arena/enter, GET /health | < 200ms |
+| P1 Standard | GET /api/v1/pets/:petId, POST /api/v1/pets/:petId/train | < 300ms |
+| P2 Admin | /admin/api/* (non-real-time) | < 500ms |
+| P3 Batch | GET /admin/api/analytics, GET /admin/api/leaderboard | < 1000ms |
+
+### 17.6 API Observability Implementation
+
+```typescript
+// Fastify plugin registration
+import { metricsPlugin } from '@app/plugins/metrics'
+import { tracingPlugin } from '@app/plugins/tracing'
+
+fastify.register(metricsPlugin, {
+  endpoint: '/metrics',
+  defaultMetrics: true,
+  routeMetrics: true,
+})
+
+fastify.register(tracingPlugin, {
+  serviceName: 'pixel-pet-arena-api',
+  exporterUrl: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+})
+```
