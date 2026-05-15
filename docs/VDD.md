@@ -231,7 +231,7 @@ pixel-pet-arena occupies the **Pixel Art Retro-Futurism** style direction: pixel
 
 All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical hex, oklch, and WCAG contrast data.
 
-> **HSL equivalents**: HSL values are provided alongside oklch for tooling compatibility (e.g. Figma color pickers, older design tools that do not support oklch). oklch is the canonical format for all CSS token declarations; HSL is informational only.
+> **HSL equivalents**: HSL equivalents are provided in the §6.1 primitive-token CSS declarations as inline comments.
 
 | Token Name | Hex | oklch | WCAG Contrast on `--color-surface-base` | Usage |
 |-----------|-----|-------|----------------------------------------|-------|
