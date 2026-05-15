@@ -26,7 +26,7 @@
 
 ## Change Log
 
-This log records all revisions to this Admin Implementation document. For detailed change context and rationale, refer to the corresponding git commit history and linked review findings.
+This log records all revisions to this Admin Implementation document, including version number, date, author, and change scope summary. For detailed change context and rationale, refer to the corresponding git commit history and linked review findings.
 
 | Version | Date | Author | Change Summary |
 |---------|------|--------|----------------|
