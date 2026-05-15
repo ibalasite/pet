@@ -71,50 +71,50 @@ This section maps all 21 BDD feature files to their corresponding user stories a
 
 | US-ID | Title | Priority | Epic | AC Count | Feature Flags |
 |---|---|---|---|---|---|
-| US-PET-001 | Random Pet Display (Guest Mode) | P0 | EPIC-PET | 5 | — |
-| US-PET-002 | Procedural Pixel Pet Generation | P0 | EPIC-PET | 4 | `FF_PET_GENERATION` |
-| US-AUTH-001 | Email Claim Flow | P0 | EPIC-AUTH | 6 | — |
-| US-AUTH-002 | Returning Pet Owner Access | P0 | EPIC-AUTH | 4 | — |
-| US-TRAIN-001 | Pet Training System | P0 | EPIC-TRAINING | 5 | — |
-| US-FOOD-001 | Special Food System | P0 | EPIC-TRAINING | 4 | — |
-| US-ARENA-001 | Arena Racing Competition | P0 | EPIC-ARENA | 6 | — |
+| US-PET-001 | Random Pet Display (Guest Mode) | P0 | EPIC-PET | 7 | — |
+| US-PET-002 | Procedural Pixel Pet Generation | P0 | EPIC-PET | 6 | `FF_PET_GENERATION` |
+| US-AUTH-001 | Email Claim Flow | P0 | EPIC-AUTH | 8 | — |
+| US-AUTH-002 | Returning Pet Owner Access | P0 | EPIC-AUTH | 5 | — |
+| US-TRAIN-001 | Pet Training System | P0 | EPIC-TRAINING | 6 | — |
+| US-FOOD-001 | Special Food System | P0 | EPIC-TRAINING | 6 | — |
+| US-ARENA-001 | Arena Racing Competition | P0 | EPIC-ARENA | 8 | — |
 | US-ARENA-002 | Sumo Arena Mode | P1 | EPIC-ARENA | 4 | — |
-| US-BOARD-001 | Global Leaderboard | P0 | EPIC-RANKING | 5 | — |
-| US-RECORD-001 | Battle Records Page | P0 | EPIC-RANKING | 3 | — |
-| US-RARITY-001 | Rarity Scoring | P1 | EPIC-RANKING | 3 | `FF_RARITY_DISPLAY` |
+| US-BOARD-001 | Global Leaderboard | P0 | EPIC-RANKING | 6 | — |
+| US-RECORD-001 | Battle Records Page | P0 | EPIC-RANKING | 6 | — |
+| US-RARITY-001 | Rarity Scoring | P1 | EPIC-RANKING | 4 | `FF_RARITY_DISPLAY` |
 | US-TRADE-001 | Pet Trading Marketplace | P2 | EPIC-MARKETPLACE | 5 | `FF_MARKETPLACE` |
-| US-ADMIN-001 | Admin Pet Management | P0 | EPIC-ADMIN | 4 | `FF_ADMIN_PORTAL` |
-| US-ADMIN-002 | Admin Leaderboard Moderation | P0 | EPIC-ADMIN | 3 | `FF_ADMIN_PORTAL` |
+| US-ADMIN-001 | Admin Pet Management | P0 | EPIC-ADMIN | 5 | `FF_ADMIN_PORTAL` |
+| US-ADMIN-002 | Admin Leaderboard Moderation | P0 | EPIC-ADMIN | 4 | `FF_ADMIN_PORTAL` |
 | US-ADMIN-003 | Admin Runtime Parameter Tuning | P1 | EPIC-ADMIN | 3 | `FF_ADMIN_PORTAL` |
 | US-ADMIN-004 | GDPR Data Erasure | P0 | EPIC-ADMIN | 4 | `FF_ADMIN_PORTAL` |
-| US-ADMIN-005 | Suspicious Battle Detection | P0 | EPIC-ADMIN | 3 | `FF_ADMIN_PORTAL` |
+| US-ADMIN-005 | Suspicious Battle Detection | P0 | EPIC-ADMIN | 4 | `FF_ADMIN_PORTAL` |
 | US-ADMIN-006 | Game Economy Configuration | P1 | EPIC-ADMIN | 4 | `FF_ADMIN_PORTAL` |
 
 ---
 
 ## Test Cases
 
-| US-ID | Requirement | BDD-Server | BDD-Client | Unit | Integration | Perf / Security | Coverage Status |
-|---|---|---|---|---|---|---|---|
-| US-PET-001 | Random Pet Display (Guest Mode) | — | `pet-display.feature` (12) | Sprite generation | — | Visual regression: pixel rendering | ✅ Covered |
-| US-PET-002 | Procedural Pixel Pet Generation | `rarity-distribution.feature` (5) | `pet-display.feature` (12) | Combination space; deterministic seed | — | Statistical chi-square (rarity dist) | ✅ Covered |
-| US-AUTH-001 | Email Claim Flow | `claim-flow.feature` (8) | `claim-flow-ui.feature` (10) | OTP expiry | Email sending; one-time token | Security: email enumeration prevention; COPPA | ✅ Covered |
-| US-AUTH-002 | Returning Pet Owner Access | `claim-flow.feature` (8), `gdpr-erasure.feature` (8) | `claim-flow-ui.feature` (10), `settings.feature` (21) | — | GDPR erasure path | Security: invalid URL → 404 | ✅ Covered |
-| US-TRAIN-001 | Pet Training System | `training-food.feature` (3) | `training-ui.feature` (12) | Stat increment; stat max cap | Persistence | Visual regression: neglected state | ✅ Covered |
-| US-FOOD-001 | Special Food System | `training-food.feature` (3) | `food-system.feature` (17) | Buff application; stat max block | Food buff persistence | — | ✅ Covered |
-| US-ARENA-001 | Arena Racing Competition | `arena-battle.feature` (7) | `arena-ui.feature` (10) | Outcome calculation | Battle record save | Security: rate limit enforcement | ✅ Covered |
-| US-ARENA-002 | Sumo Arena Mode | `arena-battle.feature` (7) | `arena-ui.feature` (10) | Sumo outcome calculation | — | — | ✅ Covered |
-| US-BOARD-001 | Global Leaderboard | `leaderboard.feature` (8) | `leaderboard-ui.feature` (10) | — | Leaderboard update lag | — | ✅ Covered |
-| US-RECORD-001 | Battle Records Page | `battle-records.feature` (7) | `battle-records.feature` (19) | Battle record save/retrieve | Open Graph meta | — | ✅ Covered |
-| US-RARITY-001 | Rarity Scoring | `rarity-distribution.feature` (5) | `leaderboard-ui.feature` (10) | — | — | Visual regression: Legendary border | ✅ Covered |
-| US-TRADE-001 | Pet Trading Marketplace | `trading-system.feature` (10) — gated by `FF_MARKETPLACE`, excluded from CI until DAU ≥1,000 | — | — | — | — | ⏸ Deferred (P2) |
-| US-ADMIN-001 | Admin Pet Management | `admin-moderation.feature` (11), `admin-search-performance.feature` (6) | `admin-portal.feature` (13) | — | Ban propagation | Perf: search ≤2 s for 1 M records | ✅ Covered |
-| US-ADMIN-002 | Admin Leaderboard Moderation | `leaderboard.feature` (8), `admin-moderation.feature` (11) | `admin-portal.feature` (13) | — | — | — | ✅ Covered |
-| US-ADMIN-003 | Admin Runtime Parameter Tuning | — | `admin-portal.feature` (13) | — | Config cache refresh | — | ✅ Covered |
-| US-ADMIN-004 | GDPR Data Erasure | `gdpr-erasure.feature` (8) | `admin-portal.feature` (13) | — | — | — | ✅ Covered |
-| US-ADMIN-005 | Suspicious Battle Detection | `suspicious-detection.feature` (3), `admin-moderation.feature` (11) | `admin-portal.feature` (13) | — | — | — | ✅ Covered |
-| US-ADMIN-006 | Game Economy Configuration | `economy-config.feature` (6) | `admin-portal.feature` (13) | — | Config cache refresh; food buff multiplier | — | ✅ Covered |
-| NFR-XCUT-001 | Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention | `claim-flow.feature` (8) | `claim-flow-ui.feature` (10) | OTP expiry | One-time token | Security: email enumeration; rate limit; COPPA | ✅ Covered |
+| US-ID | Requirement | BDD-Server | BDD-Client | Unit | Integration | Perf / Security | BDD Tags (sample) | Coverage Status |
+|---|---|---|---|---|---|---|---|---|
+| US-PET-001 | Random Pet Display (Guest Mode) | — | `features/client/pet-display.feature` (12) | Sprite generation | — | Visual regression: pixel rendering | `@TC-PET-001-1`, `@TC-PET-001-2` | ✅ Covered |
+| US-PET-002 | Procedural Pixel Pet Generation | `features/rarity-distribution.feature` (5) | `features/client/pet-display.feature` (12) | Combination space; deterministic seed | — | Statistical chi-square (rarity dist) | `@TC-PET-002-1`, `@TC-PET-002-2` | ✅ Covered |
+| US-AUTH-001 | Email Claim Flow | `features/claim-flow.feature` (8) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | Email sending; one-time token | Security: email enumeration prevention; COPPA | `@TC-AUTH-001-1`, `@TC-AUTH-001-2` | ✅ Covered |
+| US-AUTH-002 | Returning Pet Owner Access | `features/claim-flow.feature` (8), `features/gdpr-erasure.feature` (8) | `features/client/claim-flow-ui.feature` (10), `features/client/settings.feature` (21) | — | GDPR erasure path | Security: invalid URL → 404 | `@TC-AUTH-002-1`, `@TC-AUTH-002-2` | ✅ Covered |
+| US-TRAIN-001 | Pet Training System | `features/training-food.feature` (3) | `features/client/training-ui.feature` (12) | Stat increment; stat max cap | Persistence | Visual regression: neglected state | `@TC-TRAIN-001-1`, `@TC-TRAIN-001-2` | ✅ Covered |
+| US-FOOD-001 | Special Food System | `features/training-food.feature` (3) | `features/client/food-system.feature` (17) | Buff application; stat max block | Food buff persistence | — | `@TC-FOOD-001-1`, `@TC-FOOD-001-2` | ✅ Covered |
+| US-ARENA-001 | Arena Racing Competition | `features/arena-battle.feature` (7) | `features/client/arena-ui.feature` (10) | Outcome calculation | Battle record save | Security: rate limit enforcement | `@TC-ARENA-001-1`, `@TC-ARENA-001-2` | ✅ Covered |
+| US-ARENA-002 | Sumo Arena Mode | `features/arena-battle.feature` (7) | `features/client/arena-ui.feature` (10) | Sumo outcome calculation | — | — | `@TC-ARENA-002-1`, `@TC-ARENA-002-2` | ✅ Covered |
+| US-BOARD-001 | Global Leaderboard | `features/leaderboard.feature` (8) | `features/client/leaderboard-ui.feature` (10) | — | Leaderboard update lag | — | `@TC-BOARD-001-1`, `@TC-BOARD-001-2` | ✅ Covered |
+| US-RECORD-001 | Battle Records Page | `features/battle-records.feature` (7) | `features/client/battle-records.feature` (19) | Battle record save/retrieve | Open Graph meta | — | `@TC-RECORD-001-1`, `@TC-RECORD-001-2` | ✅ Covered |
+| US-RARITY-001 | Rarity Scoring | `features/rarity-distribution.feature` (5) | `features/client/leaderboard-ui.feature` (10) | — | — | Visual regression: Legendary border | `@TC-RARITY-001-1`, `@TC-RARITY-001-2` | ✅ Covered |
+| US-TRADE-001 | Pet Trading Marketplace | `features/trading-system.feature` (10) — gated by `FF_MARKETPLACE`, excluded from CI until DAU ≥1,000 | — | — | — | — | `@TC-TRADE-001-1` `@FF_MARKETPLACE` | ⏸ Deferred (P2) |
+| US-ADMIN-001 | Admin Pet Management | `features/admin-moderation.feature` (11), `features/admin-search-performance.feature` (6) | `features/client/admin-portal.feature` (13) | — | Ban propagation | Perf: search ≤2 s for 1 M records | `@TC-ADMIN-001-1`, `@TC-ADMIN-001-2` | ✅ Covered |
+| US-ADMIN-002 | Admin Leaderboard Moderation | `features/leaderboard.feature` (8), `features/admin-moderation.feature` (11) | `features/client/admin-portal.feature` (13) | — | — | — | `@TC-ADMIN-002-1`, `@TC-ADMIN-002-2` | ✅ Covered |
+| US-ADMIN-003 | Admin Runtime Parameter Tuning | No dedicated server scenario; covered via integration test (config cache refresh verified in API response) | `features/client/admin-portal.feature` (13) | — | Config cache refresh | — | `@TC-ADMIN-003-1`, `@TC-ADMIN-003-2` | ✅ Covered |
+| US-ADMIN-004 | GDPR Data Erasure | `features/gdpr-erasure.feature` (8) | `features/client/admin-portal.feature` (13) | — | — | — | `@TC-ADMIN-004-1`, `@TC-ADMIN-004-2` | ✅ Covered |
+| US-ADMIN-005 | Suspicious Battle Detection | `features/suspicious-detection.feature` (3), `features/admin-moderation.feature` (11) | `features/client/admin-portal.feature` (13) | — | — | — | `@TC-ADMIN-005-1`, `@TC-ADMIN-005-2` | ✅ Covered |
+| US-ADMIN-006 | Game Economy Configuration | `features/economy-config.feature` (6) | `features/client/admin-portal.feature` (13) | — | Config cache refresh; food buff multiplier | — | `@TC-ADMIN-006-1`, `@TC-ADMIN-006-2` | ✅ Covered |
+| NFR-XCUT-001 | Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention | `features/claim-flow.feature` (8) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | One-time token | Security: email enumeration; rate limit; COPPA | `@TC-XCUT-001-1`, `@TC-XCUT-001-2` | ✅ Covered |
 
 ---
 
