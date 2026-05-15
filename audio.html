@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -461,7 +462,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#1-overview">§1. Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-audio-design-goals-and-strategy">§1.1 Audio Design Goals and Strategy</a></li><li><a class="toc__link toc__link--h3" href="#12-audio-engine-selection">§1.2 Audio Engine Selection</a></li><li><a class="toc__link" href="#2-audio-requirements-analysis">§2. Audio Requirements Analysis</a></li><li><a class="toc__link toc__link--h3" href="#21-core-game-audio-needs">§2.1 Core Game Audio Needs</a></li><li><a class="toc__link toc__link--h3" href="#22-audio-classification-by-context">§2.2 Audio Classification by Context</a></li><li><a class="toc__link toc__link--h3" href="#23-platform-considerations">§2.3 Platform Considerations</a></li><li><a class="toc__link" href="#3-audio-resources-planning">§3. Audio Resources Planning</a></li><li><a class="toc__link toc__link--h3" href="#31-sound-effects-inventory">§3.1 Sound Effects Inventory</a></li><li><a class="toc__link toc__link--h3" href="#32-background-music-optional-p3">§3.2 Background Music (Optional P3)</a></li><li><a class="toc__link toc__link--h3" href="#33-total-audio-resource-budget">§3.3 Total Audio Resource Budget</a></li><li><a class="toc__link" href="#4-engine-and-implementation">§4. Engine and Implementation</a></li><li><a class="toc__link toc__link--h3" href="#41-web-audio-api-architecture">§4.1 Web Audio API Architecture</a></li><li><a class="toc__link toc__link--h3" href="#42-cross-browser-compatibility">§4.2 Cross-Browser Compatibility</a></li><li><a class="toc__link toc__link--h3" href="#43-performance-and-cpu-budget">§4.3 Performance and CPU Budget</a></li><li><a class="toc__link" href="#5-implementation-strategy">§5. Implementation Strategy</a></li><li><a class="toc__link toc__link--h3" href="#51-audio-loading-and-initialization-flow">§5.1 Audio Loading and Initialization Flow</a></li><li><a class="toc__link toc__link--h3" href="#52-real-time-sound-playback-control">§5.2 Real-Time Sound Playback Control</a></li><li><a class="toc__link toc__link--h3" href="#53-audio-mixing-and-volume-management">§5.3 Audio Mixing and Volume Management</a></li><li><a class="toc__link toc__link--h3" href="#54-accessibility-and-inclusion-considerations">§5.4 Accessibility and Inclusion Considerations</a></li><li><a class="toc__link toc__link--h3" href="#55-audio-settings-ui">§5.5 Audio Settings UI</a></li><li><a class="toc__link" href="#6-operational-and-quality-standards">§6. Operational and Quality Standards</a></li><li><a class="toc__link toc__link--h3" href="#61-audio-file-naming-and-organization">§6.1 Audio File Naming and Organization</a></li><li><a class="toc__link toc__link--h3" href="#62-audio-quality-standards">§6.2 Audio Quality Standards</a></li><li><a class="toc__link toc__link--h3" href="#63-testing-and-validation">§6.3 Testing and Validation</a></li><li><a class="toc__link toc__link--h3" href="#64-browser-compatibility-verification">§6.4 Browser Compatibility Verification</a></li><li><a class="toc__link" href="#7-risk-mitigation-and-fallback-strategies">§7. Risk Mitigation and Fallback Strategies</a></li><li><a class="toc__link toc__link--h3" href="#71-audio-system-failure-modes">§7.1 Audio System Failure Modes</a></li><li><a class="toc__link toc__link--h3" href="#72-graceful-degradation">§7.2 Graceful Degradation</a></li><li><a class="toc__link" href="#8-timeline-and-phased-rollout">§8. Timeline and Phased Rollout</a></li><li><a class="toc__link toc__link--h3" href="#81-mvp-phase-1-2-audio-scope">§8.1 MVP (Phase 1-2) Audio Scope</a></li><li><a class="toc__link toc__link--h3" href="#82-production-deliverables">§8.2 Production Deliverables</a></li><li><a class="toc__link" href="#9-licensing-and-attribution">§9. Licensing and Attribution</a></li><li><a class="toc__link" href="#appendix-a-audio-event-reference">Appendix A. Audio Event Reference</a></li><li><a class="toc__link" href="#appendix-b-web-audio-api-concepts-for-implementers">Appendix B. Web Audio API Concepts for Implementers</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#1-overview">§1. Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-audio-design-goals-and-strategy">§1.1 Audio Design Goals and Strategy</a></li><li><a class="toc__link toc__link--h3" href="#12-audio-engine-selection">§1.2 Audio Engine Selection</a></li><li><a class="toc__link" href="#2-audio-requirements-analysis">§2. Audio Requirements Analysis</a></li><li><a class="toc__link toc__link--h3" href="#21-core-game-audio-needs">§2.1 Core Game Audio Needs</a></li><li><a class="toc__link toc__link--h3" href="#22-audio-classification-by-context">§2.2 Audio Classification by Context</a></li><li><a class="toc__link toc__link--h3" href="#23-platform-considerations">§2.3 Platform Considerations</a></li><li><a class="toc__link" href="#3-audio-resources-planning">§3. Audio Resources Planning</a></li><li><a class="toc__link toc__link--h3" href="#31-sound-effects-inventory">§3.1 Sound Effects Inventory</a></li><li><a class="toc__link toc__link--h3" href="#32-bgm-background-music-optional-p3">§3.2 BGM (Background Music) (Optional P3)</a></li><li><a class="toc__link toc__link--h3" href="#33-total-audio-resource-budget">§3.3 Total Audio Resource Budget</a></li><li><a class="toc__link" href="#4-engine-and-implementation">§4. Engine and Implementation</a></li><li><a class="toc__link toc__link--h3" href="#41-web-audio-api-architecture">§4.1 Web Audio API Architecture</a></li><li><a class="toc__link toc__link--h3" href="#42-cross-browser-compatibility">§4.2 Cross-Browser Compatibility</a></li><li><a class="toc__link toc__link--h3" href="#43-performance-and-cpu-budget">§4.3 Performance and CPU Budget</a></li><li><a class="toc__link" href="#5-implementation-strategy">§5. Implementation Strategy</a></li><li><a class="toc__link toc__link--h3" href="#51-audio-loading-and-initialization-flow">§5.1 Audio Loading and Initialization Flow</a></li><li><a class="toc__link toc__link--h3" href="#52-real-time-sound-playback-control">§5.2 Real-Time Sound Playback Control</a></li><li><a class="toc__link toc__link--h3" href="#53-audio-mixing-and-volume-management">§5.3 Audio Mixing and Volume Management</a></li><li><a class="toc__link toc__link--h3" href="#54-accessibility-and-inclusion-considerations">§5.4 Accessibility and Inclusion Considerations</a></li><li><a class="toc__link toc__link--h3" href="#55-audio-settings-ui">§5.5 Audio Settings UI</a></li><li><a class="toc__link" href="#6-operational-and-quality-standards">§6. Operational and Quality Standards</a></li><li><a class="toc__link toc__link--h3" href="#61-audio-file-naming-and-organization">§6.1 Audio File Naming and Organization</a></li><li><a class="toc__link toc__link--h3" href="#62-audio-quality-standards">§6.2 Audio Quality Standards</a></li><li><a class="toc__link toc__link--h3" href="#63-testing-and-validation">§6.3 Testing and Validation</a></li><li><a class="toc__link toc__link--h3" href="#64-browser-compatibility-verification">§6.4 Browser Compatibility Verification</a></li><li><a class="toc__link" href="#7-risk-mitigation-and-fallback-strategies">§7. Risk Mitigation and Fallback Strategies</a></li><li><a class="toc__link toc__link--h3" href="#71-audio-system-failure-modes">§7.1 Audio System Failure Modes</a></li><li><a class="toc__link toc__link--h3" href="#72-graceful-degradation">§7.2 Graceful Degradation</a></li><li><a class="toc__link" href="#8-timeline-and-phased-rollout">§8. Timeline and Phased Rollout</a></li><li><a class="toc__link toc__link--h3" href="#81-mvp-phase-1-2-audio-scope">§8.1 MVP (Phase 1-2) Audio Scope</a></li><li><a class="toc__link toc__link--h3" href="#82-production-deliverables">§8.2 Production Deliverables</a></li><li><a class="toc__link" href="#9-licensing-and-attribution">§9. Licensing and Attribution</a></li><li><a class="toc__link" href="#appendix-a-audio-event-reference">Appendix A. Audio Event Reference</a></li><li><a class="toc__link" href="#appendix-b-web-audio-api-concepts-for-implementers">Appendix B. Web Audio API Concepts for Implementers</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="audio--audio-design-and-implementation-guide">AUDIO — Audio Design and Implementation Guide</h1>
@@ -475,7 +476,7 @@
 <hr>
 <h2 id="1-overview">§1. Overview</h2>
 <h3 id="11-audio-design-goals-and-strategy">§1.1 Audio Design Goals and Strategy</h3>
-<p>The pixel-pet-arena audio system is designed to enhance player engagement through contextual sound effects and optional background music, supporting a casual browser-based gaming experience. The audio strategy prioritizes:</p>
+<p>The pixel-pet-arena audio system is designed to enhance player engagement through contextual sound effects and optional BGM, supporting a casual browser-based gaming experience. The audio strategy prioritizes:</p>
 <ol><li><strong>Minimal cognitive load</strong>: Short, recognizable sound effects (≤500ms duration) that provide feedback without interrupting gameplay</li><li><strong>Accessibility-first</strong>: All sound effects have equivalent visual/haptic feedback; audio is entirely optional</li><li><strong>Performance within budget</strong>: Total audio assets ≤ 2 MB (uncompressed reference; delivered as MP3 at 128 kbps ≈ 400 KB total)</li><li><strong>Web Audio API integration</strong>: Browser-native playback with Phaser.js 3 audio system as the rendering engine</li><li><strong>Cross-browser compatibility</strong>: Graceful fallback for audio-unavailable browsers (muted experience remains fully playable)</li></ol>
 <h3 id="12-audio-engine-selection">§1.2 Audio Engine Selection</h3>
 <p><strong>Primary Engine</strong>: Web Audio API via Phaser.js 3 Audio System</p>
@@ -534,22 +535,22 @@
 <tr><td><strong>Leaderboard Rank Up</strong></td><td>leaderboard-rankup.mp3</td><td>MP3</td><td>500</td><td>44.1 kHz</td><td>16-bit</td><td>80 KB</td><td>Ascending melody celebrating rank improvement (P2 feature)</td></tr>
 <tr><td><strong>Food Buff Applied</strong></td><td>food-buff.mp3</td><td>MP3</td><td>200</td><td>44.1 kHz</td><td>16-bit</td><td>32 KB</td><td>Shimmering magical tone</td></tr>
 </table>
-<p><strong>Total P0+P1 SFX</strong>: 11 × ~30 KB average ≈ <strong>330 KB</strong> (MP3 @ 128 kbps)</p>
-<h3 id="32-background-music-optional-p3">§3.2 Background Music (Optional P3)</h3>
+<p><strong>Total P0+P1 SFX</strong>: 12 × ~30 KB average ≈ <strong>360 KB</strong> (MP3 @ 128 kbps)</p>
+<h3 id="32-bgm-background-music-optional-p3">§3.2 BGM (Background Music) (Optional P3)</h3>
 <table>
-<tr><th>Track</th><th>Type</th><th>Duration</th><th>Sample Rate</th><th>Format</th><th>File Size (MP3 128kbps)</th><th>Notes</th></tr>
-<tr><td><strong>Arena Battle Loop</strong></td><td>BGM (looping)</td><td>45 sec</td><td>44.1 kHz</td><td>MP3</td><td>90 KB</td><td>Instrumental, no vocals; loopable at 45s with seamless cut points</td></tr>
-<tr><td><strong>Trainer Mode Ambient</strong></td><td>BGM (looping)</td><td>60 sec</td><td>44.1 kHz</td><td>MP3</td><td>120 KB</td><td>Calming loop for training/pet management (P3 polish)</td></tr>
+<tr><th>Track</th><th>Type</th><th>Duration</th><th>BPM</th><th>Sample Rate</th><th>Format</th><th>File Size (MP3 128kbps)</th><th>Notes</th></tr>
+<tr><td><strong>Arena Battle Loop</strong></td><td>BGM (looping)</td><td>45 sec</td><td>130 BPM</td><td>44.1 kHz</td><td>MP3</td><td>90 KB</td><td>Instrumental, no vocals; loopable at 45s with seamless cut points</td></tr>
+<tr><td><strong>Trainer Mode Ambient</strong></td><td>BGM (looping)</td><td>60 sec</td><td>80 BPM</td><td>44.1 kHz</td><td>MP3</td><td>120 KB</td><td>Calming loop for training/pet management (P3 polish)</td></tr>
 </table>
 <p><strong>Total Music</strong>: 2 × ~100 KB ≈ <strong>210 KB</strong></p>
 <h3 id="33-total-audio-resource-budget">§3.3 Total Audio Resource Budget</h3>
 <table>
 <tr><th>Category</th><th>Count</th><th>Total Size (MP3)</th></tr>
-<tr><td>SFX (P0+P1)</td><td>11 effects</td><td>330 KB</td></tr>
+<tr><td>SFX (P0+P1)</td><td>12 effects</td><td>360 KB</td></tr>
 <tr><td>Music (P3 optional)</td><td>2 tracks</td><td>210 KB</td></tr>
-<tr><td><strong>Total Planned</strong></td><td>13 assets</td><td><strong>540 KB</strong></td></tr>
+<tr><td><strong>Total Planned</strong></td><td>14 assets</td><td><strong>570 KB</strong></td></tr>
 <tr><td><strong>Total Budget Allocated</strong></td><td>—</td><td><strong>2 MB</strong></td></tr>
-<tr><td><strong>Headroom</strong></td><td>—</td><td>1.46 MB (73% unused)</td></tr>
+<tr><td><strong>Headroom</strong></td><td>—</td><td>1.43 MB (71.5% unused)</td></tr>
 </table>
 <p><strong>Rationale for 2 MB budget</strong>:</p>
 <ul><li>Phaser.js dynamically imports audio system on demand (no blocking the claim flow bundle)</li><li>Audio assets loaded asynchronously in background; no impact on FCP / LCP targets (ARCH §2.1 FCP &lt; 1.5s, LCP &lt; 2.5s)</li><li>Total app JS bundle ≤ 300 KB (TOTAL_JS_BUNDLE_GZIPPED_KB); audio assets separate from code bundle</li><li>Headroom allows for future sound variants, voiceover additions (P4+), or higher-fidelity music</li></ul>
@@ -684,6 +685,7 @@ this.load.audio(&#x27;pet-tap-pop&#x27;, [
 <table>
 <tr><th>React Event</th><th>Audio Trigger</th><th>SFX File</th><th>Delay</th><th>Duration</th></tr>
 <tr><td><code>pet:tap</code></td><td>Pet interaction feedback</td><td>pet-tap-pop.mp3</td><td>0 ms (immediate)</td><td>120 ms</td></tr>
+<tr><td><code>ui:button-click</code></td><td>UI button click feedback</td><td>pet-tap-click.mp3</td><td>0 ms (immediate)</td><td>100 ms</td></tr>
 <tr><td><code>training:start</code></td><td>Action button clicked</td><td>training-start.mp3</td><td>0 ms</td><td>150 ms</td></tr>
 <tr><td><code>training:complete</code></td><td>Stat increase confirmed</td><td>training-success.mp3</td><td>0 ms</td><td>200 ms</td></tr>
 <tr><td><code>stat:display</code></td><td>&quot;+X Speed&quot; toast appears</td><td>stat-ding.mp3</td><td>100 ms (with animation)</td><td>100 ms</td></tr>
@@ -785,7 +787,7 @@ export class AudioMixer {
         onChange={(e) =&gt; setSFXVolume(Number(e.target.value) / 100)}
       /&gt;
       
-      &lt;label htmlFor=&quot;music-volume&quot;&gt;Music Volume&lt;/label&gt;
+      &lt;label htmlFor=&quot;music-volume&quot;&gt;BGM Volume&lt;/label&gt;
       &lt;input 
         id=&quot;music-volume&quot;
         type=&quot;range&quot; 
@@ -808,6 +810,7 @@ export class AudioMixer {
 │       └── audio/
 │           ├── sfx/
 │           │   ├── pet-tap-pop.mp3
+│           │   ├── pet-tap-click.mp3
 │           │   ├── training-success.mp3
 │           │   ├── arena-victory.mp3
 │           │   ├── arena-defeat.mp3
@@ -901,13 +904,13 @@ export class AudioMixer {
 <h2 id="8-timeline-and-phased-rollout">§8. Timeline and Phased Rollout</h2>
 <h3 id="81-mvp-phase-1-2-audio-scope">§8.1 MVP (Phase 1-2) Audio Scope</h3>
 <p><strong>In Scope</strong> (required for launch):</p>
-<ul><li>11 × SFX (P0+P1 effects): pet-tap, training-success, arena-victory, arena-defeat, claim-success, rate-limit-warning, stat-ding, food-buff, leaderboard-rankup, arena-start, training-start</li><li>Audio toggle + master volume slider</li><li>Cross-browser testing (Chrome, Firefox, Safari, iOS Safari, Android Chrome)</li></ul>
+<ul><li>12 × SFX (P0+P1 effects): pet-tap-pop, pet-tap-click, training-success, arena-victory, arena-defeat, claim-success, rate-limit-warning, stat-ding, food-buff, leaderboard-rankup, arena-start, training-start</li><li>Audio toggle + master volume slider</li><li>Cross-browser testing (Chrome, Firefox, Safari, iOS Safari, Android Chrome)</li></ul>
 <p><strong>Out of Scope</strong> (P3 enhancement, post-GA):</p>
 <ul><li>Background music loops (optional polish)</li><li>Per-channel volume control (SFX vs. music sliders)</li><li>Spatial audio (panning, reverb)</li><li>Voiceover narration</li></ul>
 <h3 id="82-production-deliverables">§8.2 Production Deliverables</h3>
 <table>
 <tr><th>Deliverable</th><th>Owner</th><th>Due Date</th><th>Format</th></tr>
-<tr><td>11 × SFX audio files</td><td>Audio Designer / Editor</td><td>Phase 2</td><td>MP3, 128 kbps</td></tr>
+<tr><td>12 × SFX audio files</td><td>Audio Designer / Editor</td><td>Phase 2</td><td>MP3, 128 kbps</td></tr>
 <tr><td>Audio assets README</td><td>Audio Designer</td><td>Phase 2</td><td>Markdown (attribution, licensing)</td></tr>
 <tr><td>Phaser audio integration code</td><td>Frontend Engineer</td><td>Phase 2</td><td>TypeScript</td></tr>
 <tr><td>Audio settings UI</td><td>Frontend Engineer</td><td>Phase 2</td><td>React + CSS</td></tr>
@@ -921,29 +924,30 @@ export class AudioMixer {
 
 ## Sound Effects
 
-- **pet-tap-pop.mp3** — [Creator/License]
-- **training-success.mp3** — [Creator/License]
-- **arena-victory.mp3** — [Creator/License]
+- **pet-tap-pop.mp3** — PENDING — TBD at asset acquisition
+- **training-success.mp3** — PENDING — TBD at asset acquisition
+- **arena-victory.mp3** — PENDING — TBD at asset acquisition
 - ... (all SFX)
 
 ## Music
 
-- **arena-battle-loop.mp3** — [Creator/License] (P3 optional)
-- **trainer-ambient-loop.mp3** — [Creator/License] (P3 optional)
+- **arena-battle-loop.mp3** — PENDING — TBD at asset acquisition (P3 optional)
+- **trainer-ambient-loop.mp3** — PENDING — TBD at asset acquisition (P3 optional)
 
 ## Licensing Notes
 
-All audio is licensed under [LICENSE_NAME, e.g., CC-BY-4.0, proprietary].
+All audio is licensed under PENDING — TBD before Phase 2 delivery.
 Attribution: See individual file tags.
-Restrictions: [Any usage restrictions, e.g., non-commercial, internal use only]
+Restrictions: PENDING — TBD before Phase 2 delivery.
 
-For license questions, contact: audio@pixel-pet-arena.local</code></pre>
+For license questions, contact: team alias TBD</code></pre>
 <hr>
 <h2 id="appendix-a-audio-event-reference">Appendix A. Audio Event Reference</h2>
 <p><strong>Complete mapping of game events to audio cues</strong>:</p>
 <pre><code class="language-typescript">// Event → SFX mapping (TypeScript reference)
 const AUDIO_EVENTS = {
   &#x27;pet:tap&#x27;: &#x27;pet-tap-pop&#x27;,
+  &#x27;ui:button-click&#x27;: &#x27;pet-tap-click&#x27;,
   &#x27;training:start&#x27;: &#x27;training-start&#x27;,
   &#x27;training:complete&#x27;: &#x27;training-success&#x27;,
   &#x27;stat:display&#x27;: &#x27;stat-ding&#x27;,

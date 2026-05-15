@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -586,6 +587,7 @@
 }</code></pre>
 <p>The <code>details</code> field is optional and only populated when additional structured context is useful (e.g. validation field errors). It is omitted in production when it would expose internal implementation details.</p>
 <h3 id="42-http-status-code-reference">4.2 HTTP Status Code Reference</h3>
+<p>Client errors (4xx) indicate request problems; server errors (5xx) indicate platform failures.</p>
 <table>
 <tr><th>HTTP Status</th><th>Meaning</th></tr>
 <tr><td>200</td><td>Success</td></tr>
@@ -711,6 +713,7 @@
 <tr><td>400</td><td><code>VALIDATION_ERROR</code></td><td>Malformed <code>claimId</code> or <code>code</code></td></tr>
 <tr><td>400</td><td><code>INVALID_CODE</code></td><td>Code does not match the stored hash</td></tr>
 <tr><td>400</td><td><code>CODE_EXPIRED</code></td><td>OTP has passed the 15-minute window (<code>claim_code_expiry_minutes = 15</code>)</td></tr>
+<tr><td>404</td><td><code>NOT_FOUND</code></td><td><code>claimId</code> does not exist in database (expired and purged after <code>CLAIM_TOKEN_CLEANUP_TTL_HOURS</code> = 72 hours)</td></tr>
 <tr><td>429</td><td><code>MAX_ATTEMPTS_REACHED</code></td><td>10-attempt session limit reached (<code>claim_code_entry_attempts_per_session = 10</code>)</td></tr>
 </table>
 <hr>
@@ -723,6 +726,11 @@
   &quot;email&quot;: &quot;player@example.com&quot;,
   &quot;petId&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;
 }</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>email</code></td><td>string</td><td>Yes</td><td>Player&#x27;s email address. Must be a valid email format. Used to look up the associated <code>claim_identity_id</code>.</td></tr>
+<tr><td><code>petId</code></td><td>string (UUID)</td><td>Yes</td><td>UUID of the previously claimed pet for which access is being recovered.</td></tr>
+</table>
 <p><strong>Response (HTTP 200 — always):</strong></p>
 <pre><code class="language-json">{
   &quot;success&quot;: true,
@@ -738,6 +746,7 @@
 <table>
 <tr><th>HTTP</th><th>Code</th><th>Condition</th></tr>
 <tr><td>400</td><td><code>VALIDATION_ERROR</code></td><td>Malformed <code>email</code> or <code>petId</code> UUID</td></tr>
+<tr><td>429</td><td><code>RATE_LIMIT_EXCEEDED</code></td><td>Exceeded <code>AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR</code> (= 5) attempts within 1 hour for this email</td></tr>
 </table>
 <hr>
 <h3 id="52-pet-endpoints">5.2 Pet Endpoints</h3>
@@ -1105,13 +1114,11 @@
 <table>
 <tr><th>Field</th><th>Description</th></tr>
 <tr><td><code>opponentPetId</code></td><td>UUID of the opponent pet. <code>null</code> when <code>isAiOpponent</code> is <code>true</code>.</td></tr>
-</table>
-<p><strong>Open Graph Metadata Source:</strong></p>
-<p>This endpoint (<code>GET /api/v1/arena/history/:petId</code>) is the authoritative source for Open Graph metadata generation when creating social share cards for a pet&#x27;s battle records page. The client should extract <code>petId</code>, <code>wins</code> (from <code>summary.wins</code>), and combine with pet metadata (pet name, rarity, sprite image) from <code>GET /api/v1/pets/:petId</code> to construct OG tags (og:title, og:description, og:image, etc.). The win count summary (<code>summary.wins</code>) provides the win count aggregate for the OG card without needing to count individual battles.</p>
-<table>
-<tr><th><code>isAiOpponent</code></th><th><code>true</code> when this battle was resolved against an AI fallback opponent.</th></tr>
+<tr><td><code>isAiOpponent</code></td><td><code>true</code> when this battle was resolved against an AI fallback opponent.</td></tr>
 </table>
 <p>The last <strong>20 battles</strong> are shown publicly (<code>arena_battle_records_display_count = 20</code>).</p>
+<p><strong>Open Graph Metadata Source:</strong></p>
+<p>This endpoint (<code>GET /api/v1/arena/history/:petId</code>) is the authoritative source for Open Graph metadata generation when creating social share cards for a pet&#x27;s battle records page. The client should extract <code>petId</code>, <code>wins</code> (from <code>summary.wins</code>), and combine with pet metadata (pet name, rarity, sprite image) from <code>GET /api/v1/pets/:petId</code> to construct OG tags (og:title, og:description, og:image, etc.). The win count summary (<code>summary.wins</code>) provides the win count aggregate for the OG card without needing to count individual battles.</p>
 <p><strong>Error responses:</strong></p>
 <table>
 <tr><th>HTTP</th><th>Code</th><th>Condition</th></tr>
@@ -1207,6 +1214,7 @@
   },
   &quot;error&quot;: null
 }</code></pre>
+<blockquote><p><strong>Note</strong>: The <code>jobId</code> field in player-facing responses is an alias for <code>requestId</code> in admin-facing endpoints. Both refer to <code>gdpr_requests.id</code> in the database schema.</p></blockquote>
 <p><strong>SLAs</strong> (from <code>constants.json</code>):</p>
 <table>
 <tr><th>Request Type</th><th>SLA</th><th>Constant</th></tr>
@@ -1231,6 +1239,7 @@
 <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
 <tr><td><code>jobId</code></td><td>UUID</td><td>Yes</td><td>The <code>jobId</code> returned by <code>POST /api/v1/gdpr/request</code>.</td></tr>
 </table>
+<blockquote><p><strong>Note</strong>: <code>jobId</code> here is the same identifier described under <code>POST /api/v1/gdpr/request</code> — see the alias note above.</p></blockquote>
 <p><strong>Response (HTTP 200):</strong></p>
 <pre><code class="language-json">{
   &quot;success&quot;: true,
@@ -1259,20 +1268,157 @@
 <h4 id="get-apiv1marketplacelistings"><code>GET /api/v1/marketplace/listings</code></h4>
 <p>Browse active marketplace listings.</p>
 <p><strong>Auth</strong>: None</p>
-<p><strong>Query parameters:</strong> <code>?page=1&amp;limit=20&amp;sortBy=price|rarity|level&amp;order=asc|desc</code></p>
-<p><strong>Response (HTTP 200):</strong> Paginated list of active listings with pet summary and price.</p>
+<p><strong>Query parameters:</strong></p>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>page</code></td><td>integer</td><td>1</td><td>Page number (1-based).</td></tr>
+<tr><td><code>limit</code></td><td>integer</td><td>20</td><td>Results per page. Maximum 100.</td></tr>
+<tr><td><code>sortBy</code></td><td>string</td><td>(none)</td><td>Sort field: one of <code>price</code>, <code>rarity</code>, <code>level</code>.</td></tr>
+<tr><td><code>order</code></td><td>string</td><td><code>asc</code></td><td>Sort direction: <code>asc</code> or <code>desc</code>.</td></tr>
+</table>
+<p><strong>Response (HTTP 200):</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;listings&quot;: [
+      {
+        &quot;listingId&quot;: &quot;f1e2d3c4-b5a6-7890-fedc-ba0987654321&quot;,
+        &quot;petId&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+        &quot;petName&quot;: &quot;Crimson Vexor&quot;,
+        &quot;rarity&quot;: &quot;RARE&quot;,
+        &quot;level&quot;: 7,
+        &quot;sellerId&quot;: &quot;6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;,
+        &quot;price&quot;: 1200,
+        &quot;description&quot;: &quot;Well-trained RARE pet, 70% win rate.&quot;,
+        &quot;listedAt&quot;: &quot;2026-05-03T10:00:00Z&quot;
+      }
+    ]
+  },
+  &quot;error&quot;: null,
+  &quot;meta&quot;: { &quot;total&quot;: 34, &quot;page&quot;: 1, &quot;limit&quot;: 20 }
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Description</th></tr>
+<tr><td><code>listingId</code></td><td>UUID of the marketplace listing.</td></tr>
+<tr><td><code>petId</code></td><td>UUID of the listed pet.</td></tr>
+<tr><td><code>sellerId</code></td><td>UUID of the seller&#x27;s pet (the pet token used to create the listing).</td></tr>
+<tr><td><code>price</code></td><td>Asking price in bronze coins (integer).</td></tr>
+<tr><td><code>description</code></td><td>Seller-supplied description. Max 200 characters.</td></tr>
+<tr><td><code>listedAt</code></td><td>ISO 8601 timestamp when the listing was created.</td></tr>
+</table>
 <h4 id="post-apiv1marketplacelistings"><code>POST /api/v1/marketplace/listings</code></h4>
 <p>Create a new listing. Min price formula: <code>(pet_level <em> 100) + (rarity_multiplier </em> 500)</code>. Rarity multipliers: Common = 1, Rare = 2, Epic = 4, Legendary = 8 (<code>trade_min_price_formula_level_coeff = 100</code>, <code>trade_min_price_formula_rarity_coeff = 500</code>, <code>rarity_multiplier_*</code> values from <code>constants.json</code>). Anti-flip: Pet cannot be re-listed within <strong>7 days</strong> of its last completed purchase (<code>marketplace_trade_antiflip_protection_days = 7</code>).</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;petId&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;price&quot;: 1200,
+  &quot;description&quot;: &quot;Well-trained RARE pet, 70% win rate.&quot;
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Validation</th><th>Description</th></tr>
+<tr><td><code>petId</code></td><td>string (UUID)</td><td>Yes</td><td>Must be owned by the authenticated token</td><td>The pet to list for sale.</td></tr>
+<tr><td><code>price</code></td><td>integer</td><td>Yes</td><td>Must be ≥ min price formula result; in bronze coins</td><td>Asking price in bronze coins.</td></tr>
+<tr><td><code>description</code></td><td>string</td><td>No</td><td>Max 200 characters</td><td>Optional seller-supplied description.</td></tr>
+</table>
+<p><strong>Response (HTTP 201):</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;listingId&quot;: &quot;f1e2d3c4-b5a6-7890-fedc-ba0987654321&quot;,
+    &quot;petId&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;price&quot;: 1200,
+    &quot;listedAt&quot;: &quot;2026-05-03T10:00:00Z&quot;
+  },
+  &quot;error&quot;: null
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>listingId</code></td><td>UUID</td><td>Unique identifier for the created marketplace listing</td></tr>
+<tr><td><code>petId</code></td><td>UUID</td><td>UUID of the pet being listed for sale</td></tr>
+<tr><td><code>price</code></td><td>integer</td><td>Asking price in bronze coins</td></tr>
+<tr><td><code>listedAt</code></td><td>string (ISO 8601)</td><td>Timestamp when the listing was created</td></tr>
+</table>
 <h4 id="delete-apiv1marketplacelistingslistingid"><code>DELETE /api/v1/marketplace/listings/:listingId</code></h4>
 <p>Cancel an active listing. Only the listing&#x27;s owner may cancel.</p>
 <p><strong>Auth</strong>: Required (pet owner token — owner of listed pet)</p>
+<p><strong>Path parameters:</strong></p>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>listingId</code></td><td>UUID</td><td>ID of the marketplace listing to cancel.</td></tr>
+</table>
+<p><strong>Response (HTTP 200):</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;cancelled&quot;: true
+  },
+  &quot;error&quot;: null
+}</code></pre>
 <h4 id="post-apiv1marketplacelistingslistingidbuy"><code>POST /api/v1/marketplace/listings/:listingId/buy</code></h4>
 <p>Purchase a listing. A <strong>5% platform fee</strong> (<code>trade_transaction_fee_percent = 5</code>) is deducted from the seller&#x27;s proceeds and credited to the platform.</p>
 <p><strong>Auth</strong>: Required (pet owner token — buyer&#x27;s token)</p>
+<p><strong>Path parameters:</strong></p>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>listingId</code></td><td>UUID</td><td>ID of the listing to purchase.</td></tr>
+</table>
+<p><strong>Request body:</strong> No request body. The buyer is authenticated via the <code>Authorization: Bearer &lt;petToken&gt;</code> header.</p>
+<p><strong>Response (HTTP 200):</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;transactionId&quot;: &quot;e5f6a7b8-c9d0-1234-efab-cd5678901234&quot;,
+    &quot;petId&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;price&quot;: 1200,
+    &quot;platformFee&quot;: 60,
+    &quot;sellerProceeds&quot;: 1140,
+    &quot;tradedAt&quot;: &quot;2026-05-03T11:00:00Z&quot;
+  },
+  &quot;error&quot;: null
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>transactionId</code></td><td>UUID</td><td>Unique identifier for the completed trade</td></tr>
+<tr><td><code>petId</code></td><td>UUID</td><td>UUID of the traded pet</td></tr>
+<tr><td><code>price</code></td><td>integer</td><td>Gross transaction price in bronze coins</td></tr>
+<tr><td><code>platformFee</code></td><td>integer</td><td>Platform fee deducted (5% of price)</td></tr>
+<tr><td><code>sellerProceeds</code></td><td>integer</td><td>Amount credited to seller (price minus platformFee)</td></tr>
+<tr><td><code>tradedAt</code></td><td>string (ISO 8601)</td><td>Timestamp when the trade completed</td></tr>
+</table>
 <h4 id="get-apiv1marketplacehistorypetid"><code>GET /api/v1/marketplace/history/:petId</code></h4>
 <p>Returns trade history for a pet. <strong>Private</strong> — only the pet&#x27;s current owner can view (trade prices are commercial-in-confidence).</p>
+<p><strong>Note</strong>: This endpoint provides supplementary trade history data. Upstream reference: PRD US-TRADE-001 AC; enabled under FF_MARKETPLACE feature flag.</p>
 <p><strong>Auth</strong>: Required (pet owner token)</p>
+<p><strong>Path parameters:</strong></p>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>petId</code></td><td>UUID</td><td>Pet ID whose trade history is being retrieved.</td></tr>
+</table>
+<p><strong>Response (HTTP 200):</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;petId&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;trades&quot;: [
+      {
+        &quot;transactionId&quot;: &quot;e5f6a7b8-c9d0-1234-efab-cd5678901234&quot;,
+        &quot;fromOwner&quot;: &quot;6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;,
+        &quot;toOwner&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+        &quot;price&quot;: 1200,
+        &quot;tradedAt&quot;: &quot;2026-05-03T11:00:00Z&quot;
+      }
+    ]
+  },
+  &quot;error&quot;: null
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Description</th></tr>
+<tr><td><code>fromOwner</code></td><td>Pet ID of the seller at time of trade.</td></tr>
+<tr><td><code>toOwner</code></td><td>Pet ID of the buyer at time of trade.</td></tr>
+<tr><td><code>price</code></td><td>Agreed transaction price in bronze coins (gross, before platform fee).</td></tr>
+<tr><td><code>tradedAt</code></td><td>ISO 8601 timestamp when the trade was completed.</td></tr>
+</table>
 <p><strong>Error responses for all marketplace endpoints:</strong></p>
 <table>
 <tr><th>HTTP</th><th>Code</th><th>Condition</th></tr>
@@ -1342,6 +1488,11 @@
   &quot;setupToken&quot;: &quot;&lt;signed JWT from login 403 error.details.setupToken&gt;&quot;,
   &quot;password&quot;: &quot;correct-horse-battery-staple&quot;
 }</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>setupToken</code></td><td>string</td><td>Yes</td><td>Short-lived signed JWT from the 403 login error <code>details.setupToken</code>; expires in 15 minutes</td></tr>
+<tr><td><code>password</code></td><td>string</td><td>Yes</td><td>Admin password for re-confirmation before TOTP enrollment</td></tr>
+</table>
 <p><strong>Response (HTTP 200):</strong></p>
 <pre><code class="language-json">{
   &quot;success&quot;: true,
@@ -1397,6 +1548,10 @@
 <pre><code class="language-json">{
   &quot;totpCode&quot;: &quot;482917&quot;
 }</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>totpCode</code></td><td>string</td><td>Yes</td><td>6-digit TOTP code from authenticator app</td></tr>
+</table>
 <p><strong>Response (HTTP 200):</strong></p>
 <pre><code class="language-json">{
   &quot;success&quot;: true,
@@ -1552,7 +1707,55 @@
 <h4 id="get-adminapipetspetid"><code>GET /admin/api/pets/:petId</code></h4>
 <p>Returns full pet details including owner info and ban history. <em>(EDD extension — implied by ARCH §2.2 admin pet management; not individually enumerated in EDD §5.5 but required for the admin pet detail view.)</em></p>
 <p><strong>Auth</strong>: Admin session — Moderator+ or Read Only</p>
-<p><strong>Response (HTTP 200):</strong> Full pet record including <code>bannedReason</code>, <code>bannedAt</code>, <code>claimedAt</code>, <code>generationMeta</code>, current stats, and last 20 battle records.</p>
+<p><strong>Response (HTTP 200):</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;petName&quot;: &quot;Crimson Vexor&quot;,
+    &quot;seed&quot;: 7381923847561029,
+    &quot;rarity&quot;: &quot;RARE&quot;,
+    &quot;stats&quot;: {
+      &quot;speed&quot;: 34,
+      &quot;strength&quot;: 28,
+      &quot;stamina&quot;: 41,
+      &quot;level&quot;: 7
+    },
+    &quot;isBanned&quot;: false,
+    &quot;bannedReason&quot;: null,
+    &quot;bannedAt&quot;: null,
+    &quot;claimedAt&quot;: &quot;2026-04-15T09:32:00Z&quot;,
+    &quot;ownerEmailMasked&quot;: &quot;p***@example.com&quot;,
+    &quot;generationMeta&quot;: {
+      &quot;body&quot;: &quot;lizard&quot;,
+      &quot;head&quot;: &quot;horned&quot;,
+      &quot;colorPalette&quot;: &quot;crimson_gold&quot;,
+      &quot;accessory&quot;: &quot;cape&quot;,
+      &quot;rarityTrait&quot;: &quot;shimmering_scales&quot;,
+      &quot;pattern&quot;: &quot;diagonal_stripe&quot;
+    },
+    &quot;recentBattles&quot;: [
+      {
+        &quot;matchId&quot;: &quot;a1b2c3d4-e5f6-7890-abcd-ef1234567890&quot;,
+        &quot;mode&quot;: &quot;RACE&quot;,
+        &quot;opponentPetId&quot;: &quot;6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;,
+        &quot;isAiOpponent&quot;: false,
+        &quot;result&quot;: &quot;WIN&quot;,
+        &quot;completedAt&quot;: &quot;2026-05-03T11:42:00Z&quot;
+      }
+    ]
+  },
+  &quot;error&quot;: null
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Description</th></tr>
+<tr><td><code>isBanned</code></td><td><code>true</code> if the pet is currently banned. Maps to <code>pets.is_banned</code>.</td></tr>
+<tr><td><code>bannedReason</code></td><td>Admin-supplied ban reason (max 500 chars). Maps to <code>pets.banned_reason</code>. <code>null</code> when not banned.</td></tr>
+<tr><td><code>bannedAt</code></td><td>ISO 8601 timestamp when ban was applied. Maps to <code>pets.banned_at</code>. <code>null</code> when not banned.</td></tr>
+<tr><td><code>claimedAt</code></td><td>ISO 8601 timestamp when the email-OTP claim flow completed. Maps to <code>pets.claimed_at</code>. <code>null</code> for unclaimed (guest preview) pets.</td></tr>
+<tr><td><code>generationMeta</code></td><td>6-dimension procedural generation vector. Maps to <code>pets.generation_meta</code> JSONB: <code>body</code>, <code>head</code>, <code>colorPalette</code> (<code>color_palette</code>), <code>accessory</code>, <code>rarityTrait</code> (<code>rarity_trait</code>), <code>pattern</code>.</td></tr>
+<tr><td><code>recentBattles</code></td><td>Last 20 arena battles for this pet (<code>arena_battle_records_display_count = 20</code>).</td></tr>
+</table>
 <p><strong>Error responses:</strong></p>
 <table>
 <tr><th>HTTP</th><th>Code</th><th>Condition</th></tr>
@@ -1563,7 +1766,17 @@
 <h4 id="put-adminapipetspetid"><code>PUT /admin/api/pets/:petId</code></h4>
 <p>Updates administrative fields on a pet (e.g. correcting <code>petName</code> after content moderation review). <em>(EDD extension — not enumerated in EDD §5.5; scoped to Super Admin only for content moderation corrections; audit-logged.)</em></p>
 <p><strong>Auth</strong>: Admin session — Super Admin only</p>
-<p><strong>Request body:</strong> Partial pet fields that are admin-editable (e.g. <code>petName</code>).</p>
+<p><strong>Request body:</strong></p>
+<pre><code class="language-json">{
+  &quot;petName&quot;: &quot;Revised Vexor&quot;,
+  &quot;banReason&quot;: &quot;Automated bot behavior confirmed by manual review&quot;
+}</code></pre>
+<table>
+<tr><th>Field</th><th>Type</th><th>Required</th><th>Validation</th><th>Description</th></tr>
+<tr><td><code>petName</code></td><td>string</td><td>No</td><td>Max 64 characters (<code>VARCHAR(64)</code> in <code>pets.pet_name</code>)</td><td>Override the auto-generated pet name after content moderation review.</td></tr>
+<tr><td><code>banReason</code></td><td>string</td><td>No</td><td>Max 500 characters (<code>admin_moderation_reason_max_chars = 500</code>)</td><td>Sets or updates the ban reason on the pet record (<code>pets.banned_reason</code>). Providing this field alone does <strong>not</strong> ban the pet — use <code>POST /admin/api/pets/:petId/ban</code> to apply a ban. This field is for correcting or annotating an existing ban reason only.</td></tr>
+</table>
+<p>All fields are optional. At least one field must be present.</p>
 <p><strong>Response (HTTP 200):</strong></p>
 <pre><code class="language-json">{
   &quot;success&quot;: true,

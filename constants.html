@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -538,6 +539,8 @@
 <tr><td>ARENA_ENTRY_COOLDOWN_ADMIN_MAX</td><td>60</td><td>minutes</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable upper bound</td></tr>
 <tr><td>ARENA_ENTRY_COST_FOOD_CREDITS_DEFAULT</td><td>0</td><td>credits</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Default arena entry cost</td></tr>
 <tr><td>ARENA_ENTRY_COST_FOOD_CREDITS_ADMIN_MAX</td><td>10</td><td>credits</td><td>PRD §19.4 US-ADMIN-006 AC-018-1</td><td>Admin-tunable upper bound</td></tr>
+<tr><td>PET_RESERVATION_TTL</td><td>24</td><td>hours</td><td>[BRD §系統要求]</td><td>Pet claim reservation TTL</td></tr>
+<tr><td>SPRITE_RESOLUTION</td><td>32</td><td>px</td><td>[EDD §4.1 Asset Pipeline]</td><td>Pixel sprite canvas resolution</td></tr>
 </table>
 <hr>
 <h2 id="2-multipliers--modifiers">§2 Multipliers &amp; Modifiers</h2>
@@ -610,14 +613,14 @@
 <tr><td>Availability</td><td>99.9%</td><td>monthly</td><td>PRD §7.3 NFR-AVAIL-01</td><td>Maximum 43.8 minutes downtime per month</td></tr>
 <tr><td>P99 API Latency (read endpoints)</td><td>&lt; 200</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-01</td><td>All read endpoints</td></tr>
 <tr><td>P99 API Latency (write endpoints)</td><td>&lt; 500</td><td>ms at 100 RPS</td><td>PRD §7.1 NFR-PERF-02</td><td>Training, arena entry write endpoints</td></tr>
-<tr><td>First Contentful Paint (FCP)</td><td>&lt; 1.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-03</td><td>Lighthouse / Core Web Vitals</td></tr>
-<tr><td>Largest Contentful Paint (LCP)</td><td>&lt; 2.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-04</td><td>Core Web Vitals</td></tr>
-<tr><td>Cumulative Layout Shift (CLS)</td><td>&lt; 0.1</td><td>score</td><td>PRD §7.1 NFR-PERF-05</td><td>Core Web Vitals</td></tr>
-<tr><td>Interaction to Next Paint (INP)</td><td>&lt; 200</td><td>ms</td><td>PRD §7.1 NFR-PERF-06</td><td>Core Web Vitals</td></tr>
-<tr><td>Pet Animation Frame Rate</td><td>≥ 30</td><td>FPS sustained</td><td>PRD §7.1 NFR-PERF-07</td><td>Mid-range devices</td></tr>
-<tr><td>Arena Battle Result E2E</td><td>&lt; 2</td><td>seconds</td><td>PRD §7.1 NFR-PERF-08</td><td>Calculation + storage</td></tr>
-<tr><td>Leaderboard Update Lag</td><td>≤ 30</td><td>seconds</td><td>PRD §7.1 NFR-PERF-09</td><td>From battle completion</td></tr>
-<tr><td>Email Delivery (P90)</td><td>≤ 60</td><td>seconds</td><td>PRD §7.1 NFR-PERF-10</td><td>Claim password email</td></tr>
+<tr><td>First Contentful Paint (FCP)</td><td>&lt; 1.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-04</td><td>Lighthouse / Core Web Vitals</td></tr>
+<tr><td>Largest Contentful Paint (LCP)</td><td>&lt; 2.5</td><td>seconds</td><td>PRD §7.1 NFR-PERF-05</td><td>Core Web Vitals</td></tr>
+<tr><td>Cumulative Layout Shift (CLS)</td><td>&lt; 0.1</td><td>score</td><td>PRD §7.1 NFR-PERF-06</td><td>Core Web Vitals</td></tr>
+<tr><td>Interaction to Next Paint (INP)</td><td>&lt; 200</td><td>ms</td><td>PRD §7.1 NFR-PERF-07</td><td>Core Web Vitals</td></tr>
+<tr><td>Pet Animation Frame Rate</td><td>≥ 30</td><td>FPS sustained</td><td>PRD §7.1 NFR-PERF-08</td><td>Mid-range devices</td></tr>
+<tr><td>Arena Battle Result E2E</td><td>&lt; 2</td><td>seconds</td><td>PRD §7.1 NFR-PERF-09</td><td>Calculation + storage</td></tr>
+<tr><td>Leaderboard Update Lag</td><td>≤ 30</td><td>seconds</td><td>PRD §7.1 NFR-PERF-10</td><td>From battle completion</td></tr>
+<tr><td>Email Delivery (P90)</td><td>≤ 60</td><td>seconds</td><td>PRD §7.1 NFR-PERF-11</td><td>Claim password email</td></tr>
 <tr><td>Error Rate</td><td>&lt; 1%</td><td>of requests / 5 min</td><td>PRD §7.8 NFR-OBS-03</td><td>Alert trigger threshold</td></tr>
 <tr><td>Observability P99 Alert</td><td>&gt; 1000</td><td>ms / 5 min</td><td>PRD §7.8 NFR-OBS-04</td><td>Alert threshold</td></tr>
 <tr><td>Email Delivery Failure Rate</td><td>&lt; 2%</td><td>/ 30 min</td><td>PRD §7.8 NFR-OBS-05; PRD §9.2 guardrails</td><td>SendGrid failure rate alert</td></tr>
@@ -650,6 +653,10 @@
 <tr><td>Email re-send on delivery failure</td><td>3</td><td>retries</td><td>PRD §6.2 error flow</td><td>Retry queue over 15 minutes</td></tr>
 <tr><td>Email re-send retry duration</td><td>15</td><td>minutes</td><td>PRD §6.2 error flow</td><td>Total retry window for failed delivery</td></tr>
 <tr><td>Admin portal requests per admin</td><td>100</td><td>per minute</td><td>PRD §19.6 NFR-ADMIN-04</td><td>Separately rate-limited from player API</td></tr>
+<tr><td>Admin login lockout threshold</td><td>10</td><td>failed attempts</td><td>PRD §7.2 NFR-SEC-05</td><td>Admin login lockout after N failed attempts</td></tr>
+<tr><td>Admin login lockout duration</td><td>30</td><td>minutes</td><td>PRD §7.2 NFR-SEC-05</td><td>Admin login lockout duration</td></tr>
+<tr><td>Admin login IP rate limit attempts</td><td>10</td><td>attempts</td><td>PRD §7.2 NFR-SEC-06</td><td>Admin login IP rate limit attempts per window</td></tr>
+<tr><td>Admin login IP rate limit window</td><td>900</td><td>seconds</td><td>PRD §7.2 NFR-SEC-06</td><td>Admin login IP rate limit window (15 min)</td></tr>
 </table>
 <hr>
 <h2 id="7-business-rules">§7 Business Rules</h2>
@@ -716,6 +723,7 @@
 <tr><td>PEAK_OPERATION_RPS</td><td>500</td><td>RPS</td><td>PRD §7.1 capacity targets</td><td>Viral event peak</td></tr>
 <tr><td>PEAK_CONCURRENT_USERS</td><td>2000</td><td>PCU</td><td>PRD §7.1 capacity targets; PRD §13 glossary</td><td>Peak Concurrent Users during arena events</td></tr>
 <tr><td>DB_CONNECTION_POOL_MIN_CONNECTIONS</td><td>20</td><td>connections</td><td>PRD §7.1 capacity targets</td><td>PostgreSQL connection pool minimum</td></tr>
+<tr><td>DB_CONNECTION_POOL_MAX_CONNECTIONS</td><td>50</td><td>connections</td><td>PRD §7.1 NFR-PERF-01</td><td>DB connection pool maximum connections</td></tr>
 <tr><td>DAU_12_MONTH_TARGET</td><td>2000</td><td>DAU</td><td>BRD §3.1 O3; PRD §9.1 DAP targets</td><td>12-month DAU success objective; intentionally equal to NORMAL_OPERATION_DAU_MIN — represents the infrastructure sizing target</td></tr>
 <tr><td>CLAIMED_PETS_6_WEEK_TARGET</td><td>500</td><td>pets</td><td>BRD §7.2; BRD §3.5</td><td>6-week total claimed pets target</td></tr>
 <tr><td>MONTHLY_GMV_TARGET</td><td>10000</td><td>USD</td><td>BRD §3.1 O5</td><td>Marketplace monthly GMV target at 12 months</td></tr>

@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -534,7 +535,12 @@
 │   │   │   ├── ClaimEmailForm.tsx
 │   │   │   ├── ClaimCodeForm.tsx
 │   │   │   ├── ExpiryWarning.tsx
-│   │   │   └── URLReveal.tsx
+│   │   │   ├── URLReveal.tsx
+│   │   │   └── recover/
+│   │   │       ├── TokenRecoveryPage.tsx
+│   │   │       ├── RecoveryEmailForm.tsx
+│   │   │       ├── RecoveryCodeForm.tsx
+│   │   │       └── TokenRevealModal.tsx
 │   │   ├── pet/
 │   │   │   ├── PetPage.tsx
 │   │   │   ├── RarityBadge.tsx
@@ -563,7 +569,8 @@
 │   │   │   ├── BattleResultPage.tsx
 │   │   │   ├── BattleResultCard.tsx
 │   │   │   ├── StatComparison.tsx
-│   │   │   └── ShareBattleButton.tsx
+│   │   │   ├── ShareBattleButton.tsx
+│   │   │   └── ActionButtons.tsx
 │   │   ├── leaderboard/
 │   │   │   ├── LeaderboardPage.tsx
 │   │   │   ├── LeaderboardTable.tsx
@@ -593,7 +600,7 @@
 │   │   ├── useReducedMotion.ts
 │   │   └── usePetToken.ts
 │   ├── store/
-│   │   └── useAppStore.ts             # Zustand store (slices: arena, claim, toast)
+│   │   └── useAppStore.ts             # Zustand store (slices: arena, claim, recovery, pet, toast)
 │   ├── lib/
 │   │   ├── apiClient.ts               # Axios/fetch wrapper with token attachment
 │   │   ├── tokenStorage.ts            # localStorage read/write for pet_access_token
@@ -757,6 +764,21 @@ export class PetCanvasEngine {
   setClaimStep: (step: &#x27;email&#x27; | &#x27;code&#x27; | &#x27;reveal&#x27;) =&gt; void;
   setClaimId: (id: string | null) =&gt; void;
 
+  // Recovery slice (separate from claim flow state — see §5.2)
+  recoveryClaimId: string | null;
+  recoveryEmail: string | null;
+  recoveryPetId: string | null;
+  recoveryStep: &#x27;email&#x27; | &#x27;code&#x27; | &#x27;reveal&#x27;;
+  recoveryAttempts: number;
+  setRecoveryClaimId: (id: string | null) =&gt; void;
+  setRecoveryEmail: (email: string | null) =&gt; void;
+  setRecoveryPetId: (petId: string | null) =&gt; void;
+  setRecoveryStep: (step: &#x27;email&#x27; | &#x27;code&#x27; | &#x27;reveal&#x27;) =&gt; void;
+  setRecoveryAttempts: (attempts: number) =&gt; void;
+
+  // Pet slice
+  setPetToken: (token: string) =&gt; void;  // writes token to localStorage via tokenStorage.ts
+
   // Toast slice
   toasts: Toast[];
   pushToast: (toast: Toast) =&gt; void;
@@ -774,6 +796,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, lazy: () =&gt; import(&#x27;./components/landing/LandingPage&#x27;) },
       { path: &#x27;claim&#x27;, lazy: () =&gt; import(&#x27;./components/claim/ClaimPage&#x27;) },
+      { path: &#x27;claim/recover&#x27;, lazy: () =&gt; import(&#x27;./components/claim/recover/TokenRecoveryPage&#x27;) },
       { path: &#x27;pet/:petId&#x27;, lazy: () =&gt; import(&#x27;./components/pet/PetPage&#x27;) },
       { path: &#x27;pet/:petId/train&#x27;, lazy: () =&gt; import(&#x27;./components/training/TrainingPage&#x27;) },
       { path: &#x27;pet/:petId/records&#x27;, lazy: () =&gt; import(&#x27;./components/records/BattleRecordsPage&#x27;) },
@@ -889,6 +912,9 @@ export function clearPetToken(): void {
 │   │   │   └── MetricChart.vue
 │   │   ├── audit/
 │   │   │   └── AuditLogPage.vue
+│   │   ├── users/
+│   │   │   ├── UserManagementPage.vue
+│   │   │   └── UserTableRow.vue
 │   │   ├── roles/
 │   │   │   ├── RolesPage.vue
 │   │   │   └── CreateAdminModal.vue
@@ -924,7 +950,8 @@ export function clearPetToken(): void {
         ├── EmailMonitorPage.vue    /admin/email
         ├── AnalyticsPage.vue       /admin/analytics
         ├── AuditLogPage.vue        /admin/audit
-        └── RolesPage.vue           /admin/roles</code></pre>
+        ├── RolesPage.vue           /admin/roles
+        └── UserManagementPage.vue  /admin/users</code></pre>
 <h3 id="33-element-plus-usage">3.3 Element Plus Usage</h3>
 <p>Element Plus is registered globally in <code>main.ts</code>. Key components used per module:</p>
 <table>
@@ -991,6 +1018,7 @@ const router = createRouter({
         { path: &#x27;analytics&#x27;, component: () =&gt; import(&#x27;../components/analytics/AnalyticsPage.vue&#x27;) },
         { path: &#x27;audit&#x27;, component: () =&gt; import(&#x27;../components/audit/AuditLogPage.vue&#x27;) },
         { path: &#x27;roles&#x27;, component: () =&gt; import(&#x27;../components/roles/RolesPage.vue&#x27;) },
+        { path: &#x27;users&#x27;, component: () =&gt; import(&#x27;../components/users/UserManagementPage.vue&#x27;) },
       ],
     },
   ],
@@ -1387,7 +1415,10 @@ Admin portal:                 Entirely separate Vite build; no shared bundle wit
 <hr>
 <h2 id="7-accessibility">7. Accessibility</h2>
 <h3 id="71-standard">7.1 Standard</h3>
-<p><strong>WCAG 2.1 AA</strong> compliance is required across all player app screens (PRD §7.7 NFR-A11Y-01).</p>
+<p><strong>WCAG 2.1 AA</strong> compliance is required across all player app screens (PRD §7.7 NFR-A11Y-01). In-scope screens are all player-facing surfaces: landing, claim, token recovery, pet, training, arena, arena result, leaderboard, battle records, GDPR self-service, and marketplace (when FF_MARKETPLACE is active).</p>
+<p>The admin portal targets WCAG 2.1 AA compliance separately; see ADMIN_IMPL §14.2 for admin-specific accessibility requirements and the Element Plus component audit.</p>
+<p>See PRD §7.7 (NFR-A11Y-01 through NFR-A11Y-04) for the full accessibility non-functional requirements backing this standard.</p>
+<p>Target WCAG 2.1 success criteria include: 1.4.3 Contrast (Minimum) AA, 2.4.7 Focus Visible, 2.5.3 Label in Name, and 4.1.2 Name, Role, Value.</p>
 <h3 id="72-contrast-ratios">7.2 Contrast Ratios</h3>
 <table>
 <tr><th>Context</th><th>Minimum ratio</th><th>Constant key</th></tr>
@@ -1526,14 +1557,15 @@ test(&#x27;claim flow completes and token is stored&#x27;, async ({ page }) =&gt
 <tr><td>Pet Dashboard</td><td><code>/pet/:petId</code></td><td><code>pet-display.feature</code></td><td>Sprite rendering, stat display, rarity badges, action buttons, training cards</td><td>Pet generation, stat bars, rarity distribution, neglected state</td></tr>
 <tr><td>Training UI</td><td><code>/pet/:petId/train</code></td><td><code>training-ui.feature</code></td><td>Daily cap, buff selection, confirm dialog, buff application, stat change indicators</td><td>Training actions, daily limits, skill-ups, level progression</td></tr>
 <tr><td>Arena Mode Selection</td><td><code>/arena</code></td><td><code>arena-ui.feature</code></td><td>Mode selection (RACE/SUMO), opponent loading, error handling, rate limit banner</td><td>Battle mode choice, matchmaking status, AI fallback</td></tr>
-<tr><td>Battle View</td><td><code>/arena/battle/:matchId</code></td><td><code>arena-ui.feature</code></td><td>Live battle animation, result display, reward notification, share button</td><td>Battle resolution, WIN/LOSS variants, stat changes</td></tr>
+<tr><td>Battle View</td><td><code>/arena/result/:matchId</code></td><td><code>arena-ui.feature</code></td><td>Live battle animation, result display, reward notification, share button</td><td>Battle resolution, WIN/LOSS variants, stat changes</td></tr>
 <tr><td>Leaderboard</td><td><code>/leaderboard</code></td><td><code>leaderboard-ui.feature</code></td><td>Ranking display, pagination, player search, filter by rarity</td><td>Top 100 display, rarity filters, score calculation</td></tr>
 <tr><td>Battle Records</td><td><code>/pet/:petId/records</code></td><td><code>battle-records.feature</code></td><td>Record list, pagination, social share preview, public access</td><td>History display, OG meta tags, pagination cursor, AI opponent marking</td></tr>
-<tr><td>Settings</td><td><code>/settings</code></td><td><code>settings.feature</code></td><td>Theme toggle, audio mute, notification prefs, session management</td><td>User preferences, local state, logout</td></tr>
+<tr><td>Token Recovery</td><td><code>/claim/recover</code></td><td><code>features/client/claim-flow-ui.feature</code></td><td>recovery email, OTP code entry, token reveal</td><td>US-AUTH-002</td></tr>
+<tr><td>GDPR Self-Service</td><td><code>/gdpr</code></td><td><code>features/client/gdpr-ui.feature</code></td><td>request submission, status polling, SLA display</td><td>US-ADMIN-004</td></tr>
 <tr><td>Admin Portal</td><td><code>/admin</code></td><td><code>admin-portal.feature</code></td><td>Login, TOTP, dashboard, moderation, config management</td><td>Authentication, authorization, role-based access</td></tr>
 </table>
 <h3 id="101-feature-file-organization">10.1 Feature File Organization</h3>
-<ul><li><strong><code>features/client/</code></strong>: Player app UI scenarios (component behavior, routing, state management)</li><li><strong><code>features/server/</code></strong>: API scenarios (backend validation, business logic, rate limiting, GDPR compliance)</li><li><strong><code>features/server/</code></strong>: Supporting scenarios (rarity distribution, battle records API, admin operations)</li></ul>
+<ul><li><strong><code>features/client/</code></strong>: Player app UI scenarios (component behavior, routing, state management)</li><li><strong><code>features/server/</code></strong>: API scenarios (backend validation, business logic, rate limiting, GDPR compliance)</li><li><strong><code>features/server/admin/</code></strong>: Supporting scenarios (rarity distribution, battle records API, admin operations)</li></ul>
 <h3 id="102-uncovered-areas">10.2 Uncovered Areas</h3>
 <p>The following areas are covered in unit tests rather than BDD scenarios:</p>
 <ul><li>Phaser.js pixel art rendering logic (<code>apps/player/src/components/canvas/PetCanvasEngine.test.ts</code>)</li><li>TanStack Query cache invalidation patterns (<code>apps/player/src/hooks/<strong>tests</strong>/usePet.test.ts</code>)</li><li>Zod schema validation edge cases (<code>apps/player/src/schemas/<strong>tests</strong>/*.test.ts</code>)</li><li>Vue Element Plus admin data table interactions (covered in admin-portal.feature E2E scenarios)</li></ul>

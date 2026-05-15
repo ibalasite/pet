@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -483,6 +484,7 @@
 </table>
 <hr>
 <h2 id="change-log">Change Log</h2>
+<p>This log records all revisions to this Admin Implementation document, including version number, date, author, and change scope summary. For detailed change context and rationale, refer to the corresponding git commit history and linked review findings.</p>
 <table>
 <tr><th>Version</th><th>Date</th><th>Author</th><th>Change Summary</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (gendoc ADMIN_IMPL)</td><td>Initial draft</td></tr>
@@ -495,7 +497,7 @@
 <p>Core operations problems the portal solves:</p>
 <ol><li><strong>Pet ban/unban</strong> — Processes automated bot detection results (threshold: &gt; 50 battles/hr rolling window; <code>bot_detection_battles_threshold = 50</code>)</li><li><strong>Leaderboard management</strong> — Admins view Top 500; public shows only Top 100 (<code>leaderboard_admin_view = 500</code>, <code>leaderboard_top_display = 100</code>)</li><li><strong>GDPR compliance queue</strong> — Handles erasure / data_access / restrict_processing / object_leaderboard / rectification requests across 5 request types</li><li><strong>System configuration</strong> — Runtime parameters (arena rate limit, rarity weights) and economy parameters (food buff multiplier) cached in Redis (TTL: <code>config_cache_refresh_time_minutes = 5</code>)</li><li><strong>Audit log</strong> — All CUD operations recorded, retained 2 years (<code>admin_audit_log_retention_years = 2</code>)</li></ol>
 <h3 id="12-design-principles">§1.2 Design Principles</h3>
-<ul><li><strong>Security-first</strong>: RBAC minimum privilege; httpOnly + SameSite=Strict session cookie; every operation produces an audit log entry</li><li><strong>Operational efficiency</strong>: Bulk operations + smart search (pet ID / email hash)</li><li><strong>Data consistency</strong>: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s)</li><li><strong>Auditability</strong>: All CUD operations write to <code>admin_audit_log</code>, retained 2 years (<code>admin_audit_log_retention_years = 2</code>)</li></ul>
+<ul><li><strong>Security-first</strong>: RBAC minimum privilege; httpOnly + SameSite=Strict session cookie; every operation produces an audit log entry</li><li><strong>Operational efficiency</strong>: Bulk operations + smart search (pet ID / email hash)</li><li><strong>Data consistency</strong>: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s; config_cache_refresh_time_minutes = 5)</li><li><strong>Auditability</strong>: All CUD operations write to <code>admin_audit_log</code>, retained 2 years (<code>admin_audit_log_retention_years = 2</code>)</li></ul>
 <h3 id="13-user-roles-from-edd-37--arch-51">§1.3 User Roles (from EDD §3.7 + ARCH §5.1)</h3>
 <table>
 <tr><th>Role</th><th>Display Name</th><th>Accessible Features</th></tr>
@@ -813,9 +815,9 @@ export const permissionDirective = {
 <tr><td>Active Battles Today</td><td><code>GET /admin/api/dashboard → activeBattlesToday</code></td><td>On page load + manual refresh</td></tr>
 <tr><td>Pending GDPR Requests</td><td><code>GET /admin/api/dashboard → pendingGdprRequests</code></td><td>On page load (super_admin only; hidden for others)</td></tr>
 <tr><td>Daily Active Users</td><td><code>GET /admin/api/dashboard → dailyActiveUsers</code></td><td>On page load</td></tr>
-<tr><td>Error Rate (5 min)</td><td><code>GET /admin/api/dashboard → errorRateLast5Min</code></td><td>On page load + 30 s polling</td></tr>
+<tr><td>Error Rate (5 min)</td><td><code>GET /admin/api/dashboard → errorRateLast5Min</code></td><td>On page load + 30 s polling (30 s is a hardcoded UX default)</td></tr>
 <tr><td>Email Delivery Rate</td><td><code>GET /admin/api/dashboard → emailDeliveryRate</code></td><td>On page load</td></tr>
-<tr><td>System Status</td><td><code>GET /admin/api/dashboard → systemStatus</code></td><td>On page load + 30 s polling</td></tr>
+<tr><td>System Status</td><td><code>GET /admin/api/dashboard → systemStatus</code></td><td>On page load + 30 s polling (30 s is a hardcoded UX default)</td></tr>
 </table>
 <p><strong>System Status display</strong>: <code>healthy</code> → green <code>el-tag</code>; <code>degraded</code> → orange; <code>down</code> → red + <code>ElNotification</code> alert</p>
 <p><strong>Charts</strong>: Dashboard KPI data comes from the <code>GET /admin/api/dashboard</code> aggregated endpoint. Time-series charts are on <code>/admin/analytics</code> only — no ECharts instances on the Dashboard page.</p>
@@ -926,6 +928,7 @@ export const permissionDirective = {
 <h3 id="81-axios-configuration">§8.1 Axios Configuration</h3>
 <pre><code class="language-typescript">// api/http.ts
 import axios from &#x27;axios&#x27;
+import { ElMessage } from &#x27;element-plus&#x27;
 import { useAuthStore } from &#x27;@/stores/auth&#x27;
 import router from &#x27;@/router&#x27;
 
@@ -952,6 +955,13 @@ http.interceptors.response.use(
       await router.push(&#x27;/login&#x27;)
     } else if (status === 403) {
       await router.push(&#x27;/403&#x27;)
+    } else if (status === 429) {
+      // Rate limit exceeded — surface Retry-After value if present
+      const retryAfter = error.response?.headers?.[&#x27;retry-after&#x27;]
+      const msg = retryAfter
+        ? `Rate limit exceeded. Please wait ${retryAfter} seconds before retrying.`
+        : &#x27;Rate limit exceeded. Please try again later.&#x27;
+      ElMessage({ type: &#x27;error&#x27;, message: msg, duration: 5000 })
     }
     return Promise.reject(error)
   }
@@ -962,7 +972,7 @@ export default http</code></pre>
 <p>Admin API CSRF protection relies on the <code>SameSite=Strict</code> attribute on the session cookie (API.md §2.2). Because the cookie is <code>SameSite=Strict</code>, browsers will not attach it to cross-origin requests, making cross-site request forgery impossible without additional token mechanisms. No <code>X-CSRF-Token</code> header is required (FRONTEND.md §3.6). If the deployment is ever extended to cross-origin scenarios, an <code>X-CSRF-Token</code> double-submit pattern must be added at that time.</p>
 <h3 id="83-admin-session-handling">§8.3 Admin Session Handling</h3>
 <p>Admin sessions use server-side Redis sessions (<code>session:admin:{session_id}</code>):</p>
-<ul><li><strong>Inactivity TTL</strong>: 14400 s (admin_session_inactivity_expiry_hours = 4) — automatically renewed by the server on each request</li><li><strong>Absolute expiry</strong>: 28800 s (admin_session_absolute_expiry_hours = 8) — server enforces via <code>absExpiry</code> field in the session JSON</li><li><strong>Frontend monitoring</strong>: <code>useSessionTimer.ts</code> composable starts a timer at login; shows a toast 5 minutes before inactivity expiry; forces redirect to login at absolute expiry</li></ul>
+<ul><li><strong>Inactivity TTL</strong>: 14400 s (admin_session_inactivity_expiry_hours = 4) — automatically renewed by the server on each request</li><li><strong>Absolute expiry</strong>: 28800 s (admin_session_absolute_expiry_hours = 8) — server enforces via <code>absExpiry</code> field in the session JSON</li><li><strong>Frontend monitoring</strong>: <code>useSessionTimer.ts</code> composable starts a timer at login; shows a toast 5 minutes before inactivity expiry (<code>// 5-minute UX warning before 4h inactivity expiry — no separate constant; derived from admin_inactivity_timeout_minutes = 240</code>); forces redirect to login at absolute expiry</li></ul>
 <h3 id="84-api-endpoint-mapping-all-adminapi-routes-from-apimd-6">§8.4 API Endpoint Mapping (all <code>/admin/api/*</code> routes from API.md §6)</h3>
 <table>
 <tr><th>Feature</th><th>Method</th><th>Path</th><th>Required Permission</th><th>Page</th></tr>
@@ -1392,7 +1402,10 @@ use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, Legen
 <pre><code class="language-vue">&lt;v-chart :option=&quot;chartOption&quot; autoresize style=&quot;height: 320px&quot; /&gt;</code></pre>
 <hr>
 <h2 id="13-internationalization-i18n">§13 Internationalization (i18n)</h2>
-<p>The Admin Portal is single-language (English). No multi-locale configuration is required. Element Plus locale uses the default <code>en</code> locale.</p>
+<p>The Admin Portal is single-language (English). No multi-locale configuration is required. Element Plus locale is explicitly registered in <code>main.ts</code> using <code>ElConfigProvider</code> with the built-in English locale pack:</p>
+<pre><code class="language-typescript">import { ElConfigProvider } from &#x27;element-plus&#x27;
+import en from &#x27;element-plus/es/locale/lang/en&#x27;</code></pre>
+<p>Wrap the root <code>&lt;App /&gt;</code> in <code>&lt;ElConfigProvider :locale=&quot;en&quot;&gt;</code> to ensure all Element Plus components (date pickers, pagination labels, validation messages) render in English consistently. If the portal scope expands beyond English in a future phase, vue-i18n can be added without restructuring the existing component tree.</p>
 <hr>
 <h2 id="14-performance">§14 Performance</h2>
 <h3 id="141-route-level-lazy-loading">§14.1 Route-Level Lazy Loading</h3>
@@ -1504,6 +1517,7 @@ npx vite-bundle-visualizer</code></pre>
 <tr><td>Audit log search (any 12-month window)</td><td>&lt; 3000 ms</td><td>admin_audit_log_search_response_time_seconds = 3</td></tr>
 <tr><td>FCP (First Contentful Paint)</td><td>&lt; 2000 ms</td><td>Derived from admin page load target</td></tr>
 </table>
+<blockquote><p><strong>FCP deviation note</strong>: Admin portal FCP target is relaxed to &lt; 2000 ms (vs player app ≤ 1500 ms) consistent with the 3000 ms admin page load budget from PRD NFR-ADMIN-06. This is an intentional deviation from the project-wide FCP ≤ 1.5 s target.</p></blockquote>
 <h3 id="144-element-plus-on-demand-import-configuration">§14.4 Element Plus On-Demand Import Configuration</h3>
 <pre><code class="language-typescript">// vite.config.ts (unplugin configuration)
 import AutoImport from &#x27;unplugin-auto-import/vite&#x27;
@@ -1564,13 +1578,16 @@ export default defineConfig({
 <tr><th>Variable</th><th>Development</th><th>Production</th></tr>
 <tr><td><code>VITE_API_BASE_URL</code></td><td><code>http://localhost:3000</code></td><td><code>https://api.pixel-pet-arena.com</code> (via Nginx proxy)</td></tr>
 <tr><td><code>VITE_ADMIN_PATH</code></td><td><code>/admin</code></td><td><code>/admin</code></td></tr>
+<tr><td><code>ADMIN_ALLOWED_IPS</code></td><td><em>(empty — allowlist disabled in development)</em></td><td>Comma-separated CIDR list (e.g. <code>10.0.0.0/8,203.0.113.0/24</code>); required in production per NFR-ADMIN-07 (ARCH §5.1)</td></tr>
 </table>
 <p><code>.env.development</code>:</p>
 <pre><code class="">VITE_API_BASE_URL=http://localhost:3000
-VITE_ADMIN_PATH=/admin</code></pre>
+VITE_ADMIN_PATH=/admin
+# ADMIN_ALLOWED_IPS= (empty — IP allowlist disabled in development)</code></pre>
 <p><code>.env.production</code>:</p>
 <pre><code class="">VITE_API_BASE_URL=https://api.pixel-pet-arena.com
-VITE_ADMIN_PATH=/admin</code></pre>
+VITE_ADMIN_PATH=/admin
+ADMIN_ALLOWED_IPS=&lt;comma-separated CIDR list&gt;</code></pre>
 <h3 id="153-nginx-routing-configuration">§15.3 Nginx Routing Configuration</h3>
 <pre><code class="language-nginx"># Admin Portal SPA routing
 location /admin/ {
@@ -1604,6 +1621,7 @@ location /admin/api/ {
 <tr><td>TOTP enforcement</td><td>Every admin login requires TOTP after enrollment; <code>TOTP_SETUP_REQUIRED</code> returned on first login</td></tr>
 <tr><td>Account lockout</td><td>10 consecutive failures trigger 30-minute lockout (admin_login_lockout_threshold = 10, admin_login_lockout_duration_minutes = 30)</td></tr>
 <tr><td>IP rate limiting</td><td>10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10, admin_login_ip_rate_limit_window_seconds = 900)</td></tr>
+<tr><td>IP allowlist</td><td><code>ADMIN_ALLOWED_IPS</code> env var (CIDR list); requests outside allowlist receive 403 before credential check; required in production per NFR-ADMIN-07 (ARCH §5.1 accepted deviation: optional, default disabled)</td></tr>
 <tr><td>Password hashing</td><td>bcrypt, minimum work factor 12 (SCHEMA.md §2.10 comment)</td></tr>
 <tr><td>TOTP secret storage</td><td>AES-256-GCM encrypted in <code>admin_accounts.totp_secret_encrypted</code></td></tr>
 <tr><td>Backup codes</td><td>10 single-use codes; SHA-256 hashes stored in <code>totp_backup_codes_hash</code> array</td></tr>
@@ -1631,7 +1649,7 @@ location /admin/api/ {
 <tr><td>3</td><td>§5 RBAC: three roles fully defined + PermissionGuard composable + <code>v-permission</code> directive</td><td>✅</td></tr>
 <tr><td>4</td><td>§5.2 Permission Guard: <code>hasPermission()</code> (role hierarchy) + route guard + button-level permission examples</td><td>✅</td></tr>
 <tr><td>5</td><td>§7 Page specs: Login / Dashboard / Pet / Battle / Suspicious / Leaderboard / Analytics / Email / Config (Runtime/Economy/Flags) / GDPR / Roles / Audit — all have column and action descriptions</td><td>✅</td></tr>
-<tr><td>6</td><td>§8.1 Axios config: baseURL + <code>withCredentials: true</code> (session cookie) + response interceptor (401/403 handling); CSRF handled by SameSite=Strict (no token injection needed)</td><td>✅</td></tr>
+<tr><td>6</td><td>§8.1 Axios config: baseURL + <code>withCredentials: true</code> (session cookie) + response interceptor (401/403/429 handling); CSRF handled by SameSite=Strict (no token injection needed)</td><td>✅</td></tr>
 <tr><td>7</td><td>§8.4 <code>/admin/api/*</code> endpoint mapping complete (32 endpoints, covering API.md §6.1–§6.9)</td><td>✅</td></tr>
 <tr><td>8</td><td>§9 Three Pinia stores (authStore / permissionStore / configStore) with full state + actions</td><td>✅</td></tr>
 <tr><td>9a</td><td>§15.1 Vite build: <code>base=&#x27;/admin/&#x27;</code>, <code>outDir=&#x27;dist/admin&#x27;</code>, <code>manualChunks</code> vendor splitting, <code>server.proxy</code> for <code>/admin/api</code></td><td>✅</td></tr>

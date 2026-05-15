@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -461,7 +462,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#prerequisites">Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#required-versions">Required versions</a></li><li><a class="toc__link toc__link--h3" href="#supabase-cli-required-for-local-setup">Supabase CLI (required for local setup)</a></li><li><a class="toc__link toc__link--h3" href="#optional-tools">Optional tools</a></li><li><a class="toc__link toc__link--h3" href="#platform-notes">Platform notes</a></li><li><a class="toc__link" href="#environment-setup">Environment Setup</a></li><li><a class="toc__link toc__link--h3" href="#clone-the-repository">Clone the repository</a></li><li><a class="toc__link toc__link--h3" href="#copy-environment-files">Copy environment files</a></li><li><a class="toc__link toc__link--h3" href="#key-environment-variables">Key environment variables</a></li><li><a class="toc__link toc__link--h3" href="#generating-a-jwt_secret">Generating a JWT_SECRET</a></li><li><a class="toc__link toc__link--h3" href="#feature-flags">Feature flags</a></li><li><a class="toc__link" href="#setup-steps">Setup Steps</a></li><li><a class="toc__link" href="#verification">Verification</a></li><li><a class="toc__link toc__link--h3" href="#api-health-check">API health check</a></li><li><a class="toc__link toc__link--h3" href="#player-frontend">Player frontend</a></li><li><a class="toc__link toc__link--h3" href="#admin-portal-login-page">Admin portal login page</a></li><li><a class="toc__link toc__link--h3" href="#leaderboard-endpoint">Leaderboard endpoint</a></li><li><a class="toc__link toc__link--h3" href="#test-admin-account">Test admin account</a></li><li><a class="toc__link" href="#common-issues-and-troubleshooting">Common Issues and Troubleshooting</a></li><li><a class="toc__link toc__link--h3" href="#supabase-will-not-start">Supabase will not start</a></li><li><a class="toc__link toc__link--h3" href="#port-already-in-use-3000-5173-5174">Port already in use (3000, 5173, 5174)</a></li><li><a class="toc__link toc__link--h3" href="#redis-connection-refused-or-port-6379-already-in-use">Redis connection refused or port 6379 already in use</a></li><li><a class="toc__link toc__link--h3" href="#totp-setup-for-the-local-admin-account">TOTP setup for the local admin account</a></li><li><a class="toc__link toc__link--h3" href="#database-migration-errors">Database migration errors</a></li><li><a class="toc__link toc__link--h3" href="#pnpm-workspace-dependency-issues">pnpm workspace dependency issues</a></li><li><a class="toc__link" href="#development-workflow-tips">Development Workflow Tips</a></li><li><a class="toc__link toc__link--h3" href="#hot-reload">Hot reload</a></li><li><a class="toc__link toc__link--h3" href="#running-tests">Running tests</a></li><li><a class="toc__link toc__link--h3" href="#supabase-studio">Supabase Studio</a></li><li><a class="toc__link toc__link--h3" href="#feature-flag-overrides">Feature flag overrides</a></li><li><a class="toc__link toc__link--h3" href="#useful-one-liners">Useful one-liners</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#prerequisites">Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#required-versions">Required versions</a></li><li><a class="toc__link toc__link--h3" href="#supabase-cli-required-for-local-setup">Supabase CLI (required for local setup)</a></li><li><a class="toc__link toc__link--h3" href="#optional-tools">Optional tools</a></li><li><a class="toc__link toc__link--h3" href="#platform-notes">Platform notes</a></li><li><a class="toc__link" href="#environment-setup">Environment Setup</a></li><li><a class="toc__link toc__link--h3" href="#clone-the-repository">Clone the repository</a></li><li><a class="toc__link toc__link--h3" href="#copy-environment-files">Copy environment files</a></li><li><a class="toc__link toc__link--h3" href="#key-environment-variables">Key environment variables</a></li><li><a class="toc__link toc__link--h3" href="#generating-a-jwt_secret">Generating a JWT_SECRET</a></li><li><a class="toc__link toc__link--h3" href="#feature-flags">Feature flags</a></li><li><a class="toc__link" href="#setup-steps">Setup Steps</a></li><li><a class="toc__link" href="#docker-compose--redis-and-api-services">Docker Compose — Redis and API Services</a></li><li><a class="toc__link toc__link--h3" href="#starting-the-stack">Starting the stack</a></li><li><a class="toc__link toc__link--h3" href="#starting-with-2-api-replicas-recommended">Starting with 2 API replicas (recommended)</a></li><li><a class="toc__link toc__link--h3" href="#example-docker-composedevyml">Example docker-compose.dev.yml</a></li><li><a class="toc__link toc__link--h3" href="#stopping-the-stack">Stopping the stack</a></li><li><a class="toc__link" href="#verification">Verification</a></li><li><a class="toc__link toc__link--h3" href="#api-health-check">API health check</a></li><li><a class="toc__link toc__link--h3" href="#player-frontend">Player frontend</a></li><li><a class="toc__link toc__link--h3" href="#admin-portal-login-page">Admin portal login page</a></li><li><a class="toc__link toc__link--h3" href="#leaderboard-endpoint">Leaderboard endpoint</a></li><li><a class="toc__link toc__link--h3" href="#test-admin-account">Test admin account</a></li><li><a class="toc__link" href="#common-issues-and-troubleshooting">Common Issues and Troubleshooting</a></li><li><a class="toc__link toc__link--h3" href="#supabase-will-not-start">Supabase will not start</a></li><li><a class="toc__link toc__link--h3" href="#port-already-in-use-3000-5173-5174">Port already in use (3000, 5173, 5174)</a></li><li><a class="toc__link toc__link--h3" href="#redis-connection-refused-or-port-6379-already-in-use">Redis connection refused or port 6379 already in use</a></li><li><a class="toc__link toc__link--h3" href="#totp-setup-for-the-local-admin-account">TOTP setup for the local admin account</a></li><li><a class="toc__link toc__link--h3" href="#database-migration-errors">Database migration errors</a></li><li><a class="toc__link toc__link--h3" href="#pnpm-workspace-dependency-issues">pnpm workspace dependency issues</a></li><li><a class="toc__link" href="#development-workflow-tips">Development Workflow Tips</a></li><li><a class="toc__link toc__link--h3" href="#hot-reload">Hot reload</a></li><li><a class="toc__link toc__link--h3" href="#running-tests">Running tests</a></li><li><a class="toc__link toc__link--h3" href="#supabase-studio">Supabase Studio</a></li><li><a class="toc__link toc__link--h3" href="#feature-flag-overrides">Feature flag overrides</a></li><li><a class="toc__link toc__link--h3" href="#useful-one-liners">Useful one-liners</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="local-development-setup--pixel-pet-arena">Local Development Setup — pixel-pet-arena</h1>
@@ -498,7 +499,7 @@ brew install supabase/tap/supabase</code></pre>
 <h2 id="environment-setup">Environment Setup</h2>
 <p>Each application in the monorepo has its own environment file. You must copy and populate all three before starting any service.</p>
 <h3 id="clone-the-repository">Clone the repository</h3>
-<pre><code class="language-bash">git clone https://github.com/&lt;your-org&gt;/pixel-pet-arena.git
+<pre><code class="language-bash">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
 cd pixel-pet-arena</code></pre>
 <h3 id="copy-environment-files">Copy environment files</h3>
 <pre><code class="language-bash">cp apps/api/.env.example     apps/api/.env.local
@@ -572,6 +573,47 @@ FF_ARENA_SUMO=true</code></pre>
 <p>The Vue 3 admin portal runs on its own Vite dev server at port 5174.</p>
 <pre><code class="language-bash">   pnpm --filter admin-app dev</code></pre>
 <p>Each of the three services in steps 6–8 should be run in separate terminal tabs or panes so you can observe their output simultaneously.</p>
+<hr>
+<h2 id="docker-compose--redis-and-api-services">Docker Compose — Redis and API Services</h2>
+<p>A <code>docker-compose.dev.yml</code> file is provided at the repository root for local development. It starts the Redis cache and the Fastify API together, with environment variables sourced from <code>apps/api/.env.local</code>.</p>
+<blockquote><p><strong>Note:</strong> The Supabase stack is managed separately via the Supabase CLI (<code>supabase start</code>) and is not included in this Compose file. Complete Setup Steps 1–4 before starting the Compose stack.</p></blockquote>
+<h3 id="starting-the-stack">Starting the stack</h3>
+<pre><code class="language-bash">docker-compose -f docker-compose.dev.yml up -d</code></pre>
+<h3 id="starting-with-2-api-replicas-recommended">Starting with 2 API replicas (recommended)</h3>
+<pre><code class="language-bash">docker-compose -f docker-compose.dev.yml up --scale api=2 -d</code></pre>
+<p>Running 2 API replicas in local dev mirrors the production replica count and surfaces any race conditions early.</p>
+<h3 id="example-docker-composedevyml">Example <code>docker-compose.dev.yml</code></h3>
+<pre><code class="language-yaml">version: &quot;3.9&quot;
+
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.dev
+    ports:
+      - &quot;3000:3000&quot;
+      - &quot;3001:3001&quot;
+    env_file:
+      - ./apps/api/.env.local
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - &quot;6379:6379&quot;
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:</code></pre>
+<h3 id="stopping-the-stack">Stopping the stack</h3>
+<pre><code class="language-bash">docker-compose -f docker-compose.dev.yml down</code></pre>
 <hr>
 <h2 id="verification">Verification</h2>
 <p>Once all three services are running, use the following checks to confirm a healthy local environment.</p>

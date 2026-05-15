@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -461,7 +462,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-client-overview">§1 Client Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-engine--framework-summary">§1.1 Engine / Framework Summary</a></li><li><a class="toc__link toc__link--h3" href="#12-selection-rationale">§1.2 Selection Rationale</a></li><li><a class="toc__link toc__link--h3" href="#13-backend-integration">§1.3 Backend Integration</a></li><li><a class="toc__link" href="#2-project-structure">§2 Project Structure</a></li><li><a class="toc__link toc__link--h3" href="#21-directory-structure">§2.1 Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#22-naming-conventions">§2.2 Naming Conventions</a></li><li><a class="toc__link" href="#3-page--view-structure">§3 Page / View Structure</a></li><li><a class="toc__link toc__link--h3" href="#31-page-list">§3.1 Page List</a></li><li><a class="toc__link toc__link--h3" href="#32-component-tree-structure">§3.2 Component Tree Structure</a></li><li><a class="toc__link toc__link--h3" href="#33-page-transition-logic">§3.3 Page Transition Logic</a></li><li><a class="toc__link" href="#4-asset-pipeline">§4 Asset Pipeline</a></li><li><a class="toc__link toc__link--h3" href="#41-asset-directory-structure">§4.1 Asset Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#42-asset-naming-conventions">§4.2 Asset Naming Conventions</a></li><li><a class="toc__link toc__link--h3" href="#43-asset-loading-strategy">§4.3 Asset Loading Strategy</a></li><li><a class="toc__link toc__link--h3" href="#44-asset-budget">§4.4 Asset Budget</a></li><li><a class="toc__link" href="#5-animation-integration">§5 Animation Integration</a></li><li><a class="toc__link toc__link--h3" href="#51-animation-list">§5.1 Animation List</a></li><li><a class="toc__link toc__link--h3" href="#52-animation-trigger-map">§5.2 Animation Trigger Map</a></li><li><a class="toc__link toc__link--h3" href="#53-animation-state-machine">§5.3 Animation State Machine</a></li><li><a class="toc__link toc__link--h3" href="#54-animation-performance-rules">§5.4 Animation Performance Rules</a></li><li><a class="toc__link" href="#6-audio-integration">§6 Audio Integration</a></li><li><a class="toc__link toc__link--h3" href="#61-audio-list-phase-2--planned">§6.1 Audio List (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#62-audio-trigger-map-phase-2--planned">§6.2 Audio Trigger Map (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#63-audio-manager-architecture-phase-2--planned">§6.3 Audio Manager Architecture (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#64-audio-performance-rules-phase-2--planned">§6.4 Audio Performance Rules (Phase 2 — Planned)</a></li><li><a class="toc__link" href="#7-visual-effects-integration">§7 Visual Effects Integration</a></li><li><a class="toc__link toc__link--h3" href="#71-vfx-list">§7.1 VFX List</a></li><li><a class="toc__link toc__link--h3" href="#72-vfx-trigger-map">§7.2 VFX Trigger Map</a></li><li><a class="toc__link toc__link--h3" href="#73-vfx-performance-rules">§7.3 VFX Performance Rules</a></li><li><a class="toc__link" href="#8-ui-flow-state-machine">§8 UI Flow State Machine</a></li><li><a class="toc__link toc__link--h3" href="#81-ui-state-list">§8.1 UI State List</a></li><li><a class="toc__link toc__link--h3" href="#82-state-transition-rules">§8.2 State Transition Rules</a></li><li><a class="toc__link toc__link--h3" href="#83-loading--error--network-state-handling">§8.3 Loading / Error / Network State Handling</a></li><li><a class="toc__link" href="#9-api-integration">§9 API Integration</a></li><li><a class="toc__link toc__link--h3" href="#91-api-call-list">§9.1 API Call List</a></li><li><a class="toc__link toc__link--h3" href="#92-state-synchronisation-strategy">§9.2 State Synchronisation Strategy</a></li><li><a class="toc__link toc__link--h3" href="#93-offline--weak-network-handling">§9.3 Offline / Weak Network Handling</a></li><li><a class="toc__link" href="#10-performance-budget">§10 Performance Budget</a></li><li><a class="toc__link toc__link--h3" href="#101-rendering-performance">§10.1 Rendering Performance</a></li><li><a class="toc__link toc__link--h3" href="#102-memory-budget">§10.2 Memory Budget</a></li><li><a class="toc__link toc__link--h3" href="#103-bundle-budget">§10.3 Bundle Budget</a></li><li><a class="toc__link toc__link--h3" href="#104-code-splitting-configuration">§10.4 Code Splitting Configuration</a></li><li><a class="toc__link" href="#11-test-specification">§11 Test Specification</a></li><li><a class="toc__link toc__link--h3" href="#111-unit-test-scope">§11.1 Unit Test Scope</a></li><li><a class="toc__link toc__link--h3" href="#112-integration-test-scenarios">§11.2 Integration Test Scenarios</a></li><li><a class="toc__link toc__link--h3" href="#113-e2e-test-scenarios-playwright">§11.3 E2E Test Scenarios (Playwright)</a></li><li><a class="toc__link toc__link--h3" href="#114-performance-test-conditions">§11.4 Performance Test Conditions</a></li><li><a class="toc__link" href="#12-local-development-workflow">§12 Local Development Workflow</a></li><li><a class="toc__link toc__link--h3" href="#121-prerequisites">§12.1 Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#122-setup">§12.2 Setup</a></li><li><a class="toc__link toc__link--h3" href="#123-development-server">§12.3 Development Server</a></li><li><a class="toc__link toc__link--h3" href="#124-unit-tests">§12.4 Unit Tests</a></li><li><a class="toc__link toc__link--h3" href="#125-e2e-tests-playwright">§12.5 E2E Tests (Playwright)</a></li><li><a class="toc__link toc__link--h3" href="#126-build">§12.6 Build</a></li><li><a class="toc__link toc__link--h3" href="#127-type-checking">§12.7 Type Checking</a></li><li><a class="toc__link" href="#13-known-limitations-and-technical-debt">§13 Known Limitations and Technical Debt</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-client-overview">§1 Client Overview</a></li><li><a class="toc__link toc__link--h3" href="#11-engine--framework-summary">§1.1 Engine / Framework Summary</a></li><li><a class="toc__link toc__link--h3" href="#12-selection-rationale">§1.2 Selection Rationale</a></li><li><a class="toc__link toc__link--h3" href="#13-backend-integration">§1.3 Backend Integration</a></li><li><a class="toc__link" href="#2-project-structure">§2 Project Structure</a></li><li><a class="toc__link toc__link--h3" href="#21-directory-structure">§2.1 Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#23-pixel-art-rendering-rules">§2.3 Pixel Art Rendering Rules</a></li><li><a class="toc__link toc__link--h3" href="#22-naming-conventions">§2.2 Naming Conventions</a></li><li><a class="toc__link" href="#3-page--view-structure">§3 Page / View Structure</a></li><li><a class="toc__link toc__link--h3" href="#31-page-list">§3.1 Page List</a></li><li><a class="toc__link toc__link--h3" href="#32-component-tree-structure">§3.2 Component Tree Structure</a></li><li><a class="toc__link toc__link--h3" href="#33-page-transition-logic">§3.3 Page Transition Logic</a></li><li><a class="toc__link" href="#4-asset-pipeline">§4 Asset Pipeline</a></li><li><a class="toc__link toc__link--h3" href="#41-asset-directory-structure">§4.1 Asset Directory Structure</a></li><li><a class="toc__link toc__link--h3" href="#42-asset-naming-conventions">§4.2 Asset Naming Conventions</a></li><li><a class="toc__link toc__link--h3" href="#43-asset-loading-strategy">§4.3 Asset Loading Strategy</a></li><li><a class="toc__link toc__link--h3" href="#44-asset-budget">§4.4 Asset Budget</a></li><li><a class="toc__link" href="#5-animation-integration">§5 Animation Integration</a></li><li><a class="toc__link toc__link--h3" href="#50-phaser-game-configuration">§5.0 Phaser Game Configuration</a></li><li><a class="toc__link toc__link--h3" href="#51-animation-list">§5.1 Animation List</a></li><li><a class="toc__link toc__link--h3" href="#52-animation-trigger-map">§5.2 Animation Trigger Map</a></li><li><a class="toc__link toc__link--h3" href="#53-animation-state-machine">§5.3 Animation State Machine</a></li><li><a class="toc__link toc__link--h3" href="#54-animation-performance-rules">§5.4 Animation Performance Rules</a></li><li><a class="toc__link toc__link--h3" href="#55-phaserreact-event-bridge">§5.5 Phaser–React Event Bridge</a></li><li><a class="toc__link" href="#6-audio-integration">§6 Audio Integration</a></li><li><a class="toc__link toc__link--h3" href="#61-audio-list-phase-2--planned">§6.1 Audio List (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#62-audio-trigger-map-phase-2--planned">§6.2 Audio Trigger Map (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#63-audio-manager-architecture-phase-2--planned">§6.3 Audio Manager Architecture (Phase 2 — Planned)</a></li><li><a class="toc__link toc__link--h3" href="#64-audio-performance-rules-phase-2--planned">§6.4 Audio Performance Rules (Phase 2 — Planned)</a></li><li><a class="toc__link" href="#7-visual-effects-integration">§7 Visual Effects Integration</a></li><li><a class="toc__link toc__link--h3" href="#71-vfx-list">§7.1 VFX List</a></li><li><a class="toc__link toc__link--h3" href="#72-vfx-trigger-map">§7.2 VFX Trigger Map</a></li><li><a class="toc__link toc__link--h3" href="#73-vfx-performance-rules">§7.3 VFX Performance Rules</a></li><li><a class="toc__link" href="#8-ui-flow-state-machine">§8 UI Flow State Machine</a></li><li><a class="toc__link toc__link--h3" href="#81-ui-state-list">§8.1 UI State List</a></li><li><a class="toc__link toc__link--h3" href="#82-state-transition-rules">§8.2 State Transition Rules</a></li><li><a class="toc__link toc__link--h3" href="#83-loading--error--network-state-handling">§8.3 Loading / Error / Network State Handling</a></li><li><a class="toc__link" href="#9-api-integration">§9 API Integration</a></li><li><a class="toc__link toc__link--h3" href="#91-api-call-list">§9.1 API Call List</a></li><li><a class="toc__link toc__link--h3" href="#92-state-synchronisation-strategy">§9.2 State Synchronisation Strategy</a></li><li><a class="toc__link toc__link--h3" href="#93-offline--weak-network-handling">§9.3 Offline / Weak Network Handling</a></li><li><a class="toc__link" href="#10-performance-budget">§10 Performance Budget</a></li><li><a class="toc__link toc__link--h3" href="#101-rendering-performance">§10.1 Rendering Performance</a></li><li><a class="toc__link toc__link--h3" href="#102-memory-budget">§10.2 Memory Budget</a></li><li><a class="toc__link toc__link--h3" href="#103-bundle-budget">§10.3 Bundle Budget</a></li><li><a class="toc__link toc__link--h3" href="#104-code-splitting-configuration">§10.4 Code Splitting Configuration</a></li><li><a class="toc__link" href="#11-test-specification">§11 Test Specification</a></li><li><a class="toc__link toc__link--h3" href="#111-unit-test-scope">§11.1 Unit Test Scope</a></li><li><a class="toc__link toc__link--h3" href="#112-integration-test-scenarios">§11.2 Integration Test Scenarios</a></li><li><a class="toc__link toc__link--h3" href="#113-e2e-test-scenarios-playwright">§11.3 E2E Test Scenarios (Playwright)</a></li><li><a class="toc__link toc__link--h3" href="#114-performance-test-conditions">§11.4 Performance Test Conditions</a></li><li><a class="toc__link" href="#12-local-development-workflow">§12 Local Development Workflow</a></li><li><a class="toc__link toc__link--h3" href="#121-prerequisites">§12.1 Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#122-setup">§12.2 Setup</a></li><li><a class="toc__link toc__link--h3" href="#123-development-server">§12.3 Development Server</a></li><li><a class="toc__link toc__link--h3" href="#124-unit-tests">§12.4 Unit Tests</a></li><li><a class="toc__link toc__link--h3" href="#125-e2e-tests-playwright">§12.5 E2E Tests (Playwright)</a></li><li><a class="toc__link toc__link--h3" href="#126-build">§12.6 Build</a></li><li><a class="toc__link toc__link--h3" href="#127-type-checking">§12.7 Type Checking</a></li><li><a class="toc__link" href="#13-known-limitations-and-technical-debt">§13 Known Limitations and Technical Debt</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="client_impl--client-implementation-specification">CLIENT_IMPL — Client Implementation Specification</h1>
@@ -484,6 +485,7 @@
 </table>
 <hr>
 <h2 id="change-log">Change Log</h2>
+<p>This change log tracks all versioned revisions to the CLIENT_IMPL specification for the pixel-pet-arena player application. Each entry records the detailed scope of changes made during the gendoc review cycle.</p>
 <table>
 <tr><th>Version</th><th>Date</th><th>Author</th><th>Change Summary</th></tr>
 <tr><td>v1.0</td><td>2026-05-03</td><td>AI Generated (gendoc CLIENT_IMPL)</td><td>Initial draft</td></tr>
@@ -604,7 +606,10 @@
             │   │   └── MarketplacePage.tsx
             │   └── canvas/
             │       ├── PetCanvas.tsx    ← React host div; manages Phaser lifecycle
-            │       └── PetCanvasEngine.ts  ← SOLE Phaser import boundary
+            │       ├── PetCanvasEngine.ts  ← SOLE Phaser import boundary
+            │       └── scenes/
+            │           ├── PetIdleScene.ts      ← Phaser scene: idle sprite loop
+            │           └── ArenaBattleScene.ts  ← Phaser scene: battle animation
             ├── hooks/
             │   ├── usePet.ts            ← TanStack Query: GET /api/v1/pets/:petId
             │   ├── useLeaderboard.ts    ← TanStack Query + refetchInterval: 30_000
@@ -620,7 +625,8 @@
             │   ├── apiClient.ts         ← Axios instance; Bearer token interceptor
             │   ├── tokenStorage.ts      ← getPetToken / setPetToken / clearPetToken
             │   ├── petGeneration.ts     ← seed → AttributeVector (deterministic, 6 dims)
-            │   └── spriteLoader.ts      ← Phaser preload helper utilities
+            │   ├── spriteLoader.ts      ← Phaser preload helper utilities
+            │   └── phaserBridge.ts      ← mitt singleton bridge (§5.5)
             ├── schemas/
             │   ├── pet.ts               ← Zod schema: PetResponse
             │   ├── claim.ts             ← Zod schema: ClaimResponse, VerifyResponse
@@ -633,6 +639,19 @@
             │   └── global.css           ← Reset + base element styles
             └── types/
                 └── index.ts             ← Shared TypeScript types for player app</code></pre>
+<h3 id="23-pixel-art-rendering-rules">§2.3 Pixel Art Rendering Rules</h3>
+<blockquote><p>Ref: ARCH §2.1 — pixel-art canvas requirements.</p></blockquote>
+<p>The Phaser <code>&lt;canvas&gt;</code> element rendered by <code>PetCanvas.tsx</code> must preserve hard pixel boundaries. Apply the following CSS directly to the <code>&lt;canvas&gt;</code> element via the <code>PetCanvas.tsx</code> component class or inline style:</p>
+<pre><code class="language-css">canvas.pet-canvas {
+  image-rendering: pixelated;       /* Chrome, Edge, Opera */
+  image-rendering: crisp-edges;     /* Firefox, Safari */
+}</code></pre>
+<p><code>PetCanvas.tsx</code> adds <code>className=&quot;pet-canvas&quot;</code> to the host <code>&lt;div&gt;</code> and the rule cascades to the <code>&lt;canvas&gt;</code> child generated by Phaser.</p>
+<h4 id="webgl-unavailable--canvas-2d-fallback">WebGL Unavailable — Canvas 2D Fallback</h4>
+<p>When WebGL is not available in the browser (e.g., software rendering, hardware acceleration disabled), Phaser falls back to Canvas 2D renderer automatically via <code>renderer: Phaser.AUTO</code>. In this fallback mode:</p>
+<ul><li>The sprite animation loop is <strong>not started</strong> (<code>sprite.anims.stop()</code> called after <code>create()</code>).</li><li>The <strong>static first frame</strong> of the sprite sheet is displayed instead.</li><li>No particle systems or tweens are activated.</li><li>The <code>image-rendering</code> CSS rules above remain in effect so the static frame stays crisp.</li></ul>
+<p>This ensures a functional, non-broken display on Canvas 2D without requiring a full animation loop. Detect renderer mode via <code>this.sys.game.renderer.type === Phaser.CANVAS</code> inside scene <code>create()</code>.</p>
+<hr>
 <h3 id="22-naming-conventions">§2.2 Naming Conventions</h3>
 <table>
 <tr><th>Type</th><th>Convention</th><th>Example</th></tr>
@@ -799,6 +818,51 @@
 </table>
 <hr>
 <h2 id="5-animation-integration">§5 Animation Integration</h2>
+<h3 id="50-phaser-game-configuration">§5.0 Phaser Game Configuration</h3>
+<p>Each Phaser-hosted React component (<code>PetCanvas.tsx</code>, <code>ArenaScene.tsx</code>) creates its own <code>Phaser.Game</code> instance via <code>PetCanvasEngine.ts</code>. The configuration object must follow the shape below:</p>
+<pre><code class="language-typescript">// src/components/canvas/PetCanvasEngine.ts
+import Phaser from &#x27;phaser&#x27;;
+import { PetIdleScene } from &#x27;./scenes/PetIdleScene&#x27;;
+
+export function createPetGame(parent: HTMLElement): Phaser.Game {
+  const config: Phaser.Types.Core.GameConfig = {
+    type: Phaser.AUTO,           // WebGL with automatic Canvas 2D fallback
+    pixelArt: true,              // Disables texture smoothing; preserves hard pixel edges
+    backgroundColor: &#x27;#0d0d1a&#x27;, // --color-bg-primary token (VDD §6)
+    parent,                     // Mount into the host &lt;div&gt; ref from PetCanvas.tsx
+    width: 128,                  // SPRITE_CANVAS_WIDTH_PX (multiples of 32 px grid)
+    height: 128,                 // SPRITE_CANVAS_HEIGHT_PX
+    scene: [PetIdleScene],       // PetCanvas uses idle scene only
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+  };
+  return new Phaser.Game(config);
+}
+
+// src/components/arena/ArenaScene.tsx — separate game instance for battle canvas
+import { ArenaBattleScene } from &#x27;../canvas/scenes/ArenaBattleScene&#x27;;
+
+export function createArenaGame(parent: HTMLElement): Phaser.Game {
+  const config: Phaser.Types.Core.GameConfig = {
+    type: Phaser.AUTO,
+    pixelArt: true,
+    backgroundColor: &#x27;#0d0d1a&#x27;,
+    parent,
+    width: 480,
+    height: 160,
+    scene: [ArenaBattleScene],   // Arena uses battle scene only
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+  };
+  return new Phaser.Game(config);
+}</code></pre>
+<p>Key constraints:</p>
+<ul><li><code>type: Phaser.AUTO</code> — enables WebGL with automatic Canvas 2D fallback (see §2.3).</li><li><code>pixelArt: true</code> — sets <code>roundPixels: true</code> and disables texture smoothing on WebGL and Canvas 2D contexts.</li><li><code>parent</code> is passed the <code>ref.current</code> <code>HTMLElement</code> from the React host component; Phaser mounts the <code>&lt;canvas&gt;</code> as a child of that element.</li><li><code>backgroundColor</code> must match <code>--color-bg-primary</code> (<code>#0d0d1a</code>) from <code>tokens.css</code> to prevent flash-of-white on scene load.</li><li>Scene arrays are <strong>single-scene</strong> per game instance. <code>PetIdleScene</code> is never loaded into an arena game and vice versa.</li><li>Both game instances are destroyed in the React <code>useEffect</code> cleanup: <code>game.destroy(true)</code> (removes canvas DOM node).</li></ul>
+<hr>
 <h3 id="51-animation-list">§5.1 Animation List</h3>
 <table>
 <tr><th>Anim ID</th><th>Name</th><th>Target</th><th>Duration</th><th>Loop</th><th>Trigger</th></tr>
@@ -860,6 +924,88 @@ ArenaBattleScene states:
 <tr><td>Particle count per burst</td><td>≤ 200</td><td>Victory burst is 24 particles — well within budget (Phaser <code>GameObjects.Particles</code> built-in system; no tsparticles dependency)</td></tr>
 <tr><td>Animation clip max duration</td><td>15 s</td><td>Arena match max is <code>ARENA_MATCH_DURATION_MAX_SECONDS = 15 s</code></td></tr>
 <tr><td><code>prefers-reduced-motion: reduce</code></td><td>Pause all Phaser loops; suppress CSS shimmers</td><td><code>useReducedMotion()</code> hook; <code>@media (prefers-reduced-motion: reduce) { .rarity-legendary, .rarity-epic { animation: none; } }</code></td></tr>
+</table>
+<h3 id="55-phaserreact-event-bridge">§5.5 Phaser–React Event Bridge</h3>
+<blockquote><p>Ref: ARCH ADR-003 — communication between Phaser scenes and React must use a typed event emitter bridge, not direct prop mutation or Zustand calls from within Phaser scene code.</p></blockquote>
+<h4 id="bridge-file">Bridge File</h4>
+<p><strong><code>src/lib/phaserBridge.ts</code></strong> — singleton <code>EventEmitter</code> instance shared between Phaser scenes and React components.</p>
+<pre><code class="language-typescript">// src/lib/phaserBridge.ts
+import mitt from &#x27;mitt&#x27;;
+
+// ── Event payload types ──────────────────────────────────────────────────────
+
+export type TrainingSuccessPayload = {
+  petId: string;
+  expGained: number;
+  newLevel?: number;     // present only when a level-up occurred
+};
+
+export type BattleResultPayload = {
+  matchId: string;
+  outcome: &#x27;WIN&#x27; | &#x27;LOSS&#x27;;
+  opponentPetId: string;
+};
+
+export type PetLevelUpPayload = {
+  petId: string;
+  oldLevel: number;
+  newLevel: number;
+};
+
+// ── Event map ────────────────────────────────────────────────────────────────
+
+export type BridgeEvents = {
+  &#x27;training:success&#x27;: TrainingSuccessPayload;
+  &#x27;battle:result&#x27;:    BattleResultPayload;
+  &#x27;pet:levelup&#x27;:      PetLevelUpPayload;
+};
+
+// ── Singleton emitter ────────────────────────────────────────────────────────
+
+export const phaserBridge = mitt&lt;BridgeEvents&gt;();</code></pre>
+<h4 id="usage--phaser-scene-emit">Usage — Phaser Scene (emit)</h4>
+<pre><code class="language-typescript">// Inside PetIdleScene.ts — after training animation completes
+import { phaserBridge } from &#x27;../../lib/phaserBridge&#x27;;
+
+// Emitted when the Phaser scene receives a training-success signal from the API layer
+phaserBridge.emit(&#x27;training:success&#x27;, {
+  petId: this.petId,
+  expGained: delta.exp,
+  newLevel: delta.newLevel ?? undefined,
+});</code></pre>
+<h4 id="usage--react-component-subscribe">Usage — React Component (subscribe)</h4>
+<pre><code class="language-typescript">// Inside TrainingPage.tsx or a custom hook
+import { useEffect } from &#x27;react&#x27;;
+import { phaserBridge, TrainingSuccessPayload } from &#x27;../../lib/phaserBridge&#x27;;
+
+useEffect(() =&gt; {
+  const handler = (payload: TrainingSuccessPayload) =&gt; {
+    // Trigger React state update — e.g. show StatChangeIndicator or invalidate query
+    setShowIndicator(true);
+    queryClient.invalidateQueries({ queryKey: [&#x27;pet&#x27;, payload.petId] });
+  };
+
+  phaserBridge.on(&#x27;training:success&#x27;, handler);
+
+  // Cleanup on unmount — prevents memory leaks and stale listeners
+  return () =&gt; {
+    phaserBridge.off(&#x27;training:success&#x27;, handler);
+  };
+}, [queryClient]);</code></pre>
+<h4 id="cleanup-on-scene-destroy">Cleanup on Scene Destroy</h4>
+<p>Every Phaser scene that emits bridge events must remove its listeners in the scene&#x27;s <code>destroy</code> (or <code>shutdown</code>) lifecycle method to prevent memory leaks:</p>
+<pre><code class="language-typescript">// PetIdleScene.ts
+shutdown(): void {
+  // Remove all handlers this scene registered — use named references not anonymous functions
+  phaserBridge.off(&#x27;training:success&#x27;);
+  // If scene subscribed to bridge events (less common), remove those too
+}</code></pre>
+<h4 id="event-enum-reference">Event Enum Reference</h4>
+<table>
+<tr><th>Event key</th><th>Direction</th><th>Payload type</th><th>Trigger</th></tr>
+<tr><td><code>training:success</code></td><td>Phaser → React</td><td><code>TrainingSuccessPayload</code></td><td>Training effort animation complete; API success already confirmed</td></tr>
+<tr><td><code>battle:result</code></td><td>Phaser → React</td><td><code>BattleResultPayload</code></td><td><code>ArenaBattleScene</code> receives match result from server; victory animation ends</td></tr>
+<tr><td><code>pet:levelup</code></td><td>Phaser → React</td><td><code>PetLevelUpPayload</code></td><td>Level-up threshold crossed (derived from <code>expGained</code> in <code>training:success</code>)</td></tr>
 </table>
 <hr>
 <h2 id="6-audio-integration">§6 Audio Integration</h2>
@@ -1126,7 +1272,7 @@ export default defineConfig({
 <ul><li>Node.js 20 LTS</li><li>pnpm 8+ (<code>npm install -g pnpm</code>)</li><li>Access to <code>.env.local</code> with <code>VITE_API_BASE_URL</code> set (or local Fastify running on port 3000)</li></ul>
 <h3 id="122-setup">§12.2 Setup</h3>
 <pre><code class="language-bash"># Clone monorepo and install all workspace dependencies
-git clone https://github.com/your-org/pixel-pet-arena.git
+git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
 cd pixel-pet-arena
 pnpm install
 

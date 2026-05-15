@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link active" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -461,137 +462,132 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#1-baseline-metrics">§1 Baseline Metrics</a></li><li><a class="toc__link" href="#2-pipeline-configuration">§2 Pipeline Configuration</a></li><li><a class="toc__link toc__link--h3" href="#21-session-config">§2.1 Session Config</a></li><li><a class="toc__link toc__link--h3" href="#22-active-vs-skipped-steps">§2.2 Active vs Skipped Steps</a></li><li><a class="toc__link" href="#3-mandatory-steps-checklist">§3 Mandatory Steps Checklist</a></li><li><a class="toc__link" href="#4-per-step-completeness-standards">§4 Per-Step Completeness Standards</a></li><li><a class="toc__link toc__link--h3" href="#41-document-steps">§4.1 Document Steps</a></li><li><a class="toc__link toc__link--h3" href="#42-multi-file-steps">§4.2 Multi-File Steps</a></li><li><a class="toc__link toc__link--h3" href="#43-universal-anti-fake-rules-all-steps">§4.3 Universal Anti-Fake Rules (All Steps)</a></li><li><a class="toc__link" href="#5-gate-check-rules-location">§5 Gate Check Rules Location</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#1-文件說明">§1 文件說明</a></li><li><a class="toc__link" href="#2-execution-context執行環境">§2 Execution Context（執行環境）</a></li><li><a class="toc__link toc__link--h3" href="#21-system-parameters系統量化錨點">§2.1 System Parameters（系統量化錨點）</a></li><li><a class="toc__link toc__link--h3" href="#22-active-conditional-steps條件步驟啟用狀態">§2.2 Active Conditional Steps（條件步驟啟用狀態）</a></li><li><a class="toc__link" href="#3-mandatory-steps-checklist強制步驟清單">§3 Mandatory Steps Checklist（強制步驟清單）</a></li><li><a class="toc__link" href="#4-per-step-completeness-standards逐步完整性標準">§4 Per-Step Completeness Standards（逐步完整性標準）</a></li><li><a class="toc__link" href="#5-anti-fake-guard-summary防偽造規則說明">§5 Anti-Fake Guard Summary（防偽造規則說明）</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1 id="manifest--gendoc-pipeline-execution-plan">MANIFEST — gendoc Pipeline Execution Plan</h1>
-<p><strong>Project</strong>: pixel-pet-arena</p>
-<p><strong>Generated</strong>: 2026-05-03</p>
-<p><strong>Pipeline Version</strong>: 3.0</p>
-<p><strong>Status</strong>: ✅ COMPLETE</p>
-<hr>
-<h2 id="1-baseline-metrics">§1 Baseline Metrics</h2>
-<p>Computed from upstream documents (EDD.md, PRD.md, ARCH.md, API.md):</p>
+    <main class="doc-content"><h1 id="manifest--pipeline-execution-manifest">MANIFEST — Pipeline Execution Manifest</h1>
+<h2 id="document-control">Document Control</h2>
 <table>
-<tr><th>Metric</th><th>Value</th><th>Source</th></tr>
-<tr><td>Domain entity count</td><td>13</td><td>EDD.md §4 Data Models (13 subsections)</td></tr>
-<tr><td>REST endpoint count</td><td>53</td><td>API.md (53 <code>#### \</code>METHOD /...\`` definitions)</td></tr>
-<tr><td>User story count</td><td>18</td><td>PRD.md (18 unique US-xxx-nnn IDs)</td></tr>
-<tr><td>Architecture layer count</td><td>8</td><td>ARCH.md (8 top-level §§ sections)</td></tr>
-<tr><td>BDD scenario minimum</td><td>15</td><td>ceil(18 × 0.8)</td></tr>
-<tr><td>Test plan minimum sections</td><td>10</td><td>arch_layers + 2</td></tr>
+<tr><th>欄位</th><th>內容</th></tr>
+<tr><td><strong>Generated Date</strong></td><td>2026-05-15</td></tr>
+<tr><td><strong>Pipeline Version</strong></td><td>4.0</td></tr>
+<tr><td><strong>EDD Version</strong></td><td>v1.0.0</td></tr>
+<tr><td><strong>Client Type</strong></td><td>game</td></tr>
+<tr><td><strong>Has Admin Backend</strong></td><td>true</td></tr>
+<tr><td><strong>Active Steps Count</strong></td><td>34</td></tr>
+<tr><td><strong>Skipped Steps Count</strong></td><td>0</td></tr>
 </table>
 <hr>
-<h2 id="2-pipeline-configuration">§2 Pipeline Configuration</h2>
-<h3 id="21-session-config">§2.1 Session Config</h3>
+<h2 id="1-文件說明">§1 文件說明</h2>
+<p>本文件（MANIFEST.md）是 gendoc pipeline 的<strong>執行前清單</strong>，在任何文件實際生成之前產出。</p>
+<p>它回答三個問題：</p>
+<ol><li><strong>量化錨點是什麼？</strong>（§2.1）— 從上游文件萃取的數字，成為所有下游品質規則的基礎</li><li><strong>哪些步驟要跑？</strong>（§2.2）— 依 pipeline.json 條件篩選，明確標示 Active / Skipped</li><li><strong>每步驗收標準是什麼？</strong>（§4）— gate-check 將逐步核對，不符即失敗</li></ol>
+<blockquote><p>修改本文件等同於修改驗收標準。若需調整某步驟的量化門檻，應在 DRYRUN 步驟重新執行，而非直接手動編輯本文件的 <code>{{PLACEHOLDER}}</code> 外的值。</p></blockquote>
+<hr>
+<h2 id="2-execution-context執行環境">§2 Execution Context（執行環境）</h2>
+<h3 id="21-system-parameters系統量化錨點">§2.1 System Parameters（系統量化錨點）</h3>
+<p>以下數值由 DRYRUN 生成步驟從上游文件自動計算，是<strong>所有下游步驟 gate-check 的量化基準</strong>。</p>
 <table>
-<tr><th>Setting</th><th>Value</th></tr>
-<tr><td><code>client_type</code></td><td><code>web</code></td></tr>
-<tr><td><code>has_admin_backend</code></td><td><code>true</code></td></tr>
-<tr><td><code>execution_mode</code></td><td><code>full-auto</code></td></tr>
-<tr><td><code>review_strategy</code></td><td><code>exhaustive</code></td></tr>
+<tr><th>參數</th><th>值</th><th>說明</th></tr>
+<tr><td><code>entity_count</code></td><td>40</td><td>EDD.md classDiagram 中的 class 數量（grep -cE &#x27;^\s*class\s+[A-Za-z]&#x27; docs/EDD.md）；影響 SCHEMA min_table_count</td></tr>
+<tr><td><code>rest_endpoint_count</code></td><td>33</td><td>EDD.md 中的 REST 端點數（§5 API tables + inline refs，deduplicated，排除流程圖縮寫 POST /claim）；影響 API min_endpoint_count</td></tr>
+<tr><td><code>user_story_count</code></td><td>18</td><td>PRD.md 中 US- 標題數量（grep -c &#x27;^## US-\</td><td>^### US-&#x27;）；影響 RTM min_row_count、BDD min_scenario_count</td></tr>
+<tr><td><code>arch_layer_count</code></td><td>19</td><td>ARCH.md §3 Tech Stack 表格非標頭列數（最小值 4）；影響 test-plan min_h2_sections</td></tr>
 </table>
-<h3 id="22-active-vs-skipped-steps">§2.2 Active vs Skipped Steps</h3>
-<p><strong>Active steps (32)</strong>: All steps execute for <code>client_type=web, has_admin_backend=true</code>.</p>
-<p><strong>Skipped steps (2)</strong>:</p>
+<blockquote><p><strong>量化錨點說明</strong>：以上數字在生成後不得手動修改。若上游文件更新（如新增 Entity 或 User Story），需重新執行 DRYRUN 步驟以更新錨點，所有下游 gate-check 閾值將自動聯動更新。</p></blockquote>
+<hr>
+<h3 id="22-active-conditional-steps條件步驟啟用狀態">§2.2 Active Conditional Steps（條件步驟啟用狀態）</h3>
+<p>以下步驟依 <code>client_type</code> 和 <code>has_admin_backend</code> 狀態決定啟用與否。</p>
 <table>
-<tr><th>Step</th><th>Condition</th><th>Reason</th></tr>
-<tr><td>AUDIO</td><td><code>client_type == game</code></td><td><code>client_type=web</code> — not a game project</td></tr>
-<tr><td>ANIM</td><td><code>client_type == game</code></td><td><code>client_type=web</code> — not a game project</td></tr>
+<tr><th>Step ID</th><th>條件</th><th>Active Y/N</th><th>原因</th></tr>
+<tr><td>PDD</td><td><code>client_type != none</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>VDD</td><td><code>client_type != none</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>FRONTEND</td><td><code>client_type != none</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>AUDIO</td><td><code>client_type == game</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>ANIM</td><td><code>client_type == game</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>CLIENT_IMPL</td><td><code>client_type != none</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>ADMIN_IMPL</td><td><code>has_admin_backend</code></td><td>true</td><td>has_admin_backend = true</td></tr>
+<tr><td>RESOURCE</td><td><code>client_type != none</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>BDD-client</td><td><code>client_type != none</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>MOCK</td><td><code>client_type != api-only</code></td><td>true</td><td>client_type = game</td></tr>
+<tr><td>PROTOTYPE</td><td><code>client_type != api-only</code></td><td>true</td><td>client_type = game</td></tr>
 </table>
 <hr>
-<h2 id="3-mandatory-steps-checklist">§3 Mandatory Steps Checklist</h2>
+<h2 id="3-mandatory-steps-checklist強制步驟清單">§3 Mandatory Steps Checklist（強制步驟清單）</h2>
+<p>以下步驟在所有 <code>client_type</code> 條件下<strong>永遠啟用</strong>（condition: always）。</p>
 <table>
-<tr><th>#</th><th>Step ID</th><th>Type</th><th>Output</th><th>Status</th></tr>
-<tr><td>1</td><td>IDEA</td><td>Concept</td><td>docs/IDEA.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>2</td><td>BRD</td><td>Business</td><td>docs/BRD.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>3</td><td>PRD</td><td>Product</td><td>docs/PRD.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>4</td><td>CONSTANTS</td><td>Constants</td><td>docs/CONSTANTS.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>5</td><td>PDD</td><td>Design</td><td>docs/PDD.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>6</td><td>VDD</td><td>Visual</td><td>docs/VDD.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>7</td><td>EDD</td><td>Engineering</td><td>docs/EDD.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>8</td><td>ARCH</td><td>Architecture</td><td>docs/ARCH.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>9</td><td>DRYRUN</td><td>Special</td><td>docs/MANIFEST.md + .gendoc-rules/</td><td>✅ COMPLETE</td></tr>
-<tr><td>10</td><td>API</td><td>API</td><td>docs/API.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>11</td><td>SCHEMA</td><td>Schema</td><td>docs/SCHEMA.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>12</td><td>FRONTEND</td><td>Frontend</td><td>docs/FRONTEND.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>13</td><td>CLIENT_IMPL</td><td>Implementation</td><td>docs/CLIENT_IMPL.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>14</td><td>ADMIN_IMPL</td><td>Implementation</td><td>docs/ADMIN_IMPL.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>15</td><td>RESOURCE</td><td>Infrastructure</td><td>docs/RESOURCE.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>16</td><td>UML</td><td>Diagrams</td><td>docs/diagrams/ (≥9 files)</td><td>✅ COMPLETE</td></tr>
-<tr><td>17</td><td>test-plan</td><td>Testing</td><td>docs/test-plan.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>18</td><td>BDD-server</td><td>features/server/ (6 files, 18 scenarios)</td><td>✅ COMPLETE</td></tr>
-<tr><td>19</td><td>BDD-client</td><td>BDD</td><td>features/client/ (≥15 scenarios)</td><td>✅ COMPLETE</td></tr>
-<tr><td>20</td><td>RTM</td><td>Traceability</td><td>docs/RTM.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>21</td><td>runbook</td><td>Operations</td><td>docs/runbook.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>22</td><td>LOCAL_DEPLOY</td><td>DevEx</td><td>docs/LOCAL_DEPLOY.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>23</td><td>CICD</td><td>CI/CD</td><td>docs/CICD.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>24</td><td>DEVELOPER_GUIDE</td><td>DevEx</td><td>docs/DEVELOPER_GUIDE.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>25</td><td>UML-CICD</td><td>Diagrams</td><td>docs/diagrams/cicd-*.md (≥5 files)</td><td>✅ COMPLETE</td></tr>
-<tr><td>26</td><td>ALIGN</td><td>Alignment</td><td>docs/ALIGN-REPORT.md</td><td>✅ COMPLETE</td></tr>
-<tr><td>27</td><td>ALIGN-FIX</td><td>Alignment</td><td>docs/ALIGN-REPORT.md (fixed)</td><td>✅ COMPLETE</td></tr>
-<tr><td>28</td><td>ALIGN-VERIFY</td><td>Alignment</td><td>docs/ALIGN-REPORT.md (verified)</td><td>✅ COMPLETE</td></tr>
-<tr><td>29</td><td>CONTRACTS</td><td>Contracts</td><td>docs/contracts/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
-<tr><td>30</td><td>MOCK</td><td>Mock Data</td><td>docs/mock-data/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
-<tr><td>31</td><td>PROTOTYPE</td><td>Prototype</td><td>docs/prototype/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
-<tr><td>32</td><td>HTML</td><td>HTML</td><td>docs/pages/ (≥3 files)</td><td>✅ COMPLETE</td></tr>
+<tr><th>Step ID</th><th>Output Files</th><th>Layer</th><th>Status</th></tr>
+<tr><td>IDEA</td><td>docs/IDEA.md</td><td>需求層</td><td>active</td></tr>
+<tr><td>BRD</td><td>docs/BRD.md</td><td>需求層</td><td>active</td></tr>
+<tr><td>PRD</td><td>docs/PRD.md</td><td>需求層</td><td>active</td></tr>
+<tr><td>CONSTANTS</td><td>docs/CONSTANTS.md</td><td>需求層</td><td>active</td></tr>
+<tr><td>EDD</td><td>docs/EDD.md</td><td>設計層</td><td>active</td></tr>
+<tr><td>ARCH</td><td>docs/ARCH.md</td><td>設計層</td><td>active</td></tr>
+<tr><td>API</td><td>docs/API.md</td><td>設計層</td><td>active</td></tr>
+<tr><td>SCHEMA</td><td>docs/SCHEMA.md</td><td>設計層</td><td>active</td></tr>
+<tr><td>UML</td><td>docs/diagrams/*.md</td><td>設計層</td><td>active</td></tr>
+<tr><td>test-plan</td><td>docs/test-plan.md</td><td>品質層</td><td>active</td></tr>
+<tr><td>BDD-server</td><td>features/*.feature</td><td>品質層</td><td>active</td></tr>
+<tr><td>RTM</td><td>docs/RTM.md</td><td>品質層</td><td>active</td></tr>
+<tr><td>runbook</td><td>docs/runbook.md</td><td>運維層</td><td>active</td></tr>
+<tr><td>LOCAL_DEPLOY</td><td>docs/LOCAL_DEPLOY.md</td><td>運維層</td><td>active</td></tr>
+<tr><td>CICD</td><td>docs/CICD.md</td><td>運維層</td><td>active</td></tr>
+<tr><td>DEVELOPER_GUIDE</td><td>docs/DEVELOPER_GUIDE.md</td><td>運維層</td><td>active</td></tr>
+<tr><td>UML-CICD</td><td>docs/diagrams/cicd-*.md</td><td>運維層</td><td>active</td></tr>
+<tr><td>ALIGN</td><td>docs/ALIGN_REPORT.md</td><td>稽核層</td><td>active</td></tr>
+<tr><td>CONTRACTS</td><td>docs/blueprint/contracts/</td><td>實作層</td><td>active</td></tr>
+<tr><td>HTML</td><td>docs/pages/</td><td>稽核層</td><td>active</td></tr>
+</table>
+<blockquote><p>Status 值：<code>PENDING</code>（尚未執行）、<code>DONE</code>（已完成）、<code>FAILED</code>（未達品質門檻）</p></blockquote>
+<hr>
+<h2 id="4-per-step-completeness-standards逐步完整性標準">§4 Per-Step Completeness Standards（逐步完整性標準）</h2>
+<p>以下每行定義 gate-check 在驗收該步驟輸出時的最低要求。所有帶 <code>{{PLACEHOLDER}}</code> 的欄位在 DRYRUN 生成時由量化錨點計算填入。</p>
+<table>
+<tr><th>Step ID</th><th>Output File</th><th>Min §Sections</th><th>Quantitative Rules</th><th>Anti-Fake Rules</th></tr>
+<tr><td>IDEA</td><td>docs/IDEA.md</td><td>3</td><td>至少 1 個 Persona 卡片；Elevator Pitch 不得為空</td><td>no_bare_placeholder；no_trivial_entity_names</td></tr>
+<tr><td>BRD</td><td>docs/BRD.md</td><td>5</td><td>MoSCoW 表格含 P0/P1/P2/Out 四分類；KPI 含具體數字</td><td>no_bare_placeholder；min_section_words_30</td></tr>
+<tr><td>PRD</td><td>docs/PRD.md</td><td>6</td><td>US 數量 ≥ 1；每個 US 含 AC；NFR 數字不得為「TBD」</td><td>no_bare_placeholder；no_trivial_entity_names</td></tr>
+<tr><td>CONSTANTS</td><td>docs/CONSTANTS.md</td><td>3</td><td>至少 5 個常數條目；每條含 name/value/unit/source/note</td><td>no_bare_placeholder</td></tr>
+<tr><td>PDD</td><td>docs/PDD.md</td><td>4</td><td>至少 3 個 Screen；每個 Screen 含欄位清單</td><td>no_bare_placeholder；min_section_words_30</td></tr>
+<tr><td>VDD</td><td>docs/VDD.md</td><td>4</td><td>至少 5 個 Design Token；Color Palette 不得為空</td><td>no_bare_placeholder</td></tr>
+<tr><td>EDD</td><td>docs/EDD.md</td><td>8</td><td>§3.3 不含 placeholder；§7 SCALE 含具體數字；UML 9 大圖已生成</td><td>no_bare_placeholder；no_duplicate_paragraphs_150；min_section_words_30</td></tr>
+<tr><td>ARCH</td><td>docs/ARCH.md</td><td>6</td><td>C4 L1/L2/L3 三圖均存在；§14 ADR ≥ 1 條目；§15 12 項 NFR 均已驗證</td><td>no_bare_placeholder；no_duplicate_paragraphs_150</td></tr>
+<tr><td>API</td><td>docs/API.md</td><td>5</td><td>min_endpoint_count = max(28, 5)；含 Authentication / Error Codes / Rate Limiting 章節</td><td>no_bare_placeholder；required_keywords_per_section</td></tr>
+<tr><td>SCHEMA</td><td>docs/SCHEMA.md</td><td>4</td><td>min_table_count = max(42, 3)；含 Indexes / Migration 章節</td><td>no_bare_placeholder；no_trivial_entity_names</td></tr>
+<tr><td>FRONTEND</td><td>docs/FRONTEND.md</td><td>4</td><td>至少 3 個 Component；E2E 覆蓋範圍不得為空</td><td>no_bare_placeholder</td></tr>
+<tr><td>AUDIO</td><td>docs/AUDIO.md</td><td>3</td><td>BGM/SFX 清單至少各 1 項；音效觸發邏輯不得為空</td><td>no_bare_placeholder</td></tr>
+<tr><td>ANIM</td><td>docs/ANIM.md</td><td>3</td><td>至少 3 個動畫定義；效能預算不得為空</td><td>no_bare_placeholder</td></tr>
+<tr><td>CLIENT_IMPL</td><td>docs/CLIENT_IMPL.md</td><td>4</td><td>場景結構已定義；資源載入策略不得為空</td><td>no_bare_placeholder</td></tr>
+<tr><td>ADMIN_IMPL</td><td>docs/ADMIN_IMPL.md</td><td>4</td><td>RBAC 角色 ≥ 2；路由清單不得為空</td><td>no_bare_placeholder；no_trivial_entity_names</td></tr>
+<tr><td>RESOURCE</td><td>docs/RESOURCE.md</td><td>3</td><td>資產條目 ≥ 5；每條含 ID/檔名/type/prompt</td><td>no_bare_placeholder</td></tr>
+<tr><td>UML</td><td>docs/diagrams/</td><td>—</td><td>9 大圖全部存在；class-inventory.md 已生成</td><td>no_bare_placeholder</td></tr>
+<tr><td>test-plan</td><td>docs/test-plan.md</td><td>21</td><td>覆蓋率目標 ≥ 80%；Unit/Integration/E2E 三層均有策略</td><td>no_bare_placeholder；min_section_words_30</td></tr>
+<tr><td>BDD-server</td><td>features/*.feature</td><td>—</td><td>min_scenario_count = ceil(18 × 0.8)；每個 Scenario 含 @TC-ID tag</td><td>no_bare_placeholder；required_keywords_per_section</td></tr>
+<tr><td>BDD-client</td><td>features/client/*.feature</td><td>—</td><td>min_scenario_count = ceil(18 × 0.6)；每個 Scenario 含 @TC-ID tag</td><td>no_bare_placeholder</td></tr>
+<tr><td>RTM</td><td>docs/RTM.md</td><td>4</td><td>min_row_count = 18（RTM 列數 ≥ US 數量）；需求覆蓋率 ≥ 100% P0</td><td>no_bare_placeholder；no_duplicate_paragraphs_150</td></tr>
+<tr><td>runbook</td><td>docs/runbook.md</td><td>4</td><td>至少 3 個 Incident 場景；每個場景含 診斷步驟 + 修復命令</td><td>no_bare_placeholder；min_section_words_30</td></tr>
+<tr><td>LOCAL_DEPLOY</td><td>docs/LOCAL_DEPLOY.md</td><td>4</td><td>API Server replica ≥ 2；docker-compose 命令可執行</td><td>no_bare_placeholder</td></tr>
+<tr><td>CICD</td><td>docs/CICD.md</td><td>4</td><td>Pipeline stages ≥ 3；Secret 注入策略不得為空</td><td>no_bare_placeholder</td></tr>
+<tr><td>DEVELOPER_GUIDE</td><td>docs/DEVELOPER_GUIDE.md</td><td>3</td><td>日常操作命令 ≥ 5 條；Make targets 不得為空</td><td>no_bare_placeholder</td></tr>
+<tr><td>UML-CICD</td><td>docs/diagrams/cicd-*.md</td><td>—</td><td>5 張 CI/CD UML 圖全部存在</td><td>no_bare_placeholder</td></tr>
+<tr><td>ALIGN</td><td>docs/ALIGN_REPORT.md</td><td>3</td><td>CRITICAL 問題數 = 0；HIGH 問題數 = 0（或已全部 FIX）</td><td>no_bare_placeholder</td></tr>
+<tr><td>CONTRACTS</td><td>docs/blueprint/contracts/</td><td>—</td><td>openapi.yaml 通過 openapi-spec-validator；path 數量 ≥ max(28, 5)</td><td>no_bare_placeholder</td></tr>
+<tr><td>MOCK</td><td>docs/blueprint/mock/</td><td>—</td><td>main.py --check 可成功啟動；Mock endpoint 數量 ≥ max(28, 5)</td><td>no_bare_placeholder</td></tr>
+<tr><td>PROTOTYPE</td><td>docs/pages/prototype/</td><td>—</td><td>index.html 存在且可瀏覽；至少 3 個 Screen 頁面</td><td>no_bare_placeholder</td></tr>
+<tr><td>HTML</td><td>docs/pages/</td><td>—</td><td>index.html 存在；所有 docs/*.md 均有對應連結</td><td>no_bare_placeholder</td></tr>
 </table>
 <hr>
-<h2 id="4-per-step-completeness-standards">§4 Per-Step Completeness Standards</h2>
-<p>Each step must pass the following gate checks before being marked COMPLETE.</p>
-<h3 id="41-document-steps">§4.1 Document Steps</h3>
+<h2 id="5-anti-fake-guard-summary防偽造規則說明">§5 Anti-Fake Guard Summary（防偽造規則說明）</h2>
+<p>gate-check 在驗收每份輸出文件時，除量化規則外，還會執行以下五條<strong>防偽造規則</strong>。任一規則失敗即視為 FAILED。（JSON key 使用底線+數字格式，如 <code>min_section_words_30</code>）</p>
 <table>
-<tr><th>Step</th><th>Output</th><th>Min §§</th><th>Required Sections</th><th>Special Rules</th></tr>
-<tr><td>IDEA</td><td>docs/IDEA.md</td><td>3</td><td>Problem Statement, Target Users, Core Value</td><td>—</td></tr>
-<tr><td>BRD</td><td>docs/BRD.md</td><td>5</td><td>Business Objectives, Stakeholders, Success Metrics</td><td>—</td></tr>
-<tr><td>PRD</td><td>docs/PRD.md</td><td>5</td><td>User Stories, Acceptance Criteria, Out of Scope</td><td>—</td></tr>
-<tr><td>CONSTANTS</td><td>docs/CONSTANTS.md</td><td>3</td><td>Business Rules, System Parameters</td><td>—</td></tr>
-<tr><td>PDD</td><td>docs/PDD.md</td><td>4</td><td>Product Vision, Feature List, Roadmap</td><td>—</td></tr>
-<tr><td>VDD</td><td>docs/VDD.md</td><td>3</td><td>Design Principles, Visual Language</td><td>—</td></tr>
-<tr><td>EDD</td><td>docs/EDD.md</td><td>8</td><td>Domain Model, Service Architecture, Data Flow</td><td>—</td></tr>
-<tr><td>ARCH</td><td>docs/ARCH.md</td><td>5</td><td>Architecture Overview, Tech Stack, Component Design</td><td>—</td></tr>
-<tr><td>API</td><td>docs/API.md</td><td>6</td><td>API Overview, Authentication, Endpoints, Error Codes</td><td>min_endpoint_count = 53</td></tr>
-<tr><td>SCHEMA</td><td>docs/SCHEMA.md</td><td>5</td><td>Overview, Tables, Indexes</td><td>min_table_count = 13</td></tr>
-<tr><td>FRONTEND</td><td>docs/FRONTEND.md</td><td>4</td><td>Page Structure, Component Design, State Management</td><td>—</td></tr>
-<tr><td>CLIENT_IMPL</td><td>docs/CLIENT_IMPL.md</td><td>4</td><td>Technology Stack, Project Structure, Build Process</td><td>—</td></tr>
-<tr><td>ADMIN_IMPL</td><td>docs/ADMIN_IMPL.md</td><td>4</td><td>Admin Architecture, Feature Modules, Access Control</td><td>—</td></tr>
-<tr><td>RESOURCE</td><td>docs/RESOURCE.md</td><td>3</td><td>Infrastructure Overview, Resource Allocation</td><td>—</td></tr>
-<tr><td>test-plan</td><td>docs/test-plan.md</td><td>10</td><td>Test Objectives, Test Scope, Test Cases</td><td>—</td></tr>
-<tr><td>RTM</td><td>docs/RTM.md</td><td>3</td><td>Requirements, Test Cases, Coverage</td><td>min_row_count = 18</td></tr>
-<tr><td>runbook</td><td>docs/runbook.md</td><td>4</td><td>Deployment, Incident Response, Rollback</td><td>—</td></tr>
-<tr><td>LOCAL_DEPLOY</td><td>docs/LOCAL_DEPLOY.md</td><td>5</td><td>Prerequisites, Setup Steps, Verification</td><td>—</td></tr>
-<tr><td>CICD</td><td>docs/CICD.md</td><td>6</td><td>Pipeline Overview, Jenkinsfile, PR Gate, ArgoCD</td><td>—</td></tr>
-<tr><td>DEVELOPER_GUIDE</td><td>docs/DEVELOPER_GUIDE.md</td><td>5</td><td>Daily Scenarios, CI/CD Diagnosis, Quick Reference</td><td>—</td></tr>
-<tr><td>ALIGN</td><td>docs/ALIGN-REPORT.md</td><td>3</td><td>Alignment Issues, Cross-Document Gaps</td><td>—</td></tr>
+<tr><th>規則名稱</th><th>觸發條件</th><th>說明</th></tr>
+<tr><td><strong>no_bare_placeholder</strong></td><td>文件中殘留未替換的 <code>{{...}}</code> 語法</td><td>所有 <code>{{PLACEHOLDER}}</code> 必須在生成時替換為真實內容。殘留 placeholder 代表生成不完整，等同於「空白填表」。</td></tr>
+<tr><td><strong>min_section_words_30</strong></td><td>任何 <code>##</code> 或 <code>###</code> 章節的正文字數不足 30 字</td><td>每個非標題章節的實質內容不得少於 30 個字（中英文均計）。避免「章節標題存在但內容為空」的偽完成。</td></tr>
+<tr><td><strong>no_duplicate_paragraphs_150</strong></td><td>文件中存在兩段以上完全相同且長度 ≥ 150 字元的段落</td><td>禁止跨章節複製貼上。相同段落出現 ≥ 2 次代表 AI 以重複填充代替實質內容，屬偽造。</td></tr>
+<tr><td><strong>required_keywords_per_section</strong></td><td>特定章節缺少必要關鍵字（依步驟類型定義）</td><td>例如：API.md 的 Authentication 章節必須包含 <code>Bearer</code> 或 <code>API Key</code>；Error Codes 章節必須包含 <code>4xx</code> 或 <code>5xx</code>。缺少關鍵字代表章節為空洞佔位。</td></tr>
+<tr><td><strong>no_trivial_entity_names</strong></td><td>文件中出現 <code>FooBar</code>、<code>TestEntity</code>、<code>SampleClass</code>、<code>MyModel</code>、<code>Example</code> 等顯然虛假的實體名稱</td><td>所有 Entity、Class、Table、Endpoint 名稱必須來自真實業務語境（從 PRD/EDD 上游文件衍生）。虛假命名代表 AI 未讀取上游文件即自行杜撰。</td></tr>
 </table>
-<h3 id="42-multi-file-steps">§4.2 Multi-File Steps</h3>
-<table>
-<tr><th>Step</th><th>Output Glob</th><th>Min Files</th><th>Special Rules</th></tr>
-<tr><td>UML</td><td>docs/diagrams/*.md</td><td>9</td><td>—</td></tr>
-<tr><td>BDD-server</td><td>features/server/*.feature</td><td>—</td><td>min_scenario_count = 15</td></tr>
-<tr><td>BDD-client</td><td>features/client/*.feature</td><td>—</td><td>min_scenario_count = 15</td></tr>
-<tr><td>UML-CICD</td><td>docs/diagrams/cicd-*.md</td><td>5</td><td>—</td></tr>
-<tr><td>CONTRACTS</td><td>docs/contracts/*.md</td><td>3</td><td>min_h2_per_file = 3</td></tr>
-<tr><td>MOCK</td><td>docs/mock-data/*</td><td>3</td><td>—</td></tr>
-<tr><td>PROTOTYPE</td><td>docs/prototype/*</td><td>3</td><td>—</td></tr>
-<tr><td>HTML</td><td>docs/pages/*.html</td><td>3</td><td>—</td></tr>
-</table>
-<h3 id="43-universal-anti-fake-rules-all-steps">§4.3 Universal Anti-Fake Rules (All Steps)</h3>
-<p>All generated documents must pass:</p>
-<ol><li><strong>No bare placeholders</strong>: No unfilled template placeholder strings in output</li><li><strong>No duplicate paragraphs</strong>: Paragraphs ≥150 chars must not repeat verbatim</li><li><strong>Minimum section words</strong>: Each section must contain ≥30 words</li><li><strong>No trivial entity names</strong>: No generic names like &quot;Entity1&quot;, &quot;Component2&quot;</li></ol>
-<hr>
-<h2 id="5-gate-check-rules-location">§5 Gate Check Rules Location</h2>
-<p>Individual gate rules are stored in <code>.gendoc-rules/&lt;STEP-ID&gt;-rules.json</code>.</p>
-<p>These files are used by <code>gate-check.sh</code> before each step&#x27;s review loop begins.</p>
-<table>
-<tr><th>File</th><th>Step</th><th>Key Rule</th></tr>
-<tr><td><code>.gendoc-rules/API-rules.json</code></td><td>API</td><td>min_endpoint_count = 53</td></tr>
-<tr><td><code>.gendoc-rules/SCHEMA-rules.json</code></td><td>SCHEMA</td><td>min_table_count = 13</td></tr>
-<tr><td><code>.gendoc-rules/RTM-rules.json</code></td><td>RTM</td><td>min_row_count = 18</td></tr>
-<tr><td><code>.gendoc-rules/BDD-server-rules.json</code></td><td>BDD-server</td><td>min_scenario_count = 15</td></tr>
-<tr><td><code>.gendoc-rules/BDD-client-rules.json</code></td><td>BDD-client</td><td>min_scenario_count = 15</td></tr>
-<tr><td><code>.gendoc-rules/test-plan-rules.json</code></td><td>test-plan</td><td>min_h2_sections = 10</td></tr>
-</table></main>
+<blockquote><p><strong>重要</strong>：防偽造規則的目的不是追求「形式正確」，而是確保 AI 在生成每份文件時確實<strong>讀取了上游文件</strong>並<strong>用上游內容填充</strong>，而非以 placeholder 或重複段落濫竽充數。</p></blockquote></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';

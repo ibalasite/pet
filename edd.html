@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -2029,7 +2030,7 @@ CREATE TABLE pets (
 <tr><td>Auth</td><td>missing/invalid pet token</td><td>401</td><td>拒絕</td></tr>
 <tr><td>Forbidden</td><td>non-owner training</td><td>403</td><td>拒絕</td></tr>
 <tr><td>Not found</td><td>unknown petId</td><td>404</td><td>拒絕</td></tr>
-<tr><td>Conflict</td><td>already claimed, duplicate listing</td><td>409</td><td>拒絕</td></tr>
+<tr><td>Conflict</td><td>already claimed, duplicate listing（FF_MARKETPLACE — deferred）</td><td>409</td><td>拒絕</td></tr>
 <tr><td>Rate limit</td><td>too many requests</td><td>429</td><td>Retry-After header</td></tr>
 <tr><td>Timeout</td><td>matchmaking timeout</td><td>408</td><td>提示 user</td></tr>
 <tr><td>Server</td><td>unexpected exception</td><td>500</td><td>記錄 + 通用訊息</td></tr>

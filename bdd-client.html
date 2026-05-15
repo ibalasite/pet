@@ -349,6 +349,7 @@
 <a class="sidebar__link" href="cicd.html">📄 Cicd</a>
 <a class="sidebar__link" href="contracts.html">📦 機器可讀合約</a>
 <a class="sidebar__link" href="developer_guide.html">📄 Developer Guide</a>
+<a class="sidebar__link" href="dryrun_dev_feedback.html">📄 Dryrun Dev Feedback</a>
 <a class="sidebar__link" href="implementation_readiness.html">📄 Implementation Readiness</a>
 <a class="sidebar__link" href="manifest.html">📄 Manifest</a>
 <a class="sidebar__link" href="resource.html">📄 Resource</a>
@@ -461,7 +462,7 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#admin-portalfeature">admin-portal.feature</a></li><li><a class="toc__link" href="#arena-uifeature">arena-ui.feature</a></li><li><a class="toc__link" href="#battle-recordsfeature">battle-records.feature</a></li><li><a class="toc__link" href="#claim-flow-uifeature">claim-flow-ui.feature</a></li><li><a class="toc__link" href="#food-systemfeature">food-system.feature</a></li><li><a class="toc__link" href="#leaderboard-uifeature">leaderboard-ui.feature</a></li><li><a class="toc__link" href="#pet-displayfeature">pet-display.feature</a></li><li><a class="toc__link" href="#settingsfeature">settings.feature</a></li><li><a class="toc__link" href="#training-uifeature">training-ui.feature</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#admin-portalfeature">admin-portal.feature</a></li><li><a class="toc__link" href="#arena-uifeature">arena-ui.feature</a></li><li><a class="toc__link" href="#battle-recordsfeature">battle-records.feature</a></li><li><a class="toc__link" href="#claim-flow-uifeature">claim-flow-ui.feature</a></li><li><a class="toc__link" href="#food-systemfeature">food-system.feature</a></li><li><a class="toc__link" href="#leaderboard-uifeature">leaderboard-ui.feature</a></li><li><a class="toc__link" href="#pet-displayfeature">pet-display.feature</a></li><li><a class="toc__link" href="#settingsfeature">settings.feature</a></li><li><a class="toc__link" href="#trading-uifeature">trading-ui.feature</a></li><li><a class="toc__link" href="#training-uifeature">training-ui.feature</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h2 id="admin-portalfeature">admin-portal.feature</h2>
@@ -473,6 +474,7 @@
 
   # --- Admin login (TOTP) ---
 
+  @TC-CLI-ADMIN-001
   Scenario: Admin submits valid credentials with TOTP code and is redirected to dashboard
     Given the LoginPage.vue is showing an ElForm with an email input, password input, and TOTP code input
     And POST /admin/api/auth/login responds HTTP 200 with Set-Cookie: session=&lt;id&gt;; HttpOnly; SameSite=Strict; Secure; Path=/admin
@@ -483,6 +485,7 @@
     And Vue Router navigates to &quot;/admin/dashboard&quot;
     And the TOTP code input field is cleared immediately after submission
 
+  @TC-CLI-ADMIN-002
   Scenario: First-time admin login without TOTP enrolled — redirected to TOTP setup
     Given the admin has not enrolled a TOTP device
     And POST /admin/api/auth/login responds HTTP 403 with error code &quot;TOTP_SETUP_REQUIRED&quot; and a &quot;setupToken&quot;
@@ -492,6 +495,7 @@
     And the TotpSetupPage.vue renders a QR code and calls POST /admin/api/auth/totp/setup with {&quot;setupToken&quot;: &quot;...&quot;}
     And backup codes are displayed exactly once
 
+  @TC-CLI-ADMIN-003
   Scenario: Invalid admin credentials return inline error
     Given the admin has entered an incorrect password
     And POST /admin/api/auth/login responds HTTP 401 with error code &quot;UNAUTHORIZED&quot;
@@ -499,23 +503,27 @@
     Then an inline error message &quot;Invalid credentials.&quot; is shown on the LoginPage ElForm
     And the user remains on &quot;/admin/login&quot;
 
+  @TC-CLI-ADMIN-004
   Scenario: Account locked after repeated failed logins — lock message displayed
     Given the admin has made (admin_login_lockout_threshold = 10) consecutive failed login attempts
     And POST /admin/api/auth/login responds HTTP 403 with error code &quot;ACCOUNT_LOCKED&quot; and &quot;unlockedAt&quot;
     When the admin clicks the &quot;Login&quot; button
     Then the LoginPage shows the account is locked and displays the unlock time from the &quot;unlockedAt&quot; field
 
+  @TC-CLI-ADMIN-005
   Scenario: IP rate limit on login — 15-minute countdown shown
     Given the IP address has made (admin_login_ip_rate_limit_attempts = 10) requests within (admin_login_ip_rate_limit_window_seconds = 900) seconds (15 minutes)
     And POST /admin/api/auth/login responds HTTP 429
     When the admin submits the login form
     Then a rate-limit message is displayed with a countdown of up to 900 seconds
 
+  @TC-CLI-ADMIN-006
   Scenario: Unauthenticated access to admin route redirects to login
     Given the admin user is not authenticated (no valid session cookie)
     When the user navigates directly to &quot;/admin/pets&quot;
     Then the user is redirected to &quot;/admin/login&quot;
 
+  @TC-CLI-ADMIN-007
   Scenario: Session expiry during admin work — redirect to login
     Given the admin is authenticated and viewing &quot;/admin/pets&quot;
     And the session has been inactive for more than (admin_session_inactivity_expiry_hours = 4) hours
@@ -525,6 +533,7 @@
 
   # --- Pet moderation queue ---
 
+  @TC-CLI-ADMIN-008
   Scenario: Admin views pet list and filters by SUSPICIOUS status
     Given the admin is authenticated as a moderator or super_admin
     And the admin has navigated to &quot;/admin/pets&quot;
@@ -534,6 +543,7 @@
     And the ElTable displays pet rows with columns: pet ID, masked owner email, rarity, level, arena record, creation date
     And an ElSelect filter for status &quot;SUSPICIOUS&quot; is available
 
+  @TC-CLI-ADMIN-009
   Scenario: Admin bans a pet with a reason
     Given the admin is on &quot;/admin/pets&quot; and can see a pet with petId &quot;bad-pet-001&quot;
     And POST /admin/api/pets/bad-pet-001/ban responds HTTP 200
@@ -543,6 +553,7 @@
     Then POST /admin/api/pets/bad-pet-001/ban is called with body {&quot;reason&quot;: &quot;&lt;reason&gt;&quot;}
     And the pet row status is updated to &quot;BANNED&quot; in the ElTable
 
+  @TC-CLI-ADMIN-010
   Scenario: Ban reason exceeding 500 characters is rejected client-side
     Given the PetBanModal is open for petId &quot;bad-pet-001&quot;
     When the admin types a reason of 501 or more characters in the reason field
@@ -551,6 +562,7 @@
 
   # --- Admin leaderboard moderation ---
 
+  @TC-CLI-ADMIN-011
   Scenario: Admin leaderboard shows up to 500 entries with SUSPICIOUS flag badges
     Given the admin has navigated to &quot;/admin/leaderboard&quot;
     And GET /admin/api/leaderboard responds with up to (leaderboard_admin_view = 500) entries
@@ -558,6 +570,7 @@
     Then the ElTable shows all returned entries without pagination
     And pets with more than (bot_detection_battles_threshold = 50) battles in the last (bot_detection_window_minutes = 60) minutes have a SuspiciousFlagBadge component visible
 
+  @TC-CLI-ADMIN-012
   Scenario: Admin removes a suspicious pet from the leaderboard
     Given the AdminLeaderboardPage shows petId &quot;cheat-pet-007&quot; with a SuspiciousFlagBadge
     And DELETE /admin/api/leaderboard/cheat-pet-007 responds HTTP 200
@@ -565,6 +578,7 @@
     Then DELETE /admin/api/leaderboard/cheat-pet-007 is called with the session cookie
     And the row for &quot;cheat-pet-007&quot; disappears from the AdminLeaderboardPage ElTable
 
+  @TC-CLI-ADMIN-013
   Scenario: Admin adjusts max battles per hour via runtime config panel
     Given the admin is authenticated as a super_admin and has navigated to &quot;/admin/config/runtime&quot;
     And the RuntimeConfigPage.vue is showing an ElForm with an ElInputNumber for &quot;Max Battles Per Hour&quot;
@@ -572,6 +586,93 @@
     And clicks &quot;Save&quot;
     Then PUT /admin/api/config/runtime is called with the updated value
     And a success confirmation is displayed in the RuntimeConfigPage.vue
+
+  # --- GDPR Data Deletion (US-ADMIN-004) ---
+
+  @TC-CLI-ADMIN-014
+  Scenario: Admin views GDPR deletion request queue with status badges
+    Given the admin is authenticated as a super_admin and navigates to &quot;/admin/gdpr/deletion-requests&quot;
+    And GET /admin/api/gdpr/deletion-requests responds HTTP 200 with a list of requests
+    When the GdprDeletionQueuePage.vue renders
+    Then the ElTable shows each request with columns: request ID, masked email, submitted date, and status badge
+    And requests with status &quot;PENDING&quot; display an orange badge
+    And requests with status &quot;PROCESSED&quot; display a green &quot;Processed&quot; badge
+
+  @TC-CLI-ADMIN-015
+  Scenario: Admin approves a GDPR deletion request and sees confirmation dialog
+    Given the GdprDeletionQueuePage shows a PENDING request with requestId &quot;gdpr-req-001&quot;
+    And POST /admin/api/gdpr/deletion-requests/gdpr-req-001/approve responds HTTP 200
+    When the admin clicks the &quot;Approve&quot; button on the request row
+    Then a confirmation dialog appears asking &quot;Are you sure you want to permanently delete this user&#x27;s data?&quot;
+    And the dialog has &quot;Confirm&quot; and &quot;Cancel&quot; buttons
+    When the admin clicks &quot;Confirm&quot;
+    Then POST /admin/api/gdpr/deletion-requests/gdpr-req-001/approve is called with the session cookie
+    And the request row status badge updates to &quot;PROCESSING&quot;
+    And a success notification is shown: &quot;Deletion request approved and queued for processing&quot;
+
+  @TC-CLI-ADMIN-016
+  Scenario: Completed deletion requests show as &quot;Processed&quot; in the queue
+    Given the GdprDeletionQueuePage is loaded
+    And GET /admin/api/gdpr/deletion-requests returns a mix of PENDING and PROCESSED requests
+    When the page renders
+    Then completed requests display a green &quot;Processed&quot; badge in the status column
+    And a &quot;processed_at&quot; timestamp is shown for each completed request
+    And PROCESSED rows are not actionable (no &quot;Approve&quot; button visible)
+
+  # --- Suspicious Battle Detection (US-ADMIN-005) ---
+
+  @TC-CLI-ADMIN-017
+  Scenario: Admin views suspicious detection dashboard with flagged battles
+    Given the admin is authenticated and navigates to &quot;/admin/suspicious-battles&quot;
+    And GET /admin/api/suspicious-battles responds HTTP 200 with a list of flagged battle entries
+    When the SuspiciousBattleDashboardPage.vue renders
+    Then the ElTable shows flagged battles with columns: battle ID, pet IDs, battle timestamp, flag reason, and status
+    And each flagged entry shows a &quot;FLAGGED&quot; badge
+    And the page title reads &quot;Suspicious Battle Detection&quot;
+
+  @TC-CLI-ADMIN-018
+  Scenario: Admin reviews and clears a suspicious flag with reason
+    Given the SuspiciousBattleDashboardPage shows a flagged battle with battleId &quot;battle-sus-042&quot;
+    And POST /admin/api/suspicious-battles/battle-sus-042/clear responds HTTP 200
+    When the admin clicks &quot;Clear Flag&quot; on the flagged battle row
+    Then a modal appears with a text area for the admin to enter a review reason
+    When the admin enters a reason (up to 500 characters) and clicks &quot;Confirm Clear&quot;
+    Then POST /admin/api/suspicious-battles/battle-sus-042/clear is called with body {&quot;reason&quot;: &quot;&lt;reason&gt;&quot;}
+    And the battle row status updates to &quot;REVIEWED&quot;
+    And the &quot;FLAGGED&quot; badge is replaced with a &quot;REVIEWED&quot; badge
+
+  @TC-CLI-ADMIN-019
+  Scenario: Auto-flag threshold configuration is displayed in admin settings
+    Given the admin navigates to &quot;/admin/config/bot-detection&quot;
+    And GET /admin/api/config/bot-detection responds HTTP 200 with current thresholds
+    When the BotDetectionConfigPage.vue renders
+    Then the current value of (bot_detection_battles_threshold = 50) is shown in an ElInputNumber field
+    And the current value of (bot_detection_window_minutes = 60) is shown in a separate ElInputNumber field
+    And a &quot;Save&quot; button is visible
+    When the admin changes the threshold and clicks &quot;Save&quot;
+    Then PUT /admin/api/config/bot-detection is called with the new threshold values
+
+  # --- Game Economy Configuration (US-ADMIN-006) ---
+
+  @TC-CLI-ADMIN-020
+  Scenario: Admin configures food buff multiplier via economy config form
+    Given the admin is authenticated as a super_admin and navigates to &quot;/admin/config/economy&quot;
+    And GET /admin/api/config/economy responds HTTP 200 with current economy settings including &quot;foodBuffMultiplier&quot;
+    When the EconomyConfigPage.vue renders
+    Then an ElInputNumber field for &quot;Food Buff Multiplier&quot; is visible with the current value
+    When the admin changes the multiplier value and clicks &quot;Save&quot;
+    Then PUT /admin/api/config/economy is called with the updated &quot;foodBuffMultiplier&quot; value
+    And a success toast &quot;Economy configuration saved&quot; is shown
+
+  @TC-CLI-ADMIN-021
+  Scenario: Admin sets arena entry cost and sees changes reflected immediately
+    Given the admin is on &quot;/admin/config/economy&quot;
+    And the current &quot;arenaEntryCost&quot; is 10
+    When the admin updates the &quot;Arena Entry Cost&quot; ElInputNumber field to 15
+    And clicks &quot;Save&quot;
+    Then PUT /admin/api/config/economy is called with body containing &quot;arenaEntryCost&quot;: 15
+    And the field value refreshes to 15 on the page
+    And a success notification &quot;Economy configuration saved&quot; confirms the change
 </code></pre>
 <h2 id="arena-uifeature">arena-ui.feature</h2>
 <pre><code class="language-gherkin">Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display (US-ARENA-001, US-ARENA-002)
@@ -583,6 +684,7 @@
 
   # --- Mode selection and arena entry ---
 
+  @TC-CLI-ARENA-001
   Scenario: Owner selects RACE mode and clicks Enter Arena — matchmaking begins
     Given the ModeSelector component shows two options: &quot;RACE&quot; and &quot;SUMO&quot;
     And no prior HTTP 429 rate limit response is stored in the Zustand arena slice
@@ -593,6 +695,7 @@
     And the MatchmakingStatus component appears with text &quot;Finding opponent...&quot;
     And the MatchmakingStatus has aria-live=&quot;polite&quot; and aria-busy=&quot;true&quot;
 
+  @TC-CLI-ARENA-002
   Scenario: Opponent found within matchmaking timeout — battle animation plays
     Given the MatchmakingStatus is showing &quot;Finding opponent...&quot;
     And the owner has clicked the &quot;Enter Arena&quot; button in PreBattlePanel
@@ -603,6 +706,7 @@
     And the battle animation lasts between (arena_match_duration_min_seconds = 5) and (arena_match_duration_max_seconds = 15) seconds
     And the app navigates to &quot;/arena/result/:matchId&quot; after the animation completes
 
+  @TC-CLI-ARENA-003
   Scenario: No opponent found — AIOfferModal is shown after 30-second timeout
     Given the owner has clicked the &quot;Enter Arena&quot; button in PreBattlePanel
     And POST /api/v1/arena/enter responds HTTP 408 with error code &quot;MATCHMAKING_TIMEOUT&quot; after the (arena_matchmaking_timeout_seconds = 30)-second timeout elapses
@@ -612,6 +716,7 @@
     And the modal has a focus trap: Tab cycles focus within the modal while it is open
     And the modal is dismissible via the Escape key
 
+  @TC-CLI-ARENA-004
   Scenario: User accepts AI opponent from AIOfferModal — battle proceeds
     Given the AIOfferModal is visible after a matchmaking timeout
     And the selected battle mode is &quot;RACE&quot;
@@ -622,6 +727,7 @@
 
   # --- Rate limit UI ---
 
+  @TC-CLI-ARENA-005
   Scenario: Arena rate limit reached — RateLimitBanner shown and Enter Arena disabled
     Given the owner has already entered (arena_rate_limit_battles_per_hour_default = 10) arena battles in the current hour
     And POST /api/v1/arena/enter responds HTTP 429 with a &quot;Retry-After&quot; header
@@ -631,12 +737,14 @@
     And the RateLimitBanner displays a countdown timer showing the remaining time until the rate limit resets
     And the &quot;Enter Arena&quot; button in PreBattlePanel is disabled for the duration of the cooldown
 
+  @TC-CLI-ARENA-006
   Scenario: Rate limit countdown expires — Enter Arena button re-enabled
     Given the RateLimitBanner is visible with a countdown timer
     When the Retry-After duration elapses
     Then the RateLimitBanner component disappears
     And the &quot;Enter Arena&quot; button becomes enabled again
 
+  @TC-CLI-ARENA-007
   Scenario: Banned pet cannot enter arena
     Given the player&#x27;s pet has been banned by an admin
     And POST /api/v1/arena/enter responds HTTP 403 with error code &quot;PET_BANNED&quot;
@@ -647,6 +755,7 @@
 
   # --- Battle result display ---
 
+  @TC-CLI-ARENA-008
   Scenario: Battle result page shows WIN card with stat comparison and share button
     Given the match is complete and the player&#x27;s pet won
     And the app has navigated to &quot;/arena/result/:matchId&quot;
@@ -656,6 +765,7 @@
     And the StatComparison component shows both pets&#x27; stats side by side
     And the ShareBattleButton component is visible and copies the public &quot;/arena/result/:matchId&quot; URL when clicked
 
+  @TC-CLI-ARENA-009
   Scenario: Battle result page shows LOSS card
     Given the match is complete and the player&#x27;s pet lost
     And the app has navigated to &quot;/arena/result/:matchId&quot;
@@ -663,6 +773,7 @@
     When the ResultPage renders
     Then the BattleResultCard displays in &quot;LOSS&quot; variant
 
+  @TC-CLI-ARENA-010
   Scenario: SUMO mode is available alongside RACE in the ModeSelector
     Given the ArenaPage is loaded with the FF_ARENA_SUMO feature flag enabled
     And both &quot;RACE&quot; and &quot;SUMO&quot; option buttons are visible and focusable
@@ -678,6 +789,7 @@
 
   # --- Battle records display ---
 
+  @TC-CLI-REC-001
   Scenario: Owner views battle records for their pet — shows last 20 battles
     Given a claimed pet with petId &quot;pet-abc123&quot; has (arena_battle_records_display_count = 20) stored battle records
     And GET /api/v1/pets/:petId/records responds HTTP 200 with an array of battle record objects ordered by date descending
@@ -687,12 +799,14 @@
     And the table has semantic markup with &quot;&lt;table&gt;&quot; and &quot;&lt;th scope=&quot;col&quot;&gt;&quot; column headers
     And the rows are ordered with the most recent battle at the top
 
+  @TC-CLI-REC-002
   Scenario: Battle records table shows stat differential for each battle
     Given a BattleHistoryRow for a RACE match between the player&#x27;s pet (speed 45) and opponent (speed 38)
     When the BattleRecordsPage renders
     Then the row displays &quot;Speed: +7&quot; or similar, indicating the player&#x27;s speed advantage at the time of battle
     And the stat differential is readable by screen readers via aria-label
 
+  @TC-CLI-REC-003
   Scenario: Public battle records page accessible without authentication
     Given a user (guest) navigates to &quot;/pet/:petId/records&quot; without a pet_token
     When the BattleRecordsPage loads
@@ -700,6 +814,7 @@
     And the BattleHistoryTable and PetSummaryCard render publicly
     And no &quot;Sign in to see more&quot; or auth prompt is shown
 
+  @TC-CLI-REC-004
   Scenario: Battle records page shows pet summary card with rarity and level
     Given the PetSummaryCard is rendered on the BattleRecordsPage
     When the pet&#x27;s stats are &quot;level: 5, rarity: EPIC, wins: 12, losses: 8&quot;
@@ -707,6 +822,7 @@
     And the card shows &quot;Level 5&quot; and &quot;EPIC&quot; rarity badge with appropriate color
     And the win/loss record is displayed as &quot;12 wins, 8 losses&quot;
 
+  @TC-CLI-REC-005
   Scenario: Clicking a battle row highlights stat comparison between both pets
     Given the BattleRecordsPage is displayed with a table of battle rows
     When the user clicks or taps a specific BattleHistoryRow
@@ -715,6 +831,7 @@
 
   # --- Shareable battle URLs ---
 
+  @TC-CLI-REC-006
   Scenario: Owner clicks ShareBattleButton and URL is copied to clipboard
     Given the BattleRecordsPage is displayed with a ShareBattleButton at the top or bottom
     When the owner clicks the &quot;Share Battle Results&quot; button
@@ -722,6 +839,7 @@
     And the public battle records URL &quot;/pet/:petId/records&quot; is copied to the system clipboard
     And the user can share this URL on social media or forums
 
+  @TC-CLI-REC-007
   Scenario: Social share card generation for shareable battle URL
     Given a user shares the public URL &quot;/pet/:petId/records&quot; on Twitter or Discord
     When the link is previewed
@@ -736,6 +854,7 @@
     And all URLs are absolute and properly percent-encoded
     And image dimensions are optimized for social platform compatibility
 
+  @TC-CLI-REC-008
   Scenario: Guest views opponent&#x27;s battle records after shared URL
     Given a guest receives a shared URL &quot;/pet/:petId/records&quot; for opponent &quot;Zara&quot;
     And they click the link
@@ -746,18 +865,21 @@
 
   # --- Win/loss variations ---
 
+  @TC-CLI-REC-009
   Scenario: Battle record row shows WIN indicator with green color
     Given a battle record in the BattleHistoryTable where the result is &quot;WIN&quot;
     When the BattleHistoryRow renders
     Then the result cell displays &quot;WIN&quot; with a green background or check icon
     And the cell passes a 4.5:1 contrast ratio check against its background
 
+  @TC-CLI-REC-010
   Scenario: Battle record row shows LOSS indicator with red color
     Given a battle record where the result is &quot;LOSS&quot;
     When the BattleHistoryRow renders
     Then the result cell displays &quot;LOSS&quot; with a red background or X icon
     And the cell passes a 4.5:1 contrast ratio check
 
+  @TC-CLI-REC-011
   Scenario: Battles against AI opponent are marked distinctly
     Given a battle record where the opponent is an AI-generated pet (not a real player)
     When the BattleHistoryRow renders
@@ -766,6 +888,7 @@
 
   # --- Pagination and loading states ---
 
+  @TC-CLI-REC-012
   Scenario: Empty battle records state shown when no battles exist
     Given a recently claimed pet with no battles played
     And GET /api/v1/pets/:petId/records responds HTTP 200 with an empty array
@@ -774,6 +897,7 @@
     And a friendly message &quot;No battles yet. Enter the arena to get started!&quot; is shown
     And an &quot;Enter Arena&quot; button is visible that navigates to &quot;/arena&quot;
 
+  @TC-CLI-REC-013
   Scenario: Battle records page loads with skeleton loaders during fetch
     Given GET /api/v1/pets/:petId/records is pending (takes 2+ seconds)
     When the BattleRecordsPage mounts
@@ -782,6 +906,7 @@
 
   # --- Accessibility ---
 
+  @TC-CLI-REC-014
   Scenario: Battle records table is keyboard navigable
     Given the BattleRecordsPage is rendered with a BattleHistoryTable
     When the user navigates using the Tab key
@@ -789,12 +914,14 @@
     And pressing Enter on a focused row highlights it
     And the table has proper &quot;&lt;table&gt;&quot;, &quot;&lt;thead&gt;&quot;, &quot;&lt;tbody&gt;&quot;, and &quot;&lt;tr&gt;&quot; structure
 
+  @TC-CLI-REC-015
   Scenario: Battle result colors pass contrast ratio checks
     Given the BattleHistoryTable with WIN (green) and LOSS (red) result indicators
     When tested with a contrast analyzer
     Then each color meets the 4.5:1 minimum contrast ratio for text on its background
     And the colors are distinguishable for color-blind users (not red/green alone)
 
+  @TC-CLI-REC-016
   Scenario: Responsive battle records table on mobile (320px viewport)
     Given the viewport width is 320px (mobile)
     When the BattleRecordsPage loads
@@ -804,6 +931,7 @@
 
   # --- Pagination on client ---
 
+  @TC-CLI-REC-017
   Scenario: Battle records pagination with load more button
     Given a pet has 45 total battle records
     And the first page shows 20 records
@@ -814,6 +942,7 @@
     And the next 20 battles are appended to the table
     And the button is disabled until the next page loads
 
+  @TC-CLI-REC-018
   Scenario: Load more button hidden when all records fetched
     Given a pet has 8 total battle records
     And GET /api/v1/arena/history/:petId returns all 8 records
@@ -822,6 +951,7 @@
     Then the &quot;Load More&quot; button is not displayed
     And the message &quot;You&#x27;ve reached the end of battle history&quot; is shown
 
+  @TC-CLI-REC-019
   Scenario: Pagination preserves scroll position when loading more
     Given the user scrolls to the bottom of the 20-battle table
     And clicks the &quot;Load More&quot; button
@@ -839,6 +969,7 @@
 
   # --- Step 1: Email entry ---
 
+  @TC-CLI-CLAIM-001
   Scenario: Guest submits valid email and age confirmation — advances to OTP step
     Given the ClaimEmailForm shows an email input field and an age confirmation checkbox &quot;I am at least 13 years old&quot;
     And POST /api/v1/claim/request responds HTTP 200 with &quot;claimId&quot; and &quot;expiresAt&quot;
@@ -849,6 +980,7 @@
     And the Zustand claim slice stores the claimId
     And the ClaimFlow advances to step &quot;code&quot; rendering the ClaimCodeForm
 
+  @TC-CLI-CLAIM-002
   Scenario: Email form blocks submission without age confirmation
     Given the ClaimEmailForm is visible
     When the guest enters a valid email but leaves the age confirmation checkbox unchecked
@@ -856,6 +988,7 @@
     Then POST /api/v1/claim/request is NOT called
     And an inline error &quot;Age confirmation required&quot; is shown and the checkbox is re-highlighted
 
+  @TC-CLI-CLAIM-003
   Scenario: Already-claimed pet shows inline error
     Given the pet being claimed already has an owner
     And POST /api/v1/claim/request responds HTTP 400 with error code &quot;ALREADY_CLAIMED&quot;
@@ -863,6 +996,7 @@
     Then an inline error message &quot;This pet is already owned.&quot; is shown on the ClaimEmailForm
     And the user remains on step &quot;email&quot;
 
+  @TC-CLI-CLAIM-004
   Scenario: Email claim rate limit — cooldown banner shown
     Given the guest has already made (auth_rate_limit_claim_attempts_per_hour = 5) claim requests in the current hour
     And POST /api/v1/claim/request responds HTTP 429 with a &quot;Retry-After&quot; header
@@ -872,6 +1006,7 @@
 
   # --- Step 2: OTP entry ---
 
+  @TC-CLI-CLAIM-005
   Scenario: Guest enters correct 6-digit OTP within expiry window — advances to reveal
     Given the ClaimCodeForm is visible (step &quot;code&quot;)
     And the OTP &quot;123456&quot; is valid and was issued within (claim_code_expiry_minutes = 15) minutes
@@ -882,6 +1017,7 @@
     And the pet_token key is written to localStorage
     And the Zustand claim slice advances to step &quot;reveal&quot;
 
+  @TC-CLI-CLAIM-006
   Scenario: Invalid OTP — shake animation and error message shown
     Given the ClaimCodeForm is visible (step &quot;code&quot;)
     And POST /api/v1/claim/verify responds HTTP 400 with error code &quot;INVALID_CODE&quot;
@@ -890,6 +1026,7 @@
     And an error message is displayed below the input
     And the OTP inputs remain enabled for retry
 
+  @TC-CLI-CLAIM-007
   Scenario: Expired OTP — re-request button shown
     Given the ClaimCodeForm is visible and the OTP has expired after (claim_code_expiry_minutes = 15) minutes
     And POST /api/v1/claim/verify responds HTTP 400 with error code &quot;CODE_EXPIRED&quot;
@@ -897,12 +1034,14 @@
     Then the error message &quot;Claim code has expired. Please request a new one.&quot; is shown
     And a &quot;Request a new code&quot; button is visible that re-initiates POST /api/v1/claim/request
 
+  @TC-CLI-CLAIM-008
   Scenario: ExpiryWarning activates when 2 minutes or fewer remain before OTP expiry
     Given the ClaimCodeForm is visible and (a11y_claim_code_warning_before_expiry_minutes = 2) minutes or fewer remain before OTP expiry
     When the OTP countdown timer ticks
     Then the ExpiryWarning renders with role=&quot;alert&quot; and aria-live=&quot;assertive&quot;
     And the warning text includes the remaining minutes as a countdown
 
+  @TC-CLI-CLAIM-009
   Scenario: Max OTP attempts reached — all inputs disabled with Retry-After countdown
     Given the guest has made (auth_rate_limit_code_entry_attempts_per_session = 10) failed OTP attempts in this session
     And POST /api/v1/claim/verify responds HTTP 429 with error code &quot;MAX_ATTEMPTS_REACHED&quot;
@@ -913,6 +1052,7 @@
 
   # --- Step 3: URL Reveal ---
 
+  @TC-CLI-CLAIM-010
   Scenario: Claim reveal step shows pet URL with copy button and navigates to pet page
     Given the ClaimFlow is in step &quot;reveal&quot; and the petToken and petUrl have been received
     When the URLReveal component renders
@@ -930,6 +1070,7 @@
 
   # --- Food inventory display ---
 
+  @TC-CLI-FOOD-001
   Scenario: Food inventory renders list of available food items with stat icons
     Given the FoodInventory component is visible on the PetPage
     And GET /api/v1/pets/:petId responds HTTP 200 with &quot;foodItems&quot; array containing food buff objects
@@ -941,6 +1082,7 @@
       - The buff type (permanent or temporary with duration)
       - A &quot;Use&quot; button
 
+  @TC-CLI-FOOD-002
   Scenario: Empty food inventory shows helpful message
     Given a pet with no food items in the inventory
     And GET /api/v1/pets/:petId returns HTTP 200 with &quot;foodItems&quot;: []
@@ -949,12 +1091,14 @@
     And a hint &quot;Earn food by battling or completing training streaks&quot; is shown
     And no FoodItem cards are rendered
 
+  @TC-CLI-FOOD-003
   Scenario: Food item card displays buff duration for temporary buffs
     Given a FoodItem with isPermanent = false and expiresAt = &quot;2026-05-05T10:30:00Z&quot;
     When the FoodItem card renders
     Then the card displays the remaining duration (e.g., &quot;Expires in 2h 30m&quot;)
     And the duration countdown updates in real-time
 
+  @TC-CLI-FOOD-004
   Scenario: Food item card displays &quot;Permanent&quot; label for permanent buffs
     Given a FoodItem with isPermanent = true
     When the FoodItem card renders
@@ -963,6 +1107,7 @@
 
   # --- Apply food buff interaction ---
 
+  @TC-CLI-FOOD-005
   Scenario: Owner clicks &quot;Use&quot; button on food item and stat increments
     Given the FoodInventory shows a food item with stat = &quot;speed&quot; and magnitude = 5
     And the pet&#x27;s current speed = 45
@@ -974,6 +1119,7 @@
     And a glow animation appears around the pet sprite (warm glow color)
     And GET /api/v1/pets/:petId is re-fetched to refresh all stats
 
+  @TC-CLI-FOOD-006
   Scenario: Buff stat already at maximum — use button disabled with tooltip
     Given a pet with speed = (pet_stat_max = 100)
     And a food item that targets the speed stat
@@ -981,6 +1127,7 @@
     Then the &quot;Use&quot; button is disabled (grayed out)
     And a tooltip appears on hover: &quot;This stat is already at maximum&quot;
 
+  @TC-CLI-FOOD-007
   Scenario: HTTP 400 STAT_AT_MAXIMUM response shows toast error
     Given a pet with strength = 100 and a food item targeting strength
     And POST /api/v1/pets/:petId/feed responds HTTP 400 with error code &quot;STAT_AT_MAXIMUM&quot;
@@ -990,6 +1137,7 @@
 
   # --- Stat bar buff indicator ---
 
+  @TC-CLI-FOOD-008
   Scenario: Temporary buff applied — buff badge appears on StatBar with countdown
     Given the owner has applied a temporary speed buff that expires in 45 minutes
     And the response &quot;buffApplied&quot;: {stat: &quot;speed&quot;, magnitude: 5, isPermanent: false, expiresAt: &quot;...&quot;}
@@ -998,6 +1146,7 @@
     And the badge displays a countdown timer: &quot;Expires in 45m&quot;
     And the timer updates every second and decrements
 
+  @TC-CLI-FOOD-009
   Scenario: Buff expires — buff badge disappears from StatBar
     Given a Speed StatBar showing a temporary buff expiring in 30 seconds
     When 30 seconds elapse and the buff expiry time passes
@@ -1005,6 +1154,7 @@
     And the stat value remains elevated (the buff effect is already applied to the base stat)
     And the countdown timer stops and is removed from the page
 
+  @TC-CLI-FOOD-010
   Scenario: Permanent buff applied — buff badge shown without countdown
     Given the owner has applied a permanent buff to strength
     And the response &quot;buffApplied&quot;: {stat: &quot;strength&quot;, magnitude: 10, isPermanent: true, expiresAt: null}
@@ -1012,6 +1162,7 @@
     Then the Strength StatBar shows a buff badge indicating a permanent buff
     And no countdown timer appears on the badge
 
+  @TC-CLI-FOOD-011
   Scenario: Multiple buffs on same stat displayed on StatBar
     Given a Speed StatBar with two active buffs (e.g., temporary +3 and permanent +5)
     When the StatsPanel renders
@@ -1021,6 +1172,7 @@
 
   # --- Food use animation ---
 
+  @TC-CLI-FOOD-012
   Scenario: Pet sprite plays animation when food is applied
     Given the owner clicks &quot;Use&quot; on a food item
     And POST /api/v1/pets/:petId/feed responds HTTP 200
@@ -1030,6 +1182,7 @@
       - A warm glow effect surrounds the pet (200ms)
     And the animation completes before the StatBar animation starts
 
+  @TC-CLI-FOOD-013
   Scenario: Reduced motion disables food use animation
     Given the user has &quot;prefers-reduced-motion: reduce&quot; enabled
     When the owner applies a food buff
@@ -1039,12 +1192,14 @@
 
   # --- Multiple food items and inventory management ---
 
+  @TC-CLI-FOOD-014
   Scenario: Multiple food items of same type shown separately in inventory
     Given the pet has 3 identical &quot;Speed +5&quot; food items in the inventory
     When the FoodInventory renders
     Then three separate FoodItem cards are displayed (one for each)
     And the owner can use any of them by clicking the &quot;Use&quot; button on the desired card
 
+  @TC-CLI-FOOD-015
   Scenario: Food item removed from inventory after use
     Given the FoodInventory shows a food item card
     And the owner clicks &quot;Use&quot; and the API call succeeds
@@ -1054,6 +1209,7 @@
 
   # --- Keyboard navigation ---
 
+  @TC-CLI-FOOD-016
   Scenario: Food items are keyboard navigable with Tab and activatable with Enter
     Given the FoodInventory is rendered with multiple FoodItem cards
     When the user navigates using Tab
@@ -1063,6 +1219,7 @@
 
   # --- Accessibility for buff indicators ---
 
+  @TC-CLI-FOOD-017
   Scenario: Buff countdown timer announced to screen readers
     Given a temporary buff with remaining duration on a StatBar
     When the countdown timer updates
@@ -1078,6 +1235,7 @@
 
   # --- Normal leaderboard display ---
 
+  @TC-CLI-BOARD-001
   Scenario: Public leaderboard loads top 100 pets without authentication
     Given no &quot;pet_token&quot; is present in localStorage
     And GET /api/v1/leaderboard?page=1&amp;limit=100 responds HTTP 200 with an array of up to (leaderboard_top_display = 100) pet entries
@@ -1086,6 +1244,7 @@
     And the table has semantic markup with &quot;&lt;table&gt;&quot; containing &quot;&lt;th scope=&quot;col&quot;&gt;&quot; column headers
     And no login prompt or token is required to view the page
 
+  @TC-CLI-BOARD-002
   Scenario: Leaderboard auto-refreshes every 30 seconds via TanStack Query
     Given the LeaderboardPage is mounted
     And (leaderboard_update_lag_max_seconds = 30) seconds have elapsed since the last fetch
@@ -1093,6 +1252,7 @@
     When the TanStack Query stale timer fires a background refetch
     Then the LeaderboardTable updates to reflect the refreshed data without a full page reload
 
+  @TC-CLI-BOARD-003
   Scenario: Rarity filter updates URL and refetches leaderboard
     Given the LeaderboardPage is loaded showing all rarities
     And GET /api/v1/leaderboard?rarity=EPIC&amp;page=1&amp;limit=100 responds HTTP 200 with EPIC rarity pet entries
@@ -1101,6 +1261,7 @@
     And GET /api/v1/leaderboard?rarity=EPIC&amp;page=1&amp;limit=100 is called
     And only EPIC rarity pets are shown in the LeaderboardTable
 
+  @TC-CLI-BOARD-004
   Scenario: Rarity filter selection is preserved on page refresh
     Given the user is on &quot;/leaderboard?rarity=RARE&quot;
     And GET /api/v1/leaderboard?rarity=RARE&amp;page=1&amp;limit=100 responds HTTP 200 with RARE rarity pet entries
@@ -1108,6 +1269,7 @@
     Then the &quot;Rare&quot; tab is active in RarityFilter
     And GET /api/v1/leaderboard?rarity=RARE&amp;page=1&amp;limit=100 is called on mount
 
+  @TC-CLI-BOARD-005
   Scenario: Owner rank banner shows when pet token is present and pet is in top 100
     Given a &quot;pet_token&quot; is present in localStorage identifying pet &quot;abc123&quot;
     And GET /api/v1/leaderboard/rank/abc123 responds HTTP 200 with {&quot;rank&quot;: 47, &quot;petName&quot;: &quot;Zara&quot;}
@@ -1115,6 +1277,7 @@
     Then the OwnerRankBanner component is visible with text &quot;Your pet Zara is ranked #47&quot;
     And the OwnerRankBanner has role=&quot;status&quot;
 
+  @TC-CLI-BOARD-006
   Scenario: Owner rank banner shows when pet is ranked below top 100
     Given a &quot;pet_token&quot; is present in localStorage identifying pet &quot;abc123&quot;
     And GET /api/v1/leaderboard/rank/abc123 responds HTTP 200 with {&quot;rank&quot;: 342, &quot;petName&quot;: &quot;Bolt&quot;}
@@ -1122,11 +1285,13 @@
     Then the OwnerRankBanner shows &quot;Your pet Bolt is ranked #342&quot;
     And the pet is not visible in the main LeaderboardTable (which only displays top 100)
 
+  @TC-CLI-BOARD-007
   Scenario: Owner rank banner is hidden when no pet token is present
     Given no &quot;pet_token&quot; is in localStorage
     When the LeaderboardPage renders
     Then the OwnerRankBanner component is not rendered
 
+  @TC-CLI-BOARD-008
   Scenario: Clicking a leaderboard row navigates to the pet&#x27;s battle records page
     Given the LeaderboardTable shows a row for pet &quot;Blaze&quot; with petId &quot;xyz789&quot;
     When the user clicks or presses Enter on the &quot;Blaze&quot; LeaderboardRow
@@ -1134,12 +1299,14 @@
 
   # --- Degraded leaderboard state ---
 
+  @TC-CLI-BOARD-009
   Scenario: Degraded leaderboard banner shown when Redis is unavailable
     Given GET /api/v1/leaderboard responds HTTP 200 but with response body field &quot;degraded&quot;: true indicating stale/cached data from a degraded Redis backend
     When the LeaderboardPage renders the response
     Then an orange &quot;Live data temporarily unavailable&quot; banner is visible above the LeaderboardTable
     And the banner has a color that meets 4.5:1 contrast ratio against its background
 
+  @TC-CLI-BOARD-010
   Scenario: Banned pet removed from leaderboard within 5 minutes of admin ban
     Given a pet with petId &quot;bad123&quot; is visible at rank 12 in the LeaderboardTable
     And the pet &quot;bad123&quot; has been banned by an admin
@@ -1156,6 +1323,7 @@
 
   # --- Pet token generation ---
 
+  @TC-CLI-PET-001
   Scenario: Guest visits the landing page and a new pet token is generated
     Given no &quot;pet_token&quot; key exists in localStorage
     When the browser loads &quot;/&quot;
@@ -1164,6 +1332,7 @@
     And a &quot;pet_token&quot; entry is written to localStorage with a value of at least (pet_access_token_min_bytes = 32) bytes
     And the PetCanvas component renders inside a div with role=&quot;img&quot; and aria-label=&quot;Pixel pet canvas&quot;
 
+  @TC-CLI-PET-002
   Scenario: Returning guest has an existing token — no new pet is generated
     Given a &quot;pet_token&quot; value of at least (pet_access_token_min_bytes = 32) bytes is present in localStorage
     When the browser loads &quot;/pet/:petId&quot;
@@ -1171,6 +1340,7 @@
     And GET /api/v1/pets/random is NOT called
     And the PetCanvas component renders the sprite corresponding to the stored token
 
+  @TC-CLI-PET-003
   Scenario: Pet page loads and displays stat bars for speed, strength, and stamina
     Given a claimed pet is accessible at &quot;/pet/:petId&quot;
     And GET /api/v1/pets/:petId returns HTTP 200 with &quot;speed&quot;, &quot;strength&quot;, and &quot;stamina&quot; values between 1 and 100
@@ -1180,12 +1350,14 @@
     And a StatBar labeled &quot;Stamina&quot; is visible with a width proportional to the stamina value
     And each StatBar element has an aria-label announcing the stat name and current value
 
+  @TC-CLI-PET-004
   Scenario: Pixel art canvas renders with pixelated image rendering
     Given a pet is displayed on the LandingPage
     When the PetCanvas div is inspected
     Then the container has the CSS property &quot;image-rendering: pixelated&quot;
     And the Phaser game canvas dimensions are (sprite_resolution_px = 32) × 2 = 64 CSS px wide and 64 CSS px tall
 
+  @TC-CLI-PET-005
   Scenario: Neglected pet displays desaturated visual state after threshold exceeded
     Given a claimed pet&#x27;s &quot;last_trained_at&quot; timestamp is more than (training_neglect_threshold_days = 3) days ago
     When the PetPage at &quot;/pet/:petId&quot; loads
@@ -1193,12 +1365,14 @@
     And the canvas wrapper has CSS filter &quot;grayscale(60%) brightness(0.8)&quot; applied
     And the NeglectedState component is visible on the page
 
+  @TC-CLI-PET-006
   Scenario: Reduced motion preference suppresses Phaser idle animation
     Given the OS/browser has &quot;prefers-reduced-motion: reduce&quot; enabled
     When the PetCanvas mounts and PetCanvasEngine initializes
     Then the Phaser animation loop is paused and a static sprite frame is rendered
     And the CSS rarity shimmer animations are suppressed via &quot;@media (prefers-reduced-motion: reduce)&quot;
 
+  @TC-CLI-PET-007
   Scenario: Temporary food buff indicator shown on StatsPanel with countdown timer
     Given a claimed pet has an active temporary food buff on the &quot;speed&quot; stat
     And the buff was applied via POST /api/v1/food/apply and the response &quot;buffApplied.isPermanent&quot; is false
@@ -1208,6 +1382,7 @@
     And the buff badge displays a countdown timer showing the remaining duration until &quot;expiresAt&quot;
     And the buff indicator disappears once the &quot;expiresAt&quot; time has passed
 
+  @TC-CLI-PET-008
   Scenario: Legendary pet displays animated shimmer border
     Given a claimed pet has rarity &quot;LEGENDARY&quot;
     When the PetPage renders
@@ -1216,12 +1391,14 @@
 
   # --- Pet Seed Uniqueness &amp; Generation Validation ---
 
+  @TC-CLI-PET-009
   Scenario: Pet seed uniqueness is guaranteed across generation requests
     Given 100 consecutive calls to GET /api/v1/pets/random via the landing page
     When seeds from all 100 generated pets are collected by the client
     Then no two pets share the same seed value
     And the uniqueness constraint on the server side is verified in tests
 
+  @TC-CLI-PET-010
   Scenario: Random pet generation returns valid unclaimed pet with rarity distribution
     Given a request to GET /api/v1/pets/random without authentication
     When the endpoint is called multiple times (sample size ≥ 1000)
@@ -1234,6 +1411,7 @@
     And each pet has fields: id, seed, rarity, stats (speed, strength, stamina all = 10)
     And reservedUntil is set to NOW() + 24 hours
 
+  @TC-CLI-PET-011
   Scenario: Retrieve claimed pet shows owner-only fields when authenticated
     Given a claimed pet with petId &quot;pet-uuid-003&quot; and valid petToken
     When GET /api/v1/pets/:petId is called with Authorization: Bearer {petToken}
@@ -1241,6 +1419,7 @@
     And stats.level is calculated from total_training_actions
     And isNeglected reflects whether pet was trained within 3 days
 
+  @TC-CLI-PET-012
   Scenario: Retrieve pet without authentication shows public data only
     Given a claimed pet with petId &quot;pet-uuid-004&quot;
     When GET /api/v1/pets/:petId is called WITHOUT authentication header
@@ -1258,6 +1437,7 @@
 
   # --- Settings page access ---
 
+  @TC-CLI-SET-001
   Scenario: Owner opens settings from navbar menu
     Given the player is on any page with the NavBar visible
     When the owner clicks a settings icon or menu button in the NavBar
@@ -1265,6 +1445,7 @@
     And options for &quot;Theme&quot;, &quot;Audio&quot;, and &quot;Notifications&quot; are visible
     And a &quot;Close&quot; button or Escape key dismisses the settings
 
+  @TC-CLI-SET-002
   Scenario: Settings preferences persist in localStorage
     Given the user is on the SettingsPage
     And the user changes the theme from &quot;Dark&quot; to &quot;Light&quot;
@@ -1275,6 +1456,7 @@
 
   # --- Dark mode / Light mode toggle ---
 
+  @TC-CLI-SET-003
   Scenario: User toggles dark mode on and off
     Given the SettingsPage shows a &quot;Dark Mode&quot; toggle switch
     And the default mode is &quot;Dark&quot;
@@ -1283,18 +1465,21 @@
     And text color inverts appropriately to maintain 4.5:1 contrast ratio
     And the toggle switch visual state updates to show &quot;Light&quot; is selected
 
+  @TC-CLI-SET-004
   Scenario: Dark mode colors maintain accessibility contrast ratios
     Given the dark mode is enabled
     When the page renders with dark background and light text
     Then the text color (e.g., #e8e8f0) on dark surface (#1a1a2e) has a contrast ratio of at least 4.5:1
     And all interactive elements (buttons, links) maintain 3:1 contrast for focus states
 
+  @TC-CLI-SET-005
   Scenario: Light mode colors maintain accessibility contrast ratios
     Given the light mode is enabled
     When the page renders
     Then the text color on light surface has a contrast ratio of at least 4.5:1
     And buttons and interactive elements meet the same contrast minimums
 
+  @TC-CLI-SET-006
   Scenario: Rarity badge colors adapt to theme
     Given a Legendary pet with rarity badge in Dark mode
     And the user switches to Light mode
@@ -1304,6 +1489,7 @@
 
   # --- Audio and sound settings ---
 
+  @TC-CLI-SET-007
   Scenario: Owner disables sound effects globally
     Given the SettingsPage shows a &quot;Sound Effects&quot; toggle
     And sound is enabled by default
@@ -1311,12 +1497,14 @@
     Then no sound is played for subsequent interactions (button clicks, stat changes, arena)
     And the setting is stored in localStorage
 
+  @TC-CLI-SET-008
   Scenario: Owner re-enables sound effects
     Given sound effects are currently disabled
     When the owner clicks the toggle to re-enable sound
     Then sound plays for the next interaction (button click)
     And a confirmation sound plays to indicate the toggle worked
 
+  @TC-CLI-SET-009
   Scenario: Sound setting does not affect reduced-motion behavior
     Given the user has &quot;prefers-reduced-motion: reduce&quot; enabled at the OS level
     And sound effects are enabled in settings
@@ -1327,6 +1515,7 @@
 
   # --- Notification preferences ---
 
+  @TC-CLI-SET-010
   Scenario: Owner enables/disables push notifications
     Given the SettingsPage shows a &quot;Notifications&quot; toggle
     And notifications are enabled by default
@@ -1334,6 +1523,7 @@
     Then no push notifications are sent for subsequent pet events (training complete, arena available)
     And the setting is stored in localStorage
 
+  @TC-CLI-SET-011
   Scenario: Owner views notification channels
     Given the owner navigates to Notification settings
     When the settings section expands
@@ -1343,6 +1533,7 @@
       - Pet level up (enabled by default)
     And the owner can toggle each channel independently
 
+  @TC-CLI-SET-012
   Scenario: Owner enables daily training reminder notification
     Given notification reminders are disabled
     When the owner checks the &quot;Daily training reminder&quot; checkbox
@@ -1352,12 +1543,14 @@
 
   # --- Settings form behavior ---
 
+  @TC-CLI-SET-013
   Scenario: Changes to settings are applied immediately
     Given the user is on the SettingsPage with the theme set to &quot;Dark&quot;
     When the user clicks the theme toggle to &quot;Light&quot;
     Then the page theme changes immediately without requiring a save button
     And no &quot;Save Settings&quot; action is required
 
+  @TC-CLI-SET-014
   Scenario: Settings modal or panel can be closed without saving
     Given the SettingsPage is open and the user has made changes
     When the user clicks the X button or presses Escape
@@ -1365,6 +1558,7 @@
     And all changes are persisted (no &quot;Cancel&quot; or &quot;Revert&quot; action needed)
     And the user is returned to the previous page
 
+  @TC-CLI-SET-015
   Scenario: Reset to defaults button restores original settings
     Given the user has customized multiple settings (theme, sound, notifications)
     When a &quot;Reset to Defaults&quot; button is visible and clicked
@@ -1376,6 +1570,7 @@
 
   # --- Accessibility of settings controls ---
 
+  @TC-CLI-SET-016
   Scenario: Settings toggle switches are keyboard operable
     Given the SettingsPage is open with toggle switches for theme and sound
     When the user navigates using Tab to a toggle switch
@@ -1383,6 +1578,7 @@
     Then the toggle state changes
     And a visual focus indicator is visible on the toggle
 
+  @TC-CLI-SET-017
   Scenario: Settings labels are properly associated with inputs
     Given the SettingsPage shows &quot;Dark Mode&quot; label with a toggle switch
     When inspected in the browser DevTools
@@ -1390,6 +1586,7 @@
     Or the label wraps the input element
     And screen readers correctly announce the label and current state
 
+  @TC-CLI-SET-018
   Scenario: Settings form has proper heading hierarchy
     Given the SettingsPage is open
     When inspected for heading structure
@@ -1399,6 +1596,7 @@
 
   # --- Settings validation ---
 
+  @TC-CLI-SET-019
   Scenario: Invalid settings are prevented from being saved
     Given a hypothetical settings form with a numeric input (e.g., notification delay)
     When the user enters a non-numeric value (e.g., &quot;abc&quot;)
@@ -1408,6 +1606,7 @@
 
   # --- Settings responsiveness ---
 
+  @TC-CLI-SET-020
   Scenario: Settings panel is accessible on mobile (320px viewport)
     Given the viewport width is 320px (mobile)
     When the user opens the settings
@@ -1415,12 +1614,35 @@
     And toggle switches and buttons are at least 44×44px for touch interaction
     And text is readable without zooming
 
+  @TC-CLI-SET-021
   Scenario: Settings layout adapts to small screens
     Given the viewport width is 375px (mobile)
     When the SettingsPage renders
     Then the layout is single-column
     And all controls (toggles, buttons) are vertically stacked
     And no controls are hidden or require horizontal scrolling
+</code></pre>
+<h2 id="trading-uifeature">trading-ui.feature</h2>
+<pre><code class="language-gherkin">@us-trade-001 @wip
+Feature: Pet Trading Marketplace UI — Browse Listings and Initiate Trade (US-TRADE-001)
+
+  # This feature is deferred and not yet implemented.
+  # The trading marketplace is planned for a future release.
+  # Scenarios tagged @future document the intended client-side flow.
+
+  Background:
+    Given the player app is loaded
+    And a valid &quot;pet_token&quot; is stored in localStorage
+
+  @future @TC-CLI-TRADE-001
+  Scenario: Owner browses marketplace listings and views available pets for trade
+    Given the owner navigates to &quot;/marketplace&quot;
+    And GET /api/v1/marketplace/listings responds HTTP 200 with a list of listed pets
+    When the MarketplacePage renders
+    Then a grid of ListingCard components is displayed
+    And each ListingCard shows the pet sprite, rarity badge, stat summary, and asking price
+    And a search/filter bar allows filtering by rarity and stat range
+    And an &quot;Offer Trade&quot; button is visible on each ListingCard
 </code></pre>
 <h2 id="training-uifeature">training-ui.feature</h2>
 <pre><code class="language-gherkin">Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAIN-001)
@@ -1433,6 +1655,7 @@
 
   # --- Happy path training ---
 
+  @TC-CLI-TRAIN-001
   Scenario: Owner performs a RUN training action and StatChangeIndicator appears
     Given the TrainingPage is showing three TrainingActionCard components labeled &quot;RUN&quot;, &quot;STRENGTH&quot;, and &quot;STAMINA&quot;
     And the &quot;actionsRemainingToday&quot; value is 3 (training_actions_per_day = 3)
@@ -1445,6 +1668,7 @@
     And the Speed StatBar in StatsPanel animates to the new speed value
     And GET /api/v1/pets/:petId is re-fetched
 
+  @TC-CLI-TRAIN-002
   Scenario: STRENGTH training action increments strength stat
     Given &quot;actionsRemainingToday&quot; is 2
     And POST /api/v1/training responds HTTP 200 with &quot;statDelta&quot;, &quot;updatedStats&quot;, and &quot;actionsRemainingToday&quot;
@@ -1453,6 +1677,7 @@
     And the StatChangeIndicator shows &quot;+X Strength&quot; for (training_stat_display_duration_seconds = 2) seconds
     And the Strength StatBar animates to the updated value
 
+  @TC-CLI-TRAIN-003
   Scenario: STAMINA training action increments stamina stat
     Given &quot;actionsRemainingToday&quot; is 1
     And POST /api/v1/training responds HTTP 200 with &quot;statDelta&quot;, &quot;updatedStats&quot;, and &quot;actionsRemainingToday&quot;
@@ -1462,6 +1687,7 @@
 
   # --- Daily cap enforcement ---
 
+  @TC-CLI-TRAIN-004
   Scenario: All training actions exhausted — cards disabled and DailyResetTimer appears
     Given the owner has already used all (training_actions_per_day = 3) daily training actions
     And GET /api/v1/pets/:petId responds HTTP 200 with &quot;actionsRemainingToday&quot;: 0
@@ -1471,6 +1697,7 @@
     And the DailyResetTimer has aria-live=&quot;polite&quot; and announces the remaining time throttled at 60-second intervals and at ≤ 5 minutes remaining
     And no &quot;Come back tomorrow&quot; or exhaustion message is shown without also showing the DailyResetTimer
 
+  @TC-CLI-TRAIN-005
   Scenario: Daily reset at UTC 00:00 re-enables training cards
     Given all (training_actions_per_day = 3) training actions were exhausted and the DailyResetTimer is showing
     And GET /api/v1/pets/:petId responds HTTP 200 with &quot;actionsRemainingToday&quot;: 3
@@ -1479,6 +1706,7 @@
     And the three TrainingActionCard &quot;Train&quot; buttons become enabled again
     And the DailyResetTimer component disappears from the page
 
+  @TC-CLI-TRAIN-006
   Scenario: Stat already at maximum — toast shown and that stat card stays disabled
     Given the pet&#x27;s speed stat is already at (pet_stat_max = 100)
     And POST /api/v1/training responds HTTP 400 with error code &quot;STAT_AT_MAXIMUM&quot;
@@ -1487,12 +1715,14 @@
     And the &quot;RUN&quot; action card &quot;Train&quot; button is disabled with a &quot;Max&quot; indicator
     And the &quot;STRENGTH&quot; and &quot;STAMINA&quot; action card buttons remain enabled
 
+  @TC-CLI-TRAIN-007
   Scenario: Training action renders with correct tab-order for keyboard navigation
     Given the TrainingPage is loaded with three action cards
     When the user navigates using the Tab key
     Then the focus order follows: &quot;RUN&quot; card → RUN Train button → &quot;STRENGTH&quot; card → STRENGTH Train button → &quot;STAMINA&quot; card → STAMINA Train button
     And each &quot;Train&quot; button is activatable via Enter or Space
 
+  @TC-CLI-TRAIN-008
   Scenario: HTTP 401 during training clears token and redirects to home
     Given the owner is on the TrainingPage
     And POST /api/v1/training responds HTTP 401
@@ -1502,6 +1732,7 @@
 
   # --- Server-side training behavior ---
 
+  @TC-CLI-TRAIN-009
   Scenario: Training action increments stat within valid range
     Given a pet with stat_speed = 25 and a valid petToken
     And the pet has remaining training actions today (&lt; 3 used)
@@ -1511,6 +1742,7 @@
     And new stat_speed is between 26 and 28 inclusive
     And a training_logs record is created with training_type, stat_delta, and stat_after values
 
+  @TC-CLI-TRAIN-010
   Scenario: Training action increments total_training_actions for level formula
     Given a pet with total_training_actions = 27 (current level = 2)
     When a training action is submitted successfully
@@ -1519,12 +1751,14 @@
     When 2 more training actions are submitted successfully
     Then total_training_actions = 30 and level = 3
 
+  @TC-CLI-TRAIN-011
   Scenario: Training disabled on banned pet returns HTTP 403
     Given a pet with is_banned = true and a valid petToken
     When POST /api/v1/training is called
     Then the system returns HTTP 403 with error code PET_BANNED
     And no training is applied
 
+  @TC-CLI-TRAIN-012
   Scenario: Daily training limit resets at UTC midnight
     Given a pet that completed 3 training actions at 23:59 UTC
     When the UTC day rolls over to 00:00 UTC
