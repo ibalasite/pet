@@ -6,14 +6,17 @@ This document describes the complete continuous integration and delivery pipelin
 
 ## Table of Contents
 
+This document defines the Continuous Integration and Continuous Deployment pipeline for pixel-pet-arena. It covers the full automation lifecycle from code commit through production deployment, including secret management, environment-specific strategies, rollback procedures, and monitoring integration. Use the links below to jump directly to any section; each section is self-contained and cross-references related sections where appropriate.
+
 1. [Pipeline Overview](#pipeline-overview)
-2. [GitHub Actions Workflows](#github-actions-workflows)
-3. [PR Gate](#pr-gate)
-4. [ArgoCD](#argocd)
-5. [Database Migrations](#database-migrations)
-6. [Secrets Management](#secrets-management)
-7. [Monitoring Integration](#monitoring-integration)
-8. [Jenkinsfile](#jenkinsfile)
+2. [Branching Strategy](#branching-strategy)
+3. [GitHub Actions Workflows](#github-actions-workflows)
+4. [PR Gate](#pr-gate)
+5. [ArgoCD](#argocd)
+6. [Database Migrations](#database-migrations)
+7. [Secrets Management](#secrets-management)
+8. [Monitoring Integration](#monitoring-integration)
+9. [Jenkinsfile](#jenkinsfile)
 
 ---
 
@@ -70,12 +73,52 @@ Developer workstation
 
 ### Trigger Conditions
 
+There is no deployed `dev` environment. Local development runs entirely on the developer's workstation using `supabase start` for a local Supabase stack and `pnpm test` for all automated checks. The first deployed environment is staging, which is triggered automatically on every push to the `develop` branch.
+
 | Event | Workflow triggered |
 |---|---|
+| Local workstation only (`supabase start` + `pnpm test`) | No workflow — local dev only, not deployed |
 | Pull request opened or synchronised (→ `develop` or `main`) | `ci.yml` |
 | Push to `develop` branch | `deploy-staging.yml` |
 | Tag push matching `v[0-9]*.[0-9]*.[0-9]*` | `deploy-production.yml` |
 | Manual `workflow_dispatch` on any workflow | All three workflows support manual runs |
+
+---
+
+## Branching Strategy
+
+### Branching Model
+
+pixel-pet-arena follows a trunk-based branching model with short-lived feature branches and two long-lived integration branches.
+
+**Branch naming conventions:**
+
+| Branch type | Pattern | Example |
+|---|---|---|
+| Feature branches | `feature/<ticket>-<slug>` | `feature/PPA-42-pet-battle-modal` |
+| Hotfix branches | `hotfix/<slug>` | `hotfix/fix-token-expiry` |
+| Release branches (if needed) | `release/<version>` | `release/1.3.0` |
+| Long-lived integration | `develop`, `main` | — |
+
+**Branch lifecycle:**
+
+1. All feature work is developed on `feature/*` branches cut from `develop`.
+2. Completed features are merged back into `develop` via a reviewed pull request that must pass the full PR gate (`ci.yml`).
+3. When `develop` is stable and ready to ship, it is promoted to production by pushing a semantic version tag (e.g., `git tag v1.3.0 && git push origin v1.3.0`). Release branches are optional for teams that need staged release preparation.
+4. `main` always reflects the last production-deployed version. The `deploy-production.yml` workflow commits updated Kubernetes manifests to `main` as part of the deploy.
+
+**Auto-deploy triggers:**
+
+- Pushing to the `develop` branch automatically triggers `deploy-staging.yml`, which builds, migrates, and deploys to the staging environment.
+- Pushing a version tag matching `v*` automatically triggers `deploy-production.yml`, which builds, requires manual approval, migrates, and deploys to production.
+
+**Hotfix and emergency path:**
+
+For urgent production fixes, cut a `hotfix/<slug>` branch directly from `main`. After the fix is validated:
+
+1. Open a PR from `hotfix/<slug>` targeting `main` — the PR gate runs as normal.
+2. After the PR merges, tag the resulting commit on `main` with a patch version tag (e.g., `v1.2.1`). The tag push triggers `deploy-production.yml` and follows the normal production deploy path, including the manual approval gate.
+3. Back-merge the hotfix into `develop` immediately to keep branches in sync.
 
 ---
 
