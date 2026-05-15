@@ -45,8 +45,8 @@ description: Pipeline Execution Manifest — 流水線執行摘要，記錄本�
 
 | 參數 | 值 | 說明 |
 |------|----|------|
-| `entity_count` | 42 | EDD.md classDiagram 中的 class 數量（grep -c '^\s*class '）；影響 SCHEMA min_table_count |
-| `rest_endpoint_count` | 28 | EDD.md 中的 REST 端點數（<<REST>>、<<Interface>>、HTTP 動詞）；若計算結果 < 5，使用保守預設值 10（避免過低門檻無意義）；影響 API min_endpoint_count |
+| `entity_count` | 40 | EDD.md classDiagram 中的 class 數量（grep -cE '^\s*class\s+[A-Za-z]' docs/EDD.md）；影響 SCHEMA min_table_count |
+| `rest_endpoint_count` | 33 | EDD.md 中的 REST 端點數（§5 API tables + inline refs，deduplicated，排除流程圖縮寫 POST /claim）；影響 API min_endpoint_count |
 | `user_story_count` | 18 | PRD.md 中 US- 標題數量（grep -c '^## US-\|^### US-'）；影響 RTM min_row_count、BDD min_scenario_count |
 | `arch_layer_count` | 19 | ARCH.md §3 Tech Stack 表格非標頭列數（最小值 4）；影響 test-plan min_h2_sections |
 
