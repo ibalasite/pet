@@ -8,6 +8,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   # --- Happy path training ---
 
+  @TC-CLI-TRAIN-001
   Scenario: Owner performs a RUN training action and StatChangeIndicator appears
     Given the TrainingPage is showing three TrainingActionCard components labeled "RUN", "STRENGTH", and "STAMINA"
     And the "actionsRemainingToday" value is 3 (training_actions_per_day = 3)
@@ -20,6 +21,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     And the Speed StatBar in StatsPanel animates to the new speed value
     And GET /api/v1/pets/:petId is re-fetched
 
+  @TC-CLI-TRAIN-002
   Scenario: STRENGTH training action increments strength stat
     Given "actionsRemainingToday" is 2
     And POST /api/v1/training responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
@@ -28,6 +30,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     And the StatChangeIndicator shows "+X Strength" for (training_stat_display_duration_seconds = 2) seconds
     And the Strength StatBar animates to the updated value
 
+  @TC-CLI-TRAIN-003
   Scenario: STAMINA training action increments stamina stat
     Given "actionsRemainingToday" is 1
     And POST /api/v1/training responds HTTP 200 with "statDelta", "updatedStats", and "actionsRemainingToday"
@@ -37,6 +40,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   # --- Daily cap enforcement ---
 
+  @TC-CLI-TRAIN-004
   Scenario: All training actions exhausted — cards disabled and DailyResetTimer appears
     Given the owner has already used all (training_actions_per_day = 3) daily training actions
     And GET /api/v1/pets/:petId responds HTTP 200 with "actionsRemainingToday": 0
@@ -46,6 +50,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     And the DailyResetTimer has aria-live="polite" and announces the remaining time throttled at 60-second intervals and at ≤ 5 minutes remaining
     And no "Come back tomorrow" or exhaustion message is shown without also showing the DailyResetTimer
 
+  @TC-CLI-TRAIN-005
   Scenario: Daily reset at UTC 00:00 re-enables training cards
     Given all (training_actions_per_day = 3) training actions were exhausted and the DailyResetTimer is showing
     And GET /api/v1/pets/:petId responds HTTP 200 with "actionsRemainingToday": 3
@@ -54,6 +59,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     And the three TrainingActionCard "Train" buttons become enabled again
     And the DailyResetTimer component disappears from the page
 
+  @TC-CLI-TRAIN-006
   Scenario: Stat already at maximum — toast shown and that stat card stays disabled
     Given the pet's speed stat is already at (pet_stat_max = 100)
     And POST /api/v1/training responds HTTP 400 with error code "STAT_AT_MAXIMUM"
@@ -62,12 +68,14 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     And the "RUN" action card "Train" button is disabled with a "Max" indicator
     And the "STRENGTH" and "STAMINA" action card buttons remain enabled
 
+  @TC-CLI-TRAIN-007
   Scenario: Training action renders with correct tab-order for keyboard navigation
     Given the TrainingPage is loaded with three action cards
     When the user navigates using the Tab key
     Then the focus order follows: "RUN" card → RUN Train button → "STRENGTH" card → STRENGTH Train button → "STAMINA" card → STAMINA Train button
     And each "Train" button is activatable via Enter or Space
 
+  @TC-CLI-TRAIN-008
   Scenario: HTTP 401 during training clears token and redirects to home
     Given the owner is on the TrainingPage
     And POST /api/v1/training responds HTTP 401
@@ -77,6 +85,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
 
   # --- Server-side training behavior ---
 
+  @TC-CLI-TRAIN-009
   Scenario: Training action increments stat within valid range
     Given a pet with stat_speed = 25 and a valid petToken
     And the pet has remaining training actions today (< 3 used)
@@ -86,6 +95,7 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     And new stat_speed is between 26 and 28 inclusive
     And a training_logs record is created with training_type, stat_delta, and stat_after values
 
+  @TC-CLI-TRAIN-010
   Scenario: Training action increments total_training_actions for level formula
     Given a pet with total_training_actions = 27 (current level = 2)
     When a training action is submitted successfully
@@ -94,12 +104,14 @@ Feature: Training UI — Training Action Flow and Daily Cap Enforcement (US-TRAI
     When 2 more training actions are submitted successfully
     Then total_training_actions = 30 and level = 3
 
+  @TC-CLI-TRAIN-011
   Scenario: Training disabled on banned pet returns HTTP 403
     Given a pet with is_banned = true and a valid petToken
     When POST /api/v1/training is called
     Then the system returns HTTP 403 with error code PET_BANNED
     And no training is applied
 
+  @TC-CLI-TRAIN-012
   Scenario: Daily training limit resets at UTC midnight
     Given a pet that completed 3 training actions at 23:59 UTC
     When the UTC day rolls over to 00:00 UTC

@@ -7,6 +7,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Settings page access ---
 
+  @TC-CLI-SET-001
   Scenario: Owner opens settings from navbar menu
     Given the player is on any page with the NavBar visible
     When the owner clicks a settings icon or menu button in the NavBar
@@ -14,6 +15,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     And options for "Theme", "Audio", and "Notifications" are visible
     And a "Close" button or Escape key dismisses the settings
 
+  @TC-CLI-SET-002
   Scenario: Settings preferences persist in localStorage
     Given the user is on the SettingsPage
     And the user changes the theme from "Dark" to "Light"
@@ -24,6 +26,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Dark mode / Light mode toggle ---
 
+  @TC-CLI-SET-003
   Scenario: User toggles dark mode on and off
     Given the SettingsPage shows a "Dark Mode" toggle switch
     And the default mode is "Dark"
@@ -32,18 +35,21 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     And text color inverts appropriately to maintain 4.5:1 contrast ratio
     And the toggle switch visual state updates to show "Light" is selected
 
+  @TC-CLI-SET-004
   Scenario: Dark mode colors maintain accessibility contrast ratios
     Given the dark mode is enabled
     When the page renders with dark background and light text
     Then the text color (e.g., #e8e8f0) on dark surface (#1a1a2e) has a contrast ratio of at least 4.5:1
     And all interactive elements (buttons, links) maintain 3:1 contrast for focus states
 
+  @TC-CLI-SET-005
   Scenario: Light mode colors maintain accessibility contrast ratios
     Given the light mode is enabled
     When the page renders
     Then the text color on light surface has a contrast ratio of at least 4.5:1
     And buttons and interactive elements meet the same contrast minimums
 
+  @TC-CLI-SET-006
   Scenario: Rarity badge colors adapt to theme
     Given a Legendary pet with rarity badge in Dark mode
     And the user switches to Light mode
@@ -53,6 +59,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Audio and sound settings ---
 
+  @TC-CLI-SET-007
   Scenario: Owner disables sound effects globally
     Given the SettingsPage shows a "Sound Effects" toggle
     And sound is enabled by default
@@ -60,12 +67,14 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     Then no sound is played for subsequent interactions (button clicks, stat changes, arena)
     And the setting is stored in localStorage
 
+  @TC-CLI-SET-008
   Scenario: Owner re-enables sound effects
     Given sound effects are currently disabled
     When the owner clicks the toggle to re-enable sound
     Then sound plays for the next interaction (button click)
     And a confirmation sound plays to indicate the toggle worked
 
+  @TC-CLI-SET-009
   Scenario: Sound setting does not affect reduced-motion behavior
     Given the user has "prefers-reduced-motion: reduce" enabled at the OS level
     And sound effects are enabled in settings
@@ -76,6 +85,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Notification preferences ---
 
+  @TC-CLI-SET-010
   Scenario: Owner enables/disables push notifications
     Given the SettingsPage shows a "Notifications" toggle
     And notifications are enabled by default
@@ -83,6 +93,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     Then no push notifications are sent for subsequent pet events (training complete, arena available)
     And the setting is stored in localStorage
 
+  @TC-CLI-SET-011
   Scenario: Owner views notification channels
     Given the owner navigates to Notification settings
     When the settings section expands
@@ -92,6 +103,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
       - Pet level up (enabled by default)
     And the owner can toggle each channel independently
 
+  @TC-CLI-SET-012
   Scenario: Owner enables daily training reminder notification
     Given notification reminders are disabled
     When the owner checks the "Daily training reminder" checkbox
@@ -101,12 +113,14 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Settings form behavior ---
 
+  @TC-CLI-SET-013
   Scenario: Changes to settings are applied immediately
     Given the user is on the SettingsPage with the theme set to "Dark"
     When the user clicks the theme toggle to "Light"
     Then the page theme changes immediately without requiring a save button
     And no "Save Settings" action is required
 
+  @TC-CLI-SET-014
   Scenario: Settings modal or panel can be closed without saving
     Given the SettingsPage is open and the user has made changes
     When the user clicks the X button or presses Escape
@@ -114,6 +128,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     And all changes are persisted (no "Cancel" or "Revert" action needed)
     And the user is returned to the previous page
 
+  @TC-CLI-SET-015
   Scenario: Reset to defaults button restores original settings
     Given the user has customized multiple settings (theme, sound, notifications)
     When a "Reset to Defaults" button is visible and clicked
@@ -125,6 +140,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Accessibility of settings controls ---
 
+  @TC-CLI-SET-016
   Scenario: Settings toggle switches are keyboard operable
     Given the SettingsPage is open with toggle switches for theme and sound
     When the user navigates using Tab to a toggle switch
@@ -132,6 +148,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     Then the toggle state changes
     And a visual focus indicator is visible on the toggle
 
+  @TC-CLI-SET-017
   Scenario: Settings labels are properly associated with inputs
     Given the SettingsPage shows "Dark Mode" label with a toggle switch
     When inspected in the browser DevTools
@@ -139,6 +156,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     Or the label wraps the input element
     And screen readers correctly announce the label and current state
 
+  @TC-CLI-SET-018
   Scenario: Settings form has proper heading hierarchy
     Given the SettingsPage is open
     When inspected for heading structure
@@ -148,6 +166,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Settings validation ---
 
+  @TC-CLI-SET-019
   Scenario: Invalid settings are prevented from being saved
     Given a hypothetical settings form with a numeric input (e.g., notification delay)
     When the user enters a non-numeric value (e.g., "abc")
@@ -157,6 +176,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
 
   # --- Settings responsiveness ---
 
+  @TC-CLI-SET-020
   Scenario: Settings panel is accessible on mobile (320px viewport)
     Given the viewport width is 320px (mobile)
     When the user opens the settings
@@ -164,6 +184,7 @@ Feature: Settings and Preferences UI — Theme Toggle, Audio, Notifications (Use
     And toggle switches and buttons are at least 44×44px for touch interaction
     And text is readable without zooming
 
+  @TC-CLI-SET-021
   Scenario: Settings layout adapts to small screens
     Given the viewport width is 375px (mobile)
     When the SettingsPage renders

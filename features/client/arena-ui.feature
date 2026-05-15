@@ -7,6 +7,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
 
   # --- Mode selection and arena entry ---
 
+  @TC-CLI-ARENA-001
   Scenario: Owner selects RACE mode and clicks Enter Arena — matchmaking begins
     Given the ModeSelector component shows two options: "RACE" and "SUMO"
     And no prior HTTP 429 rate limit response is stored in the Zustand arena slice
@@ -17,6 +18,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     And the MatchmakingStatus component appears with text "Finding opponent..."
     And the MatchmakingStatus has aria-live="polite" and aria-busy="true"
 
+  @TC-CLI-ARENA-002
   Scenario: Opponent found within matchmaking timeout — battle animation plays
     Given the MatchmakingStatus is showing "Finding opponent..."
     And the owner has clicked the "Enter Arena" button in PreBattlePanel
@@ -27,6 +29,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     And the battle animation lasts between (arena_match_duration_min_seconds = 5) and (arena_match_duration_max_seconds = 15) seconds
     And the app navigates to "/arena/result/:matchId" after the animation completes
 
+  @TC-CLI-ARENA-003
   Scenario: No opponent found — AIOfferModal is shown after 30-second timeout
     Given the owner has clicked the "Enter Arena" button in PreBattlePanel
     And POST /api/v1/arena/enter responds HTTP 408 with error code "MATCHMAKING_TIMEOUT" after the (arena_matchmaking_timeout_seconds = 30)-second timeout elapses
@@ -36,6 +39,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     And the modal has a focus trap: Tab cycles focus within the modal while it is open
     And the modal is dismissible via the Escape key
 
+  @TC-CLI-ARENA-004
   Scenario: User accepts AI opponent from AIOfferModal — battle proceeds
     Given the AIOfferModal is visible after a matchmaking timeout
     And the selected battle mode is "RACE"
@@ -46,6 +50,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
 
   # --- Rate limit UI ---
 
+  @TC-CLI-ARENA-005
   Scenario: Arena rate limit reached — RateLimitBanner shown and Enter Arena disabled
     Given the owner has already entered (arena_rate_limit_battles_per_hour_default = 10) arena battles in the current hour
     And POST /api/v1/arena/enter responds HTTP 429 with a "Retry-After" header
@@ -55,12 +60,14 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     And the RateLimitBanner displays a countdown timer showing the remaining time until the rate limit resets
     And the "Enter Arena" button in PreBattlePanel is disabled for the duration of the cooldown
 
+  @TC-CLI-ARENA-006
   Scenario: Rate limit countdown expires — Enter Arena button re-enabled
     Given the RateLimitBanner is visible with a countdown timer
     When the Retry-After duration elapses
     Then the RateLimitBanner component disappears
     And the "Enter Arena" button becomes enabled again
 
+  @TC-CLI-ARENA-007
   Scenario: Banned pet cannot enter arena
     Given the player's pet has been banned by an admin
     And POST /api/v1/arena/enter responds HTTP 403 with error code "PET_BANNED"
@@ -71,6 +78,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
 
   # --- Battle result display ---
 
+  @TC-CLI-ARENA-008
   Scenario: Battle result page shows WIN card with stat comparison and share button
     Given the match is complete and the player's pet won
     And the app has navigated to "/arena/result/:matchId"
@@ -80,6 +88,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     And the StatComparison component shows both pets' stats side by side
     And the ShareBattleButton component is visible and copies the public "/arena/result/:matchId" URL when clicked
 
+  @TC-CLI-ARENA-009
   Scenario: Battle result page shows LOSS card
     Given the match is complete and the player's pet lost
     And the app has navigated to "/arena/result/:matchId"
@@ -87,6 +96,7 @@ Feature: Arena UI — Enter Arena Flow, Rate Limit UI, and Battle Result Display
     When the ResultPage renders
     Then the BattleResultCard displays in "LOSS" variant
 
+  @TC-CLI-ARENA-010
   Scenario: SUMO mode is available alongside RACE in the ModeSelector
     Given the ArenaPage is loaded with the FF_ARENA_SUMO feature flag enabled
     And both "RACE" and "SUMO" option buttons are visible and focusable

@@ -7,6 +7,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
 
   # --- Food inventory display ---
 
+  @TC-CLI-FOOD-001
   Scenario: Food inventory renders list of available food items with stat icons
     Given the FoodInventory component is visible on the PetPage
     And GET /api/v1/pets/:petId responds HTTP 200 with "foodItems" array containing food buff objects
@@ -18,6 +19,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
       - The buff type (permanent or temporary with duration)
       - A "Use" button
 
+  @TC-CLI-FOOD-002
   Scenario: Empty food inventory shows helpful message
     Given a pet with no food items in the inventory
     And GET /api/v1/pets/:petId returns HTTP 200 with "foodItems": []
@@ -26,12 +28,14 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
     And a hint "Earn food by battling or completing training streaks" is shown
     And no FoodItem cards are rendered
 
+  @TC-CLI-FOOD-003
   Scenario: Food item card displays buff duration for temporary buffs
     Given a FoodItem with isPermanent = false and expiresAt = "2026-05-05T10:30:00Z"
     When the FoodItem card renders
     Then the card displays the remaining duration (e.g., "Expires in 2h 30m")
     And the duration countdown updates in real-time
 
+  @TC-CLI-FOOD-004
   Scenario: Food item card displays "Permanent" label for permanent buffs
     Given a FoodItem with isPermanent = true
     When the FoodItem card renders
@@ -40,6 +44,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
 
   # --- Apply food buff interaction ---
 
+  @TC-CLI-FOOD-005
   Scenario: Owner clicks "Use" button on food item and stat increments
     Given the FoodInventory shows a food item with stat = "speed" and magnitude = 5
     And the pet's current speed = 45
@@ -51,6 +56,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
     And a glow animation appears around the pet sprite (warm glow color)
     And GET /api/v1/pets/:petId is re-fetched to refresh all stats
 
+  @TC-CLI-FOOD-006
   Scenario: Buff stat already at maximum — use button disabled with tooltip
     Given a pet with speed = (pet_stat_max = 100)
     And a food item that targets the speed stat
@@ -58,6 +64,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
     Then the "Use" button is disabled (grayed out)
     And a tooltip appears on hover: "This stat is already at maximum"
 
+  @TC-CLI-FOOD-007
   Scenario: HTTP 400 STAT_AT_MAXIMUM response shows toast error
     Given a pet with strength = 100 and a food item targeting strength
     And POST /api/v1/pets/:petId/feed responds HTTP 400 with error code "STAT_AT_MAXIMUM"
@@ -67,6 +74,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
 
   # --- Stat bar buff indicator ---
 
+  @TC-CLI-FOOD-008
   Scenario: Temporary buff applied — buff badge appears on StatBar with countdown
     Given the owner has applied a temporary speed buff that expires in 45 minutes
     And the response "buffApplied": {stat: "speed", magnitude: 5, isPermanent: false, expiresAt: "..."}
@@ -75,6 +83,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
     And the badge displays a countdown timer: "Expires in 45m"
     And the timer updates every second and decrements
 
+  @TC-CLI-FOOD-009
   Scenario: Buff expires — buff badge disappears from StatBar
     Given a Speed StatBar showing a temporary buff expiring in 30 seconds
     When 30 seconds elapse and the buff expiry time passes
@@ -82,6 +91,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
     And the stat value remains elevated (the buff effect is already applied to the base stat)
     And the countdown timer stops and is removed from the page
 
+  @TC-CLI-FOOD-010
   Scenario: Permanent buff applied — buff badge shown without countdown
     Given the owner has applied a permanent buff to strength
     And the response "buffApplied": {stat: "strength", magnitude: 10, isPermanent: true, expiresAt: null}
@@ -89,6 +99,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
     Then the Strength StatBar shows a buff badge indicating a permanent buff
     And no countdown timer appears on the badge
 
+  @TC-CLI-FOOD-011
   Scenario: Multiple buffs on same stat displayed on StatBar
     Given a Speed StatBar with two active buffs (e.g., temporary +3 and permanent +5)
     When the StatsPanel renders
@@ -98,6 +109,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
 
   # --- Food use animation ---
 
+  @TC-CLI-FOOD-012
   Scenario: Pet sprite plays animation when food is applied
     Given the owner clicks "Use" on a food item
     And POST /api/v1/pets/:petId/feed responds HTTP 200
@@ -107,6 +119,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
       - A warm glow effect surrounds the pet (200ms)
     And the animation completes before the StatBar animation starts
 
+  @TC-CLI-FOOD-013
   Scenario: Reduced motion disables food use animation
     Given the user has "prefers-reduced-motion: reduce" enabled
     When the owner applies a food buff
@@ -116,12 +129,14 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
 
   # --- Multiple food items and inventory management ---
 
+  @TC-CLI-FOOD-014
   Scenario: Multiple food items of same type shown separately in inventory
     Given the pet has 3 identical "Speed +5" food items in the inventory
     When the FoodInventory renders
     Then three separate FoodItem cards are displayed (one for each)
     And the owner can use any of them by clicking the "Use" button on the desired card
 
+  @TC-CLI-FOOD-015
   Scenario: Food item removed from inventory after use
     Given the FoodInventory shows a food item card
     And the owner clicks "Use" and the API call succeeds
@@ -131,6 +146,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
 
   # --- Keyboard navigation ---
 
+  @TC-CLI-FOOD-016
   Scenario: Food items are keyboard navigable with Tab and activatable with Enter
     Given the FoodInventory is rendered with multiple FoodItem cards
     When the user navigates using Tab
@@ -140,6 +156,7 @@ Feature: Food System UI — Inventory, Apply Buff, and Buff Indicator Display (U
 
   # --- Accessibility for buff indicators ---
 
+  @TC-CLI-FOOD-017
   Scenario: Buff countdown timer announced to screen readers
     Given a temporary buff with remaining duration on a StatBar
     When the countdown timer updates
