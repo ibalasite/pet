@@ -10,7 +10,7 @@
 
 This document summarizes the 12 server-side BDD feature files that specify the backend API and business logic for pixel-pet-arena. Each feature file contains Gherkin scenarios that validate acceptance criteria from the PRD.
 
-**Total Coverage:** 12 server features, 81 scenarios, 14 PRD user stories linked (including US-ADMIN-006 economy config and US-TRADE-001 marketplace deferred behind `FF_MARKETPLACE`).
+**Total Coverage:** 12 server features, 82 scenarios, 14 PRD user stories linked (including US-ADMIN-006 economy config and US-TRADE-001 marketplace deferred behind `FF_MARKETPLACE`).
 
 > The six feature files originally summarized in detail below cover the v1 P0 scope (arena, claim, GDPR, leaderboard, training, suspicious detection). The full list of 12 feature files (including `admin-moderation`, `admin-search-performance`, `battle-records`, `economy-config`, `rarity-distribution`, `trading-system`) is enumerated in `docs/RTM.md` §"Server-Side Features" and is the authoritative inventory.
 

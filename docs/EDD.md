@@ -1863,7 +1863,7 @@ sequenceDiagram
 | Auth | missing/invalid pet token | 401 | 拒絕 |
 | Forbidden | non-owner training | 403 | 拒絕 |
 | Not found | unknown petId | 404 | 拒絕 |
-| Conflict | already claimed, duplicate listing | 409 | 拒絕 |
+| Conflict | already claimed, duplicate listing（FF_MARKETPLACE — deferred） | 409 | 拒絕 |
 | Rate limit | too many requests | 429 | Retry-After header |
 | Timeout | matchmaking timeout | 408 | 提示 user |
 | Server | unexpected exception | 500 | 記錄 + 通用訊息 |

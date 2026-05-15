@@ -8,7 +8,7 @@
 - [ ] iOS Native
 - [ ] Android Native
 - [ ] Desktop App（Electron / macOS / Windows）
-- [ ] Game UI（Phaser 3 / HTML5 Canvas）
+- [x] Game UI（Phaser 3 / HTML5 Canvas）
 - [ ] Embedded / Kiosk
 
 ---

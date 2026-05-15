@@ -6,7 +6,7 @@
 | **Project** | pixel-pet-arena |
 | **Date** | 2026-05-08 |
 | **Version** | 1.1.0 |
-| **Last refresh** | 2026-05-08 (align-fix: regenerated against `features/` after dedup of `features/server/`, US-GEN-001 → US-PET-002 + US-RARITY-001 retag, addition of `economy-config.feature`) |
+| **Last refresh** | 2026-05-15 (align-fix gencode: BDD Tags column regenerated from actual @TC-SRV-*/CLI-* tags; client inventory updated to 10 files/133 scenarios; admin-portal count 13→21; trading-ui.feature added as ⏸ Deferred) |
 
 ---
 
@@ -28,7 +28,7 @@ The companion machine-readable view of this document lives at `docs/RTM.csv` and
 
 This section maps all 21 BDD feature files to their corresponding user stories and test layers.
 
-**Total**: 12 server feature files + 9 client feature files = **21 files / 206 scenarios**.
+**Total**: 12 server feature files + 10 client feature files = **22 files / 215 scenarios**.
 
 ### Server-Side Features (12 files, 82 scenarios)
 
@@ -48,7 +48,7 @@ This section maps all 21 BDD feature files to their corresponding user stories a
 | `features/trading-system.feature` | 10 | US-TRADE-001 (deferred behind `FF_MARKETPLACE`) | Backend API | ⏸ Deferred (P2) |
 | **Total** | **82** | — | — | — |
 
-### Client-Side Features (9 files, 124 scenarios)
+### Client-Side Features (10 files, 133 scenarios)
 
 | Feature File | Scenarios | US Stories | Layer | Coverage |
 |---|---|---|---|---|
@@ -59,9 +59,10 @@ This section maps all 21 BDD feature files to their corresponding user stories a
 | `features/client/arena-ui.feature` | 10 | US-ARENA-001, US-ARENA-002 | Frontend UI | ✅ Covered |
 | `features/client/leaderboard-ui.feature` | 10 | US-BOARD-001, US-RARITY-001 | Frontend UI | ✅ Covered |
 | `features/client/battle-records.feature` | 19 | US-RECORD-001 | Frontend UI | ✅ Covered |
-| `features/client/admin-portal.feature` | 13 | US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006 | Frontend Admin | ✅ Covered |
+| `features/client/admin-portal.feature` | 21 | US-ADMIN-001, US-ADMIN-002, US-ADMIN-003, US-ADMIN-004, US-ADMIN-005, US-ADMIN-006 | Frontend Admin | ✅ Covered |
 | `features/client/settings.feature` | 21 | US-AUTH-002 (settings/account preferences) | Frontend UI | ✅ Covered |
-| **Total** | **124** | — | — | — |
+| `features/client/trading-ui.feature` | 1 | US-TRADE-001 (deferred behind `FF_MARKETPLACE`) | Frontend UI | ⏸ Deferred (P2) |
+| **Total** | **133** | — | — | — |
 
 > **Cleanup note** (2026-05-08): the previous duplicate `features/server/` directory has been removed (was byte-identical to `features/`) and the canonical path is now flat (`features/<name>.feature` for server-side, `features/client/<name>.feature` for client-side). RTM rows below cite only the canonical paths.
 
@@ -96,25 +97,25 @@ This section maps all 21 BDD feature files to their corresponding user stories a
 
 | US-ID | Requirement | BDD-Server | BDD-Client | Unit | Integration | Perf / Security | BDD Tags (sample) | Coverage Status |
 |---|---|---|---|---|---|---|---|---|
-| US-PET-001 | Random Pet Display (Guest Mode) | — | `features/client/pet-display.feature` (12) | Sprite generation | — | Visual regression: pixel rendering | `@TC-PET-001-1`, `@TC-PET-001-2` | ✅ Covered |
-| US-PET-002 | Procedural Pixel Pet Generation | `features/rarity-distribution.feature` (5) | `features/client/pet-display.feature` (12) | Combination space; deterministic seed | — | Statistical chi-square (rarity dist) | `@TC-PET-002-1`, `@TC-PET-002-2` | ✅ Covered |
-| US-AUTH-001 | Email Claim Flow | `features/claim-flow.feature` (8) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | Email sending; one-time token | Security: email enumeration prevention; COPPA | `@TC-AUTH-001-1`, `@TC-AUTH-001-2` | ✅ Covered |
-| US-AUTH-002 | Returning Pet Owner Access | `features/claim-flow.feature` (8), `features/gdpr-erasure.feature` (8) | `features/client/claim-flow-ui.feature` (10), `features/client/settings.feature` (21) | — | GDPR erasure path | Security: invalid URL → 404 | `@TC-AUTH-002-1`, `@TC-AUTH-002-2` | ✅ Covered |
-| US-TRAIN-001 | Pet Training System | `features/training-food.feature` (3) | `features/client/training-ui.feature` (12) | Stat increment; stat max cap | Persistence | Visual regression: neglected state | `@TC-TRAIN-001-1`, `@TC-TRAIN-001-2` | ✅ Covered |
-| US-FOOD-001 | Special Food System | `features/training-food.feature` (3) | `features/client/food-system.feature` (17) | Buff application; stat max block | Food buff persistence | — | `@TC-FOOD-001-1`, `@TC-FOOD-001-2` | ✅ Covered |
-| US-ARENA-001 | Arena Racing Competition | `features/arena-battle.feature` (7) | `features/client/arena-ui.feature` (10) | Outcome calculation | Battle record save | Security: rate limit enforcement | `@TC-ARENA-001-1`, `@TC-ARENA-001-2` | ✅ Covered |
-| US-ARENA-002 | Sumo Arena Mode | `features/arena-battle.feature` (7) | `features/client/arena-ui.feature` (10) | Sumo outcome calculation | — | — | `@TC-ARENA-002-1`, `@TC-ARENA-002-2` | ✅ Covered |
-| US-BOARD-001 | Global Leaderboard | `features/leaderboard.feature` (8) | `features/client/leaderboard-ui.feature` (10) | — | Leaderboard update lag | — | `@TC-BOARD-001-1`, `@TC-BOARD-001-2` | ✅ Covered |
-| US-RECORD-001 | Battle Records Page | `features/battle-records.feature` (7) | `features/client/battle-records.feature` (19) | Battle record save/retrieve | Open Graph meta | — | `@TC-RECORD-001-1`, `@TC-RECORD-001-2` | ✅ Covered |
-| US-RARITY-001 | Rarity Scoring | `features/rarity-distribution.feature` (5) | `features/client/leaderboard-ui.feature` (10) | — | — | Visual regression: Legendary border | `@TC-RARITY-001-1`, `@TC-RARITY-001-2` | ✅ Covered |
-| US-TRADE-001 | Pet Trading Marketplace | `features/trading-system.feature` (10) — gated by `FF_MARKETPLACE`, excluded from CI until DAU ≥1,000 | — | — | — | — | `@TC-TRADE-001-1` `@FF_MARKETPLACE` | ⏸ Deferred (P2) |
-| US-ADMIN-001 | Admin Pet Management | `features/admin-moderation.feature` (11), `features/admin-search-performance.feature` (6) | `features/client/admin-portal.feature` (13) | — | Ban propagation | Perf: search ≤2 s for 1 M records | `@TC-ADMIN-001-1`, `@TC-ADMIN-001-2` | ✅ Covered |
-| US-ADMIN-002 | Admin Leaderboard Moderation | `features/leaderboard.feature` (8), `features/admin-moderation.feature` (11) | `features/client/admin-portal.feature` (13) | — | — | — | `@TC-ADMIN-002-1`, `@TC-ADMIN-002-2` | ✅ Covered |
-| US-ADMIN-003 | Admin Runtime Parameter Tuning | No dedicated server scenario; covered via integration test (config cache refresh verified in API response) | `features/client/admin-portal.feature` (13) | — | Config cache refresh | — | `@TC-ADMIN-003-1`, `@TC-ADMIN-003-2` | ✅ Covered |
-| US-ADMIN-004 | GDPR Data Erasure | `features/gdpr-erasure.feature` (8) | `features/client/admin-portal.feature` (13) | — | — | — | `@TC-ADMIN-004-1`, `@TC-ADMIN-004-2` | ✅ Covered |
-| US-ADMIN-005 | Suspicious Battle Detection | `features/suspicious-detection.feature` (3), `features/admin-moderation.feature` (11) | `features/client/admin-portal.feature` (13) | — | — | — | `@TC-ADMIN-005-1`, `@TC-ADMIN-005-2` | ✅ Covered |
-| US-ADMIN-006 | Game Economy Configuration | `features/economy-config.feature` (6) | `features/client/admin-portal.feature` (13) | — | Config cache refresh; food buff multiplier | — | `@TC-ADMIN-006-1`, `@TC-ADMIN-006-2` | ✅ Covered |
-| NFR-XCUT-001 | Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention | `features/claim-flow.feature` (8) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | One-time token | Security: email enumeration; rate limit; COPPA | `@TC-XCUT-001-1`, `@TC-XCUT-001-2` | ✅ Covered |
+| US-PET-001 | Random Pet Display (Guest Mode) | — | `features/client/pet-display.feature` (12) | Sprite generation | — | Visual regression: pixel rendering | `@TC-CLI-PET-001`, `@TC-CLI-PET-002` | ✅ Covered |
+| US-PET-002 | Procedural Pixel Pet Generation | `features/rarity-distribution.feature` (5) | `features/client/pet-display.feature` (12) | Combination space; deterministic seed | — | Statistical chi-square (rarity dist) | `@TC-SRV-RARITY-001`, `@TC-CLI-PET-001` | ✅ Covered |
+| US-AUTH-001 | Email Claim Flow | `features/claim-flow.feature` (8) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | Email sending; one-time token | Security: email enumeration prevention; COPPA | `@TC-SRV-CLAIM-001`, `@TC-CLI-CLAIM-001` | ✅ Covered |
+| US-AUTH-002 | Returning Pet Owner Access | `features/claim-flow.feature` (8), `features/gdpr-erasure.feature` (8) | `features/client/claim-flow-ui.feature` (10), `features/client/settings.feature` (21) | — | GDPR erasure path | Security: invalid URL → 404 | `@TC-SRV-GDPR-001`, `@TC-CLI-CLAIM-001`, `@TC-CLI-SET-001` | ✅ Covered |
+| US-TRAIN-001 | Pet Training System | `features/training-food.feature` (3) | `features/client/training-ui.feature` (12) | Stat increment; stat max cap | Persistence | Visual regression: neglected state | `@TC-SRV-TRAIN-001`, `@TC-CLI-TRAIN-001` | ✅ Covered |
+| US-FOOD-001 | Special Food System | `features/training-food.feature` (3) | `features/client/food-system.feature` (17) | Buff application; stat max block | Food buff persistence | — | `@TC-SRV-TRAIN-003`, `@TC-CLI-FOOD-001` | ✅ Covered |
+| US-ARENA-001 | Arena Racing Competition | `features/arena-battle.feature` (7) | `features/client/arena-ui.feature` (10) | Outcome calculation | Battle record save | Security: rate limit enforcement | `@TC-SRV-ARENA-001`, `@TC-CLI-ARENA-001` | ✅ Covered |
+| US-ARENA-002 | Sumo Arena Mode | `features/arena-battle.feature` (7) | `features/client/arena-ui.feature` (10) | Sumo outcome calculation | — | — | `@TC-SRV-ARENA-004`, `@TC-CLI-ARENA-001` | ✅ Covered |
+| US-BOARD-001 | Global Leaderboard | `features/leaderboard.feature` (8) | `features/client/leaderboard-ui.feature` (10) | — | Leaderboard update lag | — | `@TC-SRV-BOARD-001`, `@TC-CLI-BOARD-001` | ✅ Covered |
+| US-RECORD-001 | Battle Records Page | `features/battle-records.feature` (7) | `features/client/battle-records.feature` (19) | Battle record save/retrieve | Open Graph meta | — | `@TC-SRV-REC-001`, `@TC-CLI-REC-001` | ✅ Covered |
+| US-RARITY-001 | Rarity Scoring | `features/rarity-distribution.feature` (5) | `features/client/leaderboard-ui.feature` (10) | — | — | Visual regression: Legendary border | `@TC-SRV-RARITY-001`, `@TC-CLI-BOARD-001` | ✅ Covered |
+| US-TRADE-001 | Pet Trading Marketplace | `features/trading-system.feature` (10) — gated by `FF_MARKETPLACE`, excluded from CI until DAU ≥1,000 | `features/client/trading-ui.feature` (1) — `@future @wip` | — | — | — | `@TC-SRV-TRADE-001`, `@TC-CLI-TRADE-001` `@FF_MARKETPLACE` | ⏸ Deferred (P2) |
+| US-ADMIN-001 | Admin Pet Management | `features/admin-moderation.feature` (11), `features/admin-search-performance.feature` (6) | `features/client/admin-portal.feature` (21) | — | Ban propagation | Perf: search ≤2 s for 1 M records | `@TC-SRV-MOD-001`, `@TC-SRV-SRCH-001`, `@TC-CLI-ADMIN-001` | ✅ Covered |
+| US-ADMIN-002 | Admin Leaderboard Moderation | `features/leaderboard.feature` (8), `features/admin-moderation.feature` (11) | `features/client/admin-portal.feature` (21) | — | — | — | `@TC-SRV-BOARD-003`, `@TC-SRV-MOD-001`, `@TC-CLI-ADMIN-001` | ✅ Covered |
+| US-ADMIN-003 | Admin Runtime Parameter Tuning | No dedicated server scenario; covered via integration test (config cache refresh verified in API response) | `features/client/admin-portal.feature` (21) | — | Config cache refresh | — | `@TC-CLI-ADMIN-001` | ✅ Covered |
+| US-ADMIN-004 | GDPR Data Erasure | `features/gdpr-erasure.feature` (8) | `features/client/admin-portal.feature` (21) | — | — | — | `@TC-SRV-GDPR-001`, `@TC-SRV-GDPR-002`, `@TC-CLI-ADMIN-001` | ✅ Covered |
+| US-ADMIN-005 | Suspicious Battle Detection | `features/suspicious-detection.feature` (3), `features/admin-moderation.feature` (11) | `features/client/admin-portal.feature` (21) | — | — | — | `@TC-SRV-SUSP-001`, `@TC-SRV-MOD-001`, `@TC-CLI-ADMIN-001` | ✅ Covered |
+| US-ADMIN-006 | Game Economy Configuration | `features/economy-config.feature` (6) | `features/client/admin-portal.feature` (21) | — | Config cache refresh; food buff multiplier | — | `@TC-SRV-ECO-001`, `@TC-SRV-ECO-002`, `@TC-CLI-ADMIN-001` | ✅ Covered |
+| NFR-XCUT-001 | Cross-cutting non-functional: auth security hardening, rate limiting, COPPA age gate, email enumeration prevention | `features/claim-flow.feature` (8) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | One-time token | Security: email enumeration; rate limit; COPPA | `@TC-SRV-CLAIM-003`, `@TC-SRV-CLAIM-008`, `@TC-CLI-CLAIM-001` | ✅ Covered |
 
 ---
 

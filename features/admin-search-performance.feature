@@ -1,4 +1,4 @@
-Feature: Admin Search Performance SLA (US-ADMIN-003)
+Feature: Admin Search Performance SLA (US-ADMIN-001)
   As an admin
   I want to search through pet records quickly
   So that moderation tasks complete within reasonable time
