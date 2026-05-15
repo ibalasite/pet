@@ -333,7 +333,7 @@ graph TD
 | Global leaderboard | Must Have | O2, O4 | 1 sprint |
 | Battle records page (shareable URL) | Must Have | O4 | 1 sprint |
 | Rarity scoring system | Should Have | O4 | 1 sprint |
-| Sumo arena mode | Could Have | O2 | 2 sprints |
+| Sumo arena mode | Should Have | O2 | 2 sprints |
 | Pet trading marketplace | Won't Have (v1) | O5 | — |
 | Seasonal tournament system | Won't Have (v1) | O5 | — |
 | Social follow/friends | Won't Have (v1) | — | — |
@@ -910,7 +910,7 @@ stateDiagram-v2
 | NFR-SEC-10 | Arena rate limiting: max 10 battles per pet per hour enforced at API gateway level; Redis-backed counter with TTL |
 | NFR-SEC-11 | Admin portal requires separate authentication (password + TOTP); admin session tokens have a 4-hour expiry |
 | NFR-SEC-12 | Sensitive operations (email claim, data deletion) produce audit log entries with timestamp, IP (hashed), action type, and outcome |
-| NFR-SEC-13 | 授權模型：RBAC — Admin portal 強制角色型存取控制，四種角色（Super Admin / Moderator / Analyst / Support Agent，見 §19.2）；玩家端操作需有效 PetAccessToken；禁止跨角色權限提升 | RBAC 測試套件 |
+| NFR-SEC-13 | 授權模型：RBAC — Admin portal 強制角色型存取控制，四種角色（Super Admin / Moderator / Analyst / Support Agent，見 §19.2）；玩家端操作需有效 PetAccessToken；禁止跨角色權限提升；量測：RBAC 測試套件 |
 
 ### 7.3 Availability
 
@@ -1003,7 +1003,7 @@ All events must be captured in the analytics pipeline for funnel analysis and re
 | `claim_initiated` | User clicks "Claim This Pet" | is_after_interaction, time_on_page_seconds | Funnel step 1 |
 | `claim_email_submitted` | Email form submitted | — | Funnel step 2 |
 | `claim_email_delivered` | SendGrid delivery webhook | delivery_latency_ms | Email health |
-| `claim_code_entered` | User submits 6-digit claim password | is_first_attempt, attempt_number | Funnel step 3 |
+| `claim_password_entered` | User submits 6-digit claim password | is_first_attempt, attempt_number | Funnel step 3 |
 | `claim_completed` | Pet ownership bound | time_to_claim_minutes, pet_rarity | Conversion |
 | `training_performed` | Training action executed | training_type, stat_increased, new_stat_value | Engagement |
 | `food_item_consumed` | Food item used | food_type, stat_effect, is_temporary | Item usage |
@@ -1332,7 +1332,7 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 
 | User Story ID | AC# | Feature | Priority | BRD Objective | MoSCoW | Feature Flag | PDD §Section | EDD §Section | Test Case ID | Business Risk if Missing | Test Coverage | Status |
 |---|---|---------|:---:|:---:|:---:|---|---|---|---|---|---|---|
-| US-PET-001 | AC-001-1 … AC-001-6 | Random pixel pet display (guest) | P0 | O1 | Must | `FF_GUEST_PET_DISPLAY` | (TBD) | (TBD) | TC-PET-001-1 … TC-PET-001-6 | Acquisition funnel cannot start | E2E + Visual Regression | DRAFT |
+| US-PET-001 | AC-001-1 … AC-001-7 | Random pixel pet display (guest) | P0 | O1 | Must | `FF_GUEST_PET_DISPLAY` | (TBD) | (TBD) | TC-PET-001-1 … TC-PET-001-7 | Acquisition funnel cannot start | E2E + Visual Regression | DRAFT |
 | US-PET-002 | AC-002-1 … AC-002-6 | Procedural generation (>1B combinations) | P0 | O1, O4 | Must | `FF_PET_GENERATION` | (TBD) | (TBD) | TC-PET-002-1 … TC-PET-002-6 | Uniqueness/rarity perception fails | Unit + Integration | DRAFT |
 | US-AUTH-001 | AC-003-1 … AC-003-8 | Email claim flow (password + URL) | P0 | O1, O3 | Must | `FF_EMAIL_CLAIM` | (TBD) | (TBD) | TC-AUTH-001-1 … TC-AUTH-001-8 | Core identity layer absent; no persistence | E2E + Integration + Security | DRAFT |
 | US-AUTH-002 | AC-004-1 … AC-004-5 | Returning pet owner access | P0 | O1 | Must | `FF_EMAIL_CLAIM` | (TBD) | (TBD) | TC-AUTH-002-1 … TC-AUTH-002-5 | Claimed owners cannot return; Day-7 retention collapses | E2E | DRAFT |
