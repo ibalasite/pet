@@ -4,6 +4,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
   I want to list my pet for sale in the marketplace
   So that I can trade pets with other players
 
+  @TC-SRV-TRADE-001
   Scenario: Feature flag controls marketplace access
     Given FF_MARKETPLACE = false (feature disabled)
     When POST /api/v1/marketplace/listings is called with a valid petToken
@@ -13,6 +14,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And the same request is resubmitted
     Then the system returns HTTP 201 with created listing
 
+  @TC-SRV-TRADE-002
   Scenario: Create marketplace listing with price validation
     Given a pet owned by player A with petToken_A
     And pet stats: level = 5, rarity = RARE
@@ -26,6 +28,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
       | listed_at | ISO-8601 timestamp |
     And marketplace_listings row is created in PostgreSQL
 
+  @TC-SRV-TRADE-003
   Scenario: Listing price below minimum rejected
     Given a pet with minimum required price = 1500 credits
     When POST /api/v1/marketplace/listings is called with price_credits = 1400
@@ -33,6 +36,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And error message indicates minimum price requirement
     And no listing is created
 
+  @TC-SRV-TRADE-004
   Scenario: Anti-flip protection prevents rapid re-listing
     Given a pet sold in marketplace_transactions 3 days ago (within 7-day anti-flip window)
     And the same pet is owned by a new buyer (marketplace_trade_antiflip_protection_days = 7)
@@ -41,6 +45,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And error message is "This pet cannot be re-listed within 7 days of purchase"
     And no new listing is created
 
+  @TC-SRV-TRADE-005
   Scenario: Purchase listing transfers ownership and applies platform fee
     Given an active listing with price_credits = 1000 owned by seller_A
     And buyer_B with a valid petToken and sufficient credits
@@ -61,6 +66,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And seller_A receives 950 credits (1000 - 50 fee)
     And buyer_B receives ownership of the pet
 
+  @TC-SRV-TRADE-006
   Scenario: Cancel active listing
     Given an active listing created by player_A
     When DELETE /api/v1/marketplace/listings/:listingId is called with player_A's petToken
@@ -69,6 +75,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And marketplace_listings.completed_at is set to NOW()
     And the pet remains owned by player_A
 
+  @TC-SRV-TRADE-007
   Scenario: Only listing owner can cancel
     Given an active listing owned by player_A with listingId "list-001"
     And player_B with a different petToken
@@ -76,12 +83,14 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     Then the system returns HTTP 403 with error code NOT_OWNER
     And the listing remains active
 
+  @TC-SRV-TRADE-008
   Scenario: Purchase endpoint requires buyer authentication
     Given an active listing
     When POST /api/v1/marketplace/listings/:listingId/buy is called WITHOUT authentication
     Then the system returns HTTP 401 with error code UNAUTHORIZED
     And the listing is not marked as sold
 
+  @TC-SRV-TRADE-009
   Scenario: Browse marketplace listings
     Given 50 active marketplace listings with varying prices and rarities
     When GET /api/v1/marketplace/listings?page=1&limit=20&sortBy=price&order=asc is called
@@ -93,6 +102,7 @@ Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-T
     And listings are sorted by price ascending (lowest to highest)
     And each listing includes pet summary: petId, rarity, level, owner name (masked)
 
+  @TC-SRV-TRADE-010
   Scenario: Trade history private to pet owner
     Given a pet with completed sale in marketplace_transactions
     And the pet is now owned by a new buyer

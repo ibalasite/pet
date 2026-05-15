@@ -3,6 +3,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
   I want to ban disruptive pets and flag suspicious battles
   So that the game environment remains fair and enjoyable
 
+  @TC-SRV-MOD-001
   Scenario: Moderator bans pet with reason
     Given a pet with is_banned = false
     And a moderator_alice with role = 'moderator'
@@ -19,6 +20,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
       | target_id | pet_id |
       | detail | {"reason": "...", "previous_is_banned": false} |
 
+  @TC-SRV-MOD-002
   Scenario: Banned pet removed from leaderboard within SLA
     Given a pet currently ranked 15th on the leaderboard
     When POST /admin/api/pets/:petId/ban is called
@@ -28,6 +30,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
       | GET /api/v1/leaderboard | pet is not in top 100 |
       | pet appearance | pet is removed from results |
 
+  @TC-SRV-MOD-003
   Scenario: Banned pet blocked from arena entry
     Given a pet with is_banned = true
     And the pet owner with a valid petToken
@@ -36,6 +39,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
     And the matchmaking entry is NOT created
     And error message is "This pet has been banned from the arena"
 
+  @TC-SRV-MOD-004
   Scenario: Moderator unbans pet
     Given a pet with is_banned = true and a ban reason on file
     When POST /admin/api/pets/:petId/unban is called with reason = "Manual review confirmed legitimate play"
@@ -45,6 +49,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
     And pets.banned_at is NOT reset (immutable for audit)
     And an audit_log entry is created with action = "pet.unban"
 
+  @TC-SRV-MOD-005
   Scenario: Unban requires moderator role
     Given a read_only admin user
     When POST /admin/api/pets/:petId/unban is called
@@ -52,6 +57,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
     And error message is "Your role does not have permission for this action"
     And the ban status is NOT changed
 
+  @TC-SRV-MOD-006
   Scenario: Flag suspicious battle with reason
     Given a completed arena_match with matchId "match-uuid-001"
     And a moderator with role = 'moderator'
@@ -61,6 +67,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
     And arena_matches.flagged_at is set to current timestamp
     And an audit_log entry is created with action = "arena_match.flag"
 
+  @TC-SRV-MOD-007
   Scenario: Unflag battle
     Given a flagged battle with is_flagged = true
     When DELETE /admin/api/battles/:matchId/flag is called with reason = "Manual review confirmed legitimate outcome"
@@ -69,6 +76,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
     And arena_matches.flagged_at is cleared (set to NULL)
     And an audit_log entry is created with action = "arena_match.unflag"
 
+  @TC-SRV-MOD-008
   Scenario: Only moderator+ can flag battles
     Given a read_only admin user
     And a battle to flag
@@ -76,6 +84,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
     Then the system returns HTTP 403 with error code FORBIDDEN
     And the battle remains unflagged
 
+  @TC-SRV-MOD-009
   Scenario: Admin can view flagged battles list
     Given 25 flagged battles and 100 unflagged battles in the database
     When GET /admin/api/battles?flagged=true is called
@@ -85,6 +94,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
       | meta.total | 25 |
     And each battle includes: matchId, petAId, petBId, winnerId, is_flagged
 
+  @TC-SRV-MOD-010
   Scenario: Ban reason stored with character limit
     Given a moderator with a 600-character ban reason (exceeds 500-char limit)
     When POST /admin/api/pets/:petId/ban is called
@@ -92,6 +102,7 @@ Feature: Admin Moderation — Pet Banning and Battle Flagging
     And error message indicates "Reason must not exceed 500 characters"
     And no ban is applied
 
+  @TC-SRV-MOD-011
   Scenario: Audit log captures all ban/unban/flag operations
     Given a moderator performs: ban pet_A, flag battle_B, unban pet_C
     When GET /admin/api/audit?limit=10 is called

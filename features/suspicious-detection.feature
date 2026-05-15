@@ -1,5 +1,6 @@
 Feature: Suspicious Battle Detection (US-ADMIN-005)
 
+  @TC-SRV-SUSP-001
   Scenario: Pet is auto-flagged SUSPICIOUS after exceeding the battle threshold in the detection window
     Given pet "spammer-token-001" has completed more than (bot_detection_battles_threshold = 50) battles within the last (bot_detection_window_minutes = 60) minutes
     When the background detection job evaluates battle counts for all active pets
@@ -7,6 +8,7 @@ Feature: Suspicious Battle Detection (US-ADMIN-005)
     And a moderation alert is created in the admin review queue for "spammer-token-001"
     And no automatic ban is applied — the pet remains able to battle until a moderator acts
 
+  @TC-SRV-SUSP-002
   Scenario: Moderator reviews a SUSPICIOUS pet and submits an arena ban with a reason
     Given a moderator is authenticated with a valid httpOnly SameSite=Strict admin session cookie
     And pet "spammer-token-001" has status "SUSPICIOUS" in the moderation queue
@@ -16,6 +18,7 @@ Feature: Suspicious Battle Detection (US-ADMIN-005)
     And an entry is written to admin_audit_log with action "BAN", admin_id, ip_address_hash, and the reason in the detail JSONB column
     And the server responds with HTTP 200
 
+  @TC-SRV-SUSP-003
   Scenario: Banned pet cannot enter future arena matches
     Given pet "banned-token-002" has status "BANNED" in the database
     When "banned-token-002" attempts to join the matchmaking queue via POST /api/v1/arena/enter
