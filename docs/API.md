@@ -215,6 +215,8 @@ The `details` field is optional and only populated when additional structured co
 
 ### 4.2 HTTP Status Code Reference
 
+Client errors (4xx) indicate request problems; server errors (5xx) indicate platform failures.
+
 | HTTP Status | Meaning |
 |-------------|---------|
 | 200 | Success |
@@ -1101,7 +1103,14 @@ Browse active marketplace listings.
 
 **Auth**: None
 
-**Query parameters:** `?page=1&limit=20&sortBy=price|rarity|level&order=asc|desc`
+**Query parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `page` | integer | 1 | Page number (1-based). |
+| `limit` | integer | 20 | Results per page. Maximum 100. |
+| `sortBy` | string | (none) | Sort field: one of `price`, `rarity`, `level`. |
+| `order` | string | `asc` | Sort direction: `asc` or `desc`. |
 
 **Response (HTTP 200):**
 
@@ -1180,6 +1189,12 @@ Cancel an active listing. Only the listing's owner may cancel.
 
 **Auth**: Required (pet owner token — owner of listed pet)
 
+**Path parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `listingId` | UUID | ID of the marketplace listing to cancel. |
+
 **Response (HTTP 200):**
 
 ```json
@@ -1198,17 +1213,13 @@ Purchase a listing. A **5% platform fee** (`trade_transaction_fee_percent = 5`) 
 
 **Auth**: Required (pet owner token — buyer's token)
 
-**Request body:**
+**Path parameters:**
 
-```json
-{
-  "petToken": "dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
-}
-```
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `listingId` | UUID | ID of the listing to purchase. |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `petToken` | string | Yes | The buyer's pet ownership token. Used to authenticate the buyer and transfer ownership of the purchased pet to the buyer's identity. |
+**Request body:** No request body. The buyer is authenticated via the `Authorization: Bearer <petToken>` header.
 
 **Response (HTTP 200):**
 
@@ -1234,6 +1245,12 @@ Returns trade history for a pet. **Private** — only the pet's current owner ca
 **Note**: This endpoint provides supplementary trade history data. Upstream reference: PRD US-TRADE-001 AC; enabled under FF_MARKETPLACE feature flag.
 
 **Auth**: Required (pet owner token)
+
+**Path parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `petId` | UUID | Pet ID whose trade history is being retrieved. |
 
 **Response (HTTP 200):**
 
