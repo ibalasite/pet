@@ -241,7 +241,7 @@ All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical 
 | `--color-surface-base` | `#1a1a2e` | `oklch(12% 0.04 280)` | N/A (background) | Page background, primary canvas surface |
 | `--color-surface-raised` | `#242444` | `oklch(17% 0.05 280)` | N/A (background) | Cards, panels, modals, raised UI chrome |
 | `--color-surface-overlay` | `#2d2d5a` | `oklch(22% 0.07 280)` | N/A (background) | Hover states, selected states, secondary overlay |
-| `--color-neutral-50` | `#e8e8f0` | `oklch(93% 0.01 280)` | 12.4:1 (AAA) | Primary body text — highest contrast on dark base |
+| `--color-text-primary` | `#e8e8f0` | `oklch(93% 0.01 280)` | 12.4:1 (AAA) | Primary body text — highest contrast on dark base |
 | `--color-focus` | `#ffd700` | `oklch(90% 0.17 82)` | 3.1:1 (AA non-text) | Focus ring on all interactive elements |
 
 ### §3.2 Semantic / Functional Colors
@@ -298,7 +298,7 @@ The rarity color system is the core brand differentiator. Colors are selected fo
 **Logo clearance**: Minimum 16px (2 pixel grid units at 8px base) on all sides.
 
 **Logo color variants**:
-- Primary: `--color-neutral-50` (`#e8e8f0`) on dark surfaces
+- Primary: `--color-text-primary` (`#e8e8f0`) on dark surfaces
 - Inverted: `--color-surface-base` (`#1a1a2e`) on light surfaces
 - Accent: `--color-brand-accent` (`#fdcb6e`) for special promotional use only
 
