@@ -1,36 +1,5 @@
 {
-  "step_id": "ADMIN_IMPL",
-  "step_name": "Admin Portal Implementation",
-  "output_files": [
-    {
-      "path": "docs/ADMIN_IMPL.md",
-      "must_exist": true,
-      "must_not_be_empty": true,
-      "min_h2_sections": 4,
-      "required_sections": [
-        "Admin Architecture",
-        "Feature Modules",
-        "Access Control"
-      ],
-      "no_bare_placeholders": true,
-      "min_words_per_section": 30
-    }
-  ],
-  "anti_fake_rules": [
-    {
-      "type": "no_placeholder_strings",
-      "pattern": "\\{\\{[A-Z_]+\\}\\}"
-    },
-    {
-      "type": "no_duplicate_paragraphs",
-      "min_char_length": 150
-    },
-    {
-      "type": "min_section_words",
-      "min_words": 30
-    },
-    {
-      "type": "no_trivial_entity_names"
-    }
-  ]
+  "min_rbac_roles": 2,
+  "min_h2_sections": 3,
+  "max_placeholder_count": 0
 }

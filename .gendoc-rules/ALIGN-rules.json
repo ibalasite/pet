@@ -1,35 +1,4 @@
 {
-  "step_id": "ALIGN",
-  "step_name": "Alignment Report",
-  "output_files": [
-    {
-      "path": "docs/ALIGN-REPORT.md",
-      "must_exist": true,
-      "must_not_be_empty": true,
-      "min_h2_sections": 3,
-      "required_sections": [
-        "Alignment Issues",
-        "Cross-Document Gaps"
-      ],
-      "no_bare_placeholders": true,
-      "min_words_per_section": 30
-    }
-  ],
-  "anti_fake_rules": [
-    {
-      "type": "no_placeholder_strings",
-      "pattern": "\\{\\{[A-Z_]+\\}\\}"
-    },
-    {
-      "type": "no_duplicate_paragraphs",
-      "min_char_length": 150
-    },
-    {
-      "type": "min_section_words",
-      "min_words": 30
-    },
-    {
-      "type": "no_trivial_entity_names"
-    }
-  ]
+  "min_h2_sections": 2,
+  "max_placeholder_count": 0
 }

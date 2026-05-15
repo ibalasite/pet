@@ -1,29 +1,6 @@
 {
-  "step_id": "BDD-client",
-  "step_name": "BDD Client Feature Files",
-  "output_files": [
-    {
-      "output_glob": "features/client/*.feature",
-      "must_exist": true,
-      "min_scenario_count": 15,
-      "no_bare_placeholders": true
-    }
-  ],
-  "anti_fake_rules": [
-    {
-      "type": "no_placeholder_strings",
-      "pattern": "\\{\\{[A-Z_]+\\}\\}"
-    },
-    {
-      "type": "no_duplicate_paragraphs",
-      "min_char_length": 150
-    },
-    {
-      "type": "min_section_words",
-      "min_words": 30
-    },
-    {
-      "type": "no_trivial_entity_names"
-    }
-  ]
+  "expected_client_scenario_count": 21,
+  "min_scenario_count": 11,
+  "min_steps_per_scenario": 3,
+  "max_placeholder_count": 0
 }

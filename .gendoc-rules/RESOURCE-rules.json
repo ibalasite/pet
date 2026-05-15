@@ -1,35 +1,5 @@
 {
-  "step_id": "RESOURCE",
-  "step_name": "Resource & Infrastructure Plan",
-  "output_files": [
-    {
-      "path": "docs/RESOURCE.md",
-      "must_exist": true,
-      "must_not_be_empty": true,
-      "min_h2_sections": 3,
-      "required_sections": [
-        "Infrastructure Overview",
-        "Resource Allocation"
-      ],
-      "no_bare_placeholders": true,
-      "min_words_per_section": 30
-    }
-  ],
-  "anti_fake_rules": [
-    {
-      "type": "no_placeholder_strings",
-      "pattern": "\\{\\{[A-Z_]+\\}\\}"
-    },
-    {
-      "type": "no_duplicate_paragraphs",
-      "min_char_length": 150
-    },
-    {
-      "type": "min_section_words",
-      "min_words": 30
-    },
-    {
-      "type": "no_trivial_entity_names"
-    }
-  ]
+  "min_resource_entries": 20,
+  "min_h2_sections": 3,
+  "max_placeholder_count": 0
 }

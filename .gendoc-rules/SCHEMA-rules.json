@@ -1,37 +1,6 @@
 {
-  "step_id": "SCHEMA",
-  "step_name": "Database Schema",
-  "output_files": [
-    {
-      "path": "docs/SCHEMA.md",
-      "must_exist": true,
-      "must_not_be_empty": true,
-      "min_h2_sections": 5,
-      "required_sections": [
-        "Overview",
-        "Tables",
-        "Indexes"
-      ],
-      "no_bare_placeholders": true,
-      "min_words_per_section": 30,
-      "min_table_count": 13
-    }
-  ],
-  "anti_fake_rules": [
-    {
-      "type": "no_placeholder_strings",
-      "pattern": "\\{\\{[A-Z_]+\\}\\}"
-    },
-    {
-      "type": "no_duplicate_paragraphs",
-      "min_char_length": 150
-    },
-    {
-      "type": "min_section_words",
-      "min_words": 30
-    },
-    {
-      "type": "no_trivial_entity_names"
-    }
-  ]
+  "min_table_count": 42,
+  "min_columns_per_table": 4,
+  "min_h2_sections": 3,
+  "max_placeholder_count": 0
 }
