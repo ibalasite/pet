@@ -27,7 +27,7 @@
 
 ## Change Log
 
-This change log tracks all versioned revisions to the CLIENT_IMPL specification for the pixel-pet-arena player application. Each entry notes the scope of changes made during the gendoc review cycle.
+This change log tracks all versioned revisions to the CLIENT_IMPL specification for the pixel-pet-arena player application. Each entry records the detailed scope of changes made during the gendoc review cycle.
 
 | Version | Date | Author | Change Summary |
 |---------|------|--------|----------------|
@@ -438,7 +438,7 @@ export function createPetGame(parent: HTMLElement): Phaser.Game {
 }
 
 // src/components/arena/ArenaScene.tsx — separate game instance for battle canvas
-import { ArenaBattleScene } from './scenes/ArenaBattleScene';
+import { ArenaBattleScene } from '../canvas/scenes/ArenaBattleScene';
 
 export function createArenaGame(parent: HTMLElement): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
