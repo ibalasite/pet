@@ -107,6 +107,118 @@ Validates bot/spam detection and admin moderation workflow.
 
 ---
 
+## 7. Admin Moderation (`features/admin-moderation.feature`)
+
+**Linked PRD User Stories:** US-ADMIN-001, US-ADMIN-005  
+**Scenarios:** 11
+
+Validates admin moderation actions — pet banning, battle flagging, and audit logging.
+
+- **Moderator Bans Pet**: Moderator bans pet with reason; reason stored with 500-char limit
+- **Ban Leaderboard Removal**: Banned pet removed from leaderboard within SLA (5 min)
+- **Arena Block**: Banned pet blocked from arena entry (HTTP 403 PET_BANNED)
+- **Unban Flow**: Moderator unbans pet; requires moderator role
+- **Battle Flag**: Flag/unflag suspicious battle with reason
+- **RBAC Guard**: Only moderator+ can flag battles
+- **Audit Capture**: All ban/unban/flag operations logged with admin_id + ip_address_hash
+
+**Key Constants Referenced:** `admin_moderation_reason_max_chars = 500`, `leaderboard_ban_reflection_time_minutes = 5`
+
+---
+
+## 8. Battle Records (`features/battle-records.feature`)
+
+**Linked PRD User Stories:** US-RECORD-001  
+**Scenarios:** 7
+
+Validates battle history pagination, public access, and OG card generation.
+
+- **Last 20 Battles**: Returns last 20 battles with pagination cursor (AC-010-1)
+- **Fewer Than 20**: All records shown when fewer than 20 exist
+- **Pagination Cursor**: Next batch available via cursor
+- **OG Meta Tags**: Correct Open Graph meta tags generated for each battle record
+- **Full Fields**: Battle record details include all required fields (mode, winner, duration, stats)
+- **Public Access**: Endpoint accessible without authentication
+- **AI Battles**: AI opponent battles marked as such in records
+
+**Key Constants Referenced:** `arena_battle_records_display = 20`
+
+---
+
+## 9. Economy Configuration (`features/economy-config.feature`)
+
+**Linked PRD User Stories:** US-ADMIN-006  
+**Scenarios:** 6
+
+Validates admin-tunable game economy parameters (AC-018-1 through AC-018-4).
+
+- **Valid Edit**: Super Admin edits economy parameters within allowed ranges
+- **Range Rejection**: Out-of-range values rejected with VALIDATION_ERROR
+- **Preview Confirmation**: Configuration change requires preview before saving
+- **Cache Refresh**: Saved config takes effect within 5 minutes (AC-018-3)
+- **Audit Log**: Every economy edit captured with full change context
+- **RBAC Guard**: Non-super_admin forbidden from editing
+
+**Key Constants Referenced:** `food_buff_multiplier_admin_min = 0.5`, `food_buff_multiplier_admin_max = 5.0`
+
+---
+
+## 10. Rarity Distribution (`features/rarity-distribution.feature`)
+
+**Linked PRD User Stories:** US-PET-002, US-RARITY-001  
+**Scenarios:** 5
+
+Validates procedural pet rarity algorithm statistical correctness.
+
+- **Distribution**: Pet generation follows 60% common / 25% rare / 12% epic / 3% legendary
+- **Sum to 100%**: Individual rarity probabilities verified to sum to 100%
+- **Seed Determinism**: Same random seed always produces same rarity (EDD §4.7.3)
+- **Population Test**: Distribution holds across population samples
+- **Legendary Cap**: Legendary rarity cap enforced
+
+**Key Constants Referenced:** `rarity_probability_common = 0.60`, `rarity_probability_rare = 0.25`, `rarity_probability_epic = 0.12`, `rarity_probability_legendary = 0.03`
+
+---
+
+## 11. Trading System (`features/trading-system.feature`)
+
+**Linked PRD User Stories:** US-TRADE-001 [FF_MARKETPLACE — Phase 3]  
+**Scenarios:** 10
+
+Validates marketplace listing, purchase, anti-flip protection, and access control.
+
+- **Feature Flag**: FF_MARKETPLACE controls marketplace access; disabled by default
+- **Create Listing**: Listing created with price validation against minimum (rarity-based formula)
+- **Price Rejection**: Below-minimum price rejected
+- **Anti-Flip**: Rapid re-listing of recently purchased pet prevented
+- **Purchase**: Ownership transferred + platform fee applied on purchase
+- **Cancel**: Listing cancelled by owner only
+- **RBAC**: Purchase requires buyer authentication
+- **Browse**: Public marketplace listing browsable
+- **Trade History**: Trade history private to pet owner
+
+**Key Constants Referenced:** `marketplace_platform_fee_percent = 5`, `marketplace_anti_flip_hours = 168`
+
+---
+
+## 12. Admin Search Performance (`features/admin-search-performance.feature`)
+
+**Linked PRD User Stories:** US-ADMIN-001  
+**Scenarios:** 6
+
+Validates admin pet search SLA and index efficiency under load.
+
+- **1M Record SLA**: Search returns results within 2 seconds for 1 million pet records
+- **Query Patterns**: Performance consistent across multiple query patterns
+- **No Table Locks**: Search does not cause table-level locks
+- **Empty Results Fast**: No-results search returns quickly (< 200ms)
+- **Index Monitoring**: Search index hit rate tracked via observability
+- **Pagination**: Large result sets paginated efficiently (page_size from CONSTANTS.md)
+
+**Key Constants Referenced:** `admin_search_sla_ms = 2000`, `leaderboard_admin_view = 500`
+
+---
+
 ## Cross-Reference: PRD Acceptance Criteria
 
 | AC ID | Story | Covered By | Status |
