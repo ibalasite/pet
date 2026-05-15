@@ -6,7 +6,7 @@
   "max_rounds": 99,
   "client_type": "game",
   "client_type_source": "confirmed",
-  "last_updated": "2026-05-15T14:00:00Z",
+  "last_updated": "2026-05-15T19:18:22Z",
   "has_admin_backend": true,
   "review_strategy": "exhaustive",
   "stop_condition": "finding=0（無上限）",
@@ -31,9 +31,6 @@
     "MOCK",
     "PROTOTYPE",
     "HTML",
-    "EDD",
-    "SCHEMA",
-    "DRYRUN",
     "PRD",
     "CONSTANTS",
     "ARCH",
@@ -43,65 +40,26 @@
     "LOCAL_DEPLOY",
     "VDD",
     "RTM",
-    "API",
     "CICD",
-    "BDD-server",
     "DEVELOPER_GUIDE",
-    "CLIENT_IMPL",
     "PDD",
     "BDD-client",
     "BRD",
-    "ANIM",
     "FRONTEND",
     "test-plan",
     "runbook",
-    "ADMIN_IMPL"
+    "DRYRUN",
+    "API",
+    "SCHEMA",
+    "EDD",
+    "ANIM",
+    "ADMIN_IMPL",
+    "CLIENT_IMPL",
+    "BDD-server"
   ],
-  "last_completed": "CONSTANTS",
+  "last_completed": "DRYRUN",
   "pipeline_hash": "49f8456caade9b87",
   "review_progress": {
-    "EDD": {
-      "rounds_done": 1,
-      "max_rounds": 5,
-      "strategy": "exhaustive",
-      "last_finding_total": 2,
-      "last_CHM": [
-        0,
-        0,
-        2
-      ],
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed"
-    },
-    "SCHEMA": {
-      "rounds_done": 3,
-      "max_rounds": 5,
-      "strategy": "exhaustive",
-      "last_finding_total": 0,
-      "last_CHM": [
-        0,
-        0,
-        0
-      ],
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed"
-    },
-    "DRYRUN": {
-      "rounds_done": 2,
-      "max_rounds": 99,
-      "strategy": "exhaustive",
-      "last_finding_total": 0,
-      "last_CHM": [
-        0,
-        0,
-        0
-      ],
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed"
-    },
     "PRD": {
       "rounds_done": 3,
       "max_rounds": 99,
@@ -210,33 +168,16 @@
       "terminate_reason": "zero_finding",
       "quality_status": "passed"
     },
-    "API": {
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed"
-    },
     "CICD": {
       "terminated": true,
       "terminate_reason": "zero_finding",
       "quality_status": "passed"
-    },
-    "BDD-server": {
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed",
-      "rounds_done": 2
     },
     "DEVELOPER_GUIDE": {
       "terminated": true,
       "terminate_reason": "zero_finding",
       "quality_status": "passed",
       "rounds_done": 3
-    },
-    "CLIENT_IMPL": {
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed",
-      "rounds_done": 4
     },
     "PDD": {
       "terminated": true,
@@ -251,11 +192,6 @@
       "rounds_done": 2
     },
     "BRD": {
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed"
-    },
-    "ANIM": {
       "terminated": true,
       "terminate_reason": "zero_finding",
       "quality_status": "passed"
@@ -278,11 +214,46 @@
       "quality_status": "passed",
       "rounds_done": 4
     },
+    "DRYRUN": {
+      "rounds_done": 0,
+      "terminated": true,
+      "terminate_reason": "script_driven",
+      "quality_status": "passed"
+    },
+    "API": {
+      "terminated": true,
+      "terminate_reason": "gen-only rebuild",
+      "rounds_done": 0
+    },
+    "SCHEMA": {
+      "terminated": true,
+      "terminate_reason": "gen-only rebuild",
+      "rounds_done": 0
+    },
+    "EDD": {
+      "terminated": true,
+      "terminate_reason": "gen-only rebuild",
+      "rounds_done": 0
+    },
+    "ANIM": {
+      "terminated": true,
+      "terminate_reason": "gen-only rebuild",
+      "rounds_done": 0
+    },
     "ADMIN_IMPL": {
       "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed",
-      "rounds_done": 5
+      "terminate_reason": "gen-only rebuild",
+      "rounds_done": 0
+    },
+    "CLIENT_IMPL": {
+      "terminated": true,
+      "terminate_reason": "gen-only rebuild",
+      "rounds_done": 0
+    },
+    "BDD-server": {
+      "terminated": true,
+      "terminate_reason": "gen-only rebuild",
+      "rounds_done": 0
     }
   },
   "step_specifications": {
@@ -446,12 +417,12 @@
       "max_placeholder_count": 0
     },
     "HTML": {
-      "expected_html_files": 32,
+      "expected_html_files": 33,
       "max_placeholder_count": 0
     }
   },
   "dryrun_metadata": {
-    "extraction_timestamp": "2026-05-15T11:03:55.551777+00:00",
+    "extraction_timestamp": "2026-05-15T18:25:04.749065+00:00",
     "extracted_metrics_count": 4,
     "derived_step_specs_count": 34,
     "dryrun_engine_version": "v2.0.0"

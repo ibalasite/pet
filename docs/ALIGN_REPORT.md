@@ -27,7 +27,7 @@ generated: 2026-05-16
 ║  Dim3 Code → Test     N/A     N/A    N/A   N/A   N/A  ⏳（待實作）║
 ║  Dim4 Doc → Test        0       0      0     0     0   ✅          ║
 ║  Dim5 UML/RTM 品質      0       0      0     0     0   ✅          ║
-║  Dim6 AI Gencode        0       0      0     0     0   ✅ 90%      ║
+║  Dim6 AI Gencode        0       0      0     0     0   ✅ 91%      ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║  總計                   0       3      5     3    11               ║
 ╠══════════════════════════════════════════════════════════════════╣
@@ -331,7 +331,7 @@ generated: 2026-05-16
 
 ## Dimension 6 — AI Gencode Readiness
 
-**結果：✅ 整體 90%（所有層 ≥ 60%）**
+**結果：✅ 整體 91%（所有層 ≥ 60%）**
 
 | Layer | Score | 狀態 |
 |-------|-------|------|
@@ -342,18 +342,18 @@ generated: 2026-05-16
 | BDD/Tests | 85% | ✅ 就緒 |
 | CI/CD | 70% | ⚠️ 可提升（非阻塞） |
 
-**整體 AI Gencode 就緒度：90%** — 可執行 `/gendoc-align-fix --layer gencode`
+**整體 AI Gencode 就緒度：91%** — gencode 修復已完成（`/gendoc-align-fix --layer gencode` 已執行）
 
 ---
 
 ## 可自動修復清單（align-fix 輸入）
 
-| ID | 嚴重度 | 來源 → 目標 | 修復動作 |
-|----|-------|------------|---------|
-| F-H1 | HIGH | SCHEMA → ADMIN_IMPL | admin_accounts → admin_users; admin_audit_log → audit_logs 全局替換 |
-| F-H3 | HIGH | PRD → BDD-server | arena-battle.feature @TC-SRV-ARENA-004 sumo outcome 步驟修正 |
-| F-M3 | MEDIUM | test-plan → RTM | RTM Feature Flags 欄位補齊 6 個 US |
-| F-L1 | LOW | PDD → EDD | PDD §2.6 "5 attribute dimensions" → "6 attribute dimensions" |
+| ID | 嚴重度 | 來源 → 目標 | 修復動作 | 狀態 |
+|----|-------|------------|---------|------|
+| F-H1 | HIGH | SCHEMA → ADMIN_IMPL | admin_accounts → admin_users; admin_audit_log → audit_logs 全局替換 | [FIXED: 1586d4a] |
+| F-H3 | HIGH | PRD → BDD-server | arena-battle.feature @TC-SRV-ARENA-004 sumo outcome 步驟修正 | [FIXED: d538644] |
+| F-M3 | MEDIUM | test-plan → RTM | RTM Feature Flags 欄位補齊 6 個 US | [FIXED: a74999b] |
+| F-L1 | LOW | PDD → EDD | PDD §2.6 "5 attribute dimensions" → "6 attribute dimensions" | [FIXED: bf452e8] |
 
 **不可自動修復（需人工決策）**：F-H2（RBAC 4 vs 3 角色）、F-M1（Notification ADR）、F-M2（US-ADMIN-003 BDD）、F-M4（Worker LOCAL_DEPLOY）、F-M5（Notification SCHEMA note）、F-L2（ARCH diagram note）、F-L3（RBAC ADR）
 
