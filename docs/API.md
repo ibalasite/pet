@@ -374,6 +374,7 @@ Verifies the 6-digit OTP and, on success, issues the pet access token.
 | 400 | `VALIDATION_ERROR` | Malformed `claimId` or `code` |
 | 400 | `INVALID_CODE` | Code does not match the stored hash |
 | 400 | `CODE_EXPIRED` | OTP has passed the 15-minute window (`claim_code_expiry_minutes = 15`) |
+| 404 | `NOT_FOUND` | `claimId` does not exist in database (expired and purged after `CLAIM_TOKEN_CLEANUP_TTL_HOURS` = 72 hours) |
 | 429 | `MAX_ATTEMPTS_REACHED` | 10-attempt session limit reached (`claim_code_entry_attempts_per_session = 10`) |
 
 ---
@@ -394,6 +395,11 @@ On successful OTP verification via `POST /api/v1/claim/verify` (recovery path), 
   "petId": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `email` | string | Yes | Player's email address. Must be a valid email format. Used to look up the associated `claim_identity_id`. |
+| `petId` | string (UUID) | Yes | UUID of the previously claimed pet for which access is being recovered. |
 
 **Response (HTTP 200 — always):**
 
@@ -417,6 +423,7 @@ The `claimId` is only functional if the email/petId combination matches a claime
 | HTTP | Code | Condition |
 |------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Malformed `email` or `petId` UUID |
+| 429 | `RATE_LIMIT_EXCEEDED` | Exceeded `AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR` (= 5) attempts within 1 hour for this email |
 
 ---
 
@@ -878,12 +885,12 @@ Returns the last 20 arena battles for a pet. Public endpoint.
 | Field | Description |
 |-------|-------------|
 | `opponentPetId` | UUID of the opponent pet. `null` when `isAiOpponent` is `true`. |
-
-**Open Graph Metadata Source:**  
-This endpoint (`GET /api/v1/arena/history/:petId`) is the authoritative source for Open Graph metadata generation when creating social share cards for a pet's battle records page. The client should extract `petId`, `wins` (from `summary.wins`), and combine with pet metadata (pet name, rarity, sprite image) from `GET /api/v1/pets/:petId` to construct OG tags (og:title, og:description, og:image, etc.). The win count summary (`summary.wins`) provides the win count aggregate for the OG card without needing to count individual battles.
 | `isAiOpponent` | `true` when this battle was resolved against an AI fallback opponent. |
 
 The last **20 battles** are shown publicly (`arena_battle_records_display_count = 20`).
+
+**Open Graph Metadata Source:**  
+This endpoint (`GET /api/v1/arena/history/:petId`) is the authoritative source for Open Graph metadata generation when creating social share cards for a pet's battle records page. The client should extract `petId`, `wins` (from `summary.wins`), and combine with pet metadata (pet name, rarity, sprite image) from `GET /api/v1/pets/:petId` to construct OG tags (og:title, og:description, og:image, etc.). The win count summary (`summary.wins`) provides the win count aggregate for the OG card without needing to count individual battles.
 
 **Error responses:**
 
@@ -1018,6 +1025,8 @@ Submits a GDPR request (erasure, data access, restrict processing, object leader
 }
 ```
 
+> **Note**: The `jobId` field in player-facing responses is an alias for `requestId` in admin-facing endpoints. Both refer to `gdpr_requests.id` in the database schema.
+
 **SLAs** (from `constants.json`):
 
 | Request Type | SLA | Constant |
@@ -1048,6 +1057,8 @@ Checks the status of a specific GDPR request. The server validates that the auth
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `jobId` | UUID | Yes | The `jobId` returned by `POST /api/v1/gdpr/request`. |
+
+> **Note**: The `jobId` field in player-facing responses is an alias for `requestId` in admin-facing endpoints. Both refer to `gdpr_requests.id` in the database schema.
 
 **Response (HTTP 200):**
 
@@ -1092,7 +1103,39 @@ Browse active marketplace listings.
 
 **Query parameters:** `?page=1&limit=20&sortBy=price|rarity|level&order=asc|desc`
 
-**Response (HTTP 200):** Paginated list of active listings with pet summary and price.
+**Response (HTTP 200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "listings": [
+      {
+        "listingId": "f1e2d3c4-b5a6-7890-fedc-ba0987654321",
+        "petId": "550e8400-e29b-41d4-a716-446655440000",
+        "petName": "Crimson Vexor",
+        "rarity": "RARE",
+        "level": 7,
+        "sellerId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        "price": 1200,
+        "description": "Well-trained RARE pet, 70% win rate.",
+        "listedAt": "2026-05-03T10:00:00Z"
+      }
+    ]
+  },
+  "error": null,
+  "meta": { "total": 34, "page": 1, "limit": 20 }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `listingId` | UUID of the marketplace listing. |
+| `petId` | UUID of the listed pet. |
+| `sellerId` | UUID of the seller's pet (the pet token used to create the listing). |
+| `price` | Asking price in bronze coins (integer). |
+| `description` | Seller-supplied description. Max 200 characters. |
+| `listedAt` | ISO 8601 timestamp when the listing was created. |
 
 #### `POST /api/v1/marketplace/listings`
 
@@ -1100,11 +1143,54 @@ Create a new listing. Min price formula: `(pet_level * 100) + (rarity_multiplier
 
 **Auth**: Required (pet owner token)
 
+**Request body:**
+
+```json
+{
+  "petId": "550e8400-e29b-41d4-a716-446655440000",
+  "price": 1200,
+  "description": "Well-trained RARE pet, 70% win rate."
+}
+```
+
+| Field | Type | Required | Validation | Description |
+|-------|------|----------|------------|-------------|
+| `petId` | string (UUID) | Yes | Must be owned by the authenticated token | The pet to list for sale. |
+| `price` | integer | Yes | Must be ≥ min price formula result; in bronze coins | Asking price in bronze coins. |
+| `description` | string | No | Max 200 characters | Optional seller-supplied description. |
+
+**Response (HTTP 201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "listingId": "f1e2d3c4-b5a6-7890-fedc-ba0987654321",
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "price": 1200,
+    "listedAt": "2026-05-03T10:00:00Z"
+  },
+  "error": null
+}
+```
+
 #### `DELETE /api/v1/marketplace/listings/:listingId`
 
 Cancel an active listing. Only the listing's owner may cancel.
 
 **Auth**: Required (pet owner token — owner of listed pet)
+
+**Response (HTTP 200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "cancelled": true
+  },
+  "error": null
+}
+```
 
 #### `POST /api/v1/marketplace/listings/:listingId/buy`
 
@@ -1112,11 +1198,70 @@ Purchase a listing. A **5% platform fee** (`trade_transaction_fee_percent = 5`) 
 
 **Auth**: Required (pet owner token — buyer's token)
 
+**Request body:**
+
+```json
+{
+  "petToken": "dGhpcyBpcyBhIDMyLWJ5dGUgY3J5cHRvZ3JhcGhpY2FsbHkgcmFuZG9t"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `petToken` | string | Yes | The buyer's pet ownership token. Used to authenticate the buyer and transfer ownership of the purchased pet to the buyer's identity. |
+
+**Response (HTTP 200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "transactionId": "e5f6a7b8-c9d0-1234-efab-cd5678901234",
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "price": 1200,
+    "platformFee": 60,
+    "sellerProceeds": 1140,
+    "tradedAt": "2026-05-03T11:00:00Z"
+  },
+  "error": null
+}
+```
+
 #### `GET /api/v1/marketplace/history/:petId`
 
 Returns trade history for a pet. **Private** — only the pet's current owner can view (trade prices are commercial-in-confidence).
 
+**Note**: This endpoint provides supplementary trade history data. Upstream reference: PRD US-TRADE-001 AC; enabled under FF_MARKETPLACE feature flag.
+
 **Auth**: Required (pet owner token)
+
+**Response (HTTP 200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "petId": "550e8400-e29b-41d4-a716-446655440000",
+    "trades": [
+      {
+        "transactionId": "e5f6a7b8-c9d0-1234-efab-cd5678901234",
+        "fromOwner": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        "toOwner": "550e8400-e29b-41d4-a716-446655440000",
+        "price": 1200,
+        "tradedAt": "2026-05-03T11:00:00Z"
+      }
+    ]
+  },
+  "error": null
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `fromOwner` | Pet ID of the seller at time of trade. |
+| `toOwner` | Pet ID of the buyer at time of trade. |
+| `price` | Agreed transaction price in bronze coins (gross, before platform fee). |
+| `tradedAt` | ISO 8601 timestamp when the trade was completed. |
 
 **Error responses for all marketplace endpoints:**
 
@@ -1516,7 +1661,58 @@ Returns full pet details including owner info and ban history. *(EDD extension �
 
 **Auth**: Admin session — Moderator+ or Read Only
 
-**Response (HTTP 200):** Full pet record including `bannedReason`, `bannedAt`, `claimedAt`, `generationMeta`, current stats, and last 20 battle records.
+**Response (HTTP 200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "petName": "Crimson Vexor",
+    "seed": 7381923847561029,
+    "rarity": "RARE",
+    "stats": {
+      "speed": 34,
+      "strength": 28,
+      "stamina": 41,
+      "level": 7
+    },
+    "isBanned": false,
+    "bannedReason": null,
+    "bannedAt": null,
+    "claimedAt": "2026-04-15T09:32:00Z",
+    "ownerEmailMasked": "p***@example.com",
+    "generationMeta": {
+      "body": "lizard",
+      "head": "horned",
+      "colorPalette": "crimson_gold",
+      "accessory": "cape",
+      "rarityTrait": "shimmering_scales",
+      "pattern": "diagonal_stripe"
+    },
+    "recentBattles": [
+      {
+        "matchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "mode": "RACE",
+        "opponentPetId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        "isAiOpponent": false,
+        "result": "WIN",
+        "completedAt": "2026-05-03T11:42:00Z"
+      }
+    ]
+  },
+  "error": null
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `isBanned` | `true` if the pet is currently banned. Maps to `pets.is_banned`. |
+| `bannedReason` | Admin-supplied ban reason (max 500 chars). Maps to `pets.banned_reason`. `null` when not banned. |
+| `bannedAt` | ISO 8601 timestamp when ban was applied. Maps to `pets.banned_at`. `null` when not banned. |
+| `claimedAt` | ISO 8601 timestamp when the email-OTP claim flow completed. Maps to `pets.claimed_at`. `null` for unclaimed (guest preview) pets. |
+| `generationMeta` | 6-dimension procedural generation vector. Maps to `pets.generation_meta` JSONB: `body`, `head`, `colorPalette` (`color_palette`), `accessory`, `rarityTrait` (`rarity_trait`), `pattern`. |
+| `recentBattles` | Last 20 arena battles for this pet (`arena_battle_records_display_count = 20`). |
 
 **Error responses:**
 
@@ -1533,7 +1729,21 @@ Updates administrative fields on a pet (e.g. correcting `petName` after content 
 
 **Auth**: Admin session — Super Admin only
 
-**Request body:** Partial pet fields that are admin-editable (e.g. `petName`).
+**Request body:**
+
+```json
+{
+  "petName": "Revised Vexor",
+  "banReason": "Automated bot behavior confirmed by manual review"
+}
+```
+
+| Field | Type | Required | Validation | Description |
+|-------|------|----------|------------|-------------|
+| `petName` | string | No | Max 64 characters (`VARCHAR(64)` in `pets.pet_name`) | Override the auto-generated pet name after content moderation review. |
+| `banReason` | string | No | Max 500 characters (`admin_moderation_reason_max_chars = 500`) | Sets or updates the ban reason on the pet record (`pets.banned_reason`). Providing this field alone does **not** ban the pet — use `POST /admin/api/pets/:petId/ban` to apply a ban. This field is for correcting or annotating an existing ban reason only. |
+
+All fields are optional. At least one field must be present.
 
 **Response (HTTP 200):**
 
