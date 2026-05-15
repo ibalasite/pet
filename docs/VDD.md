@@ -246,12 +246,12 @@ All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical 
 
 ### §3.2 Semantic / Functional Colors
 
-| Token | Light Hex | Dark Hex | Usage |
-|-------|-----------|----------|-------|
-| `--color-success` | `#00836b` | `#00b894` | Training complete, claim success, pet ownership confirmed |
-| `--color-warning` | `#cc5a00` | `#e8a87c` | Rate limit banners, claim code expiry warnings, arena cooldown |
-| `--color-error` | `#cc3333` | `#e87c7c` | Form validation errors, invalid code entry, API failures |
-| `--color-info` | `#4a80cc` | `#7cb4e8` | Informational tips, probability disclosures, AI opponent labels |
+| Token | Light Hex | Light oklch | Dark Hex | Dark oklch | Usage |
+|-------|-----------|-------------|----------|------------|-------|
+| `--color-success` | `#00836b` | `oklch(65% 0.20 145)` | `#00b894` | `oklch(70% 0.20 145)` | Training complete, claim success, pet ownership confirmed |
+| `--color-warning` | `#cc5a00` | `oklch(75% 0.18 75)` | `#e8a87c` | `oklch(80% 0.18 75)` | Rate limit banners, claim code expiry warnings, arena cooldown |
+| `--color-error` | `#cc3333` | `oklch(55% 0.22 25)` | `#e87c7c` | `oklch(60% 0.22 25)` | Form validation errors, invalid code entry, API failures |
+| `--color-info` | `#4a80cc` | `oklch(60% 0.18 260)` | `#7cb4e8` | `oklch(65% 0.18 260)` | Informational tips, probability disclosures, AI opponent labels |
 
 ### §3.3 Rarity Color System
 
@@ -525,27 +525,27 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-navy-border-strong: oklch(45% 0.06 280); /* #4d4d7a — hsl(240, 22%, 39%) */
 
 /* Light Mode Surface Primitives */
---primitive-light-surface-base: #f8f8fc;
---primitive-light-surface-raised: #eeeef8;
---primitive-light-surface-overlay: #e2e2f0;
---primitive-light-text-primary: #1a1a2e;
---primitive-light-text-secondary: #4a4a7a;
---primitive-light-text-disabled: #7a7aaa;
---primitive-light-brand-primary: #4a3fd4;
---primitive-light-border-default: #9999bb;  /* use §6.4 canonical value */
---primitive-light-border-strong: #9898c0;
---primitive-light-brand-accent: #c9930a;    /* Dark gold for light bg — Legendary on light mode */
---primitive-light-rarity-legendary: #b07e00;   /* §6.4 Legendary on light bg */
---primitive-light-rarity-epic: #6a5fe8;        /* §6.4 Epic on light bg */
---primitive-light-rarity-rare: #009688;        /* §6.4 Rare on light bg */
---primitive-light-rarity-common: #636b72;      /* §6.4 Common on light bg */
---primitive-light-error: #cc3333;             /* §6.4 Error on light bg */
---primitive-light-success: #00836b;           /* §6.4 Success on light bg */
---primitive-light-warning: #cc5a00;           /* §6.4 Warning on light bg */
---primitive-light-focus: #c49900;             /* §6.4 Focus on light bg */
---primitive-light-info: #4a80cc;              /* §3.2 Info on light bg */
---primitive-light-surface-hover: #d4d4e8;     /* Light hover surface — navy tint on light bg */
---primitive-light-brand-secondary: #007a5e;   /* Darker teal for contrast on light bg */
+--primitive-light-surface-base: #f8f8fc;          /* oklch(98% 0.005 280) */
+--primitive-light-surface-raised: #eeeef8;         /* oklch(95% 0.008 280) */
+--primitive-light-surface-overlay: #e2e2f0;        /* oklch(91% 0.010 280) */
+--primitive-light-text-primary: #1a1a2e;           /* oklch(12% 0.04 280) */
+--primitive-light-text-secondary: #4a4a7a;         /* oklch(35% 0.07 280) */
+--primitive-light-text-disabled: #7a7aaa;          /* oklch(55% 0.06 280) */
+--primitive-light-brand-primary: #4a3fd4;          /* oklch(45% 0.20 280) */
+--primitive-light-border-default: #9999bb;  /* oklch(65% 0.05 280) — use §6.4 canonical value */
+--primitive-light-border-strong: #9898c0;          /* oklch(65% 0.06 280) */
+--primitive-light-brand-accent: #c9930a;    /* oklch(67% 0.16 82) — Dark gold for light bg — Legendary on light mode */
+--primitive-light-rarity-legendary: #b07e00;   /* oklch(58% 0.15 82) — §6.4 Legendary on light bg */
+--primitive-light-rarity-epic: #6a5fe8;        /* oklch(52% 0.21 280) — §6.4 Epic on light bg */
+--primitive-light-rarity-rare: #009688;        /* oklch(57% 0.13 190) — §6.4 Rare on light bg */
+--primitive-light-rarity-common: #636b72;      /* oklch(46% 0.01 200) — §6.4 Common on light bg */
+--primitive-light-error: #cc3333;             /* oklch(55% 0.22 25) — §6.4 Error on light bg */
+--primitive-light-success: #00836b;           /* oklch(65% 0.20 145) — §6.4 Success on light bg */
+--primitive-light-warning: #cc5a00;           /* oklch(75% 0.18 75) — §6.4 Warning on light bg */
+--primitive-light-focus: #c49900;             /* oklch(68% 0.16 82) — §6.4 Focus on light bg */
+--primitive-light-info: #4a80cc;              /* oklch(60% 0.18 260) — §3.2 Info on light bg */
+--primitive-light-surface-hover: #d4d4e8;     /* oklch(87% 0.012 280) — Light hover surface — navy tint on light bg */
+--primitive-light-brand-secondary: #007a5e;   /* oklch(53% 0.19 164) — Darker teal for contrast on light bg */
 
 /* =============================================
    PRIMITIVE: Spacing (4px base grid — UI elements)
