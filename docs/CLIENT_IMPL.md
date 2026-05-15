@@ -1046,4 +1046,4 @@ pnpm typecheck
 
 ---
 
-STEP_COMPLETE: CLIENT_IMPL
+*This CLIENT_IMPL document specifies the React 18 + Phaser 3 player application implementation for pixel-pet-arena. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 and referenced upstream documents (EDD, ARCH, PDD, ANIM). Implementation must adhere to the performance budgets, animation integration patterns, and API contracts defined in this document.*
