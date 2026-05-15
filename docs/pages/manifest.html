@@ -489,8 +489,8 @@
 <p>以下數值由 DRYRUN 生成步驟從上游文件自動計算，是<strong>所有下游步驟 gate-check 的量化基準</strong>。</p>
 <table>
 <tr><th>參數</th><th>值</th><th>說明</th></tr>
-<tr><td><code>entity_count</code></td><td>40</td><td>EDD.md classDiagram 中的 class 數量（grep -cE &#x27;^\s*class\s+[A-Za-z]&#x27; docs/EDD.md）；影響 SCHEMA min_table_count</td></tr>
-<tr><td><code>rest_endpoint_count</code></td><td>33</td><td>EDD.md 中的 REST 端點數（§5 API tables + inline refs，deduplicated，排除流程圖縮寫 POST /claim）；影響 API min_endpoint_count</td></tr>
+<tr><td><code>entity_count</code></td><td>42</td><td>EDD.md classDiagram 中的 class 數量（grep -c &#x27;^\s*class &#x27;）；影響 SCHEMA min_table_count</td></tr>
+<tr><td><code>rest_endpoint_count</code></td><td>28</td><td>EDD.md 中的 REST 端點數（&lt;&lt;REST&gt;&gt;、&lt;&lt;Interface&gt;&gt;、HTTP 動詞）；若計算結果 &lt; 5，使用保守預設值 10（避免過低門檻無意義）；影響 API min_endpoint_count</td></tr>
 <tr><td><code>user_story_count</code></td><td>18</td><td>PRD.md 中 US- 標題數量（grep -c &#x27;^## US-\</td><td>^### US-&#x27;）；影響 RTM min_row_count、BDD min_scenario_count</td></tr>
 <tr><td><code>arch_layer_count</code></td><td>19</td><td>ARCH.md §3 Tech Stack 表格非標頭列數（最小值 4）；影響 test-plan min_h2_sections</td></tr>
 </table>

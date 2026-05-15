@@ -2,7 +2,7 @@
   "index.html": {
     "url": "index.html",
     "title": "pet 文件中心",
-    "excerpt": "pixel-pet-arena\nZero-account-barrier HTML5 browser game where players claim, train, and battle procedurally-generated pixel pets via email — no regist"
+    "excerpt": "Pixel Pet Arena\nZero-signup HTML5 pixel pet game — claim your pet via email OTP, train it, and battle in a global arena without ever creating a passwo"
   },
   "idea.html": {
     "url": "idea.html",
@@ -97,7 +97,7 @@
   "align_report.html": {
     "url": "align_report.html",
     "title": "對齊報告",
-    "excerpt": "ALIGN_REPORT — 全局對齊掃描報告\n專案：pixel-pet-arena\n掃描日期：2026-05-15\n掃描策略：exhaustive（全量掃描，六個維度）\nClient Type：game | Has Admin Backend：true\n\n執行摘要\n╔═══════════════"
+    "excerpt": "ALIGN_REPORT — 全局對齊掃描報告\n專案：pixel-pet-arena\n掃描日期：2026-05-16\n狀態：gendoc-align-check 完整掃描\n\n總覽儀表板\n╔════════════════════════════════════════════════════════"
   },
   "admin_impl.html": {
     "url": "admin_impl.html",

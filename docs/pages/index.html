@@ -462,409 +462,412 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#table-of-contents">Table of Contents</a></li><li><a class="toc__link" href="#overview">Overview</a></li><li><a class="toc__link" href="#core-features">Core Features</a></li><li><a class="toc__link" href="#system-architecture">System Architecture</a></li><li><a class="toc__link" href="#tech-stack">Tech Stack</a></li><li><a class="toc__link" href="#quick-start">Quick Start</a></li><li><a class="toc__link toc__link--h3" href="#prerequisites">Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#docker-recommended">Docker (Recommended)</a></li><li><a class="toc__link toc__link--h3" href="#macos--linux-native">macOS / Linux (Native)</a></li><li><a class="toc__link toc__link--h3" href="#windows-powershell">Windows (PowerShell)</a></li><li><a class="toc__link" href="#environment-variables">Environment Variables</a></li><li><a class="toc__link" href="#api-quick-reference">API Quick Reference</a></li><li><a class="toc__link" href="#directory-structure">Directory Structure</a></li><li><a class="toc__link" href="#documentation">Documentation</a></li><li><a class="toc__link toc__link--h3" href="#interactive-demos">Interactive Demos</a></li><li><a class="toc__link" href="#testing">Testing</a></li><li><a class="toc__link toc__link--h3" href="#run-all-tests">Run All Tests</a></li><li><a class="toc__link toc__link--h3" href="#generate-coverage-report">Generate Coverage Report</a></li><li><a class="toc__link toc__link--h3" href="#individual-test-types">Individual Test Types</a></li><li><a class="toc__link toc__link--h3" href="#performance-targets">Performance Targets</a></li><li><a class="toc__link" href="#known-limitations">Known Limitations</a></li><li><a class="toc__link" href="#changelog">Changelog</a></li><li><a class="toc__link" href="#development-guide">Development Guide</a></li><li><a class="toc__link toc__link--h3" href="#branch-strategy">Branch Strategy</a></li><li><a class="toc__link toc__link--h3" href="#commit-message-format">Commit Message Format</a></li><li><a class="toc__link" href="#license">License</a></li><li><a class="toc__link" href="#security-policy">Security Policy</a></li><li><a class="toc__link toc__link--h3" href="#responsible-disclosure">Responsible Disclosure</a></li><li><a class="toc__link" href="#architecture-quick-reference">Architecture Quick Reference</a></li><li><a class="toc__link" href="#code-of-conduct">Code of Conduct</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#table-of-contents">Table of Contents</a></li><li><a class="toc__link" href="#overview">Overview</a></li><li><a class="toc__link" href="#core-features">Core Features</a></li><li><a class="toc__link" href="#system-architecture">System Architecture</a></li><li><a class="toc__link" href="#tech-stack">Tech Stack</a></li><li><a class="toc__link" href="#quick-start">Quick Start</a></li><li><a class="toc__link toc__link--h3" href="#prerequisites">Prerequisites</a></li><li><a class="toc__link toc__link--h3" href="#docker-recommended">Docker (Recommended)</a></li><li><a class="toc__link toc__link--h3" href="#macos--linux-native">macOS / Linux (Native)</a></li><li><a class="toc__link toc__link--h3" href="#windows-powershell">Windows (PowerShell)</a></li><li><a class="toc__link" href="#environment-variables">Environment Variables</a></li><li><a class="toc__link" href="#api-quick-reference">API Quick Reference</a></li><li><a class="toc__link" href="#directory-structure">Directory Structure</a></li><li><a class="toc__link" href="#documentation">Documentation</a></li><li><a class="toc__link" href="#testing">Testing</a></li><li><a class="toc__link toc__link--h3" href="#run-all-tests">Run All Tests</a></li><li><a class="toc__link toc__link--h3" href="#generate-coverage-report">Generate Coverage Report</a></li><li><a class="toc__link toc__link--h3" href="#individual-test-types">Individual Test Types</a></li><li><a class="toc__link toc__link--h3" href="#bdd-coverage">BDD Coverage</a></li><li><a class="toc__link" href="#development-workflow">Development Workflow</a></li><li><a class="toc__link toc__link--h3" href="#branch-strategy">Branch Strategy</a></li><li><a class="toc__link toc__link--h3" href="#commit-message-format">Commit Message Format</a></li><li><a class="toc__link toc__link--h3" href="#pull-request-checklist">Pull Request Checklist</a></li><li><a class="toc__link" href="#deployment">Deployment</a></li><li><a class="toc__link toc__link--h3" href="#staging">Staging</a></li><li><a class="toc__link toc__link--h3" href="#production">Production</a></li><li><a class="toc__link toc__link--h3" href="#rollback">Rollback</a></li><li><a class="toc__link" href="#troubleshooting">Troubleshooting</a></li><li><a class="toc__link" href="#known-limitations">Known Limitations</a></li><li><a class="toc__link" href="#architecture-quick-reference">Architecture Quick Reference</a></li><li><a class="toc__link" href="#security-policy">Security Policy</a></li><li><a class="toc__link" href="#contributing">Contributing</a></li><li><a class="toc__link toc__link--h3" href="#fork-and-pr-flow">Fork and PR Flow</a></li><li><a class="toc__link toc__link--h3" href="#code-style">Code Style</a></li><li><a class="toc__link" href="#code-of-conduct">Code of Conduct</a></li><li><a class="toc__link" href="#license">License</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h1 id="pixel-pet-arena">pixel-pet-arena</h1>
-<blockquote><p>Zero-account-barrier HTML5 browser game where players claim, train, and battle procedurally-generated pixel pets via email — no registration required.</p></blockquote>
-<p><a href="https://github.com/ibalasite/pet/actions/workflows/ci.yml" target="_blank" rel="noopener"><img src="https://github.com/ibalasite/pet/actions/workflows/ci.yml/badge.svg" alt="CI" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
+    <main class="doc-content"><h1 id="pixel-pet-arena">Pixel Pet Arena</h1>
+<blockquote><p>Zero-signup HTML5 pixel pet game — claim your pet via email OTP, train it, and battle in a global arena without ever creating a password.</p></blockquote>
+<p><a href="https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml" target="_blank" rel="noopener"><img src="https://github.com/pixel-pet-arena/pixel-pet-arena/actions/workflows/ci.yml/badge.svg" alt="CI" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
+<p><a href="https://codecov.io/gh/pixel-pet-arena/pixel-pet-arena" target="_blank" rel="noopener"><img src="https://codecov.io/gh/pixel-pet-arena/pixel-pet-arena/branch/main/graph/badge.svg" alt="Coverage" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <p><a href="LICENSE" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <p><a href="https://nodejs.org/" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Node.js-20%20LTS-green.svg" alt="Node.js" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <p><a href="https://www.typescriptlang.org/" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/TypeScript-5-blue.svg" alt="TypeScript" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
-<p><a href="https://pnpm.io/" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/pnpm-9.x-orange.svg" alt="pnpm" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:this.alt}))"></a></p>
 <hr>
 <h2 id="table-of-contents">Table of Contents</h2>
-<ul><li><a href="#overview">Overview</a></li><li><a href="#core-features">Core Features</a></li><li><a href="#system-architecture">System Architecture</a></li><li><a href="#tech-stack">Tech Stack</a></li><li><a href="#quick-start">Quick Start</a></li><li><a href="#environment-variables">Environment Variables</a></li><li><a href="#api-quick-reference">API Quick Reference</a></li><li><a href="#directory-structure">Directory Structure</a></li><li><a href="#documentation">Documentation</a></li><li><a href="#testing">Testing</a></li><li><a href="#known-limitations">Known Limitations</a></li><li><a href="#changelog">Changelog</a></li><li><a href="#development-guide">Development Guide</a></li><li><a href="#license">License</a></li><li><a href="#security-policy">Security Policy</a></li><li><a href="#architecture-quick-reference">Architecture Quick Reference</a></li><li><a href="#code-of-conduct">Code of Conduct</a></li></ul>
+<ul><li><a href="#overview">Overview</a></li><li><a href="#core-features">Core Features</a></li><li><a href="#system-architecture">System Architecture</a></li><li><a href="#tech-stack">Tech Stack</a></li><li><a href="#quick-start">Quick Start</a></li><li><a href="#environment-variables">Environment Variables</a></li><li><a href="#api-quick-reference">API Quick Reference</a></li><li><a href="#directory-structure">Directory Structure</a></li><li><a href="#documentation">Documentation</a></li><li><a href="#testing">Testing</a></li><li><a href="#development-workflow">Development Workflow</a></li><li><a href="#deployment">Deployment</a></li><li><a href="#troubleshooting">Troubleshooting</a></li><li><a href="#known-limitations">Known Limitations</a></li><li><a href="#architecture-quick-reference">Architecture Quick Reference</a></li><li><a href="#security-policy">Security Policy</a></li><li><a href="#contributing">Contributing</a></li><li><a href="#code-of-conduct">Code of Conduct</a></li><li><a href="#license">License</a></li></ul>
 <hr>
 <h2 id="overview">Overview</h2>
-<p><strong>pixel-pet-arena</strong> is a zero-account-barrier HTML5 browser game where players discover and claim procedurally-generated pixel pets using only their email address — no account registration, no password to remember.</p>
-<p>It was built to solve the mutual exclusivity between &quot;no account barrier&quot; and &quot;persistent data&quot; that has prevented casual players from truly owning virtual pets on the web. The core innovation is <strong>email as a lightweight identity layer</strong>: a 6-digit OTP issues a 32-byte cryptographic URL token. Players bookmark their unique URL — that URL is their identity, accessible from any device, forever.</p>
+<p><strong>Pixel Pet Arena</strong> is a browser-native HTML5 SaaS platform where players discover, claim, train, and battle procedurally generated pixel-art pets — with zero account creation and zero installation.</p>
+<p>It was built to solve the <strong>high barrier of entry that prevents casual players from experiencing persistent virtual pet games</strong> — a gap that matters to <strong>casual and retro gaming audiences</strong> because traditional platforms demand account registration before any meaningful play can begin.</p>
+<p>Identity is entirely token-based: a 6-digit OTP code sent by email generates a 32-byte cryptographic URL token. Players bookmark that URL to return to their pet. No passwords. No accounts. No friction.</p>
 <p>The project is governed by the upstream documents below; every design decision maps to a tracked requirement:</p>
 <table>
 <tr><th>Document</th><th>Purpose</th></tr>
-<tr><td><a href="brd.html" target="_blank" rel="noopener">BRD</a></td><td>Business goals, success metrics, stakeholder sign-off</td></tr>
+<tr><td><a href="brd.html" target="_blank" rel="noopener">BRD</a></td><td>Business goals, ROI analysis, stakeholder sign-off</td></tr>
 <tr><td><a href="prd.html" target="_blank" rel="noopener">PRD</a></td><td>User stories, acceptance criteria, priority tiers</td></tr>
 <tr><td><a href="pdd.html" target="_blank" rel="noopener">PDD</a></td><td>UX flows, interaction specs, design tokens</td></tr>
 <tr><td><a href="edd.html" target="_blank" rel="noopener">EDD</a></td><td>Architecture decisions, technology choices, data models</td></tr>
-<tr><td><a href="arch.html" target="_blank" rel="noopener">ARCH</a></td><td>C4 diagrams, component architecture, ADRs</td></tr>
 </table>
 <p>See <a href="#system-architecture">System Architecture</a> below for a visual overview, and <a href="#documentation">Documentation</a> for the full HTML reference site.</p>
 <hr>
 <h2 id="core-features">Core Features</h2>
 <p><strong>P0 — Must ship for v1.0:</strong></p>
-<ul><li><strong>Random Pixel Pet Generation</strong> — Each pet is procedurally generated across 6 attribute dimensions (body, head, color_palette, accessory, rarity_trait, pattern) guaranteeing ≥ 1 billion unique combinations. 32×32 px sprite rendered on HTML5 Canvas via Phaser.js 3.</li><li><strong>Email Claim Flow</strong> — Guests interact immediately with no login wall. Entering an email sends a 6-digit OTP plus a permanent unique URL. The pet is accessible from any device via that bookmarked URL forever.</li><li><strong>Pet Training &amp; Feeding System</strong> — 3 training actions per day (reset UTC 00:00). Special food items grant temporary or permanent stat buffs to Speed, Strength, or Stamina (max 100 each). Pets visually degrade after 3 days of neglect.</li><li><strong>Arena Combat</strong> — Race mode (Speed-weighted) and Sumo mode (Strength-weighted) with ±15% seeded random modifier. Real-time matchmaking with 30-second AI fallback. Default rate-limit 10 battles/hour per pet (admin-tunable).</li><li><strong>Global Leaderboard</strong> — Top 100 pets by win rate, updated within 30 seconds via Redis sorted set. Filterable by rarity tier (Common / Rare / Epic / Legendary).</li><li><strong>Battle Records Page</strong> — Shareable URL displaying the last 20 battles per pet with outcomes, stat snapshots, and opponent info.</li><li><strong>Admin Portal</strong> — Vue 3 + Element Plus admin SPA for moderation, GDPR processing, runtime parameter tuning, suspicious-pet detection, and game economy configuration.</li></ul>
-<p><strong>P1 — Roadmap:</strong></p>
-<ul><li>Rarity scoring system (Common 60% / Rare 25% / Epic 12% / Legendary 3%) with visual badges and dedicated rarity-distribution tracking.</li></ul>
-<p><strong>P2 — Future (feature-flagged):</strong></p>
-<ul><li>Pet trading marketplace (<code>FF_MARKETPLACE</code>, 5% platform fee), tournament system, seasonal competitions.</li></ul>
+<ul><li><strong>Zero-Signup Guest Play</strong> — Any visitor instantly gets a randomly generated pixel pet (1 billion+ unique combinations across 6 attribute dimensions: body, head, color_palette, accessory, rarity_trait, pattern). No account required.</li><li><strong>Email Claim Flow</strong> — Players send their email to receive a 6-digit OTP; on verification they get a unique 32-byte URL token. Bookmark the URL to return. No passwords. Rarity: Common 60% / Rare 25% / Epic 12% / Legendary 3%.</li><li><strong>Pet Training &amp; Feeding</strong> — Up to 3 training actions per day (resets UTC 00:00) to raise Speed, Strength, and Stamina stats (range 1–100, capped at level 100). Special food items provide stat boosts. Neglect for 3+ days triggers a visual neglect animation state.</li><li><strong>Arena Battle System</strong> — Race mode (Speed stat) and Sumo mode (Strength stat) with ±15% seeded random modifier for fairness. Real-time matchmaking via Redis ZPOPMIN; AI bot fallback after 30-second timeout. Battle rate limit: 10 battles/hour per pet (admin-tunable).</li><li><strong>Global Leaderboard</strong> — Top 100 pets by win rate, updated with ≤30-second lag via Redis sorted set. Shareable URL per pet.</li><li><strong>Battle Records Page</strong> — Per-pet battle history page with Open Graph social share card generation. Last 20 battles displayed publicly via shareable URL.</li></ul>
+<p><strong>P1 — Post-MVP:</strong></p>
+<ul><li><strong>Sumo Arena Mode</strong> — Strength-based battle variant (feature flag <code>FF_ARENA_SUMO</code>, default enabled in local dev)</li><li><strong>Pet Marketplace / Trading</strong> — 5% platform fee per trade (feature flag <code>FF_MARKETPLACE</code>, off by default)</li></ul>
 <hr>
 <h2 id="system-architecture">System Architecture</h2>
-<div class="diagram-container"><pre class="mermaid">flowchart TB
-    subgraph Browser[&quot;Browser — Vercel CDN&quot;]
-        PA[&quot;Player App\nReact 18 + Phaser.js 3\nVite 5 / TypeScript 5&quot;]
-        AP[&quot;Admin Portal\nVue 3 + Element Plus\nVite 5 / TypeScript 5&quot;]
+<div class="diagram-container"><pre class="mermaid">graph TB
+    subgraph Actors
+        Guest[&quot;Guest Player&lt;br/&gt;(no account)&quot;]
+        Owner[&quot;Pet Owner&lt;br/&gt;(email-claimed, URL token)&quot;]
+        Comp[&quot;Competitive Player&lt;br/&gt;(token + arena)&quot;]
+        AdminOp[&quot;Admin Operator&lt;br/&gt;(TOTP session)&quot;]
+        Job[&quot;System Scheduled Jobs&lt;br/&gt;(cron / cleanup)&quot;]
     end
 
-    subgraph API[&quot;API Layer — Railway (autoscale HPA 70% CPU)&quot;]
-        GA[&quot;Game API\nFastify 4 / Node.js 20 LTS\n≥ 2 replicas&quot;]
-        AA[&quot;Admin API\nFastify 4 / Node.js 20 LTS\n1 replica (mounted at /admin)&quot;]
+    subgraph &quot;Pixel Pet Arena Platform&quot;
+        PPA[&quot;pixel-pet-arena&lt;br/&gt;HTML5 browser game + REST API + Admin Portal&lt;br/&gt;(React 18 + Phaser 3 / Vue 3 / Fastify 4 / Node 20)&quot;]
     end
 
-    subgraph Data[&quot;Data Tier&quot;]
-        PG[(&quot;PostgreSQL 15+\nSupabase managed\nDaily S3 backup&quot;)]
-        RD[(&quot;Redis 7+\nUpstash serverless\nLeaderboard · Rate-limits · Sessions · Matchmaking&quot;)]
+    subgraph &quot;External Systems&quot;
+        SG[&quot;SendGrid v3 API&lt;br/&gt;(transactional email, primary)&quot;]
+        SMTP[&quot;Nodemailer SMTP&lt;br/&gt;(email fallback after 3 failures)&quot;]
+        SB[&quot;Supabase&lt;br/&gt;(PostgreSQL 15 managed)&quot;]
+        UP[&quot;Upstash Redis&lt;br/&gt;(serverless cache + leaderboard)&quot;]
+        VC[&quot;Vercel Edge CDN&lt;br/&gt;(static SPA bundles + global PoP)&quot;]
+        S3[&quot;S3-compatible Storage&lt;br/&gt;(DB backups)&quot;]
+        Social[&quot;Social Share&lt;br/&gt;(Open Graph / battle result cards)&quot;]
     end
 
-    subgraph Email[&quot;Email Services&quot;]
-        SG[&quot;SendGrid v3\nprimary&quot;]
-        NM[&quot;Nodemailer SMTP\nfallback — activates after\n3 consecutive SendGrid failures&quot;]
-    end
+    Guest --&gt;|&quot;HTTPS / browse pet preview&quot;| PPA
+    Owner --&gt;|&quot;HTTPS / pet URL token&quot;| PPA
+    Comp --&gt;|&quot;HTTPS / arena interactions&quot;| PPA
+    AdminOp --&gt;|&quot;HTTPS / admin session (TOTP 2FA)&quot;| PPA
+    Job --&gt;|&quot;cron triggers (GDPR erasure, leaderboard snapshot)&quot;| PPA
 
-    PA --&gt;|&quot;REST /api/v1/*&quot;| GA
-    AP --&gt;|&quot;REST /admin/api/*&quot;| AA
-    GA --&gt; PG
-    GA --&gt; RD
-    AA --&gt; PG
-    AA --&gt; RD
-    GA --&gt;|&quot;transactional email&quot;| SG
-    SG -.-&gt;|&quot;failover&quot;| NM</pre></div>
+    PPA --&gt;|&quot;send OTP claim email&quot;| SG
+    SG -.-&gt;|&quot;fallback after 3 failures&quot;| SMTP
+    PPA --&gt;|&quot;persist all durable data&quot;| SB
+    PPA --&gt;|&quot;cache + leaderboard sorted set + rate-limit counters&quot;| UP
+    PPA --&gt;|&quot;static assets served via&quot;| VC
+    SB --&gt;|&quot;daily automated backup&quot;| S3
+    PPA --&gt;|&quot;battle result social cards&quot;| Social</pre></div>
 <blockquote><p>For component-level detail, data flow diagrams, and ADR records see:</p></blockquote>
+<blockquote><p>- <a href="pdd.html" target="_blank" rel="noopener">PDD — Product Design Document</a> (UX + interaction specs)</p></blockquote>
 <blockquote><p>- <a href="edd.html" target="_blank" rel="noopener">EDD — Engineering Design Document</a> (architecture + implementation)</p></blockquote>
-<blockquote><p>- <a href="arch.html" target="_blank" rel="noopener">ARCH — System Architecture</a> (C4 diagrams + ADRs)</p></blockquote>
-<blockquote><p>- <a href="docs/diagrams/" target="_blank" rel="noopener">docs/diagrams/</a> (Mermaid UML — 9 server + 16 frontend + 5 CI/CD + 2 modulith)</p></blockquote>
+<blockquote><p>- <a href="arch.html" target="_blank" rel="noopener">ARCH — Architecture Document</a> (ADRs, C4 diagrams, security model)</p></blockquote>
 <hr>
 <h2 id="tech-stack">Tech Stack</h2>
 <table>
 <tr><th>Layer</th><th>Technology</th><th>Notes</th></tr>
-<tr><td><strong>Frontend (Player)</strong></td><td>React 18 + Phaser.js 3 + Vite 5 + TypeScript 5</td><td>Canvas rendering for pixel pets; TanStack Query v5, Zustand, React Hook Form + Zod</td></tr>
-<tr><td><strong>Frontend (Admin)</strong></td><td>Vue 3 + Element Plus + Vite 5 + TypeScript 5</td><td>Data-dense admin portal; separate Vite build deployed independently</td></tr>
-<tr><td><strong>Backend</strong></td><td>Node.js 20 LTS + Fastify 4</td><td>Game API + Admin API as two Fastify plugins in one Node process; admin mounted at <code>/admin</code></td></tr>
-<tr><td><strong>Package Manager</strong></td><td>pnpm 9.x (workspaces)</td><td>Monorepo via <code>pnpm-workspace.yaml</code>; cross-app linking via <code>workspace:*</code></td></tr>
-<tr><td><strong>Database</strong></td><td>PostgreSQL 15+ (Supabase managed)</td><td>Primary writer + 1 read replica; auto-failover 60s; daily S3 backup</td></tr>
-<tr><td><strong>Cache / Queue</strong></td><td>Redis 7+ (Upstash serverless)</td><td>Leaderboard sorted set, rate-limit counters, admin sessions, matchmaking queue</td></tr>
-<tr><td><strong>Infrastructure</strong></td><td>Vercel (frontend CDN) + Railway (API, autoscale)</td><td>HPA triggers at 70% CPU; ≥ 2 API replicas for game server</td></tr>
-<tr><td><strong>CI / CD</strong></td><td>GitHub Actions</td><td>Lint → Test → Build → Deploy pipeline; coverage gate ≥ 80%; see <code>docs/CICD.md</code></td></tr>
-<tr><td><strong>Email</strong></td><td>SendGrid v3 (primary) + Nodemailer SMTP (fallback)</td><td>Failover after 3 consecutive SendGrid failures; SPF + DKIM configured</td></tr>
-<tr><td><strong>Testing</strong></td><td>Vitest (unit) + Supertest (integration) + Playwright (E2E) + Cucumber (BDD)</td><td>80% coverage enforced as CI gate</td></tr>
-<tr><td><strong>Observability</strong></td><td>Pino (structured JSON logs) + OpenTelemetry + Prometheus</td><td>Traces exported via OTel collector</td></tr>
+<tr><td><strong>Player Frontend</strong></td><td>React 18 + Phaser 3 + TypeScript 5 + Vite</td><td>HTML5 SPA; Phaser isolated in <code>PetCanvasEngine</code> component; React for all UI chrome</td></tr>
+<tr><td><strong>Admin Frontend</strong></td><td>Vue 3 + Element Plus + TypeScript 5 + Vite</td><td>Admin portal SPA; separated to avoid pixel-art design system pollution</td></tr>
+<tr><td><strong>Backend API</strong></td><td>Node.js 20 LTS + Fastify 4 + TypeScript 5</td><td>Modular Monolith; Clean Architecture layers (Controller → Service → Repository)</td></tr>
+<tr><td><strong>Database</strong></td><td>PostgreSQL 15 (Supabase managed)</td><td>Primary durable store for pets, battles, users, audit logs</td></tr>
+<tr><td><strong>Cache / Queue</strong></td><td>Redis (Upstash serverless)</td><td>Leaderboard sorted sets, rate-limit counters, arena matchmaking queue (ZPOPMIN)</td></tr>
+<tr><td><strong>Email</strong></td><td>SendGrid v3 API (primary) + Nodemailer SMTP (fallback)</td><td>OTP claim emails; fallback triggered after 3 consecutive SendGrid failures</td></tr>
+<tr><td><strong>Infrastructure</strong></td><td>Docker + Railway + Supabase + Vercel Edge CDN</td><td>Containerized API on Railway; static SPAs on Vercel; PostgreSQL on Supabase</td></tr>
+<tr><td><strong>CI / CD</strong></td><td>GitHub Actions</td><td><code>ci.yml</code> (lint + test + build, Node 20/22 matrix); <code>deploy.yml</code> (staging/prod)</td></tr>
+<tr><td><strong>Observability</strong></td><td>Prometheus + Grafana + OpenTelemetry</td><td>SLO: 99.9% monthly uptime; P99 read &lt;200ms at 100 RPS</td></tr>
+<tr><td><strong>Testing</strong></td><td>Vitest (unit/integration) + Playwright (E2E) + Cucumber (BDD)</td><td>80%+ coverage target; 215 BDD scenarios (82 server + 133 client)</td></tr>
 </table>
 <hr>
 <h2 id="quick-start">Quick Start</h2>
 <h3 id="prerequisites">Prerequisites</h3>
 <p>All three installation paths share these requirements:</p>
-<ul><li><a href="https://git-scm.com/" target="_blank" rel="noopener">Git</a> 2.40+</li><li>An <code>.env</code> file — copy from <code>.env.example</code> (see <a href="#environment-variables">Environment Variables</a>)</li></ul>
+<ul><li><a href="https://git-scm.com/" target="_blank" rel="noopener">Git</a> 2.40+</li><li><a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js</a> 20 LTS + npm 10+</li><li>An <code>.env.local</code> file — copy from <code>.env.example</code> (see <a href="#environment-variables">Environment Variables</a>)</li></ul>
 <hr>
 <h3 id="docker-recommended">Docker (Recommended)</h3>
-<p>The fastest path: Docker Compose starts the app, PostgreSQL, Redis, and MailHog (local email catcher) with a single command.</p>
+<p>The fastest path to a running instance. Docker Compose starts all services — API, PostgreSQL, and Redis — with a single command.</p>
 <p><strong>Prerequisites:</strong> <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">Docker Desktop</a> 24+ (includes Compose v2)</p>
-<pre><code class="language-bash">git clone https://github.com/ibalasite/pet.git
-cd pet
+<pre><code class="language-bash">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
+cd pixel-pet-arena
 
 # Configure environment
-cp .env.example .env
-# Edit .env — at minimum confirm POSTGRES_PASSWORD and generate EMAIL_ENCRYPTION_KEY:
-#   openssl rand -hex 32
+cp .env.example .env.local
+# Edit .env.local — at minimum set JWT_SECRET and EMAIL_ENCRYPTION_KEY
 
-# Start all services (api + postgres + redis + mailhog)
+# Start all services (API + PostgreSQL + Redis)
 docker compose up -d
 
-# Confirm everything is healthy
+# Verify everything is healthy
 docker compose ps
 # Expected: all services show &quot;running (healthy)&quot;</code></pre>
-<p>Verify the app is responding:</p>
+<p>Verify the API is responding:</p>
 <pre><code class="language-bash">curl http://localhost:3000/health
 # {&quot;status&quot;:&quot;ok&quot;,&quot;version&quot;:&quot;1.0.0&quot;,&quot;uptime&quot;:3}</code></pre>
-<p>Open the player app at <strong>http://localhost:5173</strong> and the admin portal at <strong>http://localhost:5174</strong>.</p>
-<p>MailHog web UI (captured claim emails): <strong>http://localhost:8025</strong></p>
 <hr>
 <h3 id="macos--linux-native">macOS / Linux (Native)</h3>
 <p><strong>Prerequisites:</strong></p>
-<ul><li>Node.js 20 LTS (<a href="https://nodejs.org/en/download/" target="_blank" rel="noopener">install guide</a>)</li><li>pnpm 9.x — <code>npm install -g pnpm@latest</code></li><li>PostgreSQL 15+ (local or Supabase CLI) and Redis 7+ (local or Upstash)</li><li>See <a href="local_deploy.html" target="_blank" rel="noopener">docs/LOCAL_DEPLOY.md</a> for the full local setup including Supabase CLI and TOTP admin bootstrap.</li></ul>
-<pre><code class="language-bash">git clone https://github.com/ibalasite/pet.git
-cd pet
-
-# Install all workspace dependencies (resolves the pnpm workspace tree)
-pnpm install
-
-# Configure environment for each app (api, player-app, admin-app)
-cp .env.example .env
-# Edit .env with your local database, Redis, and email credentials
-
-# Run database migrations
-pnpm db:migrate
-
-# Seed the database (creates a default admin account; SAVE THE PRINTED CREDENTIALS)
-pnpm db:seed
-
-# Start the development servers (API + player app + admin portal concurrently)
-pnpm dev
-# or per-app:
-#   pnpm --filter api dev
-#   pnpm --filter player-app dev
-#   pnpm --filter admin-app dev</code></pre>
-<p>Expected output:</p>
-<pre><code class="">[api]         Listening on http://localhost:3000
-[api]         Database: connected (postgres://localhost:5432/pixel_pet_arena)
-[api]         Redis: connected (redis://localhost:6379)
-[player-app]  VITE v5.x.x  ready in  800 ms  →  http://localhost:5173/
-[admin-app]   VITE v5.x.x  ready in  900 ms  →  http://localhost:5174/</code></pre>
-<hr>
-<h3 id="windows-powershell">Windows (PowerShell)</h3>
-<blockquote><p><strong>Recommendation:</strong> Use <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">WSL 2</a> + Docker Desktop for the smoothest experience. The commands below work in PowerShell 7+ natively.</p></blockquote>
-<p><strong>Prerequisites:</strong> Node.js 20 LTS, pnpm 9.x, PostgreSQL 15+, Redis 7+ (all installable via <a href="https://learn.microsoft.com/windows/package-manager/" target="_blank" rel="noopener">winget</a>).</p>
-<pre><code class="language-powershell">git clone https://github.com/ibalasite/pet.git
-Set-Location pet
+<ul><li>Node.js 20 LTS (<a href="https://github.com/nvm-sh/nvm" target="_blank" rel="noopener">install via nvm</a>)</li><li>PostgreSQL 15+ (local) or Supabase connection string in <code>DATABASE_URL</code></li><li>Redis 7+ (local) or Upstash connection string in <code>REDIS_URL</code></li></ul>
+<pre><code class="language-bash">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
+cd pixel-pet-arena
 
 # Install all workspace dependencies
-pnpm install
+npm install
 
 # Configure environment
-Copy-Item .env.example .env
-# Open .env in your editor and fill in database / Redis / email credentials
+cp .env.example .env.local
+# Edit .env.local — fill DATABASE_URL, REDIS_URL, JWT_SECRET, EMAIL_ENCRYPTION_KEY
+# Generate JWT_SECRET:
+#   node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(64).toString(&#x27;base64url&#x27;))&quot;
+# Generate EMAIL_ENCRYPTION_KEY:
+#   node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(32).toString(&#x27;hex&#x27;))&quot;
 
 # Run database migrations
-pnpm db:migrate
+npm run db:migrate
 
-# Start the development servers
-pnpm dev</code></pre>
+# Start the API development server
+npm run dev:api
+# → Fastify API listening on http://localhost:3000
+
+# In a second terminal, start the player frontend
+npm run dev:player
+# → Vite player app at http://localhost:5173
+
+# In a third terminal, start the admin portal
+npm run dev:admin
+# → Vite admin portal at http://localhost:5174</code></pre>
+<p>Expected API startup output:</p>
+<pre><code class="">[pixel-pet-arena] Fastify listening on http://0.0.0.0:3000
+[pixel-pet-arena] PostgreSQL: connected (pool min=20 max=50)
+[pixel-pet-arena] Redis: connected
+[pixel-pet-arena] SendGrid: configured (dummy key for local dev — emails captured by Inbucket at :54324)</code></pre>
+<hr>
+<h3 id="windows-powershell">Windows (PowerShell)</h3>
+<blockquote><p><strong>Recommendation:</strong> Use <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">WSL 2</a> + Docker Desktop for the smoothest experience on Windows.</p></blockquote>
+<p><strong>Prerequisites:</strong> Node.js 20 LTS via <a href="https://learn.microsoft.com/windows/package-manager/" target="_blank" rel="noopener">winget</a> or the <a href="https://nodejs.org/" target="_blank" rel="noopener">official installer</a>, PostgreSQL 15+, Redis 7+.</p>
+<pre><code class="language-powershell">git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
+Set-Location pixel-pet-arena
+
+# Install all workspace dependencies
+npm install
+
+# Configure environment
+Copy-Item .env.example .env.local
+# Open .env.local in your editor and fill in DATABASE_URL, REDIS_URL, JWT_SECRET, EMAIL_ENCRYPTION_KEY
+
+# Run database migrations
+npm run db:migrate
+
+# Start the API development server
+npm run dev:api</code></pre>
 <p>Verify the server started:</p>
 <pre><code class="language-powershell">Invoke-RestMethod http://localhost:3000/health</code></pre>
 <hr>
 <h2 id="environment-variables">Environment Variables</h2>
-<p>Copy <code>.env.example</code> to <code>.env</code> before starting. The app validates all required variables at startup and exits with a clear error if any are missing. Each app in the monorepo (<code>api</code>, <code>player-app</code>, <code>admin-app</code>) has its own <code>.env.example</code> — see <a href="local_deploy.html" target="_blank" rel="noopener">docs/LOCAL_DEPLOY.md §Environment Setup</a> for the full per-app matrix.</p>
+<p>Copy <code>.env.example</code> to <code>.env.local</code> before starting the application. The API validates all required variables at startup and exits with a clear error if any are missing.</p>
 <table>
 <tr><th>Variable</th><th>Description</th><th>Required</th><th>Default</th><th>Example</th></tr>
-<tr><td><code>POSTGRES_DB</code></td><td>PostgreSQL database name</td><td>Yes</td><td>—</td><td><code>pixel_pet_arena</code></td></tr>
-<tr><td><code>POSTGRES_USER</code></td><td>PostgreSQL username</td><td>Yes</td><td>—</td><td><code>postgres</code></td></tr>
-<tr><td><code>POSTGRES_PASSWORD</code></td><td>PostgreSQL password</td><td>Yes</td><td>—</td><td><code>changeme_local</code></td></tr>
-<tr><td><code>DATABASE_URL</code></td><td>Full PostgreSQL connection string (overrides <code>POSTGRES_*</code> if set)</td><td>No</td><td>built from <code>POSTGRES_*</code></td><td><code>postgresql://user:pass@localhost:5432/pixel_pet_arena</code></td></tr>
-<tr><td><code>REDIS_URL</code></td><td>Redis connection string (Upstash or local)</td><td>No</td><td><code>redis://localhost:6379</code></td><td><code>rediss://user:pass@host:6380</code></td></tr>
-<tr><td><code>SENDGRID_API_KEY</code></td><td>SendGrid v3 API key for transactional email</td><td>Yes (prod)</td><td>—</td><td><code>SG.xxxxx</code></td></tr>
-<tr><td><code>EMAIL_ENCRYPTION_KEY</code></td><td>AES-256-GCM key for GDPR email storage (hex 32 bytes)</td><td>Yes</td><td>—</td><td><code>openssl rand -hex 32</code></td></tr>
-<tr><td><code>JWT_SECRET</code></td><td>HMAC secret for short-lived signed tokens (admin TOTP setup, etc.)</td><td>Yes</td><td>—</td><td><code>openssl rand -hex 32</code></td></tr>
-<tr><td><code>APP_PORT</code></td><td>HTTP port the Game API listens on</td><td>No</td><td><code>3000</code></td><td><code>8080</code></td></tr>
-<tr><td><code>LOG_LEVEL</code></td><td>Minimum log level (<code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code>)</td><td>No</td><td><code>info</code></td><td><code>debug</code></td></tr>
-<tr><td><code>ADMIN_TOTP_ISSUER</code></td><td>TOTP issuer label shown in authenticator apps</td><td>No</td><td><code>pixel-pet-arena</code></td><td><code>Pixel Pet Arena (Staging)</code></td></tr>
-<tr><td><code>FF_MARKETPLACE</code></td><td>Feature flag — pet trading marketplace (Phase 3)</td><td>No</td><td><code>false</code></td><td><code>true</code></td></tr>
-<tr><td><code>FF_BATTLE_RECORDS</code></td><td>Feature flag — Battle Records page (P0/ON, kill-switch)</td><td>No</td><td><code>true</code></td><td><code>false</code></td></tr>
+<tr><td><code>DATABASE_URL</code></td><td>PostgreSQL connection string</td><td>Yes</td><td>—</td><td><code>postgresql://postgres:postgres@localhost:54322/postgres</code></td></tr>
+<tr><td><code>REDIS_URL</code></td><td>Redis / Upstash connection string</td><td>Yes</td><td>—</td><td><code>redis://localhost:6379</code></td></tr>
+<tr><td><code>JWT_SECRET</code></td><td>TOTP setup token signer (64-byte base64url)</td><td>Yes</td><td>—</td><td><em>(generate via node crypto)</em></td></tr>
+<tr><td><code>EMAIL_ENCRYPTION_KEY</code></td><td>AES-256-GCM key for GDPR email hashing (32-byte hex)</td><td>Yes</td><td>—</td><td><em>(generate via node crypto)</em></td></tr>
+<tr><td><code>SENDGRID_API_KEY</code></td><td>SendGrid v3 API key</td><td>Yes</td><td><code>any-dummy-string-for-local</code></td><td><code>SG.xxxx</code></td></tr>
+<tr><td><code>ADMIN_TOTP_ISSUER</code></td><td>TOTP issuer name shown in authenticator app</td><td>No</td><td><code>pixel-pet-arena-local</code></td><td><code>pixel-pet-arena-prod</code></td></tr>
+<tr><td><code>POSTGRES_DB</code></td><td>Database name (docker-compose)</td><td>No</td><td><code>pixel_pet_arena</code></td><td><code>pixel_pet_arena</code></td></tr>
+<tr><td><code>POSTGRES_USER</code></td><td>DB user (docker-compose)</td><td>No</td><td><code>postgres</code></td><td><code>postgres</code></td></tr>
+<tr><td><code>POSTGRES_PASSWORD</code></td><td>DB password (docker-compose)</td><td>No</td><td><code>changeme_local</code></td><td><em>(strong password for prod)</em></td></tr>
+<tr><td><code>FF_MARKETPLACE</code></td><td>Feature flag — enable Marketplace (post-MVP)</td><td>No</td><td><code>false</code></td><td><code>true</code></td></tr>
+<tr><td><code>FF_ARENA_SUMO</code></td><td>Feature flag — enable Sumo arena mode (P1)</td><td>No</td><td><code>true</code></td><td><code>true</code></td></tr>
+<tr><td><code>FF_RARITY_DISPLAY</code></td><td>Feature flag — display rarity badges in UI</td><td>No</td><td><code>true</code></td><td><code>true</code></td></tr>
+<tr><td><code>VITE_API_BASE_URL</code></td><td>API base URL for frontend SPAs</td><td>No</td><td><code>http://localhost:3000</code></td><td><code>https://api.pixelpetarena.com</code></td></tr>
 </table>
-<p>See <code>.env.example</code> for the full annotated list and optional tuning parameters (rate-limit overrides, food-buff multiplier ranges, etc.).</p>
+<p>See <code>.env.example</code> for the full annotated list and optional tuning parameters.</p>
 <hr>
 <h2 id="api-quick-reference">API Quick Reference</h2>
-<p>All player-facing endpoints use the <code>/api/v1/</code> prefix. All admin endpoints use the <code>/admin/api/</code> prefix and are served by the same Node.js/Fastify process. Authentication: pet endpoints use <code>Authorization: Bearer &lt;pet_access_token&gt;</code>; admin endpoints use httpOnly session cookie + TOTP.</p>
+<p>All player endpoints are prefixed with <code>/api/v1</code>. Authentication uses the pet&#x27;s URL token in <code>Authorization: Bearer &lt;token&gt;</code> for owner-restricted actions. Admin endpoints use <code>/admin/api/</code> with TOTP-based session cookies.</p>
 <table>
 <tr><th>Method + Path</th><th>Auth</th><th>Description</th></tr>
-<tr><td><code>POST /api/v1/claim</code></td><td>None</td><td>Send 6-digit OTP to email address to begin claim</td></tr>
-<tr><td><code>POST /api/v1/claim/verify</code></td><td>None</td><td>Verify OTP code → receive permanent pet access token + URL</td></tr>
-<tr><td><code>POST /api/v1/claim/recover</code></td><td>None</td><td>Recover access for a lost bookmarked URL (issues fresh token, invalidates old)</td></tr>
-<tr><td><code>GET /api/v1/pets/random</code></td><td>None</td><td>Generate and preview a fresh procedural pet (pre-claim)</td></tr>
-<tr><td><code>GET /api/v1/pets/:petId</code></td><td>None</td><td>Retrieve public pet profile (stats, appearance, rarity)</td></tr>
-<tr><td><code>POST /api/v1/pets/:petId/train</code></td><td>Pet token</td><td>Perform 1 training action (max 3/day, reset UTC 00:00)</td></tr>
-<tr><td><code>POST /api/v1/pets/:petId/feed</code></td><td>Pet token</td><td>Apply a food buff (temporary or permanent stat boost)</td></tr>
-<tr><td><code>POST /api/v1/arena/enter</code></td><td>Pet token</td><td>Enter arena queue (race or sumo mode); rate-limited 10/hr default</td></tr>
-<tr><td><code>GET /api/v1/leaderboard</code></td><td>None</td><td>Top 100 pets by win rate; filterable by rarity</td></tr>
-<tr><td><code>GET /health</code></td><td>None</td><td>Service health check with version and uptime</td></tr>
+<tr><td><code>GET /api/v1/pets/random</code></td><td>None</td><td>Get a randomly generated unclaimed pet for guest preview</td></tr>
+<tr><td><code>POST /api/v1/claim</code></td><td>None</td><td>Initiate email claim flow — sends 6-digit OTP to player email</td></tr>
+<tr><td><code>POST /api/v1/claim/verify</code></td><td>None</td><td>Submit OTP code — returns 32-byte URL token on success</td></tr>
+<tr><td><code>POST /api/v1/claim/recover</code></td><td>None</td><td>Recover lost pet access via email re-verification</td></tr>
+<tr><td><code>POST /api/v1/pets/:petId/train</code></td><td>Bearer</td><td>Perform a training action (max 3/day, resets UTC 00:00)</td></tr>
+<tr><td><code>POST /api/v1/pets/:petId/feed</code></td><td>Bearer</td><td>Feed special food item to boost stats</td></tr>
+<tr><td><code>POST /api/v1/arena/enter</code></td><td>Bearer</td><td>Enter arena matchmaking queue (rate limit: 10 battles/hour)</td></tr>
+<tr><td><code>GET /api/v1/arena/match/:matchId</code></td><td>None</td><td>Retrieve full battle record with deterministic replay log</td></tr>
+<tr><td><code>GET /api/v1/arena/history/:petId</code></td><td>None</td><td>Per-pet battle history (last 20 battles + OG metadata for share card)</td></tr>
+<tr><td><code>GET /api/v1/leaderboard</code></td><td>None</td><td>Global leaderboard — top 100 pets by win rate</td></tr>
+<tr><td><code>POST /api/v1/gdpr/request</code></td><td>Bearer</td><td>Submit GDPR erasure request (email deleted within 7 days)</td></tr>
 </table>
-<p>For full request/response schemas, error codes, rate limits, and admin endpoints see:</p>
-<ul><li>Markdown source: <a href="api.html" target="_blank" rel="noopener">docs/API.md</a></li><li>HTML online: <a href="api.html" target="_blank" rel="noopener">docs/pages/api.html</a></li><li>Mock server: <a href="docs/blueprint/mock/" target="_blank" rel="noopener">docs/blueprint/mock/</a> (FastAPI-based stub for frontend development)</li><li>OpenAPI 3.1 contract: <a href="docs/blueprint/contracts/openapi.yaml" target="_blank" rel="noopener">docs/blueprint/contracts/openapi.yaml</a></li></ul>
+<p>For request/response schemas, error codes, rate limits, and pagination see the full API reference:</p>
+<ul><li>Markdown source: <a href="api.html" target="_blank" rel="noopener">docs/API.md</a></li><li>HTML online: <a href="api.html" target="_blank" rel="noopener">docs/pages/api.html</a></li></ul>
 <hr>
 <h2 id="directory-structure">Directory Structure</h2>
 <pre><code class="">pixel-pet-arena/
-├── .github/                    # GitHub Actions CI/CD workflows
+├── .github/                  # GitHub Actions CI/CD workflows
 │   └── workflows/
-│       ├── ci.yml              # Lint, test, build on every PR
-│       └── deploy.yml          # Deploy to Railway + Vercel
-├── apps/
-│   ├── api/                    # Fastify 4 unified API process (Game + Admin plugins)
-│   │   └── src/
-│   │       ├── claim/          # OTP generation, email dispatch, token issuance
-│   │       ├── pets/           # Pet CRUD, training, feeding
-│   │       ├── arena/          # Matchmaking, battle engine, result recording
-│   │       ├── leaderboard/    # Redis sorted set reads + PostgreSQL fallback
-│   │       ├── admin/          # Admin plugin (mounted at /admin/api)
-│   │       └── shared/         # Config, logger, Zod schemas, DB client
-│   ├── player-app/             # React 18 + Phaser.js 3 player SPA
-│   │   └── src/
-│   │       ├── game/           # Phaser.js canvas engine, sprite generator
-│   │       ├── claim/          # Claim flow (3-step compound component)
-│   │       ├── arena/          # Arena lobby, match UI
-│   │       └── leaderboard/    # Leaderboard page
-│   └── admin-app/              # Vue 3 + Element Plus admin SPA
-├── packages/
-│   ├── shared-types/           # Shared TypeScript types across all apps
-│   └── constants/              # Shared game constants from constants.json
-├── docs/                       # Markdown source for all design documents
-│   ├── BRD.md                  # Business Requirements Document
-│   ├── PRD.md                  # Product Requirements Document
-│   ├── PDD.md                  # Product Design Document (UX)
-│   ├── EDD.md                  # Engineering Design Document
-│   ├── ARCH.md                 # System Architecture + ADRs
-│   ├── API.md                  # REST API reference
-│   ├── SCHEMA.md               # Database schema reference
-│   ├── CICD.md                 # CI/CD pipeline design
-│   ├── LOCAL_DEPLOY.md         # Local development deployment guide
-│   ├── test-plan.md            # Test Plan + RTM
-│   ├── diagrams/               # Generated UML (9 server + 16 frontend + 5 CI/CD + 2 modulith)
-│   ├── blueprint/              # Generated contracts (OpenAPI, JSON Schema, Pact, IaC, mock server)
-│   └── pages/                  # Generated HTML documentation site (incl. interactive prototypes)
-├── features/                   # Cucumber/Gherkin BDD feature files (server-side)
-│   ├── claim-flow.feature
+│       ├── ci.yml            # Lint, typecheck, test (Node 20/22 matrix), build on every PR
+│       └── deploy.yml        # Deploy to staging / production (Railway + Vercel)
+├── docs/                     # Markdown source for all design documents
+│   ├── BRD.md                # Business Requirements Document
+│   ├── PRD.md                # Product Requirements Document (18 User Stories)
+│   ├── PDD.md                # Product Design Document (UX + interaction specs)
+│   ├── EDD.md                # Engineering Design Document (v2.0)
+│   ├── ARCH.md               # Architecture + ADRs (C4 diagrams)
+│   ├── API.md                # REST API reference (28 endpoints)
+│   ├── SCHEMA.md             # PostgreSQL schema reference (42 entities) + migration SQL
+│   ├── CONSTANTS.md          # All numeric constants (single source of truth)
+│   ├── ANIM.md               # Phaser animation state machine + sprite specs
+│   ├── FRONTEND.md           # Frontend architecture (React + Phaser + Vue)
+│   ├── ADMIN_IMPL.md         # Admin portal implementation spec (Vue 3)
+│   ├── CLIENT_IMPL.md        # Player app implementation spec (React + Phaser)
+│   ├── ALIGN_REPORT.md       # Six-dimension alignment check report (91% AI Gencode Ready)
+│   ├── RTM.md                # Requirements Traceability Matrix
+│   ├── test-plan.md          # Test plan + tooling
+│   ├── CICD.md               # CI/CD pipeline specification
+│   ├── LOCAL_DEPLOY.md       # Local development environment setup guide
+│   ├── runbook.md            # Operations runbook (incident response)
+│   ├── BDD-server.md         # BDD server scenario index (12 feature files, 82 scenarios)
+│   └── pages/                # HTML documentation site (auto-generated by gendoc)
+├── features/                 # BDD Gherkin feature files — Server (Cucumber)
 │   ├── arena-battle.feature
-│   ├── battle-records.feature
-│   ├── leaderboard.feature
-│   ├── training-food.feature
-│   ├── trading-system.feature
-│   ├── rarity-distribution.feature
-│   ├── economy-config.feature
-│   ├── admin-moderation.feature
-│   ├── admin-search-performance.feature
-│   ├── suspicious-detection.feature
-│   ├── gdpr-erasure.feature
-│   ├── steps/                  # TypeScript step definitions (Cucumber-js, 12 files, 82 scenarios)
-│   │   ├── world.ts            # AppWorld — shared API client + state
-│   │   ├── hooks.ts            # Before/After lifecycle hooks
-│   │   ├── claim-flow.steps.ts
-│   │   ├── arena-battle.steps.ts
-│   │   ├── training-food.steps.ts
-│   │   └── ...                 # 9 more domain step files
-│   └── client/                 # Playwright E2E feature files + step definitions
-│       ├── claim-flow-ui.feature
-│       ├── pet-display.feature
-│       ├── training-ui.feature
-│       ├── food-system.feature
-│       ├── arena-ui.feature
-│       ├── battle-records.feature
-│       ├── leaderboard-ui.feature
-│       ├── admin-portal.feature
-│       ├── settings.feature
-│       └── steps/              # TypeScript step definitions (Playwright+Cucumber, 10 files, 133 scenarios)
-│           ├── world.ts        # ClientWorld — Browser/Page + state
-│           ├── hooks.ts        # Browser lifecycle hooks
-│           └── ...             # 10 domain step files
-├── .env.example                # Annotated environment variable template
-├── docker-compose.yml          # Local multi-service development stack
-├── pnpm-workspace.yaml         # pnpm workspace definition
-└── package.json                # Monorepo root</code></pre>
+│   ├── pet-training.feature
+│   ├── claim-flow.feature
+│   └── ... (12 server feature files, 82 scenarios total)
+│   └── client/               # BDD Gherkin feature files — Client E2E (10 files, 133 scenarios)
+├── docker-compose.yml        # Local multi-service development stack
+└── .env.example              # Annotated environment variable template</code></pre>
+<blockquote><p><strong>Note:</strong> <code>src/</code> and <code>tests/</code> directories will be created during the AI codegen phase. This repo represents the complete pre-implementation design — 215 BDD scenarios, OpenAPI contracts, TypeScript interfaces, and SQL schemas are all ready for code generation.</p></blockquote>
 <hr>
 <h2 id="documentation">Documentation</h2>
-<p>The full documentation suite is generated into a static HTML site in <code>docs/pages/</code>.</p>
+<p>The full documentation suite is auto-generated into a static HTML site at <strong><a href="index.html" target="_blank" rel="noopener">docs/pages/index.html</a></strong>.</p>
 <table>
 <tr><th>Document</th><th>Markdown Source</th><th>HTML</th><th>Description</th></tr>
 <tr><td>BRD</td><td><a href="brd.html" target="_blank" rel="noopener">docs/BRD.md</a></td><td><a href="brd.html" target="_blank" rel="noopener">brd.html</a></td><td>Business goals, ROI analysis, stakeholder sign-off</td></tr>
-<tr><td>PRD</td><td><a href="prd.html" target="_blank" rel="noopener">docs/PRD.md</a></td><td><a href="prd.html" target="_blank" rel="noopener">prd.html</a></td><td>User stories, acceptance criteria, priority tiers</td></tr>
-<tr><td>PDD</td><td><a href="pdd.html" target="_blank" rel="noopener">docs/PDD.md</a></td><td><a href="pdd.html" target="_blank" rel="noopener">pdd.html</a></td><td>UX flows, wireframes, component specs</td></tr>
-<tr><td>EDD</td><td><a href="edd.html" target="_blank" rel="noopener">docs/EDD.md</a></td><td><a href="edd.html" target="_blank" rel="noopener">edd.html</a></td><td>Architecture, technology choices, data models</td></tr>
-<tr><td>ARCH</td><td><a href="arch.html" target="_blank" rel="noopener">docs/ARCH.md</a></td><td><a href="arch.html" target="_blank" rel="noopener">arch.html</a></td><td>C4 diagrams, component architecture, ADRs</td></tr>
-<tr><td>API</td><td><a href="api.html" target="_blank" rel="noopener">docs/API.md</a></td><td><a href="api.html" target="_blank" rel="noopener">api.html</a></td><td>REST API endpoints, schemas, error codes</td></tr>
-<tr><td>SCHEMA</td><td><a href="schema.html" target="_blank" rel="noopener">docs/SCHEMA.md</a></td><td><a href="schema.html" target="_blank" rel="noopener">schema.html</a></td><td>Database table definitions and ERD</td></tr>
-<tr><td>CICD</td><td><a href="cicd.html" target="_blank" rel="noopener">docs/CICD.md</a></td><td><a href="cicd.html" target="_blank" rel="noopener">cicd.html</a></td><td>CI/CD pipeline, secrets flow, infra topology</td></tr>
-<tr><td>LOCAL_DEPLOY</td><td><a href="local_deploy.html" target="_blank" rel="noopener">docs/LOCAL_DEPLOY.md</a></td><td><a href="local-deploy.html" target="_blank" rel="noopener">local-deploy.html</a></td><td>Local development setup walkthrough</td></tr>
-<tr><td>BDD (server)</td><td>features/</td><td><a href="bdd-server.html" target="_blank" rel="noopener">bdd-server.html</a></td><td>Gherkin server feature files</td></tr>
-<tr><td>BDD (client / E2E)</td><td>features/client/</td><td><a href="bdd-client.html" target="_blank" rel="noopener">bdd-client.html</a></td><td>Playwright E2E feature files</td></tr>
-<tr><td>Test Plan</td><td><a href="test-plan.html" target="_blank" rel="noopener">docs/test-plan.md</a></td><td><a href="test-plan.html" target="_blank" rel="noopener">test-plan.html</a></td><td>Test strategy, coverage matrix, RTM</td></tr>
+<tr><td>PRD</td><td><a href="prd.html" target="_blank" rel="noopener">docs/PRD.md</a></td><td><a href="prd.html" target="_blank" rel="noopener">prd.html</a></td><td>User stories (18 US), acceptance criteria, priority tiers</td></tr>
+<tr><td>PDD</td><td><a href="pdd.html" target="_blank" rel="noopener">docs/PDD.md</a></td><td><a href="pdd.html" target="_blank" rel="noopener">pdd.html</a></td><td>UX flows, wireframes, component specs, design tokens</td></tr>
+<tr><td>EDD</td><td><a href="edd.html" target="_blank" rel="noopener">docs/EDD.md</a></td><td><a href="edd.html" target="_blank" rel="noopener">edd.html</a></td><td>Architecture, tech stack, data models, ADRs</td></tr>
+<tr><td>ARCH</td><td><a href="arch.html" target="_blank" rel="noopener">docs/ARCH.md</a></td><td><a href="arch.html" target="_blank" rel="noopener">arch.html</a></td><td>C4 diagrams, ADRs, security model (STRIDE/OWASP)</td></tr>
+<tr><td>API</td><td><a href="api.html" target="_blank" rel="noopener">docs/API.md</a></td><td><a href="api.html" target="_blank" rel="noopener">api.html</a></td><td>REST API endpoints (28), request/response schemas, error codes</td></tr>
+<tr><td>SCHEMA</td><td><a href="schema.html" target="_blank" rel="noopener">docs/SCHEMA.md</a></td><td><a href="schema.html" target="_blank" rel="noopener">schema.html</a></td><td>PostgreSQL table definitions (42 entities), ERD, migration SQL</td></tr>
+<tr><td>CONSTANTS</td><td><a href="constants.html" target="_blank" rel="noopener">docs/CONSTANTS.md</a></td><td><a href="constants.html" target="_blank" rel="noopener">constants.html</a></td><td>All numeric constants (authoritative source)</td></tr>
+<tr><td>BDD-Server</td><td>features/</td><td><a href="bdd-server.html" target="_blank" rel="noopener">bdd-server.html</a></td><td>12 server feature files, 82 Gherkin scenarios</td></tr>
+<tr><td>BDD-Client</td><td>features/client/</td><td><a href="bdd-client.html" target="_blank" rel="noopener">bdd-client.html</a></td><td>10 client feature files, 133 E2E scenarios</td></tr>
+<tr><td>ANIM</td><td><a href="anim.html" target="_blank" rel="noopener">docs/ANIM.md</a></td><td><a href="anim.html" target="_blank" rel="noopener">anim.html</a></td><td>Phaser animation state machine, sprite atlas spec</td></tr>
+<tr><td>CICD</td><td><a href="cicd.html" target="_blank" rel="noopener">docs/CICD.md</a></td><td><a href="cicd.html" target="_blank" rel="noopener">cicd.html</a></td><td>CI/CD pipeline (GitHub Actions, Node 20/22 matrix)</td></tr>
+<tr><td>LOCAL_DEPLOY</td><td><a href="local_deploy.html" target="_blank" rel="noopener">docs/LOCAL_DEPLOY.md</a></td><td><a href="local_deploy.html" target="_blank" rel="noopener">local_deploy.html</a></td><td>Local docker-compose setup guide</td></tr>
 </table>
-<h3 id="interactive-demos">Interactive Demos</h3>
-<p>Three runnable, zero-backend prototypes ship with the docs site so reviewers can experience the full surface area without a local dev stack:</p>
-<table>
-<tr><th>Demo</th><th>Link</th><th>Description</th></tr>
-<tr><td>UI Prototype (Player)</td><td><a href="prototype/index.html" target="_blank" rel="noopener">docs/pages/prototype/index.html</a></td><td>10 player-facing screens (Landing → Claim → My Pet → Training → Arena → Battle Result → Leaderboard → Battle Records → Marketplace → GDPR) with hash-routing, mock data, Web Audio synth, and 28 P0/P1 animations</td></tr>
-<tr><td>API Explorer</td><td><a href="prototype/api-explorer/index.html" target="_blank" rel="noopener">docs/pages/prototype/api-explorer/index.html</a></td><td>Postman-style explorer for all 53 endpoints across 16 groups; chip quick-select for enum params, request body presets, copy-as-cURL, hash deep-links, and JavaScript mock responses (no backend required)</td></tr>
-<tr><td>Admin Portal Prototype</td><td><a href="prototype/admin/admin-login.html" target="_blank" rel="noopener">docs/pages/prototype/admin/admin-login.html</a></td><td>5-page Admin Portal walkthrough — Login (admin / Admin@2026 / TOTP 123456) → Dashboard → Users → Roles → Audit Log; covers RBAC (5 roles, 30 permissions), GDPR queue, suspicious-pet review, and 18-entry CSV-exportable immutable audit trail</td></tr>
-</table>
-<p>Regenerate the HTML site:</p>
-<pre><code class="language-bash">python3 ~/.claude/skills/gendoc/tools/bin/gen_html.py
-# Output: docs/pages/*.html</code></pre>
 <hr>
 <h2 id="testing">Testing</h2>
 <h3 id="run-all-tests">Run All Tests</h3>
-<pre><code class="language-bash">pnpm test</code></pre>
+<pre><code class="language-bash">npm test
+# Runs Vitest unit + integration + Playwright E2E + Cucumber BDD</code></pre>
 <h3 id="generate-coverage-report">Generate Coverage Report</h3>
-<pre><code class="language-bash">pnpm test:coverage
-# Report written to coverage/lcov-report/index.html</code></pre>
-<p>Coverage target: <strong>80% lines, branches, functions.</strong> The CI pipeline fails if coverage drops below this threshold.</p>
+<pre><code class="language-bash">npm run test:coverage
+# Coverage report written to coverage/lcov-report/index.html</code></pre>
+<p>Coverage target: <strong>80% lines, branches, functions.</strong> The CI pipeline fails if coverage drops below this threshold (enforced via <code>COVERAGE_THRESHOLD=80</code> in GitHub Actions matrix across Node 20 and 22).</p>
 <h3 id="individual-test-types">Individual Test Types</h3>
 <pre><code class="language-bash"># Unit tests only (Vitest)
-pnpm test:unit
+npm run test:unit
 
 # Integration tests (requires DATABASE_URL and REDIS_URL)
-pnpm test:integration
+npm run test:integration
 
-# BDD / Cucumber feature tests (server)
-pnpm test:bdd
+# BDD / Cucumber server feature tests (82 scenarios)
+npm run test:bdd
 
-# End-to-end tests (Playwright, requires a running app instance)
-pnpm test:e2e</code></pre>
-<h3 id="performance-targets">Performance Targets</h3>
+# BDD / Cucumber client E2E tests (133 scenarios, requires running app)
+npm run test:bdd:client
+
+# Playwright E2E tests (requires running player + admin apps)
+npm run test:e2e</code></pre>
+<h3 id="bdd-coverage">BDD Coverage</h3>
 <table>
-<tr><th>Metric</th><th>Target</th></tr>
-<tr><td>P99 read latency</td><td>&lt; 200 ms at 100 RPS</td></tr>
-<tr><td>P99 write latency</td><td>&lt; 500 ms at 100 RPS</td></tr>
-<tr><td>LCP (player app)</td><td>&lt; 2.5 s</td></tr>
-<tr><td>FCP (player app)</td><td>&lt; 1.5 s</td></tr>
-<tr><td>CLS</td><td>&lt; 0.1</td></tr>
-<tr><td>Leaderboard update lag</td><td>≤ 30 s (Redis sorted set vs. PostgreSQL <code>battle_records</code>)</td></tr>
+<tr><th>Layer</th><th>Feature Files</th><th>Scenarios</th><th>Status</th></tr>
+<tr><td>Server (Cucumber)</td><td>12</td><td>82</td><td>Step stubs generated — ready for implementation</td></tr>
+<tr><td>Client E2E (Playwright + Cucumber)</td><td>10</td><td>133</td><td>Step stubs generated — ready for implementation</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>22</strong></td><td><strong>215</strong></td><td><strong>Pre-implementation design phase</strong></td></tr>
 </table>
 <hr>
-<h2 id="known-limitations">Known Limitations</h2>
-<ol><li><strong>Email pre-scan (Gmail/Outlook)</strong>: Email clients may auto-click URLs in emails. Mitigated by using a 6-digit numeric code + a separate URL (not a magic-link), requiring manual code entry.</li><li><strong>Token enumeration surface</strong>: Pet access tokens are 32-byte cryptographically random — brute-force infeasible — but long-lived. Pets with no owner interaction for <code>PET_RESERVATION_TTL_HOURS</code> (24h) are cleaned up.</li><li><strong>Arena matchmaking at low CCU</strong>: With &lt; ~50 online players, AI-controlled opponents fill matchmaking after the 30-second timeout. AI fallback stats are seeded from the global average.</li><li><strong>Leaderboard eventual consistency</strong>: Redis sorted set may lag up to 30 seconds behind the authoritative PostgreSQL <code>battle_records</code> table during peak load. Displayed with a &quot;last updated&quot; timestamp.</li><li><strong>Marketplace (P2) not yet implemented</strong>: Pet trading feature (<code>FF_MARKETPLACE</code>) is behind a feature flag and not available in v1.0.</li><li><strong>Admin runtime config cache</strong>: Admin parameter changes (<code>PUT /admin/api/config/runtime</code>) take effect within 5 minutes due to <code>config_cache_refresh_time_minutes = 5</code>.</li></ol>
-<hr>
-<h2 id="changelog">Changelog</h2>
-<p>See <a href="https://github.com/ibalasite/pet/releases" target="_blank" rel="noopener">GitHub Releases</a> for versioned release notes. Changes to design docs are tracked in each <code>docs/*.md</code> file&#x27;s Change Log section.</p>
-<hr>
-<h2 id="development-guide">Development Guide</h2>
-<blockquote><p>This README is auto-generated from <code>docs/BRD.md</code>, <code>docs/PRD.md</code>, <code>docs/EDD.md</code>, <code>docs/ARCH.md</code>, <code>docs/API.md</code>, and related upstream documents via the <code>gendoc</code> pipeline. To regenerate: <code>/gendoc readme</code> or <code>/gendoc-gen-html</code>.</p></blockquote>
-<p>See <a href="developer_guide.html" target="_blank" rel="noopener">docs/DEVELOPER_GUIDE.md</a> for the full onboarding guide including branch strategy, commit message format, PR checklist, local environment tips, and release process.</p>
+<h2 id="development-workflow">Development Workflow</h2>
 <h3 id="branch-strategy">Branch Strategy</h3>
 <table>
 <tr><th>Branch</th><th>Purpose</th><th>Direct Push</th></tr>
 <tr><td><code>main</code></td><td>Production-ready code, tagged releases</td><td>No — PR only</td></tr>
 <tr><td><code>develop</code></td><td>Integration branch; staging deploys from here</td><td>No — PR only</td></tr>
-<tr><td><code>feature/&lt;ticket-id&gt;-short-description</code></td><td>New features</td><td>Yes (author)</td></tr>
-<tr><td><code>fix/&lt;ticket-id&gt;-short-description</code></td><td>Bug fixes</td><td>Yes (author)</td></tr>
+<tr><td><code>feature/US-XXX-short-description</code></td><td>New features (link to PRD User Story)</td><td>Yes (author)</td></tr>
+<tr><td><code>fix/TC-XXX-short-description</code></td><td>Bug fixes (link to BDD test case)</td><td>Yes (author)</td></tr>
+<tr><td><code>chore/short-description</code></td><td>Tooling and maintenance</td><td>Yes (author)</td></tr>
 </table>
 <h3 id="commit-message-format">Commit Message Format</h3>
-<p>Follows <a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a>: <code>feat</code>, <code>fix</code>, <code>docs</code>, <code>test</code>, <code>refactor</code>, <code>chore</code>, <code>perf</code>, <code>ci</code>.</p>
-<pre><code class="">feat(arena): add per-pet rate-limit override for admin tuning
-fix(claim): reject expired OTP codes with 410 instead of 400
-docs(readme): refresh from upstream after ALIGN-FIX</code></pre>
+<p>This project follows <a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a>:</p>
+<pre><code class="">&lt;type&gt;(&lt;scope&gt;): &lt;short summary in imperative mood&gt;
+
+[optional body — what and why, not how]
+
+[optional footer — BREAKING CHANGE, closes #issue]</code></pre>
+<p>Types: <code>feat</code>, <code>fix</code>, <code>docs</code>, <code>test</code>, <code>refactor</code>, <code>chore</code>, <code>perf</code>, <code>ci</code></p>
+<p>Examples:</p>
+<pre><code class="">feat(arena): implement race battle matchmaking via Redis ZPOPMIN
+fix(claim): reject OTP codes older than 15 minutes (CLAIM_CODE_EXPIRY_MINUTES)
+docs(readme): update quick-start for monorepo workspace structure
+test(bdd): add step definitions for arena rate-limit scenarios</code></pre>
+<h3 id="pull-request-checklist">Pull Request Checklist</h3>
+<p>Before requesting review, confirm all of the following:</p>
+<ul><li style="list-style:none"><input type="checkbox" disabled> All CI checks are green (build, lint, type-check, tests on Node 20 + 22 matrix)</li><li style="list-style:none"><input type="checkbox" disabled> Coverage has not dropped below 80%</li><li style="list-style:none"><input type="checkbox" disabled> New API behavior is documented in <code>docs/API.md</code></li><li style="list-style:none"><input type="checkbox" disabled> All numeric values reference <code>CONSTANTS.md</code> — no magic numbers in code</li><li style="list-style:none"><input type="checkbox" disabled> BDD scenarios exist for new AC before implementation (TDD)</li><li style="list-style:none"><input type="checkbox" disabled> Breaking schema changes include migration SQL in <code>docs/SCHEMA.md</code></li></ul>
 <hr>
-<h2 id="license">License</h2>
-<p>MIT License</p>
-<p>Copyright (c) 2026 pixel-pet-arena contributors</p>
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
-<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
-<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</p>
-<p>See <a href="LICENSE" target="_blank" rel="noopener">LICENSE</a> for the full text.</p>
+<h2 id="deployment">Deployment</h2>
+<h3 id="staging">Staging</h3>
+<p>Staging deploys automatically on every merge to <code>develop</code>. The pipeline runs the full test suite on Node.js 20 and 22 matrix, builds Docker images, and deploys to Railway staging environment.</p>
+<pre><code class="language-bash"># Trigger a manual staging deploy (GitHub Actions)
+gh workflow run deploy.yml -f environment=staging -f ref=develop</code></pre>
+<h3 id="production">Production</h3>
+<p>Production deploys are triggered by tagging a release on <code>main</code>:</p>
+<pre><code class="language-bash">git tag v1.0.0 &amp;&amp; git push origin v1.0.0</code></pre>
+<p>The CI pipeline promotes the staging image (already tested) to production without a rebuild. Vercel deploys frontend SPAs automatically on every <code>main</code> push.</p>
+<h3 id="rollback">Rollback</h3>
+<p>If a production issue is detected (SLO: 99.9% monthly, ≤43.8 min downtime/month):</p>
+<pre><code class="language-bash"># Roll back Railway API deployment
+railway rollback --service api
+
+# Or identify previous stable tag via GitHub releases
+gh release list --limit 5</code></pre>
+<p>For full incident response procedures including database rollback and GDPR emergency erasure see <a href="runbook.html" target="_blank" rel="noopener">docs/runbook.md</a>.</p>
 <hr>
-<h2 id="security-policy">Security Policy</h2>
-<h3 id="responsible-disclosure">Responsible Disclosure</h3>
-<p>If you discover a security vulnerability, <strong>do not open a public GitHub Issue</strong>. Instead, email <strong>security@pixel-pet-arena.com</strong> (or use <a href="https://github.com/ibalasite/pet/security/advisories/new" target="_blank" rel="noopener">GitHub Security Advisories</a>) with:</p>
-<ol><li>A description of the vulnerability and its potential impact</li><li>Steps to reproduce</li><li>Any suggested mitigations</li></ol>
-<p><strong>Response SLA:</strong></p>
+<h2 id="troubleshooting">Troubleshooting</h2>
 <table>
-<tr><th>Severity</th><th>Acknowledgement</th><th>Initial Assessment</th><th>Patch Target</th></tr>
-<tr><td>Critical</td><td>72 hours</td><td>72 hours</td><td>7 days</td></tr>
-<tr><td>High</td><td>72 hours</td><td>7 days</td><td>30 days</td></tr>
-<tr><td>Medium</td><td>72 hours</td><td>14 days</td><td>90 days</td></tr>
+<tr><th>Problem</th><th>Likely Cause</th><th>Solution</th></tr>
+<tr><td><code>Error: connect ECONNREFUSED 127.0.0.1:5432</code></td><td>PostgreSQL not running or <code>DATABASE_URL</code> wrong</td><td>Start PostgreSQL or Supabase (<code>supabase start</code>), verify <code>DATABASE_URL</code> in <code>.env.local</code>, run <code>npm run db:migrate</code></td></tr>
+<tr><td><code>Error: Redis connection refused</code></td><td>Redis not running or <code>REDIS_URL</code> wrong</td><td>Start Redis (<code>redis-server</code>) and confirm <code>REDIS_URL=redis://localhost:6379</code> in <code>.env.local</code></td></tr>
+<tr><td>OTP email not received locally</td><td>SendGrid not configured for local dev</td><td>Expected — use Supabase Inbucket at <code>http://localhost:54324</code> to capture local emails</td></tr>
+<tr><td><code>TOTP_SETUP_REQUIRED</code> on admin login</td><td>Admin account has no TOTP configured</td><td>Complete TOTP setup via <code>POST /admin/api/auth/totp/setup</code> with the <code>setupToken</code> from the 403 response</td></tr>
+<tr><td>Arena matchmaking stuck / no opponent</td><td>Only one pet in queue; AI fallback pending</td><td>Wait 30 seconds (<code>ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30</code>); AI bot opponent is paired automatically</td></tr>
+<tr><td><code>429 Too Many Requests</code> on <code>/arena/enter</code></td><td>Exceeded 10 battles/hour default limit</td><td>Wait for the hourly window to reset. Admin can adjust via <code>PUT /admin/api/config/runtime</code></td></tr>
+<tr><td><code>JWT_SECRET</code> validation error at startup</td><td>Missing or short JWT_SECRET env var</td><td>Generate: <code>node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(64).toString(&#x27;base64url&#x27;))&quot;</code></td></tr>
+<tr><td>Docker Compose services restart repeatedly</td><td>Missing <code>.env.local</code> required values</td><td>Run <code>docker compose logs api</code> to see the startup validation error; confirm all required vars are set</td></tr>
 </table>
-<p>We credit responsible disclosures in release notes. See SECURITY.md for the full policy.</p>
+<hr>
+<h2 id="known-limitations">Known Limitations</h2>
+<ul><li><strong>RBAC role count</strong>: FRONTEND/ADMIN_IMPL currently implement 3 roles (<code>super_admin</code>, <code>moderator</code>, <code>read_only</code>) while PRD §9.6 defines 4 (<code>super_admin</code>, <code>moderator</code>, <code>analyst</code>, <code>support_agent</code>). The 3-role model is a deliberate MVP simplification pending product decision on role granularity.</li><li><strong>Notification Bounded Context</strong>: EDD §4 ADR for notification service architecture (embedded vs. separate BC) is pending documentation. Current implementation uses embedded email within the claim BC.</li><li><strong>US-ADMIN-003 BDD</strong>: Admin GDPR audit trail user story lacks server-side BDD scenarios. These will be added in the post-MVP sprint.</li><li><strong>Pre-implementation phase</strong>: <code>src/</code> and <code>tests/</code> directories do not yet exist. This repo represents the complete design phase — all 215 BDD scenarios, OpenAPI contracts, TypeScript interfaces, and SQL schemas are ready for AI codegen.</li></ul>
 <hr>
 <h2 id="architecture-quick-reference">Architecture Quick Reference</h2>
 <table>
 <tr><th>Key Decision</th><th>Choice</th><th>Document</th></tr>
-<tr><td>API paradigm</td><td>REST (<code>/api/v1/</code>, <code>/admin/api/</code>) — URI path versioning</td><td><a href="arch.html" target="_blank" rel="noopener">docs/ARCH.md</a></td></tr>
-<tr><td>Database</td><td>PostgreSQL 15+ (Supabase managed) + Redis 7+ (Upstash)</td><td><a href="schema.html" target="_blank" rel="noopener">docs/SCHEMA.md</a></td></tr>
-<tr><td>Authentication</td><td>Email OTP → 32-byte cryptographic URL token (no sessions for players); httpOnly session + TOTP for admin</td><td><a href="arch.html" target="_blank" rel="noopener">docs/ARCH.md §5 Security</a></td></tr>
-<tr><td>Frontend separation</td><td>Player app (React + Phaser.js) and Admin portal (Vue 3 + Element Plus) as separate Vite builds</td><td><a href="edd.html" target="_blank" rel="noopener">docs/EDD.md</a></td></tr>
-<tr><td>Multi-tenancy strategy</td><td>Single-tenant (one game instance per deployment); per-pet isolation via token-bound rows</td><td><a href="schema.html" target="_blank" rel="noopener">docs/SCHEMA.md</a></td></tr>
-<tr><td>Deployment platform</td><td>Vercel (frontend CDN) + Railway (API, autoscale HPA 70% CPU)</td><td><a href="local_deploy.html" target="_blank" rel="noopener">docs/LOCAL_DEPLOY.md</a></td></tr>
+<tr><td>API paradigm</td><td>REST (Fastify 4 + JSON Schema validation)</td><td><a href="arch.html#adr" target="_blank" rel="noopener">docs/ARCH.md</a></td></tr>
+<tr><td>Database</td><td>PostgreSQL 15 (Supabase managed, 42 entity types)</td><td><a href="schema.html" target="_blank" rel="noopener">docs/SCHEMA.md</a></td></tr>
+<tr><td>Authentication</td><td>Email OTP (6-digit, 15-min TTL) → 32-byte URL token (no passwords)</td><td><a href="arch.html#security" target="_blank" rel="noopener">docs/ARCH.md</a></td></tr>
+<tr><td>Arena matchmaking</td><td>Redis ZPOPMIN + AI bot fallback after 30s timeout</td><td><a href="edd.html" target="_blank" rel="noopener">docs/EDD.md</a></td></tr>
+<tr><td>Identity model</td><td>No traditional accounts; URL token as identity anchor; GDPR erasure within 7 days</td><td><a href="prd.html" target="_blank" rel="noopener">docs/PRD.md</a></td></tr>
 </table>
-<p>Main ADRs: <a href="arch.html#14-architecture-decision-records" target="_blank" rel="noopener">docs/ARCH.md — Architecture Decision Records</a></p>
+<p>Primary ADRs: <a href="arch.html#adr" target="_blank" rel="noopener">docs/ARCH.md — ADR section</a> — covers modular monolith, React/Phaser split, dual-stack frontend, token identity model.</p>
+<hr>
+<h2 id="security-policy">Security Policy</h2>
+<p>如發現安全漏洞，請<strong>不要</strong>透過公開 Issue 回報。</p>
+<p><strong>負責任揭露（Responsible Disclosure）：</strong></p>
+<ul><li>使用 GitHub 私人漏洞回報：<a href="https://github.com/pixel-pet-arena/pixel-pet-arena/security/advisories/new" target="_blank" rel="noopener">Security Advisories</a></li><li>或發送 Email 至：<code>security@pixelpetarena.com</code></li></ul>
+<p><strong>回應承諾（SLA）：</strong></p>
+<table>
+<tr><th>嚴重等級</th><th>確認</th><th>修復目標</th></tr>
+<tr><td>Critical</td><td>48 小時內確認</td><td>72 小時內修復</td></tr>
+<tr><td>High</td><td>48 小時內確認</td><td>7 日內修復</td></tr>
+<tr><td>Medium / Low</td><td>48 小時內確認</td><td>90 日內修復並公開披露（CVE）</td></tr>
+</table>
+<p>詳見 SECURITY.md</p>
+<hr>
+<h2 id="contributing">Contributing</h2>
+<p>Contributions are welcome. Please read this section before submitting a pull request.</p>
+<h3 id="fork-and-pr-flow">Fork and PR Flow</h3>
+<ol><li>Fork the repository on GitHub</li><li>Create a feature branch from <code>develop</code>: <code>git checkout -b feature/US-XXX-your-feature develop</code></li><li>Write BDD scenarios first (in <code>features/</code>) — TDD approach is required</li><li>Commit using Conventional Commits format (see <a href="#development-workflow">Development Workflow</a>)</li><li>Push your branch and open a PR against <code>develop</code> (not <code>main</code>)</li><li>Address all review feedback; request re-review after each update</li></ol>
+<h3 id="code-style">Code Style</h3>
+<ul><li>Code is formatted by <strong>Prettier</strong> on save (configured in <code>.prettierrc</code>)</li><li>Lint rules defined in <code>.eslintrc.cjs</code> (TypeScript ESLint + Unicorn plugin)</li><li>Type-checking: <code>npm run typecheck</code> — CI blocks on type errors</li><li>Run <code>npm run format</code> locally before committing to avoid CI failures</li><li>Module size hard limits: 800 lines/module, 50 lines/function (enforced by ESLint <code>max-lines</code>)</li><li>No magic numbers — all numeric constants must reference <code>CONSTANTS.md</code></li></ul>
 <hr>
 <h2 id="code-of-conduct">Code of Conduct</h2>
-<p>This project adopts the <a href="https://www.contributor-covenant.org/" target="_blank" rel="noopener">Contributor Covenant</a> v2.1 as its Code of Conduct.</p>
-<p>See CODE_OF_CONDUCT.md for the full text.</p>
-<p>For violations, contact the maintainers at <strong>conduct@pixel-pet-arena.com</strong>.</p><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">🎮 互動 Prototype</h2><div class="index-grid"><a class="index-card" href="prototype/index.html" target="prototype-window"><span class="index-card__icon">🎮</span><span class="index-card__title">UI Prototype</span></a><a class="index-card" href="prototype/admin/index.html" target="prototype-window"><span class="index-card__icon">🎮</span><span class="index-card__title">Admin Prototype</span></a><a class="index-card" href="prototype/api-explorer/index.html" target="prototype-window"><span class="index-card__icon">🎮</span><span class="index-card__title">API Explorer</span></a></div></section><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">文件導覽</h2><div class="index-grid"><a class="index-card" href="idea.html"><span class="index-card__icon">💡</span><span class="index-card__title">構想文件 (IDEA)</span></a><a class="index-card" href="brd.html"><span class="index-card__icon">📋</span><span class="index-card__title">商業需求文件 (BRD)</span></a><a class="index-card" href="prd.html"><span class="index-card__icon">📝</span><span class="index-card__title">產品需求文件 (PRD)</span></a><a class="index-card" href="pdd.html"><span class="index-card__icon">🎨</span><span class="index-card__title">產品設計文件 (PDD)</span></a><a class="index-card" href="vdd.html"><span class="index-card__icon">🖼️</span><span class="index-card__title">視覺設計文件 (VDD)</span></a><a class="index-card" href="edd.html"><span class="index-card__icon">🏗️</span><span class="index-card__title">工程設計文件 (EDD)</span></a><a class="index-card" href="arch.html"><span class="index-card__icon">🧩</span><span class="index-card__title">架構設計</span></a><a class="index-card" href="api.html"><span class="index-card__icon">🔌</span><span class="index-card__title">API 文件</span></a><a class="index-card" href="schema.html"><span class="index-card__icon">🗄️</span><span class="index-card__title">Schema 文件</span></a><a class="index-card" href="frontend.html"><span class="index-card__icon">🖥️</span><span class="index-card__title">前端設計文件</span></a><a class="index-card" href="audio.html"><span class="index-card__icon">🔊</span><span class="index-card__title">音效設計文件</span></a><a class="index-card" href="anim.html"><span class="index-card__icon">🎬</span><span class="index-card__title">動畫特效文件</span></a><a class="index-card" href="client_impl.html"><span class="index-card__icon">🖥</span><span class="index-card__title">客戶端實作規格</span></a><a class="index-card" href="constants.html"><span class="index-card__icon">🔢</span><span class="index-card__title">業務常數文件</span></a><a class="index-card" href="test-plan.html"><span class="index-card__icon">✅</span><span class="index-card__title">測試計畫 (Test Plan)</span></a><a class="index-card" href="runbook.html"><span class="index-card__icon">📖</span><span class="index-card__title">Runbook</span></a><a class="index-card" href="local_deploy.html"><span class="index-card__icon">🚀</span><span class="index-card__title">本地部署指南</span></a><a class="index-card" href="rtm.html"><span class="index-card__icon">🗂️</span><span class="index-card__title">需求追蹤矩陣 (RTM)</span></a><a class="index-card" href="align_report.html"><span class="index-card__icon">🔍</span><span class="index-card__title">對齊報告</span></a><a class="index-card" href="admin_impl.html"><span class="index-card__icon">📄</span><span class="index-card__title">Admin Impl</span></a><a class="index-card" href="align-report.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align-Report</span></a><a class="index-card" href="align_fix_complete.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Complete</span></a><a class="index-card" href="align_fix_summary.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Summary</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Client</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Server</span></a><a class="index-card" href="cicd.html"><span class="index-card__icon">📄</span><span class="index-card__title">Cicd</span></a><a class="index-card" href="contracts.html"><span class="index-card__icon">📦</span><span class="index-card__title">機器可讀合約</span></a><a class="index-card" href="developer_guide.html"><span class="index-card__icon">📄</span><span class="index-card__title">Developer Guide</span></a><a class="index-card" href="dryrun_dev_feedback.html"><span class="index-card__icon">📄</span><span class="index-card__title">Dryrun Dev Feedback</span></a><a class="index-card" href="implementation_readiness.html"><span class="index-card__icon">📄</span><span class="index-card__title">Implementation Readiness</span></a><a class="index-card" href="manifest.html"><span class="index-card__icon">📄</span><span class="index-card__title">Manifest</span></a><a class="index-card" href="resource.html"><span class="index-card__icon">📄</span><span class="index-card__title">Resource</span></a><a class="index-card" href="background-jobs.html"><span class="index-card__icon">📄</span><span class="index-card__title">Background-Jobs</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Server BDD</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Client BDD</span></a><a class="index-card" href="diagrams/activity-arena-battle.html"><span class="index-card__icon">📐</span><span class="index-card__title">UML 圖表 (42 張)</span><span class="index-card__desc">Server 26 / Frontend 16</span></a></div></section><section style="margin-top:3rem;padding:1.5rem;background:#fff;border:1px solid var(--border);border-radius:8px;"><h2 style="margin-top:0">📊 專案健康狀態</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:1rem"><div style="text-align:center;padding:1rem;background:var(--page-bg);border-radius:6px"><div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">已完成 STEP</div><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">0/20</div></div></div></section></main>
+<p>本專案採用 <a href="https://www.contributor-covenant.org/" target="_blank" rel="noopener">Contributor Covenant</a> v2.1 作為行為準則。</p>
+<p>詳見 CODE_OF_CONDUCT.md</p>
+<p>如有違規事宜，請聯繫 <code>conduct@pixelpetarena.com</code></p>
+<hr>
+<h2 id="license">License</h2>
+<p>MIT License</p>
+<p>Copyright (c) 2026 Pixel Pet Arena Contributors</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+<p>See <a href="LICENSE" target="_blank" rel="noopener">LICENSE</a> for the full text.</p>
+<hr>
+<blockquote><p><em>This README and all docs under <code>docs/</code> were generated by <a href="https://github.com/ibalasite/gendoc" target="_blank" rel="noopener">gendoc</a> — a document-driven design pipeline for AI-assisted software development. Every section traces to a tracked requirement in BRD/PRD/EDD.</em></p></blockquote><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">🎮 互動 Prototype</h2><div class="index-grid"><a class="index-card" href="prototype/index.html" target="prototype-window"><span class="index-card__icon">🎮</span><span class="index-card__title">UI Prototype</span></a><a class="index-card" href="prototype/admin/index.html" target="prototype-window"><span class="index-card__icon">🎮</span><span class="index-card__title">Admin Prototype</span></a><a class="index-card" href="prototype/api-explorer/index.html" target="prototype-window"><span class="index-card__icon">🎮</span><span class="index-card__title">API Explorer</span></a></div></section><section style="margin-top:2.5rem"><h2 style="font-size:1rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">文件導覽</h2><div class="index-grid"><a class="index-card" href="idea.html"><span class="index-card__icon">💡</span><span class="index-card__title">構想文件 (IDEA)</span></a><a class="index-card" href="brd.html"><span class="index-card__icon">📋</span><span class="index-card__title">商業需求文件 (BRD)</span></a><a class="index-card" href="prd.html"><span class="index-card__icon">📝</span><span class="index-card__title">產品需求文件 (PRD)</span></a><a class="index-card" href="pdd.html"><span class="index-card__icon">🎨</span><span class="index-card__title">產品設計文件 (PDD)</span></a><a class="index-card" href="vdd.html"><span class="index-card__icon">🖼️</span><span class="index-card__title">視覺設計文件 (VDD)</span></a><a class="index-card" href="edd.html"><span class="index-card__icon">🏗️</span><span class="index-card__title">工程設計文件 (EDD)</span></a><a class="index-card" href="arch.html"><span class="index-card__icon">🧩</span><span class="index-card__title">架構設計</span></a><a class="index-card" href="api.html"><span class="index-card__icon">🔌</span><span class="index-card__title">API 文件</span></a><a class="index-card" href="schema.html"><span class="index-card__icon">🗄️</span><span class="index-card__title">Schema 文件</span></a><a class="index-card" href="frontend.html"><span class="index-card__icon">🖥️</span><span class="index-card__title">前端設計文件</span></a><a class="index-card" href="audio.html"><span class="index-card__icon">🔊</span><span class="index-card__title">音效設計文件</span></a><a class="index-card" href="anim.html"><span class="index-card__icon">🎬</span><span class="index-card__title">動畫特效文件</span></a><a class="index-card" href="client_impl.html"><span class="index-card__icon">🖥</span><span class="index-card__title">客戶端實作規格</span></a><a class="index-card" href="constants.html"><span class="index-card__icon">🔢</span><span class="index-card__title">業務常數文件</span></a><a class="index-card" href="test-plan.html"><span class="index-card__icon">✅</span><span class="index-card__title">測試計畫 (Test Plan)</span></a><a class="index-card" href="runbook.html"><span class="index-card__icon">📖</span><span class="index-card__title">Runbook</span></a><a class="index-card" href="local_deploy.html"><span class="index-card__icon">🚀</span><span class="index-card__title">本地部署指南</span></a><a class="index-card" href="rtm.html"><span class="index-card__icon">🗂️</span><span class="index-card__title">需求追蹤矩陣 (RTM)</span></a><a class="index-card" href="align_report.html"><span class="index-card__icon">🔍</span><span class="index-card__title">對齊報告</span></a><a class="index-card" href="admin_impl.html"><span class="index-card__icon">📄</span><span class="index-card__title">Admin Impl</span></a><a class="index-card" href="align-report.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align-Report</span></a><a class="index-card" href="align_fix_complete.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Complete</span></a><a class="index-card" href="align_fix_summary.html"><span class="index-card__icon">📄</span><span class="index-card__title">Align Fix Summary</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Client</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">📄</span><span class="index-card__title">Bdd-Server</span></a><a class="index-card" href="cicd.html"><span class="index-card__icon">📄</span><span class="index-card__title">Cicd</span></a><a class="index-card" href="contracts.html"><span class="index-card__icon">📦</span><span class="index-card__title">機器可讀合約</span></a><a class="index-card" href="developer_guide.html"><span class="index-card__icon">📄</span><span class="index-card__title">Developer Guide</span></a><a class="index-card" href="dryrun_dev_feedback.html"><span class="index-card__icon">📄</span><span class="index-card__title">Dryrun Dev Feedback</span></a><a class="index-card" href="implementation_readiness.html"><span class="index-card__icon">📄</span><span class="index-card__title">Implementation Readiness</span></a><a class="index-card" href="manifest.html"><span class="index-card__icon">📄</span><span class="index-card__title">Manifest</span></a><a class="index-card" href="resource.html"><span class="index-card__icon">📄</span><span class="index-card__title">Resource</span></a><a class="index-card" href="background-jobs.html"><span class="index-card__icon">📄</span><span class="index-card__title">Background-Jobs</span></a><a class="index-card" href="bdd-server.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Server BDD</span></a><a class="index-card" href="bdd-client.html"><span class="index-card__icon">🧪</span><span class="index-card__title">Client BDD</span></a><a class="index-card" href="diagrams/activity-arena-battle.html"><span class="index-card__icon">📐</span><span class="index-card__title">UML 圖表 (42 張)</span><span class="index-card__desc">Server 26 / Frontend 16</span></a></div></section><section style="margin-top:3rem;padding:1.5rem;background:#fff;border:1px solid var(--border);border-radius:8px;"><h2 style="margin-top:0">📊 專案健康狀態</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-top:1rem"><div style="text-align:center;padding:1rem;background:var(--page-bg);border-radius:6px"><div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">已完成 STEP</div><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">0/20</div></div></div></section></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
