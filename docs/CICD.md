@@ -212,9 +212,15 @@ jobs:
         run: pnpm --recursive exec tsc --noEmit
 
   unit-tests:
-    name: Unit tests (Vitest)
+    name: Unit tests (Vitest) — Node ${{ matrix.node-version }}
     needs: install
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        node-version: ["20", "22"]
+      fail-fast: false
+    env:
+      COVERAGE_THRESHOLD: "80"
     steps:
       - uses: actions/checkout@v4
 
