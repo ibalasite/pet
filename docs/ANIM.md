@@ -778,3 +778,228 @@ This section defines the runtime metrics, error fallback chains, and structured-
 ---
 
 *This ANIM document specifies all animation and sprite design for pixel-pet-arena. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 and referenced upstream documents (EDD, ARCH, PRD). Implementation must adhere to the performance targets (≥30 FPS, ≤2 s render), asset budgets, and cross-platform fallback chains defined in this document.*
+
+---
+
+## §11 AI Gencode 參考骨架
+
+> **目的**：ANIM.md 的文字描述不足以讓 AI codegen 工具生成正確的 Phaser 3 動畫程式碼；本節提供結構化 transition table 和 TypeScript class skeleton，供 AI 直接參照生成。
+> CLIENT_ENGINE = Phaser 3（React 18 + Phaser 3 + Vite stack，見 EDD §3）
+
+### §11.1 State Machine Transition Table
+
+> 從 §4.2 Animation State Machine 提取所有 state，建立完整 transition table。
+
+| From State | Trigger Event | To State | Guard Condition | Duration / Timing |
+|-----------|--------------|---------|----------------|------------------|
+| `idle` | `onClick` / `onTouch` | `interacting` | — | 立即；300ms 後 → `idle` |
+| `idle` | `trainStart` | `training` | training AC 未耗盡（≤3/day） | 立即；600ms 後 → `idle_happy` |
+| `idle` | `battleStart` | `battle` | arena session active | 立即 |
+| `idle` | `levelUp` | `levelup` | new level achieved | 立即；800ms 後 → `idle_happy` |
+| `idle` | `neglectCheck` | `neglected` | `last_trained_at` > 3 consecutive days (TRAINING_NEGLECT_THRESHOLD) | 持續直到訓練 |
+| `interacting` | `animationComplete` | `idle` | 300ms elapsed | 自動 |
+| `training` | `animationComplete` | `idle_happy` | 600ms elapsed | 自動 |
+| `idle_happy` | `loopEnd` | `idle` | 3 loops completed | 自動 |
+| `battle` | `battleEntry` | `battle_active` | — | entry anim complete |
+| `battle_active` | `battleEnd(win)` | `battle_win` | outcome = WIN | 立即；400ms 後 → `idle_happy` |
+| `battle_active` | `battleEnd(lose)` | `battle_lose` | outcome = LOSE | 立即；400ms 後 → `idle` |
+| `levelup` | `animationComplete` | `idle_happy` | 800ms elapsed | 自動 |
+| `neglected` | `trainStart` | `training` | any training action dispatched | 立即 |
+| `battle_win` | `animationComplete` | `idle_happy` | 400ms elapsed | 自動 |
+| `battle_lose` | `animationComplete` | `idle` | 400ms elapsed | 自動 |
+
+### §11.2 Engine-Aware Class Skeleton（Phaser 3）
+
+```typescript
+// src/game/scenes/PetAnimationStateMachine.ts
+// 依 ANIM.md §11.1 Transition Table 實作
+
+type PetAnimState =
+  | 'idle' | 'interacting' | 'training' | 'idle_happy'
+  | 'battle' | 'battle_active' | 'battle_win' | 'battle_lose'
+  | 'levelup' | 'neglected';
+
+interface AnimEvent {
+  type:
+    | 'onClick' | 'onTouch' | 'trainStart' | 'battleStart'
+    | 'levelUp' | 'neglectCheck' | 'animationComplete' | 'loopEnd'
+    | 'battleEntry' | 'battleEnd';
+  payload?: { outcome?: 'win' | 'lose'; level?: number };
+}
+
+// SPRITE_RESOLUTION = 32 (from CONSTANTS.md SPRITE_RESOLUTION)
+const SPRITE_W = 32;
+const SPRITE_H = 32;
+
+class PetAnimationStateMachine {
+  private current: PetAnimState = 'idle';
+  private loopCount = 0;
+  private sprite: Phaser.GameObjects.Sprite;
+  private scene: Phaser.Scene;
+  private petKey: string; // e.g. 'pet-cat-rare'
+
+  constructor(sprite: Phaser.GameObjects.Sprite, scene: Phaser.Scene, petKey: string) {
+    this.sprite = sprite;
+    this.scene = scene;
+    this.petKey = petKey;
+    this.sprite.on('animationcomplete', () => this.dispatch({ type: 'animationComplete' }));
+    this.sprite.on('animationrepeat', () => {
+      this.loopCount++;
+      if (this.loopCount >= 3) this.dispatch({ type: 'loopEnd' });
+    });
+    this.playAnim('idle');
+  }
+
+  dispatch(event: AnimEvent): void {
+    const { type, payload } = event;
+    // §11.1 Transition Table — exhaustive mapping
+    if (this.current === 'idle') {
+      if (type === 'onClick' || type === 'onTouch') {
+        this.transition('interacting');
+        this.scene.time.delayedCall(300, () => this.transition('idle'));
+      } else if (type === 'trainStart') {
+        this.transition('training');
+      } else if (type === 'battleStart') {
+        this.transition('battle');
+      } else if (type === 'levelUp') {
+        this.transition('levelup');
+      } else if (type === 'neglectCheck') {
+        this.transition('neglected');
+      }
+    } else if (this.current === 'training' && type === 'animationComplete') {
+      this.transition('idle_happy');
+    } else if (this.current === 'idle_happy' && type === 'loopEnd') {
+      this.loopCount = 0;
+      this.transition('idle');
+    } else if (this.current === 'battle' && type === 'battleEntry') {
+      this.transition('battle_active');
+    } else if (this.current === 'battle_active' && type === 'battleEnd') {
+      if (payload?.outcome === 'win') {
+        this.transition('battle_win');
+        this.scene.time.delayedCall(400, () => this.transition('idle_happy'));
+      } else {
+        this.transition('battle_lose');
+        this.scene.time.delayedCall(400, () => this.transition('idle'));
+      }
+    } else if (this.current === 'levelup' && type === 'animationComplete') {
+      this.transition('idle_happy');
+    } else if (this.current === 'neglected' && type === 'trainStart') {
+      this.transition('training');
+    }
+  }
+
+  private transition(next: PetAnimState): void {
+    this.current = next;
+    this.playAnim(next);
+  }
+
+  private playAnim(state: PetAnimState): void {
+    // key format: `{petKey}-{state}` — e.g. 'pet-cat-rare-idle'
+    this.sprite.play(`${this.petKey}-${state}`, true);
+  }
+
+  get currentState(): PetAnimState { return this.current; }
+}
+
+// Phaser Scene integration
+function preloadPetAssets(scene: Phaser.Scene, petKey: string): void {
+  const states: PetAnimState[] = [
+    'idle', 'interacting', 'training', 'idle_happy',
+    'battle', 'battle_active', 'battle_win', 'battle_lose',
+    'levelup', 'neglected'
+  ];
+  for (const state of states) {
+    scene.load.spritesheet(
+      `${petKey}-${state}`,
+      `assets/sprites/${petKey}/${state}.png`,
+      { frameWidth: SPRITE_W, frameHeight: SPRITE_H }
+    );
+  }
+}
+
+function createPetAnimations(scene: Phaser.Scene, petKey: string): void {
+  // FPS values from CONSTANTS.md (IDLE_ANIMATION_FPS, BATTLE_ANIMATION_FPS, etc.)
+  const animConfigs: Array<{ state: PetAnimState; frames: number; fps: number; loop: boolean }> = [
+    { state: 'idle',         frames: 4, fps: 8,  loop: true  },
+    { state: 'interacting',  frames: 6, fps: 12, loop: false },
+    { state: 'training',     frames: 8, fps: 12, loop: false },
+    { state: 'idle_happy',   frames: 4, fps: 10, loop: true  },
+    { state: 'battle',       frames: 4, fps: 8,  loop: true  },
+    { state: 'battle_active',frames: 6, fps: 15, loop: true  },
+    { state: 'battle_win',   frames: 8, fps: 12, loop: false },
+    { state: 'battle_lose',  frames: 6, fps: 10, loop: false },
+    { state: 'levelup',      frames: 10,fps: 15, loop: false },
+    { state: 'neglected',    frames: 2, fps: 4,  loop: true  },
+  ];
+  for (const { state, frames, fps, loop } of animConfigs) {
+    scene.anims.create({
+      key: `${petKey}-${state}`,
+      frames: scene.anims.generateFrameNumbers(`${petKey}-${state}`, { start: 0, end: frames - 1 }),
+      frameRate: fps,
+      repeat: loop ? -1 : 0,
+    });
+  }
+}
+```
+
+### §11.3 程序生成資產演算法骨架
+
+> 觸發條件：PRD 含「程序生成」「procedural generation」— 已觸發（see EDD §4.7.3）。
+
+```typescript
+// src/game/services/PetGenerationService.ts
+// Mirrors EDD §4.7.3 — seed must produce identical sprite on every call
+
+// mulberry32: simple seeded PRNG (deterministic, same output for same seed)
+function mulberry32(seed: number): () => number {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Asset dimension arrays (populated from §3 Sprite Asset Planning)
+const BODY_TYPES  = ['round', 'slender', 'fluffy', 'stocky', 'angular'];
+const HEAD_TYPES  = ['large', 'small', 'round', 'elongated'];
+const PALETTES    = ['pastel_blue', 'warm_orange', 'forest_green', 'candy_pink', 'galaxy_purple'];
+const ACCESSORIES = ['bow', 'hat', 'collar', 'none', 'wings'];
+const PATTERNS    = ['solid', 'striped', 'spotted', 'gradient'];
+
+function determineRarity(roll: number): 'common' | 'rare' | 'epic' | 'legendary' {
+  // RTP from CONSTANTS.md: legendary=2%, epic=8%, rare=30%, common=60%
+  if (roll < 0.02) return 'legendary';
+  if (roll < 0.10) return 'epic';
+  if (roll < 0.40) return 'rare';
+  return 'common';
+}
+
+interface PetGenerationResult {
+  petName: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  bodyType: string;
+  headType: string;
+  palette: string;
+  accessory: string;
+  pattern: string;
+  // sprite: ImageData  — rendered at SPRITE_RESOLUTION=32 via canvas 2D
+}
+
+function generateFromSeed(seed: bigint): PetGenerationResult {
+  const rng = mulberry32(Number(seed));  // seed → deterministic sequence
+  const body      = BODY_TYPES[Math.floor(rng() * BODY_TYPES.length)];
+  const head      = HEAD_TYPES[Math.floor(rng() * HEAD_TYPES.length)];
+  const palette   = PALETTES[Math.floor(rng() * PALETTES.length)];
+  const accessory = ACCESSORIES[Math.floor(rng() * ACCESSORIES.length)];
+  const pattern   = PATTERNS[Math.floor(rng() * PATTERNS.length)];
+  const rarity    = determineRarity(rng());
+  const petName   = `${palette.split('_')[0]} ${body} ${head}`;
+  return { petName, rarity, bodyType: body, headType: head, palette, accessory, pattern };
+}
+
+// Test vectors (from EDD §4.7.3):
+// generateFromSeed(123456789n) → deterministic fixed output (regression test)
+// generateFromSeed(987654321n) → different combination, both valid
+// generateFromSeed(0n)         → uses PRNG floor: valid combination, rarity=common expected
+```
