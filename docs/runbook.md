@@ -147,7 +147,7 @@ Both Railway and Fly.io support rolling deploys. The backend is stateless (sessi
 
 ## Incident Response
 
-This section defines severity levels, SLAs, escalation paths, and first-responder playbooks for common failure scenarios.
+This section defines severity levels, SLAs, escalation paths, and first-responder playbooks for common failure scenarios in the pixel-pet-arena production environment. Each playbook provides step-by-step diagnostic commands and repair actions to restore service within the defined SLA window.
 
 ### Severity Matrix
 
@@ -468,7 +468,7 @@ In all forward-fix cases, acknowledge the incident, communicate the fix ETA, and
 
 ## Health Checks and Monitoring
 
-The `/health` endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating.
+The `/health` endpoint is the canonical liveness and readiness signal for the pixel-pet-arena backend. All load balancers and deployment platforms should use this endpoint for health-gating. This section covers the response schema, expected subsystem statuses, and the alerting thresholds used by on-call monitoring.
 
 ### `/health` Response Schema
 
@@ -581,7 +581,7 @@ alerts:
 
 ## On-Call Quick Reference
 
-A compact reference card for the first responder. Full API documentation is in `docs/API.md`.
+A compact reference card for the first responder during active incidents. Covers critical endpoints, key environment variables, common diagnostic commands, and escalation contacts. Full API documentation is in `docs/API.md`; full incident playbooks are in the Incident Response section above.
 
 ### Critical Endpoints
 
