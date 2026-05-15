@@ -1545,6 +1545,78 @@ graph TB
 
 ---
 
+### §4.7 核心演算法規格（Core Algorithm Spec）
+
+> `client_type = game`，§4.7 強制生成。所有 table/column/Redis key 名稱取自 SCHEMA.md。
+
+#### §4.7.1 Arena 勝負判定（Battle Outcome Algorithm）
+
+| 欄位 | 內容 |
+|------|------|
+| **演算法名稱** | `BattleOutcomeService.computeOutcome()` — POST /api/v1/arena/enter |
+| **輸入** | `petA: { id: UUID, stat_speed: int[1..100], stat_strength: int[1..100], stat_stamina: int[1..100] }`, `petB: same`, `mode: 'race' \| 'sumo'`, `randomSeed: bigint` |
+| **輸出** | `{ winnerId: UUID, petAScore: number, petBScore: number, durationMs: int[5000..15000] }` |
+| **Pseudocode** | ```typescript\nfunction computeOutcome(petA, petB, mode, randomSeed) {\n  const baseStat = mode === 'race' ? 'stat_speed' : 'stat_strength';\n  const rng = seededRandom(randomSeed); // mulberry32(seed)\n  const modifier = (rng() * 2 - 1) * 0.15; // ±15%\n  const scoreA = petA[baseStat] * (1 + modifier);\n  const modifier2 = (rng() * 2 - 1) * 0.15;\n  const scoreB = petB[baseStat] * (1 + modifier2);\n  const durationMs = Math.floor(rng() * 10000) + 5000; // [5000..15000]\n  const winnerId = scoreA >= scoreB ? petA.id : petB.id;\n  return { winnerId, petAScore: scoreA, petBScore: scoreB, durationMs };\n}``` |
+| **複雜度** | Time O(1) / Space O(1) |
+| **Test Vector** | ①`petA={speed:55}, petB={speed:10}, mode='race', seed=7654321` → `winnerId=petA.id, petAScore≈55±8.25, petBScore≈10±1.5` ②`petA={strength:10}, petB={strength:90}, mode='sumo', seed=1122334` → `winnerId=petB.id` (90×(1±0.15) >> 10×(1±0.15)) |
+
+#### §4.7.2 Pet 等級公式（Level Calculation）
+
+| 欄位 | 內容 |
+|------|------|
+| **演算法名稱** | `PetLevelService.computeLevel()` — PATCH pets on training_logs INSERT |
+| **輸入** | `total_training_actions: int[0..∞]` (from `pets.total_training_actions`) |
+| **輸出** | `level: int[1..100]` (written to `pets.level`) |
+| **Pseudocode** | ```typescript\nfunction computeLevel(totalTrainingActions: number): number {\n  // PET_LEVEL_FORMULA_DIVISOR = 10\n  const raw = Math.floor(totalTrainingActions / 10);\n  // PET_LEVEL_MAX = 100, PET_LEVEL_DEFAULT = 1\n  return Math.max(1, Math.min(100, raw === 0 ? 1 : raw));\n}``` |
+| **複雜度** | Time O(1) / Space O(1) |
+| **Test Vector** | ①`total_training_actions=0` → `level=1` ②`total_training_actions=95` → `level=9` ③`total_training_actions=1000` → `level=100` (capped) |
+
+#### §4.7.3 程序化 Pet 生成（Procedural Generation）
+
+| 欄位 | 內容 |
+|------|------|
+| **演算法名稱** | `PetGenerationService.generateFromSeed()` — called on claim_identities INSERT |
+| **輸入** | `seed: bigint` (globally unique, stored in `pets.seed`); 6 dimensions: body, head, color, accessory, rarity_trait, pattern |
+| **輸出** | `{ sprite: base64_png, petName: string, rarity: 'common'\|'rare'\|'epic'\|'legendary' }` |
+| **Pseudocode** | ```typescript\nfunction generateFromSeed(seed: bigint) {\n  const rng = mulberry32(Number(seed));\n  const body = BODY_PARTS[Math.floor(rng() * BODY_PARTS.length)];\n  const head = HEAD_PARTS[Math.floor(rng() * HEAD_PARTS.length)];\n  const color = COLOR_PALETTES[Math.floor(rng() * COLOR_PALETTES.length)];\n  const accessory = ACCESSORIES[Math.floor(rng() * ACCESSORIES.length)];\n  const rarityRoll = rng();\n  // RTP table: common=60%, rare=30%, epic=8%, legendary=2%\n  const rarity = rarityRoll < 0.02 ? 'legendary'\n    : rarityRoll < 0.10 ? 'epic'\n    : rarityRoll < 0.40 ? 'rare' : 'common';\n  const sprite = compositeSprite(body, head, color, accessory, SPRITE_RESOLUTION=32);\n  const petName = `${color.name} ${body.species}`;\n  return { sprite, petName, rarity };\n}``` |
+| **複雜度** | Time O(D) where D=6 dimensions / Space O(sprite_px²) = O(1024) |
+| **Test Vector** | ①`seed=123456789` → deterministic body/head/color (same result on every call) ②`seed=111222333` → different combination; both must produce valid 32×32 PNG |
+
+#### §4.7.4 Leaderboard 積分與 Redis Sorted Set 操作
+
+| 欄位 | 內容 |
+|------|------|
+| **演算法名稱** | `LeaderboardService.updateRank()` — called after arena_matches INSERT |
+| **輸入** | `petId: UUID`, `won: boolean`, `winCount: int`, `totalBattles: int` |
+| **輸出** | `score: number` written to Redis `ZADD leaderboard:global {score} {petId}` |
+| **Pseudocode** | ```typescript\nfunction computeScore(winCount: number, totalBattles: number): number {\n  if (totalBattles === 0) return 0;\n  const winRate = winCount / totalBattles;\n  // score = win_count * 100 + win_rate * 1000 (higher battles break ties)\n  return Math.floor(winCount * 100 + winRate * 1000);\n}\nasync function updateRank(petId, won, winCount, totalBattles) {\n  const score = computeScore(winCount, totalBattles);\n  await redis.zadd('leaderboard:global', score, petId);\n  // Top 500 snapshot every 5 min via cron\n}``` |
+| **複雜度** | Time O(log N) for ZADD / Space O(N) where N ≤ 500 (top-N cap) |
+| **Test Vector** | ①`winCount=50, totalBattles=60` → `score = 50*100 + (50/60)*1000 = 5000+833 = 5833` ②`winCount=2, totalBattles=5` → `score = 200+400 = 600` |
+
+#### §4.7.5 Pet Access Token 雜湊（Token Hashing）
+
+| 欄位 | 內容 |
+|------|------|
+| **演算法名稱** | `AuthService.issueToken()` / `AuthService.verifyToken()` |
+| **輸入** | `tokenBytes: Buffer[32]` (crypto.randomBytes(32), URL-safe base64 encoded) |
+| **輸出** | `tokenHash: string` (SHA-256 hex, stored in `pets.owner_token_hash`) |
+| **Pseudocode** | ```typescript\nfunction issueToken(): { token: string; hash: string } {\n  const buf = crypto.randomBytes(32); // PET_ACCESS_TOKEN_MIN_BYTES=32\n  const token = buf.toString('base64url');\n  const hash = crypto.createHash('sha256').update(buf).digest('hex');\n  return { token, hash }; // token returned to user, hash stored in DB\n}\nfunction verifyToken(rawToken: string, storedHash: string): boolean {\n  const buf = Buffer.from(rawToken, 'base64url');\n  const hash = crypto.createHash('sha256').update(buf).digest('hex');\n  return timingSafeEqual(Buffer.from(hash), Buffer.from(storedHash));\n}``` |
+| **複雜度** | Time O(1) / Space O(1) |
+| **Test Vector** | ①`token='abc123...'(32 bytes base64url)` → `hash=sha256(decode(token))` deterministic ②`wrong token` → `timingSafeEqual returns false` without timing leak |
+
+#### §4.7.6 Rate Limiting — Sliding Window（Redis）
+
+| 欄位 | 內容 |
+|------|------|
+| **演算法名稱** | `RateLimitMiddleware.check()` — all endpoints (see SCHEMA.md §12 Redis keys) |
+| **輸入** | `key: string` (e.g. `rl:arena:enter:{petId}`), `limit: int`, `windowSec: int` |
+| **輸出** | `{ allowed: boolean; remaining: int; resetAt: Date }` |
+| **Pseudocode** | ```typescript\nasync function checkRateLimit(key, limit, windowSec) {\n  const now = Date.now();\n  const windowStart = now - windowSec * 1000;\n  // Sliding window via sorted set\n  await redis.zremrangebyscore(key, 0, windowStart);\n  const count = await redis.zcard(key);\n  if (count >= limit) {\n    const oldestScore = await redis.zrange(key, 0, 0, 'WITHSCORES');\n    const resetAt = new Date(Number(oldestScore[1]) + windowSec * 1000);\n    return { allowed: false, remaining: 0, resetAt };\n  }\n  await redis.zadd(key, now, `${now}-${Math.random()}`);\n  await redis.expire(key, windowSec);\n  return { allowed: true, remaining: limit - count - 1, resetAt: new Date(now + windowSec * 1000) };\n}``` |
+| **複雜度** | Time O(log N) for ZADD/ZREMRANGE / Space O(limit) per key |
+| **Test Vector** | ①`limit=10, windowSec=3600, count=9` → `allowed=true, remaining=0` ②`count=10` → `allowed=false, remaining=0` |
+
+---
+
 ## §5. API Design
 
 完整 endpoint 規格：詳見 `docs/API.md`。本節提供工程設計層必要摘要。
