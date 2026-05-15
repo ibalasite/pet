@@ -253,7 +253,7 @@
 
 **相對現有解法（競品 / 替代方案），本產品的獨特差異：**
 
-> pixel-pet-arena 是唯一同時具備「無帳號 email 認領制（Magic Link 模式）」+ 「程序化像素寵物保證唯一性（>10 億組合）」+ 「多模式競技場對戰」+ 「P2P 寵物交易市場」的 HTML5 瀏覽器端養成競技遊戲。競品要麼需要完整帳號（Neopets、CryptoKitties），要麼缺乏持久性（itch.io 單機小遊戲），要麼沒有社交競技維度（傳統 Tamagotchi）。
+> pixel-pet-arena 是唯一同時具備「無帳號 email 認領制（OTP 密碼信 + URL Token 模式）」+ 「程序化像素寵物保證唯一性（>10 億組合）」+ 「多模式競技場對戰」+ 「P2P 寵物交易市場」的 HTML5 瀏覽器端養成競技遊戲。競品要麼需要完整帳號（Neopets、CryptoKitties），要麼缺乏持久性（itch.io 單機小遊戲），要麼沒有社交競技維度（傳統 Tamagotchi）。
 
 | 維度 | pixel-pet-arena | Neopets | itch.io Browser Pet Games | CryptoKitties |
 |------|:--------------:|:-------:|:------------------------:|:------------:|
