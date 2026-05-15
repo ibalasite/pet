@@ -49,7 +49,7 @@ last-updated: "2026-05-04"
 |-------|-------------|
 | `ID` | Unique asset identifier (RES-IMG-001, RES-ANIM-001, etc.) |
 | `filename` | Final deliverable filename (with extension) |
-| `type` | `image` / `animation` / `particle` / `font` |
+| `type` | `image` / `animation` / `particle` / `font` / `sfx` / `bgm` |
 | `source_tool` | Generation tool (Stable Diffusion XL / Midjourney v6 / DALL-E 3 / hand-crafted pixel art tool / Aseprite) |
 | `prompt` | Ready-to-use generation prompt (English). For pixel art sprites, describes the pixel grid style, color constraints, and frame layout. |
 | `dimensions` | Image: W×H px; animation: frames × fps |
