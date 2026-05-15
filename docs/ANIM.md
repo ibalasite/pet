@@ -129,7 +129,7 @@ Total rendered sprite at 32×32 is the result of layer blending in WebGL, or can
 | `anim_neglect_desaturate` | 1 frame | — | No | Triggered when last_trained_at > 3 days | Desaturated shader applied (no frame anim) |
 | `anim_stat_buff_glow` | 3 frames | 400 | No | Food buff applied | Glow/flash overlay on pet; plays once on buff activation |
 
-**Total Frame Count**: ~73 frames across all 16 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).
+**Total Frame Count**: ~74 frames across all 17 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).
 
 ### §2.3 Animation Spritesheet Planning
 
@@ -145,7 +145,7 @@ Row 4:  [anim_battle_hit frames 0-2]              [anim_battle_win frames 0-5]  
 Row 5:  [anim_levelup_burst frames 0-11 (2×width)]
 Row 6:  [anim_stat_buff_glow frames 0-2]              [anim_neglect_desaturate frame 0]
 
-Total grid: ~7 rows × 4 columns (with frame packing) = ~73 used frames → ~73 frames total (remaining cells are blank padding to fill the spritesheet grid)
+Total grid: ~7 rows × 4 columns (with frame packing) = ~74 used frames → ~74 frames total (remaining cells are blank padding to fill the spritesheet grid)
 Physical size: 32px × 28 cells = 896 × 768 px spritesheet per variant
 Compressed PNG: ~80–120 KB per variant (subject to color optimization)
 ```
