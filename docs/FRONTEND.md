@@ -89,7 +89,12 @@ apps/player/
 │   │   │   ├── ClaimEmailForm.tsx
 │   │   │   ├── ClaimCodeForm.tsx
 │   │   │   ├── ExpiryWarning.tsx
-│   │   │   └── URLReveal.tsx
+│   │   │   ├── URLReveal.tsx
+│   │   │   └── recover/
+│   │   │       ├── TokenRecoveryPage.tsx
+│   │   │       ├── RecoveryEmailForm.tsx
+│   │   │       ├── RecoveryCodeForm.tsx
+│   │   │       └── TokenRevealModal.tsx
 │   │   ├── pet/
 │   │   │   ├── PetPage.tsx
 │   │   │   ├── RarityBadge.tsx
@@ -118,7 +123,8 @@ apps/player/
 │   │   │   ├── BattleResultPage.tsx
 │   │   │   ├── BattleResultCard.tsx
 │   │   │   ├── StatComparison.tsx
-│   │   │   └── ShareBattleButton.tsx
+│   │   │   ├── ShareBattleButton.tsx
+│   │   │   └── ActionButtons.tsx
 │   │   ├── leaderboard/
 │   │   │   ├── LeaderboardPage.tsx
 │   │   │   ├── LeaderboardTable.tsx
@@ -334,6 +340,21 @@ interface AppStore {
   setClaimStep: (step: 'email' | 'code' | 'reveal') => void;
   setClaimId: (id: string | null) => void;
 
+  // Recovery slice (separate from claim flow state — see §5.2)
+  recoveryClaimId: string | null;
+  recoveryEmail: string | null;
+  recoveryPetId: string | null;
+  recoveryStep: 'email' | 'code' | 'reveal';
+  recoveryAttempts: number;
+  setRecoveryClaimId: (id: string | null) => void;
+  setRecoveryEmail: (email: string | null) => void;
+  setRecoveryPetId: (petId: string | null) => void;
+  setRecoveryStep: (step: 'email' | 'code' | 'reveal') => void;
+  setRecoveryAttempts: (attempts: number) => void;
+
+  // Pet slice
+  setPetToken: (token: string) => void;  // writes token to localStorage via tokenStorage.ts
+
   // Toast slice
   toasts: Toast[];
   pushToast: (toast: Toast) => void;
@@ -360,6 +381,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, lazy: () => import('./components/landing/LandingPage') },
       { path: 'claim', lazy: () => import('./components/claim/ClaimPage') },
+      { path: 'claim/recover', lazy: () => import('./components/claim/recover/TokenRecoveryPage') },
       { path: 'pet/:petId', lazy: () => import('./components/pet/PetPage') },
       { path: 'pet/:petId/train', lazy: () => import('./components/training/TrainingPage') },
       { path: 'pet/:petId/records', lazy: () => import('./components/records/BattleRecordsPage') },
@@ -495,6 +517,9 @@ apps/admin/
 │   │   │   └── MetricChart.vue
 │   │   ├── audit/
 │   │   │   └── AuditLogPage.vue
+│   │   ├── users/
+│   │   │   ├── UserManagementPage.vue
+│   │   │   └── UserTableRow.vue
 │   │   ├── roles/
 │   │   │   ├── RolesPage.vue
 │   │   │   └── CreateAdminModal.vue
@@ -615,6 +640,7 @@ const router = createRouter({
         { path: 'analytics', component: () => import('../components/analytics/AnalyticsPage.vue') },
         { path: 'audit', component: () => import('../components/audit/AuditLogPage.vue') },
         { path: 'roles', component: () => import('../components/roles/RolesPage.vue') },
+        { path: 'users', component: () => import('../components/users/UserManagementPage.vue') },
       ],
     },
   ],
@@ -1456,17 +1482,16 @@ Each page and component in the player app is covered by BDD scenarios in the `fe
 | Pet Dashboard | `/pet/:petId` | `pet-display.feature` | Sprite rendering, stat display, rarity badges, action buttons, training cards | Pet generation, stat bars, rarity distribution, neglected state |
 | Training UI | `/pet/:petId/train` | `training-ui.feature` | Daily cap, buff selection, confirm dialog, buff application, stat change indicators | Training actions, daily limits, skill-ups, level progression |
 | Arena Mode Selection | `/arena` | `arena-ui.feature` | Mode selection (RACE/SUMO), opponent loading, error handling, rate limit banner | Battle mode choice, matchmaking status, AI fallback |
-| Battle View | `/arena/battle/:matchId` | `arena-ui.feature` | Live battle animation, result display, reward notification, share button | Battle resolution, WIN/LOSS variants, stat changes |
+| Battle View | `/arena/result/:matchId` | `arena-ui.feature` | Live battle animation, result display, reward notification, share button | Battle resolution, WIN/LOSS variants, stat changes |
 | Leaderboard | `/leaderboard` | `leaderboard-ui.feature` | Ranking display, pagination, player search, filter by rarity | Top 100 display, rarity filters, score calculation |
 | Battle Records | `/pet/:petId/records` | `battle-records.feature` | Record list, pagination, social share preview, public access | History display, OG meta tags, pagination cursor, AI opponent marking |
-| Settings | `/settings` | `settings.feature` | Theme toggle, audio mute, notification prefs, session management | User preferences, local state, logout |
 | Admin Portal | `/admin` | `admin-portal.feature` | Login, TOTP, dashboard, moderation, config management | Authentication, authorization, role-based access |
 
 ### 10.1 Feature File Organization
 
 - **`features/client/`**: Player app UI scenarios (component behavior, routing, state management)
 - **`features/server/`**: API scenarios (backend validation, business logic, rate limiting, GDPR compliance)
-- **`features/server/`**: Supporting scenarios (rarity distribution, battle records API, admin operations)
+- **`features/server/admin/`**: Supporting scenarios (rarity distribution, battle records API, admin operations)
 
 ### 10.2 Uncovered Areas
 
