@@ -26,6 +26,8 @@
 
 ## Change Log
 
+This log records all revisions to this Admin Implementation document. For detailed change context and rationale, refer to the corresponding git commit history and linked review findings.
+
 | Version | Date | Author | Change Summary |
 |---------|------|--------|----------------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc ADMIN_IMPL) | Initial draft |
