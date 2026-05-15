@@ -76,12 +76,12 @@ This section maps all 21 BDD feature files to their corresponding user stories a
 | US-PET-002 | Procedural Pixel Pet Generation | P0 | EPIC-PET | 6 | `FF_PET_GENERATION` |
 | US-AUTH-001 | Email Claim Flow | P0 | EPIC-AUTH | 8 | — |
 | US-AUTH-002 | Returning Pet Owner Access | P0 | EPIC-AUTH | 5 | — |
-| US-TRAIN-001 | Pet Training System | P0 | EPIC-TRAINING | 6 | — |
-| US-FOOD-001 | Special Food System | P0 | EPIC-TRAINING | 6 | — |
-| US-ARENA-001 | Arena Racing Competition | P0 | EPIC-ARENA | 8 | — |
-| US-ARENA-002 | Sumo Arena Mode | P1 | EPIC-ARENA | 4 | — |
-| US-BOARD-001 | Global Leaderboard | P0 | EPIC-RANKING | 6 | — |
-| US-RECORD-001 | Battle Records Page | P0 | EPIC-RANKING | 6 | — |
+| US-TRAIN-001 | Pet Training System | P0 | EPIC-TRAINING | 6 | `FF_TRAINING_SYSTEM` |
+| US-FOOD-001 | Special Food System | P0 | EPIC-TRAINING | 6 | `FF_FOOD_SYSTEM` |
+| US-ARENA-001 | Arena Racing Competition | P0 | EPIC-ARENA | 8 | `FF_ARENA_RACE` |
+| US-ARENA-002 | Sumo Arena Mode | P1 | EPIC-ARENA | 4 | `FF_ARENA_SUMO` |
+| US-BOARD-001 | Global Leaderboard | P0 | EPIC-RANKING | 6 | `FF_LEADERBOARD` |
+| US-RECORD-001 | Battle Records Page | P0 | EPIC-RANKING | 6 | `FF_BATTLE_RECORDS` |
 | US-RARITY-001 | Rarity Scoring | P1 | EPIC-RANKING | 4 | `FF_RARITY_DISPLAY` |
 | US-TRADE-001 | Pet Trading Marketplace | P2 | EPIC-MARKETPLACE | 5 | `FF_MARKETPLACE` |
 | US-ADMIN-001 | Admin Pet Management | P0 | EPIC-ADMIN | 5 | `FF_ADMIN_PORTAL` |
