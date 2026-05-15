@@ -671,7 +671,7 @@ User's pet URL token has expired or has been revoked → API returns 401 or 403 
 
 ### 5.10 Admin Portal — Route: `/admin` (separate auth domain)
 
-Covered fully in §15 Admin Portal Product Design.
+The Admin Portal is a separate authenticated web application at `/admin` serving platform operators. It is covered fully in §15 Admin Portal Product Design, including role-based access, screen specifications, state matrices, and UX decisions.
 
 ---
 
@@ -1611,6 +1611,18 @@ Two-section form (separated clearly to avoid scope confusion with Economy Config
 **8. Game Economy Config (`/admin/config/economy`)**
 Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary buff multiplier (0.5x-5.0x) (FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5× / ADMIN_MAX = 5.0×) and permanent buff multiplier (0.5x-5.0x) with current values displayed. Section 2 — Arena Entry Cooldown: Numeric input, range 0-60 minutes (ARENA_ENTRY_COOLDOWN_ADMIN_MIN = 0 / MAX = 60 min), default 0. Section 3 — Arena Entry Cost: Numeric input, range 0-10 food credits, default 0. All three sections include example calculations showing the player-facing effect (e.g., "At 2.0x multiplier, Speed Berry gives +10 Speed instead of +5"). Change preview modal before applying. 5-minute cache refresh notice.
 
+**9. Pet Management (`/admin/pets`)**
+Full-page view for moderators to search, review, and act on pets platform-wide. Key UI elements: search bar (by pet ID or email fragment), paginated table with columns — Pet ID, rarity badge, owner (masked email), ban status, battle count, and row action buttons. Each row exposes "Ban Pet" (danger style, requires reason text ≤ 500 chars) and "Flag for Review" (amber ghost button). Banning a pet is recorded in the Audit Log. A Suspicious Activity sub-tab surfaces pets auto-flagged by bot-detection logic for moderator triage. Primary user actions: search pets, ban a pet with reason, flag for review, dismiss flag. Relevant US IDs: US-ADMIN-001, US-ADMIN-005.
+
+**10. Battle Records (`/admin/battles`)**
+Read-oriented screen for reviewing individual battle events across the platform. Key UI elements: search/filter bar (pet ID, date range, suspicious-only toggle), paginated table with columns — Timestamp, Pet A ID, Pet B ID, Arena Mode, Outcome, and Suspicious badge (amber, shown when bot-detection threshold exceeded). Clicking a row opens an inline detail panel showing full battle parameters, rarity tiers of both combatants, and moderator action buttons (Flag Battle, Dismiss Flag) with mandatory reason field. CSV export available for Super Admin. No record editing. Primary user actions: search battles, filter suspicious, open detail, flag or dismiss. Relevant US IDs: US-ADMIN-005, US-RECORD-001.
+
+**11. Email Delivery Monitor (`/admin/email`)**
+Operational health screen for tracking transactional email delivery to players. Key UI elements: three gauge/metric cards at top — Delivery Rate (green ≥ 95%, amber 90–95%, red < 90%), Bounce Rate (red if > 5%), Spam Complaint Rate (red if > 0.1%). Below: paginated Failed Delivery table with columns — Recipient (masked), Timestamp, Failure Reason, Status, and per-row "Manual Resend" ghost button (disabled if resend already attempted within 24 h). All metrics show last-refresh timestamp. Primary user actions: monitor health gauges, identify failed deliveries, trigger manual resend. Relevant US IDs: US-AUTH-001 (access link delivery), platform NFR-REL email SLA.
+
+**12. Analytics Dashboard (`/admin/analytics`)**
+Data overview screen for analysts and super admins to track platform KPIs. Key UI elements: DAP (Daily Active Pets) metric card with 7-day sparkline and day-over-day delta; Claim Conversion Funnel chart (Visitors → Pet Interactions → Claim Started → Claim Completed) with percentage labels at each step; Arena Battles time-series line chart (daily resolution, current day highlighted); Day-7 Retention Cohort table (week-of-claim cohorts, cohort size, Day-7 return %, color-coded by retention tier). All charts are read-only display components — no editing or export from this screen. Primary user actions: review KPI trends, identify retention drop-offs, assess funnel performance. Relevant US IDs: US-BOARD-001, US-RARITY-001, US-ARENA-001.
+
 ### §15.3.1 Admin Component State Matrices
 
 **Admin Dashboard (`/admin/dashboard`)**
@@ -1679,7 +1691,7 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 | `CreateAdminButton` | Primary button; always visible for Super Admin | Brightens | scale(0.97); background deepens | Focus ring | Disabled for non-Super-Admin roles | N/A | N/A |
 | `DeactivateButton` | Danger ghost button; visible in account detail panel | Brightens with red glow | scale(0.97) | Focus ring | Disabled for own account | Spinner; aria-busy="true" | Error toast: "Deactivation failed" |
 
-**Battle Records (`/admin/battle-records`)**
+**Battle Records (`/admin/battles`)**
 
 | Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
 |-----------|---------|-------|--------|-------|----------|---------|-------|
@@ -1824,7 +1836,8 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 | US-ARENA-002 | AC-008-1 through AC-008-4 | §5.5 ModeSelector, §6.5 MI-battle-start |
 | US-BOARD-001 | AC-009-1 through AC-009-6 | §5.7, §3.3 |
 | US-RECORD-001 | AC-010-1 through AC-010-6 | §5.8, §10.2 |
-| US-RARITY-001 / US-PET-002 rarity | AC-002-5 | §9.1 Rarity Colors, §5.3 RarityBadge, §5.7 RarityFilter |
+| US-RARITY-001 | AC-011-1 through AC-011-4 | §9.1 Color Palette, §5.3 RarityBadge, §5.7 RarityFilter |
+| US-PET-002 rarity | AC-002-5 | §9.1 Rarity Colors, §5.3 RarityBadge, §5.7 RarityFilter |
 | US-ADMIN-001 | AC-013-1 through AC-013-5 | §15.3 (Pet Management) |
 | US-ADMIN-002 | AC-014-1 through AC-014-4 | §15.3 Leaderboard Management, §15.4 |
 | US-ADMIN-003 | AC-015-1 through AC-015-3 | §15.3 Arena Rate Config, §15.4 |
