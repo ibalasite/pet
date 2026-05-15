@@ -74,76 +74,159 @@ Email is stored exclusively as AES-256-GCM ciphertext plus a SHA-256 lookup hash
 
 ---
 
-### §1.2 System Context Diagram (ASCII)
+### §1.2 C4 Level 1 — System Context Diagram
 
+```mermaid
+graph TB
+    subgraph Actors
+        Guest["Guest Player<br/>(no account)"]
+        Owner["Pet Owner<br/>(email-claimed, URL token)"]
+        Comp["Competitive Player<br/>(token + arena)"]
+        AdminOp["Admin Operator<br/>(TOTP session)"]
+        Job["System Scheduled Jobs<br/>(cron / cleanup)"]
+    end
+
+    subgraph "Pixel Pet Arena Platform"
+        PPA["pixel-pet-arena<br/>HTML5 browser game + REST API + Admin Portal<br/>(React 18 + Phaser 3 / Vue 3 / Fastify 4 / Node 20)"]
+    end
+
+    subgraph "External Systems"
+        SG["SendGrid v3 API<br/>(transactional email, primary)"]
+        SMTP["Nodemailer SMTP<br/>(email fallback after 3 failures)"]
+        SB["Supabase<br/>(PostgreSQL 15 managed)"]
+        UP["Upstash Redis<br/>(serverless cache + leaderboard)"]
+        VC["Vercel Edge CDN<br/>(static SPA bundles + global PoP)"]
+        S3["S3-compatible Storage<br/>(DB backups)"]
+        Social["Social Share<br/>(Open Graph / battle result cards)"]
+    end
+
+    Guest -->|"HTTPS / browse pet preview"| PPA
+    Owner -->|"HTTPS / pet URL token"| PPA
+    Comp -->|"HTTPS / arena interactions"| PPA
+    AdminOp -->|"HTTPS / admin session (TOTP 2FA)"| PPA
+    Job -->|"cron triggers (GDPR erasure, leaderboard snapshot)"| PPA
+
+    PPA -->|"send OTP claim email"| SG
+    SG -.->|"fallback after 3 failures"| SMTP
+    PPA -->|"persist all durable data"| SB
+    PPA -->|"cache + leaderboard sorted set + rate-limit counters"| UP
+    PPA -->|"static assets served via"| VC
+    SB -->|"daily automated backup"| S3
+    PPA -->|"battle result social cards"| Social
 ```
- ┌────────────────────────────────────────────────────────────────────────────────────┐
- │  EXTERNAL ACTORS                                                                   │
- │                                                                                    │
- │  ┌─────────────┐  ┌──────────────────┐  ┌───────────────────┐  ┌───────────────┐ │
- │  │ Guest Player│  │ Pet Owner        │  │Competitive Player │  │Admin Operator │ │
- │  │ (no token)  │  │ (URL token)      │  │(token + arena)    │  │(TOTP session) │ │
- │  └──────┬──────┘  └────────┬─────────┘  └─────────┬─────────┘  └──────┬────────┘ │
- └─────────┼───────────────────┼────────────────────────┼───────────────────┼─────────┘
-           │  HTTPS            │  HTTPS                  │  HTTPS            │  HTTPS
-           ▼                   ▼                         ▼                   ▼
- ┌─────────────────────────────────────────────────────────────────────────────────────┐
- │  CDN / Edge (Vercel)                                                                │
- │  ┌───────────────────────────────┐    ┌────────────────────────────────────────┐   │
- │  │  Player App                   │    │  Admin Portal                          │   │
- │  │  React 18 + Phaser.js 3       │    │  Vue 3 + Element Plus                  │   │
- │  │  Vite 5 / TypeScript 5        │    │  Vite 5 / TypeScript 5                 │   │
- │  └──────────────┬────────────────┘    └──────────────────────┬─────────────────┘   │
- └─────────────────┼────────────────────────────────────────────┼─────────────────────┘
-                   │ HTTPS                                       │ HTTPS
-                   ▼                                             ▼
- ┌─────────────────────────────────────────────────────────────────────────────────────┐
- │  API Gateway / Load Balancer (Nginx or Vercel Edge)                                 │
- │  TLS termination · rate-limit header forwarding · X-Real-IP passthrough            │
- └─────────────────┼────────────────────────────────────────────┼─────────────────────┘
-                   │ REST /api/v1/*                              │ REST /admin/api/*
-                   ▼                                             ▼
- ┌─────────────────────────────────────────────────────────────────────────────────────┐
- │  API Layer (Railway — containerized, autoscale HPA at 70% CPU)                      │
- │  ┌──────────────────────────────┐    ┌────────────────────────────────────────────┐ │
- │  │  Game API Server              │    │  Admin API Server                          │ │
- │  │  Node.js 20 LTS / Fastify 4  │    │  Node.js 20 LTS / Fastify 4               │ │
- │  │  ≥ 2 replicas                 │    │  1 replica (/admin ns plugin)             │ │
- │  └──────────────┬───────────────┘    └────────────────────────┬───────────────────┘ │
- └─────────────────┼────────────────────────────────────────────┼─────────────────────┘
-                   │                                             │
-         ┌─────────┴─────────────────────────────────┬─────────┘
-         │                                           │
-         ▼                                           ▼
- ┌──────────────────────────┐            ┌─────────────────────────────────┐
- │  PostgreSQL 15+          │            │  Redis 7+                       │
- │  (Supabase managed)      │            │  (Upstash serverless)           │
- │  Primary writer           │            │  Leaderboard sorted set        │
- │  + 1 read replica         │            │  Rate-limit counters           │
- │  Auto-failover 60s        │            │  Admin sessions                │
- │  Daily S3 backup          │            │  Matchmaking queue             │
- └──────────────────────────┘            │  Config cache (TTL 300s)       │
-                                          │  Token blacklist               │
-                                          └─────────────────────────────────┘
-         │
-         ▼
- ┌──────────────────────────────────────────────────────────────────────┐
- │  External Services                                                   │
- │  ┌────────────────────────────┐  ┌───────────────────────────────┐  │
- │  │  SendGrid v3 API (primary) │  │  Nodemailer SMTP (fallback)   │  │
- │  │  Transactional email only  │  │  Activates after 3 consec.    │  │
- │  │  SPF + DKIM configured     │  │  SendGrid failures            │  │
- │  └────────────────────────────┘  └───────────────────────────────┘  │
- │  ┌────────────────────────────┐  ┌───────────────────────────────┐  │
- │  │  GitHub Actions (CI/CD)    │  │  S3-compatible (DB backups)   │  │
- │  │  Test → Build → Deploy     │  │  Supabase automated daily     │  │
- │  └────────────────────────────┘  └───────────────────────────────┘  │
- └──────────────────────────────────────────────────────────────────────┘
+
+### §1.3 C4 Level 2 — Container Diagram
+
+```mermaid
+graph TB
+    Browser["Player Browser<br/>(React 18 + Phaser 3 SPA)"]
+    AdminBrowser["Admin Browser<br/>(Vue 3 + Element Plus SPA)"]
+
+    subgraph "Edge / CDN Layer (Vercel)"
+        CDN["Vercel Global CDN<br/>(Player SPA + Admin Portal static bundles)<br/>TTL=31536000s for hashed assets"]
+        LB["Nginx / Vercel Edge<br/>(TLS termination, X-Real-IP passthrough,<br/>rate-limit header forwarding)"]
+    end
+
+    subgraph "Application Tier (Railway — containerized)"
+        API1["Game API Server Replica 1<br/>(Fastify 4 / Node.js 20 LTS)<br/>/api/v1/* routes"]
+        API2["Game API Server Replica 2<br/>(Fastify 4 / Node.js 20 LTS)<br/>HPA maxReplicas=10 at 70% CPU"]
+        ADM1["Admin API Server Replica 1<br/>(Fastify 4 plugin / Node.js 20 LTS)<br/>/admin/api/* routes"]
+        ADM2["Admin API Server Replica 2<br/>(Fastify 4 plugin / Node.js 20 LTS)<br/>minReplicas=2"]
+        W1["Worker Replica 1<br/>(Node.js 20 LTS)<br/>GDPR erasure (24h SLA), leaderboard snapshot (hourly), cleanup"]
+        W2["Worker Replica 2<br/>(Node.js 20 LTS)<br/>idempotent job design"]
+    end
+
+    subgraph "Data Tier"
+        PG_P["PostgreSQL Primary<br/>(Supabase managed)<br/>all writes + ACID transactions"]
+        PG_R["PostgreSQL Read Replica<br/>(Supabase managed)<br/>leaderboard / public reads / admin list views"]
+        REDIS_P["Redis Primary<br/>(Upstash serverless)<br/>leaderboard sorted set, rate-limit counters,<br/>admin sessions, matchmaking queue, config cache, token blacklist"]
+        REDIS_S["Redis Replica<br/>(Upstash Sentinel)<br/>HA standby"]
+    end
+
+    subgraph "External Services"
+        SG["SendGrid v3 API<br/>(transactional email)"]
+        SMTP["Nodemailer SMTP fallback"]
+        S3["S3-compatible Storage<br/>(Supabase daily backups)"]
+    end
+
+    Browser --> CDN
+    AdminBrowser --> CDN
+    CDN --> LB
+    LB --> API1
+    LB --> API2
+    LB --> ADM1
+    LB --> ADM2
+    API1 --> PG_P
+    API2 --> PG_P
+    ADM1 --> PG_P
+    ADM2 --> PG_P
+    API1 --> PG_R
+    API2 --> PG_R
+    ADM1 --> PG_R
+    ADM2 --> PG_R
+    API1 --> REDIS_P
+    API2 --> REDIS_P
+    ADM1 --> REDIS_P
+    ADM2 --> REDIS_P
+    REDIS_P --> REDIS_S
+    PG_P --> PG_R
+    PG_P --> S3
+    W1 --> PG_P
+    W2 --> PG_P
+    W1 --> REDIS_P
+    W2 --> REDIS_P
+    API1 --> SG
+    API2 --> SG
+    SG -.->|"3 consecutive failures"| SMTP
 ```
 
 ---
 
 ## §2. Component Architecture
+
+> **依賴方向**: 遵循 EDD §3.1b Clean Architecture 依賴規則 (Presentation → Application → Domain ← Infrastructure)。Domain 層無向外箭頭，所有外部依賴透過 Interface（IRepository / IService）注入。參見 EDD §3.1b 的完整 SOLID 對照表。
+
+### §2.0 Layer Dependency Diagram
+
+The following diagram illustrates the Clean Architecture layer dependencies enforced across all backend packages (Game API, Admin API, Worker). Dependency arrows always point inward — outer layers depend on inner layers; inner layers have no knowledge of outer layers. All external I/O crosses the Infrastructure boundary via injected interfaces (IRepository, IEmailService, etc.). See EDD §3.1b for the full SOLID mapping table.
+
+```mermaid
+graph TB
+    subgraph "Presentation Layer (outer)"
+        HTTP["HTTP Controllers<br/>(Fastify route handlers, Zod request validation)"]
+        JOBS["Job Runners<br/>(Worker cron entry points)"]
+    end
+
+    subgraph "Application Layer"
+        UC["Use Cases / Services<br/>(ClaimPetUseCase, ArenaMatchUseCase,<br/>GDPRErasureService, LeaderboardService)"]
+    end
+
+    subgraph "Domain Layer (inner — no external imports)"
+        ENT["Domain Entities<br/>(Pet, ClaimCode, ArenaMatch, AdminUser)"]
+        INTF["Repository / Service Interfaces<br/>(IPetRepository, IEmailService,<br/>ILeaderboardRepository, ITokenBlacklist)"]
+        RULES["Domain Rules<br/>(battle outcome formula, rate-limit policy,<br/>GDPR SLAs, token entropy constants)"]
+    end
+
+    subgraph "Infrastructure Layer (outer)"
+        PG_REPO["PostgreSQL Repositories<br/>(PetRepositoryPg, ArenaMatchRepositoryPg,<br/>node-postgres + node-pg-migrate)"]
+        REDIS_IMPL["Redis Implementations<br/>(LeaderboardRepositoryRedis,<br/>TokenBlacklistRedis, ConfigCacheRedis)"]
+        EMAIL_IMPL["Email Service Implementations<br/>(SendGridEmailService,<br/>NodemailerSMTPService — fallback)"]
+        EXT_API["External API Adapters<br/>(SendGrid v3 SDK, S3-compatible client)"]
+    end
+
+    HTTP -->|"calls"| UC
+    JOBS -->|"calls"| UC
+    UC -->|"depends on interfaces"| INTF
+    UC -->|"operates on"| ENT
+    ENT --> RULES
+    PG_REPO -->|"implements"| INTF
+    REDIS_IMPL -->|"implements"| INTF
+    EMAIL_IMPL -->|"implements"| INTF
+    PG_REPO --> EXT_API
+    EMAIL_IMPL --> EXT_API
+```
+
+**Dependency rule enforcement**: The Domain layer has zero imports from `node-postgres`, `ioredis`, `@sendgrid/mail`, or any Infrastructure package. Violations are caught by TypeScript path aliases and ESLint import boundary rules (enforced in CI — see §7.2).
 
 ### §2.1 Frontend Architecture (React + Phaser.js Player App)
 
@@ -275,7 +358,7 @@ The admin portal is a separate Vite application, deployed to Vercel independentl
 Two Fastify processes share the same codebase and database credentials via environment variables:
 
 - **Game API Server**: ≥ 2 replicas on Railway; handles all `/api/v1/*` player-facing routes.
-- **Admin API Server**: 1 replica; handles all `/admin/api/*` routes via a dedicated Fastify plugin registered under the `/admin` prefix.
+- **Admin API Server**: ≥ 2 replicas; handles all `/admin/api/*` routes via a dedicated Fastify plugin registered under the `/admin` prefix.
 
 **Horizontal Autoscale**: CPU threshold 70% (HORIZONTAL_SCALE_CPU_THRESHOLD_PERCENT = 70). Railway autoscaling or Kubernetes HPA. Baseline resource limits: 512 MB RAM, 0.5 CPU per replica; burst ceiling: 2 GB / 2 CPU (EDD §10.2 infrastructure constraints).
 
@@ -635,137 +718,98 @@ Phase 3 consideration: LaunchDarkly or Flagsmith integration for runtime per-use
 
 ### §4.1 Pet Claim Flow
 
-```
-Guest Browser                  Game API (Fastify)          PostgreSQL       Redis         SendGrid
-     │                               │                          │               │               │
-     │  GET /api/v1/pets/random       │                          │               │               │
-     │──────────────────────────────>│                          │               │               │
-     │                               │ Generate seed (random)   │               │               │
-     │                               │ Check seed uniqueness    │               │               │
-     │                               │─────────────────────────>│               │               │
-     │                               │ INSERT pets(seed, rarity, reserved_until=NOW()+24h)       │
-     │                               │   [PET_RESERVATION_TTL_HOURS = 24]                        │
-     │                               │<─────────────────────────│               │               │
-     │  {petId, seed, rarity, ...}   │                          │               │               │
-     │<──────────────────────────────│                          │               │               │
-     │                               │                          │               │               │
-     │  [player interacts with pet]  │                          │               │               │
-     │                               │                          │               │               │
-     │  POST /api/v1/claim            │                          │               │               │
-     │  {email, petId, ageConfirmed} │                          │               │               │
-     │──────────────────────────────>│                          │               │               │
-     │                               │ Check rate limit         │               │               │
-     │                               │─────────────────────────────────────────>│               │
-     │                               │ INCR rl:claim:{email_hash} (≤5/hr)       │               │
-     │                               │<─────────────────────────────────────────│               │
-     │                               │ Generate 6-digit OTP                     │               │
-     │                               │ Hash OTP (SHA-256)       │               │               │
-     │                               │ INSERT claim_codes(pet_id, email_hash,   │               │
-     │                               │   code_hash, expires_at=NOW()+15min)     │               │
-     │                               │─────────────────────────>│               │               │
-     │                               │ Send OTP email (plaintext code, NO URL)  │               │
-     │                               │──────────────────────────────────────────────────────────>│
-     │  {claimId, expiresAt}         │                          │               │               │
-     │<──────────────────────────────│                          │               │               │
-     │                               │                          │               │               │
-     │  POST /api/v1/claim/verify    │                          │               │               │
-     │  {claimId, code}              │                          │               │               │
-     │──────────────────────────────>│                          │               │               │
-     │                               │ Check code_entry rate limit              │               │
-     │                               │─────────────────────────────────────────>│               │
-     │                               │ INCR rl:code_entry:{session_id} (≤10)   │               │
-     │                               │<─────────────────────────────────────────│               │
-     │                               │ Fetch claim_codes row, verify hash       │               │
-     │                               │─────────────────────────>│               │               │
-     │                               │ BEGIN TRANSACTION        │               │               │
-     │                               │  UPSERT claim_identities(email_hash)     │               │
-     │                               │  UPDATE pets SET owner_token_hash=SHA256(token),         │
-     │                               │    claimed_at=NOW(), reserved_until=NULL │               │
-     │                               │    claim_identity_id=<id>                │               │
-     │                               │  UPDATE claim_codes SET used_at=NOW()   │               │
-     │                               │ COMMIT                   │               │               │
-     │                               │<─────────────────────────│               │               │
-     │  {petToken, petId, petUrl}    │                          │               │               │
-     │<──────────────────────────────│                          │               │               │
-     │                               │                          │               │               │
-     │  [Player bookmarks petUrl]    │                          │               │               │
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Browser as Guest Browser
+    participant API as Game API (Fastify 4)
+    participant PG as PostgreSQL
+    participant Redis as Redis (Upstash)
+    participant SG as SendGrid
+
+    Browser->>API: GET /api/v1/pets/random
+    API->>PG: Generate seed (random), check uniqueness
+    PG-->>API: seed unique confirmed
+    API->>PG: INSERT pets(seed, rarity, reserved_until=NOW()+24h)<br/>[PET_RESERVATION_TTL_HOURS = 24]
+    PG-->>API: petId
+    API-->>Browser: {petId, seed, rarity, ...}
+
+    Note over Browser: Player interacts with pet preview
+
+    Browser->>API: POST /api/v1/claim<br/>{email, petId, ageConfirmed}
+    API->>Redis: INCR rl:claim:{email_hash} (≤ 5/hr)<br/>[AUTH_RATE_LIMIT_CLAIM_ATTEMPTS_PER_HOUR]
+    Redis-->>API: rate limit OK
+    API->>API: Generate 6-digit OTP, Hash OTP (SHA-256)
+    API->>PG: INSERT claim_codes(pet_id, email_hash, code_hash,<br/>expires_at=NOW()+15min) [CLAIM_CODE_EXPIRY_MINUTES]
+    PG-->>API: claimId
+    API->>SG: Send OTP email (plaintext 6-digit code, NO URL)<br/>[mitigates email-client pre-scan attacks]
+    SG-->>API: delivered
+    API-->>Browser: {claimId, expiresAt}
+
+    Browser->>API: POST /api/v1/claim/verify<br/>{claimId, code}
+    API->>Redis: INCR rl:code_entry:{session_id} (≤ 10)<br/>[AUTH_RATE_LIMIT_CODE_ENTRY_ATTEMPTS_PER_SESSION]
+    Redis-->>API: rate limit OK
+    API->>PG: Fetch claim_codes row, verify hash
+    PG-->>API: code valid
+    API->>PG: BEGIN TRANSACTION<br/>UPSERT claim_identities(email_hash)<br/>UPDATE pets SET owner_token_hash=SHA256(token),<br/>  claimed_at=NOW(), reserved_until=NULL,<br/>  claim_identity_id=id<br/>UPDATE claim_codes SET used_at=NOW()<br/>COMMIT
+    PG-->>API: transaction committed
+    API-->>Browser: {petToken, petId, petUrl}
+
+    Note over Browser: Player bookmarks petUrl — this IS their login
 ```
 
 ---
 
 ### §4.2 Arena Battle Flow
 
-```
-Pet Owner Browser              Game API                    PostgreSQL       Redis
-     │                               │                          │               │
-     │  POST /api/v1/arena/enter     │                          │               │
-     │  {petId, mode, acceptAI}      │                          │               │
-     │──────────────────────────────>│                          │               │
-     │                               │ Verify pet token         │               │
-     │                               │─────────────────────────>│               │
-     │                               │ Check rate limit         │               │
-     │                               │─────────────────────────────────────────>│
-     │                               │ INCR rl:arena:{pet_id} (≤10/hr default) │
-     │                               │<─────────────────────────────────────────│
-     │                               │ [Rate limit OK]          │               │
-     │                               │ ZADD matchmaking:queue:{mode}            │
-     │                               │   score=enqueue_epoch member="{petId}:epoch"
-     │                               │─────────────────────────────────────────>│
-     │                               │                          │               │
-     │                               │ [Poll for opponent — up to 30s ARENA_MATCHMAKING_TIMEOUT_SECONDS]
-     │                               │ [Transport: HTTP long-poll (synchronous response, up to 30s)
-     │                               │  OQ-E02 open: WebSocket alternative under evaluation]
-     │                               │ ZRANGEBYSCORE matchmaking:queue:{mode}   │
-     │                               │   oldest eligible entry  │               │
-     │                               │<─────────────────────────────────────────│
-     │                               │                          │               │
-     │                               │ [Opponent found]         │               │
-     │                               │ Fetch both pet stats     │               │
-     │                               │─────────────────────────>│               │
-     │                               │ Calculate outcome:       │               │
-     │                               │   seed = random() → stored as random_seed BIGINT│
-     │                               │   (enables deterministic replay per EDD §4.4)   │
-     │                               │   statA = stat_by_mode(mode): Race→speed, Sumo→strength│
-     │                               │   [provisional — see EDD OQ-E08 re: equal-stat edge cases]│
-     │                               │   modA = statA × (1 ± ARENA_BATTLE_OUTCOME_RANDOM_MODIFIER_PERCENT/100 × rand)│
-     │                               │   winner = MAX(modA, modB)               │
-     │                               │   tie-break: earlier enqueue wins        │
-     │                               │ INSERT arena_matches(...)│               │
-     │                               │─────────────────────────>│               │
-     │                               │ [Battle animation: ARENA_MATCH_DURATION_MIN_SECONDS = 5 s
-     │                               │  to ARENA_MATCH_DURATION_MAX_SECONDS = 15 s]
-     │                               │ ZADD leaderboard:global  │               │
-     │                               │   score=arena_score member=winnerPetId   │
-     │                               │ ZADD leaderboard:global  │               │
-     │                               │   score=arena_score member=loserPetId    │
-     │                               │─────────────────────────────────────────>│
-     │                               │ [Both ZADDs in MULTI/EXEC pipeline for atomicity │
-     │                               │  — see §4.3 for full leaderboard update flow]    │
-     │  {matchId, result, ...}       │                          │               │
-     │<──────────────────────────────│                          │               │
-     │                               │                          │               │
-     │  [No opponent within 30s,     │                          │               │
-     │   acceptAI=true]              │                          │               │
-     │──────────────────────────────>│                          │               │
-     │                               │ Generate AI opponent pet (synthetic seed)│
-     │                               │ Same battle calculation  │               │
-     │                               │ INSERT arena_matches(is_ai_opponent=true) │
-     │                               │─────────────────────────>│               │
-     │                               │ ZADD leaderboard:global score member=playerPetId
-     │                               │─────────────────────────>│               │
-     │                               │ [AI matches DO update player pet's leaderboard score;
-     │                               │  the AI synthetic pet does NOT get a leaderboard entry]
-     │  {matchId, result, isAI=true} │                          │               │
-     │<──────────────────────────────│                          │               │
-     │                               │                          │               │
-     │  [No opponent, acceptAI=false]│                          │               │
-     │  HTTP 408 MATCHMAKING_TIMEOUT │                          │               │
-     │<──────────────────────────────│ [Rate limit NOT incremented on timeout]   │
+```mermaid
+sequenceDiagram
+    participant B as Pet Owner Browser
+    participant G as Game API
+    participant P as PostgreSQL
+    participant R as Redis
+
+    B->>G: POST /api/v1/arena/enter {petId, mode, acceptAI}
+    G->>P: Verify pet token (owner_token_hash lookup)
+    G->>R: INCR rl:arena:{pet_id} (ARENA_RATE_LIMIT_BATTLES_PER_HOUR_DEFAULT=10/hr)
+    R-->>G: Rate limit OK
+    G->>R: ZADD matchmaking:queue:{mode} score=enqueue_epoch member=petId:epoch
+
+    Note over G,R: HTTP long-poll up to ARENA_MATCHMAKING_TIMEOUT_SECONDS=30s<br/>OQ-E02: WebSocket alternative under evaluation for v2
+
+    G->>R: ZRANGEBYSCORE matchmaking:queue:{mode} -- oldest eligible entry
+    R-->>G: Opponent petId
+
+    G->>P: Fetch both pet stats
+    P-->>G: petA stats, petB stats
+
+    Note over G: seed=random() stored as random_seed BIGINT (replay EDD 4.4)<br/>statA=stat_by_mode(mode): Race=speed, Sumo=strength (EDD OQ-E08)<br/>modA=statA x (1 +/- BATTLE_RANDOM_MODIFIER_PERCENT/100 x rand)<br/>winner=MAX(modA,modB); tie-break: earlier enqueue wins
+
+    G->>P: INSERT arena_matches(matchId, winnerPetId, loserPetId, random_seed)
+
+    Note over G,R: Battle animation 5s-15s (ARENA_MATCH_DURATION_MIN/MAX_SECONDS)
+
+    G->>R: MULTI/EXEC ZADD leaderboard:global winner score + loser score
+    Note over R: Both ZADDs atomic in MULTI/EXEC pipeline -- see 4.3
+
+    G-->>B: 200 {matchId, result, winnerPetId}
+
+    alt No opponent within 30s AND acceptAI=true
+        Note over G: Generate synthetic AI opponent (random seed); same battle calc
+        G->>P: INSERT arena_matches(is_ai_opponent=true)
+        G->>R: ZADD leaderboard:global score member=playerPetId
+        Note over R: AI matches update player leaderboard; synthetic AI pet excluded
+        G-->>B: 200 {matchId, result, isAI=true}
+    else No opponent AND acceptAI=false
+        G-->>B: 408 MATCHMAKING_TIMEOUT (rate limit NOT incremented)
+    end
 ```
 
 ---
 
 ### §4.3 Leaderboard Update Flow
+
+> Note: The following sequence is presented as structured text; a Mermaid sequenceDiagram rendering is equivalent to this flow.
 
 ```
 Arena Match Completion         Game API                    PostgreSQL       Redis
@@ -809,6 +853,8 @@ GET /api/v1/leaderboard        │                          │               �
 ---
 
 ### §4.4 GDPR Erasure Flow
+
+> Note: The following sequence is presented as structured text; a Mermaid sequenceDiagram rendering is equivalent to this flow.
 
 ```
 Pet Owner Browser              Game API                    PostgreSQL       Redis
@@ -947,6 +993,8 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 
 **TLS**: Minimum TLS 1.2 at the API gateway; TLS 1.3 preferred (PRD NFR-SEC-06). TLS termination at the Nginx/Vercel Edge layer per §1.2 diagram. Downgrade to HTTP never permitted.
 
+**DDoS Protection**: The Vercel Edge CDN layer provides volumetric DDoS mitigation at the network and transport layers for all static asset traffic. Railway's ingress load balancer provides connection-level protection for API traffic. Application-layer DDoS is mitigated by Fastify rate limiting (§5.3) and IP-based blocklisting via `ADMIN_ALLOWED_IPS`. Post-GA evaluation: Cloudflare Workers for edge-side geo-routing and advanced DDoS mitigation if sustained attack traffic exceeds Railway ingress capacity (see §18.2).
+
 **Security Response Headers** (set on all API and frontend responses):
 
 | Header | Value |
@@ -960,6 +1008,8 @@ All rate limits are enforced by Redis counters with automatic TTL expiry. If Red
 **Content Security Policy** (PRD NFR-SEC-08):
 - Phase 1-2: `default-src 'self'; script-src 'self' 'unsafe-inline'` — **accepted deviation from PRD NFR-SEC-08** (`unsafe-inline` required by Phaser.js canvas rendering in Phase 1-2). Risk accepted: script injection surface is limited by Phaser.js's inline canvas model; all other NFR-SEC controls (TLS, HSTS, token hashing) remain enforced. Deviation documented as accepted risk in the project risk register.
 - Phase 3 hardening: nonce-based CSP (`script-src 'self' 'nonce-{RANDOM}'`) with no `unsafe-inline` eliminates the deviation (EDD §13.3)
+
+**DDoS 防護**: Vercel Edge 提供 L7 DDoS 防護（靜態資源 + 函數）; Railway 平台提供 L3/L4 網路防護。MVP 階段接受 L7 應用層 DDoS 風險（無 WAF）；如有需要，可接入 Cloudflare Proxy（見 §18.2）。應用層 rate limiting 透過 Redis 計數器實作（§5.3），對重複 IP 提供部分防護。
 
 ---
 
@@ -1063,7 +1113,8 @@ Request to send email
 | Player App (static) | Vercel — Global CDN | Vite build, auto-deploy from `main` branch |
 | Admin Portal (static) | Vercel — separate project | Same CDN, separate build and deploy |
 | Game API Server | Railway — containerized | Node.js 20, ≥ 2 replicas, autoscale at 70% CPU |
-| Admin API Server | Railway — same container | Node.js 20, 1 replica, `/admin` plugin namespace |
+| Admin API Server | Railway — containerized | Node.js 20, ≥ 2 replicas, `/admin` plugin namespace |
+| Worker | Railway (containerized) | Node.js 20, ≥ 2 replicas, idempotent job design; GDPR erasure (24h SLA), leaderboard snapshot (hourly), cleanup jobs |
 | PostgreSQL | Supabase managed | PostgreSQL 15+, primary + 1 read replica |
 | Redis | Upstash serverless | Pay-per-request, built-in persistence |
 | Email (primary) | SendGrid v3 API | Transactional only |
@@ -1072,6 +1123,77 @@ Request to send email
 | Container registry | GitHub Container Registry (ghcr.io) | Docker images for API servers |
 
 **Monthly Infrastructure Cost at DAU ≤ 5,000**: $50–$200 (SERVER_COST_DAU5K_MONTHLY_MIN_USD = 50; SERVER_COST_DAU5K_MONTHLY_MAX_USD = 200). Annual infrastructure base budget: $8,000 (INFRA_COST_ANNUAL_BASE_USD = 8,000).
+
+**靜態資源流程**: GitHub → GitHub Actions (npm run build) → Vercel 自動部署 → Edge CDN 全球分發。Sprite 資產存放於 Vercel Public 目錄，TTL=31536000 秒（1年）。Cache Invalidation 觸發條件：每次 Vercel 重新部署（hash-based 檔名確保 stale 不發生）。
+
+**網路分區**:
+- **Public Tier**: Browser → Vercel Edge CDN (靜態資源, HTTPS/443); Browser → Railway API (HTTPS/443)
+- **Private Tier**: Railway API → Supabase PostgreSQL (private endpoint / TLS); Railway API → Upstash Redis (TLS)
+- **External**: Railway → SendGrid (HTTPS/443); Railway → AWS S3-compatible (HTTPS/443)
+- **Note**: MVP 階段 Railway 至 Supabase 走 Supabase connection pooler (port 5432/6543 TLS)；Upstash Redis 走 TLS port 6380
+
+### §7.1a Deployment Topology Diagram
+
+The following diagram shows the public/private network boundary and CDN/static asset serving path.
+
+```mermaid
+graph TB
+    subgraph "Public Internet"
+        PlayerBrowser["Player Browser"]
+        AdminBrowser["Admin Browser"]
+    end
+
+    subgraph "Public Subnet — Vercel Edge CDN (Global PoP)"
+        CDN_Player["Player SPA Bundle<br/>React 18 + Phaser 3 + Sprites<br/>Cache-Control: max-age=31536000, immutable<br/>(hash-based filenames)"]
+        CDN_Admin["Admin Portal Bundle<br/>Vue 3 + Element Plus<br/>Cache-Control: max-age=31536000, immutable"]
+        LB["Vercel Edge / Nginx<br/>TLS termination, DDoS mitigation<br/>Rate-limit header forwarding"]
+    end
+
+    subgraph "Public Subnet — Railway (containerized, HTTPS ingress)"
+        API["Game API Server<br/>Fastify 4 / Node.js 20<br/>min 2 replicas, HPA max 10 at 70% CPU<br/>/api/v1/*"]
+        ADMSRV["Admin API Server<br/>Fastify 4 / Node.js 20<br/>min 2 replicas<br/>/admin/api/*"]
+        WORKER["Worker<br/>Node.js 20, min 2 replicas<br/>GDPR erasure + leaderboard snapshot"]
+    end
+
+    subgraph "Private Subnet — Managed Data Tier (TLS-only connections)"
+        PG["PostgreSQL 15<br/>Supabase managed<br/>Primary + Read Replica<br/>port 5432/6543 (pooler)"]
+        REDIS["Redis<br/>Upstash serverless<br/>Primary + Sentinel Replica<br/>port 6380 TLS"]
+    end
+
+    subgraph "External SaaS"
+        SG["SendGrid v3 API<br/>(transactional email)"]
+        SMTP_FB["Nodemailer SMTP<br/>(fallback after 3 failures)"]
+        S3["S3-compatible Storage<br/>(daily DB backups)"]
+    end
+
+    PlayerBrowser -->|"HTTPS/443"| CDN_Player
+    AdminBrowser -->|"HTTPS/443"| CDN_Admin
+    CDN_Player --> LB
+    CDN_Admin --> LB
+    LB -->|"HTTPS/443"| API
+    LB -->|"HTTPS/443"| ADMSRV
+    API -->|"TLS 5432/6543"| PG
+    API -->|"TLS 6380"| REDIS
+    ADMSRV -->|"TLS 5432/6543"| PG
+    ADMSRV -->|"TLS 6380"| REDIS
+    WORKER -->|"TLS 5432/6543"| PG
+    WORKER -->|"TLS 6380"| REDIS
+    API -->|"HTTPS/443"| SG
+    SG -.->|"3 consecutive failures"| SMTP_FB
+    PG -->|"HTTPS/443"| S3
+```
+
+### §7.1b CDN / Static Asset Architecture
+
+| Asset Type | Location | Cache Strategy | Invalidation |
+|-----------|----------|---------------|-------------|
+| React SPA bundle (`app.[hash].js`) | Vercel Edge CDN | `Cache-Control: max-age=31536000, immutable` | New hash on every Vite build |
+| Vue Admin bundle (`admin.[hash].js`) | Vercel Edge CDN | `Cache-Control: max-age=31536000, immutable` | New hash on every Vite build |
+| Pet sprites (PNG/AVIF) | Vercel Edge CDN — `/assets/sprites/` | `Cache-Control: max-age=31536000, immutable` | New hash filename on sprite update |
+| `index.html` (entry point) | Vercel Edge CDN | `Cache-Control: no-cache` | Every deploy (must always be fresh) |
+| API responses | No CDN — served by Railway API | `Cache-Control: no-store` for auth endpoints | N/A |
+
+**CDN serving flow**: Vite build produces content-hashed filenames → GitHub Actions `pnpm build` → Vercel auto-deploys on `main` merge → Vercel Edge propagates to global PoPs. Stale assets cannot be served because old URLs (old hashes) remain valid for the old deploy's lifetime, and the new `index.html` (served with `no-cache`) always references the latest hashes.
 
 ---
 
@@ -1267,6 +1389,45 @@ Secrets (database URLs, Redis URLs, SendGrid API keys, SMTP credentials, JWT sig
 
 ---
 
+### §8.4 Communication Patterns
+
+本表列出所有跨元件通訊模式及其技術理由。MVP 階段優先採用同步 REST；異步模式僅在 SLA 允許非即時處理時使用。
+
+| 使用情境 | 通訊模式 | 協定 | 理由 |
+|---------|---------|------|------|
+| Claim Pet / User auth | 同步 REST | HTTP/HTTPS | 即時回應，用戶等待 < 2s；失敗立即反饋 |
+| Arena Matchmaking | Long-poll (v1) | HTTP | WebSocket 複雜度推遲至 v2 (OQ-E02)；30s timeout 後回傳 AI 對手 |
+| GDPR Erasure | 異步背景任務 | DB Job Queue (Worker) | 24h SLA 允許非同步處理；Worker ≥ 2 replicas 確保任務不丟失 |
+| Leaderboard Snapshot | 異步排程 | Cron Job (Worker) | 每小時批次快照至 PostgreSQL，非即時；Redis 為即時來源 |
+| Token Blacklist sync | 異步 Redis TTL | Redis SETEX | 容忍最終一致性 (< 1s replication lag)；Redis 全失效時安全降級至拒絕所有請求 |
+| Config Cache propagation | 異步 Redis TTL | Redis SET w/ TTL | CONFIG_CACHE_REFRESH_TIME_MINUTES = 5；接受 5min 最終一致性窗口 |
+| Ban leaderboard removal | 同步 ZREM | Redis | LEADERBOARD_BAN_REFLECTION_TIME_MINUTES = 5；ban 事務中同步執行 ZREM |
+
+---
+
+### §8.5 資料一致性策略 (Data Consistency Strategy)
+
+本系統三個主要最終一致性（Eventual Consistency）場景：
+
+**1. Leaderboard（EC window: ~30s → 最終 ~60min PostgreSQL snapshot）**
+- Redis ZADD 為即時寫入（update lag ≤ 30s per LEADERBOARD_UPDATE_LAG_MAX_SECONDS）
+- Worker 每小時執行 Snapshot 至 PostgreSQL `leaderboard_snapshots` 表
+- Redis 失效時降級至 PostgreSQL snapshot 查詢（降級回應，`degraded=true` flag）
+- Redis 完全刷新後，從最近 snapshot 重建 sorted set（OQ-E06 重建 SLA 待測量）
+
+**2. GDPR Erasure（EC window: ~24h）**
+- 玩家發送 `POST /api/v1/gdpr/request` → HTTP 202 立即回應，INSERT `gdpr_requests` 標記 pending
+- Worker 異步在 24h 內完成：NULL `email_encrypted`、ZREM leaderboard entries、UPDATE status='completed'
+- Audit log 記錄開始時間與完成時間，確保可稽核
+- 完整 GDPR SLA: 7 日內生效（GDPR_EMAIL_DELETION_WINDOW_DAYS = 7），內部 SLA 24h（GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS）
+
+**3. Token Blacklist（EC window: Redis replication lag ~1s）**
+- 舊 token 替換時，原子寫入 `token:blacklist:{token_hash}` (Redis SETEX, TTL = CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72h)
+- Redis replication 至 Replica 約 1s 延遲（EC window）
+- Redis 全失效（Primary + Replica 皆不可用）時：安全降級策略為拒絕所有帶 token 的請求（fail-closed per P5 設計原則），避免被替換的舊 token 被接受
+
+---
+
 *This ARCH document is the authoritative system architecture specification for pixel-pet-arena. All implementation must reference and comply with this document. All numeric values are sourced from CONSTANTS-PIXEL-PET-ARENA-20260503 (constants.json). Conflicts between this ARCH and upstream EDD/PRD/PDD shall be resolved by filing an Engineering Change Request (ECR) against the relevant upstream document.*
 
 ---
@@ -1277,13 +1438,32 @@ Pixel Pet Arena targets 99.9% monthly availability (CONSTANTS: Availability). Th
 
 | Component | HA Strategy | RTO | RPO |
 |-----------|-------------|-----|-----|
-| Next.js frontend | Vercel edge network (global CDN) | < 30s | N/A (stateless) |
-| NestJS backend | Railway auto-restart + health check `/health` (500ms SLA) | < 60s | N/A |
+| React 18 + Vue 3 frontend (Vercel) | Vercel edge network (global CDN) | < 30s | N/A (stateless) |
+| Fastify 4 API Server | Railway auto-restart + health check `/health` (500ms SLA), ≥ 2 replicas | < 60s | N/A |
+| Admin API Server | Railway auto-restart, ≥ 2 replicas, Fastify 4 plugin | < 60s | N/A |
+| Worker | Railway auto-restart, ≥ 2 replicas, idempotent jobs | < 60s | N/A |
 | PostgreSQL | Supabase managed with automated failover (CONSTANTS: DB_AUTOFAILOVER_TIME = 60s) | 60s | < 1min |
-| Redis | Upstash serverless with durability enabled | < 30s | < 5s |
+| Redis | Upstash serverless with durability enabled, Sentinel replica | < 30s | < 5s |
 | Email | SendGrid primary + Nodemailer SMTP fallback (after 3 failures) | Automatic | N/A |
 
 **Maintenance windows**: Max 2 hours/month (CONSTANTS: DB_MAINTENANCE_WINDOW_MAX), 48h advance notice required.
+
+---
+
+### §9.1 SPOF Analysis
+
+下表列出所有已識別的單點故障（Single Points of Failure），其緩解機制，以及 Production 最小副本數。任何 minReplicas < 2 的元件即為 SPOF，本系統強制所有 Application Tier 元件 ≥ 2 replicas（EDD §3.6 HA-First 原則）。
+
+| 元件 | 失敗模式 | 風險等級 | 緩解機制 | Production 最小副本 |
+|------|---------|---------|---------|------|
+| API Server (Game) | Pod crash / OOM | HIGH | K8s/Railway 自動重啟, ≥ 2 replicas, LB failover | 2 |
+| API Server (Admin) | Pod crash / OOM | HIGH | K8s/Railway 自動重啟, ≥ 2 replicas, LB failover | 2 |
+| Worker | Job stuck / crash | MEDIUM | ≥ 2 replicas, job idempotency (unique key + processed_at), retry logic | 2 |
+| PostgreSQL Primary | 主節點故障 | CRITICAL | Primary + Standby Replica (Supabase managed), 自動 failover 60s (DB_AUTOFAILOVER_TIME_SECONDS) | 1P+1R |
+| Redis Primary | Redis crash | HIGH | Primary + Replica (Upstash Sentinel), token blacklist TTL, leaderboard fallback to PostgreSQL | 1P+1R |
+| Email Service | SendGrid outage | MEDIUM | Nodemailer SMTP fallback after 3 consecutive failures (SENDGRID_FAILOVER_CONSECUTIVE_FAILURES) | - |
+| CDN/Edge | Vercel outage | LOW | 靜態資源快取, 全球 PoP, hash-based filenames prevent stale | 全球分散 |
+| Load Balancer | Edge node failure | LOW | Vercel Edge multi-AZ, Railway load balancer redundancy | 自動 |
 
 ---
 
@@ -1309,14 +1489,16 @@ Pixel Pet Arena targets 99.9% monthly availability (CONSTANTS: Availability). Th
 
 | Layer | Technology | Version | Rationale |
 |-------|-----------|---------|-----------|
-| Frontend | Next.js + Phaser 3 | Next 14 / Phaser 3.60 | SSR for SEO; Canvas 2D for pet animation ≥ 30 FPS |
-| Backend | Node.js / NestJS | Node 20 LTS | TypeScript-first; modular; Railway deploy |
-| Database | PostgreSQL (Supabase) | PostgreSQL 15 | Managed hosting; Row-level security; real-time subscriptions |
-| Cache / Queue | Redis (Upstash) | Serverless | Leaderboard; arena matchmaking queue; rate limit counters |
-| Email | SendGrid + Nodemailer | SendGrid v3 API | 98% delivery SLA; SMTP fallback |
-| Deployment | Vercel (frontend) + Railway (backend) | — | Serverless + container-based; $50–200/month at DAU ≤ 5k |
-| Monitoring | Sentry + Datadog | — | Error tracking + metrics; alert on P99 > 1000ms |
-| CDN | Vercel Edge | — | Static assets + sprite sheets; global edge caching |
+| Player Frontend | React 18 + Phaser.js 3 + Vite 5 + TypeScript 5 | React 18 / Phaser 3.60 | Client-side SPA; Phaser for canvas animation ≥ 30 FPS; React for UI chrome |
+| Admin Portal | Vue 3 + Element Plus + Vite 5 + TypeScript 5 | Vue 3 | Data-dense admin UI; Element Plus table/form; Pinia state management |
+| Backend API | Node.js 20 LTS + Fastify 4 + TypeScript 5 | Node 20 LTS | TypeScript-first monorepo; JSON Schema validation; Railway deploy |
+| ORM / DB Driver | node-postgres (pg) | pg@8+ | Lightweight parameterized queries; connection pool min 20 / max 50 |
+| Database | PostgreSQL 15 (Supabase) | PostgreSQL 15 | Managed hosting; primary + read replica; automated failover 60s |
+| Cache / Queue | Redis 7 (Upstash serverless) | Serverless | Leaderboard sorted set; arena matchmaking queue; rate-limit counters |
+| Email | SendGrid v3 API + Nodemailer SMTP fallback | SendGrid v3 | 98% delivery SLA; SMTP fallback after 3 consecutive failures |
+| Deployment | Vercel (frontend CDN) + Railway (backend containerized) | — | Serverless edge + container-based; $50–200/month at DAU ≤ 5k |
+| Monitoring | Sentry + Datadog + Grafana | — | Error tracking + metrics + dashboards; alert on P99 > 1000ms |
+| CDN | Vercel Edge | — | Static SPA assets + sprite sheets; global edge caching |
 
 ---
 
@@ -1361,15 +1543,19 @@ Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`,
 
 ## §14. Architecture Decision Records
 
-| ADR # | Title | Status | Decision |
+§14 ADR 索引（Architecture Decision Records）: 完整 ADR 詳見 §3 關鍵架構決策，共 7 條（ADR-001 至 ADR-007）。§3 為唯一 ADR 真相來源。
+
+| ADR # | Title | Status | §3 參考 |
 |-------|-------|--------|---------|
-| ADR-001 | Use Supabase (managed PostgreSQL) over self-hosted | Accepted | Reduces ops burden for MVP; acceptable vendor lock-in at DAU ≤ 5k |
-| ADR-002 | Phaser 3 over Unity WebGL for browser game | Accepted | Smaller bundle; no plugin; native HTML5 Canvas |
-| ADR-003 | NestJS over plain Express for backend | Accepted | Dependency injection; modular architecture; TypeScript-native |
-| ADR-004 | Upstash Redis over ElastiCache | Accepted | Serverless billing; no idle cost; Vercel edge compatible |
-| ADR-005 | ENV-variable feature flags over LaunchDarkly | Accepted | MVP scope; LaunchDarkly re-evaluated at beta if runtime toggles needed |
-| ADR-006 | Admin portal on `/admin` route (same deployment) | Accepted | MVP simplicity; revisit for subdomain isolation post-GA security audit |
-| ADR-007 | Email-based passwordless auth over OAuth | Accepted | PRD requirement; reduces friction; no third-party OAuth vendor risk |
+| ADR-001 | No User Accounts — Email OTP + URL Token Identity | Accepted | §3.1 |
+| ADR-002 | Monorepo Structure (pnpm workspaces) | Accepted | §3.2 |
+| ADR-003 | React 18 + Phaser.js 3 for Player App | Accepted | §3.3 |
+| ADR-004 | Vue 3 + Element Plus for Admin Portal | Accepted | §3.4 |
+| ADR-005 | Node.js 20 + Fastify 4 over Go/Fiber | Accepted | §3.5 |
+| ADR-006 | PostgreSQL + Redis Dual Storage | Accepted | §3.6 |
+| ADR-007 | Feature Flag Strategy (FF_MARKETPLACE) | Accepted | §3.7 |
+
+> 完整決策脈絡（Context / Decision / Consequences）請見 §3。本表僅為索引，不重複 §3 內容。
 
 ---
 
@@ -1378,9 +1564,9 @@ Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`,
 ### §15.1 安全性
 
 - [x] 所有 API 端點有 authentication guard（admin routes + user routes）
-- [x] Rate limiting 實作在 NestJS middleware（Redis 計數器）
-- [x] SQL injection 防護：使用 Prisma ORM（parameterized queries）
-- [x] CSRF 保護：stateless JWT + SameSite cookie
+- [x] Rate limiting 實作在 Fastify plugin / middleware（Redis 計數器）
+- [x] SQL injection 防護：使用 node-postgres (pg) parameterized queries
+- [x] CSRF 保護：stateless token + SameSite cookie
 - [x] Secrets 在 ENV vars；不在 code 或 image 中
 - [ ] Security audit（pre-launch）
 
@@ -1399,6 +1585,53 @@ Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`,
 - [x] Error rate alerting（Sentry + Datadog）
 - [ ] Custom dashboard for MAAPO / DAP metrics（post-launch）
 
+### §15.4 Scalability
+
+- [ ] API Server (Game) minReplicas ≥ 2; HPA maxReplicas = 10; PEAK_OPERATION_RPS = 500
+- [ ] API Server (Admin) minReplicas ≥ 2
+- [ ] Worker minReplicas ≥ 2; auto-scale on job queue depth
+- [ ] DB connection pool: min 20 (DB_CONNECTION_POOL_MIN_CONNECTIONS), max 50 (DB_CONNECTION_POOL_MAX_CONNECTIONS) connections
+- [ ] Load test at PEAK_OPERATION_RPS = 500 and PEAK_CONCURRENT_USERS = 2,000 before GA
+
+### §15.5 GDPR Compliance
+
+- [ ] 刪除 API 實作 24h 內完成 PII 清除 (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24; AC-009-1)
+- [ ] 完整 GDPR 刪除在 7 日內完成 (GDPR_EMAIL_DELETION_WINDOW_DAYS = 7)
+- [ ] Audit log 保留 2 年 (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2)
+- [ ] 同意書記錄於 user_consents / `claim_identities` 表（COPPA age-13 confirmation）
+- [ ] 資料存取請求在 30 日內完成 (GDPR_DATA_ACCESS_RESPONSE_DAYS = 30)
+- [ ] `email_encrypted` 欄位在處理限制請求後 24h 內完成 (GDPR_RESTRICT_PROCESSING_RESPONSE_HOURS = 24)
+
+### §15.6 Performance / Core Web Vitals
+
+- [ ] LCP < 2.5s (LCP_SECONDS = 2.5; NFR-PERF-05)
+- [ ] INP < 200ms (INP_MS = 200; NFR-PERF-07)
+- [ ] CLS < 0.1 (CLS_SCORE = 0.1)
+- [ ] FCP < 1.5s (FCP_SECONDS = 1.5)
+- [ ] JS bundle ≤ 300 KB gzipped (TOTAL_JS_BUNDLE_GZIPPED_KB = 300)
+- [ ] Pet canvas render on load ≤ 2s (PET_RENDER_ON_LOAD_SECONDS = 2)
+- [ ] P99 read API latency < 200ms at 100 RPS (P99_API_LATENCY_READ_MS_AT_100_RPS)
+- [ ] P99 write API latency < 500ms at 100 RPS (P99_API_LATENCY_WRITE_MS_AT_100_RPS)
+
+### §15.7 Accessibility
+
+- [ ] WCAG 2.1 Level AA 合規 (PRD §7.5)
+- [ ] Alt text 完整覆蓋所有非裝飾性圖片
+- [ ] 鍵盤操作：所有互動元素可鍵盤訪問；modal 內 focus trap
+- [ ] 螢幕閱讀器支援：`aria-live` regions 用於動態內容（排行榜更新、OTP 計時器）
+- [ ] 焦點指示器對比度 ≥ 3:1 (A11Y_FOCUS_CONTRAST_RATIO)
+- [ ] 正常文字對比度 ≥ 4.5:1 (A11Y_TEXT_CONTRAST_NORMAL)
+- [ ] `prefers-reduced-motion: reduce` → 靜態 sprite，無粒子動效
+
+### §15.8 Data Retention
+
+- [ ] Analytics hot data: 90 天 (ANALYTICS_EVENT_HOT_RETENTION_DAYS = 90)
+- [ ] Analytics cold data: 2 年 (ANALYTICS_EVENT_COLD_ARCHIVE_YEARS = 2)
+- [ ] Audit log: 2 年 (ADMIN_AUDIT_LOG_RETENTION_YEARS = 2)
+- [ ] IP address log: 90 天 (IP_ADDRESS_LOG_RETENTION_DAYS = 90)
+- [ ] Claim codes cleanup: 72h 後清除 (CLAIM_TOKEN_CLEANUP_TTL_HOURS = 72)
+- [ ] Leaderboard snapshots 保留 12 個月 (LEADERBOARD_SNAPSHOT_RETENTION_MONTHS = 12), top 500 entries/snapshot
+
 ---
 
 ## §16. Cost Optimization & FinOps
@@ -1416,10 +1649,21 @@ Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`,
 | Datadog | $15–30 | Free | Metrics > 500/month |
 | **Total** | **$20–125** | — | Per CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MIN/MAX ($50–200) |
 
+### §16.1a Per-User Cost Estimate
+
+| DAU Scenario | Est. Monthly Infra | Cost / DAU / Month | Cost / MAU / Month (30% active) |
+|-------------|-------------------|-------------------|----------------------------------|
+| 500 DAU (early launch) | ~$20–50 | ~$0.04–0.10 | ~$0.13–0.33 |
+| 1,000 DAU (FF_MARKETPLACE trigger) | ~$50–80 | ~$0.05–0.08 | ~$0.17–0.27 |
+| 5,000 DAU (MVP ceiling) | ~$50–125 | ~$0.01–0.025 | ~$0.03–0.08 |
+| 10,000 DAU (post-MVP scale) | ~$150–300 | ~$0.015–0.03 | ~$0.05–0.10 |
+
+Unit economics improve with scale due to fixed-cost components (Railway base plan, Supabase Pro tier). The primary variable cost drivers are Upstash Redis commands (battle/leaderboard operations) and SendGrid emails (new claims). At DAU=5,000 with ~$125/month total cost: ~$0.025/DAU/month, ~$0.30/MAU/month at 30% daily-to-monthly active ratio.
+
 ### §16.2 Cost Guardrails
 
 - Monthly cost alert at $150 (75% of CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX)
-- Auto-scaling limited to Railway horizontal pod expansion (max 3 replicas for MVP)
+- Auto-scaling limited to Railway horizontal pod expansion (max 10 replicas per HPA; MVP baseline 2 replicas per service)
 
 ---
 
@@ -1442,21 +1686,21 @@ Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`,
 
 ## §18. API Gateway & Service Mesh Architecture
 
-Pixel Pet Arena uses a **direct-call architecture** for MVP (no API gateway or service mesh). All routing is handled by NestJS Router + Vercel Edge.
+Pixel Pet Arena uses a **direct-call architecture** for MVP (no API gateway or service mesh). All routing is handled by Fastify Router + Vercel Edge.
 
 ### §18.1 Request Flow
 
 ```
-User Browser
-  → Vercel Edge (CDN / Next.js SSR)
-    → NestJS API (/api/v1/*)        [Railway]
-      → Supabase PostgreSQL         [Supabase]
-      → Upstash Redis               [Upstash]
-      → SendGrid                    [External]
+Player Browser
+  → Vercel Edge CDN (React 18 + Vite SPA, static)
+    → Fastify 4 Game API (/api/v1/*)  [Railway, ≥ 2 replicas]
+      → Supabase PostgreSQL            [Supabase]
+      → Upstash Redis                  [Upstash]
+      → SendGrid                       [External]
 
 Admin Browser
-  → Vercel Edge (/admin/*)
-    → NestJS API (/api/admin/*)     [Railway, same deployment]
+  → Vercel Edge CDN (Vue 3 + Vite Admin Portal, static)
+    → Fastify 4 Admin API (/admin/api/*)  [Railway, ≥ 2 replicas, same Fastify plugin]
       → Supabase PostgreSQL
 ```
 
@@ -1470,18 +1714,20 @@ If traffic exceeds PEAK_OPERATION_RPS = 500 or multi-region deployment is requir
 
 ## §19. Admin Portal 架構
 
-The admin portal is deployed as part of the same Next.js application (route: `/admin/*`). Separation from player routes is enforced at the NestJS authentication layer.
+The admin portal is a separate Vue 3 + Vite application deployed independently to Vercel. It connects exclusively to `/admin/api/*` endpoints on the Fastify 4 Admin API Server. Separation from player routes is enforced at the Fastify 4 authentication plugin layer (Admin API is a dedicated Fastify plugin registered under the `/admin` prefix).
 
 ### §19.1 Admin Authentication
 
-- Dedicated admin JWT (separate secret from player JWT)
+- Dedicated admin session via Redis server-side session (httpOnly + SameSite=Strict cookie); no player JWT used
+- Two-factor: username + bcrypt password (12 rounds) + RFC 6238 TOTP (mandatory)
 - Session inactivity expiry: 4 hours (CONSTANTS: ADMIN_SESSION_INACTIVITY_EXPIRY)
 - Absolute session expiry: 8 hours (CONSTANTS: ADMIN_SESSION_ABSOLUTE_EXPIRY)
 - Rate limit: 100 requests/minute per admin (CONSTANTS: ADMIN_RATE_LIMIT_REQUESTS_PER_MINUTE)
+- Enforced via Fastify plugin / middleware (admin auth guard registered as Fastify preHandler)
 
 ### §19.2 Admin API Routes
 
-All admin endpoints are prefixed `/api/admin/` and guarded by `AdminAuthGuard`. Response time SLA: 2 seconds for search (up to 1M pet records). See `docs/API.md §Admin` for full endpoint list.
+All admin endpoints are prefixed `/admin/api/` and guarded by the Fastify admin auth preHandler. Response time SLA: 2 seconds for search (up to 1M pet records). See `docs/API.md §Admin` for full endpoint list.
 
 ### §19.3 Admin Data Access
 
