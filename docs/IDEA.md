@@ -47,7 +47,7 @@
 1. **Who**：休閒玩家（不想創帳號的輕度用戶）、像素藝術愛好者、輕度競技遊戲玩家、寵物收藏愛好者。
 2. **Problem**：現有虛擬寵物遊戲大多要求完整帳號註冊，門檻高；而現有 HTML5 遊戲缺乏持久性寵物養成與競技生態，玩家無法真正「擁有」並培育獨特寵物。
 3. **Solution**：純 HTML5 網站，訪客可即時互動隨機寵物；想養就輸入 email，系統寄送認領密碼與專屬 URL，下次直接回訪繼續；像素風格程序化生成保證每隻寵物外型獨特，可訓練、喂食、競技、交易。
-4. **Why Now**：HTML5 Canvas + Phaser.js 技術成熟，瀏覽器端遊戲無需安裝門檻最低；email Magic-Link 模式已成熟（Notion、Slack 均採用）；Pixel Art 風格在 itch.io 等平台持續熱門，玩家對 retro 風格接受度高。
+4. **Why Now**：HTML5 Canvas + Phaser.js 技術成熟，瀏覽器端遊戲無需安裝門檻最低；email OTP 驗證碼登入（低摩擦、無密碼）；Pixel Art 風格在 itch.io 等平台持續熱門，玩家對 retro 風格接受度高。
 5. **Key Differentiator**：唯一結合「無帳號門檻 email 認領」＋「程序化像素寵物唯一性生成」＋「跨模式競技場（跑步 / 相撲 / 更多）」＋「寵物 P2P 交易市場」的輕量 HTML5 寵物遊戲。
 
 ---
@@ -59,7 +59,7 @@
 > **will** 自發性認領寵物、持續回訪訓練並參與競技，  
 > **which will lead to** 高 Day-7 回訪率（MVP Go Threshold：≥25%；Aspirational target：>30%，見 §5.2）、競技場日活躍對戰場次數增長，以及寵物交易市場有機成長，最終形成社群口碑傳播。
 
-*假說需可測試、可被推翻。90 天驗證：認領數 ≥ 500、Day-7 回訪 >30%（aspirational）、競技場日對戰 ≥ 100 場次。*
+*假說需可測試、可被推翻。90 天驗證：認領數 ≥ 500、Day-7 回訪 >30%（aspirational）、競技場日對戰 ≥ 50 場次。*
 
 ---
 
@@ -732,7 +732,7 @@ IDEA.md （本文件）
 - 渲染框架建議：Phaser 3 或 LittleJS（輕量），Canvas 搭配 image-rendering: pixelated
 - 像素生成：程序化生成（Sprite 組件拼裝），支援調色盤隨機化確保唯一性
 - 後端：Node.js (Express/Fastify) + PostgreSQL（寵物數據持久化）
-- Auth：Email Magic Link（JWT token，有效期 15 分鐘）+ 專屬 URL（長效 token）
+- Auth：Email OTP + URL Token（6-digit code，有效期 15 分鐘）+ 專屬 URL（長效 token）
 - Email：SendGrid / Nodemailer（SMTP fallback）
 ```
 
