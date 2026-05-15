@@ -1247,6 +1247,8 @@ The admin portal targets WCAG 2.1 AA compliance separately; see ADMIN_IMPL §14.
 
 See PRD §7.7 (NFR-A11Y-01 through NFR-A11Y-04) for the full accessibility non-functional requirements backing this standard.
 
+Target WCAG 2.1 success criteria include: 1.4.3 Contrast (Minimum) AA, 2.4.7 Focus Visible, 2.5.3 Label in Name, and 4.1.2 Name, Role, Value.
+
 ### 7.2 Contrast Ratios
 
 | Context | Minimum ratio | Constant key |
