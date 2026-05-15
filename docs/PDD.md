@@ -56,18 +56,25 @@
 
 ### §1.2 PRD Requirement Mapping
 
-| Epic / US Cluster | PRD Reference | PDD Section |
-|-------------------|--------------|-------------|
-| Pet Generation & Display (EPIC-PET) | §5 US-PET-001, US-PET-002 | §5.1 Landing Page, §5.2 Claim Pet Page, §6.5 Micro-interactions |
-| Authentication & Identity (EPIC-AUTH) | §5 US-AUTH-001, US-AUTH-002 | §5.2 Claim Pet Page, §4.1 Happy Path Flow, §4.3 Error Flows |
-| Training & Feeding System (EPIC-TRAINING) | §5 US-TRAIN-001, US-FOOD-001 | §5.3 My Pet Page, §5.4 Training Page, §6.5 Micro-interactions |
-| Arena Battle System (EPIC-ARENA) | §5 US-ARENA-001, US-ARENA-002 | §5.5 Arena Page, §5.6 Battle Result Page, §4.1 Happy Path Flow |
-| Rankings, Records & Rarity (EPIC-RANKING) | §5 US-BOARD-001, US-RECORD-001, US-RARITY-001 | §5.7 Leaderboard Page, §5.8 Battle Records Page, §9.1 Color Palette |
-| Pet Trading Marketplace (EPIC-MARKETPLACE) | §5 US-TRADE-001 | §5.9 Marketplace Page (behind FF_MARKETPLACE) |
-| Admin & Moderation Portal (EPIC-ADMIN) | §5 US-ADMIN-001–006, §19 | §15 Admin Portal Product Design |
-| Non-functional: Accessibility | §7.7 NFR-A11Y-01–04, §18 | §8 Accessibility Specifications |
-| Non-functional: Performance | §7.1 NFR-PERF-01–10 | §14 References, §7 Responsive Design |
-| Non-functional: i18n | §7.6 NFR-I18N-01–04 | §10.3 i18n String List |
+| US-ID | US Title | Screens Covered | Primary Screen |
+|-------|----------|-----------------|----------------|
+| US-PET-001 | Animated pixel pet generation and display | §5.1 Landing Page, §6.5 Micro-interactions | §5.1 Landing Page |
+| US-PET-002 | Pet rarity tiers and visual differentiation | §5.1 Landing Page, §5.3 My Pet Page, §5.7 Leaderboard Page, §9.1 Color Palette | §5.3 My Pet Page |
+| US-PET-003 | Pet identity and unique pet URL | §5.2 Claim Pet Page, §5.3 My Pet Page, §4.1 Happy Path Flow | §5.2 Claim Pet Page |
+| US-PET-004 | Pet stat system (Speed, Strength, Stamina, Level) | §5.3 My Pet Page, §5.4 Training Page, §5.5 Arena Page | §5.3 My Pet Page |
+| US-AUTH-001 | Email-based claim flow with 6-digit code | §5.2 Claim Pet Page, §4.1 Happy Path Flow, §4.3 Error Flows, §10.2 | §5.2 Claim Pet Page |
+| US-AUTH-002 | Pet URL token access and session persistence | §5.3 My Pet Page, §4.2 Alternative Flows, §4.3 Error Flows | §5.3 My Pet Page |
+| US-TRAIN-001 | Daily training actions with stat increments | §5.4 Training Page, §6.5 (MI-03, MI-04, MI-12) | §5.4 Training Page |
+| US-FOOD-001 | Food inventory and stat buff system | §5.3 My Pet Page (FoodInventory), §6.5 (MI-10) | §5.3 My Pet Page |
+| US-ARENA-001 | Arena battle matchmaking and animation | §5.5 Arena Page, §5.6 Battle Result Page, §4.1 Happy Path Flow, §6.5 (MI-07, MI-08) | §5.5 Arena Page |
+| US-ARENA-002 | Arena mode selection (Race, Sumo) | §5.5 Arena Page (ModeSelector), §6.5 MI-battle-start | §5.5 Arena Page |
+| US-BOARD-001 | Global leaderboard with top 100 ranking | §5.7 Leaderboard Page, §3.3 Content Priority | §5.7 Leaderboard Page |
+| US-RECORD-001 | Battle records and shareable pet profile | §5.8 Battle Records Page, §5.6 Battle Result Page, §10.2 | §5.8 Battle Records Page |
+| US-RARITY-001 | Rarity visual language across all surfaces | §9.1 Color Palette, §5.3 RarityBadge, §5.7 RarityFilter | §9.1 Color Palette |
+| US-ADMIN-001 | Admin pet management (ban/flag/search) | §15.3 Pet Management, §15.4 UX Decisions | §15.3 Pet Management |
+| US-ADMIN-002 | Admin leaderboard moderation with auto-flag | §15.3 Leaderboard Management, §15.4 UX Decisions | §15.3 Leaderboard Management |
+| US-ADMIN-003 | Runtime parameter tuning (rate limits, rarity weights) | §15.3 Arena Rate Config, §15.4 UX Decisions | §15.3 Arena Rate Config |
+| US-ONBOARD-001 | Zero-friction first impression and progressive disclosure | §5.1 Landing Page, §4.1 Happy Path Flow, §1.3 Design Principles | §5.1 Landing Page |
 
 ### §1.3 Design Principles
 
@@ -777,14 +784,14 @@ N/A — pixel-pet-arena is a web browser application. The Web Vibration API has 
 
 ### §7.1 Breakpoints
 
-| Breakpoint Name | Width | Description |
-|----------------|-------|-------------|
-| `xs` | 320px | Smallest mobile (iPhone SE) |
-| `sm` | 375px | Standard mobile (iPhone 14) |
-| `md` | 768px | Tablet / large mobile landscape |
-| `lg` | 1024px | Small desktop / tablet landscape |
-| `xl` | 1440px | Standard desktop |
-| `2xl` | 1920px | Large / ultrawide desktop |
+| Breakpoint Name | Width | Description | Layout Strategy |
+|----------------|-------|-------------|-----------------|
+| `xs` | 320px | Smallest mobile (iPhone SE) | Single column; full-width components; bottom navigation bar; stacked stats and training cards |
+| `sm` | 375px | Standard mobile (iPhone 14) | Single column; slightly wider cards; 1.5 training cards visible for carousel hint |
+| `md` | 768px | Tablet / large mobile landscape | 2-column grid for training actions and food inventory; centered modals (480px max-width); side panel collapsed |
+| `lg` | 1024px | Small desktop / tablet landscape | 3-column layout for training actions; horizontal nav bar visible; side panel collapses to icon-only in admin |
+| `xl` | 1440px | Standard desktop | 3-column content grid; side panel fully visible in admin; pet canvas and stats panel side-by-side |
+| `2xl` | 1920px | Large / ultrawide desktop | Max-width containers centered (1200px for content, 1440px outer); no additional layout change from xl |
 
 ### §7.2 Component Behavior Matrix
 
@@ -832,7 +839,15 @@ This design system uses a **mobile-first** approach. Base styles target 320px vi
 
 ## §8 Accessibility Specifications
 
-### §8.3 Keyboard Navigation
+### §8.1 Keyboard Navigation
+
+All interactive elements in pixel-pet-arena must be fully operable using only a keyboard. Because the product is a competitive game, keyboard navigation must be fast and low-friction — not just technically conformant. Tab order follows natural document flow on every page. No keyboard trap exists outside of intentional modal focus traps (which all close via Escape). Focus management after async operations — form submission, training action, arena entry — must move focus to the result or status region so that keyboard-only players receive the same feedback as pointer users. The pixel-art game canvas registers keyboard events for pet interaction (Enter or Space activates the canvas interaction equivalent of a click). Arrow keys navigate within ARIA tablist components such as the RarityFilter. All custom components that behave as buttons or links must respond to Enter and Space per ARIA Authoring Practices Guide patterns.
+
+### §8.2 Screen Reader Support
+
+pixel-pet-arena provides first-class screen reader support across VoiceOver (macOS Safari), NVDA (Windows Chrome), and TalkBack (Android Chrome). Every page has a descriptive `<title>` and a logical heading hierarchy starting at `<h1>`. The Phaser.js game canvas exposes an accessible text alternative via `aria-label` that describes the current pet (species, rarity, level) and updates when the pet state changes. All live regions — matchmaking status, countdown timers, training result announcements, claim code expiry warnings — use `aria-live="polite"` or `role="alert"` as appropriate. Stat change indicators ("+X Speed") announce via a visually-hidden `aria-live` region so screen reader users receive the same stat feedback as sighted users. Decorative animations and sparkle effects are marked `aria-hidden="true"`. The leaderboard table uses proper `<th scope="col">` headers and `<caption>` elements. All modals follow the ARIA dialog pattern with focus trap and Escape-to-close.
+
+### §8.3 Keyboard Navigation Flows
 
 All player-facing P0 flows must be fully operable via keyboard alone. The following named flows document the required key sequences, components involved, and expected outcomes. These flows must pass manual keyboard-only walkthrough as part of Phase 3 validation (§11.2).
 
@@ -976,6 +991,11 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 --primitive-shadow-md: 4px 4px 0px var(--color-neutral-900);
 --primitive-shadow-lg: 6px 6px 0px var(--color-neutral-900);
 
+/* Primitive: Radius (pixel-art aesthetic — sharp by default, minimal rounding) */
+--primitive-radius-sm: 0px;   /* Fully sharp corners — pixel-art buttons, badges, stat bars */
+--primitive-radius-md: 2px;   /* Minimal rounding — input fields, tooltips */
+--primitive-radius-lg: 4px;   /* Slight rounding — modals, cards, panels */
+
 /* Primitive: Easing */
 --primitive-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 --primitive-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -999,6 +1019,11 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 --space-component-padding: var(--primitive-space-4);
 --space-section: clamp(4rem, 3rem + 5vw, 10rem);
 --space-section-inner: var(--primitive-space-12); /* 48px — inner section padding */
+
+/* Semantic: Radius */
+--radius-sharp: var(--primitive-radius-sm);    /* 0px — primary pixel-art UI elements */
+--radius-input: var(--primitive-radius-md);    /* 2px — form inputs, tooltips */
+--radius-container: var(--primitive-radius-lg); /* 4px — cards, modals, panels */
 
 /* Semantic: Duration */
 --duration-interaction: var(--primitive-duration-fast);
@@ -1162,50 +1187,6 @@ AdminDataTable (shared admin component)
 ├── children: AdminTableRow[]
 └── features: bulk select, CSV export, search
 ```
-
----
-
-## §9.5 Client 類別圖（Class Diagram）
-
-> 本節定義 **Client 端（前端 Web）** 的程式結構，依照 Clean Architecture 原則分層。
-> 每一層只依賴它下方的層，絕對不跨層溝通。
-
-### §9.5.1 Web 前端 Class Diagram（概覽）
-
-```
-Presentation Layer
-  ├── PageRouter（路由管理）
-  ├── PetCanvasView（Canvas 渲染）
-  ├── ArenaView（戰鬥畫面）
-  ├── LeaderboardView（排行榜）
-  └── AdminPortalView（管理後台）
-
-Application Layer
-  ├── PetUseCase（生成、訓練、食物 buff）
-  ├── ArenaUseCase（配對、戰鬥結果）
-  ├── AuthUseCase（Claim Code 流程）
-  └── TradeUseCase（交易，FF_MARKETPLACE）
-
-Domain Layer
-  ├── Pet（entity: id, rarity, stats, level）
-  ├── Battle（entity: outcome, timestamp, random_modifier）
-  ├── ClaimToken（entity: code, expiry）
-  └── LeaderboardEntry（entity: rank, score）
-
-Infrastructure Layer
-  ├── ApiClient（REST calls to backend）
-  ├── CanvasRenderer（Phaser 3 / HTML5 Canvas）
-  └── LocalStorageAdapter（token cache）
-```
-
-| Class | Layer | 主要職責 | 對應 PRD |
-|-------|-------|---------|---------|
-| PageRouter | Presentation | URL routing, SPA navigation | US-PET-001 |
-| PetCanvasView | Presentation | Canvas pet rendering ≥ 30 FPS | US-PET-001 AC-001-1 |
-| ArenaView | Presentation | Battle animation 5–15s | US-ARENA-001 AC-007-3 |
-| PetUseCase | Application | Training, food buff logic | US-TRAIN-001, US-FOOD-001 |
-| ArenaUseCase | Application | Matchmaking, outcome calculation | US-ARENA-001, US-ARENA-002 |
-| ApiClient | Infrastructure | All REST calls, error handling | API.md |
 
 ---
 
@@ -1627,6 +1608,85 @@ Two-section form (separated clearly to avoid scope confusion with Economy Config
 **8. Game Economy Config (`/admin/config/economy`)**
 Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary buff multiplier (0.5x-5.0x) (FOOD_BUFF_MULTIPLIER_ADMIN_MIN = 0.5× / ADMIN_MAX = 5.0×) and permanent buff multiplier (0.5x-5.0x) with current values displayed. Section 2 — Arena Entry Cooldown: Numeric input, range 0-60 minutes (ARENA_ENTRY_COOLDOWN_ADMIN_MIN = 0 / MAX = 60 min), default 0. Section 3 — Arena Entry Cost: Numeric input, range 0-10 food credits, default 0. All three sections include example calculations showing the player-facing effect (e.g., "At 2.0x multiplier, Speed Berry gives +10 Speed instead of +5"). Change preview modal before applying. 5-minute cache refresh notice.
 
+### §15.3.1 Admin Component State Matrices
+
+**Admin Dashboard (`/admin/dashboard`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `MetricCard` (DAP, Battles/hr, Conversion) | Displays current metric value with label and trend arrow; dark surface card with pixel-art border | Border brightens slightly; cursor pointer | Card scale(0.98); border deepens to `--color-brand-primary-dark` | Visible focus ring on card | Greyed out if data unavailable | Skeleton shimmer replacing metric value | Red border with error icon; "Data unavailable" message |
+| `SuspiciousQueueBadge` | Amber count badge with "Review" CTA; pulsing if count > 0 | Badge brightens; tooltip shows oldest queued item timestamp | Button scale(0.97); background deepens | Focus ring on "Review" button | Hidden if no suspicious items | Spinner while count fetches | Badge shows "—" if count fetch fails |
+| `GDPRQueueBadge` | Count badge; red if any item < 48h remaining before SLA breach | Badge brightens; tooltip shows next SLA deadline | Button scale(0.97) | Focus ring on badge | N/A | Spinner while count fetches | "—" if fetch fails |
+| `RecentAuditLogTable` | Last 10 audit entries in compact table; read-only | Row highlights on hover | Row scale(0.99) | Row focusable; Enter navigates to full audit log | N/A | Skeleton rows while loading | "Failed to load audit log" message |
+
+**User Management (`/admin/users`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `UserSearchBar` | Empty input with placeholder "Search by email or pet ID" | Input border brightens | N/A | Visible pixel-art border focus ring | N/A | N/A | Red border with inline error for invalid input |
+| `UserTableRow` | Masked email, pet count, account status badge, GDPR status, registered date, action buttons | Row background shifts; action buttons become visible | Row scale(0.99) | Row focusable; Enter expands row | "Delete User Data" button disabled for non-Super-Admin roles | Spinner on row when action pending | Error toast for failed action |
+| `ResendAccessLinkButton` | Ghost style button with envelope icon | Button brightens | scale(0.97); border deepens | Visible focus ring | Disabled if user has no claimed pet | Pixel-art spinner; pointer-events: none; aria-busy="true" | Error toast: "Failed to resend access link" |
+| `DeleteUserDataButton` | Danger style; red border; only visible for Super Admin | Button brightens with red glow | scale(0.97); background deepens to error color | Visible focus ring | Disabled for non-Super-Admin roles | Spinner; pointer-events: none | Error toast: "GDPR deletion failed — retry or escalate" |
+
+**Pet Management (`/admin/pets`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `PetSearchBar` | Empty input with placeholder "Search by pet ID or email fragment" | Border brightens | N/A | Pixel-art border focus ring | N/A | N/A | Red border with inline validation error |
+| `PetTableRow` | Pet ID, rarity badge, owner (masked), ban status, battle count; row actions visible | Row background brightens; action buttons highlight | Row scale(0.99) | Row focusable via keyboard | Actions disabled if viewing own admin account pets | Spinner overlay on row during action | Error toast for failed ban or flag action |
+| `BanPetButton` | Danger style with "Ban" label | Button brightens with red glow | scale(0.97); background deepens to error red | Focus ring visible | Disabled if pet already banned | Spinner; aria-busy="true"; pointer-events: none | Error toast: "Ban failed — please retry" |
+| `FlagForReviewButton` | Amber ghost button with flag icon | Button brightens | scale(0.97) | Focus ring visible | Disabled if pet already flagged | Spinner; pointer-events: none | Error toast: "Flag action failed" |
+| `ReasonTextField` (ban/flag) | Empty textarea; required field indicator | Border brightens on hover | N/A | Pixel-art border focus ring | N/A | N/A | Red border with "Reason is required" inline error |
+
+**Leaderboard Management (`/admin/leaderboard`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `LeaderboardAdminTable` | Top 500 rows with Rank, Pet ID, Rarity, Score, Suspicious flag column | Row highlights; suspicious rows glow amber | Row scale(0.99) | Row focusable; Enter opens action panel | N/A | Skeleton rows while fetching | "Failed to load leaderboard" message |
+| `SuspiciousActionPanel` | Right-side panel: battle timeline, bot-pattern score, 3 action buttons | Button brightens on hover | Button scale(0.97) | Each button has focus ring; tab order: Dismiss → Temp Remove → Permanent Ban | All buttons disabled until reason textarea has content | Spinner on active action button | Error toast for failed action |
+| `DismissFlagButton` | Ghost button, green border | Brightens | scale(0.97) | Focus ring | Disabled if no reason entered | Spinner; aria-busy="true" | Error toast |
+| `TempRemoveButton` | Amber ghost button | Brightens with amber glow | scale(0.97); amber deepens | Focus ring | Disabled if no reason entered | Spinner; aria-busy="true" | Error toast |
+| `PermanentBanButton` | Danger button, red border | Brightens with red glow | scale(0.97); red deepens | Focus ring | Disabled if no reason entered | Spinner; aria-busy="true" | Error toast: "Ban failed — retry or contact engineering" |
+
+### §15.3.2 Admin Screen Interaction Specifications
+
+**Admin Dashboard Interactions**
+
+| Interaction Trigger | Action | Animation/Transition | Duration | Visual Feedback |
+|--------------------|--------|---------------------|----------|-----------------|
+| Page loads | Metric cards animate in with stagger | ease-out-expo stagger (100ms per card) | 300ms total | Cards slide in from bottom (translateY 12px → 0) |
+| "Review" CTA on SuspiciousQueueBadge clicked | Navigates to `/admin/leaderboard` with suspicious filter pre-applied | scale(0.97) press + page transition | 200ms press + 300ms transition | Button presses in; page slides |
+| "Process" CTA on GDPRQueueBadge clicked | Navigates to `/admin/users` with GDPR queue tab active | scale(0.97) press + page transition | 200ms + 300ms | Button presses in; GDPR tab is pre-selected |
+| Audit log row clicked | Navigates to full `/admin/audit` with that entry highlighted | Row scale(0.99) + page transition | 150ms + 300ms | Row briefly highlights amber before navigation |
+
+**User Management Interactions**
+
+| Interaction Trigger | Action | Animation/Transition | Duration | Visual Feedback |
+|--------------------|--------|---------------------|----------|-----------------|
+| Admin types in search bar | Table rows filter in real-time (debounced 300ms) | Rows fade out/in | ease-out-expo 200ms | Spinner appears in search bar while debounce fires |
+| "Delete User Data" button clicked | Confirmation dialog slides in from bottom with GDPR workflow detail | ease-out-expo translateY 60px → 0 | 300ms | Focus traps in dialog; background dims with overlay |
+| Deletion confirmed | Button enters loading state; success toast on completion; row updates GDPR status badge | scale(0.97) + spinner + toast slide-in | 200ms + async | "GDPR Deletion Queued" success toast appears bottom-right |
+| "Resend Access Link" clicked | Button enters loading state; success toast on success | scale(0.97) + spinner | 200ms + async | Toast: "Access link sent to {masked email}" |
+
+**Pet Management Interactions**
+
+| Interaction Trigger | Action | Animation/Transition | Duration | Visual Feedback |
+|--------------------|--------|---------------------|----------|-----------------|
+| Admin searches for pet | Table filters with debounce 300ms; skeleton shown during fetch | Rows fade out/in (ease-out-expo) | 200ms | Spinner in search bar during debounce |
+| "Ban" button clicked | Reason text field expands below row (accordion reveal); "Confirm Ban" button activates | ease-out-expo accordion open | 200ms | Reason field slides down; Confirm button activates once text entered |
+| Ban confirmed | Button loading state; row updates to "BANNED" status badge in red | scale(0.97) + spinner + badge color change | 200ms + async | Row status badge transitions to red "BANNED" |
+| Pet row expanded | Pet detail panel opens on right side showing stats, battle history, owner info | ease-out-expo slide from right (translateX 40px → 0) | 250ms | Panel overlays table partially; focus moves to panel |
+
+**Leaderboard Management Interactions**
+
+| Interaction Trigger | Action | Animation/Transition | Duration | Visual Feedback |
+|--------------------|--------|---------------------|----------|-----------------|
+| Suspicious row clicked | Right-side action panel slides in with battle timeline and action buttons | ease-out-expo translateX 40px → 0 | 250ms | Panel slides in; background row highlighted amber |
+| "Dismiss Flag" confirmed | Action panel closes; row suspicious badge removed | ease-out-expo panel slide out | 200ms | Amber badge fades out; row returns to normal background |
+| "Temporary Remove" confirmed | Action panel closes; row moves to "Removed" section with amber badge | Panel slide out + row re-sort animation | 200ms + 300ms re-sort | Row animates to removed section; status badge changes |
+| "Permanent Ban" confirmed | Action panel closes; row disappears from leaderboard | Panel slide out + row fade-out (opacity 1 → 0) | 200ms + 400ms fade | Row fades out with red flash; toast confirms action |
+| Bulk select "Clear Flags" | Selected rows' suspicious badges clear simultaneously | Simultaneous badge fade-out | 300ms | All selected badges fade; checkboxes deselect |
+
 ### §15.4 Admin UX Design Decisions
 
 1. **Audit log is read-only, immutable by design**: No edit or delete controls exist in the audit log UI — not even for Super Admins. The UI visually signals immutability with a "lock" icon in the header, a "Read Only" badge, and the absence of any row action buttons. Rationale: Audit integrity is a GDPR Article 30 compliance requirement; making deletion technically impossible at the UI layer eliminates the temptation to cover tracks.
@@ -1659,8 +1719,8 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 
 | PRD User Story | Acceptance Criteria (AC#s) | Design Sections |
 |---------------|--------------------------|-----------------|
-| US-PET-001 | AC-001-1 through AC-001-6 | §5.1, §6.1.1, §8.4 |
-| US-PET-002 | AC-002-1 through AC-002-5 | §9.1 (Rarity Colors), §9.2 |
+| US-PET-001 | AC-001-1 through AC-001-7 | §5.1, §6.1.1, §8.4 |
+| US-PET-002 | AC-002-1 through AC-002-6 | §9.1 (Rarity Colors), §9.2 |
 | US-AUTH-001 | AC-003-1 through AC-003-8 | §5.2, §4.1, §4.3, §10.2 |
 | US-AUTH-002 | AC-004-1 through AC-004-5 | §5.3, §4.2, §4.3 |
 | US-TRAIN-001 | AC-005-1 through AC-005-6 | §5.4, §6.5 (MI-03, MI-04, MI-12) |
@@ -1670,8 +1730,8 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 | US-BOARD-001 | AC-009-1 through AC-009-6 | §5.7, §3.3 |
 | US-RECORD-001 | AC-010-1 through AC-010-6 | §5.8, §10.2 |
 | US-RARITY-001 / US-PET-002 rarity | AC-002-5 | §9.1 Rarity Colors, §5.3 RarityBadge, §5.7 RarityFilter |
-| US-ADMIN-001 | AC-013-1 through AC-013-4 | §15.3 (Pet Management) |
-| US-ADMIN-002 | AC-014-1 through AC-014-3 | §15.3 Leaderboard Management, §15.4 |
+| US-ADMIN-001 | AC-013-1 through AC-013-5 | §15.3 (Pet Management) |
+| US-ADMIN-002 | AC-014-1 through AC-014-4 | §15.3 Leaderboard Management, §15.4 |
 | US-ADMIN-003 | AC-015-1 through AC-015-3 | §15.3 Arena Rate Config, §15.4 |
 | US-ADMIN-004 | AC-016-1 through AC-016-4 | §15.3 (User Management), §15.4 |
 | US-ADMIN-005 | AC-017-1 through AC-017-4 | §15.3 (Leaderboard Management), §15.4 |
