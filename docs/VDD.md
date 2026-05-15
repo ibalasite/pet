@@ -231,7 +231,7 @@ pixel-pet-arena occupies the **Pixel Art Retro-Futurism** style direction: pixel
 
 All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical hex, oklch, and WCAG contrast data.
 
-> **HSL equivalents**: HSL equivalents are provided in the §6.1 primitive-token CSS declarations as inline comments.
+> **HSL equivalents**: HSL equivalents are provided for chromatic scales (purple, teal, gold, navy, feedback) in §6.1 primitive-token CSS declarations. The achromatic grey scale uses hex-only comments since it has no meaningful hue.
 
 | Token Name | Hex | oklch | WCAG Contrast on `--color-surface-base` | Usage |
 |-----------|-----|-------|----------------------------------------|-------|
@@ -257,12 +257,12 @@ All colors inherit from PDD §9.1 and §9.4. Values below confirm the canonical 
 
 The rarity color system is the core brand differentiator. Colors are selected for maximum perceptual impact against the dark navy base, verified for WCAG AA contrast, and designed to evoke the emotional register of each tier.
 
-| Rarity Tier | Probability | Dark Hex | Light Hex | oklch (dark) | WCAG on Dark Base | Visual Treatment | CONSTANTS Reference |
-|------------|-------------|----------|-----------|--------------|-------------------|-----------------|-------------------|
-| **Common** | 60% | `#b2bec3` | `#636b72` | `oklch(72% 0.01 0)` | 7.1:1 (AAA) | Flat grey border, matte finish, no glow | `RARITY_MULTIPLIER_COMMON = 1` |
-| **Rare** | 25% | `#4ecdc4` | `#009688` | `oklch(72% 0.13 190)` | 6.8:1 (AA) | Teal border, faint outer teal glow `0 0 8px rgba(78,205,196,0.4)` | `RARITY_MULTIPLIER_RARE = 2` |
-| **Epic** | 12% | `#a29bfe` | `#6a5fe8` | `oklch(75% 0.21 280)` | 5.9:1 (AA) | Purple border, animated shimmer sweep `epic-shimmer 3s linear infinite` | `RARITY_MULTIPLIER_EPIC = 4` |
-| **Legendary** | 3% | `#fdcb6e` | `#b07e00` | `oklch(85% 0.15 82)` | 8.4:1 (AAA) | Gold border, CRT glow `0 0 24px rgba(253,203,110,0.5)`, animated shimmer `legendary-shimmer 2s ease-in-out infinite` | `RARITY_MULTIPLIER_LEGENDARY = 8` |
+| Rarity Tier | Probability | Dark Hex | Light Hex | oklch (dark) | oklch (light) | WCAG on Dark Base | Visual Treatment | CONSTANTS Reference |
+|------------|-------------|----------|-----------|--------------|---------------|-------------------|-----------------|-------------------|
+| **Common** | 60% | `#b2bec3` | `#636b72` | `oklch(72% 0.01 0)` | `oklch(46% 0.01 200)` | 7.1:1 (AAA) | Flat grey border, matte finish, no glow | `RARITY_MULTIPLIER_COMMON = 1` |
+| **Rare** | 25% | `#4ecdc4` | `#009688` | `oklch(72% 0.13 190)` | `oklch(57% 0.13 190)` | 6.8:1 (AA) | Teal border, faint outer teal glow `0 0 8px rgba(78,205,196,0.4)` | `RARITY_MULTIPLIER_RARE = 2` |
+| **Epic** | 12% | `#a29bfe` | `#6a5fe8` | `oklch(75% 0.21 280)` | `oklch(52% 0.21 280)` | 5.9:1 (AA) | Purple border, animated shimmer sweep `epic-shimmer 3s linear infinite` | `RARITY_MULTIPLIER_EPIC = 4` |
+| **Legendary** | 3% | `#fdcb6e` | `#b07e00` | `oklch(85% 0.15 82)` | `oklch(58% 0.15 82)` | 8.4:1 (AAA) | Gold border, CRT glow `0 0 24px rgba(253,203,110,0.5)`, animated shimmer `legendary-shimmer 2s ease-in-out infinite` | `RARITY_MULTIPLIER_LEGENDARY = 8` |
 
 **Rarity animation specifications**:
 
