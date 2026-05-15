@@ -509,9 +509,9 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-gold-700: oklch(55% 0.17 82);     /* #c49900 — hsl(46, 100%, 38%) */
 
 /* Feedback / Status Color Primitives */
---primitive-orange-400: oklch(70% 0.17 40); /* #e8a87c — Warning */
---primitive-red-400: oklch(72% 0.2 25); /* #e87c7c — Error */
---primitive-blue-400: oklch(72% 0.15 240); /* #7cb4e8 — Info */
+--primitive-orange-400: oklch(70% 0.17 40);  /* #e8a87c — hsl(26, 68%, 70%) — Warning */
+--primitive-red-400: oklch(72% 0.2 25);      /* #e87c7c — hsl(0, 65%, 70%) — Error */
+--primitive-blue-400: oklch(72% 0.15 240);   /* #7cb4e8 — hsl(210, 65%, 70%) — Info */
 
 /* Navy Scale */
 --primitive-navy-900: oklch(12% 0.04 280);    /* #1a1a2e — hsl(256, 30%, 18%) — Surface base */
@@ -818,7 +818,7 @@ All `--text-*` CSS custom properties declared above map directly to the §5.2 ty
    COMPONENT: Button (Primary)
    ============================================= */
 --button-primary-bg: var(--color-brand-primary);
---button-primary-text: var(--color-text-primary);
+--button-primary-text: var(--color-neutral-50);         /* #f9fafb — 4.72:1 ✓ AA */
 --button-primary-hover-bg: var(--color-brand-primary-light);
 --button-primary-active-bg: var(--color-brand-primary-dark);
 --button-primary-disabled-bg: var(--primitive-grey-400);
@@ -979,7 +979,7 @@ The following component-level token names extend PDD §9.3. Where VDD uses a mor
 | Token | Old Value (PDD §9.3) | New Value (VDD) | Effective Duration | Reason |
 |-------|---------------------|----------------|-------------------|--------|
 | `--duration-celebration` | `var(--primitive-duration-slow)` (600ms) | `var(--primitive-duration-celebration)` (1200ms) | 1200ms | Celebration animations (claim success, rarity reveal) need 1200ms for full pixel-art sequence; original 600ms was insufficient for 8-frame sprite celebration sequence |
-| `--button-primary-text` | `var(--color-neutral-50)` (#f9fafb) | `var(--color-text-primary)` (#e8e8f0) | — | Unified with semantic text-primary to ensure consistent brand tone across button and body text; contrast ratio maintained at 3.51:1 (see §9.1 for design review note) |
+| `--button-primary-text` | `var(--color-neutral-50)` (#f9fafb) | `var(--color-neutral-50)` (#f9fafb) | — | Reverted to PDD §9.3 canonical value — achieves 4.72:1 ✓ AA (prior drift to `var(--color-text-primary)` failed WCAG AA at 3.51:1; resolved in Review Round 2) |
 
 EDD authors must use the VDD token names in the left column. The PDD §9.3 names are deprecated at the component level and retained only as backward-compatible aliases.
 
@@ -1476,7 +1476,7 @@ Active only when `DAU_MARKETPLACE_TRIGGER = 1000` users sustained for 2 weeks (p
 | Body text | `--color-text-primary` on `--color-surface-base` | `#e8e8f0` | `#1a1a2e` | **12.4:1** | AAA | Primary reading text |
 | Secondary text | `--color-text-secondary` on `--color-surface-base` | `#6c6c9a` | `#1a1a2e` | **4.7:1** | AA | Descriptions, metadata |
 | Disabled text | `--color-text-disabled` on `--color-surface-base` | `#4a4a6a` | `#1a1a2e` | **3.1:1** | AA Large | Large text / non-text minimum |
-| Brand primary (button text) | `--color-text-primary` on `--color-brand-primary` | `#e8e8f0` | `#6c5ce7` | **3.51:1** | AA non-text only — WCAG 1.4.11 | Button label on purple — requires design review before production. **Resolution**: Use `--color-neutral-50` (#f9fafb) instead of `--color-text-primary` for button text on brand-primary background → achieves 4.72:1 ✓ AA. Update `--button-primary-text` to `var(--color-neutral-50)` or override at component level. |
+| Brand primary (button text) | `--button-primary-text` on `--color-brand-primary` | `#f9fafb` | `#6c5ce7` | **4.72:1** | ✓ AA | Button label on purple — **FIXED** in Review Round 2: `--button-primary-text` declared as `var(--color-neutral-50)` (#f9fafb); prior drift to `var(--color-text-primary)` (#e8e8f0, 3.51:1) failed WCAG AA and has been reverted. |
 | Common rarity label | `--color-rarity-common` on `--color-surface-base` | `#b2bec3` | `#1a1a2e` | **7.1:1** | AAA | Rarity badge text |
 | Rare rarity label | `--color-rarity-rare` on `--color-surface-base` | `#4ecdc4` | `#1a1a2e` | **6.8:1** | AA | Rarity badge text |
 | Epic rarity label | `--color-rarity-epic` on `--color-surface-base` | `#a29bfe` | `#1a1a2e` | **5.9:1** | AA | Rarity badge text |
