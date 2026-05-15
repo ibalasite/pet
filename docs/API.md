@@ -1183,6 +1183,13 @@ Create a new listing. Min price formula: `(pet_level * 100) + (rarity_multiplier
 }
 ```
 
+| Field | Type | Description |
+|-------|------|-------------|
+| `listingId` | UUID | Unique identifier for the created marketplace listing |
+| `petId` | UUID | UUID of the pet being listed for sale |
+| `price` | integer | Asking price in bronze coins |
+| `listedAt` | string (ISO 8601) | Timestamp when the listing was created |
+
 #### `DELETE /api/v1/marketplace/listings/:listingId`
 
 Cancel an active listing. Only the listing's owner may cancel.
@@ -1237,6 +1244,15 @@ Purchase a listing. A **5% platform fee** (`trade_transaction_fee_percent = 5`) 
   "error": null
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `transactionId` | UUID | Unique identifier for the completed trade |
+| `petId` | UUID | UUID of the traded pet |
+| `price` | integer | Gross transaction price in bronze coins |
+| `platformFee` | integer | Platform fee deducted (5% of price) |
+| `sellerProceeds` | integer | Amount credited to seller (price minus platformFee) |
+| `tradedAt` | string (ISO 8601) | Timestamp when the trade completed |
 
 #### `GET /api/v1/marketplace/history/:petId`
 
@@ -1381,6 +1397,11 @@ Completes TOTP enrollment for a first-time admin login. Requires the short-lived
 }
 ```
 
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `setupToken` | string | Yes | Short-lived signed JWT from the 403 login error `details.setupToken`; expires in 15 minutes |
+| `password` | string | Yes | Admin password for re-confirmation before TOTP enrollment |
+
 **Response (HTTP 200):**
 
 ```json
@@ -1458,6 +1479,10 @@ Verifies a TOTP code against the current admin's secret. Used for step-up authen
   "totpCode": "482917"
 }
 ```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `totpCode` | string | Yes | 6-digit TOTP code from authenticator app |
 
 **Response (HTTP 200):**
 
