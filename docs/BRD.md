@@ -28,6 +28,8 @@
 |------|------|------|---------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc brd) | 初稿（依 IDEA-PIXEL-PET-ARENA-20260503 自動生成）|
 
+此文件追蹤所有對業務需求、範圍決策及利害關係人承諾的重大異動。版本號遞增代表範圍變更，下游文件（PRD、PDD、EDD）需同步評估影響並更新對應章節。
+
 ---
 
 ## §0 背景研究（Market Intelligence Summary）
@@ -278,7 +280,7 @@ graph TD
 
 - ❌ **硬核 RPG / MMORPG 玩家**（原因：對養成深度和戰鬥機制複雜性要求遠超 MVP 範圍；已有 WoW、FF14 等專業選擇）
 - ❌ **P2E 區塊鏈遊戲玩家**（原因：需要錢包 + 鏈上資產，技術門檻高且與「無帳號」核心理念衝突；本產品聚焦娛樂而非投機）
-- ❌ **12 歲以下兒童（主要目標族群）**（原因：Email 認領機制需要基本 email 使用能力；COPPA 法規要求兒童數據特殊處理，MVP 階段暫不優化此群體）
+- ❌ **未滿13歲 (under 13) 兒童（主要目標族群）**（原因：Email 認領機制需要基本 email 使用能力；COPPA 法規禁止收集未滿13歲兒童個人資料，MVP 階段暫不優化此群體）
 
 ### 4.4 RACI Matrix
 
@@ -359,13 +361,13 @@ pixel-pet-arena 以「Email 認領制的程序化像素寵物養成競技平台�
 | 基礎訓練 / 喂食系統 | **Must Have** | O1, O2 | 驅動 Day-7 回訪；缺少此功能玩家認領後沒有持續動力 |
 | 競技場基礎對戰（跑步賽）| **Must Have** | O2 | 競技社交動力是留存核心；缺少此功能排行榜缺乏內容 |
 | 全服排行榜 | **Must Have** | O2, O4 | 社交展示動力；缺少此功能競技無意義，口碑傳播缺少載體 |
-| 戰績記錄頁面（可分享 URL）| **Should Have** | O4 | 高價值口碑傳播機制；不阻擋上線但對社群增長關鍵 |
+| 戰績記錄頁面（可分享 URL）| **Must Have** | O4 | 高價值口碑傳播機制；§5.3 In Scope 明確列為 MVP Must Have；PRD §4.5 P0 升級確認 |
 | 程序化像素寵物稀有度評分（Common/Rare/Epic/Legendary）| **Should Have** | O4 | 強化收藏驅動力；不阻擋上線但影響口碑傳播質量 |
 | 第 2 種競技模式（相撲擂台）| **Could Have** | O2, O5 | 在第 1 種模式驗證後擴展，降低玩家疲勞 |
 | 寵物交易市場 | **Won't Have（本版）** | O5 | 需 DAU > 1,000 才有成交量；MVP 先驗證留存 |
 | 付費道具 / 稀有寵物直售 | **Won't Have（本版）** | O5 | 留存驗證前不引入付費摩擦 |
 
-> Must Have 功能評估：5 個 Must Have 功能（訪客互動 + email 認領 + 訓練系統 + 競技場 + 排行榜）估計佔開發容量約 55%，符合 ≤60% 原則，保留緩衝。
+> Must Have 功能評估：6 個 Must Have 功能（訪客互動 + email 認領 + 訓練系統 + 競技場 + 排行榜 + 戰績記錄頁面）估計佔開發容量約 60%，符合 ≤60% 原則。
 
 ---
 
@@ -487,7 +489,7 @@ Input（我們可控的行動）
 |------|------|------|
 | 預算上限：$40,000（MVP 開發）| 硬性 | 影響功能範圍（僅做 5 個 Must Have 功能）|
 | 上線期限：2026 年 Q3（建議 BRD 確認後 4 個月內上線）| 軟性 | 影響技術選型複雜度（優先選成熟框架）|
-| 合規要求：GDPR / CAN-SPAM / COPPA | 硬性 | 影響 email 數據處理方式；12 歲以下兒童排除 |
+| 合規要求：GDPR / CAN-SPAM / COPPA | 硬性 | 影響 email 數據處理方式；未滿13歲 (under 13) 兒童排除 |
 | 品牌規範：像素藝術風格（pixel art）| 軟性 | 影響所有 UI 設計決策 |
 | 技術平台：HTML5 瀏覽器端（無需安裝）| 硬性 | 影響前端技術選型（Canvas / Phaser.js）|
 
@@ -549,6 +551,18 @@ Input（我們可控的行動）
 | email 模板合規審查 | MVP 開發前 | Legal + Engineering | PENDING |
 | GDPR 用戶刪除流程驗證 | MVP 上線前 | Engineering + Legal | PENDING |
 
+### 9.4 Compliance Implementation Checklist（合規實施查核清單）
+
+下列項目為 GA 上線前必須完成的合規行動，由 Legal 與 Engineering 共同驗收：
+
+- [ ] **年齡確認機制（Age Gate）**：認領流程加入「我已年滿 13 歲」checkbox，未勾選者無法提交 email
+- [ ] **隱私政策公開**：隱私政策頁面（Privacy Policy）上線，說明 email 收集目的、保留期限及用戶刪除權
+- [ ] **Cookie 同意橫幅（Cookie Consent Banner）**：EU 用戶首次訪問時顯示 Cookie 說明並取得同意
+- [ ] **GDPR 刪除端點（Erasure Endpoint）**：`DELETE /api/auth/me` 端點實作完成，支援用戶自助請求 email 刪除（7 日內執行軟刪除）
+- [ ] **資料保留自動化（Data Retention Automation）**：認領 token 過期後 72 小時自動物理刪除；系統日誌 30/90 日自動歸檔
+- [ ] **COPPA 家長同意機制（若範圍擴展至未滿 13 歲）**：若未來產品範圍調整納入未滿 13 歲用戶，需在上線前完成家長同意（Verifiable Parental Consent）流程設計與法務審查
+- [ ] **電子郵件合規審查**：所有 transactional email 模板通過 CAN-SPAM 合規審查（發件人真實、主旨說明、opt-out 連結）
+
 ### 9.5 Data Governance & Lifecycle Management（資料治理與生命週期管理）
 
 | 資料類型 | 資料擁有人 | 保留期限 | 存取控制政策 | 刪除程序 | 稽核需求 |
@@ -609,7 +623,7 @@ Input（我們可控的行動）
 
 | 要素 | 內容 |
 |------|------|
-| **收入來源（Revenue Streams）** | 主要（v2）：寵物交易市場手續費（每筆成交 5-10%）<br>次要（v2）：稀有/限定寵物直售（$0.99–$4.99）<br>三級（v3 考慮）：廣告（eCPM $1-3，低優先，避免破壞遊戲體驗）|
+| **收入來源（Revenue Streams）** | 主要（v2）：寵物交易市場手續費（每筆成交 5%，當前實作值；見 CONSTANTS: TRADE_TRANSACTION_FEE_PERCENT = 5%。5–10% 區間保留供 Phase 3 定價評審使用）<br>次要（v2）：稀有/限定寵物直售（$0.99–$4.99）<br>三級（v3 考慮）：廣告（eCPM $1-3，低優先，避免破壞遊戲體驗）|
 | **定價策略** | Freemium：基礎功能完全免費（訪客互動 + email 認領 + 訓練 + 競技場 + 排行榜）；交易市場抽成；稀有寵物直售 |
 | **成本結構（Cost Structure）** | 伺服器（Vercel + Supabase + Railway）：~$50-200/月（DAU 5k 以下）；Email 發送（SendGrid）：~$20/月（10,000 封以下）；開發人力（主要成本）：$40K 初期 + $8K/年維護；固定成本 30% vs 變動成本 70% |
 | **核心資源（Key Resources）** | 程序化像素寵物生成演算法（獨特競爭壁壘）；玩家社群與排行榜數據（網路效應）；email 認領用戶庫（低成本觸達渠道）|
@@ -691,7 +705,7 @@ timeline
 |---|---------|------|---------|---------|--------|---------|
 | D1 | 2026-05-03 | 是否在 MVP 包含寵物交易市場 | MVP 不包含交易市場，推遲至 DAU > 1,000 後引入 | 空洞市場無成交量；先驗證留存 Loop 比引入交易更重要；避免功能蔓延 | PM | §5.3 範圍、§3.1 O5 目標時程 |
 | D2 | 2026-05-03 | Email 認領機制：Magic Link vs. 密碼信 | 採用「密碼信」模式（6 位數字密碼手動輸入）而非直接 Magic Link | Email client 預掃描問題（Gmail/Outlook）會導致 Magic Link 提前失效，破壞用戶體驗 | Engineering Lead（待確認）| §5.5 auth BC 設計、EDD auth 選型 |
-| D3 | 2026-05-03 | 是否支援 12 歲以下兒童 | MVP 明確排除 12 歲以下兒童為主要目標族群 | COPPA 法規要求特殊處理；email 認領需基本 email 使用能力；MVP 資源有限 | PM + Legal（待確認）| §4.3 Not Our Users、§9.1 COPPA 合規 |
+| D3 | 2026-05-03 | 是否支援未滿13歲 (under 13) 兒童 | MVP 明確排除未滿13歲 (under 13) 兒童為主要目標族群 | COPPA 法規禁止收集未滿13歲兒童個人資料（含 email）；email 認領需基本 email 使用能力；MVP 資源有限 | PM + Legal（待確認）| §4.3 Not Our Users、§9.1 COPPA 合規 |
 
 ---
 
