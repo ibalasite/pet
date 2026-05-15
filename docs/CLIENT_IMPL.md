@@ -27,6 +27,8 @@
 
 ## Change Log
 
+This change log tracks all versioned revisions to the CLIENT_IMPL specification for the pixel-pet-arena player application. Each entry notes the scope of changes made during the gendoc review cycle.
+
 | Version | Date | Author | Change Summary |
 |---------|------|--------|----------------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc CLIENT_IMPL) | Initial draft |
@@ -159,7 +161,10 @@ pixel-pet-arena/                         ← monorepo root
             │   │   └── MarketplacePage.tsx
             │   └── canvas/
             │       ├── PetCanvas.tsx    ← React host div; manages Phaser lifecycle
-            │       └── PetCanvasEngine.ts  ← SOLE Phaser import boundary
+            │       ├── PetCanvasEngine.ts  ← SOLE Phaser import boundary
+            │       └── scenes/
+            │           ├── PetIdleScene.ts      ← Phaser scene: idle sprite loop
+            │           └── ArenaBattleScene.ts  ← Phaser scene: battle animation
             ├── hooks/
             │   ├── usePet.ts            ← TanStack Query: GET /api/v1/pets/:petId
             │   ├── useLeaderboard.ts    ← TanStack Query + refetchInterval: 30_000
@@ -175,7 +180,8 @@ pixel-pet-arena/                         ← monorepo root
             │   ├── apiClient.ts         ← Axios instance; Bearer token interceptor
             │   ├── tokenStorage.ts      ← getPetToken / setPetToken / clearPetToken
             │   ├── petGeneration.ts     ← seed → AttributeVector (deterministic, 6 dims)
-            │   └── spriteLoader.ts      ← Phaser preload helper utilities
+            │   ├── spriteLoader.ts      ← Phaser preload helper utilities
+            │   └── phaserBridge.ts      ← mitt singleton bridge (§5.5)
             ├── schemas/
             │   ├── pet.ts               ← Zod schema: PetResponse
             │   ├── claim.ts             ← Zod schema: ClaimResponse, VerifyResponse
@@ -410,7 +416,7 @@ Sprite sheets are served from Vercel's CDN `/public/sprites/` directory and are 
 Each Phaser-hosted React component (`PetCanvas.tsx`, `ArenaScene.tsx`) creates its own `Phaser.Game` instance via `PetCanvasEngine.ts`. The configuration object must follow the shape below:
 
 ```typescript
-// src/canvas/PetCanvasEngine.ts
+// src/components/canvas/PetCanvasEngine.ts
 import Phaser from 'phaser';
 import { PetIdleScene } from './scenes/PetIdleScene';
 
@@ -431,7 +437,7 @@ export function createPetGame(parent: HTMLElement): Phaser.Game {
   return new Phaser.Game(config);
 }
 
-// src/arena/ArenaScene.tsx — separate game instance for battle canvas
+// src/components/arena/ArenaScene.tsx — separate game instance for battle canvas
 import { ArenaBattleScene } from './scenes/ArenaBattleScene';
 
 export function createArenaGame(parent: HTMLElement): Phaser.Game {
