@@ -519,10 +519,10 @@ This section extends and canonicalizes PDD §9.3. All tokens here are the author
 --primitive-navy-700: oklch(22% 0.07 280);    /* #2d2d5a — hsl(240, 33%, 26%) — Surface overlay */
 --primitive-navy-600: oklch(28% 0.06 280);    /* #3a3a6e — hsl(240, 30%, 33%) — Hover surfaces */
 --primitive-navy-shadow: oklch(8% 0.02 280);  /* #0d0d1a — hsl(258, 25%, 10%) — deep shadow / near-black navy (PDD §9.1) */
---primitive-navy-text-secondary: oklch(60% 0.04 280); /* #6c6c9a */
---primitive-navy-text-disabled: oklch(40% 0.04 280); /* #4a4a6a */
---primitive-navy-border-default: oklch(32% 0.05 280); /* #35355c */
---primitive-navy-border-strong: oklch(45% 0.06 280); /* #4d4d7a */
+--primitive-navy-text-secondary: oklch(60% 0.04 280); /* #6c6c9a — hsl(240, 18%, 52%) */
+--primitive-navy-text-disabled: oklch(40% 0.04 280); /* #4a4a6a — hsl(240, 18%, 36%) */
+--primitive-navy-border-default: oklch(32% 0.05 280); /* #35355c — hsl(240, 26%, 28%) */
+--primitive-navy-border-strong: oklch(45% 0.06 280); /* #4d4d7a — hsl(240, 22%, 39%) */
 
 /* Light Mode Surface Primitives */
 --primitive-light-surface-base: #f8f8fc;
@@ -1488,7 +1488,7 @@ Active only when `DAU_MARKETPLACE_TRIGGER = 1000` users sustained for 2 weeks (p
 | Focus ring vs primary | `--color-focus` on `--color-brand-primary` | `#ffd700` | `#6c5ce7` | **4.2:1** | AA | Focus on active button |
 | Text on raised surface | `--color-text-primary` on `--color-surface-raised` | `#e8e8f0` | `#242444` | **11.1:1** | AAA | Text on cards/modals |
 
-> **Design Review Required**: Two pairings in the table above have contrast ratios below WCAG AA (4.5:1 for normal text): "Brand primary (button text)" at 3.51:1 and "Warning banner text" at 2.59:1. Both must undergo design review and remediation before production launch.
+> **Design Review Required**: One pairing in the table above has a contrast ratio below WCAG AA (4.5:1 for normal text): "Warning banner text" at 2.59:1. This must undergo design review and remediation before production launch.
 
 ### §9.2 Focus Style Specifications
 
