@@ -1838,7 +1838,6 @@ Data overview screen for analysts and super admins to track platform KPIs. Key U
 | US-RECORD-001 | AC-010-1 through AC-010-6 | §5.8, §10.2 |
 | US-RARITY-001 | AC-011-1 through AC-011-4 | §9.1 Color Palette, §5.3 RarityBadge, §5.7 RarityFilter |
 | US-TRADE-001 | AC-012-1 through AC-012-5 | §5.9 Marketplace Page, §4.2 Alternative Flows |
-| US-PET-002 rarity | AC-002-5 | §9.1 Rarity Colors, §5.3 RarityBadge, §5.7 RarityFilter |
 | US-ADMIN-001 | AC-013-1 through AC-013-5 | §15.3 (Pet Management) |
 | US-ADMIN-002 | AC-014-1 through AC-014-4 | §15.3 Leaderboard Management, §15.4 |
 | US-ADMIN-003 | AC-015-1 through AC-015-3 | §15.3 Arena Rate Config, §15.4 |
