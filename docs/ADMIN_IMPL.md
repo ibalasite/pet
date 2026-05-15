@@ -1540,3 +1540,178 @@ All CUD operations write to `admin_audit_log`:
 | 12 | §6.1 main layout: ASCII diagram maintains three-zone structure (Header / Sidebar / Content); §6.1 narrative covers HeaderBar / SidebarMenu / BreadCrumb / Content | ✅ |
 | 13 | §5.1 permission table one-to-one maps to API.md §6 `/admin/api/*` endpoint Role Access | ✅ |
 | 14 | All constants cited in `(constant_name = value)` format consistent with CLIENT_IMPL.md style | ✅ |
+
+---
+
+## §18 雙因子認證（2FA）登入流程骨架
+
+> `has_admin_backend = true`；admin_users 含 `totp_secret_encrypted` → TOTP MFA 強制兩步驟驗證。
+> 前端框架：Vue 3.4 + Composition API；API 端點取自 API.md §6.1 Admin Authentication。
+
+### §18.1 兩步驟登入架構
+
+```
+Step 1 — 帳密驗證：
+  POST /admin/api/auth/login
+  Request:  { username: string, password: string }
+  Response 200 (密碼正確，等待 TOTP):
+    { step: '2fa_required', message: 'Enter TOTP code' }
+    + Set-Cookie: admin_session (httpOnly, Secure, SameSite=Strict) [partial]
+  Response 403 (首次登入，未設定 TOTP):
+    { error: { code: 'TOTP_SETUP_REQUIRED', setupToken: '<short-lived JWT>' } }
+  Response 401: INVALID_CREDENTIALS
+  Response 423: ACCOUNT_LOCKED (10 failures → 30min lockout)
+
+Step 2 — TOTP 驗證：
+  POST /admin/api/auth/totp/verify
+  Request:  { totpCode: string }  (6-digit RFC 6238, 30s window)
+  Cookie:   admin_session (partial session from Step 1)
+  Response 200: { message: 'Login successful' }
+    + Upgrade admin_session cookie to fully authenticated
+  Response 401: INVALID_TOTP_CODE
+  Response 401: TOTP_TOKEN_EXPIRED
+
+First-login TOTP Enrollment (after TOTP_SETUP_REQUIRED):
+  POST /admin/api/auth/totp/setup
+  Request:  Authorization: Bearer <setupToken>
+  Response 200: { qrUri: 'otpauth://totp/...', secret: '<base32>' }
+  → Admin scans QR → enters TOTP → calls /admin/api/auth/totp/verify to complete enrollment
+```
+
+### §18.2 前端骨架（Vue 3 Composition API）
+
+```typescript
+// src/views/auth/LoginView.vue — <script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAdminAuthStore } from '@/stores/authStore'
+import { adminApi } from '@/api/admin'
+
+const router = useRouter()
+const authStore = useAdminAuthStore()
+
+type LoginStep = 'password' | 'totp' | 'totp_setup'
+const step = ref<LoginStep>('password')
+const username = ref('')
+const password = ref('')
+const totpCode = ref('')
+const setupToken = ref('')
+const qrUri = ref('')
+const error = ref('')
+const loading = ref(false)
+
+async function submitPassword(): Promise<void> {
+  loading.value = true
+  error.value = ''
+  try {
+    const { data } = await adminApi.post('/admin/api/auth/login', {
+      username: username.value,
+      password: password.value,
+    })
+    if (data.step === '2fa_required') {
+      step.value = 'totp'
+    }
+  } catch (err: any) {
+    const code = err.response?.data?.error?.code
+    if (code === 'TOTP_SETUP_REQUIRED') {
+      setupToken.value = err.response.data.error.setupToken
+      await initTotpSetup()
+    } else if (code === 'ACCOUNT_LOCKED') {
+      error.value = 'Account locked for 30 minutes (10 failed attempts)'
+    } else {
+      error.value = 'Invalid username or password'
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+async function initTotpSetup(): Promise<void> {
+  const { data } = await adminApi.post(
+    '/admin/api/auth/totp/setup',
+    {},
+    { headers: { Authorization: `Bearer ${setupToken.value}` } }
+  )
+  qrUri.value = data.qrUri
+  step.value = 'totp_setup'
+}
+
+async function submitTotp(): Promise<void> {
+  loading.value = true
+  error.value = ''
+  try {
+    await adminApi.post('/admin/api/auth/totp/verify', { totpCode: totpCode.value })
+    authStore.setAuthenticated(true)
+    router.push('/admin/dashboard')
+  } catch (err: any) {
+    const code = err.response?.data?.error?.code
+    error.value = code === 'TOTP_TOKEN_EXPIRED'
+      ? 'TOTP code expired — please try again'
+      : 'Invalid TOTP code'
+  } finally {
+    loading.value = false
+  }
+}
+```
+
+### §18.3 Session Refresh（axios interceptor）
+
+```typescript
+// src/api/admin.ts
+import axios from 'axios'
+import router from '@/router'
+
+export const adminApi = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true, // httpOnly session cookie
+})
+
+adminApi.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const status = error.response?.status
+    const code = error.response?.data?.error?.code
+
+    if (status === 401 && code === 'SESSION_EXPIRED' && !error.config._retry) {
+      error.config._retry = true
+      try {
+        // Session cookie is httpOnly — no explicit token in JS
+        // If server supports refresh: POST /admin/api/auth/refresh
+        // Otherwise: redirect to login
+        router.push('/admin/login')
+      } catch {
+        router.push('/admin/login')
+      }
+    }
+
+    if (status === 403 && !error.config.url?.includes('/auth/')) {
+      router.push('/admin/403')
+    }
+
+    return Promise.reject(error)
+  }
+)
+```
+
+### §18.4 Account Lockout UX
+
+```typescript
+// Lockout detection + countdown display
+const lockoutUntil = ref<Date | null>(null)
+const lockoutRemaining = ref(0)
+
+function handleLockout(resetAtIso: string): void {
+  lockoutUntil.value = new Date(resetAtIso)
+  const interval = setInterval(() => {
+    const remaining = Math.ceil((lockoutUntil.value!.getTime() - Date.now()) / 1000)
+    if (remaining <= 0) {
+      lockoutRemaining.value = 0
+      lockoutUntil.value = null
+      clearInterval(interval)
+    } else {
+      lockoutRemaining.value = remaining
+    }
+  }, 1000)
+}
+// Template: <span v-if="lockoutRemaining > 0">Locked — {{ lockoutRemaining }}s remaining</span>
+```
