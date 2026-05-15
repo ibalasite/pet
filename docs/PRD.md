@@ -371,6 +371,7 @@ graph TD
 | AC-001-4 | Given a guest visitor refreshes the page, a different pet is generated (not the previously displayed pet) | E2E |
 | AC-001-5 | Given reduced motion is enabled in the OS, the pet's idle animation is suppressed or reduced to a static sprite | Accessibility |
 | AC-001-6 | Given the pet is rendered, the canvas pixel art renders with `image-rendering: pixelated` CSS property ensuring crisp pixel edges at all zoom levels | Visual Regression |
+| AC-001-7 | **Error Path**: Given the pixel pet canvas fails to render within 3 seconds (WebGL unavailable, asset load timeout, or Phaser.js initialization error), a static fallback pet image is displayed with the message "Having trouble loading? Try refreshing the page"; the "Claim This Pet" CTA button remains accessible and functional. *(Test Type: E2E + Integration)* | E2E + Integration |
 
 ---
 
@@ -393,6 +394,7 @@ graph TD
 | AC-002-3 | Given a new pet claim, the system checks the pet_seed against existing seeds in the database and regenerates if a collision is detected | Integration |
 | AC-002-4 | Given 10,000 generated pets in a test run, no two pets share the same seed value (uniqueness guarantee) | Integration |
 | AC-002-5 | Given a generated pet, the rarity is assigned probabilistically: Common 60%, Rare 25%, Epic 12%, Legendary 3% | Unit |
+| AC-002-6 | **Boundary**: Given the system cannot generate a unique `pet_seed` after 3 consecutive collision-retry attempts, the API returns HTTP 503 with body `{"error": "generation_exhausted", "message": "Unable to generate a unique pet. Please try again."}` and logs the failure for engineering review. *(Test Type: Unit)* | Unit |
 
 ---
 
@@ -417,10 +419,10 @@ graph TD
 
 | AC# | Criterion | Test Type |
 |-----|-----------|-----------|
-| AC-003-1 | Given a guest is interacting with a pet, a "Claim This Pet" CTA is visible without obscuring the main interaction area | Visual Regression |
+| AC-003-1 | Given a guest is interacting with a pet, a "Claim This Pet" CTA is visible and does not overlap the pet canvas bounding box (verified by screenshot pixel comparison); fully visible without scrolling on viewport heights ≥ 568px | Visual Regression |
 | AC-003-2 | Given the user submits a valid email address, the system sends a claim email within 60 seconds containing a 6-digit numeric password (not a clickable magic link) | Integration |
 | AC-003-3 | Given the user enters the 6-digit password on the claim page, the pet is permanently bound to their email and a unique pet URL is generated and displayed | E2E |
-| AC-003-4 | Given the claim password, it expires after 15 minutes from generation, and any attempt to use an expired password causes the system to display the error message: "Claim code has expired. Please request a new claim link." and provides a button to trigger a new claim email | Unit + E2E |
+| AC-003-4 | Given the claim password, it expires after 15 minutes from generation, and any attempt to use an expired password causes the system to display the error message: "Claim password has expired. Please request a new claim link." and provides a button to trigger a new claim email | Unit + E2E |
 | AC-003-5 | Given a claim password is used successfully, it is immediately marked as used and cannot be reused (one-time token enforcement) | Unit |
 | AC-003-6 | Given any email address is submitted (whether it exists in the system or not), the API response is identical: "If this email is valid, you will receive a claim password" (prevents email enumeration attacks) | Security |
 | AC-003-7 | Given the user clicks the unique pet URL on any device or browser, they are taken directly to their pet page without needing to re-enter credentials | E2E |
@@ -684,6 +686,7 @@ graph TD
 | AC-013-2 | Given an admin selects a pet, they can ban it from arena participation with a reason; the ban is logged with admin ID, timestamp, and reason | E2E |
 | AC-013-3 | Given an admin bans a pet, it is immediately removed from the leaderboard and cannot enter arena matches | Integration |
 | AC-013-4 | Given an admin searches by pet ID or email, results return within 2 seconds for up to 1 million records | Performance |
+| AC-013-5 | **Error Path**: Given an admin attempts to ban a pet and the database write fails (DB error or network timeout), the UI displays "Ban action failed — please try again" toast and the pet remains in its previous (unbanned) state; no partial state change occurs. *(Test Type: Integration)* | Integration |
 
 ---
 
@@ -704,6 +707,7 @@ graph TD
 | AC-014-1 | Given the leaderboard management section, an admin can view all top 500 pets with their hourly battle counts, flagging any pet with >50 battles/hour as suspicious | E2E |
 | AC-014-2 | Given a suspicious pet, an admin can remove it from the leaderboard temporarily (pending review) or permanently (ban) | E2E |
 | AC-014-3 | Given a leaderboard removal action, it takes effect within 5 minutes and is reflected on the public leaderboard | Integration |
+| AC-014-4 | **Error Path**: Given an admin attempts to remove a leaderboard entry and the operation fails (Redis/DB unavailable), the UI displays "Removal failed — please try again" and the entry remains on the leaderboard with no partial state change. *(Test Type: Integration)* | Integration |
 
 ---
 
@@ -746,11 +750,11 @@ flowchart TD
     J --> H
     I -->|Yes| K[System generates 6-digit password + unique pet URL token]
     K --> L[Claim password email sent via SendGrid within 60s]
-    L --> M[Page shows: 'Check your email for your claim code']
-    M --> N[User receives email with 6-digit code]
-    N --> O[User enters 6-digit code in claim form]
+    L --> M[Page shows: 'Check your email for your claim password']
+    M --> N[User receives email with 6-digit claim password]
+    N --> O[User enters 6-digit claim password in claim form]
     O --> P{Code valid and not expired?}
-    P -->|Expired or invalid| Q[Error: 'Code expired. Request a new one.']
+    P -->|Expired or invalid| Q[Error: 'Claim password expired. Request a new one.']
     Q --> H
     P -->|Valid| R[Pet ownership bound to email; unique URL displayed]
     R --> S[Redirect to pet management page via unique URL]
@@ -814,8 +818,8 @@ stateDiagram-v2
     Generated --> Expired : Page refresh without claim (new pet generated)
     Interacted --> ClaimPending : Guest clicks 'Claim This Pet'
     ClaimPending --> ClaimPending : Password email sent; awaiting code entry
-    ClaimPending --> Claimed : Valid 6-digit code entered within 15 min
-    ClaimPending --> Expired : Claim code expires (>15 min); pet recyclable
+    ClaimPending --> Claimed : Valid 6-digit claim password entered within 15 min
+    ClaimPending --> Expired : Claim password expires (>15 min); pet recyclable
     Claimed --> Active : Owner returns via unique URL
     Active --> Training : Owner performs training action
     Training --> Active : Training complete; stats updated
@@ -835,11 +839,11 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Generated : Guest clicks "Claim This Pet"; 6-digit code created + expiry set (T+15min)
+    [*] --> Generated : Guest clicks "Claim This Pet"; 6-digit claim password created + expiry set (T+15min)
     Generated --> EmailSent : SendGrid/SMTP delivers claim email to guest
     Generated --> EmailFailed : Email delivery fails (bounce or API error); token remains valid for retry
     EmailFailed --> EmailSent : Guest retries after 60s cooldown; new delivery attempt succeeds
-    EmailSent --> Used : Guest enters correct 6-digit code within 15 minutes; pet ownership bound
+    EmailSent --> Used : Guest enters correct 6-digit claim password within 15 minutes; pet ownership bound
     EmailSent --> Expired : 15 minutes elapse without code entry; token invalidated
     Generated --> Expired : 15 minutes elapse before email sent (rare edge case: generation without delivery)
     Used --> Deleted : 72 hours after creation (scheduled cleanup job)
@@ -870,14 +874,15 @@ stateDiagram-v2
 |--------|----------|-------------|-------------------|--------|
 | NFR-PERF-01 | API Latency | P99 API response time for all read endpoints | APM (DataDog/Prometheus) | < 200ms at 100 RPS |
 | NFR-PERF-02 | API Latency | P99 API response time for write endpoints (training, arena entry) | APM | < 500ms at 100 RPS |
-| NFR-PERF-03 | Page Load | First Contentful Paint (FCP) on initial page load | Lighthouse / Core Web Vitals | < 1.5s |
-| NFR-PERF-04 | Page Load | Largest Contentful Paint (LCP) | Core Web Vitals | < 2.5s |
-| NFR-PERF-05 | Page Load | Cumulative Layout Shift (CLS) | Core Web Vitals | < 0.1 |
-| NFR-PERF-06 | Page Load | Interaction to Next Paint (INP) | Core Web Vitals | < 200ms |
-| NFR-PERF-07 | Game Performance | Pet animation frame rate on mid-range devices | Playwright performance test | ≥ 30 FPS sustained |
-| NFR-PERF-08 | Arena | Battle result calculation and storage | Backend integration test | < 2 seconds end-to-end |
-| NFR-PERF-09 | Leaderboard | Time from battle completion to leaderboard update | Integration test | ≤ 30 seconds |
-| NFR-PERF-10 | Email | Claim password email delivery time | SendGrid webhook monitoring | ≤ 60 seconds P90 |
+| NFR-PERF-03 | API Latency | API P50 response time (read endpoints) < 50ms at 100 RPS; write endpoints < 150ms at 100 RPS | APM (Datadog/New Relic) | P50 read < 50ms; P50 write < 150ms at 100 RPS |
+| NFR-PERF-04 | Page Load | First Contentful Paint (FCP) on initial page load | Lighthouse / Core Web Vitals | < 1.5s |
+| NFR-PERF-05 | Page Load | Largest Contentful Paint (LCP) | Core Web Vitals | < 2.5s |
+| NFR-PERF-06 | Page Load | Cumulative Layout Shift (CLS) | Core Web Vitals | < 0.1 |
+| NFR-PERF-07 | Page Load | Interaction to Next Paint (INP) | Core Web Vitals | < 200ms |
+| NFR-PERF-08 | Game Performance | Pet animation frame rate on mid-range devices | Playwright performance test | ≥ 30 FPS sustained |
+| NFR-PERF-09 | Arena | Battle result calculation and storage | Backend integration test | < 2 seconds end-to-end |
+| NFR-PERF-10 | Leaderboard | Time from battle completion to leaderboard update | Integration test | ≤ 30 seconds |
+| NFR-PERF-11 | Email | Claim password email delivery time | SendGrid webhook monitoring | ≤ 60 seconds P90 |
 
 **Capacity targets**:
 - Normal operation: 100 RPS sustained, DAU 2,000-5,000
@@ -905,6 +910,7 @@ stateDiagram-v2
 | NFR-SEC-10 | Arena rate limiting: max 10 battles per pet per hour enforced at API gateway level; Redis-backed counter with TTL |
 | NFR-SEC-11 | Admin portal requires separate authentication (password + TOTP); admin session tokens have a 4-hour expiry |
 | NFR-SEC-12 | Sensitive operations (email claim, data deletion) produce audit log entries with timestamp, IP (hashed), action type, and outcome |
+| NFR-SEC-13 | 授權模型：RBAC — Admin portal 強制角色型存取控制，四種角色（Super Admin / Moderator / Analyst / Support Agent，見 §19.2）；玩家端操作需有效 PetAccessToken；禁止跨角色權限提升 | RBAC 測試套件 |
 
 ### 7.3 Availability
 
@@ -992,21 +998,21 @@ All events must be captured in the analytics pipeline for funnel analysis and re
 | Event Name | Trigger | Key Properties | Used For |
 |------------|---------|---------------|---------|
 | `page_view` | Every page load | page_name, referrer, device_type, is_returning | Traffic analysis |
-| `pet_displayed` | Random pet rendered for guest | pet_rarity, pet_generation_ms | Performance, rarity distribution |
+| `pet_display_rendered` | Random pet rendered for guest | pet_rarity, pet_generation_ms | Performance, rarity distribution |
 | `pet_interacted` | Guest clicks/taps pet | interaction_type, time_since_load_ms | Engagement quality |
 | `claim_initiated` | User clicks "Claim This Pet" | is_after_interaction, time_on_page_seconds | Funnel step 1 |
 | `claim_email_submitted` | Email form submitted | — | Funnel step 2 |
 | `claim_email_delivered` | SendGrid delivery webhook | delivery_latency_ms | Email health |
-| `claim_code_entered` | User submits 6-digit code | is_first_attempt, attempt_number | Funnel step 3 |
+| `claim_code_entered` | User submits 6-digit claim password | is_first_attempt, attempt_number | Funnel step 3 |
 | `claim_completed` | Pet ownership bound | time_to_claim_minutes, pet_rarity | Conversion |
 | `training_performed` | Training action executed | training_type, stat_increased, new_stat_value | Engagement |
-| `food_fed` | Food item used | food_type, stat_effect, is_temporary | Item usage |
-| `arena_entered` | User enters arena lobby | mode (race/sumo), pet_level | Arena funnel |
-| `battle_started` | Match found | matchmaking_wait_seconds, is_ai_match | Arena quality |
+| `food_item_consumed` | Food item used | food_type, stat_effect, is_temporary | Item usage |
+| `arena_entry_initiated` | User enters arena lobby | mode (race/sumo), pet_level | Arena funnel |
+| `battle_match_started` | Match found | matchmaking_wait_seconds, is_ai_match | Arena quality |
 | `battle_completed` | Battle result recorded | outcome (win/loss), mode, pet_level_diff | Arena outcomes |
-| `battle_shared` | Share URL generated | mode, outcome | Virality |
-| `leaderboard_viewed` | Leaderboard page opened | is_owner_viewing_own_rank | Retention signal |
-| `pet_url_accessed` | Unique URL used to access pet | days_since_claim, is_returning | Retention |
+| `battle_url_shared` | Share URL generated | mode, outcome | Virality |
+| `leaderboard_page_viewed` | Leaderboard page opened | is_owner_viewing_own_rank | Retention signal |
+| `pet_url_access_succeeded` | Unique URL used to access pet | days_since_claim, is_returning | Retention |
 | `admin_pet_banned` | Admin bans a pet from arena and leaderboard | admin_id_hash, pet_id, ban_reason_category (one of: bot_activity, cheating, inappropriate_content, other), is_permanent (boolean) | Admin moderation audit, bot infestation trending |
 | `admin_leaderboard_removal` | Admin removes a pet from the leaderboard | admin_id_hash, pet_id, action_type (one of: temporary_removal, permanent_ban, score_reset) | Leaderboard integrity monitoring |
 | `battle_records_viewed` | Visitor opens a pet's public battle records page | pet_id, is_owner_viewing, referrer_type (direct/share_url/leaderboard), battle_count | Virality measurement, k-factor tracking, share URL conversion |
@@ -1110,6 +1116,20 @@ Metrics that must not degrade while improving the North Star:
 | Spam complaint rate (SendGrid) | < 0.1% | High spam rates trigger SendGrid IP throttling, killing email delivery |
 | Leaderboard page UV/DAU ratio | ≥ 20% | Measures social discovery and competitive motivation (BRD §7.2 O2) |
 | Arena social share rate | ≥ 5% | Measures virality and organic growth from battle result sharing (BRD §7.2 O4) |
+
+### 9.2.1 KPI Table（關鍵績效指標）
+
+| 指標 | Baseline（上線前） | 目標（上線後 30 天） | 量測工具 |
+|------|---------|----------|---------|
+| Claim 轉換率 | 0% | ≥ 10% | GA4 |
+| Day-1 留存率 | 0% | ≥ 50% | Mixpanel |
+| Day-7 留存率 | 0% | ≥ 25% | Mixpanel |
+| Day-30 留存率 | 0% | ≥ 15% | Mixpanel |
+| 每日競技場對戰數（3M MAAPO）| 0 | ≥ 100 場/天 | 後端事件日誌 |
+| 排行榜 UV/DAU | 0% | ≥ 20% | GA4 |
+| 競技場分享率 | 0% | ≥ 5% | GA4 + ShareKit |
+| DAU（12M MAAPO）| 0 | ≥ 2,000 | GA4 |
+| 累計 Claimed Pets（上線後 6 週）| 0 | ≥ 500 | 後端 DB query |
 
 ### 9.3 Go / No-Go Criteria
 
@@ -1310,26 +1330,26 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 
 > **BRD RTM cross-reference note**: BRD §3.4 RTM should be updated with the US-IDs from this table as a follow-up action (post-PRD approval). The BRD RTM currently contains placeholder requirement references. Responsibility: PM, target completion within 1 week of PRD approval.
 
-| User Story ID | Feature | Priority | BRD Objective | MoSCoW | Feature Flag | Business Risk if Missing | Test Coverage |
-|---|---------|:---:|:---:|:---:|---|---|---|
-| US-PET-001 | Random pixel pet display (guest) | P0 | O1 | Must | `FF_GUEST_PET_DISPLAY` | Acquisition funnel cannot start | E2E + Visual Regression |
-| US-PET-002 | Procedural generation (>1B combinations) | P0 | O1, O4 | Must | `FF_PET_GENERATION` | Uniqueness/rarity perception fails | Unit + Integration |
-| US-AUTH-001 | Email claim flow (password + URL) | P0 | O1, O3 | Must | `FF_EMAIL_CLAIM` | Core identity layer absent; no persistence | E2E + Integration + Security |
-| US-AUTH-002 | Returning pet owner access | P0 | O1 | Must | `FF_EMAIL_CLAIM` | Claimed owners cannot return; Day-7 retention collapses | E2E |
-| US-TRAIN-001 | Pet training system | P0 | O1, O2, O3 | Must | `FF_TRAINING_SYSTEM` | No Day-7 return motivation | E2E + Integration |
-| US-FOOD-001 | Special food items | P0 | O1, O2 | Must | `FF_FOOD_SYSTEM` | Reduced training depth; item economy absent | E2E + Integration |
-| US-ARENA-001 | Arena racing competition | P0 | O2, O3 | Must | `FF_ARENA_RACE` | No competitive hook; leaderboard meaningless | E2E + Integration + Performance |
-| US-ARENA-002 | Sumo arena mode | P1 | O2 | Should | `FF_ARENA_SUMO` | Reduced arena variety (acceptable for v1) | E2E + Integration |
-| US-BOARD-001 | Global leaderboard | P0 | O2, O4 | Must | `FF_LEADERBOARD` | No social comparison; competitive motivation absent | E2E + Integration |
-| US-RECORD-001 | Battle records page (shareable URL) | **P0** *(promoted from P1; see §1.3 note)* | O4 | Must | `FF_BATTLE_RECORDS` | Viral sharing mechanism absent; lower k-factor | E2E + Integration |
-| US-RARITY-001 | Rarity scoring display | P1 | O4 | Should | `FF_RARITY_DISPLAY` | Collection drive weaker; rarity value not communicated | Visual Regression + E2E |
-| US-TRADE-001 | Pet trading marketplace | P2 | O5 | Could | `FF_MARKETPLACE` | Revenue model delayed (acceptable; requires DAU > 1,000) | E2E + Integration |
-| US-ADMIN-001 | Admin pet management | P0 | O2 | Must | `FF_ADMIN_PORTAL` | No moderation capability; bot infestation risk | E2E + Security |
-| US-ADMIN-002 | Admin leaderboard moderation | P0 | O2, O4 | Must | `FF_ADMIN_PORTAL` | Leaderboard integrity fails under bot attack | E2E + Integration |
-| US-ADMIN-003 | Admin runtime parameter tuning | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Platform safety parameters (rate limits, rarity weights) cannot be adjusted without code deployments; slow response to live bot attacks | E2E |
-| US-ADMIN-004 | GDPR data deletion processing | P0 | O1 | Must | `FF_ADMIN_PORTAL` | GDPR non-compliance risk; legal liability | E2E + Integration |
-| US-ADMIN-005 | Suspicious battle detection | P0 | O2 | Must | `FF_ADMIN_PORTAL` | Automated bot detection absent; moderator workload unbounded | E2E + Integration |
-| US-ADMIN-006 | Game Economy Configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | Game economy balance (food buffs, arena costs) cannot be tuned post-launch without engineering effort; misbalanced economy risks player churn | E2E + Integration |
+| User Story ID | AC# | Feature | Priority | BRD Objective | MoSCoW | Feature Flag | PDD §Section | EDD §Section | Test Case ID | Business Risk if Missing | Test Coverage | Status |
+|---|---|---------|:---:|:---:|:---:|---|---|---|---|---|---|---|
+| US-PET-001 | AC-001-1 … AC-001-6 | Random pixel pet display (guest) | P0 | O1 | Must | `FF_GUEST_PET_DISPLAY` | (TBD) | (TBD) | TC-PET-001-1 … TC-PET-001-6 | Acquisition funnel cannot start | E2E + Visual Regression | DRAFT |
+| US-PET-002 | AC-002-1 … AC-002-6 | Procedural generation (>1B combinations) | P0 | O1, O4 | Must | `FF_PET_GENERATION` | (TBD) | (TBD) | TC-PET-002-1 … TC-PET-002-6 | Uniqueness/rarity perception fails | Unit + Integration | DRAFT |
+| US-AUTH-001 | AC-003-1 … AC-003-8 | Email claim flow (password + URL) | P0 | O1, O3 | Must | `FF_EMAIL_CLAIM` | (TBD) | (TBD) | TC-AUTH-001-1 … TC-AUTH-001-8 | Core identity layer absent; no persistence | E2E + Integration + Security | DRAFT |
+| US-AUTH-002 | AC-004-1 … AC-004-5 | Returning pet owner access | P0 | O1 | Must | `FF_EMAIL_CLAIM` | (TBD) | (TBD) | TC-AUTH-002-1 … TC-AUTH-002-5 | Claimed owners cannot return; Day-7 retention collapses | E2E | DRAFT |
+| US-TRAIN-001 | AC-005-1 … AC-005-6 | Pet training system | P0 | O1, O2, O3 | Must | `FF_TRAINING_SYSTEM` | (TBD) | (TBD) | TC-TRAIN-001-1 … TC-TRAIN-001-6 | No Day-7 return motivation | E2E + Integration | DRAFT |
+| US-FOOD-001 | AC-006-1 … AC-006-6 | Special food items | P0 | O1, O2 | Must | `FF_FOOD_SYSTEM` | (TBD) | (TBD) | TC-FOOD-001-1 … TC-FOOD-001-6 | Reduced training depth; item economy absent | E2E + Integration | DRAFT |
+| US-ARENA-001 | AC-007-1 … AC-007-8 | Arena racing competition | P0 | O2, O3 | Must | `FF_ARENA_RACE` | (TBD) | (TBD) | TC-ARENA-001-1 … TC-ARENA-001-8 | No competitive hook; leaderboard meaningless | E2E + Integration + Performance | DRAFT |
+| US-ARENA-002 | AC-008-1 … AC-008-4 | Sumo arena mode | P1 | O2 | Should | `FF_ARENA_SUMO` | (TBD) | (TBD) | TC-ARENA-002-1 … TC-ARENA-002-4 | Reduced arena variety (acceptable for v1) | E2E + Integration | DRAFT |
+| US-BOARD-001 | AC-009-1 … AC-009-6 | Global leaderboard | P0 | O2, O4 | Must | `FF_LEADERBOARD` | (TBD) | (TBD) | TC-BOARD-001-1 … TC-BOARD-001-6 | No social comparison; competitive motivation absent | E2E + Integration | DRAFT |
+| US-RECORD-001 | AC-010-1 … AC-010-6 | Battle records page (shareable URL) | **P0** *(promoted from P1; see §1.3 note)* | O4 | Must | `FF_BATTLE_RECORDS` | (TBD) | (TBD) | TC-RECORD-001-1 … TC-RECORD-001-6 | Viral sharing mechanism absent; lower k-factor | E2E + Integration | DRAFT |
+| US-RARITY-001 | AC-011-1 … AC-011-4 | Rarity scoring display | P1 | O4 | Should | `FF_RARITY_DISPLAY` | (TBD) | (TBD) | TC-RARITY-001-1 … TC-RARITY-001-4 | Collection drive weaker; rarity value not communicated | Visual Regression + E2E | DRAFT |
+| US-TRADE-001 | AC-012-1 … AC-012-5 | Pet trading marketplace | P2 | O5 | Could | `FF_MARKETPLACE` | (TBD) | (TBD) | TC-TRADE-001-1 … TC-TRADE-001-5 | Revenue model delayed (acceptable; requires DAU > 1,000) | E2E + Integration | DRAFT |
+| US-ADMIN-001 | AC-013-1 … AC-013-5 | Admin pet management | P0 | O2 | Must | `FF_ADMIN_PORTAL` | (TBD) | (TBD) | TC-ADMIN-001-1 … TC-ADMIN-001-5 | No moderation capability; bot infestation risk | E2E + Security | DRAFT |
+| US-ADMIN-002 | AC-014-1 … AC-014-4 | Admin leaderboard moderation | P0 | O2, O4 | Must | `FF_ADMIN_PORTAL` | (TBD) | (TBD) | TC-ADMIN-002-1 … TC-ADMIN-002-4 | Leaderboard integrity fails under bot attack | E2E + Integration | DRAFT |
+| US-ADMIN-003 | AC-015-1 … AC-015-3 | Admin runtime parameter tuning | P1 | O2 | Should | `FF_ADMIN_PORTAL` | (TBD) | (TBD) | TC-ADMIN-003-1 … TC-ADMIN-003-3 | Platform safety parameters (rate limits, rarity weights) cannot be adjusted without code deployments; slow response to live bot attacks | E2E | DRAFT |
+| US-ADMIN-004 | AC-016-1 … AC-016-4 | GDPR data deletion processing | P0 | O1 | Must | `FF_ADMIN_PORTAL` | (TBD) | (TBD) | TC-ADMIN-004-1 … TC-ADMIN-004-4 | GDPR non-compliance risk; legal liability | E2E + Integration | DRAFT |
+| US-ADMIN-005 | AC-017-1 … AC-017-4 | Suspicious battle detection | P0 | O2 | Must | `FF_ADMIN_PORTAL` | (TBD) | (TBD) | TC-ADMIN-005-1 … TC-ADMIN-005-4 | Automated bot detection absent; moderator workload unbounded | E2E + Integration | DRAFT |
+| US-ADMIN-006 | AC-018-1 … AC-018-4 | Game Economy Configuration | P1 | O2 | Should | `FF_ADMIN_PORTAL` | (TBD) | (TBD) | TC-ADMIN-006-1 … TC-ADMIN-006-4 | Game economy balance (food buffs, arena costs) cannot be tuned post-launch without engineering effort; misbalanced economy risks player churn | E2E + Integration | DRAFT |
 
 ---
 
@@ -1404,7 +1424,7 @@ All accessibility requirements follow WCAG 2.1 Level AA standard.
 | A11y-06 | Text elements meet minimum contrast ratios: normal text 4.5:1, large text 3:1, UI components 3:1 against their background | 1.4.3, 1.4.11 | Automated (Lighthouse + axe-core) |
 | A11y-07 | Pet animations and arena battle animations respect the OS `prefers-reduced-motion` setting; when enabled, animations are reduced to cross-fade or suppressed | 2.3.3 | Playwright test with `reducedMotion: true` |
 | A11y-08 | The leaderboard table has proper semantic markup (`<table>`, `<th scope="col">` for column headers); screen readers can navigate the leaderboard using table navigation commands | 1.3.1 | Manual screen reader test (NVDA/VoiceOver) |
-| A11y-09 | Session timeouts (claim code expiry 15 minutes) warn users 2 minutes before expiry with an accessible notification; users can extend the session | 2.2.1 | Manual test + Automated |
+| A11y-09 | Session timeouts (claim password expiry 15 minutes) warn users 2 minutes before expiry with an accessible notification; users can extend the session | 2.2.1 | Manual test + Automated |
 | A11y-10 | All page titles are unique and descriptive; each pet page title includes the pet's name and rarity (e.g., "Sparky — Legendary Dragon | pixel-pet-arena") | 2.4.2 | Automated (axe-core) |
 
 ---
