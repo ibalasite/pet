@@ -154,7 +154,7 @@ apps/player/
 │   │   ├── useReducedMotion.ts
 │   │   └── usePetToken.ts
 │   ├── store/
-│   │   └── useAppStore.ts             # Zustand store (slices: arena, claim, toast)
+│   │   └── useAppStore.ts             # Zustand store (slices: arena, claim, recovery, pet, toast)
 │   ├── lib/
 │   │   ├── apiClient.ts               # Axios/fetch wrapper with token attachment
 │   │   ├── tokenStorage.ts            # localStorage read/write for pet_access_token
@@ -559,7 +559,8 @@ App.vue
         ├── EmailMonitorPage.vue    /admin/email
         ├── AnalyticsPage.vue       /admin/analytics
         ├── AuditLogPage.vue        /admin/audit
-        └── RolesPage.vue           /admin/roles
+        ├── RolesPage.vue           /admin/roles
+        └── UserManagementPage.vue  /admin/users
 ```
 
 ### 3.3 Element Plus Usage
@@ -1240,7 +1241,11 @@ export default defineConfig({
 
 ### 7.1 Standard
 
-**WCAG 2.1 AA** compliance is required across all player app screens (PRD §7.7 NFR-A11Y-01).
+**WCAG 2.1 AA** compliance is required across all player app screens (PRD §7.7 NFR-A11Y-01). In-scope screens are all player-facing surfaces: landing, claim, token recovery, pet, training, arena, arena result, leaderboard, battle records, GDPR self-service, and marketplace (when FF_MARKETPLACE is active).
+
+The admin portal targets WCAG 2.1 AA compliance separately; see ADMIN_IMPL §14.2 for admin-specific accessibility requirements and the Element Plus component audit.
+
+See PRD §7.7 (NFR-A11Y-01 through NFR-A11Y-04) for the full accessibility non-functional requirements backing this standard.
 
 ### 7.2 Contrast Ratios
 
@@ -1485,6 +1490,8 @@ Each page and component in the player app is covered by BDD scenarios in the `fe
 | Battle View | `/arena/result/:matchId` | `arena-ui.feature` | Live battle animation, result display, reward notification, share button | Battle resolution, WIN/LOSS variants, stat changes |
 | Leaderboard | `/leaderboard` | `leaderboard-ui.feature` | Ranking display, pagination, player search, filter by rarity | Top 100 display, rarity filters, score calculation |
 | Battle Records | `/pet/:petId/records` | `battle-records.feature` | Record list, pagination, social share preview, public access | History display, OG meta tags, pagination cursor, AI opponent marking |
+| Token Recovery | `/claim/recover` | `features/client/claim-flow-ui.feature` | recovery email, OTP code entry, token reveal | US-AUTH-002 |
+| GDPR Self-Service | `/gdpr` | `features/client/gdpr-ui.feature` | request submission, status polling, SLA display | US-ADMIN-004 |
 | Admin Portal | `/admin` | `admin-portal.feature` | Login, TOTP, dashboard, moderation, config management | Authentication, authorization, role-based access |
 
 ### 10.1 Feature File Organization

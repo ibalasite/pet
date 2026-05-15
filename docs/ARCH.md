@@ -282,7 +282,7 @@ App
 │       │   ├── ModeSelector (RACE / SUMO)
 │       │   ├── MatchmakingQueue (30s timeout — ARENA_MATCHMAKING_TIMEOUT_SECONDS = 30)
 │       │   └── BattleAnimation (Phaser.js scene — 5–15 s: ARENA_MATCH_DURATION_MIN_SECONDS / ARENA_MATCH_DURATION_MAX_SECONDS)
-│       ├── BattleResultPage (/arena/result/:battleId)
+│       ├── BattleResultPage (/arena/result/:matchId)
 │       │   ├── BattleResultCard (WIN/LOSS variants)
 │       │   └── [OQ-E05 open: Open Graph card generation method TBD]
 │       ├── LeaderboardPage (/leaderboard)
@@ -344,6 +344,8 @@ The admin portal is a separate Vite application, deployed to Vercel independentl
 | Analytics | /admin/analytics | Moderator+ / Read Only |
 | Audit Log | /admin/audit | Super Admin |
 | Roles | /admin/roles | Super Admin |
+| Feature Flags | /admin/config/flags | Super Admin |
+| User Management | /admin/users | Super Admin |
 
 **State**: Pinia (Vue-native) for local portal state. Axios with request/response interceptors for session expiry (4h inactivity — ADMIN_SESSION_INACTIVITY_EXPIRY_HOURS = 4; 8h absolute — ADMIN_SESSION_ABSOLUTE_EXPIRY_HOURS = 8).
 
