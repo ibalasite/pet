@@ -12,6 +12,8 @@
 
 ## §1. Overview
 
+This section establishes the animation design vision, technical stack choices, and performance targets that govern all sprite work in pixel-pet-arena.
+
 ### §1.1 Animation Design Vision
 
 pixel-pet-arena delivers a retro-pixel aesthetic with smooth, performant sprite animation across all major browsers. The animation system is built on **Phaser.js 3** (v3.55.2 or later), isolated within the `PetCanvasEngine` React component. Animation runtime targets ≥30 FPS sustained on desktop and modern mobile browsers (ARCH §2.1, EDD §1; PET_ANIMATION_FPS_MIN = 30).
@@ -56,6 +58,8 @@ canvas {
 ---
 
 ## §2. Animation Requirements Analysis
+
+This section catalogs every required animation, maps each to its spritesheet placement, and establishes the memory budget needed to support them at runtime.
 
 ### §2.1 Pet Generation & Asset Mapping
 
@@ -123,8 +127,9 @@ Total rendered sprite at 32×32 is the result of layer blending in WebGL, or can
 | `anim_battle_lose` | 4 frames | 600 | No | Battle match lost | Defeat pose (slump, disappointment) |
 | `anim_levelup_burst` | 12 frames | 1200 | No | Pet levels up | Particle explosion effect with stat highlight |
 | `anim_neglect_desaturate` | 1 frame | — | No | Triggered when last_trained_at > 3 days | Desaturated shader applied (no frame anim) |
+| `anim_stat_buff_glow` | 3 frames | 400 | No | Food buff applied | Glow/flash overlay on pet; plays once on buff activation |
 
-**Total Frame Count**: ~70 frames across all 15 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).
+**Total Frame Count**: ~73 frames across all 16 animations at 32×32 px = ~490 unique frame images (accounting for shared body/head assets).
 
 ### §2.3 Animation Spritesheet Planning
 
@@ -138,9 +143,10 @@ Row 2:  [anim_interact_head_turn frames 0-1]      [anim_train_flex frames 0-4]  
 Row 3:  [anim_battle_entry frames 0-3]            [anim_battle_idle frames 0-1]        [anim_battle_attack frames 0-4]
 Row 4:  [anim_battle_hit frames 0-2]              [anim_battle_win frames 0-5]         [anim_battle_lose frames 0-3]
 Row 5:  [anim_levelup_burst frames 0-11 (2×width)]
+Row 6:  [anim_stat_buff_glow frames 0-2]              [anim_neglect_desaturate frame 0]
 
-Total grid: ~6 rows × 4 columns (with frame packing) = 24 visible tiles → 96 frames total
-Physical size: 32px × 24 cells = 768 × 768 px spritesheet per variant
+Total grid: ~7 rows × 4 columns (with frame packing) = ~73 used frames → ~73 frames total (remaining cells are blank padding to fill the spritesheet grid)
+Physical size: 32px × 28 cells = 896 × 768 px spritesheet per variant
 Compressed PNG: ~80–120 KB per variant (subject to color optimization)
 ```
 
@@ -177,6 +183,8 @@ This exceeds the per-page CSS budget of 50 KB (TOTAL_CSS_BUNDLE_GZIPPED_KB = 50;
 ---
 
 ## §3. Sprite Asset Planning
+
+This section defines the pixel constraints, file naming conventions, and folder structure that artists and engineers must follow when producing sprite assets.
 
 ### §3.1 Sprite Design Specification
 
@@ -249,6 +257,8 @@ assets/
 ---
 
 ## §4. Animation Engine & Implementation
+
+This section covers the Phaser.js integration pattern, the per-pet animation state machine, frame timing calculations, and particle effect design.
 
 ### §4.1 Phaser.js Integration
 
@@ -453,6 +463,8 @@ At 30 FPS, the screen redraws every 33.3 ms. Phaser's internal timestep is 60 Hz
 
 ## §5. Performance & Optimization
 
+This section describes the spritesheet loading pipeline, WebGL fallback behavior, and reduced-motion support that keep the animation system within its performance budget.
+
 ### §5.1 Asset Loading Strategy
 
 **Critical Path Optimization**:
@@ -523,6 +535,8 @@ if (prefersReducedMotion) {
 
 ## §6. Cross-Platform Considerations
 
+This section documents the expected animation behavior and any required adaptations across desktop browsers, mobile devices, and changing tablet orientations.
+
 ### §6.1 Desktop (Chrome, Firefox, Safari, Edge)
 
 **Target**: 60 FPS, modern WebGL
@@ -563,6 +577,8 @@ if (prefersReducedMotion) {
 ---
 
 ## §7. Implementation Phases
+
+This section breaks animation delivery into four sequential phases, each with concrete deliverables and asset size milestones.
 
 ### §7.1 Phase 1: Core Idle Animation (Weeks 1–2)
 
@@ -609,6 +625,8 @@ if (prefersReducedMotion) {
 ---
 
 ## §8. Testing Strategy
+
+This section specifies the visual regression, performance, cross-browser, and accessibility test cases required to validate the animation system before each phase ships.
 
 ### §8.1 Visual Regression Testing
 
@@ -661,6 +679,8 @@ if (prefersReducedMotion) {
 
 ## §9. Risk Mitigation & Open Questions
 
+This section lists the known technical risks with their mitigations, and the open questions that require a decision before implementation can be finalized.
+
 ### §9.1 Risks
 
 | Risk | Impact | Mitigation |
@@ -692,6 +712,8 @@ if (prefersReducedMotion) {
 ---
 
 ## §10. Monitoring & Observability
+
+This section defines the runtime metrics, error fallback chains, and structured-logging events used to track animation health in production.
 
 ### §10.1 Animation Performance Metrics
 
