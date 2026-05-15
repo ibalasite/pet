@@ -809,81 +809,55 @@ sequenceDiagram
 
 ### §4.3 Leaderboard Update Flow
 
-> Note: The following sequence is presented as structured text; a Mermaid sequenceDiagram rendering is equivalent to this flow.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant AMF as ArenaMatchFlow
+    participant API as GameAPI (Fastify 4)
+    participant PG as PostgreSQL
+    participant RD as Redis
 
-```
-Arena Match Completion         Game API                    PostgreSQL       Redis
-(Post-battle write path)            │                          │               │
-     │                               │                          │               │
-     │  Arena match completed        │                          │               │
-     │  (winnerPetId determined)     │                          │               │
-     │──────────────────────────────>│                          │               │
-     │                               │ Recalculate arena_score for WINNER       │
-     │                               │   formula: win_rate × battles × level_mult
-     │                               │ Recalculate arena_score for LOSER        │
-     │                               │   (battles_played increases; win_rate drops)
-     │                               │ ZADD leaderboard:global score member=winnerPetId
-     │                               │ ZADD leaderboard:global score member=loserPetId
-     │                               │─────────────────────────────────────────>│
-     │                               │ [Both ZADDs wrapped in Redis MULTI/EXEC pipeline for atomicity]
-     │                               │ [Update lag ≤30s per LEADERBOARD_UPDATE_LAG_MAX_SECONDS]
-     │                               │                          │               │
-     │                               │ [Every hour: snapshot job]               │
-     │                               │ ZRANGEBYSCORE leaderboard:global (top 500)
-     │                               │<─────────────────────────────────────────│
-     │                               │ INSERT leaderboard_snapshots(snapshot_time, entries[])
-     │                               │─────────────────────────>│               │
-     │                               │                          │               │
-GET /api/v1/leaderboard        │                          │               │
-     │──────────────────────────────>│                          │               │
-     │                               │ ZRANGEBYSCORE leaderboard:global (top 100)
-     │                               │─────────────────────────────────────────>│
-     │                               │ [Redis available]        │               │
-     │  {entries[100], lastUpdated}  │                          │               │
-     │<──────────────────────────────│                          │               │
-     │                               │                          │               │
-     │                               │ [Redis unavailable]      │               │
-     │                               │ SELECT entries FROM leaderboard_snapshots
-     │                               │   ORDER BY snapshot_time DESC LIMIT 1    │
-     │                               │─────────────────────────>│               │
-     │  {entries[100], degraded=true}│                          │               │
-     │<──────────────────────────────│                          │               │
+    AMF->>API: Arena match completed (winnerPetId, loserPetId determined)
+    API->>API: Recalculate arena_score for WINNER (win_rate × battles × level_mult)
+    API->>API: Recalculate arena_score for LOSER (battles_played++, win_rate drops)
+    API->>PG: INSERT arena_matches (winner_pet_id, loser_pet_id, scores)
+    Note over API,RD: MULTI/EXEC pipeline for atomicity
+    API->>RD: ZADD leaderboard:global <winner_score> <winnerPetId>
+    API->>RD: ZADD leaderboard:global <loser_score> <loserPetId>
+    RD-->>API: EXEC — both ZADDs committed atomically
+    Note over API: Update lag ≤30s per LEADERBOARD_UPDATE_LAG_MAX_SECONDS
+
+    Note over API,RD: Hourly snapshot job
+    API->>RD: ZRANGEBYSCORE leaderboard:global (top 500)
+    RD-->>API: top-500 entries
+    API->>PG: INSERT leaderboard_snapshots(snapshot_time, entries[])
 ```
 
 ---
 
 ### §4.4 GDPR Erasure Flow
 
-> Note: The following sequence is presented as structured text; a Mermaid sequenceDiagram rendering is equivalent to this flow.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant POB as PetOwnerBrowser
+    participant API as GameAPI (Fastify 4)
+    participant PG as PostgreSQL
+    participant RD as Redis
+    participant WK as Worker
 
-```
-Pet Owner Browser              Game API                    PostgreSQL       Redis
-     │                               │                          │               │
-     │  POST /api/v1/gdpr/request    │                          │               │
-     │  {type: "erasure"}            │                          │               │
-     │  Authorization: Bearer <token>│                          │               │
-     │──────────────────────────────>│                          │               │
-     │                               │ Verify pet token         │               │
-     │                               │─────────────────────────>│               │
-     │                               │ Resolve claim_identity_id via pets row   │
-     │                               │ INSERT gdpr_requests(claim_identity_id,  │
-     │                               │   request_type='erasure', status='pending')
-     │                               │─────────────────────────>│               │
-     │  HTTP 202 {jobId}             │                          │               │
-     │<──────────────────────────────│                          │               │
-     │                               │                          │               │
-     │                               │ [Background job — within 24h internal SLA: GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS]
-     │                               │ UPDATE claim_identities  │               │
-     │                               │   SET email_encrypted=NULL               │
-     │                               │   WHERE id=claim_identity_id             │
-     │                               │─────────────────────────>│               │
-     │                               │ ZREM leaderboard:global <all pet_ids for identity>
-     │                               │─────────────────────────────────────────>│
-     │                               │ UPDATE gdpr_requests SET status='completed'
-     │                               │─────────────────────────>│               │
-     │                               │ [Full compliance within 7 days — GDPR_EMAIL_DELETION_WINDOW_DAYS]
-     │                               │ [email_hash retained for anti-re-registration]
-     │                               │ [pets rows retained with owner_token_hash NULL]
+    POB->>API: DELETE /api/v1/me (Authorization: Bearer <token>)
+    API->>PG: Validate pet token — hash and compare owner_token_hash
+    PG-->>API: token valid, claim_identity_id resolved
+    API->>PG: Mark for erasure — INSERT gdpr_requests(claim_identity_id, request_type='erasure', status='pending')
+    API-->>POB: HTTP 202 {jobId}
+
+    Note over WK: Async job — within 24h SLA (GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS)
+    WK->>PG: Anonymize email_hash in claim_identities (SET email_encrypted=NULL, email_hash=NULL)
+    WK->>RD: ZREM leaderboard:global for all pet_ids belonging to identity
+    WK->>PG: INSERT gdpr_erasure_log (claim_identity_id, completed_at)
+    WK->>PG: UPDATE gdpr_requests SET status='completed'
+    Note over WK,PG: Full compliance within 7 days (GDPR_EMAIL_DELETION_WINDOW_DAYS)
 ```
 
 ---
@@ -1517,11 +1491,11 @@ Pixel Pet Arena targets 99.9% monthly availability (CONSTANTS: Availability). Th
 
 ### §12.2 Logs
 
-Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`, `trace_id`, `event`, `duration_ms`. PII (email, IP) never logged raw — hashed only.
+Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`, `trace_id`, `event`, `duration_ms`. PII (email, IP) never logged raw — hashed only (see §8.1 for PII-in-logs policy). Log transport: Railway stdout → Datadog log drain. Retention: 90-day hot storage for active querying; 2-year cold archive for compliance and audit requirements.
 
 ### §12.3 Traces
 
-`X-Trace-ID` header propagated across all boundaries. Used for debugging arena battle E2E latency (SLA: < 2s per CONSTANTS: `Arena Battle Result E2E`).
+`X-Trace-ID` header propagated across all service boundaries. Trace collection uses Datadog APM with OpenTelemetry instrumentation. Sampling strategy: 100% for error paths; 10% for successful requests by default (adjustable via environment variable). Span naming follows `service.operation` convention (e.g. `game-api.battle.resolve`, `worker.gdpr.erase`). Used for debugging arena battle E2E latency (SLA: < 2s per CONSTANTS: `Arena Battle Result E2E`).
 
 ---
 
@@ -1649,7 +1623,7 @@ Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`,
 | Datadog | $15–30 | Free | Metrics > 500/month |
 | **Total** | **$20–125** | — | Per CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MIN/MAX ($50–200) |
 
-### §16.1a Per-User Cost Estimate
+### §16.2 Per-User Unit Economics
 
 | DAU Scenario | Est. Monthly Infra | Cost / DAU / Month | Cost / MAU / Month (30% active) |
 |-------------|-------------------|-------------------|----------------------------------|
@@ -1660,7 +1634,7 @@ Structured JSON logs from all services. Fields: `timestamp`, `level`, `service`,
 
 Unit economics improve with scale due to fixed-cost components (Railway base plan, Supabase Pro tier). The primary variable cost drivers are Upstash Redis commands (battle/leaderboard operations) and SendGrid emails (new claims). At DAU=5,000 with ~$125/month total cost: ~$0.025/DAU/month, ~$0.30/MAU/month at 30% daily-to-monthly active ratio.
 
-### §16.2 Cost Guardrails
+### §16.3 Cost Guardrails
 
 - Monthly cost alert at $150 (75% of CONSTANTS: SERVER_COST_DAU5K_MONTHLY_MAX)
 - Auto-scaling limited to Railway horizontal pod expansion (max 10 replicas per HPA; MVP baseline 2 replicas per service)
