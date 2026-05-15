@@ -134,7 +134,7 @@ SCHEMA.md §1.1 無 notification 相關表。
 
 ---
 
-### [MEDIUM] D1-M1：BDD-server → RTM — Scenario 計數不一致（81 vs 82）
+### [MEDIUM] D1-M1：BDD-server → RTM — Scenario 計數不一致（81 vs 82）`[FIXED: 0e053e7]`
 
 BDD-server.md 概覽聲明「共 81 scenarios」，RTM.md §2 Server BDD 統計為 82 scenarios。
 實際 grep 計數：82 scenarios。BDD-server.md 概覽數字需更新。
@@ -189,7 +189,7 @@ LOCAL_DEPLOY.md docker-compose 片段中 API/Worker port 映射為 `"3000-3001:3
 
 ---
 
-### [LOW] D1-L2：FRONTEND → API — BigInt seed 欄位轉換契約未記錄於 API.md
+### [LOW] D1-L2：FRONTEND → API — BigInt seed 欄位轉換契約未記錄於 API.md `[FIXED: 0e053e7]`
 
 FRONTEND.md PetCanvasProps 定義 `seed: bigint` 並加注「API returns seed as a JSON number; callers must convert: BigInt(apiResponse.seed)」。此型別轉換契約未記錄於 API.md 對應端點回應 schema（JavaScript 精度截斷風險）。
 
@@ -199,7 +199,7 @@ FRONTEND.md PetCanvasProps 定義 `seed: bigint` 並加注「API returns seed as
 
 ---
 
-### [LOW] D1-L3：PDD — Platform Scope Game UI 核取方塊未勾選
+### [LOW] D1-L3：PDD — Platform Scope Game UI 核取方塊未勾選 `[FIXED: 0e053e7]`
 
 PDD.md Platform Scope 中 `Game UI (Phaser 3 / HTML5 Canvas)` 為 `[ ]` 未勾選狀態，但系統實際採用 Phaser 3，EDD 與 PRD 均明確記載。
 
@@ -240,7 +240,7 @@ VDD.md 定義深色模式色系（deep navy 色板），但 FRONTEND.md 未說�
 
 ---
 
-### [CRITICAL] D4-C1：RTM BDD Tags 欄位使用不存在的 tag 命名規則
+### [CRITICAL] D4-C1：RTM BDD Tags 欄位使用不存在的 tag 命名規則 `[FIXED: 0e053e7]`
 
 RTM.md 的「BDD Tags (sample)」欄位使用 `@TC-PET-001-1`、`@TC-AUTH-001-1`、`@TC-ARENA-001-1` 等 tag。
 這些 tag **在任何 feature 檔案中均不存在**。
@@ -254,7 +254,7 @@ RTM 的正向追溯性（requirement → BDD scenario）從 tag 層完全斷裂�
 
 ---
 
-### [CRITICAL] D4-C2：features/steps/ 不存在 — 82 個 server BDD scenarios 無法執行
+### [CRITICAL] D4-C2：features/steps/ 不存在 — 82 個 server BDD scenarios 無法執行 `[FIXED: 992aa6c]`
 
 `features/steps/` 目錄完全不存在。82 個 server-side Gherkin scenarios（12 個 feature 檔案）無任何 Cucumber-js step definition，整個 server BDD suite 無法執行。
 
@@ -265,7 +265,7 @@ RTM 的正向追溯性（requirement → BDD scenario）從 tag 層完全斷裂�
 
 ---
 
-### [CRITICAL] D4-C3：features/client/steps/ 不存在 — 133 個 client BDD scenarios 無法執行
+### [CRITICAL] D4-C3：features/client/steps/ 不存在 — 133 個 client BDD scenarios 無法執行 `[FIXED: e739041]`
 
 `features/client/steps/` 目錄完全不存在。133 個 client-side Gherkin scenarios（10 個 feature 檔案）無任何 Playwright step definition，整個 client BDD suite 無法執行。
 
@@ -289,7 +289,7 @@ PRD AC-004-5 和 AC-010-5 均要求 404 處理。
 
 ---
 
-### [HIGH] D4-H2：RTM 庫存計數陳舊
+### [HIGH] D4-H2：RTM 庫存計數陳舊 `[FIXED: 0e053e7]`
 
 RTM Overview 聲明「9 個 client feature 檔案 / 124 scenarios」。實際狀態：
 - 10 個 client feature 檔案（trading-ui.feature 未列入 RTM 庫存）
@@ -399,7 +399,7 @@ PRD AC-014-4 要求排行榜移除失敗（Redis/DB 不可用）時 UI 顯示「
 
 ---
 
-### [MEDIUM] D4-M5：PRD AC-015-1..3（US-ADMIN-003）+ admin-search-performance.feature @US tag 錯誤
+### [MEDIUM] D4-M5：PRD AC-015-1..3（US-ADMIN-003）+ admin-search-performance.feature @US tag 錯誤 `[PARTIAL-FIXED: 0e053e7 — feature header tag 已修正；AC-015-x runtime config scenarios 仍缺]`
 
 雙重問題：
 1. US-ADMIN-003 的 ACs（AC-015-1..3：runtime config 調整、5 分鐘快取刷新、稽核日誌）無任何 server BDD scenarios
@@ -452,7 +452,7 @@ EDD 定義首次 Admin 登入時回傳 HTTP 403 TOTP_SETUP_REQUIRED + setupToken
 
 ---
 
-### [MEDIUM] D4-M10：RTM admin-search-performance.feature @US tag mismatch
+### [MEDIUM] D4-M10：RTM admin-search-performance.feature @US tag mismatch `[FIXED: 0e053e7]`
 
 RTM 正確將 admin-search-performance.feature 對應至 US-ADMIN-001，但 feature 檔案本身 Feature header 標記 `US-ADMIN-003`（與 D4-M5 同一根因）。
 
@@ -472,7 +472,7 @@ RTM 將 settings.feature（21 scenarios）映射至 US-AUTH-002，而 US-AUTH-00
 
 ---
 
-### [LOW] D4-L1：trading-ui.feature（@future）未列入 RTM 庫存
+### [LOW] D4-L1：trading-ui.feature（@future）未列入 RTM 庫存 `[FIXED: 0e053e7]`
 
 trading-ui.feature 存在（1 scenario，標記 @future @wip），符合 FF_MARKETPLACE P2 延期狀態，但 RTM 庫存表未記錄此檔案，US-TRADE-001 的 BDD-Client 欄位顯示「—」。
 
@@ -482,7 +482,7 @@ trading-ui.feature 存在（1 scenario，標記 @future @wip），符合 FF_MARK
 
 ---
 
-### [LOW] D4-L2：EDD §8.1 HTTP 409 用於 duplicate marketplace listing — 貿易功能延期但文件未標記
+### [LOW] D4-L2：EDD §8.1 HTTP 409 用於 duplicate marketplace listing — 貿易功能延期但文件未標記 `[FIXED: 0e053e7]`
 
 EDD §8.1 列出 HTTP 409 的第二個觸發情境為「duplicate marketplace listing」，但 Marketplace 為 P2 延期功能（FF_MARKETPLACE）。EDD §8.1 未標記此情境為 Deferred。
 
@@ -492,7 +492,7 @@ EDD §8.1 列出 HTTP 409 的第二個觸發情境為「duplicate marketplace li
 
 ---
 
-### [LOW] D4-L3：trading-ui.feature @future 標記但 cucumber 執行時可能被誤跑
+### [LOW] D4-L3：trading-ui.feature @future 標記但 cucumber 執行時可能被誤跑 `[FIXED: 0e053e7]`
 
 trading-ui.feature 標記 @future @wip，若 cucumber 執行時沒有 `--tags "not @future"` 過濾，此 scenario 會被嘗試執行並因無 step definition 失敗。
 
@@ -544,7 +544,7 @@ trading-ui.feature 標記 @future @wip，若 cucumber 執行時沒有 `--tags "n
 | BDD/Tests | 30% | 🔴 需補強 |
 | **整體** | **76%** | ⚠️ |
 
-### [HIGH] D6-H1：BDD/Tests AI Gencode 就緒度 30% — 無 step definition stub
+### [HIGH] D6-H1：BDD/Tests AI Gencode 就緒度 30% → 95% — 無 step definition stub `[FIXED: 992aa6c, e739041]`
 
 `features/steps/` 不存在，AI 需從 215 個 Gherkin scenarios 從零推導 step definition 實作邏輯，無任何骨架可參照。此為 D4-C2 和 D4-C3 的同一根因，由 `/gendoc-align-fix --layer gencode` 處理。
 
@@ -558,27 +558,27 @@ trading-ui.feature 標記 @future @wip，若 cucumber 執行時沒有 `--tags "n
 
 ### 立即修復（CRITICAL — 阻塞後續 gencode）
 
-| ID | 問題 | 可自動修復 |
-|----|------|-----------|
-| D4-C1 | RTM BDD Tags 重新生成（@TC-SRV/CLI 命名） | YES（腳本）|
-| D4-C2 | features/steps/ 生成 server step stubs | YES（gencode）|
-| D4-C3 | features/client/steps/ 生成 client step stubs | YES（gencode）|
+| ID | 問題 | 狀態 | commit |
+|----|------|------|--------|
+| D4-C1 | RTM BDD Tags 重新生成（@TC-SRV/CLI 命名） | ✅ FIXED | 0e053e7 |
+| D4-C2 | features/steps/ 生成 server step stubs | ✅ FIXED | 992aa6c |
+| D4-C3 | features/client/steps/ 生成 client step stubs | ✅ FIXED | e739041 |
 
 ### HIGH 優先修復（gencode 前完成）
 
-| ID | 問題 | 可自動修復 |
-|----|------|-----------|
-| D4-H1 | 補充 HTTP 404 server BDD scenarios | NO |
-| D4-H2 | RTM 庫存計數更新（+ trading-ui.feature） | YES（腳本）|
-| D4-H3 | 補充 503 generation_exhausted scenario | NO |
-| D4-H4 | 補充 Canvas WebGL fallback client scenario | NO |
-| D4-H5 | 建立 gdpr-ui.feature（玩家端 GDPR） | NO |
-| D4-H6 | battle-records 補充 404 scenario | NO |
-| D4-H7 | gdpr-erasure 補充 player-initiated scenarios | NO |
-| D1-H2 | API.md 補充食物庫存端點 | NO |
-| D1-H3 | EDD + API 補充食物掉落機制設計 | NO |
-| D1-H4 | 修正 BDD-server.md 交叉參照表 3 個 AC 錯誤 | NO |
-| D1-H5 | EDD 補充 notification BC 合併 ADR | NO |
+| ID | 問題 | 狀態 | commit |
+|----|------|------|--------|
+| D4-H1 | 補充 HTTP 404 server BDD scenarios | ⏳ OPEN | — |
+| D4-H2 | RTM 庫存計數更新（+ trading-ui.feature） | ✅ FIXED | 0e053e7 |
+| D4-H3 | 補充 503 generation_exhausted scenario | ⏳ OPEN | — |
+| D4-H4 | 補充 Canvas WebGL fallback client scenario | ⏳ OPEN | — |
+| D4-H5 | 建立 gdpr-ui.feature（玩家端 GDPR） | ⏳ OPEN | — |
+| D4-H6 | battle-records 補充 404 scenario | ⏳ OPEN | — |
+| D4-H7 | gdpr-erasure 補充 player-initiated scenarios | ⏳ OPEN | — |
+| D1-H2 | API.md 補充食物庫存端點 | ⏳ OPEN | — |
+| D1-H3 | EDD + API 補充食物掉落機制設計 | ⏳ OPEN | — |
+| D1-H4 | 修正 BDD-server.md 交叉參照表 3 個 AC 錯誤 | ⏳ OPEN | — |
+| D1-H5 | EDD 補充 notification BC 合併 ADR | ⏳ OPEN | — |
 
 ### 可腳本自動修復的所有 findings
 
