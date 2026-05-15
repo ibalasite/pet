@@ -54,7 +54,7 @@ Core operations problems the portal solves:
 
 - **Security-first**: RBAC minimum privilege; httpOnly + SameSite=Strict session cookie; every operation produces an audit log entry
 - **Operational efficiency**: Bulk operations + smart search (pet ID / email hash)
-- **Data consistency**: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s)
+- **Data consistency**: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s; config_cache_refresh_time_minutes = 5)
 - **Auditability**: All CUD operations write to `admin_audit_log`, retained 2 years (`admin_audit_log_retention_years = 2`)
 
 ### §1.3 User Roles (from EDD §3.7 + ARCH §5.1)
@@ -440,9 +440,9 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 | Active Battles Today | `GET /admin/api/dashboard → activeBattlesToday` | On page load + manual refresh |
 | Pending GDPR Requests | `GET /admin/api/dashboard → pendingGdprRequests` | On page load (super_admin only; hidden for others) |
 | Daily Active Users | `GET /admin/api/dashboard → dailyActiveUsers` | On page load |
-| Error Rate (5 min) | `GET /admin/api/dashboard → errorRateLast5Min` | On page load + 30 s polling |
+| Error Rate (5 min) | `GET /admin/api/dashboard → errorRateLast5Min` | On page load + 30 s polling (30 s is a hardcoded UX default) |
 | Email Delivery Rate | `GET /admin/api/dashboard → emailDeliveryRate` | On page load |
-| System Status | `GET /admin/api/dashboard → systemStatus` | On page load + 30 s polling |
+| System Status | `GET /admin/api/dashboard → systemStatus` | On page load + 30 s polling (30 s is a hardcoded UX default) |
 
 **System Status display**: `healthy` → green `el-tag`; `degraded` → orange; `down` → red + `ElNotification` alert
 
@@ -1221,7 +1221,14 @@ use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, Legen
 
 ## §13 Internationalization (i18n)
 
-The Admin Portal is single-language (English). No multi-locale configuration is required. Element Plus locale uses the default `en` locale.
+The Admin Portal is single-language (English). No multi-locale configuration is required. Element Plus locale is explicitly registered in `main.ts` using `ElConfigProvider` with the built-in English locale pack:
+
+```typescript
+import { ElConfigProvider } from 'element-plus'
+import en from 'element-plus/es/locale/lang/en'
+```
+
+Wrap the root `<App />` in `<ElConfigProvider :locale="en">` to ensure all Element Plus components (date pickers, pagination labels, validation messages) render in English consistently. If the portal scope expands beyond English in a future phase, vue-i18n can be added without restructuring the existing component tree.
 
 ---
 
@@ -1521,7 +1528,7 @@ All CUD operations write to `admin_audit_log`:
 | 3 | §5 RBAC: three roles fully defined + PermissionGuard composable + `v-permission` directive | ✅ |
 | 4 | §5.2 Permission Guard: `hasPermission()` (role hierarchy) + route guard + button-level permission examples | ✅ |
 | 5 | §7 Page specs: Login / Dashboard / Pet / Battle / Suspicious / Leaderboard / Analytics / Email / Config (Runtime/Economy/Flags) / GDPR / Roles / Audit — all have column and action descriptions | ✅ |
-| 6 | §8.1 Axios config: baseURL + `withCredentials: true` (session cookie) + response interceptor (401/403 handling); CSRF handled by SameSite=Strict (no token injection needed) | ✅ |
+| 6 | §8.1 Axios config: baseURL + `withCredentials: true` (session cookie) + response interceptor (401/403/429 handling); CSRF handled by SameSite=Strict (no token injection needed) | ✅ |
 | 7 | §8.4 `/admin/api/*` endpoint mapping complete (32 endpoints, covering API.md §6.1–§6.9) | ✅ |
 | 8 | §9 Three Pinia stores (authStore / permissionStore / configStore) with full state + actions | ✅ |
 | 9a | §15.1 Vite build: `base='/admin/'`, `outDir='dist/admin'`, `manualChunks` vendor splitting, `server.proxy` for `/admin/api` | ✅ |
