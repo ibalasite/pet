@@ -1,6 +1,6 @@
 # ADMIN_IMPL — Admin Portal Implementation Specification
 <!-- SDLC Layer 4: Implementation Engineering -->
-<!-- Upstream: EDD.md (tech stack §3.7) + FRONTEND.md §3 (admin portal design) + API.md §6 (/admin/api/* endpoints) + SCHEMA.md (admin_accounts + admin_audit_log tables) + constants.json -->
+<!-- Upstream: EDD.md (tech stack §3.7) + FRONTEND.md §3 (admin portal design) + API.md §6 (/admin/api/* endpoints) + SCHEMA.md (admin_users + audit_logs tables) + constants.json -->
 <!-- Scope: Admin Portal (Vue 3 + Element Plus + TypeScript + Vite). Player App (React 18 + Phaser 3) is excluded — see CLIENT_IMPL.md. -->
 
 ---
@@ -18,7 +18,7 @@
 | **Date** | 2026-05-03 |
 | **Upstream EDD** | [EDD.md](EDD.md) §3.3 + §5.5-A |
 | **Upstream API** | [API.md](API.md) §6 — `/admin/api/*` endpoints |
-| **Upstream SCHEMA** | [SCHEMA.md](SCHEMA.md) — `admin_accounts` + `admin_audit_log` tables |
+| **Upstream SCHEMA** | [SCHEMA.md](SCHEMA.md) — `admin_users` + `audit_logs` tables |
 | **Upstream ARCH** | [ARCH.md](ARCH.md) — Admin Portal container (deployment + tech stack) |
 | **Upstream CONSTANTS** | [constants.json](constants.json) — session TTLs, page sizes, rate limits |
 
@@ -50,14 +50,14 @@ Core operations problems the portal solves:
 2. **Leaderboard management** — Admins view Top 500; public shows only Top 100 (`leaderboard_admin_view = 500`, `leaderboard_top_display = 100`)
 3. **GDPR compliance queue** — Handles erasure / data_access / restrict_processing / object_leaderboard / rectification requests across 5 request types
 4. **System configuration** — Runtime parameters (arena rate limit, rarity weights) and economy parameters (food buff multiplier) cached in Redis (TTL: `config_cache_refresh_time_minutes = 5`)
-5. **Audit log** — All CUD operations recorded, retained 2 years (`admin_audit_log_retention_years = 2`)
+5. **Audit log** — All CUD operations recorded, retained 2 years (`audit_logs_retention_years = 2`)
 
 ### §1.2 Design Principles
 
 - **Security-first**: RBAC minimum privilege; httpOnly + SameSite=Strict session cookie; every operation produces an audit log entry
 - **Operational efficiency**: Bulk operations + smart search (pet ID / email hash)
 - **Data consistency**: Shares the same database as the main system; admin reads configuration via Redis cache (TTL: 300 s; config_cache_refresh_time_minutes = 5)
-- **Auditability**: All CUD operations write to `admin_audit_log`, retained 2 years (`admin_audit_log_retention_years = 2`)
+- **Auditability**: All CUD operations write to `audit_logs`, retained 2 years (`audit_logs_retention_years = 2`)
 
 ### §1.3 User Roles (from EDD §3.7 + ARCH §5.1)
 
@@ -648,7 +648,7 @@ Implementation: Each route in `router/routes.ts` carries `meta.permission`. `Sid
 
 ### §7.15 Audit Log (`/admin/audit`)
 
-**Purpose**: Review all admin CUD operation records; any 12-month window search ≤ 3 s (admin_audit_log_search_response_time_seconds = 3)
+**Purpose**: Review all admin CUD operation records; any 12-month window search ≤ 3 s (audit_logs_search_response_time_seconds = 3)
 
 **Table columns**: Log ID, Admin Username, Action, Target Type, Target ID, Detail (JSONB summary), Created At
 
@@ -1162,7 +1162,7 @@ interface SearchableTableProps {
 
 ### §11.2 AuditLogDetail Component
 
-Renders the `admin_audit_log.detail` JSONB column with formatted key-value display; highlights `reason`, `previous_value`, `new_value`, and similar fields.
+Renders the `audit_logs.detail` JSONB column with formatted key-value display; highlights `reason`, `previous_value`, `new_value`, and similar fields.
 
 ```typescript
 interface AuditLogDetailProps {
@@ -1352,7 +1352,7 @@ Target: Element Plus uses automatic on-demand import (unplugin-auto-import + unp
 |--------|--------|--------|
 | Admin page load (including data) | < 3000 ms | admin_page_load_time_seconds = 3 |
 | Pet search response time | < 2000 ms | admin_search_response_time_seconds = 2 |
-| Audit log search (any 12-month window) | < 3000 ms | admin_audit_log_search_response_time_seconds = 3 |
+| Audit log search (any 12-month window) | < 3000 ms | audit_logs_search_response_time_seconds = 3 |
 | FCP (First Contentful Paint) | < 2000 ms | Derived from admin page load target |
 
 > **FCP deviation note**: Admin portal FCP target is relaxed to < 2000 ms (vs player app ≤ 1500 ms) consistent with the 3000 ms admin page load budget from PRD NFR-ADMIN-06. This is an intentional deviation from the project-wide FCP ≤ 1.5 s target.
@@ -1490,7 +1490,7 @@ location /admin/api/ {
 | IP rate limiting | 10 attempts per 15-minute window (admin_login_ip_rate_limit_attempts = 10, admin_login_ip_rate_limit_window_seconds = 900) |
 | IP allowlist | `ADMIN_ALLOWED_IPS` env var (CIDR list); requests outside allowlist receive 403 before credential check; required in production per NFR-ADMIN-07 (ARCH §5.1 accepted deviation: optional, default disabled) |
 | Password hashing | bcrypt, minimum work factor 12 (SCHEMA.md §2.10 comment) |
-| TOTP secret storage | AES-256-GCM encrypted in `admin_accounts.totp_secret_encrypted` |
+| TOTP secret storage | AES-256-GCM encrypted in `admin_users.totp_secret_encrypted` |
 | Backup codes | 10 single-use codes; SHA-256 hashes stored in `totp_backup_codes_hash` array |
 
 ### §16.2 Session Security
@@ -1513,9 +1513,9 @@ location /admin/api/ {
 
 ### §16.4 Audit Trail
 
-All CUD operations write to `admin_audit_log`:
+All CUD operations write to `audit_logs`:
 - Actor (`admin_id`), action, target type, target ID, detail (JSONB), IP hash, created at
-- Retained 2 years (admin_audit_log_retention_years = 2)
+- Retained 2 years (audit_logs_retention_years = 2)
 - IP addresses nulled after 90 days (ip_address_log_retention_days = 90)
 - Immutable — no delete or update operations are permitted
 
