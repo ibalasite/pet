@@ -262,6 +262,12 @@ Admin accounts lock after `admin_login_lockout_threshold = 10` consecutive faile
    FROM admin_users
    WHERE locked_until IS NOT NULL;
    ```
+2. Obtain the locked admin username from the incident report or PagerDuty alert, and confirm the account exists:
+   ```sql
+   SELECT username, locked_until, failed_login_count
+   FROM admin_users
+   WHERE username = '<username>';
+   ```
 3. Connect to the Supabase database (use the connection string from secrets manager, not from the locked-out admin's session):
    ```sql
    -- Find the locked account
