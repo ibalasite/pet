@@ -34,6 +34,8 @@
 
 ## Change Log
 
+This log records all revisions to this Product Design Document, including scope, author, and a brief summary of each change cycle.
+
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 1.0 | 2026-05-03 | AI Generated (gendoc pdd) | Initial draft generated from PRD-PIXEL-PET-ARENA-20260503 |
