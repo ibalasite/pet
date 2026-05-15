@@ -2436,9 +2436,145 @@ async function checkDbHealth(): Promise<{ status: 'ok' | 'degraded' | 'down'; la
 
 ---
 
-GEN_RESULT:
-  step_id: SCHEMA
-  type: SCHEMA
-  files_generated: docs/SCHEMA.md
-  sections_completed: 20
-  self_check_passed: true
+
+---
+
+## Seed Data
+
+> **目的**：讓 AI codegen 工具能直接使用 seed 資料初始化本地資料庫，無需人工推導測試資料。
+> 執行前提：所有 migration 已完成（pnpm run migrate:up）
+
+```sql
+-- ===== Seed Data（本地開發 + CI 測試用）=====
+
+-- BC: Identity
+INSERT INTO claim_identities (id, email_hash, email_encrypted, claim_token_hash, status, created_at) VALUES
+  ('11111111-0000-0000-0000-000000000001', 'sha256:abc001', 'enc:aes256gcm:abc001', 'hash:token:abc001', 'active', NOW()),
+  ('11111111-0000-0000-0000-000000000002', 'sha256:abc002', 'enc:aes256gcm:abc002', 'hash:token:abc002', 'claimed', NOW() - INTERVAL '7 days');
+
+-- BC: Pet（依賴 claim_identities）
+INSERT INTO pets (
+  id, claim_identity_id, seed, pet_name, pet_species, rarity,
+  stat_speed, stat_strength, stat_stamina, level, total_training_actions,
+  is_banned, created_at
+) VALUES
+  ('22222222-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001',
+   123456789, 'FluffBall', 'cat', 'rare', 55, 40, 45, 9, 90, false, NOW()),
+  ('22222222-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001',
+   987654321, 'ZapMaster', 'dog', 'common', 10, 10, 10, 1, 0, false, NOW()),
+  ('22222222-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000002',
+   111222333, 'BannedPet', 'rabbit', 'legendary', 80, 90, 85, 100, 1000, true, NOW() - INTERVAL '30 days');
+
+-- BC: Claim Codes（依賴 pets）
+INSERT INTO claim_codes (id, pet_id, code, status, expires_at, created_at) VALUES
+  ('33333333-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001',
+   '847291', 'pending', NOW() + INTERVAL '15 minutes', NOW()),
+  ('33333333-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000002',
+   '013847', 'claimed', NOW() - INTERVAL '1 hour', NOW() - INTERVAL '2 hours');
+
+-- BC: Arena
+INSERT INTO arena_matches (
+  id, pet_a_id, pet_b_id, mode, winner_pet_id, pet_a_stat_snapshot,
+  pet_b_stat_snapshot, random_seed, duration_ms, is_flagged, created_at
+) VALUES
+  ('44444444-0000-0000-0000-000000000001',
+   '22222222-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000002',
+   'race', '22222222-0000-0000-0000-000000000001',
+   '{"speed":55,"strength":40,"stamina":45}', '{"speed":10,"strength":10,"stamina":10}',
+   7654321, 8500, false, NOW() - INTERVAL '1 hour'),
+  ('44444444-0000-0000-0000-000000000002',
+   '22222222-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000003',
+   'sumo', '22222222-0000-0000-0000-000000000003',
+   '{"speed":10,"strength":10,"stamina":10}', '{"speed":80,"strength":90,"stamina":85}',
+   1122334, 12000, true, NOW() - INTERVAL '2 days');
+
+-- BC: Leaderboard
+INSERT INTO leaderboard_snapshots (id, pet_id, rank, win_count, total_battles, score, snapshot_at) VALUES
+  ('55555555-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001', 1, 50, 60, 9850, NOW()),
+  ('55555555-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000002', 999, 2, 5, 400, NOW());
+
+-- BC: Training Logs（依賴 pets）
+INSERT INTO training_logs (id, pet_id, training_type, stat_gained, stat_before, trained_at) VALUES
+  ('66666666-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001', 'speed', 2, 53, NOW() - INTERVAL '1 day'),
+  ('66666666-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000001', 'stamina', 3, 42, NOW() - INTERVAL '2 days');
+
+-- BC: Food Buffs（依賴 pets）
+INSERT INTO food_buffs (id, pet_id, buff_type, multiplier, expires_at, created_at) VALUES
+  ('77777777-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001', 'speed_boost', 1.5, NOW() + INTERVAL '4 hours', NOW()),
+  ('77777777-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000002', 'stamina_boost', 2.0, NOW() - INTERVAL '1 day', NOW() - INTERVAL '2 days');
+
+-- BC: GDPR Requests（依賴 claim_identities）
+INSERT INTO gdpr_requests (id, claim_identity_id, request_type, status, requested_at, completed_at) VALUES
+  ('99999999-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000002',
+   'erasure', 'pending', NOW(), NULL);
+```
+
+---
+
+## Admin Seed SQL
+
+> **目的**：建立初始 admin 帳號；`has_admin_backend = true`，`admin_users` 含 `totp_secret_encrypted` → TOTP MFA 強制初始化。
+
+```sql
+-- ===== Admin Bootstrap Seed（has_admin_backend=true）=====
+-- 執行前提：所有 migration 已完成
+-- ENV 設定：見下方「ENV 注入說明」
+
+INSERT INTO admin_users (
+  id, username, password_hash, totp_secret_encrypted,
+  role, status, created_at
+) VALUES (
+  gen_random_uuid(),
+  'admin',
+  '${ADMIN_PASSWORD_HASH}',          -- bcrypt(work_factor=12)，由 ENV 注入
+  '${ADMIN_TOTP_SECRET_ENCRYPTED}',  -- AES-256-GCM 加密的 TOTP secret，由 ENV 注入
+  'super_admin',
+  'active',
+  NOW()
+);
+```
+
+### ENV 注入說明
+
+```bash
+# 1. 生成 bcrypt 密碼 hash
+node -e "const bcrypt = require('bcryptjs'); bcrypt.hash(process.env.ADMIN_PASSWORD, 12).then(h => console.log('ADMIN_PASSWORD_HASH=' + h))"
+
+# 2. 生成 TOTP secret
+node -e "
+const speakeasy = require('speakeasy');
+const s = speakeasy.generateSecret({ name: 'Pixel Pet Arena Admin' });
+console.log('ADMIN_TOTP_SECRET=' + s.base32);
+console.log('ADMIN_TOTP_QR_URI=' + s.otpauth_url);
+"
+
+# 3. AES-256-GCM 加密 TOTP secret
+node -e "
+const crypto = require('crypto');
+const key = Buffer.from(process.env.ADMIN_TOTP_ENCRYPTION_KEY, 'hex');
+const iv = crypto.randomBytes(12);
+const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+let enc = cipher.update(process.env.ADMIN_TOTP_SECRET, 'utf8', 'hex') + cipher.final('hex');
+const tag = cipher.getAuthTag().toString('hex');
+console.log('ADMIN_TOTP_SECRET_ENCRYPTED=' + iv.toString('hex') + ':' + enc + ':' + tag);
+"
+```
+
+### 首次登入 TOTP Enrollment 流程
+
+```
+1. POST /admin/api/auth/login（username + password）
+2. 若 totp_secret_encrypted IS NULL → HTTP 403 TOTP_SETUP_REQUIRED + setupToken
+3. POST /admin/api/auth/totp/setup（setupToken）→ QR URI
+4. 掃描 QR（Google Authenticator / Authy）→ 6-digit TOTP
+5. POST /admin/api/auth/totp/verify（TOTP code）→ session 建立
+6. 後續每次登入：password → TOTP → Redis session（2-step）
+```
+
+### Account Lockout
+
+```
+連續 10 次失敗 → locked_until = NOW() + INTERVAL '30 minutes'
+手動解鎖：POST /admin/api/roles/:adminId/totp/reset（需 super_admin）
+```
+
