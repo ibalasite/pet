@@ -12,7 +12,7 @@
 |------|------|
 | **DOC-ID** | BRD-PIXEL-PET-ARENA-20260503 |
 | **專案名稱** | pixel-pet-arena |
-| **文件版本** | v1.0 |
+| **文件版本** | v1.2 |
 | **狀態** | DRAFT |
 | **作者** | AI Generated (gendoc brd) |
 | **日期** | 2026-05-03 |
@@ -27,6 +27,8 @@
 | 版本 | 日期 | 作者 | 變更摘要 |
 |------|------|------|---------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc brd) | 初稿（依 IDEA-PIXEL-PET-ARENA-20260503 自動生成）|
+| v1.1 | 2026-05-15 | AI Generated (gendoc review) | Review Round 1 修正：補充缺漏章節、修正格式問題、強化合規說明 |
+| v1.2 | 2026-05-15 | AI Generated (gendoc review) | Review Round 2 & 3 修正：統一 COPPA「未滿13歲 (under 13)」標注（§4.3、§9.4、§15 D3）、補充文件版本 |
 
 此文件追蹤所有對業務需求、範圍決策及利害關係人承諾的重大異動。版本號遞增代表範圍變更，下游文件（PRD、PDD、EDD）需同步評估影響並更新對應章節。
 
@@ -280,7 +282,7 @@ graph TD
 
 - ❌ **硬核 RPG / MMORPG 玩家**（原因：對養成深度和戰鬥機制複雜性要求遠超 MVP 範圍；已有 WoW、FF14 等專業選擇）
 - ❌ **P2E 區塊鏈遊戲玩家**（原因：需要錢包 + 鏈上資產，技術門檻高且與「無帳號」核心理念衝突；本產品聚焦娛樂而非投機）
-- ❌ **未滿13歲 (under 13) 兒童（主要目標族群）**（原因：Email 認領機制需要基本 email 使用能力；COPPA 法規禁止收集未滿13歲兒童個人資料，MVP 階段暫不優化此群體）
+- ❌ **未滿13歲 (under 13) 兒童（主要目標族群）**（原因：Email 認領機制需要基本 email 使用能力；COPPA 法規禁止收集未滿13歲 (under 13) 兒童個人資料，MVP 階段暫不優化此群體）
 
 ### 4.4 RACI Matrix
 
@@ -560,7 +562,7 @@ Input（我們可控的行動）
 - [ ] **Cookie 同意橫幅（Cookie Consent Banner）**：EU 用戶首次訪問時顯示 Cookie 說明並取得同意
 - [ ] **GDPR 刪除端點（Erasure Endpoint）**：`DELETE /api/auth/me` 端點實作完成，支援用戶自助請求 email 刪除（7 日內執行軟刪除）
 - [ ] **資料保留自動化（Data Retention Automation）**：認領 token 過期後 72 小時自動物理刪除；系統日誌 30/90 日自動歸檔
-- [ ] **COPPA 家長同意機制（若範圍擴展至未滿 13 歲）**：若未來產品範圍調整納入未滿 13 歲用戶，需在上線前完成家長同意（Verifiable Parental Consent）流程設計與法務審查
+- [ ] **COPPA 家長同意機制（若範圍擴展至未滿13歲 (under 13)）**：若未來產品範圍調整納入未滿13歲 (under 13) 用戶，需在上線前完成家長同意（Verifiable Parental Consent）流程設計與法務審查
 - [ ] **電子郵件合規審查**：所有 transactional email 模板通過 CAN-SPAM 合規審查（發件人真實、主旨說明、opt-out 連結）
 
 ### 9.5 Data Governance & Lifecycle Management（資料治理與生命週期管理）
@@ -705,7 +707,7 @@ timeline
 |---|---------|------|---------|---------|--------|---------|
 | D1 | 2026-05-03 | 是否在 MVP 包含寵物交易市場 | MVP 不包含交易市場，推遲至 DAU > 1,000 後引入 | 空洞市場無成交量；先驗證留存 Loop 比引入交易更重要；避免功能蔓延 | PM | §5.3 範圍、§3.1 O5 目標時程 |
 | D2 | 2026-05-03 | Email 認領機制：Magic Link vs. 密碼信 | 採用「密碼信」模式（6 位數字密碼手動輸入）而非直接 Magic Link | Email client 預掃描問題（Gmail/Outlook）會導致 Magic Link 提前失效，破壞用戶體驗 | Engineering Lead（待確認）| §5.5 auth BC 設計、EDD auth 選型 |
-| D3 | 2026-05-03 | 是否支援未滿13歲 (under 13) 兒童 | MVP 明確排除未滿13歲 (under 13) 兒童為主要目標族群 | COPPA 法規禁止收集未滿13歲兒童個人資料（含 email）；email 認領需基本 email 使用能力；MVP 資源有限 | PM + Legal（待確認）| §4.3 Not Our Users、§9.1 COPPA 合規 |
+| D3 | 2026-05-03 | 是否支援未滿13歲 (under 13) 兒童 | MVP 明確排除未滿13歲 (under 13) 兒童為主要目標族群 | COPPA 法規禁止收集未滿13歲 (under 13) 兒童個人資料（含 email）；email 認領需基本 email 使用能力；MVP 資源有限 | PM + Legal（待確認）| §4.3 Not Our Users、§9.1 COPPA 合規 |
 
 ---
 
