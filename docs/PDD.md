@@ -60,8 +60,6 @@
 |-------|----------|-----------------|----------------|
 | US-PET-001 | Animated pixel pet generation and display | §5.1 Landing Page, §6.5 Micro-interactions | §5.1 Landing Page |
 | US-PET-002 | Pet rarity tiers and visual differentiation | §5.1 Landing Page, §5.3 My Pet Page, §5.7 Leaderboard Page, §9.1 Color Palette | §5.3 My Pet Page |
-| US-PET-003 | Pet identity and unique pet URL | §5.2 Claim Pet Page, §5.3 My Pet Page, §4.1 Happy Path Flow | §5.2 Claim Pet Page |
-| US-PET-004 | Pet stat system (Speed, Strength, Stamina, Level) | §5.3 My Pet Page, §5.4 Training Page, §5.5 Arena Page | §5.3 My Pet Page |
 | US-AUTH-001 | Email-based claim flow with 6-digit code | §5.2 Claim Pet Page, §4.1 Happy Path Flow, §4.3 Error Flows, §10.2 | §5.2 Claim Pet Page |
 | US-AUTH-002 | Pet URL token access and session persistence | §5.3 My Pet Page, §4.2 Alternative Flows, §4.3 Error Flows | §5.3 My Pet Page |
 | US-TRAIN-001 | Daily training actions with stat increments | §5.4 Training Page, §6.5 (MI-03, MI-04, MI-12) | §5.4 Training Page |
@@ -71,10 +69,13 @@
 | US-BOARD-001 | Global leaderboard with top 100 ranking | §5.7 Leaderboard Page, §3.3 Content Priority | §5.7 Leaderboard Page |
 | US-RECORD-001 | Battle records and shareable pet profile | §5.8 Battle Records Page, §5.6 Battle Result Page, §10.2 | §5.8 Battle Records Page |
 | US-RARITY-001 | Rarity visual language across all surfaces | §9.1 Color Palette, §5.3 RarityBadge, §5.7 RarityFilter | §9.1 Color Palette |
+| US-TRADE-001 | Pet trading marketplace | §5.9 Marketplace Page, §4.2 Alternative Flows | §5.9 Marketplace Page |
 | US-ADMIN-001 | Admin pet management (ban/flag/search) | §15.3 Pet Management, §15.4 UX Decisions | §15.3 Pet Management |
 | US-ADMIN-002 | Admin leaderboard moderation with auto-flag | §15.3 Leaderboard Management, §15.4 UX Decisions | §15.3 Leaderboard Management |
 | US-ADMIN-003 | Runtime parameter tuning (rate limits, rarity weights) | §15.3 Arena Rate Config, §15.4 UX Decisions | §15.3 Arena Rate Config |
-| US-ONBOARD-001 | Zero-friction first impression and progressive disclosure | §5.1 Landing Page, §4.1 Happy Path Flow, §1.3 Design Principles | §5.1 Landing Page |
+| US-ADMIN-004 | GDPR data deletion processing | §15.3 User Management, §15.4 UX Decisions | §15.3 User Management |
+| US-ADMIN-005 | Suspicious battle detection | §15.3 Leaderboard Management, §15.4 UX Decisions | §15.3 Leaderboard Management |
+| US-ADMIN-006 | Game Economy Configuration (food buff multipliers, arena entry cost/cooldown) | §15.3 Economy Config, §15.4 UX Decisions | §15.3 Economy Config |
 
 ### §1.3 Design Principles
 
@@ -962,6 +963,8 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 
 ### §9.3 Design Token Three-Layer Architecture
 
+> **Note**: VDD §6 is the authoritative source for all design tokens. In case of conflict between values listed here and VDD §6, VDD §6 takes precedence. See [docs/VDD.md §6](VDD.md#6-design-tokens--three-layer-architecture) for canonical token values.
+
 **Layer 1 — Primitive Tokens** (raw values, no semantic meaning):
 
 ```css
@@ -992,9 +995,9 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 --primitive-shadow-lg: 6px 6px 0px var(--color-neutral-900);
 
 /* Primitive: Radius (pixel-art aesthetic — sharp by default, minimal rounding) */
---primitive-radius-sm: 0px;   /* Fully sharp corners — pixel-art buttons, badges, stat bars */
---primitive-radius-md: 2px;   /* Minimal rounding — input fields, tooltips */
---primitive-radius-lg: 4px;   /* Slight rounding — modals, cards, panels */
+--primitive-radius-none: 0px;    /* Pixel art: ALL game UI elements — buttons, badges, stat bars */
+--primitive-radius-sm: 2px;      /* Minor softening on input fields only */
+--primitive-radius-full: 9999px; /* Pill shapes (rarity filter tabs) */
 
 /* Primitive: Easing */
 --primitive-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1021,9 +1024,9 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 --space-section-inner: var(--primitive-space-12); /* 48px — inner section padding */
 
 /* Semantic: Radius */
---radius-sharp: var(--primitive-radius-sm);    /* 0px — primary pixel-art UI elements */
---radius-input: var(--primitive-radius-md);    /* 2px — form inputs, tooltips */
---radius-container: var(--primitive-radius-lg); /* 4px — cards, modals, panels */
+--radius-sharp: var(--primitive-radius-none);  /* 0px — primary pixel-art UI elements */
+--radius-input: var(--primitive-radius-sm);    /* 2px — form inputs, tooltips */
+--radius-pill: var(--primitive-radius-full);   /* 9999px — pill shapes (rarity filter tabs) */
 
 /* Semantic: Duration */
 --duration-interaction: var(--primitive-duration-fast);
@@ -1043,7 +1046,7 @@ All pixel-pet-arena typography uses a **two-family system**: `Press Start 2P` (p
 --button-primary-bg: var(--color-brand-primary);
 --button-primary-text: var(--color-neutral-50);
 --button-primary-hover-bg: color-mix(in oklch, var(--color-brand-primary), white 15%);
---button-border-radius: 0px; /* Pixel art: sharp corners */
+--button-border-radius: var(--primitive-radius-none); /* Pixel art: sharp corners */
 --button-border: 2px solid var(--color-neutral-900);
 --button-shadow: 4px 4px 0px var(--color-neutral-900); /* Pixel-art drop shadow */
 
@@ -1648,6 +1651,70 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 | `TempRemoveButton` | Amber ghost button | Brightens with amber glow | scale(0.97); amber deepens | Focus ring | Disabled if no reason entered | Spinner; aria-busy="true" | Error toast |
 | `PermanentBanButton` | Danger button, red border | Brightens with red glow | scale(0.97); red deepens | Focus ring | Disabled if no reason entered | Spinner; aria-busy="true" | Error toast: "Ban failed — retry or contact engineering" |
 
+**Arena Rate Config (`/admin/config/runtime`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `MaxBattlesInput` (numeric + slider) | Shows current value (1–50) with default indicator; pixel-art numeric input | Border brightens; slider thumb brightens | scale(0.98); border deepens | Visible focus ring on input and slider thumb | N/A | N/A | Red border with inline error if value out of range (1–50) |
+| `RarityWeightInputGroup` (4 inputs) | Four percentage inputs (Common, Rare, Epic, Legendary); live "Total: X%" indicator below | Each input border brightens | scale(0.98) on active input | Focus ring on each input | N/A | N/A | "Total" indicator turns red if sum ≠ 100%; inline error per field if out of valid range |
+| `PreviewChangesButton` | Ghost button; active once any value changed from current | Brightens | scale(0.97); border deepens | Focus ring | Disabled if no pending changes | Spinner | N/A |
+| `ApplyChangesButton` (in preview modal) | Primary button; only enabled after preview shown | Brightens | scale(0.97); background deepens | Focus ring | Disabled until preview reviewed | Spinner; aria-busy="true"; pointer-events: none | Error toast: "Config update failed — please retry" |
+
+**Economy Config (`/admin/config/economy`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `FoodBuffSlider` (temp + permanent, 0.5–5.0×) | Shows current multiplier value; example calculation rendered below each slider | Slider thumb brightens; example recalculates | scale(0.98) on active thumb | Focus ring on slider thumb | N/A | N/A | Red highlight if value is outside 0.5–5.0× range |
+| `ArenaCooldownInput` (0–60 min) | Numeric input showing current cooldown in minutes | Border brightens | scale(0.98) | Focus ring | N/A | N/A | Red border with inline error if value out of 0–60 range |
+| `ArenaEntryCostInput` (0–10 credits) | Numeric input showing current cost | Border brightens | scale(0.98) | Focus ring | N/A | N/A | Red border with inline error if value out of 0–10 range |
+| `EconomyPreviewModal` | Shows current vs. proposed values side-by-side diff; "Apply Changes" + "Cancel" buttons | Buttons brighten | scale(0.97) on each button | Focus ring; tab order: Cancel → Apply | "Apply" disabled while loading | Spinner on Apply button | Error toast on failed write |
+
+**Role Management (`/admin/roles`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `AdminAccountListRow` | Username, role badge, last login timestamp, active/inactive status badge | Row background shifts; detail panel preview shows on right | Row scale(0.99) | Row focusable; Enter opens detail panel | N/A | N/A | Error toast if account data fails to load |
+| `RoleSelector` (dropdown) | Shows current role (Super Admin / Moderator / Analyst / Support Agent) as badge | Border brightens; dropdown caret animates | scale(0.98) | Focus ring on select element | Disabled if current user lacks Super Admin role | N/A | Error toast if role save fails |
+| `ActiveToggle` | Shows current active/inactive state; color-coded (green active, grey inactive) | Toggle thumb brightens | Toggle animates slide | Focus ring on toggle | Disabled for own account (cannot deactivate self) | Spinner overlay | Error toast: "Toggle failed — please retry" |
+| `CreateAdminButton` | Primary button; always visible for Super Admin | Brightens | scale(0.97); background deepens | Focus ring | Disabled for non-Super-Admin roles | N/A | N/A |
+| `DeactivateButton` | Danger ghost button; visible in account detail panel | Brightens with red glow | scale(0.97) | Focus ring | Disabled for own account | Spinner; aria-busy="true" | Error toast: "Deactivation failed" |
+
+**Battle Records (`/admin/battle-records`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `BattleRecordsTable` | Paginated table: timestamp, pet IDs, arena mode, outcome, suspicious badge if flagged | Row highlights; suspicious rows glow amber | Row scale(0.99) | Row focusable; Enter opens battle detail | N/A | Skeleton rows while fetching | "Failed to load battle records" message with retry button |
+| `BattleRecordsSearchBar` | Empty input with placeholder "Search by pet ID or date range" | Border brightens | N/A | Pixel-art focus ring | N/A | Spinner while debouncing | Red border with inline error for invalid input |
+| `SuspiciousBadge` (on flagged rows) | Amber badge with "SUSPICIOUS" label | Badge brightens; tooltip shows detection reason | N/A | N/A (badge not interactive) | N/A | N/A | N/A |
+
+**Audit Log (`/admin/audit`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `AuditLogTable` | Paginated read-only table: timestamp, actor ID, action type badge (color-coded), target, summary, expand toggle | Row highlights; cursor pointer | Row scale(0.99) | Row focusable; Enter expands detail row | No edit/delete/bulk-select controls (immutability enforced) | Skeleton rows while fetching | "Failed to load audit log" message with retry button |
+| `AuditFilters` (date range, actor, action type) | Collapsed filter bar with current active filter indicators | Each filter input border brightens | N/A | Focus ring on each filter control | N/A | Spinner while filter results load | Error toast if filter query fails |
+| `CSVExportButton` | Ghost button with download icon (Super Admin only) | Brightens | scale(0.97) | Focus ring | Disabled for non-Super-Admin roles | Spinner; aria-busy="true"; pointer-events: none | Error toast: "Export failed — please retry" |
+| `ReadOnlyBadge` | "Read Only" badge in header with lock icon; always visible | No interaction state | N/A | N/A (decorative) | N/A | N/A | N/A |
+
+**Email Delivery Monitor (`/admin/email`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `DeliveryRateGauge` | Circular gauge showing delivery rate %; green ≥ 95%, amber 90–95%, red < 90% | Tooltip shows exact value and date range | N/A | N/A (display only) | N/A | Skeleton shimmer | "Data unavailable" with last-known timestamp |
+| `BounceRateIndicator` | Metric display with trend arrow; red if > 5% | Tooltip shows bounce count | N/A | N/A | N/A | Skeleton shimmer | "Data unavailable" |
+| `SpamComplaintIndicator` | Metric display; red if > 0.1% | Tooltip shows complaint count | N/A | N/A | N/A | Skeleton shimmer | "Data unavailable" |
+| `FailedDeliveryTable` | Paginated table of failed deliveries: recipient (masked), timestamp, failure reason, status | Row highlights | Row scale(0.99) | Row focusable | N/A | Skeleton rows while loading | "Failed to load delivery records" |
+| `ManualResendButton` (per row) | Ghost button with envelope icon | Brightens | scale(0.97) | Focus ring | Disabled if resend already attempted within 24h | Spinner; aria-busy="true" | Error toast: "Resend failed — contact SendGrid support" |
+
+**Analytics Dashboard (`/admin/analytics`)**
+
+| Component | Default | Hover | Active | Focus | Disabled | Loading | Error |
+|-----------|---------|-------|--------|-------|----------|---------|-------|
+| `DAPMetricCard` | Daily Active Pets count with 7-day sparkline; today vs. yesterday delta | Border brightens | N/A | N/A (display only) | N/A | Skeleton shimmer replacing value and sparkline | Red border with "Data unavailable" |
+| `ClaimConversionFunnelChart` | Stacked bar/funnel: Visitors → Pet Interactions → Claim Started → Claim Completed; conversion percentages at each step | Tooltip on hover showing exact counts and rates | N/A | N/A (display only) | N/A | Skeleton shimmer | "Conversion data unavailable" |
+| `ArenaBattlesChart` | Daily battles time-series line chart; current day highlighted | Tooltip on data points showing exact count | N/A | N/A (display only) | N/A | Skeleton shimmer | "Battle data unavailable" |
+| `Day7RetentionCohortTable` | Cohort table: week of claim, cohort size, Day-7 return %; color-coded by retention tier (green ≥ 20%, amber 10–20%, red < 10%) | Row highlights | N/A | N/A (read-only) | N/A | Skeleton rows | "Retention data unavailable" |
+
 ### §15.3.2 Admin Screen Interaction Specifications
 
 **Admin Dashboard Interactions**
@@ -1686,6 +1753,34 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 | "Temporary Remove" confirmed | Action panel closes; row moves to "Removed" section with amber badge | Panel slide out + row re-sort animation | 200ms + 300ms re-sort | Row animates to removed section; status badge changes |
 | "Permanent Ban" confirmed | Action panel closes; row disappears from leaderboard | Panel slide out + row fade-out (opacity 1 → 0) | 200ms + 400ms fade | Row fades out with red flash; toast confirms action |
 | Bulk select "Clear Flags" | Selected rows' suspicious badges clear simultaneously | Simultaneous badge fade-out | 300ms | All selected badges fade; checkboxes deselect |
+
+**Arena Rate Config Interactions**
+
+| Interaction Trigger | Action | Animation/Transition | Duration | Visual Feedback |
+|--------------------|--------|---------------------|----------|-----------------|
+| Admin changes MaxBattlesInput or RarityWeightInput | Input highlights; "Preview Changes" button activates | Input border brightens (ease-out-expo) | 150ms | Border color shifts to `--color-brand-primary`; Preview button changes from ghost to active |
+| RarityWeight values don't sum to 100% | "Total: X%" indicator turns red; "Preview Changes" button remains disabled | Color transition on Total indicator | 150ms | Red total label with "Must equal 100%" inline message |
+| "Preview Changes" clicked | Preview modal slides up from bottom; diff showing current vs. proposed values | ease-out-expo translateY 60px → 0 | 300ms | Focus traps in modal; background dims; diff rows highlight changed fields in amber |
+| "Apply Changes" confirmed in modal | Button enters loading state; modal closes on success; audit log notice appears as toast | scale(0.97) + spinner + ease-out-expo modal slide-down + toast slide-in | 200ms + async | "Config updated — effective within 5 minutes" success toast bottom-right |
+
+**Economy Config Interactions**
+
+| Interaction Trigger | Action | Animation/Transition | Duration | Visual Feedback |
+|--------------------|--------|---------------------|----------|-----------------|
+| Admin moves FoodBuffSlider | Example calculation below slider recalculates in real-time | Smooth value update (no animation — instant) | Instant | Example text updates (e.g., "Speed Berry gives +10 Speed at 2.0×") |
+| Admin changes ArenaCooldownInput or ArenaEntryCostInput | Input highlights; example calculation updates | Input border brightens | 150ms | Border shifts to `--color-brand-primary`; example row updates |
+| "Preview Changes" clicked | Preview modal slides up; three-section diff | ease-out-expo translateY 60px → 0 | 300ms | Focus traps; each changed field shown with old → new values; amber highlight on changed rows |
+| "Apply Changes" confirmed | Loading state; cache refresh notice; modal closes | scale(0.97) + spinner + modal slide-down + toast | 200ms + async | "Economy config updated — effective within 5 minutes" toast bottom-right |
+
+**Role Management Interactions**
+
+| Interaction Trigger | Action | Animation/Transition | Duration | Visual Feedback |
+|--------------------|--------|---------------------|----------|-----------------|
+| Admin account row clicked | Right-side detail panel slides in with role selector, toggle, and Save button | ease-out-expo translateX 40px → 0 | 250ms | Panel slides in; selected row highlighted with `--color-brand-primary` left border |
+| Role changed in detail panel | "Save Changes" button activates; role badge in list row updates optimistically | Badge color transition | 150ms | New role badge color previews in detail panel |
+| "Save Changes" clicked | Button enters loading state; success toast on completion; row role badge updates | scale(0.97) + spinner + toast slide-in | 200ms + async | "Role updated" success toast; row badge transitions to new role color |
+| "Create New Admin" clicked | Modal slides up from bottom with form fields | ease-out-expo translateY 60px → 0 | 300ms | Focus traps in modal; background dims |
+| "Deactivate" clicked | Confirmation dialog with warning text; "Confirm Deactivate" button | Confirmation dialog fade-in | 200ms | Warning icon; red-bordered confirm button; background dims |
 
 ### §15.4 Admin UX Design Decisions
 
@@ -1735,7 +1830,7 @@ Three-section form. Section 1 — Food Buff Multipliers: Sliders for temporary b
 | US-ADMIN-003 | AC-015-1 through AC-015-3 | §15.3 Arena Rate Config, §15.4 |
 | US-ADMIN-004 | AC-016-1 through AC-016-4 | §15.3 (User Management), §15.4 |
 | US-ADMIN-005 | AC-017-1 through AC-017-4 | §15.3 (Leaderboard Management), §15.4 |
-| US-ADMIN-006 | AC-018-1 through AC-018-3 | §15.3 (Economy Config), §15.4 |
+| US-ADMIN-006 | AC-018-1 through AC-018-4 | §15.3 (Economy Config), §15.4 |
 
 ### B. Screen Inventory
 
