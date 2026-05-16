@@ -11,11 +11,11 @@
 |------|------|
 | **DOC-ID** | EDD-PIXEL-PET-ARENA-20260503 |
 | **產品名稱** | Pixel Pet Arena |
-| **文件版本** | v2.1 |
+| **文件版本** | v2.2 |
 | **狀態** | DRAFT |
 | **作者** | AI Generated (gendoc edd) |
 | **建立日期** | 2026-05-03 |
-| **最後更新** | 2026-05-16 |
+| **最後更新** | 2026-05-17 |
 | **上游文件** | PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503 |
 | **下游文件** | SCHEMA.md, API.md, ARCH.md, BDD.md, test-plan.md, runbook.md |
 | **client_type** | web (HTML5 browser, no installation) |
@@ -30,6 +30,7 @@
 | v1.0 | 2026-05-03 | AI Generated (gendoc edd) | 初稿：從 PRD / PDD / VDD / CONSTANTS 生成完整工程設計文件 |
 | v2.0 | 2026-05-10 | AI Generated (gendoc edd review-r6) | 完整重寫：新增 §1.2 設計原則、§1.3 PRD 追溯表、§3.1 架構模式（Modular Monolith）、§3.1b Clean Architecture & SOLID、§3.2 ADR-001~004、§3.4 BC Schema Ownership Table、§3.6 HA/SPOF/SCALE/BCP、§3.7 Min-HA 架構圖、§4.3 跨模組 DAG 驗證、§4.5 UML 9 大圖（全 Mermaid）、§4.6 Domain Events、§8 Resilience（Bulkhead/Circuit Breaker）、§9 STRIDE+OWASP A01-A10、§9.6 RBAC、§10 Observability（SLO/SLI/Audit/Synthetic）、§11.2 Capacity Planning、§13 Deployment Strategy + DR + Runbook、§16 Implementation Plan + 依賴排序、§20 5 種 Feature Flag 類型、§21 三支柱可觀測性實作。所有 ASCII 圖改為 Mermaid，所有 PUML 改為 Mermaid。 |
 | v2.1 | 2026-05-16 | AI Generated (gendoc edd) | 新增 §3.8 Backend 目錄結構與 Plugin 掛載骨架（TypeScript + Fastify）：完整 monorepo 目錄樹（apps/api, apps/worker, apps/web, apps/admin, packages/shared）、6 步 Plugin 掛載順序（env→db→redis→auth→routes→errorHandler）、Admin Vue 3 目錄結構（router/stores/views/api 分層）；填入 `_CLIENT_ENGINE = "Phaser 3 over HTML5 Canvas"` 與 `_ADMIN_FRAMEWORK = "Vue3+ElementPlus+Vite"` 明確宣告供下游 codegen 使用。 |
+| v2.2 | 2026-05-17 | AI Generated (gendoc edd regen) | 規格更新後重新生成驗證：對齊 EDD.gen.md 最新規範（Pass-0/A/B/C 四階段檢視）。Quality Gate 全項通過：0 placeholder、全 Mermaid（無 ASCII art）、stateDiagram-v2 無 `<br/>`、§4.5 9 大 UML 完整、§4.5.2 Class Inventory 索引於 §4.5.10、§3.3 `_CLIENT_ENGINE`/`_ADMIN_FRAMEWORK` 已填具體值、§3.6 全部 Min Replicas ≥ 2、§3.6.3 SLO/RTO/RPO 數字具體（無 TBD）、§9.5 OWASP A01–A10 + STRIDE 6 威脅完整、§9.6 Admin RBAC 三角色（super_admin/moderator/read_only）+ endpoint 對照表完整。CONSTANTS.md / constants.json 同步維持 v1.0（無數值偏差）。 |
 
 ---
 
