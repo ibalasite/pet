@@ -1,68 +1,225 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/suspicious-detection.steps.ts
+// Step definitions for features/suspicious-detection.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('pet {string} has completed more than (bot_detection_battles_threshold = {int}) battles within the last (bot_detection_window_minutes = {int}) minutes', function (_token: string, _threshold: number, _window: number) {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions
+// ---------------------------------------------------------------------------
+
+Given('a moderator admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
+  // Set moderator session cookie on AppWorld — see API.md §2.2
+  // Token value is a test-only fixture credential, not a production secret
+  this.adminSessionCookie = 'admin-session=test-moderator-session-fixture';
+});
+
+Given('pet {string} exists with is_banned false', async function (this: AppWorld, petId: string) {
+  // Seed pets row with is_banned false — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false, suspicious_flag: false, owner_token_hash: `hash-of-token-${petId}` }],
+  });
+});
+
+Given('pet {string} exists with is_banned true', async function (this: AppWorld, petId: string) {
+  // Seed pets row with is_banned true — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: true, suspicious_flag: false, owner_token_hash: `hash-of-token-${petId}` }],
+  });
+});
+
+Given('pet {string} has {int} arena_matches rows with completedAt within the last {int} minutes', async function (this: AppWorld, petId: string, count: number, windowMinutes: number) {
+  // Seed N arena_matches rows within the rolling window — see SCHEMA.md arena_matches
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-susp-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opp-susp-${i}`,
+    winner_id: petId,
+    mode: 'RACE',
+    status: 'COMPLETED',
+    is_ai_opponent: false,
+    completed_at: new Date(Date.now() - (i * Math.floor((windowMinutes * 60 * 1000) / (count + 1)))).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
+});
+
+Given('pet {string} has exactly {int} arena_matches rows with completedAt within the last {int} minutes', async function (this: AppWorld, petId: string, count: number, windowMinutes: number) {
+  // Seed exactly N rows — boundary-condition variant of above
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-susp-exact-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opp-susp-exact-${i}`,
+    winner_id: petId,
+    mode: 'RACE',
+    status: 'COMPLETED',
+    is_ai_opponent: false,
+    completed_at: new Date(Date.now() - (i * Math.floor((windowMinutes * 60 * 1000) / (count + 1)))).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
+});
+
+Given('pet {string} has {int} arena_matches rows all with completedAt older than {int} minutes', async function (this: AppWorld, petId: string, count: number, windowMinutes: number) {
+  // Seed N rows outside the detection window — see EDD.md §bot-detection
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false, suspicious_flag: false }],
+  });
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-old-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opp-old-${i}`,
+    winner_id: petId,
+    mode: 'RACE',
+    status: 'COMPLETED',
+    is_ai_opponent: false,
+    completed_at: new Date(Date.now() - ((windowMinutes + 1 + i) * 60 * 1000)).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
+});
+
+Given('pet {string} has {int} arena_matches rows in the last {int} minutes', async function (this: AppWorld, petId: string, count: number, windowMinutes: number) {
+  // Seed rows within window — analytics event scenario variant
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false, suspicious_flag: false }],
+  });
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-ana-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opp-ana-${i}`,
+    winner_id: petId,
+    mode: 'RACE',
+    status: 'COMPLETED',
+    is_ai_opponent: false,
+    completed_at: new Date(Date.now() - (i * Math.floor((windowMinutes * 60 * 1000) / (count + 1)))).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
+});
+
+Given('pet {string} has suspicious_flag true in the database', async function (this: AppWorld, petId: string) {
+  // UPDATE pets SET suspicious_flag = true WHERE id = $1
+  await this.db.query('UPDATE pets SET suspicious_flag = true WHERE id = $1', [petId]);
+});
+
+Given('pet {string} is in the Redis sorted set {string}', async function (this: AppWorld, petId: string, key: string) {
+  // ZADD key score petId — see API.md §5.4
+  await this.redis.zadd(key, 80.0, petId);
+});
+
+Given('the pet owner holds token {string}', function (this: AppWorld, token: string) {
+  // Store auth token for subsequent When steps — see API.md §2.1
+  this.authToken = token;
+});
+
+// ---------------------------------------------------------------------------
+// When — triggering actions
+// ---------------------------------------------------------------------------
+
+When('the suspicious activity detection job runs', function (this: AppWorld) {
+  // Trigger bot-detection background job — see EDD.md §bot-detection
   return 'pending';
 });
 
-When('the background detection job evaluates battle counts for all active pets', function () {
+When('the admin sends GET \\/admin\\/api\\/suspicious', async function (this: AppWorld) {
+  // GET /admin/api/suspicious — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/admin/api/suspicious`,
+    headers: { Cookie: this.adminSessionCookie },
+  });
+});
+
+When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+  // POST /admin/api/pets/:petId/ban — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/admin/api/pets/${encodeURIComponent(petId)}/ban`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { reason },
+  });
+});
+
+When('{string} sends POST \\/api\\/v1\\/arena\\/enter with petId {string} mode {string} and acceptAI {word}', async function (this: AppWorld, token: string, petId: string, mode: string, acceptAIStr: string) {
+  // POST /api/v1/arena/enter — see API.md §5.3
+  const acceptAI = acceptAIStr === 'true';
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/arena/enter`,
+    headers: { Authorization: `Bearer ${token}` },
+    body: { petId, mode, acceptAI },
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response status is {int}', function (this: AppWorld, _status: number) {
   return 'pending';
 });
 
-Then('pet {string} status is updated to {string} in the database', function (_token: string, _status: string) {
+Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
   return 'pending';
 });
 
-Then('a moderation alert is created in the admin review queue for {string}', function (_token: string) {
+Then('the database pets row for {string} has suspicious_flag set to true', async function (this: AppWorld, petId: string) {
+  // SELECT suspicious_flag FROM pets WHERE id = $1 — expect true
+  const _rows = await this.db.query<{ suspicious_flag: boolean }>('SELECT suspicious_flag FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-Then('no automatic ban is applied — the pet remains able to battle until a moderator acts', function () {
+Then('the database pets row for {string} does NOT have suspicious_flag set to true', async function (this: AppWorld, petId: string) {
+  // SELECT suspicious_flag FROM pets WHERE id = $1 — expect false or null
+  const _rows = await this.db.query<{ suspicious_flag: boolean }>('SELECT suspicious_flag FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-Given('a moderator is authenticated with a valid httpOnly SameSite=Strict admin session cookie', function () {
+Then('the database admin_audit_log has a row with action {string} and target_id {string}', async function (this: AppWorld, action: string, targetId: string) {
+  // SELECT id FROM admin_audit_log WHERE action = $1 AND target_id = $2
+  const _rows = await this.db.query<{ id: string }>(
+    'SELECT id FROM admin_audit_log WHERE action = $1 AND target_id = $2',
+    [action, targetId],
+  );
   return 'pending';
 });
 
-Given('pet {string} has status {string} in the moderation queue', function (_token: string, _status: string) {
+Then('pet {string} is still able to enter arena battles \\(no automatic ban\\)', async function (this: AppWorld, petId: string) {
+  // SELECT is_banned FROM pets WHERE id = $1 — expect false
+  const _rows = await this.db.query<{ is_banned: boolean }>('SELECT is_banned FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-When('the moderator submits a ban action via POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {string}', function (_token: string, _reason: string) {
+Then('{string} appears in the response data with a SUSPICIOUS badge', function (this: AppWorld, _petId: string) {
   return 'pending';
 });
 
-Then('the reason text is fewer than (admin_moderation_reason_max_chars = {int}) characters', function (_maxChars: number) {
+Then('the database pets row for {string} has is_banned true', async function (this: AppWorld, petId: string) {
+  // SELECT is_banned FROM pets WHERE id = $1 — expect true
+  const _rows = await this.db.query<{ is_banned: boolean }>('SELECT is_banned FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-Then('the pet status is updated to {string} in the database', function (_status: string) {
+Then('the Redis sorted set {string} does NOT contain {string}', async function (this: AppWorld, key: string, petId: string) {
+  // ZRANK key petId — expect null after ban
+  const _rank = await this.redis.zrank(key, petId);
   return 'pending';
 });
 
-Then('an entry is written to admin_audit_log with action {string}, admin_id, ip_address_hash, and the reason in the detail JSONB column', function (_action: string) {
+Then('the database admin_audit_log has a row with action {string} and admin_id {string} and reason containing {string}', async function (this: AppWorld, action: string, adminId: string, _reasonFragment: string) {
+  // SELECT id FROM admin_audit_log WHERE action = $1 AND admin_id = $2 AND detail::text LIKE $3
+  const _rows = await this.db.query<{ id: string }>(
+    'SELECT id FROM admin_audit_log WHERE action = $1 AND admin_id = $2',
+    [action, adminId],
+  );
   return 'pending';
 });
 
-Then('the server responds with HTTP {int}', function (_status: number) {
+Then('a {string} analytics event is emitted with pet_id {string} and battles_in_window {int}', function (this: AppWorld, _eventName: string, _petId: string, _battles: number) {
+  // Assert analytics event payload — implementation-specific event bus check
   return 'pending';
 });
 
-Given('pet {string} has status {string} in the database', function (_token: string, _status: string) {
-  return 'pending';
-});
-
-When('{string} attempts to join the matchmaking queue via POST \\/api\\/v1\\/arena\\/enter', function (_token: string) {
-  return 'pending';
-});
-
-// NOTE: 'the server responds with HTTP {int}' is already defined above — no duplicate needed here
-
-Then('the response body contains error code {string}', function (_code: string) {
-  return 'pending';
-});
-
-Then('{string} is not added to the Redis matchmaking sorted set', function (_token: string) {
+Then('pet {string} is not added to the matchmaking queue', async function (this: AppWorld, petId: string) {
+  // ZRANK matchmaking:queue:RACE petId — expect null
+  const _rank = await this.redis.zrank('matchmaking:queue:RACE', petId);
   return 'pending';
 });

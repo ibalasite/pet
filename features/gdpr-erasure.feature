@@ -1,66 +1,83 @@
+@p0
 Feature: GDPR Data Erasure (US-AUTH-002, US-ADMIN-004)
+  As a pet owner exercising GDPR rights
+  I want to request erasure of my personal data
+  So that my email is removed while my pet history is preserved
 
-  @TC-SRV-GDPR-001
-  Scenario: Player requests email erasure and email_encrypted is nulled within the SLA
-    Given a pet owner with pet token "owner-token-gdpr" has a linked email "erasure@example.com" stored in email_encrypted
-    When the owner submits a GDPR erasure request to POST /api/v1/gdpr/request with body { "type": "erasure" }
-    Then the server enqueues an erasure job and responds with HTTP 202
-    And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column is set to NULL
+  Background:
+    Given a claimed pet "pet-gdpr-001" exists owned by claim identity "identity-gdpr-001" with email encrypted in claim_identities
+    And the pet owner holds token "token-gdpr-001" associated with "pet-gdpr-001"
 
-  @TC-SRV-GDPR-002
-  Scenario: Super admin processes GDPR deletion via the admin portal
-    Given a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
-    And a GDPR deletion request exists for pet token "owner-token-gdpr-admin"
-    When the admin submits a deletion action via POST /admin/api/gdpr/delete with the email hash and a reason
-    Then the server enqueues an erasure job and responds with HTTP 202
-    And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column for "owner-token-gdpr-admin" is set to NULL
-    And an entry is written to admin_audit_log with action "GDPR_DELETE" and the admin_id and ip_address_hash populated
+  @TC-E2E-GDPR-001-01 @contract @smoke
+  Scenario: Player submits GDPR erasure request and receives 202 with jobId
+    When "token-gdpr-001" sends POST /api/v1/gdpr/request with type "erasure"
+    Then the response status is 202
+    And the response body contains a "jobId" field
+    And the database table gdpr_requests has a row with status "pending" for "identity-gdpr-001"
 
-  @TC-SRV-GDPR-003
-  Scenario: GDPR email deletion completes within internal SLA and reports within external SLA
-    Given a player requests account deletion via email
-    When the GDPR request is processed
-    Then the email_encrypted column is set to NULL within (gdpr_email_hashing_internal_sla_hours = 24) hours
-    And the player receives deletion confirmation email within (gdpr_deletion_external_sla_days = 7) days
-    And all personal data is either:
-      - Anonymized (pet names → "Pet #123", player name removed)
-      - Deleted (claim codes, session tokens)
-      - Archived (audit logs for fraud detection, encrypted and no longer linked to player)
+  @TC-E2E-GDPR-001-02
+  Scenario: Email encrypted column is nulled within the internal SLA
+    Given a gdpr_requests row exists for "identity-gdpr-001" with status "pending"
+    When the GDPR background job processes the erasure for "identity-gdpr-001"
+    Then the database claim_identities row for "identity-gdpr-001" has email_encrypted set to null
+    And the database claim_identities row for "identity-gdpr-001" retains a non-null email_hash
+    And the gdpr_requests row status is "completed"
 
-  @TC-SRV-GDPR-004
-  Scenario: Player submits GDPR erasure request
-    Given a pet owner with a claimed pet and linked claim_identity_id
-    And a valid petToken for the pet
-    When POST /api/v1/gdpr/request is called with type = "erasure"
-    Then the system returns HTTP 202 with jobId and "Your GDPR request has been received..." message
-    And a gdpr_requests row is created with status = 'pending'
+  @TC-E2E-GDPR-001-03
+  Scenario: Erased pet is removed from Redis leaderboard
+    Given pet "pet-gdpr-001" exists in the Redis sorted set "leaderboard:global"
+    And the GDPR background job processes the erasure for "identity-gdpr-001"
+    When a GET request is made to /api/v1/leaderboard without authentication
+    Then "pet-gdpr-001" does NOT appear in the response "data.entries" array
 
-  @TC-SRV-GDPR-005
-  Scenario: GDPR-erased email cannot be re-registered immediately
-    Given an email "erased@example.com" that has been GDPR-deleted
-    And the email_hash is retained in claim_identities
-    When a new claim attempt is submitted with email = "erased@example.com"
-    Then the system rejects the claim request
+  @TC-E2E-GDPR-001-04
+  Scenario: Email hash is retained to prevent re-registration after erasure
+    Given a gdpr_requests row exists for "identity-gdpr-001" with status "completed"
+    And the claim_identities row for "identity-gdpr-001" has email_encrypted null and email_hash set
+    And a new unclaimed pet "pet-fresh-001" exists in the database
+    When the same email is submitted in POST /api/v1/claim with petId "pet-fresh-001" and ageConfirmed true
+    Then the database lookup finds the retained email_hash and prevents a duplicate identity
 
-  @TC-SRV-GDPR-006
-  Scenario: Erased pet displays with pseudonymous owner
-    Given a pet whose owner email has been erased
-    And the pet still has an arena history with visible battles
-    When GET /api/v1/pets/:petId is called
-    Then the pet data is returned (not deleted)
-    And owner email is not displayed
+  @TC-E2E-GDPR-001-05 @contract
+  Scenario: Player checks GDPR request status with matching identity
+    Given a gdpr_requests row "job-gdpr-001" exists for "identity-gdpr-001" with status "processing"
+    When "token-gdpr-001" sends GET /api/v1/gdpr/request/status with jobId "job-gdpr-001"
+    Then the response status is 200
+    And the response body field "status" is "processing"
+    And the response body contains "submittedAt" and "requestType" fields
 
-  @TC-SRV-GDPR-007
-  Scenario: Player checks GDPR request status
-    Given a submitted GDPR erasure request with jobId = "job-uuid-001"
-    And the player's petToken that initiated the request
-    When GET /api/v1/gdpr/request/status?jobId=job-uuid-001 is called
-    Then the system returns HTTP 200 with status, submittedAt, and completedAt fields
+  @TC-E2E-GDPR-001-06 @contract
+  Scenario: GDPR status check forbidden for a different identity
+    Given a gdpr_requests row "job-gdpr-other" exists for a different claim identity
+    When "token-gdpr-001" sends GET /api/v1/gdpr/request/status with jobId "job-gdpr-other"
+    Then the response status is 403
+    And the response body error code is "FORBIDDEN"
 
-  @TC-SRV-GDPR-008
-  Scenario: GDPR request status transitions
-    Given a GDPR erasure request initially in 'pending' status
-    When the background job begins processing
-    Then status transitions to 'processing'
-    When the background job completes successfully
-    Then status transitions to 'completed' and completed_at is set
+  @TC-E2E-GDPR-001-07 @contract
+  Scenario: GDPR status check returns 404 for nonexistent jobId
+    When "token-gdpr-001" sends GET /api/v1/gdpr/request/status with jobId "nonexistent-job-uuid"
+    Then the response status is 404
+    And the response body error code is "NOT_FOUND"
+
+  @TC-E2E-GDPR-001-08 @contract
+  Scenario: Unauthenticated GDPR request is rejected
+    When an unauthenticated POST request is made to /api/v1/gdpr/request with type "erasure"
+    Then the response status is 401
+    And the response body error code is "UNAUTHORIZED"
+
+  @TC-E2E-GDPR-001-09
+  Scenario: Super admin processes GDPR deletion via admin portal and audit log is written
+    Given a super_admin session cookie is set for admin user "admin-super-001"
+    And a gdpr_requests row "job-gdpr-admin-001" exists for "identity-gdpr-001" with status "pending"
+    When the admin sends POST /admin/api/gdpr/job-gdpr-admin-001/process
+    Then the response status is 200
+    And the database claim_identities row for "identity-gdpr-001" has email_encrypted set to null
+    And the database admin_audit_log has a row with action "GDPR_DELETION" and admin_id "admin-super-001"
+
+  @TC-E2E-GDPR-001-10
+  Scenario: Erased pet page still loads with pseudonymous data
+    Given the erasure for "identity-gdpr-001" is complete and email_encrypted is null
+    When a GET request is made to /api/v1/pets/pet-gdpr-001 without authentication
+    Then the response status is 200
+    And the response body does not contain any email field
+    And the response body "id" field is "pet-gdpr-001"

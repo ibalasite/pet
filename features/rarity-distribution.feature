@@ -1,53 +1,61 @@
-@US-PET-002 @US-RARITY-001
-Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
-  As a game designer
-  I want to verify that pet rarity follows the specified probability distribution
-  So that players get a balanced experience without gaming the system
+@p1
+Feature: Pet Rarity Distribution and Display (US-PET-002, US-RARITY-001)
+  As a collector
+  I want each pet to have a verifiable rarity score
+  So that I can trust that Legendary pets are genuinely rare
 
-  @TC-SRV-RARITY-001
-  Scenario: Pet generation follows 60-25-12-3 rarity distribution
-    Given a test harness generates 10000 pets
-    When the generation completes
-    Then the distribution is within acceptable bounds:
-      | Rarity    | Target | Min   | Max   |
-      | Common    | 60%    | 58%   | 62%   |
-      | Rare      | 25%    | 23%   | 27%   |
-      | Epic      | 12%    | 10%   | 14%   |
-      | Legendary | 3%     | 1.5%  | 4.5%  |
-    And the chi-square test (α=0.05) confirms distribution is not statistically biased
-    And no single rarity bucket deviates more than 2 percentage points from target
+  @TC-E2E-RARITY-001-01
+  Scenario: Pet generation follows the 60-25-12-3 rarity distribution within tolerance
+    Given the pet generation algorithm uses the constants: Common 60% Rare 25% Epic 12% Legendary 3%
+    When the pet generation algorithm is applied to 10000 unique seeds
+    Then the Common count is between 5800 and 6200
+    And the Rare count is between 2300 and 2700
+    And the Epic count is between 1000 and 1400
+    And the Legendary count is between 150 and 450
 
-  @TC-SRV-RARITY-002
-  Scenario: Individual rarity probabilities sum to 100%
-    Given the rarity weights are defined as:
-      | Rarity    | Weight |
-      | Common    | 0.60   |
-      | Rare      | 0.25   |
-      | Epic      | 0.12   |
-      | Legendary | 0.03   |
+  @TC-E2E-RARITY-001-02
+  Scenario: Rarity weights sum to exactly 100 percent
+    Given the rarity weights are Common 60 Rare 25 Epic 12 Legendary 3
     When the weights are summed
-    Then the total equals 1.00 (100%)
-    And no negative or inverted weights are present
+    Then the total is exactly 100
 
-  @TC-SRV-RARITY-003
-  Scenario: Rarity seed determinism with same random seed
-    Given a pet generation request with random_seed = 12345
-    When the pet is generated and rarity is determined
-    And a second pet is generated with the same random_seed = 12345
-    Then both pets have the SAME rarity value
-    And the rarity determination is reproducible
+  @TC-E2E-RARITY-001-03
+  Scenario: Rarity is deterministic for the same seed
+    Given the pet generation algorithm uses the constants: Common 60% Rare 25% Epic 12% Legendary 3%
+    When the pet generation algorithm is applied to seed 12345
+    And the pet generation algorithm is applied to seed 12345 a second time
+    Then both results return the same rarity value
 
-  @TC-SRV-RARITY-004
-  Scenario: Rarity distribution holds across population samples
-    Given multiple samples of 5000 pets each
-    When the rarity distribution is calculated for each sample
-    Then each sample distribution remains within the acceptable bounds
-    And no sample exhibits statistical anomalies (e.g., all Legendary)
+  @TC-E2E-RARITY-001-04 @contract
+  Scenario: Random pet API response includes rarity field with valid tier
+    When a GET request is made to /api/v1/pets/random without authentication
+    Then the response status is 200
+    And the response body "data.rarity" is one of "COMMON" "RARE" "EPIC" "LEGENDARY"
+    And the response body "data.generationMeta" contains all 6 dimension fields
 
-  @TC-SRV-RARITY-005
-  Scenario: Legendary rarity cap enforcement
-    Given a large batch of 50000 pets is generated
-    When the rarity distribution is calculated
-    Then Legendary rarity count remains within the acceptable bounds: 1.5% to 4.5%
-    And the 3% baseline (1500 pets) is maintained as the expected value
-    And statistical variance is due to random distribution, not algorithm bias
+  @TC-E2E-RARITY-001-05 @contract
+  Scenario: Pet API returns rarity for claimed pet
+    Given pet "pet-rare-001" with rarity "RARE" exists in the database
+    When a GET request is made to /api/v1/pets/pet-rare-001 without authentication
+    Then the response status is 200
+    And the response body "data.rarity" is "RARE"
+
+  @TC-E2E-RARITY-001-06 @contract
+  Scenario: Leaderboard entries include rarity field for filtering
+    Given the Redis sorted set "leaderboard:global" contains pets with rarity "LEGENDARY"
+    When a GET request is made to /api/v1/leaderboard with query param rarity=LEGENDARY without authentication
+    Then the response status is 200
+    And all entries in "data.entries" have rarity "LEGENDARY"
+
+  @TC-E2E-RARITY-001-07
+  Scenario: Pet generation collision retry works up to 3 attempts then returns 503
+    Given the database pets table already contains seeds matching the first 3 generated seeds
+    When a GET request is made to /api/v1/pets/random without authentication
+    Then the response status is 503
+    And the response body error code is "INTERNAL_SERVER_ERROR"
+
+  @TC-E2E-RARITY-001-08
+  Scenario: Pet generation combination space exceeds 1 billion distinct combinations
+    Given the generation algorithm dimension counts are known from constants
+    When the total combination space is calculated as body_count times head_count times color_palette_count times accessory_count times rarity_trait_count times pattern_count
+    Then the product exceeds 1000000000

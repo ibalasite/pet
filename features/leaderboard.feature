@@ -1,62 +1,69 @@
-Feature: Global Leaderboard (US-BOARD-001, US-ADMIN-002)
+@p0 @smoke
+Feature: Global Leaderboard (US-BOARD-001)
+  As a competitive player
+  I want to view a global leaderboard ranking all pets by performance
+  So that I have a clear goal to work toward
 
-  @TC-SRV-BOARD-001
-  Scenario: Leaderboard falls back to PostgreSQL snapshot when Redis is unavailable
-    Given the Redis Upstash instance is unreachable
-    And a PostgreSQL snapshot of leaderboard scores exists from the last sync
-    When a client requests GET /api/v1/leaderboard
-    Then the server responds with HTTP 200 using the PostgreSQL snapshot data
-    And the response body contains "degraded": true
+  Background:
+    Given the Redis sorted set "leaderboard:global" contains 150 entries with varying scores
 
-  @TC-SRV-BOARD-002
-  Scenario: Leaderboard score is updated within the configured lag window after a battle
-    Given pet "fast-pet-token" completes a Race battle and wins
-    And the win increments the battles_won counter on pet "fast-pet-token" in the pets table
-    When the leaderboard sync job runs against Redis using ZRANGE REV WITHSCORES
-    Then the updated score for "fast-pet-token" is visible in GET /api/v1/leaderboard within (leaderboard_update_lag_max_seconds = 30) seconds
-    And "fast-pet-token" appears at the correct rank position
+  @TC-E2E-BOARD-001-01 @contract @smoke
+  Scenario: Leaderboard returns top 100 pets publicly without authentication
+    When a GET request is made to /api/v1/leaderboard without authentication
+    Then the response status is 200
+    And the response body "data.entries" array contains exactly 100 entries
+    And each entry has fields: rank petId petName rarity level score winRate
+    And entries are ordered by score descending
+    And the response meta contains total page and limit fields
 
-  @TC-SRV-BOARD-003
-  Scenario: Admin ban removes pet from leaderboard within the reflection time
-    Given pet "cheating-pet-token" currently holds rank 3 on the leaderboard
-    And a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
-    When the admin issues a ban action via POST /admin/api/pets/cheating-pet-token/ban with a moderation reason under (admin_moderation_reason_max_chars = 500) characters
-    Then "cheating-pet-token" is removed from the Redis leaderboard sorted set
-    And within (leaderboard_ban_reflection_time_minutes = 5) minutes the pet no longer appears in GET /api/v1/leaderboard responses
-    And an entry is written to admin_audit_log with action "BAN" and detail containing the moderation reason
-
-  @TC-SRV-BOARD-004
-  Scenario: Leaderboard displays top 100 pets publicly
-    Given 200 pets with varying leaderboard scores in Redis leaderboard:global sorted set
-    When GET /api/v1/leaderboard with page=1, limit=100 is called without authentication
-    Then the system returns HTTP 200 with entries.length = 100
-    And each entry contains: rank, petId, petName, rarity, level, score, winRate
-    And entries are sorted by score descending (highest rank first)
-    And meta fields include total leaderboard size, page number, and limit
-
-  @TC-SRV-BOARD-005
+  @TC-E2E-BOARD-001-02
   Scenario: Leaderboard filterable by rarity tier
-    Given the leaderboard contains pets of all rarity tiers (COMMON, RARE, EPIC, LEGENDARY)
-    When GET /api/v1/leaderboard?rarity=EPIC is called
-    Then only EPIC-rarity pets are returned in the entries array
-    And meta.total reflects the filtered count
+    Given the Redis sorted set "leaderboard:global" contains pets of all rarity tiers
+    When a GET request is made to /api/v1/leaderboard with query param rarity=EPIC without authentication
+    Then the response status is 200
+    And all entries in "data.entries" have rarity "EPIC"
 
-  @TC-SRV-BOARD-006
-  Scenario: Leaderboard score calculation from formula
-    Given a pet with win_rate = 0.75, battles_played = 40, level = 5
-    When arena_score is calculated using: win_rate × battles_played × level_multiplier(5)
-    Then this score is used for leaderboard ranking
+  @TC-E2E-BOARD-001-03 @contract
+  Scenario: Individual pet rank is returned publicly
+    Given a pet "pet-rank-042" with score 87.4 exists in the leaderboard at rank 42
+    When a GET request is made to /api/v1/leaderboard/rank/pet-rank-042 without authentication
+    Then the response status is 200
+    And the response body field "rank" is 42
+    And the response body field "score" is 87.4
 
-  @TC-SRV-BOARD-007
-  Scenario: Pet rank query for individual pet
-    Given a pet with petId "pet-uuid-005" ranked 42nd on the leaderboard
-    When GET /api/v1/leaderboard/rank/pet-uuid-005 is called without authentication
-    Then the system returns HTTP 200 with rank = 42 and the calculated_score_value
+  @TC-E2E-BOARD-001-04 @contract
+  Scenario: Pet rank returns 404 for nonexistent pet
+    When a GET request is made to /api/v1/leaderboard/rank/nonexistent-pet-uuid without authentication
+    Then the response status is 404
+    And the response body error code is "PET_NOT_FOUND"
 
-  @TC-SRV-BOARD-008
-  Scenario: Erased GDPR pet removed from leaderboard
-    Given a pet belonging to a user who submitted GDPR erasure request
-    And the pet is currently ranked on the leaderboard
-    When the GDPR erasure background job completes
-    Then Redis ZREM is called to remove the pet from leaderboard:global
-    And subsequent GET /api/v1/leaderboard queries no longer include that pet
+  @TC-E2E-BOARD-001-05
+  Scenario: Leaderboard falls back to PostgreSQL snapshot when Redis is unavailable
+    Given Redis is unavailable
+    And the database table leaderboard_snapshots has a recent row with valid leaderboard data
+    When a GET request is made to /api/v1/leaderboard without authentication
+    Then the response status is 200
+    And the response body field "degraded" is true
+    And the response body "data.entries" is a non-empty array
+
+  @TC-E2E-BOARD-001-06
+  Scenario: Leaderboard score is updated within 30 seconds after a battle
+    Given pet "pet-board-001" completes a winning Race battle
+    And the battle result is persisted in arena_matches
+    When 30 seconds elapse for the leaderboard sync job to run
+    Then the Redis sorted set "leaderboard:global" contains "pet-board-001" with an updated score
+
+  @TC-E2E-BOARD-001-07
+  Scenario: Banned pet is removed from leaderboard within 5 minutes
+    Given pet "pet-board-002" exists in the Redis sorted set "leaderboard:global" at rank 10
+    And an admin session cookie is set for a moderator admin user
+    When the admin sends POST /admin/api/pets/pet-board-002/ban with reason "bot activity detected"
+    Then the response status is 200
+    And the Redis sorted set "leaderboard:global" does NOT contain "pet-board-002"
+    And the database admin_audit_log has a row with action "BAN" and pet_id "pet-board-002"
+
+  @TC-E2E-BOARD-001-08
+  Scenario: Leaderboard validation error for invalid rarity filter
+    When a GET request is made to /api/v1/leaderboard with query param rarity=INVALID without authentication
+    Then the response status is 400
+    And the response body error code is "VALIDATION_ERROR"

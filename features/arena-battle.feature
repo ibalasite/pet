@@ -1,63 +1,104 @@
+@p0 @smoke
 Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
+  As a competitive player
+  I want to enter my pet in arena battles
+  So that I can earn battle records and climb the leaderboard
 
-  @TC-SRV-ARENA-001
+  Background:
+    Given pet "pet-alpha" with speed 60 strength 40 stamina 50 level 5 exists and is owned with token "token-alpha"
+    And pet "pet-beta" with speed 55 strength 45 stamina 48 level 4 exists and is owned with token "token-beta"
+
+  @TC-E2E-ARENA-001-01 @contract @smoke
   Scenario: Two pets match and complete a Race battle
-    Given pet "alpha-token-abc" and pet "beta-token-xyz" are both in the matchmaking queue
-    And both pets have valid speed stats recorded in the database
-    When the matchmaking service pairs the two pets via ZPOPMIN from the Redis queue
-    Then a Race battle record is created with status "IN_PROGRESS" and mode "RACE"
-    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
-    And the pet with the higher effective speed (base stat plus up to ±15% random modifier) is recorded as the winner
-    And both pets receive updated win/loss counts in their profiles
+    Given pet "pet-alpha" has 0 battles this hour in Redis key "rl:arena:pet-alpha"
+    And pet "pet-beta" has 0 battles this hour in Redis key "rl:arena:pet-beta"
+    When "token-alpha" sends POST /api/v1/arena/enter with petId "pet-alpha" mode "RACE" and acceptAI false
+    And "token-beta" sends POST /api/v1/arena/enter with petId "pet-beta" mode "RACE" and acceptAI false
+    Then the response for "pet-alpha" has status 200
+    And the response body contains a "matchId" field
+    And the response body "result" is "WIN" or "LOSS"
+    And the database table arena_matches has a row with both "pet-alpha" and "pet-beta" and mode "RACE"
+    And the Redis leaderboard key "leaderboard:global" is updated within 30 seconds
 
-  @TC-SRV-ARENA-002
-  Scenario: AI fallback when no real opponent is available after timeout
-    Given pet "alpha-token-abc" has entered the matchmaking queue via POST /api/v1/arena/enter and is the only pet present
-    And (arena_matchmaking_timeout_seconds = 30) seconds pass without a second pet joining
-    When the matchmaking service triggers the AI fallback logic
-    Then a Race battle is created pairing "alpha-token-abc" against an AI bot opponent
-    And the battle record includes is_ai_opponent = true
-    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
+  @TC-E2E-ARENA-001-02 @smoke
+  Scenario: AI fallback resolves when no human opponent found within 30 seconds
+    Given pet "pet-alpha" has 0 battles this hour in Redis key "rl:arena:pet-alpha"
+    And no other pet is in the matchmaking queue for mode "RACE"
+    When "token-alpha" sends POST /api/v1/arena/enter with petId "pet-alpha" mode "RACE" and acceptAI true
+    Then the response status is 200
+    And the response body field "isAiOpponent" is true
+    And the database table arena_matches has a row with "pet-alpha" and is_ai_opponent true
 
-  @TC-SRV-ARENA-003
-  Scenario: Arena rate limit prevents excessive battles per hour
-    Given pet "alpha-token-abc" has already completed (arena_rate_limit_battles_per_hour_default = 10) battles within the current hour
-    When pet "alpha-token-abc" attempts to enter the matchmaking queue via POST /api/v1/arena/enter
-    Then the server responds with HTTP 429
-    And the response body contains error code "RATE_LIMIT_EXCEEDED"
-    And pet "alpha-token-abc" is not added to the matchmaking queue
+  @TC-E2E-ARENA-001-03 @contract
+  Scenario: Matchmaking timeout returns 408 when acceptAI is false
+    Given pet "pet-alpha" has 0 battles this hour in Redis key "rl:arena:pet-alpha"
+    And no other pet is in the matchmaking queue for mode "RACE"
+    When "token-alpha" sends POST /api/v1/arena/enter with petId "pet-alpha" mode "RACE" and acceptAI false
+    Then the response status is 408
+    And the response body error code is "MATCHMAKING_TIMEOUT"
+    And the Redis counter "rl:arena:pet-alpha" is NOT incremented
 
-  @TC-SRV-ARENA-004
-  Scenario: Sumo mode resolves outcome using strength stat instead of speed
-    Given pet "sumo-token-001" with strength 85 and speed 40 is queued for a Sumo battle
-    And pet "sumo-token-002" with strength 60 and speed 90 is queued for a Sumo battle
-    When the matchmaking service pairs the two pets for a Sumo match
-    Then a Sumo battle record is created with mode "SUMO"
-    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
-    And "sumo-token-001" is recorded as the winner because its higher effective strength stat wins
-    And the outcome is determined by the higher effective strength (base strength stat plus up to ±15% seeded random modifier)
+  @TC-E2E-ARENA-001-04 @smoke
+  Scenario: Arena rate limit blocks entry after 10 battles per hour
+    Given pet "pet-alpha" has 10 battles this hour in Redis key "rl:arena:pet-alpha"
+    When "token-alpha" sends POST /api/v1/arena/enter with petId "pet-alpha" mode "RACE" and acceptAI true
+    Then the response status is 429
+    And the response body error code is "RATE_LIMIT_EXCEEDED"
+    And the response header "Retry-After" is present
+    And pet "pet-alpha" is not added to the matchmaking queue
 
-  @TC-SRV-ARENA-005
-  Scenario: Player receives HTTP 429 when exceeding 10 battles per hour limit
-    Given a player has played 10 battles in the current hour
-    When the player attempts to start another battle via POST /api/v1/arena/enter
-    Then the API returns HTTP 429 Too Many Requests
-    And the response includes a Retry-After header with value in seconds
-    And the response body contains the message "Battle rate limit exceeded. Please wait [countdown] minutes before your next battle."
-    And the client displays a countdown timer showing remaining wait time
-    And the countdown is accurate within ±5 seconds
+  @TC-E2E-ARENA-001-05
+  Scenario: Battle outcome is deterministic with the same seed
+    Given pet "pet-gamma" with speed 50 strength 30 stamina 40 level 3 exists and is owned with token "token-gamma"
+    And pet "pet-delta" with speed 45 strength 35 stamina 38 level 3 exists and is owned with token "token-delta"
+    And the battle engine is seeded with fixed random_seed 12345
+    When battle outcome is calculated for "pet-gamma" vs "pet-delta" in mode "RACE" twice
+    Then both calculations return the same winnerId
+    And both battleLog event sequences are identical
 
-  @TC-SRV-ARENA-006
-  Scenario: Battle outcome is deterministic with same seed
-    Given petA (stat_speed = 50) and petB (stat_speed = 45) battle with fixed random_seed = 12345
-    When the battle is calculated twice independently
-    Then both calculations return the same winner and stat_delta values
-    And battleLog event sequences are identical
-    And the outcome can be replayed deterministically for viewing
+  @TC-E2E-ARENA-001-06 @contract
+  Scenario: Banned pet cannot enter arena
+    Given the pet "pet-alpha" is banned with is_banned true in the database
+    When "token-alpha" sends POST /api/v1/arena/enter with petId "pet-alpha" mode "RACE" and acceptAI false
+    Then the response status is 403
+    And the response body error code is "PET_BANNED"
 
-  @TC-SRV-ARENA-007
-  Scenario: Arena entry with authentication failures
-    Given a request to POST /api/v1/arena/enter WITHOUT authentication header
-    When the request is submitted
-    Then the system returns HTTP 401 with error code UNAUTHORIZED
-    And no matchmaking entry is created
+  @TC-E2E-ARENA-001-07 @contract
+  Scenario: Unauthenticated arena entry is rejected
+    When an unauthenticated POST request is made to /api/v1/arena/enter with petId "pet-alpha" mode "RACE"
+    Then the response status is 401
+    And the response body error code is "UNAUTHORIZED"
+
+  @TC-E2E-ARENA-001-08 @contract
+  Scenario: Token that does not own the pet is rejected
+    When "token-beta" sends POST /api/v1/arena/enter with petId "pet-alpha" mode "RACE" and acceptAI false
+    Then the response status is 403
+    And the response body error code is "NOT_OWNER"
+
+  @TC-E2E-ARENA-001-09 @contract
+  Scenario: Battle record is publicly readable by match ID
+    Given an arena match "match-001" exists with winnerId "pet-alpha" and mode "RACE"
+    When a GET request is made to /api/v1/arena/match/match-001 without authentication
+    Then the response status is 200
+    And the response body field "matchId" is "match-001"
+    And the response body field "mode" is "RACE"
+    And the response body field "winnerId" is "pet-alpha"
+
+  @TC-E2E-ARENA-001-10 @contract
+  Scenario: Battle history returns last 20 battles for a pet
+    Given pet "pet-alpha" has 25 arena_matches records in the database
+    When a GET request is made to /api/v1/arena/history/pet-alpha without authentication
+    Then the response status is 200
+    And the response body "battles" array contains exactly 20 entries
+    And each entry has fields: matchId mode opponentPetId result completedAt
+
+  @TC-E2E-ARENA-002-01 @contract
+  Scenario: Sumo mode resolves using strength stat not speed
+    Given pet "pet-sumo-strong" with speed 30 strength 90 stamina 50 level 4 exists and is owned with token "token-sumo-strong"
+    And pet "pet-sumo-fast" with speed 90 strength 30 stamina 50 level 4 exists and is owned with token "token-sumo-fast"
+    And both pets have 0 battles this hour
+    And the battle engine is seeded with fixed random_seed 99999
+    When "token-sumo-strong" sends POST /api/v1/arena/enter with petId "pet-sumo-strong" mode "SUMO" and acceptAI false
+    And "token-sumo-fast" sends POST /api/v1/arena/enter with petId "pet-sumo-fast" mode "SUMO" and acceptAI false
+    Then the database arena_matches row has mode "SUMO"
+    And the battle record winnerId is "pet-sumo-strong" reflecting the higher strength stat

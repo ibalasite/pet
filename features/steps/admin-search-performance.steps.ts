@@ -1,138 +1,138 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/admin-search-performance.steps.ts
+// Step definitions for features/admin-search-performance.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('the database contains {int} pet records', function (_count: number) {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions
+// ---------------------------------------------------------------------------
+
+Given('a moderator admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
+  // Set moderator session cookie on AppWorld — see API.md §2.2
+  // Token value is a test-only fixture credential, not a production secret
+  this.adminSessionCookie = 'admin-session=test-moderator-session-fixture';
+});
+
+Given('a read_only admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
+  // Set read_only session cookie on AppWorld — see API.md §2.2
+  this.adminSessionCookie = 'admin-session=test-readonly-session-fixture';
+});
+
+Given('the database contains at least {int} pets rows', function (this: AppWorld, _count: number) {
+  // Large-volume seed is infrastructure-level setup — deferred to test environment provisioning
+  // The 1M pets dataset is typically pre-loaded in the perf test environment, not seeded per scenario
   return 'pending';
 });
 
-Given('search index on (owner_email, pet_name, status) is active', function () {
+Given('a pet with id {string} exists in the database', async function (this: AppWorld, petId: string) {
+  // Seed the specific pet that will be searched — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'RARE', level: 5, stat_speed: 60, stat_strength: 60, stat_stamina: 60, is_banned: false }],
+  });
+});
+
+Given('a pet {string} exists with owner email {string} stored encrypted', async function (this: AppWorld, petId: string, _email: string) {
+  // Seed pet row — email stored in claim_identities.email_encrypted, not in pets — see SCHEMA.md
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false }],
+    claim_identities: [{
+      id: `identity-${petId}`,
+      pet_id: petId,
+      email_encrypted: 'encrypted-owner-email-placeholder',
+      email_hash: `hash-of-${petId}-email`,
+      created_at: new Date().toISOString(),
+    }],
+  });
+});
+
+// ---------------------------------------------------------------------------
+// When — triggering actions
+// ---------------------------------------------------------------------------
+
+When('the admin sends GET \\/admin\\/api\\/pets with search param {string}', async function (this: AppWorld, searchParam: string) {
+  // GET /admin/api/pets?search=... — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  const qs = new URLSearchParams({ search: searchParam }).toString();
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/admin/api/pets?${qs}`,
+    headers: { Cookie: this.adminSessionCookie },
+  });
+});
+
+When('the admin sends GET \\/admin\\/api\\/pets with page {int} and limit {int}', async function (this: AppWorld, page: number, limit: number) {
+  // GET /admin/api/pets?page=N&limit=N — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  const qs = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/admin/api/pets?${qs}`,
+    headers: { Cookie: this.adminSessionCookie },
+  });
+});
+
+When('an unauthenticated GET request is made to \\/admin\\/api\\/pets', async function (this: AppWorld) {
+  // GET /admin/api/pets — no cookie — expect 401 — see API.md §2.3
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/admin/api/pets`,
+  });
+});
+
+When('the read_only admin sends GET \\/admin\\/api\\/pets with page {int} and limit {int}', async function (this: AppWorld, page: number, limit: number) {
+  // GET /admin/api/pets — read_only role — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the read_only admin');
+  const qs = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/admin/api/pets?${qs}`,
+    headers: { Cookie: this.adminSessionCookie },
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response status is {int}', function (this: AppWorld, _status: number) {
   return 'pending';
 });
 
-Given('the index covers the filtering conditions (status in BANNED, FLAGGED; rarity in EPIC, LEGENDARY; created_after)', function () {
+Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
   return 'pending';
 });
 
-When('an admin searches for pets matching query {string} with filters:', function (_query: string, _table: unknown) {
+Then('the response body {string} array contains {string}', function (this: AppWorld, _field: string, _value: string) {
   return 'pending';
 });
 
-Then('the search returns results within {int} seconds', function (_seconds: number) {
+Then('the response was received within {int} milliseconds', function (this: AppWorld, _ms: number) {
+  // TODO: assert (Date.now() - requestStartTime) <= _ms
+  // requestStartTime must be captured in the When step
   return 'pending';
 });
 
-Then('the result set includes up to {int} matching records', function (_count: number) {
+Then('each entry in the response body {string} array has petId rarity level arenaRecord createdAt fields', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('pagination cursor is provided for additional results', function () {
+Then('the response meta contains total page and limit fields', function (this: AppWorld) {
   return 'pending';
 });
 
-Then('search logs query time, result count, and index hit rate for monitoring', function () {
+Then('the response body {string} array is empty', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Given('the admin search index is active', function () {
+Then('the response meta field {string} is {int}', function (this: AppWorld, _field: string, _value: number) {
   return 'pending';
 });
 
-When('multiple search queries are executed:', function (_table: unknown) {
+Then('the response body entry for {string} does not contain a plaintext email field', function (this: AppWorld, _petId: string) {
+  // TODO: parse response data array, find entry with petId === _petId, assert no /email/i key
   return 'pending';
 });
 
-Then('all queries return within the specified time envelope', function () {
-  return 'pending';
-});
-
-Then('P95 latency remains consistent across the test run', function () {
-  return 'pending';
-});
-
-Given('concurrent search queries are running (admin1 searches, admin2 searches)', function () {
-  return 'pending';
-});
-
-When('both searches are executed simultaneously', function () {
-  return 'pending';
-});
-
-Then('both complete within {int} seconds', function (_seconds: number) {
-  return 'pending';
-});
-
-Then('neither query blocks the other', function () {
-  return 'pending';
-});
-
-Then('no {string} errors are returned', function (_errorType: string) {
-  return 'pending';
-});
-
-Then('query logs show no lock contention', function () {
-  return 'pending';
-});
-
-Given('a query that matches zero pets (e.g., rarity=NONEXISTENT)', function () {
-  return 'pending';
-});
-
-When('the query is executed', function () {
-  return 'pending';
-});
-
-Then('the response returns within {int}ms', function (_ms: number) {
-  return 'pending';
-});
-
-Then('an empty result set is returned', function () {
-  return 'pending';
-});
-
-Then('error message indicates {string}', function (_message: string) {
-  return 'pending';
-});
-
-Given('the admin performs {int} searches over a {int}-minute period', function (_count: number, _minutes: number) {
-  return 'pending';
-});
-
-When('the search log is analyzed', function () {
-  return 'pending';
-});
-
-Then('index_hit_rate >= 95% (at least 95 queries used the index)', function () {
-  return 'pending';
-});
-
-Then('any index scans (sequential table scans) are logged as warnings', function () {
-  return 'pending';
-});
-
-Then('DBA is alerted if hit_rate drops below 90%', function () {
-  return 'pending';
-});
-
-Given('a search returns {int} matching records', function (_count: number) {
-  return 'pending';
-});
-
-When('the first page ({int} records) is requested', function (_count: number) {
-  return 'pending';
-});
-
-Then('the response returns within {int} seconds', function (_seconds: number) {
-  return 'pending';
-});
-
-When('the pagination cursor is used to fetch page {int}', function (_page: number) {
-  return 'pending';
-});
-
-Then('the next page also returns within {int} seconds', function (_seconds: number) {
-  return 'pending';
-});
-
-Then('cursor-based pagination does not require recalculating the entire result set', function () {
+Then('the response body {string} is a non-empty array', function (this: AppWorld, _field: string) {
   return 'pending';
 });

@@ -1,114 +1,94 @@
-@US-TRADE-001 @FF_MARKETPLACE
-Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-TRADE-001) [FF_MARKETPLACE]
-  As a pet owner
-  I want to list my pet for sale in the marketplace
-  So that I can trade pets with other players
+@p2 @FF_MARKETPLACE
+Feature: Pet Trading Marketplace (US-TRADE-001)
+  As a pet owner with surplus pets
+  I want to list my pet for trade and accept offers from other players
+  So that I can exchange pets and build my ideal collection
 
-  @TC-SRV-TRADE-001
-  Scenario: Feature flag controls marketplace access
-    Given FF_MARKETPLACE = false (feature disabled)
-    When POST /api/v1/marketplace/listings is called with a valid petToken
-    Then the system returns HTTP 403 with error code FEATURE_DISABLED
-    And error message is "The marketplace feature is not currently available"
-    When FF_MARKETPLACE is set to true
-    And the same request is resubmitted
-    Then the system returns HTTP 201 with created listing
+  Background:
+    Given the feature flag FF_MARKETPLACE is enabled
+    And pet "pet-trade-seller" with level 5 rarity "RARE" exists and is owned with token "token-seller"
+    And pet "pet-trade-buyer" with level 3 rarity "COMMON" exists and is owned with token "token-buyer"
 
-  @TC-SRV-TRADE-002
-  Scenario: Create marketplace listing with price validation
-    Given a pet owned by player A with petToken_A
-    And pet stats: level = 5, rarity = RARE
-    And minimum price formula: (level × 100) + (rarity_multiplier × 500) = (5 × 100) + (2 × 500) = 1500
-    When POST /api/v1/marketplace/listings is called with price_credits = 2000
-    Then the system returns HTTP 201 with:
-      | Field | Value |
-      | id | listing_uuid |
-      | status | active |
-      | price_credits | 2000 |
-      | listed_at | ISO-8601 timestamp |
-    And marketplace_listings row is created in PostgreSQL
+  @TC-E2E-TRADE-001-01 @contract
+  Scenario: Feature flag disabled returns FEATURE_DISABLED error
+    Given the feature flag FF_MARKETPLACE is disabled
+    When "token-seller" sends POST /api/v1/marketplace/listings with petId "pet-trade-seller" price 1200 description "Well trained"
+    Then the response status is 403
+    And the response body error code is "FEATURE_DISABLED"
 
-  @TC-SRV-TRADE-003
-  Scenario: Listing price below minimum rejected
-    Given a pet with minimum required price = 1500 credits
-    When POST /api/v1/marketplace/listings is called with price_credits = 1400
-    Then the system returns HTTP 400 with error code VALIDATION_ERROR
-    And error message indicates minimum price requirement
-    And no listing is created
+  @TC-E2E-TRADE-001-02 @contract @smoke
+  Scenario: Seller creates a marketplace listing at or above minimum price
+    Given the minimum price for "pet-trade-seller" is 1500 based on level 5 and rarity multiplier 2
+    When "token-seller" sends POST /api/v1/marketplace/listings with petId "pet-trade-seller" price 1500 description "Ready to sell"
+    Then the response status is 201
+    And the response body contains a "listingId" field
+    And the response body field "petId" is "pet-trade-seller"
+    And the database marketplace_listings has a row for "pet-trade-seller" with status "active"
 
-  @TC-SRV-TRADE-004
-  Scenario: Anti-flip protection prevents rapid re-listing
-    Given a pet sold in marketplace_transactions 3 days ago (within 7-day anti-flip window)
-    And the same pet is owned by a new buyer (marketplace_trade_antiflip_protection_days = 7)
-    When POST /api/v1/marketplace/listings is called to list the pet again
-    Then the system returns HTTP 400 with error code VALIDATION_ERROR
-    And error message is "This pet cannot be re-listed within 7 days of purchase"
-    And no new listing is created
+  @TC-E2E-TRADE-001-03 @contract
+  Scenario: Listing price below minimum formula is rejected
+    Given the minimum price for "pet-trade-seller" is 1500
+    When "token-seller" sends POST /api/v1/marketplace/listings with petId "pet-trade-seller" price 1400 description "Cheap"
+    Then the response status is 400
+    And the response body error code is "VALIDATION_ERROR"
+    And no marketplace_listings row is created
 
-  @TC-SRV-TRADE-005
-  Scenario: Purchase listing transfers ownership and applies platform fee
-    Given an active listing with price_credits = 1000 owned by seller_A
-    And buyer_B with a valid petToken and sufficient credits
-    And platform fee = 5% of price (trade_transaction_fee_percent = 5)
-    When POST /api/v1/marketplace/listings/:listingId/buy is called with buyer_B's token
-    Then the system returns HTTP 200
-    And marketplace_transactions record is created with:
-      | Field | Value |
-      | listing_id | listing_uuid |
-      | pet_id | pet_uuid |
-      | price_credits | 1000 |
-      | fee_credits | FLOOR(1000 × 0.05) = 50 |
-      | seller_token_hash | SHA-256(seller_A_token) |
-      | buyer_token_hash | SHA-256(buyer_B_token) |
-      | completed_at | current timestamp |
-    And marketplace_listings.status is updated to 'sold'
-    And marketplace_listings.completed_at is set
-    And seller_A receives 950 credits (1000 - 50 fee)
-    And buyer_B receives ownership of the pet
+  @TC-E2E-TRADE-001-04 @contract
+  Scenario: Anti-flip protection prevents re-listing within 7 days of purchase
+    Given pet "pet-trade-seller" was purchased from marketplace 3 days ago by the current owner
+    When "token-seller" sends POST /api/v1/marketplace/listings with petId "pet-trade-seller" price 1500 description "Relisting"
+    Then the response status is 400
+    And the response body error code is "VALIDATION_ERROR"
 
-  @TC-SRV-TRADE-006
-  Scenario: Cancel active listing
-    Given an active listing created by player_A
-    When DELETE /api/v1/marketplace/listings/:listingId is called with player_A's petToken
-    Then the system returns HTTP 200
-    And marketplace_listings.status is updated to 'cancelled'
-    And marketplace_listings.completed_at is set to NOW()
-    And the pet remains owned by player_A
+  @TC-E2E-TRADE-001-05 @contract @smoke
+  Scenario: Buyer purchases listing with atomic ownership transfer and 5 percent fee
+    Given an active listing "listing-001" for "pet-trade-seller" at price 1000
+    When "token-buyer" sends POST /api/v1/marketplace/listings/listing-001/buy
+    Then the response status is 200
+    And the response body field "platformFee" is 50
+    And the response body field "sellerProceeds" is 950
+    And the database marketplace_listings row for "listing-001" has status "sold"
+    And the database pets row for "pet-trade-seller" has owner_token_hash matching "token-buyer"
+    And the database marketplace_transactions has a row with transactionId and price 1000 and platformFee 50
 
-  @TC-SRV-TRADE-007
-  Scenario: Only listing owner can cancel
-    Given an active listing owned by player_A with listingId "list-001"
-    And player_B with a different petToken
-    When DELETE /api/v1/marketplace/listings/list-001 is called with player_B's token
-    Then the system returns HTTP 403 with error code NOT_OWNER
-    And the listing remains active
+  @TC-E2E-TRADE-001-06
+  Scenario: Seller cancels active listing
+    Given an active listing "listing-002" for "pet-trade-seller"
+    When "token-seller" sends DELETE /api/v1/marketplace/listings/listing-002
+    Then the response status is 200
+    And the database marketplace_listings row for "listing-002" has status "cancelled"
+    And the database pets row for "pet-trade-seller" still has owner_token_hash matching "token-seller"
 
-  @TC-SRV-TRADE-008
-  Scenario: Purchase endpoint requires buyer authentication
-    Given an active listing
-    When POST /api/v1/marketplace/listings/:listingId/buy is called WITHOUT authentication
-    Then the system returns HTTP 401 with error code UNAUTHORIZED
-    And the listing is not marked as sold
+  @TC-E2E-TRADE-001-07 @contract
+  Scenario: Non-owner cannot cancel listing
+    Given an active listing "listing-003" for "pet-trade-seller"
+    When "token-buyer" sends DELETE /api/v1/marketplace/listings/listing-003
+    Then the response status is 403
+    And the response body error code is "NOT_OWNER"
+    And the database marketplace_listings row for "listing-003" still has status "active"
 
-  @TC-SRV-TRADE-009
-  Scenario: Browse marketplace listings
-    Given 50 active marketplace listings with varying prices and rarities
-    When GET /api/v1/marketplace/listings?page=1&limit=20&sortBy=price&order=asc is called
-    Then the system returns HTTP 200 with:
-      | Field | Value |
-      | listings.length | 20 |
-      | meta.total | 50 |
-      | meta.page | 1 |
-    And listings are sorted by price ascending (lowest to highest)
-    And each listing includes pet summary: petId, rarity, level, owner name (masked)
+  @TC-E2E-TRADE-001-08 @contract
+  Scenario: Unauthenticated purchase attempt is rejected
+    Given an active listing "listing-004" for "pet-trade-seller"
+    When an unauthenticated POST request is made to /api/v1/marketplace/listings/listing-004/buy
+    Then the response status is 401
+    And the response body error code is "UNAUTHORIZED"
+    And the database marketplace_listings row for "listing-004" still has status "active"
 
-  @TC-SRV-TRADE-010
-  Scenario: Trade history private to pet owner
-    Given a pet with completed sale in marketplace_transactions
-    And the pet is now owned by a new buyer
-    When GET /api/v1/marketplace/history/:petId is called without authentication
-    Then the system returns HTTP 401 with error code UNAUTHORIZED
-    When GET /api/v1/marketplace/history/:petId is called with current owner's petToken
-    Then the system returns HTTP 200 with complete transaction history
-    And includes: price_credits, fee_credits, seller_name (masked), completed_at
-    And transaction history is private to current owner only
+  @TC-E2E-TRADE-001-09 @contract
+  Scenario: Browse marketplace listings is public
+    Given 25 active marketplace_listings rows exist in the database
+    When a GET request is made to /api/v1/marketplace/listings with page 1 and limit 20 without authentication
+    Then the response status is 200
+    And the response body "data.listings" array contains exactly 20 entries
+    And the response meta field "total" is 25
+
+  @TC-E2E-TRADE-001-10 @contract
+  Scenario: Trade history is private to current pet owner
+    Given pet "pet-trade-seller" has one marketplace_transactions record
+    When a GET request is made to /api/v1/marketplace/history/pet-trade-seller without authentication
+    Then the response status is 401
+    And the response body error code is "UNAUTHORIZED"
+    When "token-seller" sends GET /api/v1/marketplace/history/pet-trade-seller
+    Then the response status is 200
+    And the response body "data.trades" is a non-empty array

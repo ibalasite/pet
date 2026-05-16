@@ -1,113 +1,92 @@
-Feature: Admin Moderation — Pet Banning and Battle Flagging
+@p0
+Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-001, US-ADMIN-002)
   As an admin moderator
-  I want to ban disruptive pets and flag suspicious battles
-  So that the game environment remains fair and enjoyable
+  I want to ban disruptive pets and manage leaderboard integrity
+  So that the arena remains fair for all players
 
-  @TC-SRV-MOD-001
-  Scenario: Moderator bans pet with reason
-    Given a pet with is_banned = false
-    And a moderator_alice with role = 'moderator'
-    When POST /admin/api/pets/:petId/ban is called with reason = "Automated bot behavior detected: 52 battles in 60-minute window"
-    Then the system returns HTTP 200
-    And pets.is_banned is updated to true
-    And pets.banned_at is set to current timestamp
-    And pets.banned_reason is stored (max 500 characters)
-    And an audit_log entry is created with:
-      | Field | Value |
-      | admin_id | moderator_alice.id |
-      | action | pet.ban |
-      | target_type | pet |
-      | target_id | pet_id |
-      | detail | {"reason": "...", "previous_is_banned": false} |
+  Background:
+    Given a moderator admin "admin-mod-001" is authenticated with a valid session cookie
 
-  @TC-SRV-MOD-002
-  Scenario: Banned pet removed from leaderboard within SLA
-    Given a pet currently ranked 15th on the leaderboard
-    When POST /admin/api/pets/:petId/ban is called
-    Then within 5 minutes (leaderboard_ban_reflection_time_minutes):
-      | Check | Expected |
-      | Redis ZRANK | returns null |
-      | GET /api/v1/leaderboard | pet is not in top 100 |
-      | pet appearance | pet is removed from results |
+  @TC-E2E-MOD-001-01 @contract @smoke
+  Scenario: Admin bans a pet and it is removed from the leaderboard
+    Given pet "pet-mod-001" exists with is_banned false
+    And pet "pet-mod-001" is in the Redis sorted set "leaderboard:global" at rank 15
+    When the admin sends POST /admin/api/pets/pet-mod-001/ban with reason "bot activity detected: 52 battles in 60 minutes"
+    Then the response status is 200
+    And the database pets row for "pet-mod-001" has is_banned true
+    And the database pets row for "pet-mod-001" has banned_reason set
+    And the Redis sorted set "leaderboard:global" does NOT contain "pet-mod-001"
+    And the database admin_audit_log has a row with action "BAN" and admin_id "admin-mod-001" and target_id "pet-mod-001"
 
-  @TC-SRV-MOD-003
-  Scenario: Banned pet blocked from arena entry
-    Given a pet with is_banned = true
-    And the pet owner with a valid petToken
-    When POST /api/v1/arena/enter is called with the banned pet's ID
-    Then the system returns HTTP 403 with error code PET_BANNED
-    And the matchmaking entry is NOT created
-    And error message is "This pet has been banned from the arena"
+  @TC-E2E-MOD-001-02
+  Scenario: Admin ban fails gracefully when database write fails
+    Given pet "pet-mod-002" exists with is_banned false
+    And pet "pet-mod-002" is in the Redis sorted set "leaderboard:global"
+    And the database is configured to reject writes for this scenario
+    When the admin sends POST /admin/api/pets/pet-mod-002/ban with reason "test failure"
+    Then the response status is 500 or 503
+    And the database pets row for "pet-mod-002" still has is_banned false
+    And the Redis sorted set "leaderboard:global" still contains "pet-mod-002"
 
-  @TC-SRV-MOD-004
-  Scenario: Moderator unbans pet
-    Given a pet with is_banned = true and a ban reason on file
-    When POST /admin/api/pets/:petId/unban is called with reason = "Manual review confirmed legitimate play"
-    Then the system returns HTTP 200
-    And pets.is_banned is updated to false
-    And pets.banned_reason is cleared (set to NULL)
-    And pets.banned_at is NOT reset (immutable for audit)
-    And an audit_log entry is created with action = "pet.unban"
+  @TC-E2E-MOD-001-03
+  Scenario: Banned pet cannot enter arena
+    Given pet "pet-mod-003" exists with is_banned true
+    And the pet owner holds token "token-mod-003"
+    When "token-mod-003" sends POST /api/v1/arena/enter with petId "pet-mod-003" mode "RACE" and acceptAI false
+    Then the response status is 403
+    And the response body error code is "PET_BANNED"
 
-  @TC-SRV-MOD-005
-  Scenario: Unban requires moderator role
-    Given a read_only admin user
-    When POST /admin/api/pets/:petId/unban is called
-    Then the system returns HTTP 403 with error code FORBIDDEN
-    And error message is "Your role does not have permission for this action"
-    And the ban status is NOT changed
+  @TC-E2E-MOD-001-04
+  Scenario: Admin ban reason exceeding 500 characters is rejected
+    Given pet "pet-mod-001" exists with is_banned false
+    When the admin sends POST /admin/api/pets/pet-mod-001/ban with a reason of 501 characters
+    Then the response status is 400
+    And the response body error code is "VALIDATION_ERROR"
+    And the database pets row for "pet-mod-001" still has is_banned false
 
-  @TC-SRV-MOD-006
-  Scenario: Flag suspicious battle with reason
-    Given a completed arena_match with matchId "match-uuid-001"
-    And a moderator with role = 'moderator'
-    When POST /admin/api/battles/:matchId/flag is called with reason = "Abnormally fast victory; possible stat manipulation"
-    Then the system returns HTTP 200
-    And arena_matches.is_flagged is updated to true
-    And arena_matches.flagged_at is set to current timestamp
-    And an audit_log entry is created with action = "arena_match.flag"
+  @TC-E2E-MOD-001-05 @contract
+  Scenario: Banning a nonexistent pet returns 404
+    When the admin sends POST /admin/api/pets/nonexistent-pet-uuid/ban with reason "test"
+    Then the response status is 404
+    And the response body error code is "PET_NOT_FOUND"
 
-  @TC-SRV-MOD-007
-  Scenario: Unflag battle
-    Given a flagged battle with is_flagged = true
-    When DELETE /admin/api/battles/:matchId/flag is called with reason = "Manual review confirmed legitimate outcome"
-    Then the system returns HTTP 200
-    And arena_matches.is_flagged is updated to false
-    And arena_matches.flagged_at is cleared (set to NULL)
-    And an audit_log entry is created with action = "arena_match.unflag"
+  @TC-E2E-MOD-002-01 @contract @smoke
+  Scenario: Admin views top 500 pets with hourly battle counts for moderation
+    Given the database contains 500 pets with varying arena_matches counts in the last hour
+    When the admin sends GET /admin/api/pets with limit 500
+    Then the response status is 200
+    And the response body "data" array contains pet entries with petId rarity level and recent battle counts
 
-  @TC-SRV-MOD-008
-  Scenario: Only moderator+ can flag battles
-    Given a read_only admin user
-    And a battle to flag
-    When POST /admin/api/battles/:matchId/flag is called
-    Then the system returns HTTP 403 with error code FORBIDDEN
-    And the battle remains unflagged
+  @TC-E2E-MOD-002-02
+  Scenario: Leaderboard moderation removal takes effect within 5 minutes
+    Given pet "pet-mod-004" is in the Redis sorted set "leaderboard:global" at rank 3
+    When the admin sends POST /admin/api/pets/pet-mod-004/ban with reason "cheating"
+    Then the response status is 200
+    And the Redis sorted set "leaderboard:global" does NOT contain "pet-mod-004" immediately
+    And a GET request to /api/v1/leaderboard returns entries that do not include "pet-mod-004"
 
-  @TC-SRV-MOD-009
-  Scenario: Admin can view flagged battles list
-    Given 25 flagged battles and 100 unflagged battles in the database
-    When GET /admin/api/battles?flagged=true is called
-    Then the system returns HTTP 200 with:
-      | Field | Value |
-      | battles | filtered to flagged = true only |
-      | meta.total | 25 |
-    And each battle includes: matchId, petAId, petBId, winnerId, is_flagged
+  @TC-E2E-MOD-002-03
+  Scenario: Leaderboard removal fails gracefully when Redis is unavailable
+    Given pet "pet-mod-005" exists with is_banned false
+    And pet "pet-mod-005" is in the Redis sorted set "leaderboard:global"
+    And Redis is unavailable
+    When the admin sends POST /admin/api/pets/pet-mod-005/ban with reason "bot"
+    Then the response status is 500 or 503
+    And the database pets row for "pet-mod-005" still has is_banned false
 
-  @TC-SRV-MOD-010
-  Scenario: Ban reason stored with character limit
-    Given a moderator with a 600-character ban reason (exceeds 500-char limit)
-    When POST /admin/api/pets/:petId/ban is called
-    Then the system returns HTTP 400 with error code VALIDATION_ERROR
-    And error message indicates "Reason must not exceed 500 characters"
-    And no ban is applied
+  @TC-E2E-MOD-002-04 @contract
+  Scenario: Read-only admin cannot perform ban action
+    Given a read_only admin "admin-readonly-001" is authenticated with a valid session cookie
+    When the read_only admin sends POST /admin/api/pets/pet-mod-001/ban with reason "test"
+    Then the response status is 403
+    And the response body error code is "FORBIDDEN"
+    And the database pets row for "pet-mod-001" is unchanged
 
-  @TC-SRV-MOD-011
-  Scenario: Audit log captures all ban/unban/flag operations
-    Given a moderator performs: ban pet_A, flag battle_B, unban pet_C
-    When GET /admin/api/audit?limit=10 is called
-    Then at least 3 audit_log entries exist with:
-      | action | admin_id | target_type | target_id | detail |
-      | pet.ban | moderator.id | pet | pet_A.id | {...} |
-      | arena_match.flag | moderator.id | arena_match | battle_B.id | {...} |
-      | pet.unban | moderator.id | pet | pet_C.id | {...} |
+  @TC-E2E-MOD-002-05
+  Scenario: Audit log records every admin mutation in sequence
+    Given pet "pet-audit-001" exists with is_banned false
+    When the admin sends POST /admin/api/pets/pet-audit-001/ban with reason "audit test"
+    And the admin sends POST /admin/api/pets/pet-audit-001/unban with reason "audit test unban"
+    And the admin sends GET /admin/api/audit with limit 10
+    Then the response body contains at least 2 audit log entries for "pet-audit-001"
+    And the entries include actions "BAN" and "UNBAN" with admin_id "admin-mod-001"

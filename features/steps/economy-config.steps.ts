@@ -1,126 +1,166 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/economy-config.steps.ts
+// Step definitions for features/economy-config.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('a Super Admin {string} is authenticated with role = {string}', function (_name: string, _role: string) {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions
+// ---------------------------------------------------------------------------
+
+Given('a super_admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
+  // Set super_admin session cookie on AppWorld — see API.md §2.2
+  // Token value is a test-only fixture credential, not a production secret
+  this.adminSessionCookie = 'admin-session=test-super-admin-session-fixture';
+});
+
+Given('a moderator admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
+  // Set moderator session cookie on AppWorld — see API.md §2.2
+  this.adminSessionCookie = 'admin-session=test-moderator-session-fixture';
+});
+
+Given('the database config_economy row has food_buff_speed_multiplier {float} and arena_entry_cooldown_minutes {int}', async function (this: AppWorld, multiplier: number, cooldown: number) {
+  // Seed config_economy row — see SCHEMA.md config_economy
+  await this.db.seed({
+    config_economy: [{
+      id: 'config-economy-singleton',
+      food_buff_speed_multiplier: multiplier,
+      food_buff_strength_multiplier: 1.0,
+      arena_entry_cooldown_minutes: cooldown,
+      trade_transaction_fee_percent: 5,
+      updated_at: new Date().toISOString(),
+    }],
+  });
+});
+
+Given('the admin has updated food_buff_strength_multiplier to {float} successfully', async function (this: AppWorld, value: number) {
+  // UPDATE config_economy SET food_buff_strength_multiplier = $1
+  await this.db.query('UPDATE config_economy SET food_buff_strength_multiplier = $1 WHERE id = $2', [value, 'config-economy-singleton']);
+});
+
+// ---------------------------------------------------------------------------
+// When — triggering actions
+// ---------------------------------------------------------------------------
+
+When('the admin sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
+  // PUT /admin/api/config/economy — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/economy`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { food_buff_speed_multiplier: value },
+  });
+});
+
+When('the admin sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {int}', async function (this: AppWorld, value: number) {
+  // PUT /admin/api/config/economy — out-of-range integer variant — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/economy`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { food_buff_speed_multiplier: value },
+  });
+});
+
+When('the admin sends PUT \\/admin\\/api\\/config\\/economy with arena_entry_cooldown_minutes {int}', async function (this: AppWorld, value: number) {
+  // PUT /admin/api/config/economy — cooldown field — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/economy`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { arena_entry_cooldown_minutes: value },
+  });
+});
+
+When('the moderator sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
+  // PUT /admin/api/config/economy — moderator role → expect 403 — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the moderator');
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/economy`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { food_buff_speed_multiplier: value },
+  });
+});
+
+When('an unauthenticated PUT request is made to \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
+  // PUT /admin/api/config/economy — no cookie — see API.md §2.3
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/economy`,
+    body: { food_buff_speed_multiplier: value },
+  });
+});
+
+When('{int} minutes elapse for the config cache to refresh', function (this: AppWorld, _minutes: number) {
+  // Trigger config cache refresh — see EDD.md §config-cache
   return 'pending';
 });
 
-Given('the admin portal session is active and within the 4-hour inactivity window', function () {
+When('{string} sends POST \\/api\\/v1\\/pets\\/{string}\\/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}', async function (this: AppWorld, token: string, petId: string, buffType: string, stat: string, magnitude: number, isPermanentStr: string) {
+  // POST /api/v1/pets/:petId/feed — see API.md §5.2
+  const isPermanent = isPermanentStr === 'true';
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/pets/${encodeURIComponent(petId)}/feed`,
+    headers: { Authorization: `Bearer ${token}` },
+    body: { buffType, stat, magnitude, isPermanent },
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response status is {int}', function (this: AppWorld, _status: number) {
   return 'pending';
 });
 
-Given('the Game Economy Configuration module is open', function () {
+Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
   return 'pending';
 });
 
-When('the Super Admin submits PUT \\/admin\\/api\\/config\\/economy with payload:', function (_table: unknown) {
+Then('the response body field {string} is {float}', function (this: AppWorld, _field: string, _value: number) {
   return 'pending';
 });
 
-Then('the system returns HTTP {int}', function (_status: number) {
+Then('the database config_economy row has food_buff_speed_multiplier {float}', function (this: AppWorld, _value: number) {
+  // TODO: query SELECT food_buff_speed_multiplier FROM config_economy WHERE id = 'config-economy-singleton'
+  // TODO: assert result[0].food_buff_speed_multiplier === _value
   return 'pending';
 });
 
-Then('the response includes the updated config_economy values', function () {
+Then('the database config_economy row still has food_buff_speed_multiplier {float}', function (this: AppWorld, _value: number) {
+  // TODO: query SELECT food_buff_speed_multiplier FROM config_economy WHERE id = 'config-economy-singleton'
+  // TODO: assert result[0].food_buff_speed_multiplier === _value (value must be unchanged)
   return 'pending';
 });
 
-Then('each numeric value is validated against its allowed range:', function (_table: unknown) {
+Then('the database config_economy row is unchanged', function (this: AppWorld) {
+  // TODO: query SELECT * FROM config_economy WHERE id = 'config-economy-singleton'
+  // TODO: assert all fields match the values seeded in the Background step
   return 'pending';
 });
 
-When('the Super Admin submits PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier = {float}', function (_value: number) {
+Then('the database admin_audit_log has a row with action {string} field {string} old_value {string} new_value {string} and admin_id {string}', function (this: AppWorld, _action: string, _field: string, _oldVal: string, _newVal: string, _adminId: string) {
+  // TODO: query SELECT * FROM admin_audit_log WHERE action = $1 AND admin_id = $2
+  // TODO: assert detail JSONB contains field, old_value, new_value
   return 'pending';
 });
 
-Then('the system returns HTTP {int} with error code VALIDATION_ERROR', function (_status: number) {
+Then('the database admin_audit_log has a row with action {string} and admin_id {string} and old_value containing {string} and new_value containing {string}', function (this: AppWorld, _action: string, _adminId: string, _oldFragment: string, _newFragment: string) {
+  // TODO: query SELECT * FROM admin_audit_log WHERE action = $1 AND admin_id = $2
+  // TODO: assert detail::text ILIKE '%' || _oldFragment || '%' and '%' || _newFragment || '%'
   return 'pending';
 });
 
-Then('error message indicates the allowed range {string}', function (_range: string) {
+Then('no new row is added to admin_audit_log for this attempt', function (this: AppWorld) {
+  // TODO: snapshot COUNT(*) from admin_audit_log before the When step, compare after
   return 'pending';
 });
 
-Then('no audit_log entry is created', function () {
-  return 'pending';
-});
-
-Then('no config_economy row is updated', function () {
-  return 'pending';
-});
-
-Given('a pending change of arena_entry_cost_credits from {int} to {int}', function (_oldVal: number, _newVal: number) {
-  return 'pending';
-});
-
-When('the Super Admin requests POST \\/admin\\/api\\/config\\/economy\\/preview with the change set', function () {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with a preview payload showing:', function (_status: number, _table: unknown) {
-  return 'pending';
-});
-
-Then('no value is persisted until POST \\/admin\\/api\\/config\\/economy\\/confirm is called with the preview token', function () {
-  return 'pending';
-});
-
-Then('confirmation token expires after {int} minutes', function (_minutes: number) {
-  return 'pending';
-});
-
-Given('the Super Admin saves a confirmed change setting arena_entry_cooldown_minutes = {int}', function (_minutes: number) {
-  return 'pending';
-});
-
-When('the API server receives the next \\/api\\/v1\\/arena\\/enter request after {int} minutes (config_cache_refresh_max_minutes)', function (_minutes: number) {
-  return 'pending';
-});
-
-Then('the new cooldown value is applied without any service restart', function () {
-  return 'pending';
-});
-
-Then('subsequent rate-limit checks use the new {int}-minute cooldown', function (_minutes: number) {
-  return 'pending';
-});
-
-Then('no in-flight battles are interrupted by the change', function () {
-  return 'pending';
-});
-
-Given('the Super Admin {string} saves food_buff_strength_multiplier from {float} to {float}', function (_name: string, _oldVal: number, _newVal: number) {
-  return 'pending';
-});
-
-When('GET \\/admin\\/api\\/audit?action=config.economy&limit=1 is called', function () {
-  return 'pending';
-});
-
-Then('the most recent audit_log entry contains:', function (_table: unknown) {
-  return 'pending';
-});
-
-Then('the audit row is append-only (no UPDATE or DELETE permitted)', function () {
-  return 'pending';
-});
-
-Given('a moderator {string} with role = {string}', function (_name: string, _role: string) {
-  return 'pending';
-});
-
-When('{string} calls PUT \\/admin\\/api\\/config\\/economy with any payload', function (_name: string) {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with error code FORBIDDEN', function (_status: number) {
-  return 'pending';
-});
-
-Then('the existing config_economy values are unchanged', function () {
-  return 'pending';
-});
-
-Then('an audit_log entry is created with action = {string} capturing the actor and attempted change', function (_action: string) {
+Then('the applied buff magnitude reflects the {float} multiplier', function (this: AppWorld, _multiplier: number) {
   return 'pending';
 });

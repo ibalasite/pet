@@ -1,146 +1,190 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/leaderboard.steps.ts
+// Step definitions for features/leaderboard.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('the Redis Upstash instance is unreachable', function () {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions
+// ---------------------------------------------------------------------------
+
+Given('the Redis sorted set {string} contains {int} entries with varying scores', async function (this: AppWorld, key: string, count: number) {
+  // ZADD leaderboard:global score member × count — see API.md §5.4
+  for (let i = 0; i < count; i++) {
+    await this.redis.zadd(key, 100 - i * 0.5, `pet-lb-${i.toString().padStart(3, '0')}`);
+  }
+});
+
+Given('the Redis sorted set {string} contains pets of all rarity tiers', async function (this: AppWorld, key: string) {
+  // Seed cross-rarity entries into Redis sorted set
+  const rarities = ['COMMON', 'RARE', 'EPIC', 'LEGENDARY'];
+  for (let i = 0; i < 20; i++) {
+    const rarity = rarities[i % 4];
+    const petId = `pet-rarity-${rarity.toLowerCase()}-${i}`;
+    await this.db.seed({ pets: [{ id: petId, rarity, level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false }] });
+    await this.redis.zadd(key, 80 - i, petId);
+  }
+});
+
+Given('a pet {string} with score {float} exists in the leaderboard at rank {int}', async function (this: AppWorld, petId: string, score: number, _rank: number) {
+  // Seed pet row and ZADD into leaderboard:global — see API.md §5.4
+  await this.db.seed({ pets: [{ id: petId, rarity: 'RARE', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false }] });
+  await this.redis.zadd('leaderboard:global', score, petId);
+});
+
+Given('Redis is unavailable', function (this: AppWorld) {
+  // Stub Redis to simulate connectivity failure — fail-open for leaderboard
   return 'pending';
 });
 
-Given('a PostgreSQL snapshot of leaderboard scores exists from the last sync', function () {
+Given('the database table leaderboard_snapshots has a recent row with valid leaderboard data', async function (this: AppWorld) {
+  // Seed leaderboard_snapshots — PostgreSQL fallback — see EDD.md §leaderboard
+  await this.db.seed({
+    leaderboard_snapshots: [{
+      id: 'snap-001',
+      snapshot_data: JSON.stringify([{ rank: 1, petId: 'pet-lb-000', score: 100, rarity: 'RARE', level: 1, winRate: 0.75 }]),
+      created_at: new Date().toISOString(),
+    }],
+  });
+});
+
+Given('pet {string} completes a winning Race battle', async function (this: AppWorld, petId: string) {
+  // Seed an arena_matches row with this pet as winner — see SCHEMA.md arena_matches
+  await this.db.seed({
+    arena_matches: [{
+      id: `match-board-${petId}`,
+      pet_a_id: petId,
+      pet_b_id: 'opponent-board-001',
+      winner_id: petId,
+      mode: 'RACE',
+      status: 'COMPLETED',
+      completed_at: new Date().toISOString(),
+    }],
+  });
+});
+
+Given('the battle result is persisted in arena_matches', function (this: AppWorld) {
+  // State assertion — arena_matches row already seeded in previous step
   return 'pending';
 });
 
-When('a client requests GET \\/api\\/v1\\/leaderboard', function () {
+Given('pet {string} exists in the Redis sorted set {string} at rank {int}', async function (this: AppWorld, petId: string, key: string, _rank: number) {
+  // Seed pet and ZADD with a high score so it appears at rank 10
+  await this.db.seed({ pets: [{ id: petId, rarity: 'EPIC', level: 5, stat_speed: 80, stat_strength: 80, stat_stamina: 80, is_banned: false }] });
+  await this.redis.zadd(key, 92.0, petId);
+});
+
+Given('an admin session cookie is set for a moderator admin user', function (this: AppWorld) {
+  // Set admin session cookie on AppWorld from test fixture — see API.md §2.2
+  // Token value is a test-only fixture credential, not a production secret
+  this.adminSessionCookie = 'admin-session=test-moderator-session-fixture';
+});
+
+// ---------------------------------------------------------------------------
+// When — triggering actions
+// ---------------------------------------------------------------------------
+
+When('a GET request is made to \\/api\\/v1\\/leaderboard without authentication', async function (this: AppWorld) {
+  // GET /api/v1/leaderboard — see API.md §5.4
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/leaderboard`,
+  });
+});
+
+When('a GET request is made to \\/api\\/v1\\/leaderboard with query param rarity={word} without authentication', async function (this: AppWorld, rarity: string) {
+  // GET /api/v1/leaderboard?rarity=EPIC — see API.md §5.4
+  const qs = new URLSearchParams({ rarity }).toString();
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/leaderboard?${qs}`,
+  });
+});
+
+When('a GET request is made to \\/api\\/v1\\/leaderboard\\/rank\\/{string} without authentication', async function (this: AppWorld, petId: string) {
+  // GET /api/v1/leaderboard/rank/:petId — see API.md §5.4
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/leaderboard/rank/${encodeURIComponent(petId)}`,
+  });
+});
+
+When('{int} seconds elapse for the leaderboard sync job to run', function (this: AppWorld, _seconds: number) {
+  // Trigger leaderboard sync job or wait for background job — see EDD.md §leaderboard
   return 'pending';
 });
 
-Then('the server responds with HTTP {int} using the PostgreSQL snapshot data', function (_status: number) {
+When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+  // POST /admin/api/pets/:petId/ban — see API.md §5.5
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/admin/api/pets/${encodeURIComponent(petId)}/ban`,
+    headers: { Cookie: this.adminSessionCookie ?? '' },
+    body: { reason },
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response body {string} array contains exactly {int} entries', function (this: AppWorld, _field: string, _count: number) {
   return 'pending';
 });
 
-Then('the response body contains {string}', function (_field: string) {
+Then('each entry has fields: {word} {word} {word} {word} {word} {word} {word}', function (this: AppWorld, ..._fields: string[]) {
   return 'pending';
 });
 
-Given('pet {string} completes a Race battle and wins', function (_token: string) {
+Then('entries are ordered by score descending', function (this: AppWorld) {
   return 'pending';
 });
 
-Given('the win increments the battles_won counter on pet {string} in the pets table', function (_token: string) {
+Then('the response meta contains total page and limit fields', function (this: AppWorld) {
   return 'pending';
 });
 
-When('the leaderboard sync job runs against Redis using ZRANGE REV WITHSCORES', function () {
+Then('all entries in {string} have rarity {string}', function (this: AppWorld, _field: string, _rarity: string) {
   return 'pending';
 });
 
-Then('the updated score for {string} is visible in GET \\/api\\/v1\\/leaderboard within (leaderboard_update_lag_max_seconds = {int}) seconds', function (_token: string, _seconds: number) {
+Then('the response body field {string} is {float}', function (this: AppWorld, _field: string, _value: number) {
   return 'pending';
 });
 
-Then('{string} appears at the correct rank position', function (_token: string) {
+Then('the response body field {string} is {int}', function (this: AppWorld, _field: string, _value: number) {
   return 'pending';
 });
 
-Given('pet {string} currently holds rank {int} on the leaderboard', function (_token: string, _rank: number) {
+Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
   return 'pending';
 });
 
-When('the admin issues a ban action via POST \\/admin\\/api\\/pets\\/{string}\\/ban with a moderation reason under (admin_moderation_reason_max_chars = {int}) characters', function (_token: string, _maxChars: number) {
+Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
   return 'pending';
 });
 
-Then('{string} is removed from the Redis leaderboard sorted set', function (_token: string) {
+Then('the response body field {string} is true', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('within (leaderboard_ban_reflection_time_minutes = {int}) minutes the pet no longer appears in GET \\/api\\/v1\\/leaderboard responses', function (_minutes: number) {
+Then('the response body {string} is a non-empty array', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('an entry is written to admin_audit_log with action {string} and detail containing the moderation reason', function (_action: string) {
+Then('the Redis sorted set {string} contains {string} with an updated score', async function (this: AppWorld, key: string, petId: string) {
+  // ZRANK leaderboard:global {petId} — see API.md §5.4
+  void await this.redis.zrank(key, petId);
   return 'pending';
 });
 
-Given('{int} pets with varying leaderboard scores in Redis leaderboard:global sorted set', function (_count: number) {
+Then('the Redis sorted set {string} does NOT contain {string}', async function (this: AppWorld, key: string, petId: string) {
+  // ZRANK should return null after ban/erasure
+  void await this.redis.zrank(key, petId);
   return 'pending';
 });
 
-When('GET \\/api\\/v1\\/leaderboard with page={int}, limit={int} is called without authentication', function (_page: number, _limit: number) {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with entries.length = {int}', function (_status: number, _length: number) {
-  return 'pending';
-});
-
-Then('each entry contains: rank, petId, petName, rarity, level, score, winRate', function () {
-  return 'pending';
-});
-
-Then('entries are sorted by score descending (highest rank first)', function () {
-  return 'pending';
-});
-
-Then('meta fields include total leaderboard size, page number, and limit', function () {
-  return 'pending';
-});
-
-Given('the leaderboard contains pets of all rarity tiers (COMMON, RARE, EPIC, LEGENDARY)', function () {
-  return 'pending';
-});
-
-When('GET \\/api\\/v1\\/leaderboard?rarity=EPIC is called', function () {
-  return 'pending';
-});
-
-Then('only EPIC-rarity pets are returned in the entries array', function () {
-  return 'pending';
-});
-
-Then('meta.total reflects the filtered count', function () {
-  return 'pending';
-});
-
-Given('a pet with win_rate = {float}, battles_played = {int}, level = {int}', function (_winRate: number, _battles: number, _level: number) {
-  return 'pending';
-});
-
-When('arena_score is calculated using: win_rate × battles_played × level_multiplier({int})', function (_level: number) {
-  return 'pending';
-});
-
-Then('this score is used for leaderboard ranking', function () {
-  return 'pending';
-});
-
-Given('a pet with petId {string} ranked {int}nd on the leaderboard', function (_petId: string, _rank: number) {
-  return 'pending';
-});
-
-When('GET \\/api\\/v1\\/leaderboard\\/rank\\/{string} is called without authentication', function (_petId: string) {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with rank = {int} and the calculated_score_value', function (_status: number, _rank: number) {
-  return 'pending';
-});
-
-Given('a pet belonging to a user who submitted GDPR erasure request', function () {
-  return 'pending';
-});
-
-Given('the pet is currently ranked on the leaderboard', function () {
-  return 'pending';
-});
-
-When('the GDPR erasure background job completes', function () {
-  return 'pending';
-});
-
-Then('Redis ZREM is called to remove the pet from leaderboard:global', function () {
-  return 'pending';
-});
-
-Then('subsequent GET \\/api\\/v1\\/leaderboard queries no longer include that pet', function () {
+Then('the database admin_audit_log has a row with action {string} and pet_id {string}', async function (this: AppWorld, action: string, petId: string) {
+  // SELECT id FROM admin_audit_log WHERE action = $1 AND target_id = $2
+  void await this.db.query('SELECT id FROM admin_audit_log WHERE action = $1 AND target_id = $2', [action, petId]);
   return 'pending';
 });

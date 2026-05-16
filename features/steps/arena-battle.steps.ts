@@ -1,154 +1,201 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/arena-battle.steps.ts
+// Step definitions for features/arena-battle.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('pet {string} and pet {string} are both in the matchmaking queue', function (_tokenA: string, _tokenB: string) {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions
+// ---------------------------------------------------------------------------
+
+Given('pet {string} with speed {int} strength {int} stamina {int} level {int} exists and is owned with token {string}', async function (this: AppWorld, petId: string, speed: number, strength: number, stamina: number, level: number, token: string) {
+  // Seed pets row + owner token — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, stat_speed: speed, stat_strength: strength, stat_stamina: stamina, level, owner_token_hash: `hash-of-${token}`, is_banned: false }],
+  });
   return 'pending';
 });
 
-Given('both pets have valid speed stats recorded in the database', function () {
+Given('pet {string} has {int} battles this hour in Redis key {string}', async function (this: AppWorld, _petId: string, count: number, redisKey: string) {
+  // SET rl:arena:{pet_id} {count} — see API.md §3.1 arena rate limit
+  await this.redis.set(redisKey, String(count), 3600);
   return 'pending';
 });
 
-When('the matchmaking service pairs the two pets via ZPOPMIN from the Redis queue', function () {
+Given('pet {string} has 0 battles this hour in Redis key {string}', async function (this: AppWorld, _petId: string, redisKey: string) {
+  // Ensure counter is absent or zero
+  await this.redis.del(redisKey);
   return 'pending';
 });
 
-Then('a Race battle record is created with status {string} and mode {string}', function (_status: string, _mode: string) {
+Given('no other pet is in the matchmaking queue for mode {string}', async function (this: AppWorld, mode: string) {
+  // Ensure matchmaking:{mode}:queue sorted set is empty
+  await this.redis.del(`matchmaking:queue:${mode}`);
   return 'pending';
 });
 
-Then('the battle resolves within (arena_match_duration_max_seconds = {int}) seconds', function (_seconds: number) {
+Given('the pet {string} is banned with is_banned true in the database', async function (this: AppWorld, petId: string) {
+  // UPDATE pets SET is_banned = true WHERE id = petId
+  await this.db.query('UPDATE pets SET is_banned = true WHERE id = $1', [petId]);
   return 'pending';
 });
 
-Then('the pet with the higher effective speed (base stat plus up to ±15% random modifier) is recorded as the winner', function () {
+Given('the battle engine is seeded with fixed random_seed {int}', function (this: AppWorld, _seed: number) {
+  // Inject fixed seed into battle engine context
   return 'pending';
 });
 
-Then('both pets receive updated win\\/loss counts in their profiles', function () {
+Given('battle outcome is calculated for {string} vs {string} in mode {string} twice', function (this: AppWorld, _petA: string, _petB: string, _mode: string) {
+  // Calculate battle twice using same seed — see API.md §5.3 arena/enter
   return 'pending';
 });
 
-Given('pet {string} has entered the matchmaking queue via POST \\/api\\/v1\\/arena\\/enter and is the only pet present', function (_token: string) {
+Given('an arena match {string} exists with winnerId {string} and mode {string}', async function (this: AppWorld, matchId: string, winnerId: string, mode: string) {
+  // Seed arena_matches row — see SCHEMA.md arena_matches table
+  await this.db.seed({ arena_matches: [{ id: matchId, winner_id: winnerId, mode, status: 'COMPLETED' }] });
   return 'pending';
 });
 
-Given('(arena_matchmaking_timeout_seconds = {int}) seconds pass without a second pet joining', function (_seconds: number) {
+Given('an arena match {string} exists with winnerId {string} mode {string} and completedAt {string}', async function (this: AppWorld, matchId: string, winnerId: string, mode: string, completedAt: string) {
+  await this.db.seed({ arena_matches: [{ id: matchId, winner_id: winnerId, mode, status: 'COMPLETED', completed_at: completedAt }] });
   return 'pending';
 });
 
-When('the matchmaking service triggers the AI fallback logic', function () {
+Given('pet {string} has {int} arena_matches records in the database', async function (this: AppWorld, petId: string, count: number) {
+  // Seed N arena_matches rows referencing petId
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opponent-${i}`,
+    winner_id: petId,
+    mode: 'RACE',
+    status: 'COMPLETED',
+    completed_at: new Date(Date.now() - i * 60000).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
   return 'pending';
 });
 
-Then('a Race battle is created pairing {string} against an AI bot opponent', function (_token: string) {
+Given('both pets have {int} battles this hour', async function (this: AppWorld, _count: number) {
   return 'pending';
 });
 
-Then('the battle record includes is_ai_opponent = true', function () {
+// ---------------------------------------------------------------------------
+// When — triggering actions
+// ---------------------------------------------------------------------------
+
+When('{string} sends POST \\/api\\/v1\\/arena\\/enter with petId {string} mode {string} and acceptAI {word}', async function (this: AppWorld, token: string, petId: string, mode: string, acceptAIStr: string) {
+  // POST /api/v1/arena/enter — see API.md §5.3
+  const acceptAI = acceptAIStr === 'true';
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/arena/enter`,
+    headers: { Authorization: `Bearer ${token}` },
+    body: { petId, mode, acceptAI },
+  });
   return 'pending';
 });
 
-Given('pet {string} has already completed (arena_rate_limit_battles_per_hour_default = {int}) battles within the current hour', function (_token: string, _limit: number) {
+When('an unauthenticated POST request is made to \\/api\\/v1\\/arena\\/enter with petId {string} mode {string}', async function (this: AppWorld, petId: string, mode: string) {
+  // POST /api/v1/arena/enter — no Authorization header — see API.md §2.3
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/arena/enter`,
+    body: { petId, mode, acceptAI: false },
+  });
   return 'pending';
 });
 
-When('pet {string} attempts to enter the matchmaking queue via POST \\/api\\/v1\\/arena\\/enter', function (_token: string) {
+When('a GET request is made to \\/api\\/v1\\/arena\\/match\\/{string} without authentication', async function (this: AppWorld, matchId: string) {
+  // GET /api/v1/arena/match/:matchId — see API.md §5.3
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/arena/match/${matchId}`,
+  });
   return 'pending';
 });
 
-Then('the server responds with HTTP {int}', function (_status: number) {
+When('a GET request is made to \\/api\\/v1\\/arena\\/history\\/{string} without authentication', async function (this: AppWorld, petId: string) {
+  // GET /api/v1/arena/history/:petId — see API.md §5.3
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/arena/history/${petId}`,
+  });
   return 'pending';
 });
 
-Then('the response body contains error code {string}', function (_code: string) {
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response for {string} has status {int}', function (this: AppWorld, _petId: string, _status: number) {
   return 'pending';
 });
 
-Then('pet {string} is not added to the matchmaking queue', function (_token: string) {
+Then('the response body field {string} is true', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Given('pet {string} with strength {int} and speed {int} is queued for a Sumo battle', function (_token: string, _strength: number, _speed: number) {
+Then('the database table arena_matches has a row with both {string} and {string} and mode {string}', async function (this: AppWorld, petA: string, petB: string, mode: string) {
+  // SELECT id FROM arena_matches WHERE (pet_a_id IN ($1,$2) OR pet_b_id IN ($1,$2)) AND mode=$3
+  const rows = await this.db.query<{ id: string }>(
+    'SELECT id FROM arena_matches WHERE (pet_a_id = $1 OR pet_b_id = $1 OR pet_a_id = $2 OR pet_b_id = $2) AND mode = $3',
+    [petA, petB, mode],
+  );
+  return 'pending';
+  void rows;
+});
+
+Then('the Redis leaderboard key {string} is updated within {int} seconds', async function (this: AppWorld, _key: string, _seconds: number) {
+  // ZRANK leaderboard:global {petId} — see API.md §5.4
   return 'pending';
 });
 
-When('the matchmaking service pairs the two pets for a Sumo match', function () {
+Then('the database table arena_matches has a row with {string} and is_ai_opponent true', async function (this: AppWorld, _petId: string) {
   return 'pending';
 });
 
-Then('a Sumo battle record is created with mode {string}', function (_mode: string) {
+Then('the Redis counter {string} is NOT incremented', async function (this: AppWorld, key: string) {
+  // GET {key} from Redis — expect count did not change
+  const val = await this.redis.get(key);
+  return 'pending';
+  void val;
+});
+
+Then('pet {string} is not added to the matchmaking queue', async function (this: AppWorld, petId: string) {
+  // ZRANK matchmaking:queue:RACE {petId} — expect null
+  const rank = await this.redis.zrank('matchmaking:queue:RACE', petId);
+  return 'pending';
+  void rank;
+});
+
+Then('the response body {string} is {string} or {string}', function (this: AppWorld, _field: string, _val1: string, _val2: string) {
   return 'pending';
 });
 
-Then('{string} is recorded as the winner because its strength stat is higher', function (_token: string) {
+Then('both calculations return the same winnerId', function (this: AppWorld) {
   return 'pending';
 });
 
-Then('the outcome is determined solely by the raw strength stat with no random modifier applied', function () {
+Then('both battleLog event sequences are identical', function (this: AppWorld) {
   return 'pending';
 });
 
-Given('a player has played {int} battles in the current hour', function (_count: number) {
+Then('the database arena_matches row has mode {string}', async function (this: AppWorld, _mode: string) {
   return 'pending';
 });
 
-When('the player attempts to start another battle via POST \\/api\\/v1\\/arena\\/enter', function () {
+Then('the battle record winnerId is {string} reflecting the higher strength stat', function (this: AppWorld, _petId: string) {
   return 'pending';
 });
 
-Then('the API returns HTTP {int} Too Many Requests', function (_status: number) {
+Then('the response body {string} array contains exactly {int} entries', function (this: AppWorld, _field: string, _count: number) {
   return 'pending';
 });
 
-Then('the response includes a Retry-After header with value in seconds', function () {
+Then('each entry has fields: {word} {word} {word} {word} {word} {word}', function (this: AppWorld, ..._fields: string[]) {
   return 'pending';
 });
 
-Then('the response body contains the message {string}', function (_message: string) {
-  return 'pending';
-});
-
-Then('the client displays a countdown timer showing remaining wait time', function () {
-  return 'pending';
-});
-
-Then('the countdown is accurate within ±5 seconds', function () {
-  return 'pending';
-});
-
-Given('petA (stat_speed = {int}) and petB (stat_speed = {int}) battle with fixed random_seed = {int}', function (_speedA: number, _speedB: number, _seed: number) {
-  return 'pending';
-});
-
-When('the battle is calculated twice independently', function () {
-  return 'pending';
-});
-
-Then('both calculations return the same winner and stat_delta values', function () {
-  return 'pending';
-});
-
-Then('battleLog event sequences are identical', function () {
-  return 'pending';
-});
-
-Then('the outcome can be replayed deterministically for viewing', function () {
-  return 'pending';
-});
-
-Given('a request to POST \\/api\\/v1\\/arena\\/enter WITHOUT authentication header', function () {
-  return 'pending';
-});
-
-When('the request is submitted', function () {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with error code UNAUTHORIZED', function (_status: number) {
-  return 'pending';
-});
-
-Then('no matchmaking entry is created', function () {
+Then('the response body {string} is a non-empty array of events', function (this: AppWorld, _field: string) {
   return 'pending';
 });

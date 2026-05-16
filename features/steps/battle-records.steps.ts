@@ -1,138 +1,145 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/battle-records.steps.ts
+// Step definitions for features/battle-records.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('a player has {int} public battle records', function (_count: number) {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions
+// ---------------------------------------------------------------------------
+
+Given('pet {string} with rarity {string} and petName {string} exists in the database', async function (this: AppWorld, petId: string, rarity: string, _petName: string) {
+  // Seed pets row — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, rarity, stat_speed: 20, stat_strength: 20, stat_stamina: 20, level: 1, is_banned: false }],
+  });
+});
+
+Given('pet {string} has {int} arena_matches records with mode {string} and mixed Win\\/Loss results', async function (this: AppWorld, petId: string, count: number, mode: string) {
+  // Seed arena_matches rows referencing petId — see SCHEMA.md arena_matches table
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-rec-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opponent-rec-${i}`,
+    winner_id: i % 2 === 0 ? petId : `opponent-rec-${i}`,
+    mode,
+    status: 'COMPLETED',
+    is_ai_opponent: false,
+    completed_at: new Date(Date.now() - i * 60000).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
+});
+
+Given('pet {string} has {int} arena_matches records', async function (this: AppWorld, petId: string, count: number) {
+  // Seed N arena_matches rows — see SCHEMA.md arena_matches table
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', stat_speed: 20, stat_strength: 20, stat_stamina: 20, level: 1, is_banned: false }],
+  });
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-rec-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opp-${i}`,
+    winner_id: petId,
+    mode: 'RACE',
+    status: 'COMPLETED',
+    is_ai_opponent: false,
+    completed_at: new Date(Date.now() - i * 60000).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
+});
+
+Given('pet {string} has {int} arena_matches records in the database', async function (this: AppWorld, petId: string, count: number) {
+  // Seed arena_matches rows (alias, used by RECORD-001-03 with 25 matches)
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'EPIC', stat_speed: 20, stat_strength: 20, stat_stamina: 20, level: 1, is_banned: false }],
+  });
+  const rows = Array.from({ length: count }, (_, i) => ({
+    id: `match-rec2-${petId}-${i}`,
+    pet_a_id: petId,
+    pet_b_id: `opp2-${i}`,
+    winner_id: petId,
+    mode: 'RACE',
+    status: 'COMPLETED',
+    is_ai_opponent: false,
+    completed_at: new Date(Date.now() - i * 60000).toISOString(),
+  }));
+  await this.db.seed({ arena_matches: rows });
+});
+
+Given('pet {string} has an arena_matches record where is_ai_opponent is true and opponent_pet_id is null', async function (this: AppWorld, petId: string) {
+  // Seed an AI opponent match row — see SCHEMA.md arena_matches.is_ai_opponent
+  await this.db.seed({
+    arena_matches: [{
+      id: `match-ai-${petId}`,
+      pet_a_id: petId,
+      pet_b_id: null,
+      winner_id: petId,
+      mode: 'RACE',
+      status: 'COMPLETED',
+      is_ai_opponent: true,
+      completed_at: new Date().toISOString(),
+    }],
+  });
+});
+
+Given('an arena match {string} exists with winnerId {string} mode {string} and completedAt {string}', async function (this: AppWorld, matchId: string, winnerId: string, mode: string, completedAt: string) {
+  // Seed arena_matches row for match record read — see SCHEMA.md arena_matches
+  await this.db.seed({
+    arena_matches: [{ id: matchId, winner_id: winnerId, mode, status: 'COMPLETED', completed_at: completedAt }],
+  });
+});
+
+// ---------------------------------------------------------------------------
+// When — triggering actions
+// ---------------------------------------------------------------------------
+
+When('a GET request is made to \\/api\\/v1\\/arena\\/history\\/{string} without authentication', async function (this: AppWorld, petId: string) {
+  // GET /api/v1/arena/history/:petId — see API.md §5.3
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/arena/history/${encodeURIComponent(petId)}`,
+  });
+});
+
+When('a GET request is made to \\/api\\/v1\\/arena\\/match\\/{string} without authentication', async function (this: AppWorld, matchId: string) {
+  // GET /api/v1/arena/match/:matchId — see API.md §5.3
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/arena/match/${encodeURIComponent(matchId)}`,
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response body {string} array contains exactly {int} entries', function (this: AppWorld, _field: string, _count: number) {
   return 'pending';
 });
 
-When('the player requests GET \\/api\\/v1\\/arena\\/history\\/:petId', function () {
+Then('each entry has fields: {word} {word} {word} {word} {word} {word}', function (this: AppWorld, ..._fields: string[]) {
   return 'pending';
 });
 
-Then('the API returns the {int} most recent battles', function (_count: number) {
+Then('the response body {string} contains wins losses and winRate fields', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('the response includes a pagination cursor for the next batch', function () {
+Then('at least one entry in the {string} array has isAiOpponent true and opponentPetId null', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('each battle record includes: match_id, opponent_pet_id, result (WIN\\/LOSS), reward, timestamp', function () {
+Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
   return 'pending';
 });
 
-Then('the response structure includes meta.total = {int} and meta.hasMore = true', function (_total: number) {
+Then('the response body {string} is a non-empty array of events', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('the API returns all {int} records', function (_count: number) {
+Then('the response status is {int}', function (this: AppWorld, _status: number) {
   return 'pending';
 });
 
-Then('the response indicates {string} or no pagination cursor', function (_message: string) {
-  return 'pending';
-});
-
-Then('total_count = {int}', function (_count: number) {
-  return 'pending';
-});
-
-Given('a player has {int} battle records', function (_count: number) {
-  return 'pending';
-});
-
-Given('the first page returned {int} records with pagination_cursor = {string}', function (_count: number, _cursor: string) {
-  return 'pending';
-});
-
-When('the client requests GET \\/api\\/v1\\/arena\\/history\\/:petId?cursor={string}', function (_cursor: string) {
-  return 'pending';
-});
-
-Then('the API returns battles {int}-{int} (next {int} records)', function (_from: number, _to: number, _count: number) {
-  return 'pending';
-});
-
-Then('a new pagination_cursor is provided for the next batch', function () {
-  return 'pending';
-});
-
-Then('the response includes meta.hasMore = true', function () {
-  return 'pending';
-});
-
-Given('a battle was fought between Pet A (Rare, {int} wins) and Pet B (Common, {int} wins)', function (_winsA: number, _winsB: number) {
-  return 'pending';
-});
-
-When('the battle record page is rendered as a social share link', function () {
-  return 'pending';
-});
-
-Then('the meta tags include:', function (_table: unknown) {
-  return 'pending';
-});
-
-Then('all OG URLs are absolute and properly encoded', function () {
-  return 'pending';
-});
-
-Then('og:image points to a valid image URL with correct dimensions (1200x630 recommended)', function () {
-  return 'pending';
-});
-
-Given('a battle record from GET \\/api\\/v1\\/arena\\/history\\/:petId', function () {
-  return 'pending';
-});
-
-When('the response is parsed', function () {
-  return 'pending';
-});
-
-Then('each battle record contains:', function (_table: unknown) {
-  return 'pending';
-});
-
-Then('no sensitive fields (opponent owner email) are exposed', function () {
-  return 'pending';
-});
-
-Given('a battle record for a pet with public_battles = true', function () {
-  return 'pending';
-});
-
-When('GET \\/api\\/v1\\/arena\\/history\\/:petId is called WITHOUT Authorization header', function () {
-  return 'pending';
-});
-
-Then('HTTP {int} is returned', function (_status: number) {
-  return 'pending';
-});
-
-Then('the battle records are visible to any visitor', function () {
-  return 'pending';
-});
-
-Then('no authentication is required', function () {
-  return 'pending';
-});
-
-Given('a battle record where opponent is an AI-generated pet', function () {
-  return 'pending';
-});
-
-When('GET \\/api\\/v1\\/arena\\/history\\/:petId is called', function () {
-  return 'pending';
-});
-
-Then('the response includes is_ai_opponent = true', function () {
-  return 'pending';
-});
-
-Then('opponent_pet_id is NULL or omitted for AI battles', function () {
-  return 'pending';
-});
-
-Then('opponent_name indicates AI status (e.g., {string} or {string})', function (_nameA: string, _nameB: string) {
+Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
   return 'pending';
 });

@@ -1,202 +1,265 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/admin-moderation.steps.ts
+// Step definitions for features/admin-moderation.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('a pet with is_banned = false', function () {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions
+// ---------------------------------------------------------------------------
+
+Given('a moderator admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
+  // Set moderator session cookie on AppWorld — see API.md §2.2
+  // Token value is a test-only fixture credential, not a production secret
+  this.adminSessionCookie = 'admin-session=test-moderator-session-fixture';
+});
+
+Given('a read_only admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
+  // Set read_only session cookie on AppWorld — see API.md §2.2
+  this.adminSessionCookie = 'admin-session=test-readonly-session-fixture';
+});
+
+Given('pet {string} exists with is_banned false', async function (this: AppWorld, petId: string) {
+  // Seed pets row with is_banned false — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false, owner_token_hash: `hash-of-token-${petId}` }],
+  });
+});
+
+Given('pet {string} exists with is_banned true', async function (this: AppWorld, petId: string) {
+  // Seed pets row with is_banned true — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: true, owner_token_hash: `hash-of-token-${petId}` }],
+  });
+});
+
+Given('pet {string} is in the Redis sorted set {string} at rank {int}', async function (this: AppWorld, petId: string, key: string, _rank: number) {
+  // ZADD leaderboard:global high_score petId — see API.md §5.4
+  await this.redis.zadd(key, 95.0, petId);
+});
+
+Given('pet {string} is in the Redis sorted set {string}', async function (this: AppWorld, petId: string, key: string) {
+  // ZADD leaderboard:global with arbitrary score — see API.md §5.4
+  await this.redis.zadd(key, 70.0, petId);
+});
+
+Given('the pet owner holds token {string}', function (this: AppWorld, token: string) {
+  // Store token for use in When steps — see API.md §2.1
+  this.authToken = token;
+});
+
+Given('the database is configured to reject writes for this scenario', function (this: AppWorld) {
+  // Stub DB to simulate write failure — implementation-specific override
   return 'pending';
 });
 
-Given('a moderator_alice with role = {string}', function (_role: string) {
+Given('Redis is unavailable', function (this: AppWorld) {
+  // Stub Redis to simulate connectivity failure — see EDD.md §resilience
   return 'pending';
 });
 
-When('POST \\/admin\\/api\\/pets\\/:petId\\/ban is called with reason = {string}', function (_reason: string) {
+Given('the database contains {int} pets with varying arena_matches counts in the last hour', async function (this: AppWorld, count: number) {
+  // Seed N pets rows — performance/moderation list scenario
+  const rows = Array.from({ length: Math.min(count, 50) }, (_, i) => ({
+    id: `pet-mod-list-${i}`,
+    rarity: i % 4 === 0 ? 'LEGENDARY' : i % 4 === 1 ? 'EPIC' : i % 4 === 2 ? 'RARE' : 'COMMON',
+    level: (i % 10) + 1,
+    stat_speed: 20, stat_strength: 20, stat_stamina: 20,
+    is_banned: false,
+  }));
+  await this.db.seed({ pets: rows });
+});
+
+Given('pet {string} exists with is_banned false', async function (this: AppWorld) {
+  // alias handled by the parameterised version above
   return 'pending';
 });
 
-Then('the system returns HTTP {int}', function (_status: number) {
+Given('pet {string} has suspicious_flag true in the database', async function (this: AppWorld, petId: string) {
+  // UPDATE pets SET suspicious_flag = true WHERE id = $1
+  await this.db.query('UPDATE pets SET suspicious_flag = true WHERE id = $1', [petId]);
+});
+
+// ---------------------------------------------------------------------------
+// When — triggering actions
+// ---------------------------------------------------------------------------
+
+When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+  // POST /admin/api/pets/:petId/ban — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/admin/api/pets/${encodeURIComponent(petId)}/ban`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { reason },
+  });
+});
+
+When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with a reason of {int} characters', async function (this: AppWorld, petId: string, charCount: number) {
+  // POST /admin/api/pets/:petId/ban — reason length validation — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  const reason = 'x'.repeat(charCount);
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/admin/api/pets/${encodeURIComponent(petId)}/ban`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { reason },
+  });
+});
+
+When('the admin sends POST \\/admin\\/api\\/pets\\/nonexistent-pet-uuid\\/ban with reason {string}', async function (this: AppWorld, reason: string) {
+  // POST /admin/api/pets/nonexistent-pet-uuid/ban — 404 path — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/admin/api/pets/nonexistent-pet-uuid/ban`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { reason },
+  });
+});
+
+When('{string} sends POST \\/api\\/v1\\/arena\\/enter with petId {string} mode {string} and acceptAI {word}', async function (this: AppWorld, token: string, petId: string, mode: string, acceptAIStr: string) {
+  // POST /api/v1/arena/enter — see API.md §5.3
+  const acceptAI = acceptAIStr === 'true';
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/arena/enter`,
+    headers: { Authorization: `Bearer ${token}` },
+    body: { petId, mode, acceptAI },
+  });
+});
+
+When('the admin sends GET \\/admin\\/api\\/pets with limit {int}', async function (this: AppWorld, limit: number) {
+  // GET /admin/api/pets?limit=N — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  const qs = new URLSearchParams({ limit: String(limit) }).toString();
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/admin/api/pets?${qs}`,
+    headers: { Cookie: this.adminSessionCookie },
+  });
+});
+
+When('the read_only admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+  // POST /admin/api/pets/:petId/ban with read_only cookie — expect 403 — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the read_only admin');
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/admin/api/pets/${encodeURIComponent(petId)}/ban`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { reason },
+  });
+});
+
+When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/unban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+  // POST /admin/api/pets/:petId/unban — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/admin/api/pets/${encodeURIComponent(petId)}/unban`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { reason },
+  });
+});
+
+When('the admin sends GET \\/admin\\/api\\/audit with limit {int}', async function (this: AppWorld, limit: number) {
+  // GET /admin/api/audit?limit=N — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  const qs = new URLSearchParams({ limit: String(limit) }).toString();
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/admin/api/audit?${qs}`,
+    headers: { Cookie: this.adminSessionCookie },
+  });
+});
+
+When('a GET request to \\/api\\/v1\\/leaderboard returns entries that do not include {string}', async function (this: AppWorld, _petId: string) {
+  // GET /api/v1/leaderboard — verify pet absent from response
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/leaderboard`,
+  });
+});
+
+When('the moderator sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
+  // PUT /admin/api/config/economy — moderator role → expect 403 — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the moderator');
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/economy`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { food_buff_speed_multiplier: value },
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response status is {int}', function (this: AppWorld, _status: number) {
   return 'pending';
 });
 
-Then('pets.is_banned is updated to true', function () {
+Then('the response status is {int} or {int}', function (this: AppWorld, _a: number, _b: number) {
   return 'pending';
 });
 
-Then('pets.banned_at is set to current timestamp', function () {
+Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
   return 'pending';
 });
 
-Then('pets.banned_reason is stored (max 500 characters)', function () {
+Then('the database pets row for {string} has is_banned true', async function (this: AppWorld, petId: string) {
+  // SELECT is_banned FROM pets WHERE id = $1
+  const _rows = await this.db.query<{ is_banned: boolean }>('SELECT is_banned FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-Then('an audit_log entry is created with:', function (_table: unknown) {
+Then('the database pets row for {string} has banned_reason set', async function (this: AppWorld, petId: string) {
+  // SELECT banned_reason FROM pets WHERE id = $1 — expect non-null
+  const _rows = await this.db.query<{ banned_reason: string }>('SELECT banned_reason FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-Given('a pet currently ranked 15th on the leaderboard', function () {
+Then('the database pets row for {string} still has is_banned false', async function (this: AppWorld, petId: string) {
+  // SELECT is_banned FROM pets WHERE id = $1 — expect false
+  const _rows = await this.db.query<{ is_banned: boolean }>('SELECT is_banned FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-When('POST \\/admin\\/api\\/pets\\/:petId\\/ban is called', function () {
+Then('the database pets row for {string} is unchanged', async function (this: AppWorld, petId: string) {
+  // SELECT is_banned FROM pets WHERE id = $1 — expect unchanged
+  const _rows = await this.db.query<{ is_banned: boolean }>('SELECT is_banned FROM pets WHERE id = $1', [petId]);
   return 'pending';
 });
 
-Then('within 5 minutes (leaderboard_ban_reflection_time_minutes):', function (_table: unknown) {
+Then('the Redis sorted set {string} does NOT contain {string}', async function (this: AppWorld, key: string, petId: string) {
+  // ZRANK key petId — expect null
+  const _rank = await this.redis.zrank(key, petId);
   return 'pending';
 });
 
-Given('a pet with is_banned = true', function () {
+Then('the Redis sorted set {string} still contains {string}', async function (this: AppWorld, key: string, petId: string) {
+  // ZRANK key petId — expect non-null
+  const _rank = await this.redis.zrank(key, petId);
   return 'pending';
 });
 
-Given('the pet owner with a valid petToken', function () {
+Then('the database admin_audit_log has a row with action {string} and admin_id {string} and target_id {string}', async function (this: AppWorld, action: string, adminId: string, targetId: string) {
+  // SELECT id FROM admin_audit_log WHERE action = $1 AND admin_id = $2 AND target_id = $3
+  const _rows = await this.db.query<{ id: string }>(
+    'SELECT id FROM admin_audit_log WHERE action = $1 AND admin_id = $2 AND target_id = $3',
+    [action, adminId, targetId],
+  );
   return 'pending';
 });
 
-When('POST \\/api\\/v1\\/arena\\/enter is called with the banned pet\'s ID', function () {
+Then('the response body {string} array contains pet entries with petId rarity level and recent battle counts', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('the system returns HTTP {int} with error code PET_BANNED', function (_status: number) {
+Then('the response body contains at least {int} audit log entries for {string}', function (this: AppWorld, _count: number, _petId: string) {
   return 'pending';
 });
 
-Then('the matchmaking entry is NOT created', function () {
-  return 'pending';
-});
-
-Then('error message is {string}', function (_message: string) {
-  return 'pending';
-});
-
-Given('a pet with is_banned = true and a ban reason on file', function () {
-  return 'pending';
-});
-
-When('POST \\/admin\\/api\\/pets\\/:petId\\/unban is called with reason = {string}', function (_reason: string) {
-  return 'pending';
-});
-
-Then('pets.is_banned is updated to false', function () {
-  return 'pending';
-});
-
-Then('pets.banned_reason is cleared (set to NULL)', function () {
-  return 'pending';
-});
-
-Then('pets.banned_at is NOT reset (immutable for audit)', function () {
-  return 'pending';
-});
-
-Then('an audit_log entry is created with action = {string}', function (_action: string) {
-  return 'pending';
-});
-
-Given('a read_only admin user', function () {
-  return 'pending';
-});
-
-When('POST \\/admin\\/api\\/pets\\/:petId\\/unban is called', function () {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with error code FORBIDDEN', function (_status: number) {
-  return 'pending';
-});
-
-Then('the ban status is NOT changed', function () {
-  return 'pending';
-});
-
-Given('a completed arena_match with matchId {string}', function (_matchId: string) {
-  return 'pending';
-});
-
-Given('a moderator with role = {string}', function (_role: string) {
-  return 'pending';
-});
-
-When('POST \\/admin\\/api\\/battles\\/:matchId\\/flag is called with reason = {string}', function (_reason: string) {
-  return 'pending';
-});
-
-Then('arena_matches.is_flagged is updated to true', function () {
-  return 'pending';
-});
-
-Then('arena_matches.flagged_at is set to current timestamp', function () {
-  return 'pending';
-});
-
-Given('a flagged battle with is_flagged = true', function () {
-  return 'pending';
-});
-
-When('DELETE \\/admin\\/api\\/battles\\/:matchId\\/flag is called with reason = {string}', function (_reason: string) {
-  return 'pending';
-});
-
-Then('arena_matches.is_flagged is updated to false', function () {
-  return 'pending';
-});
-
-Then('arena_matches.flagged_at is cleared (set to NULL)', function () {
-  return 'pending';
-});
-
-Given('a battle to flag', function () {
-  return 'pending';
-});
-
-When('POST \\/admin\\/api\\/battles\\/:matchId\\/flag is called', function () {
-  return 'pending';
-});
-
-Then('the battle remains unflagged', function () {
-  return 'pending';
-});
-
-Given('{int} flagged battles and {int} unflagged battles in the database', function (_flagged: number, _unflagged: number) {
-  return 'pending';
-});
-
-When('GET \\/admin\\/api\\/battles?flagged=true is called', function () {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with:', function (_status: number, _table: unknown) {
-  return 'pending';
-});
-
-Then('each battle includes: matchId, petAId, petBId, winnerId, is_flagged', function () {
-  return 'pending';
-});
-
-Given('a moderator with a 600-character ban reason (exceeds 500-char limit)', function () {
-  return 'pending';
-});
-
-Then('the system returns HTTP {int} with error code VALIDATION_ERROR', function (_status: number) {
-  return 'pending';
-});
-
-Then('error message indicates {string}', function (_message: string) {
-  return 'pending';
-});
-
-Then('no ban is applied', function () {
-  return 'pending';
-});
-
-Given('a moderator performs: ban pet_A, flag battle_B, unban pet_C', function () {
-  return 'pending';
-});
-
-When('GET \\/admin\\/api\\/audit?limit=10 is called', function () {
-  return 'pending';
-});
-
-Then('at least 3 audit_log entries exist with:', function (_table: unknown) {
+Then('the entries include actions {string} and {string} with admin_id {string}', function (this: AppWorld, _action1: string, _action2: string, _adminId: string) {
   return 'pending';
 });

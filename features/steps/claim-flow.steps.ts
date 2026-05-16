@@ -1,146 +1,197 @@
-// ⚠️ Auto-generated step definition stub by gendoc-align-fix gencode
+// features/steps/claim-flow.steps.ts
+// Step definitions for features/claim-flow.feature
 import { Given, When, Then } from '@cucumber/cucumber';
+import type { AppWorld } from '../support/world';
 
-Given('a guest holds a valid pet access token of at least (pet_access_token_min_bytes = {int}) bytes', function (_minBytes: number) {
+// ---------------------------------------------------------------------------
+// Given — pre-conditions (state setup, no action verbs)
+// ---------------------------------------------------------------------------
+
+Given('a seeded unclaimed pet with id {string} exists in the database', async function (this: AppWorld, petId: string) {
+  // POST /api/v1/pets/random — see API.md §5.2
+  await this.db.seed({ pets: [{ id: petId, rarity: 'COMMON', owner_token_hash: null, claimed_at: null }] });
+  this.petId = petId;
   return 'pending';
 });
 
-Given('the guest has already requested an OTP via POST \\/api\\/v1\\/claim\\/request and received a (claim_code_digits = {int})-digit code at {string}', function (_digits: number, _email: string) {
+Given('the pet {string} has no owner_token_hash set', async function (this: AppWorld, _petId: string) {
+  // DB assertion only — no API call
   return 'pending';
 });
 
-When('the guest POSTs the correct {int}-digit code via POST \\/api\\/v1\\/claim\\/verify within (claim_code_expiry_minutes = {int}) minutes', function (_digits: number, _expiry: number) {
+Given('the pet {string} is already claimed with owner_token_hash {string}', async function (this: AppWorld, _petId: string, _hash: string) {
+  // Seed pets row with owner_token_hash populated — POST /api/v1/claim/verify state
   return 'pending';
 });
 
-Then('the server links the email to the pet token and responds with HTTP {int}', function (_status: number) {
+Given('a claim record with id {string} exists for pet {string} with a valid 6-digit code {string}', async function (this: AppWorld, claimId: string, _petId: string, _code: string) {
+  // Seed claim_codes row — see SCHEMA.md claim_codes table
+  this.claimId = claimId;
   return 'pending';
 });
 
-Then('the pets record has owner_token_hash populated and the claim_codes record has used_at set', function () {
+Given('the claim code {string} has not expired', function (this: AppWorld, _code: string) {
+  // State assertion — expires_at is in the future
   return 'pending';
 });
 
-Given('the server issued a (claim_code_digits = {int})-digit OTP to {string}', function (_digits: number, _email: string) {
+Given('the claim code {string} expired {int} second ago', function (this: AppWorld, _code: string, _seconds: number) {
+  // Seed claim_codes with expires_at = NOW() - interval
   return 'pending';
 });
 
-When('the guest POSTs the correct OTP via POST \\/api\\/v1\\/claim\\/verify after (claim_code_expiry_minutes = {int}) minutes have elapsed', function (_expiry: number) {
+Given('the claim code {string} was already used at {string}', function (this: AppWorld, _code: string, _usedAt: string) {
+  // Seed claim_codes with used_at populated
   return 'pending';
 });
 
-Then('the server responds with HTTP {int}', function (_status: number) {
+Given('the Redis rate-limit counter {string} for email {string} is at {int}', async function (this: AppWorld, key: string, _email: string, count: number) {
+  // SET rl:claim:{email_hash} {count} — see API.md §3.1
+  await this.redis.set(key, String(count), 3600);
   return 'pending';
 });
 
-Then('the response body contains error code {string}', function (_code: string) {
+Given('Redis is unavailable', function (this: AppWorld) {
+  // Stub Redis client to throw connection errors
   return 'pending';
 });
 
-Given('the guest has already requested (auth_rate_limit_claim_attempts_per_hour = {int}) OTP codes within the current hour', function (_limit: number) {
+Given('a claim record with id {string} exists for pet {string} with code {string}', async function (this: AppWorld, claimId: string, _petId: string, _code: string) {
+  this.claimId = claimId;
   return 'pending';
 });
 
-When('the guest submits a sixth claim request for {string}', function (_email: string) {
+// ---------------------------------------------------------------------------
+// When — triggering actions (one per scenario)
+// ---------------------------------------------------------------------------
+
+When('the guest sends POST \\/api\\/v1\\/claim with email {string} petId {string} and ageConfirmed true', async function (this: AppWorld, email: string, petId: string) {
+  // POST /api/v1/claim — see API.md §5.1.1
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/claim`,
+    body: { email, petId, ageConfirmed: true },
+  });
   return 'pending';
 });
 
-Then('the Retry-After header is present', function () {
+When('the guest sends POST \\/api\\/v1\\/claim with email {string} petId {string} and ageConfirmed false', async function (this: AppWorld, email: string, petId: string) {
+  // POST /api/v1/claim — see API.md §5.1.1 error: AGE_CONFIRMATION_REQUIRED
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/claim`,
+    body: { email, petId, ageConfirmed: false },
+  });
   return 'pending';
 });
 
-Given('the guest successfully verified the OTP on the first attempt', function () {
+When('the guest sends POST \\/api\\/v1\\/claim\\/verify with claimId {string} and code {string}', async function (this: AppWorld, claimId: string, code: string) {
+  // POST /api/v1/claim/verify — see API.md §5.1.2
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/claim/verify`,
+    body: { claimId, code },
+  });
   return 'pending';
 });
 
-When('the guest POSTs the same OTP a second time via POST \\/api\\/v1\\/claim\\/verify', function () {
+When('the guest sends POST \\/api\\/v1\\/claim\\/recover with email {string} and petId {string}', async function (this: AppWorld, email: string, petId: string) {
+  // POST /api/v1/claim/recover — see API.md §5.1.3
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/claim/recover`,
+    body: { email, petId },
+  });
   return 'pending';
 });
 
-Given('a guest with an unclaimed pet', function () {
+When('a GET request is made to \\/api\\/v1\\/pets\\/{string}', async function (this: AppWorld, petId: string) {
+  // GET /api/v1/pets/:petId — see API.md §5.2
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/pets/${petId}`,
+  });
   return 'pending';
 });
 
-When('the guest submits a claim request with email {string} and ageConfirmed = false', function (_email: string) {
+When('an unauthenticated POST request is made to \\/api\\/v1\\/gdpr\\/request with type {string}', async function (this: AppWorld, type: string) {
+  // POST /api/v1/gdpr/request — see API.md §5.5; no Authorization header
+  this.lastResponse = await this.client.request({
+    method: 'POST',
+    url: `${this.apiBaseUrl}/api/v1/gdpr/request`,
+    body: { type },
+  });
   return 'pending';
 });
 
-Then('the system returns HTTP {int} with error code AGE_CONFIRMATION_REQUIRED', function (_status: number) {
+// ---------------------------------------------------------------------------
+// Then — observable business results
+// ---------------------------------------------------------------------------
+
+Then('the response status is {int}', function (this: AppWorld, expectedStatus: number) {
+  // Assert this.lastResponse.status === expectedStatus
   return 'pending';
 });
 
-Then('the pet remains unclaimed', function () {
+Then('the response body contains a {string} field', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Given('a pet that is already claimed (owner_token_hash is set, claimed_at is set)', function () {
+Then('the response body contains an {string} field {int} minutes in the future', function (this: AppWorld, _field: string, _minutes: number) {
   return 'pending';
 });
 
-When('a guest submits a new claim request with a different email', function () {
+Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
+  // Assert (this.lastResponse.body as any).error.code === code
   return 'pending';
 });
 
-Then('the system returns HTTP {int} with error code ALREADY_CLAIMED', function (_status: number) {
+Then('the database record for pet {string} has owner_token_hash populated', async function (this: AppWorld, petId: string) {
+  // SELECT owner_token_hash FROM pets WHERE id = petId
+  const rows = await this.db.query('SELECT owner_token_hash FROM pets WHERE id = $1', [petId]);
+  return 'pending';
+  void rows;
+});
+
+Then('the claim code record has used_at set', async function (this: AppWorld) {
+  // SELECT used_at FROM claim_codes WHERE claim_id = this.claimId
   return 'pending';
 });
 
-Then('the existing owner\'s token remains valid', function () {
+Then('the pet {string} still has no owner_token_hash in the database', async function (this: AppWorld, _petId: string) {
+  // SELECT owner_token_hash FROM pets WHERE id = petId — expect null
   return 'pending';
 });
 
-Given('Redis is unavailable (connection refused or timeout)', function () {
+Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
   return 'pending';
 });
 
-When('a POST \\/api\\/v1\\/claim\\/verify request is submitted with a code', function () {
+Then('the response header {string} is present', function (this: AppWorld, _header: string) {
+  // Assert this.lastResponse.headers[header] is defined
   return 'pending';
 });
 
-Then('the system returns HTTP {int} Service Unavailable', function (_status: number) {
+Then('the response body is identical in structure to a successful 200 claim initiation', function (this: AppWorld) {
+  // Anti-enumeration check — response shape matches happy path
   return 'pending';
 });
 
-Then('the claim is NOT completed', function () {
+Then('the response does not reveal whether the petId exists', function (this: AppWorld) {
   return 'pending';
 });
 
-Then('an alert is logged for Redis connectivity failure', function () {
+Then('the old token hash {string} is added to Redis blacklist key {string}', async function (this: AppWorld, _hash: string, key: string) {
+  // GET token:blacklist:{hash} — see API.md §2.1 token blacklist
+  const val = await this.redis.get(key);
+  return 'pending';
+  void val;
+});
+
+Then('the response body contains a {string} field with at least {int} bytes of base64url data', function (this: AppWorld, _field: string, _minBytes: number) {
   return 'pending';
 });
 
-Then('no session is created', function () {
-  return 'pending';
-});
-
-Given('a test harness makes {int} claim requests with valid pet IDs at time series T_valid[]', function (_count: number) {
-  return 'pending';
-});
-
-Given('the harness makes {int} claim requests with invalid pet IDs at time series T_invalid[]', function (_count: number) {
-  return 'pending';
-});
-
-When('the responses are measured (time from request submission to HTTP {int} reception)', function (_status: number) {
-  return 'pending';
-});
-
-Then('response_time_valid[i] ∈ [50ms, 300ms] for all i (typical network + processing)', function () {
-  return 'pending';
-});
-
-Then('response_time_invalid[i] ∈ [50ms, 300ms] for all i (same range as valid requests)', function () {
-  return 'pending';
-});
-
-Then('|response_time_valid[i] - response_time_invalid[i]| <= 50ms for ≥95% of request pairs', function () {
-  return 'pending';
-});
-
-Then('the timing difference is attributable to network jitter, not business logic branching', function () {
-  return 'pending';
-});
-
-Then('statistical t-test (paired samples, α=0.05) shows no significant difference between valid and invalid response times', function () {
+Then('the response status is {int} or {int}', function (this: AppWorld, _a: number, _b: number) {
   return 'pending';
 });
