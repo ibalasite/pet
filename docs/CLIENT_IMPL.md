@@ -215,10 +215,11 @@ pixel-pet-arena/                          ← monorepo root (pnpm-workspace)
 | **UI Texture** | `ui_<element>_<state>.png` | `ui_btn_train_normal.png`, `ui_hpbar_fill.png` |
 | **Effect Texture** | `fx_<name>.png` | `fx_levelup_burst.png`, `fx_rarity_legendary_glow.png` |
 | **Background Texture** | `bg_<scene>_<layer>.png` | `bg_arena_floor.png` |
-| **SFX File** | `sfx-<category>-<name>.mp3` (kebab-case per AUDIO.md §6.1) | `sfx-pet-tap-pop.mp3`, `sfx-training-success.mp3` |
-| **BGM File** | `bgm-<scene>.mp3` | `bgm-arena-battle.mp3`, `bgm-trainer-ambient.mp3` |
+| **SFX File** | `<event-category>-<specific-event>-<variant>.mp3` (kebab-case per AUDIO.md §6.1 Naming Convention) | `pet-tap-pop.mp3`, `training-success.mp3` |
+| **BGM File** | `<scene>-<modifier>-loop.mp3` (kebab-case per AUDIO.md §6.1) | `arena-battle-loop.mp3`, `trainer-ambient-loop.mp3` |
 | **Phaser Cache Key (texture)** | `kebab-case-with-namespace`; constants in `game/constants/AssetKeys.ts` | `pet-body-round`, `fx-levelup-burst` |
-| **Phaser Cache Key (audio)** | `sfx-<category>-<name>` matching file name minus extension | `sfx-pet-tap-pop` |
+| **Phaser Cache Key (audio, SFX)** | `sfx-<file-stem>` — code-side namespace prefix (`sfx-`) PLUS the AUDIO.md file stem, registered in `game/constants/AssetKeys.ts` | file `pet-tap-pop.mp3` → Phaser key `sfx-pet-tap-pop` |
+| **Phaser Cache Key (audio, BGM)** | `bgm-<file-stem-without-loop-suffix>` — code-side namespace prefix (`bgm-`) | file `arena-battle-loop.mp3` → Phaser key `bgm-arena-battle` |
 | **Phaser Animation Key** | `<petKey>-<state>` per ANIM §11.2 | `pet-cat-rare-idle`, `pet-cat-rare-battle_active` |
 | **Scene Key Constant** | `UPPER_SNAKE_CASE` exported from `SceneKeys.ts` | `SCENE_KEYS.PET_IDLE = 'PetIdleScene'` |
 | **Event Key Constant** | `UPPER_SNAKE_CASE` exported from `EventKeys.ts` | `BRIDGE_EVENTS.TRAINING_COMPLETE = 'training:complete'` |
@@ -469,21 +470,23 @@ apps/web/public/assets/
 │   │   └── ui_pack.json                  (texture atlas combining all UI sprites)
 │   └── tilesets/
 │       └── bg_arena_floor.png            (32×32 tile, repeats to fill arena)
-├── audio/                                ← All 12 SFX + 2 BGM (see §6.1)
-│   ├── sfx-pet-tap-pop.mp3
-│   ├── sfx-pet-tap-click.mp3
-│   ├── sfx-training-start.mp3
-│   ├── sfx-training-success.mp3
-│   ├── sfx-stat-ding.mp3
-│   ├── sfx-arena-start.mp3
-│   ├── sfx-arena-victory.mp3
-│   ├── sfx-arena-defeat.mp3
-│   ├── sfx-claim-success.mp3
-│   ├── sfx-rate-limit-warning.mp3
-│   ├── sfx-leaderboard-rankup.mp3
-│   ├── sfx-food-buff.mp3
-│   ├── bgm-arena-battle.mp3              (P3 — feature-flagged FF_BGM)
-│   └── bgm-trainer-ambient.mp3           (P3)
+├── audio/                                ← All 12 SFX + 2 BGM (see §6.1) — filenames per AUDIO.md §6.1
+│   ├── sfx/
+│   │   ├── pet-tap-pop.mp3
+│   │   ├── pet-tap-click.mp3
+│   │   ├── training-start.mp3
+│   │   ├── training-success.mp3
+│   │   ├── stat-ding.mp3
+│   │   ├── arena-start.mp3
+│   │   ├── arena-victory.mp3
+│   │   ├── arena-defeat.mp3
+│   │   ├── claim-success.mp3
+│   │   ├── rate-limit-warning.mp3
+│   │   ├── leaderboard-rankup.mp3
+│   │   └── food-buff.mp3
+│   └── music/
+│       ├── arena-battle-loop.mp3        (P3 — feature-flagged FF_BGM)
+│       └── trainer-ambient-loop.mp3     (P3)
 ├── fonts/
 │   ├── press-start-2p-subset.woff2       (Latin + digits subset; ~12 KB)
 │   ├── press-start-2p-bitmap.png         (Phaser BitmapText source)
@@ -511,8 +514,8 @@ apps/web/public/assets/
 | 背景 | `bg_{scene}_{layer}.png` | `bg_arena_floor.png` |
 | 特效粒子 | `fx_{name}.png` | `fx_levelup_burst.png`, `fx_sparkle.png` |
 | 稀有度光暈 | `fx_rarity_{tier}.png` | `fx_rarity_legendary.png` |
-| 音效（per AUDIO §6.1） | `sfx-{category}-{name}.mp3` (kebab-case) | `sfx-pet-tap-pop.mp3` |
-| 背景音樂 | `bgm-{scene}.mp3` | `bgm-arena-battle.mp3` |
+| 音效（per AUDIO §6.1） | `{event-category}-{event}-{variant}.mp3` (kebab-case, no `sfx-` prefix in filename) | `pet-tap-pop.mp3`, `training-success.mp3` |
+| 背景音樂 | `{scene}-{modifier}-loop.mp3` (kebab-case, no `bgm-` prefix in filename) | `arena-battle-loop.mp3`, `trainer-ambient-loop.mp3` |
 | Phaser texture key (in code) | `kebab-case`, prefix matches folder | `'pet-body-round'`, `'fx-levelup-burst'`, `'ui-btn-train-normal'` |
 
 ### §4.3 Loading Strategy
@@ -523,8 +526,8 @@ apps/web/public/assets/
 | `BootScene` assets (loading bar) | Eager inside engine, <5 KB total | `this.load.image('loading-bar', '/assets/sprites/ui/ui_loading_bar.png')` in `BootScene.preload()` | First Phaser scene boot | HTTP cache 24 h | this doc §3.2 |
 | Shared atlases (UI pack, FX pack, glow pack) | Eager in `PreloadScene` | `this.load.atlas('ui-pack', ...)` + `this.load.atlas('fx-pack', ...)` | After Boot | HTTP cache 24 h, Phaser TextureManager keeps in VRAM until scene shuts down | ANIM §3.2 |
 | Per-pet atlas (one of 144 variants) | Lazy inside scene preload | `this.load.atlas(petKey, atlasPath, jsonPath)` then `this.load.start()` | When PetIdleScene.create() runs with a new `petSeed` | IndexedDB LRU cache (last 5 variants); browser HTTP cache 24 h | ANIM §5.1 |
-| Audio SFX (12 files, MP3, ~360 KB total) | Eager in `PreloadScene.preload()` | `this.load.audio('sfx-pet-tap-pop', ['/assets/audio/sfx-pet-tap-pop.mp3'])` × 12 | After Boot; async (does not block render) | Web Audio API decode buffer (per AUDIO §4.3); Phaser sound pool | AUDIO §3.1, §5.1 |
-| BGM (P3, behind `FF_BGM`) | Lazy on `ArenaBattleScene.preload()` | `this.load.audio('bgm-arena-battle', [...])` with `xhrSettings: { responseType: 'arraybuffer' }`; played via `this.sound.play(key, { loop: true })` | Arena page entry only when flag enabled | HTTP cache 24 h; not pre-decoded | AUDIO §3.2 |
+| Audio SFX (12 files, MP3, ~360 KB total) | Eager in `PreloadScene.preload()` | `this.load.audio('sfx-pet-tap-pop', ['/assets/audio/sfx/pet-tap-pop.mp3'])` × 12 — Phaser cache key keeps `sfx-` prefix (code namespace); file path uses AUDIO.md §6.1 bare filename under `audio/sfx/` | After Boot; async (does not block render) | Web Audio API decode buffer (per AUDIO §4.3); Phaser sound pool | AUDIO §3.1, §5.1 |
+| BGM (P3, behind `FF_BGM`) | Lazy on `ArenaBattleScene.preload()` | `this.load.audio('bgm-arena-battle', ['/assets/audio/music/arena-battle-loop.mp3'])` with `xhrSettings: { responseType: 'arraybuffer' }`; played via `this.sound.play(key, { loop: true })` — Phaser cache key keeps `bgm-` prefix; file is `arena-battle-loop.mp3` under `audio/music/` | Arena page entry only when flag enabled | HTTP cache 24 h; not pre-decoded | AUDIO §3.2 |
 | Fonts (Press Start 2P, Inter) | Eager via `<link rel="preload">` outside Phaser | HTML `<link rel="preload" as="font" crossorigin>` on `index.html` | Page load | Browser font cache | VDD §5.3 |
 | Static fallback sprite (reduced-motion) | Eager in `BootScene` | `this.load.image('pet-static-fallback', '/assets/sprites/characters/${variant}_static.png')` | Always (~2 KB) | HTTP cache | ANIM §5.2 |
 | Sprite manifest JSON | Eager pre-Phaser | `fetch('/assets/manifests/sprites_manifest.json')` | App boot via `lib/spriteLoader.ts` | TanStack Query (5 min staleTime) | ANIM §3.2 |
@@ -556,7 +559,7 @@ async function loadVariantAtlas(petKey: string): Promise<ArrayBuffer> {
 |------|--------|--------------------|
 | **Single texture (sprite atlas, per pet variant)** | ≤ 768×768 px (PNG, indexed colour where possible); each atlas ≤ **120 KB raw / ≤ 90 KB gzipped** | ANIM §2.3 estimates 100 KB avg per variant; we cap at 120 KB. Atlases are 24× the 32×32 frame size — comfortably below the 2048 px engine limit. |
 | **Single texture (UI / FX sprite)** | ≤ 256×256 px; ≤ **20 KB** | UI pack is a single 512×512 atlas at ~40 KB; individual UI sprites are ≤ 64×64. |
-| **SFX (single file)** | MP3 128 kbps, mono, ≤ 600 ms duration; **≤ 96 KB per file** (largest is `sfx-arena-victory.mp3` at 96 KB / 600 ms) | AUDIO §3.1 — table caps each SFX at 600 ms; 128 kbps × 600 ms = 96 KB. |
+| **SFX (single file)** | MP3 128 kbps, mono, ≤ 600 ms duration; **≤ 96 KB per file** (largest is `audio/sfx/arena-victory.mp3` at 96 KB / 600 ms) | AUDIO §3.1 — table caps each SFX at 600 ms; 128 kbps × 600 ms = 96 KB. |
 | **BGM (single file)** | MP3 128 kbps, 44.1 kHz stereo loop, ≤ 60 s; **≤ 120 KB per track** (P3 only) | AUDIO §3.2 — both planned tracks (Arena loop 45 s / 90 KB, Trainer ambient 60 s / 120 KB) are within budget. |
 | **Initial JS bundle (gzipped)** | ≤ **150 KB gzip** for first paint chunk (React + Router + TanStack Query + Zustand + Zod) | FRONTEND §6.3 says total ≤ 300 KB gzip; initial paint chunk is ≤ 150 KB. |
 | **Total JS bundle (gzipped, all chunks combined)** | ≤ **300 KB gzipped** | FRONTEND §6.3 `TOTAL_JS_BUNDLE_GZIPPED_KB = 300` |
@@ -656,22 +659,24 @@ All transitions enumerated in §11.1 (15 transitions across 10 states) — `PetA
 
 ### §6.1 SFX & BGM Inventory (from AUDIO.md §3.1)
 
-| Audio ID | Phaser Cache Key | Type | File | Duration | Volume (default) | Loop | Source |
-|----------|------------------|------|------|----------|------------------|------|--------|
-| `pet-tap-pop` | `sfx-pet-tap-pop` | SFX | `sfx-pet-tap-pop.mp3` | 120 ms | 0.7 × master × 0.8 (sfx) | no | AUDIO §3.1 |
-| `pet-tap-click` | `sfx-pet-tap-click` | UI | `sfx-pet-tap-click.mp3` | 100 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `training-start` | `sfx-training-start` | SFX | `sfx-training-start.mp3` | 150 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `training-success` | `sfx-training-success` | SFX | `sfx-training-success.mp3` | 200 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `stat-ding` | `sfx-stat-ding` | UI | `sfx-stat-ding.mp3` | 100 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `arena-start` | `sfx-arena-start` | SFX | `sfx-arena-start.mp3` | 300 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `arena-victory` | `sfx-arena-victory` | SFX | `sfx-arena-victory.mp3` | 600 ms | 0.8 × master × 0.8 | no | AUDIO §3.1 |
-| `arena-defeat` | `sfx-arena-defeat` | SFX | `sfx-arena-defeat.mp3` | 400 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `claim-success` | `sfx-claim-success` | UI | `sfx-claim-success.mp3` | 180 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `rate-limit-warning` | `sfx-rate-limit-warning` | UI | `sfx-rate-limit-warning.mp3` | 250 ms | 0.9 × master × 0.8 (alert priority) | no | AUDIO §3.1 |
-| `leaderboard-rankup` | `sfx-leaderboard-rankup` | SFX | `sfx-leaderboard-rankup.mp3` | 500 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `food-buff` | `sfx-food-buff` | SFX | `sfx-food-buff.mp3` | 200 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
-| `arena-battle` | `bgm-arena-battle` | BGM | `bgm-arena-battle.mp3` | 45 s loop | 0.5 × master | yes | AUDIO §3.2 (P3) |
-| `trainer-ambient` | `bgm-trainer-ambient` | BGM | `bgm-trainer-ambient.mp3` | 60 s loop | 0.5 × master | yes | AUDIO §3.2 (P3) |
+> **File-name convention**: filenames in the `File` column match AUDIO.md §6.1 verbatim (no `sfx-`/`bgm-` filename prefix). The `Phaser Cache Key` column adds an in-code `sfx-`/`bgm-` namespace prefix that exists only at the Phaser cache layer (registered in `game/constants/AssetKeys.ts`).
+
+| Audio ID | Phaser Cache Key | Type | File (per AUDIO.md §6.1) | Duration | Volume (default) | Loop | Source |
+|----------|------------------|------|--------------------------|----------|------------------|------|--------|
+| `pet-tap-pop` | `sfx-pet-tap-pop` | SFX | `audio/sfx/pet-tap-pop.mp3` | 120 ms | 0.7 × master × 0.8 (sfx) | no | AUDIO §3.1 |
+| `pet-tap-click` | `sfx-pet-tap-click` | UI | `audio/sfx/pet-tap-click.mp3` | 100 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `training-start` | `sfx-training-start` | SFX | `audio/sfx/training-start.mp3` | 150 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `training-success` | `sfx-training-success` | SFX | `audio/sfx/training-success.mp3` | 200 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `stat-ding` | `sfx-stat-ding` | UI | `audio/sfx/stat-ding.mp3` | 100 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `arena-start` | `sfx-arena-start` | SFX | `audio/sfx/arena-start.mp3` | 300 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `arena-victory` | `sfx-arena-victory` | SFX | `audio/sfx/arena-victory.mp3` | 600 ms | 0.8 × master × 0.8 | no | AUDIO §3.1 |
+| `arena-defeat` | `sfx-arena-defeat` | SFX | `audio/sfx/arena-defeat.mp3` | 400 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `claim-success` | `sfx-claim-success` | UI | `audio/sfx/claim-success.mp3` | 180 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `rate-limit-warning` | `sfx-rate-limit-warning` | UI | `audio/sfx/rate-limit-warning.mp3` | 250 ms | 0.9 × master × 0.8 (alert priority) | no | AUDIO §3.1 |
+| `leaderboard-rankup` | `sfx-leaderboard-rankup` | SFX | `audio/sfx/leaderboard-rankup.mp3` | 500 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `food-buff` | `sfx-food-buff` | SFX | `audio/sfx/food-buff.mp3` | 200 ms | 0.7 × master × 0.8 | no | AUDIO §3.1 |
+| `arena-battle` | `bgm-arena-battle` | BGM | `audio/music/arena-battle-loop.mp3` | 45 s loop | 0.5 × master | yes | AUDIO §3.2 (P3) |
+| `trainer-ambient` | `bgm-trainer-ambient` | BGM | `audio/music/trainer-ambient-loop.mp3` | 60 s loop | 0.5 × master | yes | AUDIO §3.2 (P3) |
 
 ### §6.2 Audio Trigger Mapping (React event → Phaser SoundManager)
 
@@ -1020,7 +1025,7 @@ window.addEventListener('online', () => { drainQueue(); });
 | Total CSS | < 50 KB | `TOTAL_CSS_BUNDLE_GZIPPED_KB = 50`; FRONTEND §6.3 |
 | Phaser lazy chunk | ≤ 300 KB | Loaded on first `<PetCanvas>` mount |
 | Per-route lazy chunk (e.g. `<ArenaPage>`) | ≤ 80 KB | Vite splits per route |
-| Largest single audio file | ≤ 96 KB | `sfx-arena-victory.mp3` |
+| Largest single audio file | ≤ 96 KB | `audio/sfx/arena-victory.mp3` |
 | Largest single sprite atlas | ≤ 120 KB raw / ≤ 90 KB gzipped | ANIM §2.3 |
 | Total cumulative download (first session) | ≤ 1.0 MB transferred for FCP path; ≤ 4.5 MB for first-visit-with-pet-render | FRONTEND §6 |
 
