@@ -2,23 +2,23 @@
 
 ## Document Control
 
-| 欄位 | 值 |
-|------|-----|
-| Document ID | `SCHEMA-PIXEL-PET-ARENA-20260510` |
-| Version | `3.0` |
-| Status | Draft |
-| Classification | Internal |
-| Owner | Database Architect / Data Engineering Lead |
-| **Owning Bounded Context / Service** | **Modular Monolith spanning 6 BCs (Identity / Pet / Arena / Leaderboard / Marketplace / Admin)**; per HC-1 each BC owns its own tables (see §1.1). The PostgreSQL instance is logically partitioned by BC ownership; cross-BC FKs at the DB level are forbidden and are enforced as application-layer ID-only references. |
-| Created | 2026-05-03 |
-| Last Updated | 2026-05-16 |
-| Upstream EDD | [docs/EDD.md](EDD.md) |
-| Upstream Constants | [docs/CONSTANTS.md](CONSTANTS.md) |
-| Upstream API | [docs/API.md](API.md) |
-| Database | PostgreSQL 15+ (Supabase managed) |
-| Cache / KV | Redis 7+ (Upstash serverless) |
-| Source of Truth | All migrations must be reviewed against this document before merge. |
-| Changelog | [See Change Log](#change-log) |
+| 欄位 | 值 | 說明 | 責任方 |
+|------|-----|------|--------|
+| Document ID | `SCHEMA-PIXEL-PET-ARENA-20260510` | Unique doc identifier | Database Architect |
+| Version | `3.0` | Semantic version | Database Architect |
+| Status | Draft | Draft / In Review / Approved | Database Architect |
+| Classification | Internal | Internal / Confidential | Data Engineering Lead |
+| Owner | Database Architect / Data Engineering Lead | Document owner | — |
+| **Owning Bounded Context / Service** | **Modular Monolith spanning 6 BCs (Identity / Pet / Arena / Leaderboard / Marketplace / Admin)** | Per HC-1 each BC owns its own tables (see §1.1); cross-BC FKs forbidden at DB level | Software Architect |
+| Created | 2026-05-03 | Initial creation date | Database Architect |
+| Last Updated | 2026-05-16 | Date of last revision | Database Architect |
+| Upstream EDD | [docs/EDD.md](EDD.md) | Engineering Design Document | Backend Architect |
+| Upstream Constants | [docs/CONSTANTS.md](CONSTANTS.md) | Shared constants reference | Backend Architect |
+| Upstream API | [docs/API.md](API.md) | API specification | Backend Architect |
+| Database | PostgreSQL 15+ (Supabase managed) | Primary RDBMS | Infrastructure |
+| Cache / KV | Redis 7+ (Upstash serverless) | In-memory cache + rate limit | Infrastructure |
+| Source of Truth | All migrations must be reviewed against this document before merge. | Migration governance rule | Database Architect |
+| Changelog | [See Change Log](#change-log) | Version history | Database Architect |
 
 ## Change Log
 
@@ -46,12 +46,12 @@
 
 > **Spring Modulith 硬約束（HC-1）：每個 Bounded Context 擁有且只擁有自己的 tables；跨 BC 資料存取只能透過對方的 Public API 或 Domain Event，絕對禁止 DB-level JOIN 或 FK 跨越 BC 邊界。**
 
-| 欄位 | 值 |
-|------|-----|
-| **Multi-Tenancy 策略** | **Single-Tenant SaaS**（單一公開遊戲，全體玩家共用一份 DB；無 tenant 隔離需求） |
-| **Schema 命名空間** | `public`（單一邏輯 schema；BC 邊界由 module ownership table + 應用層強制） |
-| **本 SCHEMA 涵蓋的 BC** | Identity / Pet / Arena / Leaderboard / Marketplace / Admin（共 6 個 BC） |
-| **本 SCHEMA 不涵蓋** | 不擁有任何外部第三方 schema（SendGrid、Vercel、Upstash、Supabase 等以 API 呼叫存取） |
+| 欄位 | 值 | 說明 | 相關章節 |
+|------|-----|------|---------|
+| **Multi-Tenancy 策略** | **Single-Tenant SaaS** | 單一公開遊戲，全體玩家共用一份 DB；無 tenant 隔離需求 | §17 |
+| **Schema 命名空間** | `public` | 單一邏輯 schema；BC 邊界由 module ownership table + 應用層強制 | §1.1.1 |
+| **本 SCHEMA 涵蓋的 BC** | Identity / Pet / Arena / Leaderboard / Marketplace / Admin（共 6 個 BC） | 每 BC 唯一擁有一組 table；見 §1.1.1 | §1.1.1 |
+| **本 SCHEMA 不涵蓋** | 不擁有任何外部第三方 schema | SendGrid、Vercel、Upstash、Supabase 等以 API 呼叫存取 | EDD §3.4 |
 
 #### 1.1.1 BC Ownership Table（與 EDD §3.4 對齊）
 
@@ -95,18 +95,18 @@
 
 ### 2.1 命名慣例
 
-| 類別 | 規則 | 範例 |
-|------|------|------|
-| 資料表名稱 | `snake_case`，**複數**（pet-arena 採英文複數約定，如 `pets`、`arena_matches`） | `pets`, `arena_matches`, `claim_codes` |
-| 欄位名稱 | `snake_case`，小寫 | `pet_name`, `created_at`, `email_hash` |
-| Boolean 欄位 | 以 `is_` / `has_` / `can_` 為前綴（或語意化動詞如 `flagged_at` 配對 `is_flagged`） | `is_banned`, `is_flagged`, `is_ai_opponent`, `is_permanent` |
-| Enum 欄位 | 以 PostgreSQL `ENUM` type 表示；type 名稱以 `_enum` 為後綴 | `rarity_enum`, `arena_mode_enum`, `gdpr_request_status_enum` |
-| 外鍵欄位 | 參照表名稱**單數** + `_id`（如 `pets` → `pet_id`） | `pet_id`, `claim_identity_id`, `listing_id`, `admin_id` |
-| 索引名稱 | `idx_{table}_{columns}`（縮寫可接受，如 `_history`） | `idx_pets_rarity`, `idx_arena_matches_pet_a_history` |
-| 唯一索引 | `uq_{table}_{columns}` 或 `idx_{table}_{columns}` 並標註 UNIQUE | `uq_pets_seed`, `uq_admin_users_username`, `uq_marketplace_transactions_listing` |
-| 外鍵約束 | `fk_{table}_{ref}` | `fk_pets_claim_identity`, `fk_audit_logs_admin` |
-| 主鍵約束 | `pk_{table}` | `pk_pets`, `pk_audit_logs` |
-| CHECK 約束 | `chk_{table}_{semantic}` | `chk_pet_stat_speed_range`, `chk_arena_match_winner_is_combatant` |
+| 類別 | 規則 | 範例 | 禁止事項 |
+|------|------|------|---------|
+| 資料表名稱 | `snake_case`，**複數**（pet-arena 採英文複數約定，如 `pets`、`arena_matches`） | `pets`, `arena_matches`, `claim_codes` | `tbl_` 前綴；中文 identifier |
+| 欄位名稱 | `snake_case`，小寫 | `pet_name`, `created_at`, `email_hash` | 中文 / 全形字元；保留字（`type`、`order`、`value`） |
+| Boolean 欄位 | 以 `is_` / `has_` / `can_` 為前綴（或語意化動詞如 `flagged_at` 配對 `is_flagged`） | `is_banned`, `is_flagged`, `is_ai_opponent`, `is_permanent` | 無前綴的 bare Boolean（`banned`、`active`） |
+| Enum 欄位 | 以 PostgreSQL `ENUM` type 表示；type 名稱以 `_enum` 為後綴 | `rarity_enum`, `arena_mode_enum`, `gdpr_request_status_enum` | VARCHAR 替代 ENUM（降低類型安全） |
+| 外鍵欄位 | 參照表名稱**單數** + `_id`（如 `pets` → `pet_id`） | `pet_id`, `claim_identity_id`, `listing_id`, `admin_id` | 不一致縮寫；複數形（`pets_id`） |
+| 索引名稱 | `idx_{table}_{columns}`（縮寫可接受，如 `_history`） | `idx_pets_rarity`, `idx_arena_matches_pet_a_history` | 無前綴；過長無語意縮寫 |
+| 唯一索引 | `uq_{table}_{columns}` 或 `idx_{table}_{columns}` 並標註 UNIQUE | `uq_pets_seed`, `uq_admin_users_username`, `uq_marketplace_transactions_listing` | 混用兩種前綴 |
+| 外鍵約束 | `fk_{table}_{ref}` | `fk_pets_claim_identity`, `fk_audit_logs_admin` | 無前綴；`foreignkey_` 前綴 |
+| 主鍵約束 | `pk_{table}` | `pk_pets`, `pk_audit_logs` | 無前綴；`primary_` 前綴 |
+| CHECK 約束 | `chk_{table}_{semantic}` | `chk_pet_stat_speed_range`, `chk_arena_match_winner_is_combatant` | 無語意後綴（如 `chk1`） |
 
 **禁止**：
 - 保留字作為欄位名稱（`name` 例外，因 `pet_name` 已加前綴；不得單獨用 `value`、`type`、`order`）
@@ -131,12 +131,12 @@ updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()                  -- 應用層更
 
 ### 2.3 主鍵 ID 策略
 
-| 策略 | 適用情境 | 本專案使用 |
-|------|---------|-----------|
-| `UUID v4` (`gen_random_uuid()`) | 外部暴露的 Resource ID（API 路徑、URL） | **預設**：`pets`、`claim_identities`、`claim_codes`、`arena_matches`、`leaderboard_snapshots`、`training_logs`、`food_buffs`、`marketplace_listings`、`marketplace_transactions`、`admin_users`、`gdpr_requests` |
-| `BIGSERIAL` | 純內部表，需要嚴格時序、不可暴露 | `audit_logs`（單調遞增；admin 介面僅依時間排序，不暴露 ID） |
-| `ULID` | 需時序的外部 ID | 暫不使用 |
-| `UUID v7` | PostgreSQL 17+ 時序 UUID | 本專案 PG 15，待後續升級評估 |
+| 策略 | 適用情境 | 本專案使用 | 升級路徑 |
+|------|---------|-----------|---------|
+| `UUID v4` (`gen_random_uuid()`) | 外部暴露的 Resource ID（API 路徑、URL） | **預設**：`pets`、`claim_identities`、`claim_codes`、`arena_matches`、`leaderboard_snapshots`、`training_logs`、`food_buffs`、`marketplace_listings`、`marketplace_transactions`、`admin_users`、`gdpr_requests` | 未來可遷移至 UUID v7（PG 17+） |
+| `BIGSERIAL` | 純內部表，需要嚴格時序、不可暴露 | `audit_logs`（單調遞增；admin 介面僅依時間排序，不暴露 ID） | 超過 2^63 理論上限（實務不會觸達） |
+| `ULID` | 需時序的外部 ID | 暫不使用 | 有庫支援時可評估 |
+| `UUID v7` | PostgreSQL 17+ 時序 UUID | 本專案 PG 15，待後續升級評估 | PG 17 升級後優先評估替換 UUID v4 |
 
 **決策規則**：
 - 對外可見資源 → UUID v4
@@ -147,14 +147,14 @@ updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()                  -- 應用層更
 
 本專案僅 `admin_users` 採軟刪除（`deactivated_at`）。其餘 table 採以下策略：
 
-| Table | 刪除策略 | 理由 |
-|-------|---------|------|
-| `admin_users` | **軟刪除** (`deactivated_at`) | `audit_logs.admin_id` FK 必須保留 actor 紀錄；硬刪會違反稽核完整性 |
-| `pets` | **硬刪除**（GDPR erasure 路徑） + status flag (`is_banned`) | GDPR 個資刪除權；用 `erase_user_pii` procedure（見 §6.3） |
-| `claim_identities` | **匿名化**（PII 清空 + retention metadata 保留） | GDPR Art.17 + 法規舉證；保留行為以稽核 erasure 完成 |
-| `claim_codes` | **硬刪除**（72h 後 background job） | OTP 短生命週期；超過 72h 無業務價值 |
-| `arena_matches` / `training_logs` / `food_buffs` | **保留**（append-only） + `is_flagged` flag | 行為稽核 / 防作弊取證 |
-| `marketplace_listings` / `marketplace_transactions` | **保留**（append-only；status 翻轉） | 財務稽核 |
+| Table | 刪除策略 | 理由 | Retention 章節 |
+|-------|---------|------|--------------|
+| `admin_users` | **軟刪除** (`deactivated_at`) | `audit_logs.admin_id` FK 必須保留 actor 紀錄；硬刪會違反稽核完整性 | §13 |
+| `pets` | **硬刪除**（GDPR erasure 路徑） + status flag (`is_banned`) | GDPR 個資刪除權；用 `erase_user_pii` procedure（見 §6.3） | §6.3 |
+| `claim_identities` | **匿名化**（PII 清空 + retention metadata 保留） | GDPR Art.17 + 法規舉證；保留行為以稽核 erasure 完成 | §6.3 |
+| `claim_codes` | **硬刪除**（72h 後 background job） | OTP 短生命週期；超過 72h 無業務價值 | §13 |
+| `arena_matches` / `training_logs` / `food_buffs` | **保留**（append-only） + `is_flagged` flag | 行為稽核 / 防作弊取證 | §13 |
+| `marketplace_listings` / `marketplace_transactions` | **保留**（append-only；status 翻轉） | 財務稽核 | §13 |
 | `leaderboard_snapshots` | **滾動硬刪**（12 個月 retention） | 歷史報表，無 PII |
 | `audit_logs` | **滾動硬刪**（2 年 retention） + `ip_address_hash` 90 天清空 | GDPR Art.30 合規上限 + IP retention |
 | `gdpr_requests` | **保留**（合規舉證） | 法規要求 |
@@ -1082,12 +1082,12 @@ CREATE TYPE gdpr_request_status_enum AS ENUM (
 
 ### 4.1 各正規化形式說明
 
-| 正規化 | 要求 | 本專案合規檢查 |
-|--------|------|---------------|
-| 1NF | 每欄位為原子值；無重複欄位組 | ✅ — `generation_meta`、`battle_log`、`entries`、`detail`、`totp_backup_codes_hash` 為 JSONB（PostgreSQL 原生 JSONB type 視為「semi-structured atomic value」），非重複欄位組 |
-| 2NF | 非主鍵欄位完全依賴主鍵（單欄主鍵下自動成立） | ✅ — 所有主鍵為單欄 UUID 或 BIGSERIAL |
-| 3NF | 非主鍵欄位不依賴其他非主鍵欄位 | ✅（除 §4.2 列出的刻意反正規化） |
-| BCNF | 每個決定因子皆為候選鍵 | ✅ — 所有決定因子（如 `pets.seed`、`admin_users.username`）皆為 UNIQUE 候選鍵 |
+| 正規化 | 要求 | 常見違反 | 本專案合規檢查 |
+|--------|------|---------|---------------|
+| 1NF | 每欄位為原子值；無重複欄位組 | `tag1`、`tag2`、`tag3` 三欄 | ✅ — `generation_meta`、`battle_log`、`entries`、`detail`、`totp_backup_codes_hash` 為 JSONB（PostgreSQL 原生 JSONB type 視為「semi-structured atomic value」），非重複欄位組 |
+| 2NF | 非主鍵欄位完全依賴主鍵（單欄主鍵下自動成立） | 複合主鍵中只依賴其中一個欄位 | ✅ — 所有主鍵為單欄 UUID 或 BIGSERIAL |
+| 3NF | 非主鍵欄位不依賴其他非主鍵欄位 | `city` 依賴 `zip_code` 而非 `user_id` | ✅（除 §4.2 列出的刻意反正規化） |
+| BCNF | 每個決定因子皆為候選鍵 | 複合候選鍵之間的依賴 | ✅ — 所有決定因子（如 `pets.seed`、`admin_users.username`）皆為 UNIQUE 候選鍵 |
 
 **1NF 範例**：
 - `pets.generation_meta` 為 JSONB — 6 維度物件而非 6 個分散欄位（`body`、`head`、`color_palette`、`accessory`、`rarity_trait`、`pattern`）。理由：sprite 生成 metadata 變動頻繁；scheme 演進不需 ALTER TABLE。
@@ -1136,14 +1136,14 @@ FROM pets;
 
 ### 5.2 索引類型選用表
 
-| 索引類型 | 適用情境 | 本專案使用範例 |
-|---------|---------|---------------|
-| **B-tree**（預設） | 等值、範圍、排序；大多數場景 | 全部 `idx_*` 索引預設 B-tree |
-| **Hash** | 僅等值，PG 10+ 持久化 | 暫不使用（B-tree 已足） |
-| **GIN** | JSONB containment、tsvector 全文搜尋、陣列 | 評估中：`pets.generation_meta` 可能加 GIN（若 admin search by accessory） |
-| **GiST** | 範圍類型、地理 | 不使用 |
-| **BRIN** | 物理有序的超大表（時序） | 候選：`audit_logs (created_at)` 達 1 億筆時 BRIN 替代 B-tree |
-| **SP-GiST** | 非平衡樹結構 | 不使用 |
+| 索引類型 | 適用情境 | 本專案使用範例 | 觸發門檻 |
+|---------|---------|---------------|---------|
+| **B-tree**（預設） | 等值、範圍、排序；大多數場景 | 全部 `idx_*` 索引預設 B-tree | 通用 |
+| **Hash** | 僅等值，PG 10+ 持久化 | 暫不使用（B-tree 已足） | 大量 hash-only 等值查詢 |
+| **GIN** | JSONB containment、tsvector 全文搜尋、陣列 | 評估中：`pets.generation_meta` 可能加 GIN（若 admin search by accessory） | JSONB 結構查詢 |
+| **GiST** | 範圍類型、地理 | 不使用 | 地理 / 範圍資料 |
+| **BRIN** | 物理有序的超大表（時序） | 候選：`audit_logs (created_at)` 達 1 億筆時 BRIN 替代 B-tree | > 1 億筆時序資料 |
+| **SP-GiST** | 非平衡樹結構 | 不使用 | IP 範圍、特殊結構 |
 
 ### 5.3 複合索引欄位順序規則
 
@@ -1407,15 +1407,15 @@ export const pgPool = new Pool({
 
 Supabase 提供 1 個 read replica；application layer 用兩個獨立 pool（primary + replica）路由：
 
-| 查詢類型 | 路由 | 範例 |
-|---------|------|------|
-| 寫入（INSERT / UPDATE / DELETE） | **Primary** | claim verify, training, arena enter, pet ban, admin login |
-| 即時讀取（write-after-read 場景） | **Primary** | 領取後立即 GET pet（避免 lag） |
-| Public pet page | **Replica** | `GET /api/v1/pets/:petId` 對 guest preview |
-| Leaderboard public read | **Replica**（次要） + Redis（主要） | `GET /api/v1/leaderboard` 走 Redis；replica 用於 fallback degraded mode（Redis 失效） |
-| Admin list views | **Replica** | `GET /admin/api/pets`, `GET /admin/api/battles` |
-| 報表 / 分析 | **Replica** | leaderboard_snapshots historical |
-| 背景 job 查詢 | **Replica** | GDPR erasure job pet listing |
+| 查詢類型 | 路由 | 範例 | Lag 容忍度 |
+|---------|------|------|----------|
+| 寫入（INSERT / UPDATE / DELETE） | **Primary** | claim verify, training, arena enter, pet ban, admin login | 無（一致性必須） |
+| 即時讀取（write-after-read 場景） | **Primary** | 領取後立即 GET pet（避免 lag） | 0（需 read-your-writes） |
+| Public pet page | **Replica** | `GET /api/v1/pets/:petId` 對 guest preview | ≤ 1 s |
+| Leaderboard public read | **Replica**（次要） + Redis（主要） | `GET /api/v1/leaderboard` 走 Redis；replica 用於 fallback degraded mode（Redis 失效） | ≤ 30 s（SLO） |
+| Admin list views | **Replica** | `GET /admin/api/pets`, `GET /admin/api/battles` | ≤ 1 s |
+| 報表 / 分析 | **Replica** | leaderboard_snapshots historical | 可接受非即時 |
+| 背景 job 查詢 | **Replica** | GDPR erasure job pet listing | ≤ 1 s |
 
 ```typescript
 // db-router.ts
@@ -1458,6 +1458,128 @@ export const dbReplica = new Pool({ connectionString: process.env.DATABASE_URL_R
 | V021 | `20260520000002_add_column_comments.sql` | 補全所有 `COMMENT ON COLUMN` 及 `COMMENT ON TABLE`（確保 pg_dump schema 文件完整） | Cross-BC | 可選；不影響功能；推薦在 staging 環境驗證後執行 |
 
 > **執行順序強制**：V001 → V002 → V003 → … → V019（V001–V019 無嚴格順序約束，但需在 V020 前全部完成）→ V020 → V021。CI migration runner（`pnpm run migrate:up`）依檔名時間戳排序自動執行。
+
+#### 8.1.1 Down Migration SQL（Rollback）
+
+每個 UP migration 對應一個 `*.down.sql`；下方列出關鍵 rollback SQL：
+
+```sql
+-- V001.down.sql — DROP all ENUM types（必須在所有 table DOWN 執行完後）
+DROP TYPE IF EXISTS gdpr_request_status_enum;
+DROP TYPE IF EXISTS gdpr_request_type_enum;
+DROP TYPE IF EXISTS admin_role_enum;
+DROP TYPE IF EXISTS listing_status_enum;
+DROP TYPE IF EXISTS buff_stat_enum;
+DROP TYPE IF EXISTS training_type_enum;
+DROP TYPE IF EXISTS arena_mode_enum;
+DROP TYPE IF EXISTS rarity_enum;
+
+-- V002.down.sql
+DROP TABLE IF EXISTS claim_identities;
+
+-- V003.down.sql
+DROP TABLE IF EXISTS pets;
+
+-- V004.down.sql
+DROP TABLE IF EXISTS claim_codes;
+
+-- V005.down.sql
+DROP TABLE IF EXISTS arena_matches;
+
+-- V006.down.sql
+DROP TABLE IF EXISTS leaderboard_snapshots;
+
+-- V007.down.sql
+DROP TABLE IF EXISTS training_logs;
+
+-- V008.down.sql
+DROP TABLE IF EXISTS food_buffs;
+
+-- V009.down.sql
+DROP TABLE IF EXISTS marketplace_listings;
+
+-- V010.down.sql
+DROP TABLE IF EXISTS marketplace_transactions;
+
+-- V011.down.sql
+DROP TABLE IF EXISTS admin_users;
+
+-- V012.down.sql
+DROP TABLE IF EXISTS audit_logs;
+
+-- V013.down.sql
+DROP TABLE IF EXISTS gdpr_requests;
+
+-- V014.down.sql — DROP Identity BC indexes
+DROP INDEX IF EXISTS idx_claim_identities_deletion;
+DROP INDEX IF EXISTS idx_claim_codes_pet_id;
+DROP INDEX IF EXISTS idx_claim_codes_email_hash;
+DROP INDEX IF EXISTS idx_claim_codes_expires_at;
+DROP INDEX IF EXISTS idx_claim_codes_created_at;
+DROP INDEX IF EXISTS idx_claim_codes_used_at;
+
+-- V015.down.sql — DROP Pet BC indexes
+DROP INDEX IF EXISTS idx_pets_rarity;
+DROP INDEX IF EXISTS idx_pets_claimed_at;
+DROP INDEX IF EXISTS idx_pets_is_banned;
+DROP INDEX IF EXISTS idx_pets_owner_token_hash;
+DROP INDEX IF EXISTS idx_pets_last_trained_at;
+DROP INDEX IF EXISTS idx_pets_claim_identity;
+DROP INDEX IF EXISTS idx_pets_reserved_until;
+DROP INDEX IF EXISTS idx_training_logs_completed_at;
+DROP INDEX IF EXISTS idx_food_buffs_pet_id;
+DROP INDEX IF EXISTS idx_food_buffs_record_expires;
+
+-- V016.down.sql — DROP Arena BC indexes
+DROP INDEX IF EXISTS idx_arena_matches_completed_at;
+DROP INDEX IF EXISTS idx_arena_matches_winner;
+DROP INDEX IF EXISTS idx_arena_matches_pet_a_history;
+DROP INDEX IF EXISTS idx_arena_matches_pet_b_history;
+DROP INDEX IF EXISTS idx_arena_matches_is_flagged;
+
+-- V017.down.sql — DROP Leaderboard BC indexes
+DROP INDEX IF EXISTS idx_leaderboard_snapshots_time;
+
+-- V018.down.sql — DROP Marketplace BC indexes
+DROP INDEX IF EXISTS idx_marketplace_listings_pet;
+DROP INDEX IF EXISTS idx_marketplace_listings_status;
+DROP INDEX IF EXISTS idx_marketplace_listings_listed_at;
+DROP INDEX IF EXISTS idx_marketplace_listings_active_pet;
+DROP INDEX IF EXISTS idx_marketplace_listings_expires_at;
+DROP INDEX IF EXISTS idx_marketplace_transactions_completed;
+DROP INDEX IF EXISTS idx_marketplace_transactions_pet_completed;
+
+-- V019.down.sql — DROP Admin BC indexes
+DROP INDEX IF EXISTS idx_audit_logs_created_at;
+DROP INDEX IF EXISTS idx_audit_logs_admin_id;
+DROP INDEX IF EXISTS idx_audit_logs_ip_hash_cleanup;
+DROP INDEX IF EXISTS idx_gdpr_requests_identity;
+DROP INDEX IF EXISTS idx_gdpr_requests_status;
+DROP INDEX IF EXISTS idx_gdpr_requests_initiating_pet;
+
+-- V020.down.sql — Restore cross-BC FKs（Rollback: add FK constraints back）
+ALTER TABLE pets ADD CONSTRAINT fk_pets_claim_identity
+    FOREIGN KEY (claim_identity_id) REFERENCES claim_identities(id) ON DELETE SET NULL;
+ALTER TABLE claim_codes ADD CONSTRAINT fk_claim_codes_pet
+    FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE;
+ALTER TABLE arena_matches ADD CONSTRAINT fk_arena_matches_pet_a
+    FOREIGN KEY (pet_a_id) REFERENCES pets(id) ON DELETE RESTRICT;
+ALTER TABLE arena_matches ADD CONSTRAINT fk_arena_matches_pet_b
+    FOREIGN KEY (pet_b_id) REFERENCES pets(id) ON DELETE SET NULL;
+ALTER TABLE arena_matches ADD CONSTRAINT fk_arena_matches_winner
+    FOREIGN KEY (winner_pet_id) REFERENCES pets(id) ON DELETE SET NULL;
+ALTER TABLE marketplace_listings ADD CONSTRAINT fk_marketplace_listings_pet
+    FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT;
+ALTER TABLE marketplace_transactions ADD CONSTRAINT fk_marketplace_transactions_pet
+    FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT;
+ALTER TABLE gdpr_requests ADD CONSTRAINT fk_gdpr_requests_initiating_pet
+    FOREIGN KEY (initiating_pet_id) REFERENCES pets(id) ON DELETE SET NULL;
+
+-- V021.down.sql — No-op（COMMENTs are non-destructive; drop not needed）
+-- COMMENT ON TABLE / COLUMN comments can be safely left; no rollback action required.
+```
+
+> **Rollback 執行順序**：與 UP 相反（先 drop 有 FK 依賴的表）。INDEX DOWN 先於 TABLE DOWN。V014–V019 DROP INDEX 先於 V013–V002 DROP TABLE。V001 DROP ENUM 最後執行。
 
 ### 8.2 零停機 Migration 模式（Expand-Contract Pattern）
 
@@ -1509,15 +1631,15 @@ SELECT COUNT(*) FROM arena_matches WHERE region IS NULL;  -- 應為 0
 
 ### 8.4 各 Migration 類型的 Rollback 策略
 
-| Migration 類型 | Rollback 難度 | 策略 |
-|---------------|--------------|------|
-| 新增資料表 | 低 | DOWN: `DROP TABLE` |
-| 新增欄位 | 低 | DOWN: `DROP COLUMN`（注意有資料需先備份）|
-| 重命名欄位 | 中 | 雙欄位 + view 轉接；分兩個 migration |
-| 刪除欄位 | 高 | 先標記 `_deprecated_*`；下個版本才刪 |
-| 資料型別變更 | 高 | 新欄位 + 應用層雙寫 + cutover；舊欄位廢棄 |
-| 跨 BC FK 移除 | 中 | DOWN: `ADD CONSTRAINT`（如資料一致則可逆）|
-| 索引 | 低 | DOWN: `DROP INDEX CONCURRENTLY` |
+| Migration 類型 | Rollback 難度 | 策略 | 前置備份需求 |
+|---------------|--------------|------|------------|
+| 新增資料表 | 低 | DOWN: `DROP TABLE IF EXISTS` | 否 |
+| 新增欄位 | 低 | DOWN: `ALTER TABLE ... DROP COLUMN IF EXISTS`（注意有資料需先備份）| 否（新欄位無舊資料）|
+| 重命名欄位 | 中 | 雙欄位 + view 轉接；分兩個 migration | 否（保留原欄位）|
+| 刪除欄位 | 高 | 先標記 `_deprecated_*`；下個版本才刪 | **是**（備份後才刪）|
+| 資料型別變更 | 高 | 新欄位 + 應用層雙寫 + cutover；舊欄位廢棄 | **是** |
+| 跨 BC FK 移除 | 中 | DOWN: `ALTER TABLE ... ADD CONSTRAINT ...`（如資料一致則可逆）| 否（ADD CONSTRAINT 可恢復）|
+| 索引 | 低 | DOWN: `DROP INDEX CONCURRENTLY` | 否 |
 
 ### 8.5 Migration 測試檢查清單
 
@@ -1595,10 +1717,10 @@ CHECK ((is_permanent = TRUE AND expires_at IS NULL) OR (is_permanent = FALSE AND
 
 ### 9.3 Unique 約束 vs Unique Index
 
-| 方式 | 本專案使用 |
-|------|----------|
-| `UNIQUE` 約束（DDL 層）| `pets.seed`, `admin_users.username`, `marketplace_transactions.listing_id`, `claim_identities.email_hash` |
-| `CREATE UNIQUE INDEX` 含 WHERE | `idx_marketplace_listings_active_pet (pet_id) WHERE status = 'active'` — 業務級唯一（同 pet 不可同時兩筆 active listing） |
+| 方式 | 語義差異 | 本專案使用 | 適用條件 |
+|------|---------|----------|---------|
+| `UNIQUE` 約束（DDL 層）| 宣告式，DDL 層語意明確 | `pets.seed`, `admin_users.username`, `marketplace_transactions.listing_id`, `claim_identities.email_hash` | 簡單欄位或欄位組合 |
+| `CREATE UNIQUE INDEX` 含 WHERE | 支援 Partial、函式表達式 | `idx_marketplace_listings_active_pet (pet_id) WHERE status = 'active'` — 業務級唯一（同 pet 不可同時兩筆 active listing） | 含 WHERE 條件、大小寫不敏感、需 CONCURRENTLY |
 
 理由：簡單欄位用 UNIQUE 約束（DDL 語意明確）；含 partial 條件用 UNIQUE INDEX。
 
@@ -1759,12 +1881,12 @@ PITR 流程：
    - `SELECT MAX(snapshot_time) FROM leaderboard_snapshots`
 4. 記錄 RTO / RPO 實測值
 
-| 指標 | 目標 | SLO 來源 |
-|------|------|---------|
-| RTO（PITR） | ≤ 4 小時 | EDD §3.6.3 |
-| RPO（PITR） | ≤ 5 分鐘（WAL archive 頻率） | EDD §3.6.3 |
-| RTO（DB primary auto-failover） | ≤ 60 秒 | EDD §3.6.3（`db_autofailover_time_seconds = 60`） |
-| RPO（synchronous standby） | 0 秒 | EDD §3.6.3 |
+| 指標 | 目標 | SLO 來源 | 最近驗證日期 |
+|------|------|---------|------------|
+| RTO（PITR） | ≤ 4 小時 | EDD §3.6.3 | 每月 DR drill |
+| RPO（PITR） | ≤ 5 分鐘（WAL archive 頻率） | EDD §3.6.3 | 每月 DR drill |
+| RTO（DB primary auto-failover） | ≤ 60 秒 | EDD §3.6.3（`db_autofailover_time_seconds = 60`） | Supabase SLA |
+| RPO（synchronous standby） | 0 秒 | EDD §3.6.3 | 同步複寫 |
 
 ---
 
@@ -1921,28 +2043,28 @@ DEL config:runtime
 
 ## 13. Data Retention Policy
 
-| Table / Key Pattern | Retention | Source Constant |
-|---------------------|-----------|-----------------|
-| `pets` | Indefinite（直至 GDPR erasure / admin delete） | — |
-| `claim_identities` | Indefinite；`email_encrypted` 在抹除請求後 7 天清空 | `gdpr_email_deletion_window_days = 7` |
-| `claim_codes` | 72h post-creation 或 `used_at`（取較晚者）後刪除 | `claim_token_cleanup_ttl_hours = 72` |
-| `arena_matches` | Indefinite（稽核不可變；最近 20 場公開顯示） | `arena_battle_records_display_count = 20` |
-| `training_logs` | Indefinite（行為稽核；feeds `total_training_actions`） | — |
-| `leaderboard_snapshots` | Rolling 12 個月 | `leaderboard_snapshot_retention_months = 12` |
-| `food_buffs` | 30 天 post-`consumed_at`（`record_expires_at` cleanup job） | `food_buff_record_retention_days = 30` |
-| `marketplace_listings` | Indefinite（被 transaction RESTRICT 引用） | — |
-| `marketplace_transactions` | Indefinite（財務稽核） | — |
-| `admin_users` | Indefinite（`audit_logs` FK；軟刪 `deactivated_at`） | — |
-| `audit_logs` | 2 年（GDPR Art.30 合規） | `admin_audit_log_retention_years = 2` |
-| `audit_logs.ip_address_hash` | 90 天（背景 job 清空） | `ip_address_log_retention_days = 90` |
-| `gdpr_requests` | Indefinite（法規舉證） | — |
-| Unclaimed `pets`（guest preview） | `reserved_until < NOW() AND owner_token_hash IS NULL` 由 background job 清理 | `pet_reservation_ttl_hours = 24` |
-| `rl:*` Redis counters | Per-key TTL（60–3600 s） | 各 `rate_limits.*` 常數 |
-| `session:admin:*` | 14400 s inactivity / 28800 s absolute | `admin_session_inactivity_expiry_hours = 4` / `admin_session_absolute_expiry_hours = 8` |
-| `token:blacklist:*` | 259200 s | `claim_token_cleanup_ttl_hours = 72` |
-| `leaderboard:global` | 無 expiry；ban / GDPR 觸發 `ZREM` | — |
-| `matchmaking:queue:*` | 無 key TTL；stale entries（> 30s + grace）由 consumer 丟棄 | `arena_matchmaking_timeout_seconds = 30` |
-| `config:runtime` | 300 s rolling TTL | `config_cache_refresh_time_minutes = 5` |
+| Table / Key Pattern | Retention | Source Constant | 刪除方式 |
+|---------------------|-----------|-----------------|---------|
+| `pets` | Indefinite（直至 GDPR erasure / admin delete） | — | GDPR erasure job（硬刪）|
+| `claim_identities` | Indefinite；`email_encrypted` 在抹除請求後 7 天清空 | `gdpr_email_deletion_window_days = 7` | 匿名化（保留行，清 PII）|
+| `claim_codes` | 72h post-creation 或 `used_at`（取較晚者）後刪除 | `claim_token_cleanup_ttl_hours = 72` | background job 硬刪 |
+| `arena_matches` | Indefinite（稽核不可變；最近 20 場公開顯示） | `arena_battle_records_display_count = 20` | 永久保留 |
+| `training_logs` | Indefinite（行為稽核；feeds `total_training_actions`） | — | 永久保留 |
+| `leaderboard_snapshots` | Rolling 12 個月 | `leaderboard_snapshot_retention_months = 12` | 背景 job 硬刪（滾動）|
+| `food_buffs` | 30 天 post-`consumed_at`（`record_expires_at` cleanup job） | `food_buff_record_retention_days = 30` | 背景 job 硬刪 |
+| `marketplace_listings` | Indefinite（被 transaction RESTRICT 引用） | — | 永久保留 |
+| `marketplace_transactions` | Indefinite（財務稽核） | — | 永久保留 |
+| `admin_users` | Indefinite（`audit_logs` FK；軟刪 `deactivated_at`） | — | 軟刪（deactivated_at）|
+| `audit_logs` | 2 年（GDPR Art.30 合規） | `admin_audit_log_retention_years = 2` | 背景 job 硬刪（滾動）|
+| `audit_logs.ip_address_hash` | 90 天（背景 job 清空） | `ip_address_log_retention_days = 90` | UPDATE 設 NULL |
+| `gdpr_requests` | Indefinite（法規舉證） | — | 永久保留 |
+| Unclaimed `pets`（guest preview） | `reserved_until < NOW() AND owner_token_hash IS NULL` 由 background job 清理 | `pet_reservation_ttl_hours = 24` | 背景 job 硬刪 |
+| `rl:*` Redis counters | Per-key TTL（60–3600 s） | 各 `rate_limits.*` 常數 | Redis TTL 自動過期 |
+| `session:admin:*` | 14400 s inactivity / 28800 s absolute | `admin_session_inactivity_expiry_hours = 4` / `admin_session_absolute_expiry_hours = 8` | Redis TTL / DEL |
+| `token:blacklist:*` | 259200 s | `claim_token_cleanup_ttl_hours = 72` | Redis TTL 自動過期 |
+| `leaderboard:global` | 無 expiry；ban / GDPR 觸發 `ZREM` | — | `ZREM` on ban / GDPR |
+| `matchmaking:queue:*` | 無 key TTL；stale entries（> 30s + grace）由 consumer 丟棄 | `arena_matchmaking_timeout_seconds = 30` | Consumer 丟棄 / `ZREMRANGEBYSCORE` |
+| `config:runtime` | 300 s rolling TTL | `config_cache_refresh_time_minutes = 5` | Redis TTL 自動過期 |
 
 > **GDPR Right to Erasure 實作細節**：見 §6.3。
 
@@ -2169,12 +2291,12 @@ erDiagram
 
 **敏感程度分類**：
 
-| 程度 | 類型 | 處理 |
-|------|------|------|
-| 最高 | password、TOTP secret | bcrypt / AES-256；不可備份至非加密存儲 |
-| 高 | email、IP | hash / 加密；retention 上限 |
-| 中 | token hash | SHA-256；隨業務 |
-| 低 | pet stats、battle log | 標準保護 |
+| 程度 | 類型 | 處理 | 存取限制 |
+|------|------|------|---------|
+| 最高 | password、TOTP secret | bcrypt / AES-256；不可備份至非加密存儲 | 僅系統；永不回傳至 API |
+| 高 | email、IP | hash / 加密；retention 上限 | 僅 GDPR 流程；IP 90 天清空 |
+| 中 | token hash | SHA-256；隨業務 | 僅 auth hot path |
+| 低 | pet stats、battle log | 標準保護 | Public API 可讀 |
 
 ---
 
@@ -2190,11 +2312,11 @@ erDiagram
 
 **比較表**：
 
-| 策略 | 是否適用本產品 | 理由 |
-|------|--------------|------|
-| Shared DB + 共用 Schema（RLS）| ❌ | 無 tenant 概念；application-level pet ownership 已足 |
-| Shared DB + Schema-per-Tenant | ❌ | 過度設計 |
-| DB-per-Tenant | ❌ | 過度設計 |
+| 策略 | 是否適用本產品 | 理由 | 未來評估門檻 |
+|------|--------------|------|------------|
+| Shared DB + 共用 Schema（RLS）| ❌ | 無 tenant 概念；application-level pet ownership 已足 | B2B 多租戶需求時引入 |
+| Shared DB + Schema-per-Tenant | ❌ | 過度設計 | 中型 B2B SaaS 時考慮 |
+| DB-per-Tenant | ❌ | 過度設計 | 企業合規要求時評估 |
 
 **未來企業版（B2B 多遊戲）規劃**：若衍生為「私營小型遊戲服務」，將引入 `tenant_id` + RLS pattern；目前為 v3 路線圖，本 SCHEMA 不規劃。
 
