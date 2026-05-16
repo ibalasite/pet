@@ -5,13 +5,13 @@
 | 欄位 | 值 |
 |------|-----|
 | Document ID | `SCHEMA-PIXEL-PET-ARENA-20260510` |
-| Version | `2.0` |
+| Version | `3.0` |
 | Status | Draft |
 | Classification | Internal |
 | Owner | Database Architect / Data Engineering Lead |
 | **Owning Bounded Context / Service** | **Modular Monolith spanning 6 BCs (Identity / Pet / Arena / Leaderboard / Marketplace / Admin)**; per HC-1 each BC owns its own tables (see §1.1). The PostgreSQL instance is logically partitioned by BC ownership; cross-BC FKs at the DB level are forbidden and are enforced as application-layer ID-only references. |
 | Created | 2026-05-03 |
-| Last Updated | 2026-05-10 |
+| Last Updated | 2026-05-16 |
 | Upstream EDD | [docs/EDD.md](EDD.md) |
 | Upstream Constants | [docs/CONSTANTS.md](CONSTANTS.md) |
 | Upstream API | [docs/API.md](API.md) |
@@ -26,6 +26,7 @@
 |---------|------|--------|---------|
 | 1.0 | 2026-05-03 | Database Architect | Initial schema design (12 PostgreSQL tables + Redis key map + retention table). |
 | 2.0 | 2026-05-10 | Database Architect | **Full rewrite** to align with `templates/SCHEMA.md`: added §1.1 Schema Boundary Declaration (HC-1 BC ownership), §2.1–§2.4 generic conventions (naming, base columns, ID strategy, soft-delete), §4 normalization rules + intentional denormalization, §5 indexing strategy reference, §6 audit & GDPR procedures, §7 performance design (query SLO table, N+1 protection, pool sizing, replica routing), §8 migration strategy, §9 integrity constraints (with §9.5 cross-BC FK audit and ID-only conversion plan), §10 partitioning strategy, §11 backup & PITR, §14 Mermaid ER diagram, §15 Multi-Tenancy declaration. All 12 existing tables retained verbatim with added BC-Ownership headers and dual-format (markdown column table → CREATE TABLE) presentation. Existing Redis key map renumbered to §12; existing Retention table renumbered to §13. |
+| 3.0 | 2026-05-16 | Database Architect | **Bug fixes + spec compliance**: (1) §8.1 rewritten from naming-convention notes to full Migration 実作清單 table (V001–V021 with file name, description, owner BC, notes); (2) Seed Data section fully rewritten — all INSERTs now use actual column names matching §3 DDLs (removed non-existent `claim_token_hash`, `status`, `pet_species`, `stat_gained`, `stat_before`, `trained_at`, `buff_type`, `multiplier`, `pet_a_stat_snapshot`, `pet_b_stat_snapshot`, `duration_ms`, individual leaderboard columns; replaced with correct column names `code_hash`, `stat_delta`, `stat_after`, `completed_at`, `food_type`, `buff_stat`, `magnitude`, `record_expires_at`, `duration_seconds`, `battle_log`, `entries` JSONB array); (3) Admin Seed SQL fixed — removed non-existent `status` column from `admin_users` INSERT. |
 
 ---
 
@@ -1428,24 +1429,35 @@ export const dbReplica = new Pool({ connectionString: process.env.DATABASE_URL_R
 
 ## 8. Migration 策略（Migration Strategy）
 
-### 8.1 命名規範
+### 8.1 Migration 実作清單（Migration Implementation List）
 
-格式：`YYYYMMDDHHMMSS_description.sql`（Drizzle / golang-migrate 風格）。例：
+**命名規範**：格式 `YYYYMMDDHHMMSS_description.sql`（Drizzle / golang-migrate 風格）。每個 migration 一件邏輯事；同時撰寫 UP 與 DOWN（`*.down.sql`）；snake_case description；動詞優先（`create_`, `add_`, `drop_`, `rename_`, `alter_`）；migration 不可直接 `DROP TABLE`，必須走 §13.1 安全刪除流程。
 
-```
-20260503000001_init_enums.sql
-20260503000002_create_claim_identities.sql
-20260503000003_create_pets.sql
-20260503000004_create_claim_codes.sql
-...
-20260503000020_drop_cross_bc_fks.sql       -- HC-1 cleanup migration
-```
+| # | Migration 檔名 | 說明 | Owner BC | 備註 |
+|---|----------------|------|---------|------|
+| V001 | `20260503000001_init_enums.sql` | 建立所有 PostgreSQL ENUM types（rarity_enum, arena_mode_enum, training_type_enum, buff_stat_enum, listing_status_enum, admin_role_enum, gdpr_request_type_enum, gdpr_request_status_enum） | Cross-BC | **必須先執行**；所有 table migration 依賴 |
+| V002 | `20260503000002_create_claim_identities.sql` | 建立 `claim_identities` 表 + `uq_claim_identities_email_hash` | Identity | §3.1 |
+| V003 | `20260503000003_create_pets.sql` | 建立 `pets` 表 + `uq_pets_seed` + 所有 CHECK constraints + 暫時 cross-BC FK `fk_pets_claim_identity`（HC-1 待 V020 移除） | Pet | §3.2；依賴 V002 |
+| V004 | `20260503000004_create_claim_codes.sql` | 建立 `claim_codes` 表 + 暫時 cross-BC FK `fk_claim_codes_pet`（HC-1 待 V020 移除） + CHECK constraints | Identity | §3.3；依賴 V003 |
+| V005 | `20260503000005_create_arena_matches.sql` | 建立 `arena_matches` 表 + 暫時 cross-BC FKs `fk_arena_matches_pet_a/pet_b/winner`（HC-1 待 V020 移除）+ CHECK constraints | Arena | §3.4；依賴 V003 |
+| V006 | `20260503000006_create_leaderboard_snapshots.sql` | 建立 `leaderboard_snapshots` 表 | Leaderboard | §3.5 |
+| V007 | `20260503000007_create_training_logs.sql` | 建立 `training_logs` 表 + same-BC FK `fk_training_logs_pet` (CASCADE) + CHECK constraints | Pet | §3.6；依賴 V003 |
+| V008 | `20260503000008_create_food_buffs.sql` | 建立 `food_buffs` 表 + same-BC FK `fk_food_buffs_pet` (CASCADE) + CHECK constraints | Pet | §3.7；依賴 V003 |
+| V009 | `20260503000009_create_marketplace_listings.sql` | 建立 `marketplace_listings` 表 + 暫時 cross-BC FK `fk_marketplace_listings_pet`（HC-1 待 V020 移除）+ CHECK constraints + partial unique index | Marketplace | §3.8；依賴 V003 |
+| V010 | `20260503000010_create_marketplace_transactions.sql` | 建立 `marketplace_transactions` 表 + same-BC FK `fk_marketplace_transactions_listing` (RESTRICT) + 暫時 cross-BC FK `fk_marketplace_transactions_pet`（HC-1 待 V020 移除）+ `uq_marketplace_transactions_listing` | Marketplace | §3.9；依賴 V009 |
+| V011 | `20260503000011_create_admin_users.sql` | 建立 `admin_users` 表 + `uq_admin_users_username` + CHECK constraints | Admin | §3.10 |
+| V012 | `20260503000012_create_audit_logs.sql` | 建立 `audit_logs` 表（BIGSERIAL PK）+ same-BC FK `fk_audit_logs_admin` (RESTRICT) | Admin | §3.11；依賴 V011 |
+| V013 | `20260503000013_create_gdpr_requests.sql` | 建立 `gdpr_requests` 表 + same-BC FK `fk_gdpr_requests_identity` (RESTRICT) + 暫時 cross-BC FK `fk_gdpr_requests_initiating_pet`（HC-1 待 V020 移除）+ CHECK constraints | Identity | §3.12；依賴 V002、V003 |
+| V014 | `20260503000014_create_indexes_identity.sql` | 建立 Identity BC indexes：`idx_claim_identities_deletion`, `idx_claim_codes_pet_id`, `idx_claim_codes_email_hash`, `idx_claim_codes_expires_at`, `idx_claim_codes_created_at`, `idx_claim_codes_used_at` | Identity | §3.1、§3.3 |
+| V015 | `20260503000015_create_indexes_pet.sql` | 建立 Pet BC indexes：`idx_pets_rarity`, `idx_pets_claimed_at`, `idx_pets_is_banned`, `idx_pets_owner_token_hash`, `idx_pets_last_trained_at`, `idx_pets_claim_identity`, `idx_pets_reserved_until`, `idx_training_logs_completed_at`, `idx_food_buffs_pet_id`, `idx_food_buffs_record_expires` | Pet | §3.2、§3.6、§3.7 |
+| V016 | `20260503000016_create_indexes_arena.sql` | 建立 Arena BC indexes：`idx_arena_matches_completed_at`, `idx_arena_matches_winner`, `idx_arena_matches_pet_a_history`, `idx_arena_matches_pet_b_history`, `idx_arena_matches_is_flagged` | Arena | §3.4 |
+| V017 | `20260503000017_create_indexes_leaderboard.sql` | 建立 Leaderboard BC indexes：`idx_leaderboard_snapshots_time` | Leaderboard | §3.5 |
+| V018 | `20260503000018_create_indexes_marketplace.sql` | 建立 Marketplace BC indexes：`idx_marketplace_listings_pet`, `idx_marketplace_listings_status`, `idx_marketplace_listings_listed_at`, `idx_marketplace_listings_active_pet` (unique partial), `idx_marketplace_listings_expires_at`, `idx_marketplace_transactions_completed`, `idx_marketplace_transactions_pet_completed` | Marketplace | §3.8、§3.9 |
+| V019 | `20260503000019_create_indexes_admin.sql` | 建立 Admin BC indexes：`idx_audit_logs_created_at`, `idx_audit_logs_admin_id`, `idx_audit_logs_ip_hash_cleanup`, `idx_gdpr_requests_identity`, `idx_gdpr_requests_status`, `idx_gdpr_requests_initiating_pet` | Admin / Identity | §3.11、§3.12 |
+| V020 | `20260520000001_drop_cross_bc_fks.sql` | **HC-1 cleanup**：移除所有 cross-BC DB-level FK constraints（見 §1.1.2）；加 `COMMENT ON COLUMN` 標注 HC-1 ID-only 策略：`fk_pets_claim_identity`, `fk_claim_codes_pet`, `fk_arena_matches_pet_a`, `fk_arena_matches_pet_b`, `fk_arena_matches_winner`, `fk_marketplace_listings_pet`, `fk_marketplace_transactions_pet`, `fk_gdpr_requests_initiating_pet` | Cross-BC | Expand-Contract Phase 3（§8.2）；需先完成 application-layer 雙寫驗證 7 天 |
+| V021 | `20260520000002_add_column_comments.sql` | 補全所有 `COMMENT ON COLUMN` 及 `COMMENT ON TABLE`（確保 pg_dump schema 文件完整） | Cross-BC | 可選；不影響功能；推薦在 staging 環境驗證後執行 |
 
-**規則**：
-- snake_case description；動詞優先（`create_`, `add_`, `drop_`, `rename_`, `alter_`）
-- 每個 migration 一件邏輯事
-- 同時撰寫 UP 與 DOWN（`*.down.sql`）
-- migration 不可直接 `DROP TABLE`，必須走 §13.1 安全刪除流程
+> **執行順序強制**：V001 → V002 → V003 → … → V019（V001–V019 無嚴格順序約束，但需在 V020 前全部完成）→ V020 → V021。CI migration runner（`pnpm run migrate:up`）依檔名時間戳排序自動執行。
 
 ### 8.2 零停機 Migration 模式（Expand-Contract Pattern）
 
@@ -2446,67 +2458,163 @@ async function checkDbHealth(): Promise<{ status: 'ok' | 'degraded' | 'down'; la
 
 ```sql
 -- ===== Seed Data（本地開發 + CI 測試用）=====
+-- 執行順序：依 BC ownership 與 FK 依賴關係排列
 
--- BC: Identity
-INSERT INTO claim_identities (id, email_hash, email_encrypted, claim_token_hash, status, created_at) VALUES
-  ('11111111-0000-0000-0000-000000000001', 'sha256:abc001', 'enc:aes256gcm:abc001', 'hash:token:abc001', 'active', NOW()),
-  ('11111111-0000-0000-0000-000000000002', 'sha256:abc002', 'enc:aes256gcm:abc002', 'hash:token:abc002', 'claimed', NOW() - INTERVAL '7 days');
+-- BC: Identity — claim_identities
+-- 欄位：id, email_hash, email_encrypted, deletion_requested_at, created_at, updated_at
+INSERT INTO claim_identities (id, email_hash, email_encrypted, deletion_requested_at, created_at, updated_at) VALUES
+  ('11111111-0000-0000-0000-000000000001',
+   'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+   NULL, NULL, NOW(), NOW()),
+  ('11111111-0000-0000-0000-000000000002',
+   'b3a8e0e1f9ab1bfe3a36f231f676f78bb28a2234cbc35a38ae7f1f6b1f1f4c5d',
+   NULL, NULL, NOW() - INTERVAL '30 days', NOW() - INTERVAL '7 days');
 
--- BC: Pet（依賴 claim_identities）
+-- BC: Pet — pets（依賴 claim_identities via cross-BC ID-only）
+-- 欄位：id, seed, rarity, pet_name, stat_speed, stat_strength, stat_stamina,
+--       level, total_training_actions, last_trained_at, owner_token_hash, claimed_at,
+--       claim_identity_id, reserved_until, is_banned, banned_reason, banned_at,
+--       generation_meta, created_at, updated_at
 INSERT INTO pets (
-  id, claim_identity_id, seed, pet_name, pet_species, rarity,
-  stat_speed, stat_strength, stat_stamina, level, total_training_actions,
-  is_banned, created_at
+  id, seed, rarity, pet_name,
+  stat_speed, stat_strength, stat_stamina,
+  level, total_training_actions, last_trained_at,
+  owner_token_hash, claimed_at, claim_identity_id,
+  reserved_until, is_banned, banned_reason, banned_at,
+  generation_meta, created_at, updated_at
 ) VALUES
-  ('22222222-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001',
-   123456789, 'FluffBall', 'cat', 'rare', 55, 40, 45, 9, 90, false, NOW()),
-  ('22222222-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001',
-   987654321, 'ZapMaster', 'dog', 'common', 10, 10, 10, 1, 0, false, NOW()),
-  ('22222222-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000002',
-   111222333, 'BannedPet', 'rabbit', 'legendary', 80, 90, 85, 100, 1000, true, NOW() - INTERVAL '30 days');
+  -- Pet 1: claimed pet (FluffBall), trained to level 9
+  ('22222222-0000-0000-0000-000000000001',
+   123456789, 'RARE', 'FluffBall',
+   55, 40, 45,
+   9, 90, NOW() - INTERVAL '1 day',
+   'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+   NOW() - INTERVAL '7 days', '11111111-0000-0000-0000-000000000001',
+   NULL, FALSE, NULL, NULL,
+   '{"body":"round","head":"big","color_palette":"blue","accessory":"hat","rarity_trait":"shiny","pattern":"stripe"}',
+   NOW() - INTERVAL '8 days', NOW() - INTERVAL '1 day'),
+  -- Pet 2: unclaimed guest preview pet (ZapMaster)
+  ('22222222-0000-0000-0000-000000000002',
+   987654321, 'COMMON', 'ZapMaster',
+   10, 10, 10,
+   1, 0, NULL,
+   NULL, NULL, NULL,
+   NOW() + INTERVAL '20 hours', FALSE, NULL, NULL,
+   '{"body":"slim","head":"small","color_palette":"red","accessory":"none","rarity_trait":"normal","pattern":"plain"}',
+   NOW(), NOW()),
+  -- Pet 3: banned pet (BannedPet), claimed, level 100
+  ('22222222-0000-0000-0000-000000000003',
+   111222333, 'LEGENDARY', 'BannedPet',
+   80, 90, 85,
+   100, 1000, NOW() - INTERVAL '31 days',
+   'f9e8d7c6b5a4f9e8d7c6b5a4f9e8d7c6b5a4f9e8d7c6b5a4f9e8d7c6b5a4f9e8',
+   NOW() - INTERVAL '60 days', '11111111-0000-0000-0000-000000000002',
+   NULL, TRUE, 'Bot detected: 150 battles in 60 min window.', NOW() - INTERVAL '30 days',
+   '{"body":"heavy","head":"horned","color_palette":"gold","accessory":"crown","rarity_trait":"glowing","pattern":"star"}',
+   NOW() - INTERVAL '60 days', NOW() - INTERVAL '30 days');
 
--- BC: Claim Codes（依賴 pets）
-INSERT INTO claim_codes (id, pet_id, code, status, expires_at, created_at) VALUES
-  ('33333333-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001',
-   '847291', 'pending', NOW() + INTERVAL '15 minutes', NOW()),
-  ('33333333-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000002',
-   '013847', 'claimed', NOW() - INTERVAL '1 hour', NOW() - INTERVAL '2 hours');
+-- BC: Identity — claim_codes（依賴 pets via cross-BC ID-only）
+-- 欄位：id, pet_id, email_hash, code_hash, expires_at, used_at, attempts, created_at
+INSERT INTO claim_codes (id, pet_id, email_hash, code_hash, expires_at, used_at, attempts, created_at) VALUES
+  -- Active OTP for Pet 2 (unclaimed)
+  ('33333333-0000-0000-0000-000000000001',
+   '22222222-0000-0000-0000-000000000002',
+   'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+   'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+   NOW() + INTERVAL '15 minutes', NULL, 0, NOW()),
+  -- Used OTP for Pet 1 (already claimed, historical)
+  ('33333333-0000-0000-0000-000000000002',
+   '22222222-0000-0000-0000-000000000001',
+   'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+   'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
+   NOW() - INTERVAL '7 days' + INTERVAL '15 minutes',
+   NOW() - INTERVAL '7 days', 1, NOW() - INTERVAL '7 days');
 
--- BC: Arena
+-- BC: Arena — arena_matches（依賴 pets via cross-BC ID-only）
+-- 欄位：id, pet_a_id, pet_b_id, is_ai_opponent, mode, winner_pet_id,
+--       random_seed, stat_delta_a, stat_delta_b, duration_seconds,
+--       battle_log, is_flagged, flagged_at, completed_at, updated_at
 INSERT INTO arena_matches (
-  id, pet_a_id, pet_b_id, mode, winner_pet_id, pet_a_stat_snapshot,
-  pet_b_stat_snapshot, random_seed, duration_ms, is_flagged, created_at
+  id, pet_a_id, pet_b_id, is_ai_opponent, mode, winner_pet_id,
+  random_seed, stat_delta_a, stat_delta_b, duration_seconds,
+  battle_log, is_flagged, flagged_at, completed_at, updated_at
 ) VALUES
+  -- Match 1: RACE, Pet 1 wins
   ('44444444-0000-0000-0000-000000000001',
-   '22222222-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000002',
-   'race', '22222222-0000-0000-0000-000000000001',
-   '{"speed":55,"strength":40,"stamina":45}', '{"speed":10,"strength":10,"stamina":10}',
-   7654321, 8500, false, NOW() - INTERVAL '1 hour'),
+   '22222222-0000-0000-0000-000000000001',
+   '22222222-0000-0000-0000-000000000003',
+   FALSE, 'RACE',
+   '22222222-0000-0000-0000-000000000001',
+   7654321, 5, 0, 8,
+   '[{"tick":1,"event":"start"},{"tick":8,"event":"finish","winner":"pet_a"}]',
+   FALSE, NULL, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '1 hour'),
+  -- Match 2: SUMO, Pet 3 wins, flagged for bot detection
   ('44444444-0000-0000-0000-000000000002',
-   '22222222-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000003',
-   'sumo', '22222222-0000-0000-0000-000000000003',
-   '{"speed":10,"strength":10,"stamina":10}', '{"speed":80,"strength":90,"stamina":85}',
-   1122334, 12000, true, NOW() - INTERVAL '2 days');
+   '22222222-0000-0000-0000-000000000003',
+   '22222222-0000-0000-0000-000000000001',
+   FALSE, 'SUMO',
+   '22222222-0000-0000-0000-000000000003',
+   1122334, 0, 3, 12,
+   '[{"tick":1,"event":"start"},{"tick":12,"event":"finish","winner":"pet_a"}]',
+   TRUE, NOW() - INTERVAL '2 days' + INTERVAL '5 minutes',
+   NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '5 minutes');
 
--- BC: Leaderboard
-INSERT INTO leaderboard_snapshots (id, pet_id, rank, win_count, total_battles, score, snapshot_at) VALUES
-  ('55555555-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001', 1, 50, 60, 9850, NOW()),
-  ('55555555-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000002', 999, 2, 5, 400, NOW());
+-- BC: Leaderboard — leaderboard_snapshots
+-- 欄位：id, snapshot_time, entries (JSONB array), created_at
+-- entries 結構：[{rank, pet_id, pet_name, score, win_rate, rarity, level}]
+INSERT INTO leaderboard_snapshots (id, snapshot_time, entries, created_at) VALUES
+  ('55555555-0000-0000-0000-000000000001',
+   NOW(),
+   '[
+     {"rank":1,"pet_id":"22222222-0000-0000-0000-000000000001","pet_name":"FluffBall","score":9850.0,"win_rate":0.833,"rarity":"RARE","level":9},
+     {"rank":2,"pet_id":"22222222-0000-0000-0000-000000000003","pet_name":"BannedPet","score":8200.0,"win_rate":0.900,"rarity":"LEGENDARY","level":100}
+   ]'::jsonb,
+   NOW());
 
--- BC: Training Logs（依賴 pets）
-INSERT INTO training_logs (id, pet_id, training_type, stat_gained, stat_before, trained_at) VALUES
-  ('66666666-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001', 'speed', 2, 53, NOW() - INTERVAL '1 day'),
-  ('66666666-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000001', 'stamina', 3, 42, NOW() - INTERVAL '2 days');
+-- BC: Pet — training_logs（依賴 pets, same-BC FK）
+-- 欄位：id, pet_id, training_type, stat_delta, stat_after, completed_at
+INSERT INTO training_logs (id, pet_id, training_type, stat_delta, stat_after, completed_at) VALUES
+  ('66666666-0000-0000-0000-000000000001',
+   '22222222-0000-0000-0000-000000000001', 'RUN', 2, 55, NOW() - INTERVAL '1 day'),
+  ('66666666-0000-0000-0000-000000000002',
+   '22222222-0000-0000-0000-000000000001', 'STAMINA', 3, 45, NOW() - INTERVAL '2 days'),
+  ('66666666-0000-0000-0000-000000000003',
+   '22222222-0000-0000-0000-000000000001', 'STRENGTH', 1, 40, NOW() - INTERVAL '3 days');
 
--- BC: Food Buffs（依賴 pets）
-INSERT INTO food_buffs (id, pet_id, buff_type, multiplier, expires_at, created_at) VALUES
-  ('77777777-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000001', 'speed_boost', 1.5, NOW() + INTERVAL '4 hours', NOW()),
-  ('77777777-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000002', 'stamina_boost', 2.0, NOW() - INTERVAL '1 day', NOW() - INTERVAL '2 days');
+-- BC: Pet — food_buffs（依賴 pets, same-BC FK）
+-- 欄位：id, pet_id, food_type, buff_stat, magnitude, is_permanent,
+--       expires_at, consumed_at, record_expires_at
+INSERT INTO food_buffs (
+  id, pet_id, food_type, buff_stat, magnitude, is_permanent,
+  expires_at, consumed_at, record_expires_at
+) VALUES
+  -- Active temporary speed buff for Pet 1
+  ('77777777-0000-0000-0000-000000000001',
+   '22222222-0000-0000-0000-000000000001',
+   'speed_berry', 'speed', 5, FALSE,
+   NOW() + INTERVAL '4 hours',
+   NOW(),
+   NOW() + INTERVAL '30 days'),
+  -- Expired stamina buff for Pet 1 (historical record, still within 30-day retention)
+  ('77777777-0000-0000-0000-000000000002',
+   '22222222-0000-0000-0000-000000000001',
+   'iron_kibble', 'stamina', 3, FALSE,
+   NOW() - INTERVAL '1 day',
+   NOW() - INTERVAL '2 days',
+   NOW() + INTERVAL '28 days');
 
--- BC: GDPR Requests（依賴 claim_identities）
-INSERT INTO gdpr_requests (id, claim_identity_id, request_type, status, requested_at, completed_at) VALUES
-  ('99999999-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000002',
-   'erasure', 'pending', NOW(), NULL);
+-- BC: Identity — gdpr_requests（依賴 claim_identities, same-BC FK）
+-- 欄位：id, claim_identity_id, initiating_pet_id, request_type, status,
+--       submitted_at, completed_at, updated_at, admin_notes
+INSERT INTO gdpr_requests (
+  id, claim_identity_id, initiating_pet_id,
+  request_type, status, submitted_at, completed_at, updated_at, admin_notes
+) VALUES
+  ('99999999-0000-0000-0000-000000000001',
+   '11111111-0000-0000-0000-000000000002',
+   '22222222-0000-0000-0000-000000000003',
+   'erasure', 'pending',
+   NOW(), NULL, NOW(), NULL);
 ```
 
 ---
@@ -2520,16 +2628,20 @@ INSERT INTO gdpr_requests (id, claim_identity_id, request_type, status, requeste
 -- 執行前提：所有 migration 已完成
 -- ENV 設定：見下方「ENV 注入說明」
 
+-- admin_users 欄位：id, username, password_hash, totp_secret_encrypted,
+--   totp_backup_codes_hash, role, last_login_at, failed_attempts, locked_until,
+--   deactivated_at, created_at, updated_at
+-- 注意：無 status 欄位；軟刪除使用 deactivated_at（NULL = active）
 INSERT INTO admin_users (
   id, username, password_hash, totp_secret_encrypted,
-  role, status, created_at
+  role, created_at, updated_at
 ) VALUES (
   gen_random_uuid(),
   'admin',
   '${ADMIN_PASSWORD_HASH}',          -- bcrypt(work_factor=12)，由 ENV 注入
   '${ADMIN_TOTP_SECRET_ENCRYPTED}',  -- AES-256-GCM 加密的 TOTP secret，由 ENV 注入
   'super_admin',
-  'active',
+  NOW(),
   NOW()
 );
 ```
