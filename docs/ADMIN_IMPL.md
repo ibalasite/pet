@@ -460,7 +460,10 @@ export function setupGuards(router: Router) {
       return next()
     }
 
-    // 未認證 → 嘗試從後端取回 me（HttpOnly cookie 仍可能有效）
+    // 未認證（頁面刷新後 in-memory store 清空）：
+    //   fetchMe() 對 GET /admin/api/dashboard 作 silent probe，但 API.md §4.1 envelope
+    //   無 actor 結構可下發 role 資訊，因此 fetchMe() 設計上總是 throw AUTH_RESYNC_REQUIRED
+    //   → 強制重新登入以取得 role（safer-by-default；見 §5.4 與 §9.2 註解）
     if (!authStore.isAuthenticated) {
       try {
         await authStore.fetchMe()
@@ -1392,13 +1395,22 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!adminId.value && !!adminRole.value)
 
   // === Actions ===
+  /**
+   * Login：API.md POST /admin/api/auth/login 回應 { adminId, role, sessionExpiresAt }（無 username）。
+   * Username 來自登入表單輸入，於此處鏡射回 store 作為 UI 顯示用。
+   * 不需 fetchMe（fetchMe 僅用於頁面刷新後 in-memory store 清空的 probe 場景）。
+   */
   async function login(req: LoginRequest): Promise<void> {
     const { data } = await authApi.login(req)
     const payload = data.data as LoginSuccess
+    if (!payload?.adminId || !payload?.role) {
+      throw new Error('login response missing adminId or role')
+    }
     adminId.value = payload.adminId
     adminRole.value = payload.role
     sessionExpiresAt.value = payload.sessionExpiresAt
-    await fetchMe()
+    // 登入表單已輸入 username；login response 不重複下發，由前端鏡射
+    adminUsername.value = req.username
   }
 
   async function handleTotpSetupRequired(token: string) {
