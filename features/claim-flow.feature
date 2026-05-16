@@ -74,11 +74,22 @@ Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
     And the pet "pet-001" still has no owner_token_hash in the database
 
   @TC-E2E-AUTH-001-09
-  Scenario: Email enumeration prevention — identical response for valid and invalid petId
+  Scenario: Email enumeration prevention — identical response shape for registered and unregistered email
     Given the pet "pet-001" has no owner_token_hash set
+    And the email "registered@example.com" is already associated with a claim identity in the database
+    When the guest sends POST /api/v1/claim with email "registered@example.com" petId "pet-001" and ageConfirmed true
+    Then the response status is 200
+    And the response body contains a "claimId" field
+    When the guest sends POST /api/v1/claim with email "unknown@example.com" petId "pet-001" and ageConfirmed true
+    Then the response status is 200
+    And the response body contains a "claimId" field
+    And both responses have identical JSON structure regardless of email registration status
+
+  @TC-E2E-AUTH-001-10
+  Scenario: Claim initiation returns 404 when petId does not exist
     When the guest sends POST /api/v1/claim with email "any@example.com" petId "nonexistent-pet-uuid" and ageConfirmed true
-    Then the response body is identical in structure to a successful 200 claim initiation
-    And the response does not reveal whether the petId exists
+    Then the response status is 404
+    And the response body error code is "PET_NOT_FOUND"
 
   @TC-E2E-AUTH-002-01 @contract
   Scenario: Pet recovery flow issues new token and blacklists old one

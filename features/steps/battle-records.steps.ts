@@ -7,6 +7,56 @@ import type { AppWorld } from '../support/world';
 // Given — pre-conditions
 // ---------------------------------------------------------------------------
 
+Given('a pet {string} with battle history of {int} wins and {int} losses', async function (this: AppWorld, petId: string, wins: number, losses: number) {
+  // Seed pet + arena_matches rows with mixed win/loss results — see SCHEMA.md arena_matches
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'RARE', stat_speed: 20, stat_strength: 20, stat_stamina: 20, level: 1, is_banned: false, pet_name: `Pet ${petId}`, sprite_ref: `sprite-${petId}.png` }],
+  });
+  const rows = [
+    ...Array.from({ length: wins }, (_, i) => ({
+      id: `match-og-win-${petId}-${i}`,
+      pet_a_id: petId,
+      pet_b_id: `opp-og-${i}`,
+      winner_id: petId,
+      mode: 'RACE',
+      status: 'COMPLETED',
+      is_ai_opponent: false,
+      completed_at: new Date(Date.now() - i * 60000).toISOString(),
+    })),
+    ...Array.from({ length: losses }, (_, i) => ({
+      id: `match-og-loss-${petId}-${i}`,
+      pet_a_id: petId,
+      pet_b_id: `opp-og-loss-${i}`,
+      winner_id: `opp-og-loss-${i}`,
+      mode: 'RACE',
+      status: 'COMPLETED',
+      is_ai_opponent: false,
+      completed_at: new Date(Date.now() - (wins + i) * 60000).toISOString(),
+    })),
+  ];
+  await this.db.seed({ arena_matches: rows });
+  return 'pending';
+});
+
+When('a visitor requests the arena history for {string}', async function (this: AppWorld, petId: string) {
+  // GET /api/v1/arena/history/:petId — see API.md §5.3
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/arena/history/${encodeURIComponent(petId)}`,
+  });
+  return 'pending';
+});
+
+Then('the response body "summary" contains wins losses and winRate', function (this: AppWorld) {
+  // Assert response body summary object has wins, losses, winRate — see API.md §5.3
+  return 'pending';
+});
+
+Then('the response body contains petName rarity and a sprite reference for social sharing', function (this: AppWorld) {
+  // Assert response body top-level has petName, rarity, spriteRef fields for OG meta — see API.md §5.3
+  return 'pending';
+});
+
 Given('pet {string} with rarity {string} and petName {string} exists in the database', async function (this: AppWorld, petId: string, rarity: string, _petName: string) {
   // Seed pets row — see SCHEMA.md pets table
   await this.db.seed({
@@ -112,9 +162,7 @@ When('a GET request is made to \\/api\\/v1\\/arena\\/match\\/{string} without au
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response body {string} array contains exactly {int} entries', function (this: AppWorld, _field: string, _count: number) {
-  return 'pending';
-});
+// NOTE: Then('the response body {string} array contains exactly {int} entries') — registered in shared.steps.ts
 
 Then('each entry has fields: {word} {word} {word} {word} {word} {word}', function (this: AppWorld, ..._fields: string[]) {
   return 'pending';
@@ -136,10 +184,5 @@ Then('the response body {string} is a non-empty array of events', function (this
   return 'pending';
 });
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts

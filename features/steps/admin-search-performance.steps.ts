@@ -94,13 +94,8 @@ When('the read_only admin sends GET \\/admin\\/api\\/pets with page {int} and li
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the response body {string} array contains {string}', function (this: AppWorld, _field: string, _value: string) {
   return 'pending';
@@ -133,6 +128,4 @@ Then('the response body entry for {string} does not contain a plaintext email fi
   return 'pending';
 });
 
-Then('the response body {string} is a non-empty array', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
+// NOTE: Then('the response body {string} is a non-empty array') — registered in shared.steps.ts

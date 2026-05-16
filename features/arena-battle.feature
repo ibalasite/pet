@@ -18,7 +18,6 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     And the response body contains a "matchId" field
     And the response body "result" is "WIN" or "LOSS"
     And the database table arena_matches has a row with both "pet-alpha" and "pet-beta" and mode "RACE"
-    And the Redis leaderboard key "leaderboard:global" is updated within 30 seconds
 
   @TC-E2E-ARENA-001-02 @smoke
   Scenario: AI fallback resolves when no human opponent found within 30 seconds
@@ -91,6 +90,14 @@ Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
     Then the response status is 200
     And the response body "battles" array contains exactly 20 entries
     And each entry has fields: matchId mode opponentPetId result completedAt
+
+  @TC-E2E-ARENA-001-11
+  Scenario: Pet banned by moderator cannot enter arena
+    Given pet "pet-mod-003" exists with is_banned true
+    And the pet owner holds token "token-mod-003"
+    When "token-mod-003" sends POST /api/v1/arena/enter with petId "pet-mod-003" mode "RACE" and acceptAI false
+    Then the response status is 403
+    And the response body error code is "PET_BANNED"
 
   @TC-E2E-ARENA-002-01 @contract
   Scenario: Sumo mode resolves using strength stat not speed

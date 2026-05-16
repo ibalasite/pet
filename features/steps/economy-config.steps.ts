@@ -41,6 +41,40 @@ Given('the admin has updated food_buff_strength_multiplier to {float} successful
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
+When('the admin sends PUT \\/admin\\/api\\/config\\/runtime with max_battles_per_hour {int}', async function (this: AppWorld, value: number) {
+  // PUT /admin/api/config/runtime — see API.md §5.5
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/runtime`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { max_battles_per_hour: value },
+  });
+  return 'pending';
+});
+
+When('the admin sends PUT \\/admin\\/api\\/config\\/runtime with rarity weights summing to {int} percent', async function (this: AppWorld, _sumPercent: number) {
+  // PUT /admin/api/config/runtime — invalid rarity weights — see API.md §5.5 error: VALIDATION_ERROR
+  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
+  this.lastResponse = await this.client.request({
+    method: 'PUT',
+    url: `${this.apiBaseUrl}/admin/api/config/runtime`,
+    headers: { Cookie: this.adminSessionCookie },
+    body: { rarity_weights: { COMMON: 60, RARE: 25, EPIC: 12, LEGENDARY: 2 } }, // sums to 99
+  });
+  return 'pending';
+});
+
+Then('the database config_runtime row has max_battles_per_hour {int}', function (this: AppWorld, _value: number) {
+  // SELECT max_battles_per_hour FROM config_runtime — see SCHEMA.md config_runtime
+  return 'pending';
+});
+
+Then('the database config_runtime row is unchanged', function (this: AppWorld) {
+  // Assert config_runtime row values match pre-scenario state — see SCHEMA.md config_runtime
+  return 'pending';
+});
+
 When('the admin sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
   // PUT /admin/api/config/economy — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
@@ -94,8 +128,8 @@ When('an unauthenticated PUT request is made to \\/admin\\/api\\/config\\/econom
   });
 });
 
-When('{int} minutes elapse for the config cache to refresh', function (this: AppWorld, _minutes: number) {
-  // Trigger config cache refresh — see EDD.md §config-cache
+When('the config cache is refreshed', function (this: AppWorld) {
+  // Trigger config cache refresh directly — see EDD.md §config-cache (no real-time wait)
   return 'pending';
 });
 
@@ -114,13 +148,8 @@ When('{string} sends POST \\/api\\/v1\\/pets\\/{string}\\/feed with buffType {st
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the response body field {string} is {float}', function (this: AppWorld, _field: string, _value: number) {
   return 'pending';

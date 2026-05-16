@@ -179,25 +179,11 @@ When('{string} sends GET \\/api\\/v1\\/marketplace\\/history\\/{string}', async 
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
-
-Then('the response body contains a {string} field', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
-
-Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
-  return 'pending';
-});
-
-Then('the response body field {string} is {int}', function (this: AppWorld, _field: string, _value: number) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
+// NOTE: Then('the response body contains a {string} field') — registered in shared.steps.ts
+// NOTE: Then('the response body field {string} is {string}') — registered in shared.steps.ts
+// NOTE: Then('the response body field {string} is {int}') — registered in shared.steps.ts
 
 Then('the database marketplace_listings has a row for {string} with status {string}', function (this: AppWorld, _petId: string, _status: string) {
   // TODO: query SELECT status FROM marketplace_listings WHERE pet_id = $1 AND status = $2
@@ -232,14 +218,10 @@ Then('no marketplace_listings row is created', function (this: AppWorld) {
   return 'pending';
 });
 
-Then('the response body {string} array contains exactly {int} entries', function (this: AppWorld, _field: string, _count: number) {
-  return 'pending';
-});
+// NOTE: Then('the response body {string} array contains exactly {int} entries') — registered in shared.steps.ts
 
 Then('the response meta field {string} is {int}', function (this: AppWorld, _field: string, _value: number) {
   return 'pending';
 });
 
-Then('the response body {string} is a non-empty array', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
+// NOTE: Then('the response body {string} is a non-empty array') — registered in shared.steps.ts

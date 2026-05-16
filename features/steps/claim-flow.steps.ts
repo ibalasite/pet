@@ -61,6 +61,11 @@ Given('a claim record with id {string} exists for pet {string} with code {string
   return 'pending';
 });
 
+Given('the email {string} is already associated with a claim identity in the database', async function (this: AppWorld, _email: string) {
+  // Seed claim_identities row with email_hash for the given email — see SCHEMA.md claim_identities
+  return 'pending';
+});
+
 // ---------------------------------------------------------------------------
 // When — triggering actions (one per scenario)
 // ---------------------------------------------------------------------------
@@ -128,23 +133,14 @@ When('an unauthenticated POST request is made to \\/api\\/v1\\/gdpr\\/request wi
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, expectedStatus: number) {
-  // Assert this.lastResponse.status === expectedStatus
-  return 'pending';
-});
-
-Then('the response body contains a {string} field', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body contains a {string} field') — registered in shared.steps.ts
 
 Then('the response body contains an {string} field {int} minutes in the future', function (this: AppWorld, _field: string, _minutes: number) {
   return 'pending';
 });
 
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  // Assert (this.lastResponse.body as any).error.code === code
-  return 'pending';
-});
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the database record for pet {string} has owner_token_hash populated', async function (this: AppWorld, petId: string) {
   // SELECT owner_token_hash FROM pets WHERE id = petId
@@ -181,6 +177,11 @@ Then('the response does not reveal whether the petId exists', function (this: Ap
   return 'pending';
 });
 
+Then('both responses have identical JSON structure regardless of email registration status', function (this: AppWorld) {
+  // Email enumeration prevention — assert both responses share the same top-level keys — see API.md §5.1.1
+  return 'pending';
+});
+
 Then('the old token hash {string} is added to Redis blacklist key {string}', async function (this: AppWorld, _hash: string, key: string) {
   // GET token:blacklist:{hash} — see API.md §2.1 token blacklist
   const val = await this.redis.get(key);
@@ -192,6 +193,4 @@ Then('the response body contains a {string} field with at least {int} bytes of b
   return 'pending';
 });
 
-Then('the response status is {int} or {int}', function (this: AppWorld, _a: number, _b: number) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int} or {int}') — registered in shared.steps.ts

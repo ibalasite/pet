@@ -27,7 +27,7 @@ Feature: Game Economy Configuration (US-ADMIN-006)
   @TC-E2E-ECO-001-03
   Scenario: Updated economy config takes effect within 5 minutes via cache refresh
     Given the admin has updated food_buff_strength_multiplier to 2.0 successfully
-    When 5 minutes elapse for the config cache to refresh
+    When the config cache is refreshed
     And "token-train-001" sends POST /api/v1/pets/pet-train-001/feed with buffType "power_mushroom" stat "strength" magnitude 3 and isPermanent false
     Then the applied buff magnitude reflects the 2.0 multiplier
 
@@ -50,6 +50,28 @@ Feature: Game Economy Configuration (US-ADMIN-006)
     When an unauthenticated PUT request is made to /admin/api/config/economy with food_buff_speed_multiplier 1.5
     Then the response status is 401
     And the response body error code is "UNAUTHORIZED"
+
+  @TC-E2E-RUNTIME-001-01 @contract
+  Scenario: Super Admin updates max_battles_per_hour from 20 to 200
+    When the admin sends PUT /admin/api/config/runtime with max_battles_per_hour 200
+    Then the response status is 200
+    And the response body field "max_battles_per_hour" is 200
+    And the database config_runtime row has max_battles_per_hour 200
+    And the database admin_audit_log has a row with action "CONFIG_UPDATE" and admin_id "admin-super-001" and old_value containing "20" and new_value containing "200"
+
+  @TC-E2E-RUNTIME-001-02 @contract
+  Scenario: Out-of-range max_battles_per_hour value 51 returns 400 OUT_OF_RANGE
+    When the admin sends PUT /admin/api/config/runtime with max_battles_per_hour 51
+    Then the response status is 400
+    And the response body error code is "OUT_OF_RANGE"
+    And the database config_runtime row is unchanged
+
+  @TC-E2E-RUNTIME-001-03 @contract
+  Scenario: Rarity weights summing to 99 percent returns 400 VALIDATION_ERROR
+    When the admin sends PUT /admin/api/config/runtime with rarity weights summing to 99 percent
+    Then the response status is 400
+    And the response body error code is "VALIDATION_ERROR"
+    And the database config_runtime row is unchanged
 
   @TC-E2E-ECO-001-07
   Scenario Outline: Food buff multiplier boundary values are validated

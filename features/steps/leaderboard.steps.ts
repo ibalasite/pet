@@ -7,6 +7,27 @@ import type { AppWorld } from '../support/world';
 // Given — pre-conditions
 // ---------------------------------------------------------------------------
 
+Given('a claimed pet {string} with a valid owner token and rank outside top 100', async function (this: AppWorld, petId: string) {
+  // Seed pet with a low score so its rank exceeds 100 — see API.md §5.4 leaderboard/rank
+  await this.db.seed({ pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: false, owner_token_hash: `hash-of-token-${petId}` }] });
+  await this.redis.zadd('leaderboard:global', 0.1, petId);
+  return 'pending';
+});
+
+When('the owner requests the rank for {string} via the leaderboard rank API', async function (this: AppWorld, petId: string) {
+  // GET /api/v1/leaderboard/rank/:petId — see API.md §5.4
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/leaderboard/rank/${encodeURIComponent(petId)}`,
+  });
+  return 'pending';
+});
+
+Then('the response body contains rank greater than 100 and the current score', function (this: AppWorld) {
+  // Assert response body has rank > 100 and a numeric score field — see API.md §5.4 leaderboard/rank
+  return 'pending';
+});
+
 Given('the Redis sorted set {string} contains {int} entries with varying scores', async function (this: AppWorld, key: string, count: number) {
   // ZADD leaderboard:global score member × count — see API.md §5.4
   for (let i = 0; i < count; i++) {
@@ -108,8 +129,8 @@ When('a GET request is made to \\/api\\/v1\\/leaderboard\\/rank\\/{string} witho
   });
 });
 
-When('{int} seconds elapse for the leaderboard sync job to run', function (this: AppWorld, _seconds: number) {
-  // Trigger leaderboard sync job or wait for background job — see EDD.md §leaderboard
+When('the leaderboard sync job is triggered', function (this: AppWorld) {
+  // Trigger leaderboard sync job directly — see EDD.md §leaderboard (no real-time wait)
   return 'pending';
 });
 
@@ -127,9 +148,7 @@ When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {s
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response body {string} array contains exactly {int} entries', function (this: AppWorld, _field: string, _count: number) {
-  return 'pending';
-});
+// NOTE: Then('the response body {string} array contains exactly {int} entries') — registered in shared.steps.ts
 
 Then('each entry has fields: {word} {word} {word} {word} {word} {word} {word}', function (this: AppWorld, ..._fields: string[]) {
   return 'pending';
@@ -159,17 +178,13 @@ Then('the response body field {string} is {string}', function (this: AppWorld, _
   return 'pending';
 });
 
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the response body field {string} is true', function (this: AppWorld, _field: string) {
   return 'pending';
 });
 
-Then('the response body {string} is a non-empty array', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
+// NOTE: Then('the response body {string} is a non-empty array') — registered in shared.steps.ts
 
 Then('the Redis sorted set {string} contains {string} with an updated score', async function (this: AppWorld, key: string, petId: string) {
   // ZRANK leaderboard:global {petId} — see API.md §5.4

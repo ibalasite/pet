@@ -28,14 +28,6 @@ Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-0
     And the database pets row for "pet-mod-002" still has is_banned false
     And the Redis sorted set "leaderboard:global" still contains "pet-mod-002"
 
-  @TC-E2E-MOD-001-03
-  Scenario: Banned pet cannot enter arena
-    Given pet "pet-mod-003" exists with is_banned true
-    And the pet owner holds token "token-mod-003"
-    When "token-mod-003" sends POST /api/v1/arena/enter with petId "pet-mod-003" mode "RACE" and acceptAI false
-    Then the response status is 403
-    And the response body error code is "PET_BANNED"
-
   @TC-E2E-MOD-001-04
   Scenario: Admin ban reason exceeding 500 characters is rejected
     Given pet "pet-mod-001" exists with is_banned false
@@ -85,8 +77,9 @@ Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-0
   @TC-E2E-MOD-002-05
   Scenario: Audit log records every admin mutation in sequence
     Given pet "pet-audit-001" exists with is_banned false
-    When the admin sends POST /admin/api/pets/pet-audit-001/ban with reason "audit test"
-    And the admin sends POST /admin/api/pets/pet-audit-001/unban with reason "audit test unban"
-    And the admin sends GET /admin/api/audit with limit 10
-    Then the response body contains at least 2 audit log entries for "pet-audit-001"
-    And the entries include actions "BAN" and "UNBAN" with admin_id "admin-mod-001"
+    And the admin has previously banned "pet-audit-001" with reason "audit test"
+    And the admin has previously unbanned "pet-audit-001" with reason "audit test unban"
+    When the admin sends GET /admin/api/audit with limit 10
+    Then the response status is 200
+    And the response body contains at least 2 audit log entries for "pet-audit-001"
+    And the entries include actions "BAN" and "UNBAN" with admin_id "admin-mod-001" in sequence

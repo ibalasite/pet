@@ -44,7 +44,7 @@ Given('the battle engine is seeded with fixed random_seed {int}', function (this
   return 'pending';
 });
 
-Given('battle outcome is calculated for {string} vs {string} in mode {string} twice', function (this: AppWorld, _petA: string, _petB: string, _mode: string) {
+When('battle outcome is calculated for {string} vs {string} in mode {string} twice', function (this: AppWorld, _petA: string, _petB: string, _mode: string) {
   // Calculate battle twice using same seed — see API.md §5.3 arena/enter
   return 'pending';
 });
@@ -76,6 +76,20 @@ Given('pet {string} has {int} arena_matches records in the database', async func
 });
 
 Given('both pets have {int} battles this hour', async function (this: AppWorld, _count: number) {
+  return 'pending';
+});
+
+Given('the pet owner holds token {string}', function (this: AppWorld, token: string) {
+  // Store auth token for use in When steps — see API.md §2.1
+  this.authToken = token;
+  return 'pending';
+});
+
+Given('pet {string} exists with is_banned true', async function (this: AppWorld, petId: string) {
+  // Seed pets row with is_banned true — see SCHEMA.md pets table
+  await this.db.seed({
+    pets: [{ id: petId, rarity: 'COMMON', level: 1, stat_speed: 20, stat_strength: 20, stat_stamina: 20, is_banned: true, owner_token_hash: `hash-of-token-${petId}` }],
+  });
   return 'pending';
 });
 

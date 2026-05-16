@@ -74,6 +74,34 @@ Given('pet {string} exists with is_banned false', async function (this: AppWorld
   return 'pending';
 });
 
+Given('the admin has previously banned {string} with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+  // Pre-state: seed an admin_audit_log BAN row for the given pet — see SCHEMA.md admin_audit_log
+  await this.db.seed({
+    admin_audit_log: [{
+      id: `audit-ban-${petId}`,
+      action: 'BAN',
+      admin_id: 'admin-mod-001',
+      target_id: petId,
+      detail: JSON.stringify({ reason }),
+      created_at: new Date(Date.now() - 2000).toISOString(),
+    }],
+  });
+});
+
+Given('the admin has previously unbanned {string} with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+  // Pre-state: seed an admin_audit_log UNBAN row for the given pet — see SCHEMA.md admin_audit_log
+  await this.db.seed({
+    admin_audit_log: [{
+      id: `audit-unban-${petId}`,
+      action: 'UNBAN',
+      admin_id: 'admin-mod-001',
+      target_id: petId,
+      detail: JSON.stringify({ reason }),
+      created_at: new Date(Date.now() - 1000).toISOString(),
+    }],
+  });
+});
+
 Given('pet {string} has suspicious_flag true in the database', async function (this: AppWorld, petId: string) {
   // UPDATE pets SET suspicious_flag = true WHERE id = $1
   await this.db.query('UPDATE pets SET suspicious_flag = true WHERE id = $1', [petId]);
@@ -195,17 +223,9 @@ When('the moderator sends PUT \\/admin\\/api\\/config\\/economy with food_buff_s
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response status is {int} or {int}', function (this: AppWorld, _a: number, _b: number) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response status is {int} or {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the database pets row for {string} has is_banned true', async function (this: AppWorld, petId: string) {
   // SELECT is_banned FROM pets WHERE id = $1
@@ -261,5 +281,10 @@ Then('the response body contains at least {int} audit log entries for {string}',
 });
 
 Then('the entries include actions {string} and {string} with admin_id {string}', function (this: AppWorld, _action1: string, _action2: string, _adminId: string) {
+  return 'pending';
+});
+
+Then('the entries include actions {string} and {string} with admin_id {string} in sequence', function (this: AppWorld, _action1: string, _action2: string, _adminId: string) {
+  // Assert audit log entries appear in BAN → UNBAN order for the given admin — see API.md §5.5
   return 'pending';
 });

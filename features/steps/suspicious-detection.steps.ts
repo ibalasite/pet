@@ -153,13 +153,8 @@ When('{string} sends POST \\/api\\/v1\\/arena\\/enter with petId {string} mode {
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the database pets row for {string} has suspicious_flag set to true', async function (this: AppWorld, petId: string) {
   // SELECT suspicious_flag FROM pets WHERE id = $1 — expect true

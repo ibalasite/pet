@@ -4,6 +4,22 @@ Feature: Pet Rarity Distribution and Display (US-PET-002, US-RARITY-001)
   I want each pet to have a verifiable rarity score
   So that I can trust that Legendary pets are genuinely rare
 
+  @TC-E2E-PET-001-01 @smoke @contract
+  Scenario: Random pet generation returns a complete pet object
+    Given no active reservation exists for seed "pet-seed-rnd-001"
+    When a visitor requests a random pet from the generation API
+    Then the response status is 200
+    And the response body contains id seed rarity petName and stats
+    And the response body contains generationMeta with algorithm version rarity roll and collision count
+    And the response body contains reservedUntil timestamp
+
+  @TC-E2E-PET-001-02 @contract
+  Scenario: Random pet generation returns 503 when generation pool is exhausted
+    Given the database pets table already contains seeds matching the first 3 generated seeds
+    When a visitor requests a random pet from the generation API
+    Then the response status is 503
+    And the response body error code is "INTERNAL_SERVER_ERROR"
+
   @TC-E2E-RARITY-001-01
   Scenario: Pet generation follows the 60-25-12-3 rarity distribution within tolerance
     Given the pet generation algorithm uses the constants: Common 60% Rare 25% Epic 12% Legendary 3%

@@ -58,3 +58,11 @@ Feature: Battle Records Page (US-RECORD-001)
     When a GET request is made to /api/v1/arena/match/nonexistent-match-uuid without authentication
     Then the response status is 404
     And the response body error code is "NOT_FOUND"
+
+  @TC-E2E-RECORD-001-08 @contract
+  Scenario: Battle records response contains all fields needed for Open Graph card generation
+    Given a pet "pet-og-001" with battle history of 10 wins and 5 losses
+    When a visitor requests the arena history for "pet-og-001"
+    Then the response status is 200
+    And the response body "summary" contains wins losses and winRate
+    And the response body contains petName rarity and a sprite reference for social sharing

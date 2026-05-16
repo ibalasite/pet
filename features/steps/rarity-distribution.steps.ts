@@ -7,6 +7,35 @@ import type { AppWorld } from '../support/world';
 // Given — pre-conditions
 // ---------------------------------------------------------------------------
 
+Given('no active reservation exists for seed {string}', function (this: AppWorld, _seed: string) {
+  // Assert no reservation row exists for this seed — see SCHEMA.md pets.generation_seed
+  return 'pending';
+});
+
+When('a visitor requests a random pet from the generation API', async function (this: AppWorld) {
+  // GET /api/v1/pets/random — see API.md §5.2
+  this.lastResponse = await this.client.request({
+    method: 'GET',
+    url: `${this.apiBaseUrl}/api/v1/pets/random`,
+  });
+  return 'pending';
+});
+
+Then('the response body contains id seed rarity petName and stats', function (this: AppWorld) {
+  // Assert response body has id, seed, rarity, petName, stats fields — see API.md §5.2 GET /pets/random
+  return 'pending';
+});
+
+Then('the response body contains generationMeta with algorithm version rarity roll and collision count', function (this: AppWorld) {
+  // Assert generationMeta object contains algorithm, version, rarityRoll, collisionCount — see API.md §5.2
+  return 'pending';
+});
+
+Then('the response body contains reservedUntil timestamp', function (this: AppWorld) {
+  // Assert reservedUntil is a valid ISO 8601 timestamp in the future — see API.md §5.2
+  return 'pending';
+});
+
 Given('the pet generation algorithm uses the constants: Common {int}% Rare {int}% Epic {int}% Legendary {int}%', function (this: AppWorld, _common: number, _rare: number, _epic: number, _legendary: number) {
   // Algorithm constants are embedded in the service under test — no seeding required
   return 'pending';
@@ -109,13 +138,8 @@ When('the total combination space is calculated as body_count times head_count t
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the Common count is between {int} and {int}', function (this: AppWorld, _min: number, _max: number) {
   // TODO: assert distribution result Common bucket falls within [_min, _max]

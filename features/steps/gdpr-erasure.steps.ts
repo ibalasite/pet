@@ -176,17 +176,9 @@ When('an unauthenticated POST request is made to \\/api\\/v1\\/gdpr\\/request wi
 // Then — observable business results
 // ---------------------------------------------------------------------------
 
-Then('the response status is {int}', function (this: AppWorld, _status: number) {
-  return 'pending';
-});
-
-Then('the response body contains a {string} field', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
-
-Then('the response body error code is {string}', function (this: AppWorld, _code: string) {
-  return 'pending';
-});
+// NOTE: Then('the response status is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body contains a {string} field') — registered in shared.steps.ts
+// NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
 Then('the database table gdpr_requests has a row with status {string} for {string}', async function (this: AppWorld, status: string, identityId: string) {
   // SELECT id FROM gdpr_requests WHERE claim_identity_id = $1 AND status = $2

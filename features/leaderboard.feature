@@ -50,7 +50,7 @@ Feature: Global Leaderboard (US-BOARD-001)
   Scenario: Leaderboard score is updated within 30 seconds after a battle
     Given pet "pet-board-001" completes a winning Race battle
     And the battle result is persisted in arena_matches
-    When 30 seconds elapse for the leaderboard sync job to run
+    When the leaderboard sync job is triggered
     Then the Redis sorted set "leaderboard:global" contains "pet-board-001" with an updated score
 
   @TC-E2E-BOARD-001-07
@@ -67,3 +67,10 @@ Feature: Global Leaderboard (US-BOARD-001)
     When a GET request is made to /api/v1/leaderboard with query param rarity=INVALID without authentication
     Then the response status is 400
     And the response body error code is "VALIDATION_ERROR"
+
+  @TC-E2E-BOARD-001-09 @contract
+  Scenario: Owner can retrieve their pet rank even when outside top 100
+    Given a claimed pet "pet-board-low" with a valid owner token and rank outside top 100
+    When the owner requests the rank for "pet-board-low" via the leaderboard rank API
+    Then the response status is 200
+    And the response body contains rank greater than 100 and the current score

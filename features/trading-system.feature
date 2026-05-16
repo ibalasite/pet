@@ -83,12 +83,16 @@ Feature: Pet Trading Marketplace (US-TRADE-001)
     And the response body "data.listings" array contains exactly 20 entries
     And the response meta field "total" is 25
 
-  @TC-E2E-TRADE-001-10 @contract
-  Scenario: Trade history is private to current pet owner
+  @TC-E2E-TRADE-001-10a @contract
+  Scenario: Unauthenticated trade history request returns 401
     Given pet "pet-trade-seller" has one marketplace_transactions record
     When a GET request is made to /api/v1/marketplace/history/pet-trade-seller without authentication
     Then the response status is 401
     And the response body error code is "UNAUTHORIZED"
+
+  @TC-E2E-TRADE-001-10b @contract
+  Scenario: Authenticated owner can retrieve their own trade history
+    Given pet "pet-trade-seller" has one marketplace_transactions record
     When "token-seller" sends GET /api/v1/marketplace/history/pet-trade-seller
     Then the response status is 200
     And the response body "data.trades" is a non-empty array
