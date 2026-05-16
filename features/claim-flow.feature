@@ -73,13 +73,17 @@ Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
     Then the response status is 503 or 429
     And the pet "pet-001" still has no owner_token_hash in the database
 
-  @TC-E2E-AUTH-001-09
-  Scenario: Email enumeration prevention — identical response shape for registered and unregistered email
+  @TC-E2E-AUTH-001-09a
+  Scenario: Email enumeration prevention — registered email returns standard claim response
     Given the pet "pet-001" has no owner_token_hash set
     And the email "registered@example.com" is already associated with a claim identity in the database
     When the guest sends POST /api/v1/claim with email "registered@example.com" petId "pet-001" and ageConfirmed true
     Then the response status is 200
     And the response body contains a "claimId" field
+
+  @TC-E2E-AUTH-001-09b
+  Scenario: Email enumeration prevention — unregistered email returns identical response shape
+    Given the pet "pet-001" has no owner_token_hash set
     When the guest sends POST /api/v1/claim with email "unknown@example.com" petId "pet-001" and ageConfirmed true
     Then the response status is 200
     And the response body contains a "claimId" field

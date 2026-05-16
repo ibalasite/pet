@@ -51,10 +51,7 @@ Given('the Redis rate-limit counter {string} for email {string} is at {int}', as
   return 'pending';
 });
 
-Given('Redis is unavailable', function (this: AppWorld) {
-  // Stub Redis client to throw connection errors
-  return 'pending';
-});
+// NOTE: 'Redis is unavailable' → registered in shared.steps.ts
 
 Given('a claim record with id {string} exists for pet {string} with code {string}', async function (this: AppWorld, claimId: string, _petId: string, _code: string) {
   this.claimId = claimId;
@@ -119,15 +116,7 @@ When('a GET request is made to \\/api\\/v1\\/pets\\/{string}', async function (t
   return 'pending';
 });
 
-When('an unauthenticated POST request is made to \\/api\\/v1\\/gdpr\\/request with type {string}', async function (this: AppWorld, type: string) {
-  // POST /api/v1/gdpr/request — see API.md §5.5; no Authorization header
-  this.lastResponse = await this.client.request({
-    method: 'POST',
-    url: `${this.apiBaseUrl}/api/v1/gdpr/request`,
-    body: { type },
-  });
-  return 'pending';
-});
+// NOTE: 'an unauthenticated POST request is made to /api/v1/gdpr/request with type {string}' → registered in shared.steps.ts
 
 // ---------------------------------------------------------------------------
 // Then — observable business results
@@ -159,9 +148,7 @@ Then('the pet {string} still has no owner_token_hash in the database', async fun
   return 'pending';
 });
 
-Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
-  return 'pending';
-});
+// NOTE: 'the response body field {string} is {string}' → registered in shared.steps.ts
 
 Then('the response header {string} is present', function (this: AppWorld, _header: string) {
   // Assert this.lastResponse.headers[header] is defined

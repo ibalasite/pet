@@ -112,22 +112,8 @@ When('a GET request is made to \\/api\\/v1\\/pets\\/random without authenticatio
   });
 });
 
-When('a GET request is made to \\/api\\/v1\\/pets\\/{string} without authentication', async function (this: AppWorld, petId: string) {
-  // GET /api/v1/pets/:petId — see API.md §5.2
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/pets/${encodeURIComponent(petId)}`,
-  });
-});
-
-When('a GET request is made to \\/api\\/v1\\/leaderboard with query param rarity={word} without authentication', async function (this: AppWorld, rarity: string) {
-  // GET /api/v1/leaderboard?rarity=LEGENDARY — see API.md §5.4
-  const qs = new URLSearchParams({ rarity }).toString();
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/leaderboard?${qs}`,
-  });
-});
+// NOTE: 'a GET request is made to /api/v1/pets/{string} without authentication' → registered in shared.steps.ts
+// NOTE: 'a GET request is made to /api/v1/leaderboard with query param rarity={word} without authentication' → registered in shared.steps.ts
 
 When('the total combination space is calculated as body_count times head_count times color_palette_count times accessory_count times rarity_trait_count times pattern_count', function (this: AppWorld) {
   // Compute product of dimension constants — combination space verification
@@ -183,9 +169,7 @@ Then('the response body {string} is {string}', function (this: AppWorld, _field:
   return 'pending';
 });
 
-Then('all entries in {string} have rarity {string}', function (this: AppWorld, _field: string, _rarity: string) {
-  return 'pending';
-});
+// NOTE: 'all entries in {string} have rarity {string}' → registered in shared.steps.ts
 
 Then('the product exceeds {int}', function (this: AppWorld, _threshold: number) {
   // TODO: assert computed combination space > _threshold (1,000,000,000)

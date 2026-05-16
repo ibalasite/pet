@@ -13,10 +13,7 @@ Given('a super_admin {string} is authenticated with a valid session cookie', fun
   this.adminSessionCookie = 'admin-session=test-super-admin-session-fixture';
 });
 
-Given('a moderator admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
-  // Set moderator session cookie on AppWorld — see API.md §2.2
-  this.adminSessionCookie = 'admin-session=test-moderator-session-fixture';
-});
+// NOTE: 'a moderator admin {string} is authenticated with a valid session cookie' → registered in shared.steps.ts
 
 Given('the database config_economy row has food_buff_speed_multiplier {float} and arena_entry_cooldown_minutes {int}', async function (this: AppWorld, multiplier: number, cooldown: number) {
   // Seed config_economy row — see SCHEMA.md config_economy
@@ -108,16 +105,7 @@ When('the admin sends PUT \\/admin\\/api\\/config\\/economy with arena_entry_coo
   });
 });
 
-When('the moderator sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
-  // PUT /admin/api/config/economy — moderator role → expect 403 — see API.md §5.5
-  if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the moderator');
-  this.lastResponse = await this.client.request({
-    method: 'PUT',
-    url: `${this.apiBaseUrl}/admin/api/config/economy`,
-    headers: { Cookie: this.adminSessionCookie },
-    body: { food_buff_speed_multiplier: value },
-  });
-});
+// NOTE: 'the moderator sends PUT /admin/api/config/economy with food_buff_speed_multiplier {float}' → registered in shared.steps.ts
 
 When('an unauthenticated PUT request is made to \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
   // PUT /admin/api/config/economy — no cookie — see API.md §2.3
@@ -133,16 +121,7 @@ When('the config cache is refreshed', function (this: AppWorld) {
   return 'pending';
 });
 
-When('{string} sends POST \\/api\\/v1\\/pets\\/{string}\\/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}', async function (this: AppWorld, token: string, petId: string, buffType: string, stat: string, magnitude: number, isPermanentStr: string) {
-  // POST /api/v1/pets/:petId/feed — see API.md §5.2
-  const isPermanent = isPermanentStr === 'true';
-  this.lastResponse = await this.client.request({
-    method: 'POST',
-    url: `${this.apiBaseUrl}/api/v1/pets/${encodeURIComponent(petId)}/feed`,
-    headers: { Authorization: `Bearer ${token}` },
-    body: { buffType, stat, magnitude, isPermanent },
-  });
-});
+// NOTE: '{string} sends POST /api/v1/pets/{string}/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}' → registered in shared.steps.ts
 
 // ---------------------------------------------------------------------------
 // Then — observable business results
@@ -151,9 +130,7 @@ When('{string} sends POST \\/api\\/v1\\/pets\\/{string}\\/feed with buffType {st
 // NOTE: Then('the response status is {int}') — registered in shared.steps.ts
 // NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
-Then('the response body field {string} is {float}', function (this: AppWorld, _field: string, _value: number) {
-  return 'pending';
-});
+// NOTE: 'the response body field {string} is {float}' → registered in shared.steps.ts
 
 Then('the database config_economy row has food_buff_speed_multiplier {float}', function (this: AppWorld, _value: number) {
   // TODO: query SELECT food_buff_speed_multiplier FROM config_economy WHERE id = 'config-economy-singleton'
@@ -190,6 +167,4 @@ Then('no new row is added to admin_audit_log for this attempt', function (this: 
   return 'pending';
 });
 
-Then('the applied buff magnitude reflects the {float} multiplier', function (this: AppWorld, _multiplier: number) {
-  return 'pending';
-});
+// NOTE: 'the applied buff magnitude reflects the {float} multiplier' → registered in shared.steps.ts

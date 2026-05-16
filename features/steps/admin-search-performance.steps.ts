@@ -7,16 +7,8 @@ import type { AppWorld } from '../support/world';
 // Given — pre-conditions
 // ---------------------------------------------------------------------------
 
-Given('a moderator admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
-  // Set moderator session cookie on AppWorld — see API.md §2.2
-  // Token value is a test-only fixture credential, not a production secret
-  this.adminSessionCookie = 'admin-session=test-moderator-session-fixture';
-});
-
-Given('a read_only admin {string} is authenticated with a valid session cookie', function (this: AppWorld, _adminId: string) {
-  // Set read_only session cookie on AppWorld — see API.md §2.2
-  this.adminSessionCookie = 'admin-session=test-readonly-session-fixture';
-});
+// NOTE: 'a moderator admin {string} is authenticated with a valid session cookie' → registered in shared.steps.ts
+// NOTE: 'a read_only admin {string} is authenticated with a valid session cookie' → registered in shared.steps.ts
 
 Given('the database contains at least {int} pets rows', function (this: AppWorld, _count: number) {
   // Large-volume seed is infrastructure-level setup — deferred to test environment provisioning
@@ -96,6 +88,9 @@ When('the read_only admin sends GET \\/admin\\/api\\/pets with page {int} and li
 
 // NOTE: Then('the response status is {int}') — registered in shared.steps.ts
 // NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
+// NOTE: Then('the response meta contains total page and limit fields') — registered in shared.steps.ts
+// NOTE: Then('the response meta field {string} is {int}') — registered in shared.steps.ts
+// NOTE: Then('the response body {string} is a non-empty array') — registered in shared.steps.ts
 
 Then('the response body {string} array contains {string}', function (this: AppWorld, _field: string, _value: string) {
   return 'pending';
@@ -111,15 +106,7 @@ Then('each entry in the response body {string} array has petId rarity level aren
   return 'pending';
 });
 
-Then('the response meta contains total page and limit fields', function (this: AppWorld) {
-  return 'pending';
-});
-
 Then('the response body {string} array is empty', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
-
-Then('the response meta field {string} is {int}', function (this: AppWorld, _field: string, _value: number) {
   return 'pending';
 });
 
@@ -127,5 +114,3 @@ Then('the response body entry for {string} does not contain a plaintext email fi
   // TODO: parse response data array, find entry with petId === _petId, assert no /email/i key
   return 'pending';
 });
-
-// NOTE: Then('the response body {string} is a non-empty array') — registered in shared.steps.ts

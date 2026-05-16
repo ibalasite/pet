@@ -220,8 +220,6 @@ Then('no marketplace_listings row is created', function (this: AppWorld) {
 
 // NOTE: Then('the response body {string} array contains exactly {int} entries') — registered in shared.steps.ts
 
-Then('the response meta field {string} is {int}', function (this: AppWorld, _field: string, _value: number) {
-  return 'pending';
-});
+// NOTE: 'the response meta field {string} is {int}' → registered in shared.steps.ts
 
 // NOTE: Then('the response body {string} is a non-empty array') — registered in shared.steps.ts

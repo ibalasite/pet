@@ -138,13 +138,7 @@ When('the same email is submitted in POST \\/api\\/v1\\/claim with petId {string
   });
 });
 
-When('a GET request is made to \\/api\\/v1\\/leaderboard without authentication', async function (this: AppWorld) {
-  // GET /api/v1/leaderboard — see API.md §5.4
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/leaderboard`,
-  });
-});
+// NOTE: 'a GET request is made to /api/v1/leaderboard without authentication' → registered in shared.steps.ts
 
 When('the admin sends POST \\/admin\\/api\\/gdpr\\/{string}\\/process', async function (this: AppWorld, jobId: string) {
   // POST /admin/api/gdpr/:jobId/process — see API.md §5.5
@@ -155,22 +149,8 @@ When('the admin sends POST \\/admin\\/api\\/gdpr\\/{string}\\/process', async fu
   });
 });
 
-When('a GET request is made to \\/api\\/v1\\/pets\\/{string} without authentication', async function (this: AppWorld, petId: string) {
-  // GET /api/v1/pets/:petId — see API.md §5.2
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/pets/${encodeURIComponent(petId)}`,
-  });
-});
-
-When('an unauthenticated POST request is made to \\/api\\/v1\\/gdpr\\/request with type {string}', async function (this: AppWorld, type: string) {
-  // POST /api/v1/gdpr/request — no Authorization header — see API.md §2.3
-  this.lastResponse = await this.client.request({
-    method: 'POST',
-    url: `${this.apiBaseUrl}/api/v1/gdpr/request`,
-    body: { type },
-  });
-});
+// NOTE: 'a GET request is made to /api/v1/pets/{string} without authentication' → registered in shared.steps.ts
+// NOTE: 'an unauthenticated POST request is made to /api/v1/gdpr/request with type {string}' → registered in shared.steps.ts
 
 // ---------------------------------------------------------------------------
 // Then — observable business results
@@ -227,9 +207,7 @@ Then('the database lookup finds the retained email_hash and prevents a duplicate
   return 'pending';
 });
 
-Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
-  return 'pending';
-});
+// NOTE: 'the response body field {string} is {string}' → registered in shared.steps.ts
 
 Then('the response body contains {string} and {string} fields', function (this: AppWorld, _field1: string, _field2: string) {
   return 'pending';

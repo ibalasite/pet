@@ -52,10 +52,7 @@ Given('a pet {string} with score {float} exists in the leaderboard at rank {int}
   await this.redis.zadd('leaderboard:global', score, petId);
 });
 
-Given('Redis is unavailable', function (this: AppWorld) {
-  // Stub Redis to simulate connectivity failure — fail-open for leaderboard
-  return 'pending';
-});
+// NOTE: 'Redis is unavailable' → registered in shared.steps.ts
 
 Given('the database table leaderboard_snapshots has a recent row with valid leaderboard data', async function (this: AppWorld) {
   // Seed leaderboard_snapshots — PostgreSQL fallback — see EDD.md §leaderboard
@@ -104,22 +101,8 @@ Given('an admin session cookie is set for a moderator admin user', function (thi
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
-When('a GET request is made to \\/api\\/v1\\/leaderboard without authentication', async function (this: AppWorld) {
-  // GET /api/v1/leaderboard — see API.md §5.4
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/leaderboard`,
-  });
-});
-
-When('a GET request is made to \\/api\\/v1\\/leaderboard with query param rarity={word} without authentication', async function (this: AppWorld, rarity: string) {
-  // GET /api/v1/leaderboard?rarity=EPIC — see API.md §5.4
-  const qs = new URLSearchParams({ rarity }).toString();
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/leaderboard?${qs}`,
-  });
-});
+// NOTE: 'a GET request is made to /api/v1/leaderboard without authentication' → registered in shared.steps.ts
+// NOTE: 'a GET request is made to /api/v1/leaderboard with query param rarity={word} without authentication' → registered in shared.steps.ts
 
 When('a GET request is made to \\/api\\/v1\\/leaderboard\\/rank\\/{string} without authentication', async function (this: AppWorld, petId: string) {
   // GET /api/v1/leaderboard/rank/:petId — see API.md §5.4
@@ -134,15 +117,7 @@ When('the leaderboard sync job is triggered', function (this: AppWorld) {
   return 'pending';
 });
 
-When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
-  // POST /admin/api/pets/:petId/ban — see API.md §5.5
-  this.lastResponse = await this.client.request({
-    method: 'POST',
-    url: `${this.apiBaseUrl}/admin/api/pets/${encodeURIComponent(petId)}/ban`,
-    headers: { Cookie: this.adminSessionCookie ?? '' },
-    body: { reason },
-  });
-});
+// NOTE: 'the admin sends POST /admin/api/pets/{string}/ban with reason {string}' → registered in shared.steps.ts
 
 // ---------------------------------------------------------------------------
 // Then — observable business results
@@ -158,31 +133,15 @@ Then('entries are ordered by score descending', function (this: AppWorld) {
   return 'pending';
 });
 
-Then('the response meta contains total page and limit fields', function (this: AppWorld) {
-  return 'pending';
-});
-
-Then('all entries in {string} have rarity {string}', function (this: AppWorld, _field: string, _rarity: string) {
-  return 'pending';
-});
-
-Then('the response body field {string} is {float}', function (this: AppWorld, _field: string, _value: number) {
-  return 'pending';
-});
-
-Then('the response body field {string} is {int}', function (this: AppWorld, _field: string, _value: number) {
-  return 'pending';
-});
-
-Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
-  return 'pending';
-});
+// NOTE: 'the response meta contains total page and limit fields' → registered in shared.steps.ts
+// NOTE: 'all entries in {string} have rarity {string}' → registered in shared.steps.ts
+// NOTE: 'the response body field {string} is {float}' → registered in shared.steps.ts
+// NOTE: 'the response body field {string} is {int}' → registered in shared.steps.ts
+// NOTE: 'the response body field {string} is {string}' → registered in shared.steps.ts
 
 // NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts
 
-Then('the response body field {string} is true', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
+// NOTE: 'the response body field {string} is true' → registered in shared.steps.ts
 
 // NOTE: Then('the response body {string} is a non-empty array') — registered in shared.steps.ts
 
@@ -192,11 +151,7 @@ Then('the Redis sorted set {string} contains {string} with an updated score', as
   return 'pending';
 });
 
-Then('the Redis sorted set {string} does NOT contain {string}', async function (this: AppWorld, key: string, petId: string) {
-  // ZRANK should return null after ban/erasure
-  void await this.redis.zrank(key, petId);
-  return 'pending';
-});
+// NOTE: 'the Redis sorted set {string} does NOT contain {string}' → registered in shared.steps.ts
 
 Then('the database admin_audit_log has a row with action {string} and pet_id {string}', async function (this: AppWorld, action: string, petId: string) {
   // SELECT id FROM admin_audit_log WHERE action = $1 AND target_id = $2

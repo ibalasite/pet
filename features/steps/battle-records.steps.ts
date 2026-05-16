@@ -97,23 +97,7 @@ Given('pet {string} has {int} arena_matches records', async function (this: AppW
   await this.db.seed({ arena_matches: rows });
 });
 
-Given('pet {string} has {int} arena_matches records in the database', async function (this: AppWorld, petId: string, count: number) {
-  // Seed arena_matches rows (alias, used by RECORD-001-03 with 25 matches)
-  await this.db.seed({
-    pets: [{ id: petId, rarity: 'EPIC', stat_speed: 20, stat_strength: 20, stat_stamina: 20, level: 1, is_banned: false }],
-  });
-  const rows = Array.from({ length: count }, (_, i) => ({
-    id: `match-rec2-${petId}-${i}`,
-    pet_a_id: petId,
-    pet_b_id: `opp2-${i}`,
-    winner_id: petId,
-    mode: 'RACE',
-    status: 'COMPLETED',
-    is_ai_opponent: false,
-    completed_at: new Date(Date.now() - i * 60000).toISOString(),
-  }));
-  await this.db.seed({ arena_matches: rows });
-});
+// NOTE: 'pet {string} has {int} arena_matches records in the database' → registered in shared.steps.ts
 
 Given('pet {string} has an arena_matches record where is_ai_opponent is true and opponent_pet_id is null', async function (this: AppWorld, petId: string) {
   // Seed an AI opponent match row — see SCHEMA.md arena_matches.is_ai_opponent
@@ -131,32 +115,14 @@ Given('pet {string} has an arena_matches record where is_ai_opponent is true and
   });
 });
 
-Given('an arena match {string} exists with winnerId {string} mode {string} and completedAt {string}', async function (this: AppWorld, matchId: string, winnerId: string, mode: string, completedAt: string) {
-  // Seed arena_matches row for match record read — see SCHEMA.md arena_matches
-  await this.db.seed({
-    arena_matches: [{ id: matchId, winner_id: winnerId, mode, status: 'COMPLETED', completed_at: completedAt }],
-  });
-});
+// NOTE: 'an arena match {string} exists with winnerId {string} mode {string} and completedAt {string}' → registered in shared.steps.ts
 
 // ---------------------------------------------------------------------------
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
-When('a GET request is made to \\/api\\/v1\\/arena\\/history\\/{string} without authentication', async function (this: AppWorld, petId: string) {
-  // GET /api/v1/arena/history/:petId — see API.md §5.3
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/arena/history/${encodeURIComponent(petId)}`,
-  });
-});
-
-When('a GET request is made to \\/api\\/v1\\/arena\\/match\\/{string} without authentication', async function (this: AppWorld, matchId: string) {
-  // GET /api/v1/arena/match/:matchId — see API.md §5.3
-  this.lastResponse = await this.client.request({
-    method: 'GET',
-    url: `${this.apiBaseUrl}/api/v1/arena/match/${encodeURIComponent(matchId)}`,
-  });
-});
+// NOTE: 'a GET request is made to /api/v1/arena/history/{string} without authentication' → registered in shared.steps.ts
+// NOTE: 'a GET request is made to /api/v1/arena/match/{string} without authentication' → registered in shared.steps.ts
 
 // ---------------------------------------------------------------------------
 // Then — observable business results
@@ -164,9 +130,7 @@ When('a GET request is made to \\/api\\/v1\\/arena\\/match\\/{string} without au
 
 // NOTE: Then('the response body {string} array contains exactly {int} entries') — registered in shared.steps.ts
 
-Then('each entry has fields: {word} {word} {word} {word} {word} {word}', function (this: AppWorld, ..._fields: string[]) {
-  return 'pending';
-});
+// NOTE: 'each entry has fields: {word} {word} {word} {word} {word} {word}' → registered in shared.steps.ts
 
 Then('the response body {string} contains wins losses and winRate fields', function (this: AppWorld, _field: string) {
   return 'pending';
@@ -176,13 +140,8 @@ Then('at least one entry in the {string} array has isAiOpponent true and opponen
   return 'pending';
 });
 
-Then('the response body field {string} is {string}', function (this: AppWorld, _field: string, _value: string) {
-  return 'pending';
-});
-
-Then('the response body {string} is a non-empty array of events', function (this: AppWorld, _field: string) {
-  return 'pending';
-});
+// NOTE: 'the response body field {string} is {string}' → registered in shared.steps.ts
+// NOTE: 'the response body {string} is a non-empty array of events' → registered in shared.steps.ts
 
 // NOTE: Then('the response status is {int}') — registered in shared.steps.ts
 // NOTE: Then('the response body error code is {string}') — registered in shared.steps.ts

@@ -110,17 +110,7 @@ When('an unauthenticated POST request is made to \\/api\\/v1\\/pets\\/{string}\\
   return 'pending';
 });
 
-When('{string} sends POST \\/api\\/v1\\/pets\\/{string}\\/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}', async function (this: AppWorld, token: string, petId: string, buffType: string, stat: string, magnitude: number, isPermanentStr: string) {
-  // POST /api/v1/pets/:petId/feed — see API.md §5.2
-  const isPermanent = isPermanentStr === 'true';
-  this.lastResponse = await this.client.request({
-    method: 'POST',
-    url: `${this.apiBaseUrl}/api/v1/pets/${petId}/feed`,
-    headers: { Authorization: `Bearer ${token}` },
-    body: { buffType, stat, magnitude, isPermanent },
-  });
-  return 'pending';
-});
+// NOTE: '{string} sends POST /api/v1/pets/{string}/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}' → registered in shared.steps.ts
 
 When('a GET request is made to \\/api\\/v1\\/pets\\/{string}\\/stats without authentication', async function (this: AppWorld, petId: string) {
   // GET /api/v1/pets/:petId/stats — see API.md §5.2
@@ -200,6 +190,4 @@ Then('the response body {string} contains speed strength stamina and level field
   return 'pending';
 });
 
-Then('the applied buff magnitude reflects the {float} multiplier', function (this: AppWorld, _multiplier: number) {
-  return 'pending';
-});
+// NOTE: 'the applied buff magnitude reflects the {float} multiplier' → registered in shared.steps.ts

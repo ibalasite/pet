@@ -167,6 +167,6 @@ Then('subsequent requests using the old session cookie return 401', async functi
     url: `${this.apiBaseUrl}/admin/api/pets`,
     headers: { Cookie: this.adminSessionCookie ?? '' },
   });
-  return 'pending';
   void probeResponse;
+  return 'pending';
 });
