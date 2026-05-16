@@ -1735,8 +1735,8 @@ graph TB
 | LeaderboardEntryRemoved | Leaderboard | `leaderboard.entry.removed` | v1 | Admin | `{petId, reason, removedAt}` |
 | GdprErasureRequested | Identity | `gdpr.request.created` | v1 | Admin, Pet, Leaderboard | `{requestId, claimIdentityId, type, submittedAt}` |
 | GdprErasureCompleted | Identity | `gdpr.request.completed` | v1 | Admin | `{requestId, claimIdentityId, completedAt}` |
-| AdminUserCreated | Admin | `admin.user.created` | v1 | (audit-only) | `{adminId, role, createdBy, createdAt}` |
-| AdminActionLogged | Admin | `admin.action.logged` | v1 | (audit-only) | `{auditLogId, adminId, action, targetType, targetId, at}` |
+| AdminUserCreated | Admin | `admin.user.created` | v1 | Admin (audit-only; no cross-BC consumer) | `{adminId, role, createdBy, createdAt}` |
+| AdminActionLogged | Admin | `admin.action.logged` | v1 | Admin (audit-only; no cross-BC consumer) | `{auditLogId, adminId, action, targetType, targetId, at}` |
 | SuspiciousPetFlagged | Admin | `admin.suspicious.flagged` | v1 | Pet, Leaderboard | `{petId, battlesLastHour, flaggedAt}` |
 | ListingCreated | Marketplace | `marketplace.listing.created` | v1 | Pet, Admin | `{listingId, petId, priceCredits, listedAt}` |
 | TradeCompleted | Marketplace | `marketplace.trade.completed` | v1 | Pet, Admin | `{tradeId, listingId, petId, priceCredits, feeCredits, completedAt}` |
