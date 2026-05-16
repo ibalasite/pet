@@ -536,7 +536,45 @@ kubectl get pods -n pixel-pet-arena-local -l app=api-server
 
 kubectl get pods -n pixel-pet-arena-local -l app=worker
 # Expected: 2 個 worker Pod 狀態為 Running
+
+# 數量驗證（CI gate 可用）
+[ "$(kubectl get pods -n pixel-pet-arena-local -l app=api-server --field-selector=status.phase=Running -o name | wc -l | tr -d ' ')" -ge 2 ] \
+  && echo "OK: api-server replicas ≥ 2" || echo "FAIL: api-server replicas < 2"
 ```
+
+**HA 故障切換驗證（Chaos Test — 強制終止一個 Pod）：**
+
+> 此驗證對應 EDD §3.7 圖 B（Local HA Topology）與 test-plan.md §3.6.3。確認 API Server 在單一副本被強制終止時，服務透過剩餘副本持續可用、且失敗副本能在 ≤ 5s 內自動重啟。
+
+```bash
+# 1. 開啟 port-forward 持續輪詢 health（另一 terminal）
+kubectl port-forward -n pixel-pet-arena-local svc/api-server-svc 8080:8080 &
+
+# 2. 強制刪除一個 api-server Pod
+kubectl delete pod -n pixel-pet-arena-local \
+  $(kubectl get pods -n pixel-pet-arena-local -l app=api-server -o jsonpath='{.items[0].metadata.name}')
+
+# 3. 立即驗證服務仍可用（剩餘副本接管，期望 5s 內回應 200）
+sleep 1
+curl -s -o /dev/null -w "fail-over response: %{http_code} in %{time_total}s\n" \
+  http://localhost:8080/api/health
+# Expected: fail-over response: 200 in <0.5s
+
+# 4. 等待 K8s 重新拉起被刪除的副本（期望 ≤ 5s 重新 Ready）
+for i in 1 2 3 4 5; do
+  READY=$(kubectl get pods -n pixel-pet-arena-local -l app=api-server \
+    --field-selector=status.phase=Running -o name | wc -l | tr -d ' ')
+  echo "t=${i}s api-server Running replicas=${READY}"
+  [ "$READY" -ge 2 ] && break
+  sleep 1
+done
+# Expected: 5 秒內回到 Running replicas=2
+
+# 5. 結束 port-forward
+kill %1 2>/dev/null || true
+```
+
+> **Worker 冪等性驗證（HA 等同步驟）：** 對 worker Deployment 重複上方步驟（`-l app=worker`），並送出同一 Job 兩次，確認 DB 結果只執行一次（冪等鎖透過 Redis SETNX 實現，見 EDD §3.7.3）。
 
 如有 Pod 停在 `Pending` 或 `CrashLoopBackOff`，請見 §10。
 
