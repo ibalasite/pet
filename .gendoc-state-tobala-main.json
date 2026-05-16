@@ -54,7 +54,6 @@
     "ADMIN_IMPL",
     "CLIENT_IMPL",
     "SCHEMA",
-    "EDD",
     "BDD-server"
   ],
   "last_completed": "BDD-server",
@@ -254,8 +253,8 @@
       "terminate_reason": "zero_finding",
       "quality_status": "passed"
     },
-    "EDD": {
-      "rounds_done": 3,
+    "BDD-server": {
+      "rounds_done": 8,
       "max_rounds": 99,
       "strategy": "exhaustive",
       "last_finding_total": 0,
@@ -268,8 +267,8 @@
       "terminate_reason": "zero_finding",
       "quality_status": "passed"
     },
-    "BDD-server": {
-      "rounds_done": 8,
+    "EDD": {
+      "rounds_done": 1,
       "max_rounds": 99,
       "strategy": "exhaustive",
       "last_finding_total": 0,
