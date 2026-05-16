@@ -249,7 +249,8 @@ services:
       context: ./apps/api
       dockerfile: Dockerfile.dev
     ports:
-      - "3000-3001:3000"
+      - "3000:3000"
+      - "3001:3001"
     env_file:
       - ./apps/api/.env.local
     environment:
