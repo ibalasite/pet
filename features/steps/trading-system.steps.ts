@@ -203,8 +203,12 @@ Then('the database marketplace_listings row for {string} still has status {strin
 });
 
 Then('the database pets row for {string} has owner_token_hash matching {string}', function (this: AppWorld, _petId: string, _token: string) {
-  // TODO: query SELECT owner_token_hash FROM pets WHERE id = $1
-  // TODO: assert result[0].owner_token_hash === hash-of-_token
+  // TODO: query SELECT owner_token_hash FROM pets WHERE id = $1; assert === hash-of-_token
+  return 'pending';
+});
+
+Then('the database pets row for {string} still has owner_token_hash matching {string}', function (this: AppWorld, _petId: string, _token: string) {
+  // POST /api/v1/marketplace/listings/:id/buy — verify seller ownership unchanged — see API.md §5.6
   return 'pending';
 });
 
