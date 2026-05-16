@@ -140,7 +140,7 @@ When('the same email is submitted in POST /api/v1/claim with petId {string} and 
 
 // NOTE: 'a GET request is made to /api/v1/leaderboard without authentication' → registered in shared.steps.ts
 
-When('the admin sends POST /admin/api/gdpr/{string}/process', async function (this: AppWorld, jobId: string) {
+When('the admin sends POST /admin/api/gdpr/{word}/process', async function (this: AppWorld, jobId: string) {
   // POST /admin/api/gdpr/:jobId/process — see API.md §5.5
   this.lastResponse = await this.client.request({
     method: 'POST',

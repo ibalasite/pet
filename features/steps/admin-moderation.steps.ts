@@ -70,7 +70,7 @@ Given('the admin has previously unbanned {string} with reason {string}', async f
 
 // NOTE: 'the admin sends POST /admin/api/pets/{string}/ban with reason {string}' → registered in shared.steps.ts
 
-When('the admin sends POST /admin/api/pets/{string}/ban with a reason of {int} characters', async function (this: AppWorld, petId: string, charCount: number) {
+When('the admin sends POST /admin/api/pets/{word}/ban with a reason of {int} characters', async function (this: AppWorld, petId: string, charCount: number) {
   // POST /admin/api/pets/:petId/ban — reason length validation — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   const reason = 'x'.repeat(charCount);
@@ -104,7 +104,7 @@ When('the admin sends GET /admin/api/pets with limit {int}', async function (thi
   });
 });
 
-When('the read_only admin sends POST /admin/api/pets/{string}/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+When('the read_only admin sends POST /admin/api/pets/{word}/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
   // POST /admin/api/pets/:petId/ban with read_only cookie — expect 403 — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the read_only admin');
   this.lastResponse = await this.client.request({
@@ -115,7 +115,7 @@ When('the read_only admin sends POST /admin/api/pets/{string}/ban with reason {s
   });
 });
 
-When('the admin sends POST /admin/api/pets/{string}/unban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+When('the admin sends POST /admin/api/pets/{word}/unban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
   // POST /admin/api/pets/:petId/unban — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({

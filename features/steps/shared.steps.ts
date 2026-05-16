@@ -262,7 +262,7 @@ When('{string} sends POST /api/v1/arena/enter with petId {string} mode {string} 
 // Shared When — admin ban (found in leaderboard and suspicious-detection)
 // ---------------------------------------------------------------------------
 
-When('the admin sends POST /admin/api/pets/{string}/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+When('the admin sends POST /admin/api/pets/{word}/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
   // Shared step — POST /admin/api/pets/:petId/ban — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -354,7 +354,7 @@ When('a GET request is made to /api/v1/pets/{word} without authentication', asyn
 // Shared When — pet feed (found in economy-config and training-food)
 // ---------------------------------------------------------------------------
 
-When('{string} sends POST /api/v1/pets/{string}/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}', async function (this: AppWorld, token: string, petId: string, buffType: string, stat: string, magnitude: number, isPermanentStr: string) {
+When('{string} sends POST /api/v1/pets/{word}/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}', async function (this: AppWorld, token: string, petId: string, buffType: string, stat: string, magnitude: number, isPermanentStr: string) {
   // Shared step — POST /api/v1/pets/:petId/feed — see API.md §5.2
   const isPermanent = isPermanentStr === 'true';
   this.lastResponse = await this.client.request({

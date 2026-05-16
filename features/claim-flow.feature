@@ -105,6 +105,6 @@ Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
 
   @TC-E2E-AUTH-002-02 @contract
   Scenario: Accessing pet via invalid URL token returns 404
-    When a GET request is made to /api/v1/pets/nonexistent-invalid-uuid
+    When a GET request is made to /api/v1/pets/nonexistent-invalid-uuid without authentication
     Then the response status is 404
     And the response body error code is "PET_NOT_FOUND"
