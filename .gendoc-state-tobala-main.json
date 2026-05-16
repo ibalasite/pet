@@ -6,7 +6,7 @@
   "max_rounds": 99,
   "client_type": "game",
   "client_type_source": "confirmed",
-  "last_updated": "2026-05-15T19:18:22Z",
+  "last_updated": "2026-05-16T09:07:13Z",
   "has_admin_backend": true,
   "review_strategy": "exhaustive",
   "stop_condition": "finding=0（無上限）",
@@ -50,14 +50,13 @@
     "runbook",
     "DRYRUN",
     "API",
-    "SCHEMA",
-    "EDD",
     "ANIM",
     "ADMIN_IMPL",
     "CLIENT_IMPL",
-    "BDD-server"
+    "BDD-server",
+    "SCHEMA"
   ],
-  "last_completed": "DRYRUN",
+  "last_completed": "SCHEMA",
   "pipeline_hash": "49f8456caade9b87",
   "review_progress": {
     "PRD": {
@@ -225,16 +224,6 @@
       "terminate_reason": "gen-only rebuild",
       "rounds_done": 0
     },
-    "SCHEMA": {
-      "terminated": true,
-      "terminate_reason": "gen-only rebuild",
-      "rounds_done": 0
-    },
-    "EDD": {
-      "terminated": true,
-      "terminate_reason": "gen-only rebuild",
-      "rounds_done": 0
-    },
     "ANIM": {
       "terminated": true,
       "terminate_reason": "gen-only rebuild",
@@ -254,6 +243,34 @@
       "terminated": true,
       "terminate_reason": "gen-only rebuild",
       "rounds_done": 0
+    },
+    "SCHEMA": {
+      "rounds_done": 1,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "EDD": {
+      "rounds_done": 2,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 1,
+      "last_CHM": [
+        0,
+        0,
+        1
+      ],
+      "terminated": false,
+      "terminate_reason": "in_progress",
+      "quality_status": "improving"
     }
   },
   "step_specifications": {
