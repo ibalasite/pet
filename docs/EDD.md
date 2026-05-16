@@ -139,7 +139,7 @@ The following constants are extracted directly from [CONSTANTS.md](CONSTANTS.md)
 
 | Epic | User Story ID | 對應 EDD 章節 | Status |
 |------|---------------|---------------|--------|
-| EPIC-PET | US-PET-001 (Random Pet Display Guest) | §4.1 Pet Module、§5.2 GET /api/v1/pets/random、§8.3 Pixel Art Rendering、§4.5.7 Activity (Claim Flow) | Designed |
+| EPIC-PET | US-PET-001 (Random Pet Display Guest) | §4.1 Pet Module、§5.2 GET /api/v1/pets/random、§4.7.3 Pet Generation Algorithm、§4.5.7 Activity (Claim Flow) | Designed |
 | EPIC-PET | US-PET-002 (Procedural Pixel Pet Generation) | §4.1 Pet Module、§4.4 Domain Glossary（PetGenerationService）、§6.1 ERD pets/generation_meta | Designed |
 | EPIC-AUTH | US-AUTH-001 (Email Claim Flow) | §5.1 Auth Endpoints、§9.1 Pet Access Token Model、§9.2 Claim Code Flow、§4.5.4 Sequence (Claim Flow) | Designed |
 | EPIC-AUTH | US-AUTH-002 (Returning Pet Owner Access) | §5.1 POST /api/v1/claim/recover、§9.1 Token recovery、§4.5.6 State (Pet) | Designed |
@@ -153,7 +153,7 @@ The following constants are extracted directly from [CONSTANTS.md](CONSTANTS.md)
 | EPIC-ADMIN | US-ADMIN-001 (Admin Pet Management) | §5.5 GET /admin/api/pets、§9.6 RBAC | Designed |
 | EPIC-ADMIN | US-ADMIN-002 (Admin Leaderboard View) | §5.5 GET /admin/api/leaderboard | Designed |
 | EPIC-ADMIN | US-ADMIN-003 (Runtime Parameter Tuning) | §5.5 PUT /admin/api/config/runtime、§3.4 BC Admin | Designed |
-| EPIC-ADMIN | US-ADMIN-004 (GDPR Erasure) | §5.5 POST /admin/api/gdpr/delete、§4.5.7 Activity (GDPR Erasure)、§9.5 GDPR Summary | Designed |
+| EPIC-ADMIN | US-ADMIN-004 (GDPR Erasure) | §5.5 POST /admin/api/gdpr/delete、§4.5.7 Activity (GDPR Erasure)、§9.4 敏感資料處理（email deletion policy）、§6.3 資料生命週期 | Designed |
 | EPIC-ADMIN | US-ADMIN-005 (Suspicious Pet Flag) | §5.5 GET /admin/api/suspicious、§4.6 Event suspicious_pet_flagged | Designed |
 | EPIC-ADMIN | US-ADMIN-006 (Game Economy Configuration) | §5.5 PUT /admin/api/config/economy | Designed |
 
@@ -1778,7 +1778,7 @@ graph TB
 | **演算法名稱** | `PetGenerationService.generateFromSeed()` — called on claim_identities INSERT |
 | **輸入** | `seed: bigint` (globally unique, stored in `pets.seed`); 6 dimensions: body, head, color, accessory, rarity_trait, pattern |
 | **輸出** | `{ sprite: base64_png, petName: string, rarity: 'common'\|'rare'\|'epic'\|'legendary' }` |
-| **Pseudocode** | ```typescript\nfunction generateFromSeed(seed: bigint) {\n  const rng = mulberry32(Number(seed));\n  const body = BODY_PARTS[Math.floor(rng() * BODY_PARTS.length)];\n  const head = HEAD_PARTS[Math.floor(rng() * HEAD_PARTS.length)];\n  const color = COLOR_PALETTES[Math.floor(rng() * COLOR_PALETTES.length)];\n  const accessory = ACCESSORIES[Math.floor(rng() * ACCESSORIES.length)];\n  const rarityRoll = rng();\n  // RTP table: common=60%, rare=30%, epic=8%, legendary=2%\n  const rarity = rarityRoll < 0.02 ? 'legendary'\n    : rarityRoll < 0.10 ? 'epic'\n    : rarityRoll < 0.40 ? 'rare' : 'common';\n  const sprite = compositeSprite(body, head, color, accessory, SPRITE_RESOLUTION=32);\n  const petName = `${color.name} ${body.species}`;\n  return { sprite, petName, rarity };\n}``` |
+| **Pseudocode** | ```typescript\nfunction generateFromSeed(seed: bigint) {\n  const rng = mulberry32(Number(seed));\n  const body = BODY_PARTS[Math.floor(rng() * BODY_PARTS.length)];\n  const head = HEAD_PARTS[Math.floor(rng() * HEAD_PARTS.length)];\n  const color = COLOR_PALETTES[Math.floor(rng() * COLOR_PALETTES.length)];\n  const accessory = ACCESSORIES[Math.floor(rng() * ACCESSORIES.length)];\n  const rarityRoll = rng();\n  // RTP table: common=60%, rare=25%, epic=12%, legendary=3% (CONSTANTS RARITY_*_PERCENT)\n  const rarity = rarityRoll < 0.03 ? 'legendary'\n    : rarityRoll < 0.15 ? 'epic'\n    : rarityRoll < 0.40 ? 'rare' : 'common';\n  const sprite = compositeSprite(body, head, color, accessory, SPRITE_RESOLUTION=32);\n  const petName = `${color.name} ${body.species}`;\n  return { sprite, petName, rarity };\n}``` |
 | **複雜度** | Time O(D) where D=6 dimensions / Space O(sprite_px²) = O(1024) |
 | **Test Vector** | ①`seed=123456789` → deterministic body/head/color (same result on every call) ②`seed=111222333` → different combination; both must produce valid 32×32 PNG |
 
@@ -2545,7 +2545,8 @@ redis_memory = leaderboard(2k pets × 50B) + rate_limit_keys + sessions
 flowchart LR
     PR[Pull Request] --> Lint[Lint + Type-check]
     Lint --> Unit[Unit Tests]
-    Unit --> Int[Integration Tests]
+    Unit --> SAST[Security Scan\npnpm audit + Snyk]
+    SAST --> Int[Integration Tests]
     Int --> Build[Build + Docker]
     Build --> Push[Push ghcr.io]
     Push --> Staging[Deploy Staging]
@@ -2559,7 +2560,18 @@ flowchart LR
 
 - GitHub Actions
 - Concurrency control：每 branch 一條 pipeline
-- Required checks：lint / type-check / unit / integration / build
+- Required checks：lint / type-check / unit / integration / SAST / build
+
+#### Quality Gate 條件
+
+| Gate | 工具 | 通過條件 |
+|------|------|---------|
+| Unit test coverage | Vitest --coverage | ≥ 80%（UNIT_TEST_COVERAGE_MIN_PERCENT） |
+| SAST | `pnpm audit` + Snyk | 無 CRITICAL 漏洞 |
+| Type check | `tsc --noEmit` | 0 errors |
+| Lint | ESLint | 0 errors（warn 允許，不影響 gate） |
+| Integration tests | Vitest + pg/redis | 所有 integration tests PASS |
+| Build | Docker multi-stage | 0 build errors |
 
 ### §13.7 Runbook Framework
 
