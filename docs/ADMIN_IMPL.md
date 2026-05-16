@@ -113,7 +113,8 @@ Admin Portal 為 **獨立 Vue 3 + Vite 應用**，部署於獨立 Vercel project
     "vue-echarts": "6.7.3",
     "dayjs": "1.11.10",
     "qrcode": "1.5.3",
-    "zod": "3.22.4"
+    "zod": "3.22.4",
+    "vue-i18n": "9.13.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.0.4",
@@ -128,7 +129,10 @@ Admin Portal 為 **獨立 Vue 3 + Vite 應用**，部署於獨立 Vercel project
     "eslint-plugin-vue": "9.25.0",
     "@typescript-eslint/parser": "7.7.0",
     "@typescript-eslint/eslint-plugin": "7.7.0",
-    "rollup-plugin-visualizer": "5.12.0"
+    "rollup-plugin-visualizer": "5.12.0",
+    "unplugin-element-plus": "0.8.0",
+    "unplugin-vue-components": "0.27.0",
+    "sass": "1.77.0"
   }
 }
 ```
@@ -690,7 +694,7 @@ const canBatchBan = computed(() => hasMinRole('moderator') && can('pet.ban'))
 | TOTP 演算法 | RFC 6238 TOTP（30s window）+ AES-256-GCM 加密 secret | EDD §9.1 |
 | Backup codes | 10 組 single-use，SHA-256 hash 存 `admin_users.totp_backup_codes_hash` | API.md §6.1 |
 
-> **設計意涵**：由於採 HttpOnly Cookie，前端 `authStore` 不持有 access token 字串；`isAuthenticated` 透過呼叫 `GET /admin/api/auth/me`（或 `dashboard` endpoint 試呼叫）判斷，避免任何 JS 端可讀的 session token 暴露於 XSS 風險。
+> **設計意涵**：由於採 HttpOnly Cookie，前端 `authStore` 不持有 access token 字串；`isAuthenticated` 透過呼叫已存在的 `GET /admin/api/dashboard`（最輕量且三角色皆可存取，作 silent probe）判斷，成功時後端 response envelope 中已含 `meta.actor`（adminId/username/role），用以同步 store；失敗（401）即觸發 §8.1 interceptor 導回 `/admin/login`。本機制完全使用 API.md §6.5 既有端點，**無需新增 `/admin/api/auth/me` 端點**，避免 API surface 漂移。
 
 ---
 
@@ -1256,17 +1260,17 @@ http.interceptors.response.use(
 | 2 | TOTP 設定 | POST | `/admin/api/auth/totp/setup` | 公開（setupToken） | `/admin/totp-setup` | `auth.totp_setup` |
 | 3 | TOTP 驗證 | POST | `/admin/api/auth/totp/verify` | 已認證 | step-up | — |
 | 4 | 登出 | POST | `/admin/api/auth/logout` | 已認證 | HeaderBar | `auth.logout` |
-| 5 | Dashboard | GET | `/admin/api/dashboard` | moderator+ / read_only | `/admin/dashboard` | — |
-| 6 | 寵物列表 | GET | `/admin/api/pets` | moderator+ / read_only | `/admin/pets` | — |
-| 7 | 寵物詳情 | GET | `/admin/api/pets/:petId` | moderator+ / read_only | `/admin/pets/:petId` | — |
+| 5 | Dashboard | GET | `/admin/api/dashboard` | super_admin / moderator / read_only | `/admin/dashboard` | — |
+| 6 | 寵物列表 | GET | `/admin/api/pets` | super_admin / moderator / read_only | `/admin/pets` | — |
+| 7 | 寵物詳情 | GET | `/admin/api/pets/:petId` | super_admin / moderator / read_only | `/admin/pets/:petId` | — |
 | 8 | 更新寵物 | PUT | `/admin/api/pets/:petId` | super_admin | `/admin/pets/:petId` | `pet.update` |
 | 9 | Ban 寵物 | POST | `/admin/api/pets/:petId/ban` | moderator+ | `/admin/pets` + `/admin/pets/:petId` | `pet.ban` |
 | 10 | Unban 寵物 | POST | `/admin/api/pets/:petId/unban` | moderator+ | `/admin/pets` + `/admin/pets/:petId` | `pet.unban` |
-| 11 | 戰鬥列表 | GET | `/admin/api/battles` | moderator+ / read_only | `/admin/battles` | — |
+| 11 | 戰鬥列表 | GET | `/admin/api/battles` | super_admin / moderator / read_only | `/admin/battles` | — |
 | 12 | 可疑佇列 | GET | `/admin/api/suspicious` | moderator+ | `/admin/suspicious` | — |
 | 13 | 旗標戰鬥 | POST | `/admin/api/battles/:matchId/flag` | moderator+ | `/admin/battles` | `arena_match.flag` |
 | 14 | 移除旗標 | DELETE | `/admin/api/battles/:matchId/flag` | moderator+ | `/admin/battles` | `arena_match.unflag` |
-| 15 | 排行榜 | GET | `/admin/api/leaderboard` | moderator+ / read_only | `/admin/leaderboard` | — |
+| 15 | 排行榜 | GET | `/admin/api/leaderboard` | super_admin / moderator / read_only | `/admin/leaderboard` | — |
 | 16 | 排行榜移除 | DELETE | `/admin/api/leaderboard/:petId` | moderator+ | `/admin/leaderboard` | `leaderboard.remove` |
 | 17 | Runtime config 讀 | GET | `/admin/api/config/runtime` | super_admin | `/admin/config/runtime` | — |
 | 18 | Runtime config 寫 | PUT | `/admin/api/config/runtime` | super_admin | `/admin/config/runtime` | `config.runtime.update` |
@@ -1278,8 +1282,8 @@ http.interceptors.response.use(
 | 24 | GDPR Erasure | POST | `/admin/api/gdpr/delete` | super_admin | `/admin/gdpr` | `gdpr.delete` |
 | 25 | GDPR 更新 | PATCH | `/admin/api/gdpr/:requestId` | super_admin | `/admin/gdpr` | `gdpr.update` |
 | 26 | 稽核日誌 | GET | `/admin/api/audit` | super_admin | `/admin/audit` | — |
-| 27 | 產品分析 | GET | `/admin/api/analytics` | moderator+ / read_only | `/admin/analytics` + `/admin/dashboard` | — |
-| 28 | 信件監控 | GET | `/admin/api/email/monitor` | moderator+ / read_only | `/admin/email` + `/admin/dashboard` | — |
+| 27 | 產品分析 | GET | `/admin/api/analytics` | super_admin / moderator / read_only | `/admin/analytics` + `/admin/dashboard` | — |
+| 28 | 信件監控 | GET | `/admin/api/email/monitor` | super_admin / moderator / read_only | `/admin/email` + `/admin/dashboard` | — |
 | 29 | 角色列表 | GET | `/admin/api/roles` | super_admin | `/admin/roles` | — |
 | 30 | 建立 admin | POST | `/admin/api/roles` | super_admin | `/admin/roles` | `admin_user.create` |
 | 31 | 停用 admin | DELETE | `/admin/api/roles/:adminId` | super_admin | `/admin/roles` | `admin_user.deactivate` |
@@ -1352,6 +1356,7 @@ export const petsApi = {
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authApi } from '@/api/auth.api'
+import { dashboardApi } from '@/api/dashboard.api'
 import { router } from '@/router'
 import type { AdminRole } from '@/router'
 
@@ -1415,11 +1420,22 @@ export const useAuthStore = defineStore('auth', () => {
     return data.data as { otpAuthUrl: string; backupCodes: string[] }
   }
 
+  /**
+   * Silent session probe — 透過 GET /admin/api/dashboard 驗證 cookie 仍有效。
+   * 後端 envelope.meta.actor = { adminId, username, role }（API.md §3.2 envelope spec），
+   * 用以同步 store。成功 → 設定 store；失敗（401） → §8.1 interceptor 已處理導回 login。
+   * 此設計避免新增專屬 /auth/me 端點，與 API.md §6 一對一對齊。
+   */
   async function fetchMe(): Promise<void> {
-    const { data } = await authApi.me()
-    adminId.value = data.data!.adminId
-    adminUsername.value = data.data!.username
-    adminRole.value = data.data!.role
+    const { data } = await dashboardApi.get()
+    const actor = data.meta?.actor
+    // 防禦式驗證：actor 物件 + 三個必要欄位皆存在，避免 undefined 賦值到 store
+    if (!actor?.adminId || !actor?.username || !actor?.role) {
+      throw new Error('actor metadata missing or incomplete in dashboard response envelope')
+    }
+    adminId.value = actor.adminId
+    adminUsername.value = actor.username
+    adminRole.value = actor.role
   }
 
   async function logout(): Promise<void> {
