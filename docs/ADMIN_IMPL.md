@@ -694,7 +694,7 @@ const canBatchBan = computed(() => hasMinRole('moderator') && can('pet.ban'))
 | TOTP 演算法 | RFC 6238 TOTP（30s window）+ AES-256-GCM 加密 secret | EDD §9.1 |
 | Backup codes | 10 組 single-use，SHA-256 hash 存 `admin_users.totp_backup_codes_hash` | API.md §6.1 |
 
-> **設計意涵**：由於採 HttpOnly Cookie，前端 `authStore` 不持有 access token 字串；`isAuthenticated` 透過呼叫已存在的 `GET /admin/api/dashboard`（最輕量且三角色皆可存取，作 silent probe）判斷，成功時後端 response envelope 中已含 `meta.actor`（adminId/username/role），用以同步 store；失敗（401）即觸發 §8.1 interceptor 導回 `/admin/login`。本機制完全使用 API.md §6.5 既有端點，**無需新增 `/admin/api/auth/me` 端點**，避免 API surface 漂移。
+> **設計意涵**：由於採 HttpOnly Cookie，前端 `authStore` 不持有 access token 字串。Session 識別資訊（adminId / username / role）僅在 **登入時** 由 `POST /admin/api/auth/login` 回應一次性下發並寫入 in-memory Pinia store；**頁面刷新後 in-memory store 清空**，前端會以 `GET /admin/api/dashboard` 作 silent probe — 若 cookie 仍有效（200），即視為 authenticated 但因不知道角色資訊，**強制導向 `/admin/login` 要求重新輸入帳密 + TOTP 取得 role**（safer-by-default）；若 cookie 失效（401），由 §8.1 response interceptor 統一導回 login。本機制完全使用 API.md §6 既有端點清單（共 32 個），**不引入 `/admin/api/auth/me`**，避免 API surface 漂移；envelope 嚴格遵守 API.md §4.1 規格（`{success, data, error}` + 列表端點額外含 `meta` 分頁欄位）。
 
 ---
 
@@ -1421,21 +1421,23 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Silent session probe — 透過 GET /admin/api/dashboard 驗證 cookie 仍有效。
-   * 後端 envelope.meta.actor = { adminId, username, role }（API.md §3.2 envelope spec），
-   * 用以同步 store。成功 → 設定 store；失敗（401） → §8.1 interceptor 已處理導回 login。
-   * 此設計避免新增專屬 /auth/me 端點，與 API.md §6 一對一對齊。
+   * Silent session probe（頁面刷新後 in-memory store 清空時使用）：
+   * - 透過 GET /admin/api/dashboard 探測 cookie 仍有效。
+   * - 由於 API.md §4.1 envelope 規格僅含 {success, data, error}（列表端點額外含 meta 分頁欄位），
+   *   無 actor 資訊可供同步 store，因此 **無論 dashboard probe 成功或失敗，都拋例外讓 router guard 導回 login**，
+   *   要求重新輸入帳密 + TOTP，由 login response 重新填充 store（safer-by-default）。
+   * - 此設計避免新增 /auth/me 端點，嚴格遵守 API.md §4 envelope 與 §6 32 個既有端點清單。
    */
   async function fetchMe(): Promise<void> {
-    const { data } = await dashboardApi.get()
-    const actor = data.meta?.actor
-    // 防禦式驗證：actor 物件 + 三個必要欄位皆存在，避免 undefined 賦值到 store
-    if (!actor?.adminId || !actor?.username || !actor?.role) {
-      throw new Error('actor metadata missing or incomplete in dashboard response envelope')
+    // 嘗試呼叫 dashboard 作 cookie 有效性 probe
+    // 401 → §8.1 interceptor 已處理；2xx → 仍強制 re-login 以取得 role 資訊
+    try {
+      await dashboardApi.get()
+    } catch {
+      // 401 由 interceptor 處理；其他錯誤同樣不視為 authenticated
     }
-    adminId.value = actor.adminId
-    adminUsername.value = actor.username
-    adminRole.value = actor.role
+    // 不論 probe 結果，都需要重新登入以取得 role；交由 router guard 導回 /admin/login
+    throw new Error('AUTH_RESYNC_REQUIRED: in-memory session lost; please re-login')
   }
 
   async function logout(): Promise<void> {
