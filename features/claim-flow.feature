@@ -97,7 +97,7 @@ Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
 
   @TC-E2E-AUTH-002-01 @contract
   Scenario: Pet recovery flow issues new token and blacklists old one
-    Given the pet "pet-001" is claimed with owner_token_hash "old-hash-xyz"
+    Given the pet "pet-001" is already claimed with owner_token_hash "old-hash-xyz"
     When the guest sends POST /api/v1/claim/recover with email "player@example.com" and petId "pet-001"
     Then the response status is 200
     And the response body contains a "claimId" field

@@ -10,7 +10,7 @@ Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-0
   @TC-E2E-MOD-001-01 @contract @smoke
   Scenario: Admin bans a pet and it is removed from the leaderboard
     Given pet "pet-mod-001" exists with is_banned false
-    And pet "pet-mod-001" is in the Redis sorted set "leaderboard:global" at rank 15
+    And pet "pet-mod-001" exists in the Redis sorted set "leaderboard:global" at rank 15
     When the admin sends POST /admin/api/pets/pet-mod-001/ban with reason "bot activity detected: 52 battles in 60 minutes"
     Then the response status is 200
     And the database pets row for "pet-mod-001" has is_banned true
@@ -28,7 +28,7 @@ Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-0
     And the database pets row for "pet-mod-002" still has is_banned false
     And the Redis sorted set "leaderboard:global" still contains "pet-mod-002"
 
-  @TC-E2E-MOD-001-04
+  @TC-E2E-MOD-001-03
   Scenario: Admin ban reason exceeding 500 characters is rejected
     Given pet "pet-mod-001" exists with is_banned false
     When the admin sends POST /admin/api/pets/pet-mod-001/ban with a reason of 501 characters
@@ -36,7 +36,7 @@ Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-0
     And the response body error code is "VALIDATION_ERROR"
     And the database pets row for "pet-mod-001" still has is_banned false
 
-  @TC-E2E-MOD-001-05 @contract
+  @TC-E2E-MOD-001-04 @contract
   Scenario: Banning a nonexistent pet returns 404
     When the admin sends POST /admin/api/pets/nonexistent-pet-uuid/ban with reason "test"
     Then the response status is 404
@@ -51,10 +51,10 @@ Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-0
 
   @TC-E2E-MOD-002-02
   Scenario: Leaderboard moderation removal takes effect within 5 minutes
-    Given pet "pet-mod-004" is in the Redis sorted set "leaderboard:global" at rank 3
+    Given pet "pet-mod-004" exists in the Redis sorted set "leaderboard:global" at rank 3
     When the admin sends POST /admin/api/pets/pet-mod-004/ban with reason "cheating"
     Then the response status is 200
-    And the Redis sorted set "leaderboard:global" does NOT contain "pet-mod-004" immediately
+    And the Redis sorted set "leaderboard:global" does NOT contain "pet-mod-004"
     And a GET request to /api/v1/leaderboard returns entries that do not include "pet-mod-004"
 
   @TC-E2E-MOD-002-03

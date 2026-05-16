@@ -134,8 +134,8 @@ Then('the response body contains an {string} field {int} minutes in the future',
 Then('the database record for pet {string} has owner_token_hash populated', async function (this: AppWorld, petId: string) {
   // SELECT owner_token_hash FROM pets WHERE id = petId
   const rows = await this.db.query('SELECT owner_token_hash FROM pets WHERE id = $1', [petId]);
-  return 'pending';
   void rows;
+  return 'pending';
 });
 
 Then('the claim code record has used_at set', async function (this: AppWorld) {
@@ -172,8 +172,8 @@ Then('both responses have identical JSON structure regardless of email registrat
 Then('the old token hash {string} is added to Redis blacklist key {string}', async function (this: AppWorld, _hash: string, key: string) {
   // GET token:blacklist:{hash} — see API.md §2.1 token blacklist
   const val = await this.redis.get(key);
-  return 'pending';
   void val;
+  return 'pending';
 });
 
 Then('the response body contains a {string} field with at least {int} bytes of base64url data', function (this: AppWorld, _field: string, _minBytes: number) {

@@ -148,29 +148,29 @@ Then('the response body {string} is a non-null ISO 8601 timestamp', function (th
 Then('the database pets row for {string} has stat_speed between {int} and {int}', async function (this: AppWorld, petId: string, min: number, max: number) {
   // SELECT stat_speed FROM pets WHERE id = $1
   const rows = await this.db.query<{ stat_speed: number }>('SELECT stat_speed FROM pets WHERE id = $1', [petId]);
-  return 'pending';
   void rows; void min; void max;
+  return 'pending';
 });
 
 Then('the database pets row for {string} has stat_strength incremented by {int}', async function (this: AppWorld, petId: string, _delta: number) {
   // SELECT stat_strength FROM pets WHERE id = $1
   const rows = await this.db.query<{ stat_strength: number }>('SELECT stat_strength FROM pets WHERE id = $1', [petId]);
-  return 'pending';
   void rows;
+  return 'pending';
 });
 
 Then('the database food_buffs row for {string} has expires_at set', async function (this: AppWorld, petId: string) {
   // SELECT expires_at FROM food_buffs WHERE pet_id = $1 AND expires_at IS NOT NULL
   const rows = await this.db.query('SELECT expires_at FROM food_buffs WHERE pet_id = $1 AND expires_at IS NOT NULL', [petId]);
-  return 'pending';
   void rows;
+  return 'pending';
 });
 
 Then('the database food_buffs table has no new row for {string}', async function (this: AppWorld, petId: string) {
   // SELECT COUNT(*) FROM food_buffs WHERE pet_id = $1
   const rows = await this.db.query('SELECT COUNT(*) FROM food_buffs WHERE pet_id = $1', [petId]);
-  return 'pending';
   void rows;
+  return 'pending';
 });
 
 Then('the response body {string} array contains one entry with stat {string} magnitude {int} and isPermanent false', function (this: AppWorld, _field: string, _stat: string, _magnitude: number) {

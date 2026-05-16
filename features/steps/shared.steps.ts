@@ -102,6 +102,11 @@ Then('each entry has fields: {word} {word} {word} {word} {word} {word}', functio
   return 'pending';
 });
 
+Then('each entry has fields: {word} {word} {word} {word} {word}', function (this: AppWorld, _a: string, _b: string, _c: string, _d: string, _e: string) {
+  // Shared step — verify 5-field entry shape
+  return 'pending';
+});
+
 // ---------------------------------------------------------------------------
 // Shared Then — ban / Redis assertions (found in admin-moderation, leaderboard,
 //               and suspicious-detection)

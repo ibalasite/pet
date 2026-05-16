@@ -102,8 +102,8 @@ Then('the database table arena_matches has a row with both {string} and {string}
     'SELECT id FROM arena_matches WHERE (pet_a_id = $1 OR pet_b_id = $1 OR pet_a_id = $2 OR pet_b_id = $2) AND mode = $3',
     [petA, petB, mode],
   );
-  return 'pending';
   void rows;
+  return 'pending';
 });
 
 Then('the Redis leaderboard key {string} is updated within {int} seconds', async function (this: AppWorld, _key: string, _seconds: number) {
@@ -118,8 +118,8 @@ Then('the database table arena_matches has a row with {string} and is_ai_opponen
 Then('the Redis counter {string} is NOT incremented', async function (this: AppWorld, key: string) {
   // GET {key} from Redis — expect count did not change
   const val = await this.redis.get(key);
-  return 'pending';
   void val;
+  return 'pending';
 });
 
 Then('the response body {string} is {string} or {string}', function (this: AppWorld, _field: string, _val1: string, _val2: string) {
