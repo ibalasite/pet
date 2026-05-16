@@ -11,11 +11,11 @@
 |------|------|
 | **DOC-ID** | EDD-PIXEL-PET-ARENA-20260503 |
 | **產品名稱** | Pixel Pet Arena |
-| **文件版本** | v2.0 |
+| **文件版本** | v2.1 |
 | **狀態** | DRAFT |
 | **作者** | AI Generated (gendoc edd) |
 | **建立日期** | 2026-05-03 |
-| **最後更新** | 2026-05-10 |
+| **最後更新** | 2026-05-16 |
 | **上游文件** | PRD-PIXEL-PET-ARENA-20260503, PDD-PIXEL-PET-ARENA-20260503, VDD-PIXEL-PET-ARENA-20260503, CONSTANTS-PIXEL-PET-ARENA-20260503 |
 | **下游文件** | SCHEMA.md, API.md, ARCH.md, BDD.md, test-plan.md, runbook.md |
 | **client_type** | web (HTML5 browser, no installation) |
@@ -29,6 +29,7 @@
 |------|------|------|---------|
 | v1.0 | 2026-05-03 | AI Generated (gendoc edd) | 初稿：從 PRD / PDD / VDD / CONSTANTS 生成完整工程設計文件 |
 | v2.0 | 2026-05-10 | AI Generated (gendoc edd review-r6) | 完整重寫：新增 §1.2 設計原則、§1.3 PRD 追溯表、§3.1 架構模式（Modular Monolith）、§3.1b Clean Architecture & SOLID、§3.2 ADR-001~004、§3.4 BC Schema Ownership Table、§3.6 HA/SPOF/SCALE/BCP、§3.7 Min-HA 架構圖、§4.3 跨模組 DAG 驗證、§4.5 UML 9 大圖（全 Mermaid）、§4.6 Domain Events、§8 Resilience（Bulkhead/Circuit Breaker）、§9 STRIDE+OWASP A01-A10、§9.6 RBAC、§10 Observability（SLO/SLI/Audit/Synthetic）、§11.2 Capacity Planning、§13 Deployment Strategy + DR + Runbook、§16 Implementation Plan + 依賴排序、§20 5 種 Feature Flag 類型、§21 三支柱可觀測性實作。所有 ASCII 圖改為 Mermaid，所有 PUML 改為 Mermaid。 |
+| v2.1 | 2026-05-16 | AI Generated (gendoc edd) | 新增 §3.8 Backend 目錄結構與 Plugin 掛載骨架（TypeScript + Fastify）：完整 monorepo 目錄樹（apps/api, apps/worker, apps/web, apps/admin, packages/shared）、6 步 Plugin 掛載順序（env→db→redis→auth→routes→errorHandler）、Admin Vue 3 目錄結構（router/stores/views/api 分層）；填入 `_CLIENT_ENGINE = "Phaser 3 over HTML5 Canvas"` 與 `_ADMIN_FRAMEWORK = "Vue3+ElementPlus+Vite"` 明確宣告供下游 codegen 使用。 |
 
 ---
 
@@ -676,6 +677,205 @@ graph TB
 | MQ / Event Bus | n/a（in-process EventEmitter） | n/a | n/a |
 
 > **重要**：Local 環境 API Server / Worker Min Replicas = **≥ 2** 是 HC-1 硬約束。設為 1 視為 SPOF 違規，CI 不可通過。DB / Redis 在 Local 允許單 instance 是因為 Local 不需驗證 failover（Staging+ 才驗證）。
+
+---
+
+### §3.8 Backend 目錄結構與 Plugin 掛載骨架（TypeScript + Fastify）
+
+`lang_stack = typescript`，`framework = fastify`，`_CLIENT_ENGINE = "Phaser 3 over HTML5 Canvas"`，`_ADMIN_FRAMEWORK = "Vue3+ElementPlus+Vite"`。
+
+本節提供 AI codegen 所需的 monorepo 目錄骨架與 Plugin 掛載順序，確保生成程式碼與 `tsconfig.json` / `pnpm workspace` 相容，不產生路徑錯誤。
+
+#### §3.8.1 Monorepo 目錄結構
+
+```
+pixel-pet-arena/                   # monorepo root
+├── apps/
+│   ├── api/                       # Game API Server (Fastify 4)
+│   │   ├── src/
+│   │   │   ├── server.ts          # 入口：buildApp() + listen(:8080)
+│   │   │   ├── app.ts             # Fastify instance + plugin register（順序見 §3.8.2）
+│   │   │   ├── plugins/           # 核心 plugin（執行順序見下方）
+│   │   │   │   ├── env.ts         # 環境變數驗證（Zod schema，缺失 process.exit(1)）
+│   │   │   │   ├── db.ts          # PostgreSQL pool（@fastify/postgres，pgPoolPlayer max:30）
+│   │   │   │   ├── redis.ts       # Upstash Redis client（ioredis）
+│   │   │   │   └── auth.ts        # Pet token 驗證 middleware（SHA-256 hash compare）
+│   │   │   ├── routes/            # BC 分組路由（對應 §3.4 BC 清單）
+│   │   │   │   ├── identity/
+│   │   │   │   │   ├── index.ts   # prefix: /api/v1/claim, /api/v1/gdpr
+│   │   │   │   │   └── schema.ts  # Zod DTO：ClaimInput, VerifyInput, GdprInput
+│   │   │   │   ├── pet/
+│   │   │   │   │   ├── index.ts   # prefix: /api/v1/pets
+│   │   │   │   │   └── schema.ts  # Zod DTO：PetResponse, TrainInput, FeedInput
+│   │   │   │   ├── arena/
+│   │   │   │   │   ├── index.ts   # prefix: /api/v1/arena
+│   │   │   │   │   └── schema.ts  # Zod DTO：EnterArenaInput, MatchResponse
+│   │   │   │   └── leaderboard/
+│   │   │   │       ├── index.ts   # prefix: /api/v1/leaderboard
+│   │   │   │       └── schema.ts  # Zod DTO：LeaderboardResponse
+│   │   │   ├── domain/            # Domain Layer（不依賴 Fastify）
+│   │   │   │   ├── identity/
+│   │   │   │   │   ├── ClaimIdentity.ts
+│   │   │   │   │   ├── ClaimCode.ts
+│   │   │   │   │   └── GdprRequest.ts
+│   │   │   │   ├── pet/
+│   │   │   │   │   ├── Pet.ts
+│   │   │   │   │   ├── PetStats.ts
+│   │   │   │   │   ├── Rarity.ts
+│   │   │   │   │   ├── TrainingLog.ts
+│   │   │   │   │   └── FoodBuff.ts
+│   │   │   │   ├── arena/
+│   │   │   │   │   ├── ArenaMatch.ts
+│   │   │   │   │   └── ArenaMode.ts
+│   │   │   │   └── leaderboard/
+│   │   │   │       └── LeaderboardEntry.ts
+│   │   │   ├── application/       # Use Cases（依賴 Domain interfaces，不依賴 Infrastructure）
+│   │   │   │   ├── identity/
+│   │   │   │   │   ├── ClaimPetUseCase.ts
+│   │   │   │   │   ├── VerifyClaimCodeUseCase.ts
+│   │   │   │   │   └── ProcessGdprErasureUseCase.ts
+│   │   │   │   ├── pet/
+│   │   │   │   │   ├── TrainPetUseCase.ts
+│   │   │   │   │   └── FeedPetUseCase.ts
+│   │   │   │   └── arena/
+│   │   │   │       └── EnterArenaUseCase.ts
+│   │   │   ├── infrastructure/    # Concrete Repository Implementations
+│   │   │   │   ├── db/
+│   │   │   │   │   ├── PostgresPetRepository.ts
+│   │   │   │   │   ├── PostgresClaimCodeRepository.ts
+│   │   │   │   │   └── PostgresArenaMatchRepository.ts
+│   │   │   │   ├── cache/
+│   │   │   │   │   └── RedisLeaderboardRepository.ts
+│   │   │   │   └── email/
+│   │   │   │       ├── SendGridEmailAdapter.ts
+│   │   │   │       └── SmtpEmailAdapter.ts
+│   │   │   └── types/
+│   │   │       └── fastify.d.ts   # 擴充 FastifyInstance（db, redis 型別宣告）
+│   │   ├── test/
+│   │   │   └── setup.ts           # Vitest + Fastify inject 配置
+│   │   ├── package.json
+│   │   └── tsconfig.json          # paths: "@/*": ["./src/*"]
+│   │
+│   ├── worker/                    # Background Job Worker（獨立 Fastify process :8081）
+│   │   ├── src/
+│   │   │   ├── server.ts          # Worker Fastify instance + health probe
+│   │   │   ├── jobs/
+│   │   │   │   ├── gdpr-erasure.job.ts        # 每 5 分鐘；Redis SETNX 互斥
+│   │   │   │   ├── leaderboard-snapshot.job.ts # 每 5 分鐘；top-500 PG 快照
+│   │   │   │   ├── cleanup-claim-codes.job.ts  # 每小時；72h TTL
+│   │   │   │   ├── cleanup-unclaimed-pets.job.ts # 每 6 小時；24h reservation
+│   │   │   │   └── cleanup-food-buffs.job.ts  # 每日；30d record_expires_at
+│   │   │   └── scheduler.ts       # node-cron 排程掛載
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   ├── web/                       # Player App（React 18 + Phaser 3 + Vite）
+│   │   ├── src/
+│   │   │   ├── main.tsx
+│   │   │   ├── game/              # Phaser 3 scenes
+│   │   │   │   ├── PetScene.ts
+│   │   │   │   └── ArenaScene.ts
+│   │   │   └── components/        # React UI chrome
+│   │   ├── index.html
+│   │   └── vite.config.ts
+│   │
+│   └── admin/                     # Admin Portal（Vue 3 + Element Plus + Vite）
+│       ├── src/
+│       │   ├── main.ts
+│       │   ├── views/             # Admin pages（pets, leaderboard, config, audit）
+│       │   └── stores/            # Pinia stores
+│       └── vite.config.ts
+│
+├── packages/
+│   └── shared/                    # @app/shared — 共享型別 + Zod schema + constants
+│       ├── src/
+│       │   ├── schemas/           # 共享 Zod schema（FE/BE 共用）
+│       │   ├── types/             # 共享 TypeScript 型別
+│       │   └── constants.ts       # 從 constants.json 匯入的型別化常數
+│       └── package.json
+│
+├── docs/                          # 所有文件（EDD / PRD / SCHEMA / API 等）
+├── docker-compose.yml             # 本地 HA 環境（api-1, api-2, worker-1, worker-2, PG, Redis）
+├── pnpm-workspace.yaml
+└── package.json
+```
+
+#### §3.8.2 Plugin 掛載順序（`apps/api/src/app.ts`，順序不可調換）
+
+```typescript
+import Fastify from 'fastify';
+import { envPlugin }   from './plugins/env';
+import { dbPlugin }    from './plugins/db';
+import { redisPlugin } from './plugins/redis';
+import { authPlugin }  from './plugins/auth';
+import { identityRoutes }    from './routes/identity';
+import { petRoutes }         from './routes/pet';
+import { arenaRoutes }       from './routes/arena';
+import { leaderboardRoutes } from './routes/leaderboard';
+import { errorHandler } from './plugins/errorHandler';
+
+export async function buildApp() {
+  const fastify = Fastify({ logger: true });
+
+  // 順序 1：最優先 — 其他 plugin 需讀 ENV；缺失任一 key process.exit(1)
+  await fastify.register(envPlugin);
+
+  // 順序 2：DB 連接（pgPoolPlayer max:30 / pgPoolAdmin max:10 / pgPoolWorker max:10）
+  await fastify.register(dbPlugin);
+
+  // 順序 3：Redis client（Upstash ioredis；leaderboard + rate-limit + session）
+  await fastify.register(redisPlugin);
+
+  // 順序 4：Auth middleware（依賴 db + redis；pet token SHA-256 驗證）
+  await fastify.register(authPlugin);
+
+  // 順序 5：BC 路由（prefix 從 CONSTANTS API_VERSION = 'v1'）
+  await fastify.register(identityRoutes,    { prefix: '/api/v1' });
+  await fastify.register(petRoutes,         { prefix: '/api/v1' });
+  await fastify.register(arenaRoutes,       { prefix: '/api/v1' });
+  await fastify.register(leaderboardRoutes, { prefix: '/api/v1' });
+
+  // 順序 6：最後 — 全域錯誤攔截（Pino 結構化 log + PII 遮罩）
+  fastify.setErrorHandler(errorHandler);
+
+  return fastify;
+}
+```
+
+**重要約束**：
+- `domain/` 層禁止 import Fastify 或任何 Infrastructure 模組
+- `application/` 層只依賴 Domain interface（Port）；具體實作由 DI 在 `app.ts` boot 時注入
+- `routes/` 中 Zod DTO schema 必須與 `packages/shared/src/schemas/` 同步（FE 直接引用）
+- `tsconfig.json paths` 必須含 `"@/*": ["./src/*"]` alias，避免相對路徑地獄
+- `services/` 層（業務邏輯）禁止直接引用 Fastify，只接受 primitive / domain 型別參數
+
+#### §3.8.3 Admin 目錄結構（`apps/admin/`，Vue 3 + Element Plus + Vite）
+
+```
+apps/admin/src/
+├── main.ts
+├── App.vue
+├── router/
+│   └── index.ts               # Vue Router 4：/login, /dashboard, /pets, /leaderboard,
+│                              #   /config/runtime, /config/economy, /gdpr, /audit
+├── stores/
+│   ├── auth.store.ts          # Pinia：admin session + TOTP state
+│   ├── pets.store.ts          # Pinia：pet list + ban/unban actions
+│   └── config.store.ts        # Pinia：runtime config + economy config
+├── views/
+│   ├── LoginView.vue          # bcrypt + TOTP MFA flow
+│   ├── DashboardView.vue      # 概覽 KPI（DAU / battles / claims）
+│   ├── PetsView.vue           # El-Table + ban/unban + suspicious filter
+│   ├── LeaderboardView.vue    # El-Table top-500 + GDPR 移除按鈕
+│   ├── ConfigRuntimeView.vue  # El-Form：rate limit / rarity weights
+│   ├── ConfigEconomyView.vue  # El-Form：trade fee / marketplace params
+│   ├── GdprView.vue           # GDPR 佇列 + 手動觸發
+│   └── AuditView.vue          # audit_logs El-Table（只讀）
+├── components/
+│   └── AdminLayout.vue        # El-Container + El-Menu side nav
+└── api/
+    └── admin.ts               # Axios instance + /admin/api/* 封裝
+```
 
 ---
 
