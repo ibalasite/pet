@@ -41,7 +41,7 @@ Given('a pet {string} exists with owner email {string} stored encrypted', async 
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
-When('the admin sends GET \\/admin\\/api\\/pets with search param {string}', async function (this: AppWorld, searchParam: string) {
+When('the admin sends GET /admin/api/pets with search param {string}', async function (this: AppWorld, searchParam: string) {
   // GET /admin/api/pets?search=... — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   const qs = new URLSearchParams({ search: searchParam }).toString();
@@ -52,7 +52,7 @@ When('the admin sends GET \\/admin\\/api\\/pets with search param {string}', asy
   });
 });
 
-When('the admin sends GET \\/admin\\/api\\/pets with page {int} and limit {int}', async function (this: AppWorld, page: number, limit: number) {
+When('the admin sends GET /admin/api/pets with page {int} and limit {int}', async function (this: AppWorld, page: number, limit: number) {
   // GET /admin/api/pets?page=N&limit=N — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   const qs = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
@@ -63,7 +63,7 @@ When('the admin sends GET \\/admin\\/api\\/pets with page {int} and limit {int}'
   });
 });
 
-When('an unauthenticated GET request is made to \\/admin\\/api\\/pets', async function (this: AppWorld) {
+When('an unauthenticated GET request is made to /admin/api/pets', async function (this: AppWorld) {
   // GET /admin/api/pets — no cookie — expect 401 — see API.md §2.3
   this.lastResponse = await this.client.request({
     method: 'GET',
@@ -71,7 +71,7 @@ When('an unauthenticated GET request is made to \\/admin\\/api\\/pets', async fu
   });
 });
 
-When('the read_only admin sends GET \\/admin\\/api\\/pets with page {int} and limit {int}', async function (this: AppWorld, page: number, limit: number) {
+When('the read_only admin sends GET /admin/api/pets with page {int} and limit {int}', async function (this: AppWorld, page: number, limit: number) {
   // GET /admin/api/pets — read_only role — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the read_only admin');
   const qs = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();

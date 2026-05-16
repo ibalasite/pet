@@ -72,7 +72,7 @@ When('battle outcome is calculated for {string} vs {string} in mode {string} twi
   return 'pending';
 });
 
-When('an unauthenticated POST request is made to \\/api\\/v1\\/arena\\/enter with petId {string} mode {string}', async function (this: AppWorld, petId: string, mode: string) {
+When('an unauthenticated POST request is made to /api/v1/arena/enter with petId {string} mode {string}', async function (this: AppWorld, petId: string, mode: string) {
   // POST /api/v1/arena/enter — no Authorization header — see API.md §2.3
   this.lastResponse = await this.client.request({
     method: 'POST',

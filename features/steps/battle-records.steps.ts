@@ -64,7 +64,7 @@ Given('pet {string} with rarity {string} and petName {string} exists in the data
   });
 });
 
-Given('pet {string} has {int} arena_matches records with mode {string} and mixed Win\\/Loss results', async function (this: AppWorld, petId: string, count: number, mode: string) {
+Given('pet {string} has {int} arena_matches records with mode {string} and mixed Win/Loss results', async function (this: AppWorld, petId: string, count: number, mode: string) {
   // Seed arena_matches rows referencing petId — see SCHEMA.md arena_matches table
   const rows = Array.from({ length: count }, (_, i) => ({
     id: `match-rec-${petId}-${i}`,

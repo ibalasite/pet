@@ -104,7 +104,7 @@ Given('an admin session cookie is set for a moderator admin user', function (thi
 // NOTE: 'a GET request is made to /api/v1/leaderboard without authentication' → registered in shared.steps.ts
 // NOTE: 'a GET request is made to /api/v1/leaderboard with query param rarity={word} without authentication' → registered in shared.steps.ts
 
-When('a GET request is made to \\/api\\/v1\\/leaderboard\\/rank\\/{string} without authentication', async function (this: AppWorld, petId: string) {
+When('a GET request is made to /api/v1/leaderboard/rank/{string} without authentication', async function (this: AppWorld, petId: string) {
   // GET /api/v1/leaderboard/rank/:petId — see API.md §5.4
   this.lastResponse = await this.client.request({
     method: 'GET',

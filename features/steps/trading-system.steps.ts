@@ -113,7 +113,7 @@ Given('pet {string} has one marketplace_transactions record', async function (th
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
-When('{string} sends POST \\/api\\/v1\\/marketplace\\/listings with petId {string} price {int} description {string}', async function (this: AppWorld, token: string, petId: string, price: number, description: string) {
+When('{string} sends POST /api/v1/marketplace/listings with petId {string} price {int} description {string}', async function (this: AppWorld, token: string, petId: string, price: number, description: string) {
   // POST /api/v1/marketplace/listings — see API.md §5.6
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -123,7 +123,7 @@ When('{string} sends POST \\/api\\/v1\\/marketplace\\/listings with petId {strin
   });
 });
 
-When('{string} sends POST \\/api\\/v1\\/marketplace\\/listings\\/{string}\\/buy', async function (this: AppWorld, token: string, listingId: string) {
+When('{string} sends POST /api/v1/marketplace/listings/{string}/buy', async function (this: AppWorld, token: string, listingId: string) {
   // POST /api/v1/marketplace/listings/:listingId/buy — see API.md §5.6
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -132,7 +132,7 @@ When('{string} sends POST \\/api\\/v1\\/marketplace\\/listings\\/{string}\\/buy'
   });
 });
 
-When('{string} sends DELETE \\/api\\/v1\\/marketplace\\/listings\\/{string}', async function (this: AppWorld, token: string, listingId: string) {
+When('{string} sends DELETE /api/v1/marketplace/listings/{string}', async function (this: AppWorld, token: string, listingId: string) {
   // DELETE /api/v1/marketplace/listings/:listingId — see API.md §5.6
   this.lastResponse = await this.client.request({
     method: 'DELETE',
@@ -141,7 +141,7 @@ When('{string} sends DELETE \\/api\\/v1\\/marketplace\\/listings\\/{string}', as
   });
 });
 
-When('an unauthenticated POST request is made to \\/api\\/v1\\/marketplace\\/listings\\/{string}\\/buy', async function (this: AppWorld, listingId: string) {
+When('an unauthenticated POST request is made to /api/v1/marketplace/listings/{string}/buy', async function (this: AppWorld, listingId: string) {
   // POST /api/v1/marketplace/listings/:listingId/buy — no Authorization header — see API.md §2.3
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -149,7 +149,7 @@ When('an unauthenticated POST request is made to \\/api\\/v1\\/marketplace\\/lis
   });
 });
 
-When('a GET request is made to \\/api\\/v1\\/marketplace\\/listings with page {int} and limit {int} without authentication', async function (this: AppWorld, page: number, limit: number) {
+When('a GET request is made to /api/v1/marketplace/listings with page {int} and limit {int} without authentication', async function (this: AppWorld, page: number, limit: number) {
   // GET /api/v1/marketplace/listings — public browse — see API.md §5.6
   const qs = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
   this.lastResponse = await this.client.request({
@@ -158,7 +158,7 @@ When('a GET request is made to \\/api\\/v1\\/marketplace\\/listings with page {i
   });
 });
 
-When('a GET request is made to \\/api\\/v1\\/marketplace\\/history\\/{string} without authentication', async function (this: AppWorld, petId: string) {
+When('a GET request is made to /api/v1/marketplace/history/{string} without authentication', async function (this: AppWorld, petId: string) {
   // GET /api/v1/marketplace/history/:petId — unauthenticated → expect 401 — see API.md §5.6
   this.lastResponse = await this.client.request({
     method: 'GET',
@@ -166,7 +166,7 @@ When('a GET request is made to \\/api\\/v1\\/marketplace\\/history\\/{string} wi
   });
 });
 
-When('{string} sends GET \\/api\\/v1\\/marketplace\\/history\\/{string}', async function (this: AppWorld, token: string, petId: string) {
+When('{string} sends GET /api/v1/marketplace/history/{string}', async function (this: AppWorld, token: string, petId: string) {
   // GET /api/v1/marketplace/history/:petId — authenticated owner — see API.md §5.6
   this.lastResponse = await this.client.request({
     method: 'GET',

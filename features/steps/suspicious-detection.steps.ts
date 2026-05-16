@@ -90,7 +90,7 @@ When('the suspicious activity detection job runs', function (this: AppWorld) {
   return 'pending';
 });
 
-When('the admin sends GET \\/admin\\/api\\/suspicious', async function (this: AppWorld) {
+When('the admin sends GET /admin/api/suspicious', async function (this: AppWorld) {
   // GET /admin/api/suspicious — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -131,7 +131,7 @@ Then('the database admin_audit_log has a row with action {string} and target_id 
   return 'pending';
 });
 
-Then('pet {string} is still able to enter arena battles \\(no automatic ban\\)', async function (this: AppWorld, petId: string) {
+Then('pet {string} is still able to enter arena battles (no automatic ban)', async function (this: AppWorld, petId: string) {
   // SELECT is_banned FROM pets WHERE id = $1 — expect false
   const _rows = await this.db.query<{ is_banned: boolean }>('SELECT is_banned FROM pets WHERE id = $1', [petId]);
   return 'pending';

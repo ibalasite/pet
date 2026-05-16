@@ -67,7 +67,7 @@ Given('the email {string} is already associated with a claim identity in the dat
 // When — triggering actions (one per scenario)
 // ---------------------------------------------------------------------------
 
-When('the guest sends POST \\/api\\/v1\\/claim with email {string} petId {string} and ageConfirmed true', async function (this: AppWorld, email: string, petId: string) {
+When('the guest sends POST /api/v1/claim with email {string} petId {string} and ageConfirmed true', async function (this: AppWorld, email: string, petId: string) {
   // POST /api/v1/claim — see API.md §5.1.1
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -77,7 +77,7 @@ When('the guest sends POST \\/api\\/v1\\/claim with email {string} petId {string
   return 'pending';
 });
 
-When('the guest sends POST \\/api\\/v1\\/claim with email {string} petId {string} and ageConfirmed false', async function (this: AppWorld, email: string, petId: string) {
+When('the guest sends POST /api/v1/claim with email {string} petId {string} and ageConfirmed false', async function (this: AppWorld, email: string, petId: string) {
   // POST /api/v1/claim — see API.md §5.1.1 error: AGE_CONFIRMATION_REQUIRED
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -87,7 +87,7 @@ When('the guest sends POST \\/api\\/v1\\/claim with email {string} petId {string
   return 'pending';
 });
 
-When('the guest sends POST \\/api\\/v1\\/claim\\/verify with claimId {string} and code {string}', async function (this: AppWorld, claimId: string, code: string) {
+When('the guest sends POST /api/v1/claim/verify with claimId {string} and code {string}', async function (this: AppWorld, claimId: string, code: string) {
   // POST /api/v1/claim/verify — see API.md §5.1.2
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -97,7 +97,7 @@ When('the guest sends POST \\/api\\/v1\\/claim\\/verify with claimId {string} an
   return 'pending';
 });
 
-When('the guest sends POST \\/api\\/v1\\/claim\\/recover with email {string} and petId {string}', async function (this: AppWorld, email: string, petId: string) {
+When('the guest sends POST /api/v1/claim/recover with email {string} and petId {string}', async function (this: AppWorld, email: string, petId: string) {
   // POST /api/v1/claim/recover — see API.md §5.1.3
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -107,7 +107,7 @@ When('the guest sends POST \\/api\\/v1\\/claim\\/recover with email {string} and
   return 'pending';
 });
 
-When('a GET request is made to \\/api\\/v1\\/pets\\/{string}', async function (this: AppWorld, petId: string) {
+When('a GET request is made to /api/v1/pets/{string}', async function (this: AppWorld, petId: string) {
   // GET /api/v1/pets/:petId — see API.md §5.2
   this.lastResponse = await this.client.request({
     method: 'GET',

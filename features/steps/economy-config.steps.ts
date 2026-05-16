@@ -38,7 +38,7 @@ Given('the admin has updated food_buff_strength_multiplier to {float} successful
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
-When('the admin sends PUT \\/admin\\/api\\/config\\/runtime with max_battles_per_hour {int}', async function (this: AppWorld, value: number) {
+When('the admin sends PUT /admin/api/config/runtime with max_battles_per_hour {int}', async function (this: AppWorld, value: number) {
   // PUT /admin/api/config/runtime — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -50,7 +50,7 @@ When('the admin sends PUT \\/admin\\/api\\/config\\/runtime with max_battles_per
   return 'pending';
 });
 
-When('the admin sends PUT \\/admin\\/api\\/config\\/runtime with rarity weights summing to {int} percent', async function (this: AppWorld, _sumPercent: number) {
+When('the admin sends PUT /admin/api/config/runtime with rarity weights summing to {int} percent', async function (this: AppWorld, _sumPercent: number) {
   // PUT /admin/api/config/runtime — invalid rarity weights — see API.md §5.5 error: VALIDATION_ERROR
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -72,7 +72,7 @@ Then('the database config_runtime row is unchanged', function (this: AppWorld) {
   return 'pending';
 });
 
-When('the admin sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
+When('the admin sends PUT /admin/api/config/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
   // PUT /admin/api/config/economy — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -83,7 +83,7 @@ When('the admin sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed
   });
 });
 
-When('the admin sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {int}', async function (this: AppWorld, value: number) {
+When('the admin sends PUT /admin/api/config/economy with food_buff_speed_multiplier {int}', async function (this: AppWorld, value: number) {
   // PUT /admin/api/config/economy — out-of-range integer variant — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -94,7 +94,7 @@ When('the admin sends PUT \\/admin\\/api\\/config\\/economy with food_buff_speed
   });
 });
 
-When('the admin sends PUT \\/admin\\/api\\/config\\/economy with arena_entry_cooldown_minutes {int}', async function (this: AppWorld, value: number) {
+When('the admin sends PUT /admin/api/config/economy with arena_entry_cooldown_minutes {int}', async function (this: AppWorld, value: number) {
   // PUT /admin/api/config/economy — cooldown field — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -107,7 +107,7 @@ When('the admin sends PUT \\/admin\\/api\\/config\\/economy with arena_entry_coo
 
 // NOTE: 'the moderator sends PUT /admin/api/config/economy with food_buff_speed_multiplier {float}' → registered in shared.steps.ts
 
-When('an unauthenticated PUT request is made to \\/admin\\/api\\/config\\/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
+When('an unauthenticated PUT request is made to /admin/api/config/economy with food_buff_speed_multiplier {float}', async function (this: AppWorld, value: number) {
   // PUT /admin/api/config/economy — no cookie — see API.md §2.3
   this.lastResponse = await this.client.request({
     method: 'PUT',

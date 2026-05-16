@@ -126,7 +126,7 @@ When('the admin submits correct password credentials for {string}', async functi
   return 'pending';
 });
 
-When('the admin sends POST \\/admin\\/api\\/auth\\/logout', async function (this: AppWorld) {
+When('the admin sends POST /admin/api/auth/logout', async function (this: AppWorld) {
   // POST /admin/api/auth/logout — see API.md §2.2
   this.lastResponse = await this.client.request({
     method: 'POST',

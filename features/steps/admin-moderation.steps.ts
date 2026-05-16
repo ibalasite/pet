@@ -70,7 +70,7 @@ Given('the admin has previously unbanned {string} with reason {string}', async f
 
 // NOTE: 'the admin sends POST /admin/api/pets/{string}/ban with reason {string}' → registered in shared.steps.ts
 
-When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with a reason of {int} characters', async function (this: AppWorld, petId: string, charCount: number) {
+When('the admin sends POST /admin/api/pets/{string}/ban with a reason of {int} characters', async function (this: AppWorld, petId: string, charCount: number) {
   // POST /admin/api/pets/:petId/ban — reason length validation — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   const reason = 'x'.repeat(charCount);
@@ -82,7 +82,7 @@ When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with a reason 
   });
 });
 
-When('the admin sends POST \\/admin\\/api\\/pets\\/nonexistent-pet-uuid\\/ban with reason {string}', async function (this: AppWorld, reason: string) {
+When('the admin sends POST /admin/api/pets/nonexistent-pet-uuid/ban with reason {string}', async function (this: AppWorld, reason: string) {
   // POST /admin/api/pets/nonexistent-pet-uuid/ban — 404 path — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -93,7 +93,7 @@ When('the admin sends POST \\/admin\\/api\\/pets\\/nonexistent-pet-uuid\\/ban wi
   });
 });
 
-When('the admin sends GET \\/admin\\/api\\/pets with limit {int}', async function (this: AppWorld, limit: number) {
+When('the admin sends GET /admin/api/pets with limit {int}', async function (this: AppWorld, limit: number) {
   // GET /admin/api/pets?limit=N — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   const qs = new URLSearchParams({ limit: String(limit) }).toString();
@@ -104,7 +104,7 @@ When('the admin sends GET \\/admin\\/api\\/pets with limit {int}', async functio
   });
 });
 
-When('the read_only admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+When('the read_only admin sends POST /admin/api/pets/{string}/ban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
   // POST /admin/api/pets/:petId/ban with read_only cookie — expect 403 — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the read_only admin');
   this.lastResponse = await this.client.request({
@@ -115,7 +115,7 @@ When('the read_only admin sends POST \\/admin\\/api\\/pets\\/{string}\\/ban with
   });
 });
 
-When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/unban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
+When('the admin sends POST /admin/api/pets/{string}/unban with reason {string}', async function (this: AppWorld, petId: string, reason: string) {
   // POST /admin/api/pets/:petId/unban — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   this.lastResponse = await this.client.request({
@@ -126,7 +126,7 @@ When('the admin sends POST \\/admin\\/api\\/pets\\/{string}\\/unban with reason 
   });
 });
 
-When('the admin sends GET \\/admin\\/api\\/audit with limit {int}', async function (this: AppWorld, limit: number) {
+When('the admin sends GET /admin/api/audit with limit {int}', async function (this: AppWorld, limit: number) {
   // GET /admin/api/audit?limit=N — see API.md §5.5
   if (!this.adminSessionCookie) throw new Error('adminSessionCookie not set — ensure a Given step authenticates the admin');
   const qs = new URLSearchParams({ limit: String(limit) }).toString();
@@ -137,7 +137,7 @@ When('the admin sends GET \\/admin\\/api\\/audit with limit {int}', async functi
   });
 });
 
-When('a GET request to \\/api\\/v1\\/leaderboard returns entries that do not include {string}', async function (this: AppWorld, _petId: string) {
+When('a GET request to /api/v1/leaderboard returns entries that do not include {string}', async function (this: AppWorld, _petId: string) {
   // GET /api/v1/leaderboard — verify pet absent from response
   this.lastResponse = await this.client.request({
     method: 'GET',

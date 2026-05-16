@@ -89,7 +89,7 @@ Given('pet {string} exists and is owned with token {string}', async function (th
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
-When('{string} sends POST \\/api\\/v1\\/pets\\/{string}\\/train with trainingType {string}', async function (this: AppWorld, token: string, petId: string, trainingType: string) {
+When('{string} sends POST /api/v1/pets/{string}/train with trainingType {string}', async function (this: AppWorld, token: string, petId: string, trainingType: string) {
   // POST /api/v1/pets/:petId/train — see API.md §5.2
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -100,7 +100,7 @@ When('{string} sends POST \\/api\\/v1\\/pets\\/{string}\\/train with trainingTyp
   return 'pending';
 });
 
-When('an unauthenticated POST request is made to \\/api\\/v1\\/pets\\/{string}\\/train with trainingType {string}', async function (this: AppWorld, petId: string, trainingType: string) {
+When('an unauthenticated POST request is made to /api/v1/pets/{string}/train with trainingType {string}', async function (this: AppWorld, petId: string, trainingType: string) {
   // POST /api/v1/pets/:petId/train — no Authorization header — see API.md §2.3
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -112,7 +112,7 @@ When('an unauthenticated POST request is made to \\/api\\/v1\\/pets\\/{string}\\
 
 // NOTE: '{string} sends POST /api/v1/pets/{string}/feed with buffType {string} stat {string} magnitude {int} and isPermanent {word}' → registered in shared.steps.ts
 
-When('a GET request is made to \\/api\\/v1\\/pets\\/{string}\\/stats without authentication', async function (this: AppWorld, petId: string) {
+When('a GET request is made to /api/v1/pets/{string}/stats without authentication', async function (this: AppWorld, petId: string) {
   // GET /api/v1/pets/:petId/stats — see API.md §5.2
   this.lastResponse = await this.client.request({
     method: 'GET',

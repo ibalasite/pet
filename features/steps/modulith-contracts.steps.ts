@@ -240,17 +240,17 @@ Then('no cycle exists in the DAG', function (this: AppWorld) {
   return 'pending';
 });
 
-Then('the import direction is: Arena -> Pet -> Auth \\(not reverse\\)', function (this: AppWorld) {
+Then('the import direction is: Arena -> Pet -> Auth (not reverse)', function (this: AppWorld) {
   // TODO: assert no Auth → Arena edge exists in the dependency graph
   return 'pending';
 });
 
-Then('Leaderboard -> Arena -> Pet \\(not reverse\\)', function (this: AppWorld) {
+Then('Leaderboard -> Arena -> Pet (not reverse)', function (this: AppWorld) {
   // TODO: assert no Pet → Arena or Pet → Leaderboard reverse edges
   return 'pending';
 });
 
-Then('Admin -> all BCs \\(Admin is a consumer-only leaf node\\)', function (this: AppWorld) {
+Then('Admin -> all BCs (Admin is a consumer-only leaf node)', function (this: AppWorld) {
   // TODO: assert no other BC imports from Admin module
   return 'pending';
 });

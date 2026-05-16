@@ -294,7 +294,7 @@ When('an unauthenticated POST request is made to /api/v1/gdpr/request with type 
 //               arena-battle and battle-records)
 // ---------------------------------------------------------------------------
 
-When('a GET request is made to /api/v1/arena/history/{string} without authentication', async function (this: AppWorld, petId: string) {
+When('a GET request is made to /api/v1/arena/history/{word} without authentication', async function (this: AppWorld, petId: string) {
   // Shared step — GET /api/v1/arena/history/:petId — see API.md §5.3
   this.lastResponse = await this.client.request({
     method: 'GET',
@@ -303,7 +303,7 @@ When('a GET request is made to /api/v1/arena/history/{string} without authentica
   return 'pending';
 });
 
-When('a GET request is made to /api/v1/arena/match/{string} without authentication', async function (this: AppWorld, matchId: string) {
+When('a GET request is made to /api/v1/arena/match/{word} without authentication', async function (this: AppWorld, matchId: string) {
   // Shared step — GET /api/v1/arena/match/:matchId — see API.md §5.3
   this.lastResponse = await this.client.request({
     method: 'GET',
@@ -341,7 +341,7 @@ When('a GET request is made to /api/v1/leaderboard with query param rarity={word
 //               rarity-distribution)
 // ---------------------------------------------------------------------------
 
-When('a GET request is made to /api/v1/pets/{string} without authentication', async function (this: AppWorld, petId: string) {
+When('a GET request is made to /api/v1/pets/{word} without authentication', async function (this: AppWorld, petId: string) {
   // Shared step — GET /api/v1/pets/:petId — see API.md §5.2
   this.lastResponse = await this.client.request({
     method: 'GET',

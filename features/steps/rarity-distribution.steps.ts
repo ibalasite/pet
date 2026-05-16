@@ -104,7 +104,7 @@ When('the pet generation algorithm is applied to seed {int} a second time', func
   return 'pending';
 });
 
-When('a GET request is made to \\/api\\/v1\\/pets\\/random without authentication', async function (this: AppWorld) {
+When('a GET request is made to /api/v1/pets/random without authentication', async function (this: AppWorld) {
   // GET /api/v1/pets/random — see API.md §5.2
   this.lastResponse = await this.client.request({
     method: 'GET',

@@ -109,7 +109,7 @@ Given('the erasure for {string} is complete and email_encrypted is null', async 
 // When — triggering actions
 // ---------------------------------------------------------------------------
 
-When('{string} sends POST \\/api\\/v1\\/gdpr\\/request with type {string}', async function (this: AppWorld, token: string, type: string) {
+When('{string} sends POST /api/v1/gdpr/request with type {string}', async function (this: AppWorld, token: string, type: string) {
   // POST /api/v1/gdpr/request — see API.md §5.5
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -119,7 +119,7 @@ When('{string} sends POST \\/api\\/v1\\/gdpr\\/request with type {string}', asyn
   });
 });
 
-When('{string} sends GET \\/api\\/v1\\/gdpr\\/request\\/status with jobId {string}', async function (this: AppWorld, token: string, jobId: string) {
+When('{string} sends GET /api/v1/gdpr/request/status with jobId {string}', async function (this: AppWorld, token: string, jobId: string) {
   // GET /api/v1/gdpr/request/status?jobId=... — see API.md §5.5
   const qs = new URLSearchParams({ jobId }).toString();
   this.lastResponse = await this.client.request({
@@ -129,7 +129,7 @@ When('{string} sends GET \\/api\\/v1\\/gdpr\\/request\\/status with jobId {strin
   });
 });
 
-When('the same email is submitted in POST \\/api\\/v1\\/claim with petId {string} and ageConfirmed true', async function (this: AppWorld, petId: string) {
+When('the same email is submitted in POST /api/v1/claim with petId {string} and ageConfirmed true', async function (this: AppWorld, petId: string) {
   // POST /api/v1/claim — email_hash collision check — see API.md §5.1.1
   this.lastResponse = await this.client.request({
     method: 'POST',
@@ -140,7 +140,7 @@ When('the same email is submitted in POST \\/api\\/v1\\/claim with petId {string
 
 // NOTE: 'a GET request is made to /api/v1/leaderboard without authentication' → registered in shared.steps.ts
 
-When('the admin sends POST \\/admin\\/api\\/gdpr\\/{string}\\/process', async function (this: AppWorld, jobId: string) {
+When('the admin sends POST /admin/api/gdpr/{string}/process', async function (this: AppWorld, jobId: string) {
   // POST /admin/api/gdpr/:jobId/process — see API.md §5.5
   this.lastResponse = await this.client.request({
     method: 'POST',
