@@ -1,271 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analytics — Pixel Pet Arena Admin</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
   <style>
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
-    .kpi-card { background: var(--color-surface); border: 2px solid var(--color-text-secondary); padding: 20px; }
-    .kpi-label { font-family: var(--font-pixel); font-size: 8px; color: var(--color-text-secondary); margin-bottom: 10px; }
-    .kpi-value { font-family: var(--font-pixel); font-size: 22px; color: var(--color-accent); }
-    .kpi-change { font-family: var(--font-ui); font-size: 12px; color: var(--color-success); margin-top: 6px; }
-    .kpi-change.down { color: var(--color-error); }
-
-    .chart-section { background: var(--color-surface); border: 2px solid var(--color-text-secondary); padding: 20px; margin-bottom: 20px; }
-    .chart-title { font-family: var(--font-pixel); font-size: 10px; color: var(--color-text-primary); margin-bottom: 16px; }
-    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
-
-    svg text { font-family: 'Inter', sans-serif; }
-
-    .top-pets-table { width: 100%; border-collapse: collapse; }
-    .top-pets-table th { font-family: var(--font-pixel); font-size: 8px; color: var(--color-text-secondary); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--color-text-secondary); }
-    .top-pets-table td { font-family: var(--font-ui); font-size: 13px; color: var(--color-text-primary); padding: 10px 12px; border-bottom: 1px solid rgba(108,108,154,0.2); }
-    .top-pets-table tr:hover td { background: var(--color-surface-overlay); }
-
-    .date-range { display: flex; gap: 8px; margin-bottom: 20px; }
-    .range-btn { background: transparent; border: 1px solid var(--color-text-secondary); color: var(--color-text-secondary); padding: 6px 14px; cursor: pointer; font-family: var(--font-pixel); font-size: 8px; }
-    .range-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
-    .range-btn:hover:not(.active) { border-color: var(--color-primary); color: var(--color-primary); }
+    .chart-container { margin-bottom: 24px; }
+    .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--admin-text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+    .chart-wrap { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--radius-md); padding: 20px 24px 12px; position: relative; height: 180px; }
+    .chart-svg { width: 100%; height: 100%; overflow: visible; }
+    .chart-line { fill: none; stroke: var(--admin-accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .chart-area { fill: url(#areaGrad); opacity: 0.25; }
+    .chart-dot { fill: var(--admin-accent); }
+    .chart-label { font-size: 10px; fill: var(--admin-text-dim); }
+    .funnel-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .funnel-label { width: 120px; font-size: 13px; color: var(--admin-text-dim); text-align: right; }
+    .funnel-bar-wrap { flex: 1; background: var(--admin-surface-2); border-radius: 4px; height: 28px; overflow: hidden; }
+    .funnel-bar { height: 100%; background: var(--admin-accent); border-radius: 4px; display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; color: #fff; transition: width 0.6s ease; }
+    .chart-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .chart-tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--admin-border); background: var(--admin-surface); color: var(--admin-text-dim); }
+    .chart-tab.active { background: var(--admin-accent); border-color: var(--admin-accent); color: #fff; }
   </style>
 </head>
 <body>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
+  </div>
+</header>
+<div id="sidebarContainer"></div>
 
-<div class="admin-layout">
-  <!-- Sidebar -->
-  <nav class="admin-sidebar">
-    <div class="admin-logo">⚙ ADMIN</div>
-    <a href="../../index.html" class="sidebar-link">📊 Dashboard</a>
-    <a href="pets.html" class="sidebar-link">🐾 Pet Management</a>
-    <a href="leaderboard.html" class="sidebar-link">🏆 Leaderboard</a>
-    <a href="config.html" class="sidebar-link">⚙ Config &amp; Flags</a>
-    <a href="analytics.html" class="sidebar-link active">📈 Analytics</a>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-user">👤 admin@ppa.io</div>
-    <a href="#" class="sidebar-link danger" onclick="alert('Logged out (prototype)')">↩ Logout</a>
-  </nav>
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">📈 Analytics</h1>
+    <span class="page-subtitle">過去 30 天時序指標</span>
+  </div>
 
-  <!-- Main -->
-  <div class="admin-main">
-    <header class="admin-topbar">
-      <span class="admin-topbar-title">PIXEL PET ARENA ADMIN</span>
-      <span class="admin-breadcrumb">Analytics</span>
-      <a href="../index.html" class="admin-topbar-link">↩ Player App</a>
-    </header>
+  <div class="chart-tabs">
+    <span class="chart-tab active" onclick="showChart('dau', this)">DAU</span>
+    <span class="chart-tab" onclick="showChart('claims', this)">Claim 漏斗</span>
+    <span class="chart-tab" onclick="showChart('battles', this)">戰鬥趨勢</span>
+    <span class="chart-tab" onclick="showChart('leaderboard', this)">Leaderboard UV</span>
+    <span class="chart-tab" onclick="showChart('email', this)">Email 成功率</span>
+  </div>
 
-    <div class="admin-content">
-      <div class="admin-page-header">
-        <h1 class="admin-page-title">📈 Analytics Dashboard</h1>
-        <div class="date-range">
-          <button class="range-btn active" onclick="setRange(this,'7d')">7 DAYS</button>
-          <button class="range-btn" onclick="setRange(this,'30d')">30 DAYS</button>
-          <button class="range-btn" onclick="setRange(this,'custom')">CUSTOM</button>
-        </div>
-      </div>
+  <div id="chartDau" class="chart-container">
+    <div class="chart-title">DAU — 每日活躍用戶（過去 30 天）</div>
+    <div class="chart-wrap"><svg class="chart-svg" id="svgDau"></svg></div>
+  </div>
 
-      <!-- KPI cards -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">DAU (TODAY)</div>
-          <div class="kpi-value">234</div>
-          <div class="kpi-change">▲ +2.6% vs yesterday</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">TOTAL BATTLES</div>
-          <div class="kpi-value">8,429</div>
-          <div class="kpi-change">▲ +12% this week</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">NEW PETS</div>
-          <div class="kpi-value">47</div>
-          <div class="kpi-change">▲ +8 today</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">TOTAL PETS</div>
-          <div class="kpi-value">847</div>
-          <div class="kpi-change down">▼ 3 banned this week</div>
-        </div>
-      </div>
+  <div id="chartClaims" class="chart-container" style="display:none;">
+    <div class="chart-title">Claim 漏斗</div>
+    <div class="panel" style="padding:20px;">
+      <div id="funnelContainer"></div>
+    </div>
+  </div>
 
-      <div class="chart-grid">
-        <!-- DAU line chart -->
-        <div class="chart-section">
-          <div class="chart-title">DAU — LAST 7 DAYS</div>
-          <svg width="100%" height="220" viewBox="0 0 440 220" id="dau-chart">
-            <!-- Grid lines -->
-            <line x1="40" y1="20" x2="420" y2="20" stroke="#2d2d5a" stroke-width="1"/>
-            <line x1="40" y1="70" x2="420" y2="70" stroke="#2d2d5a" stroke-width="1"/>
-            <line x1="40" y1="120" x2="420" y2="120" stroke="#2d2d5a" stroke-width="1"/>
-            <line x1="40" y1="170" x2="420" y2="170" stroke="#2d2d5a" stroke-width="1"/>
-            <!-- Y axis labels -->
-            <text x="35" y="24" fill="#6c6c9a" font-size="10" text-anchor="end">250</text>
-            <text x="35" y="74" fill="#6c6c9a" font-size="10" text-anchor="end">200</text>
-            <text x="35" y="124" fill="#6c6c9a" font-size="10" text-anchor="end">150</text>
-            <text x="35" y="174" fill="#6c6c9a" font-size="10" text-anchor="end">100</text>
-            <!-- DAU data: [180, 195, 201, 220, 228, 228, 234] mapped to y coords -->
-            <!-- y = 170 - (val - 100) * (150/150) = 170 - (val-100) -->
-            <!-- 180→70, 195→55, 201→49, 220→30, 228→22, 228→22, 234→16 but range 100-250 mapped to 20-170 -->
-            <!-- Formula: y = 170 - (val - 100) / 150 * 150 = 170 - (val - 100) -->
-            <polyline
-              points="40,70  100,55  160,49  220,30  280,22  340,22  420,16"
-              fill="none" stroke="#6c5ce7" stroke-width="2.5"/>
-            <!-- Area fill -->
-            <polygon
-              points="40,70  100,55  160,49  220,30  280,22  340,22  420,16  420,170  40,170"
-              fill="url(#dau-gradient)" opacity="0.3"/>
-            <defs>
-              <linearGradient id="dau-gradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#6c5ce7"/>
-                <stop offset="100%" stop-color="transparent"/>
-              </linearGradient>
-            </defs>
-            <!-- Data points -->
-            <circle cx="40"  cy="70" r="4" fill="#6c5ce7"/>
-            <circle cx="100" cy="55" r="4" fill="#6c5ce7"/>
-            <circle cx="160" cy="49" r="4" fill="#6c5ce7"/>
-            <circle cx="220" cy="30" r="4" fill="#6c5ce7"/>
-            <circle cx="280" cy="22" r="4" fill="#6c5ce7"/>
-            <circle cx="340" cy="22" r="4" fill="#6c5ce7"/>
-            <circle cx="420" cy="16" r="5" fill="#fdcb6e"/>
-            <!-- X axis labels -->
-            <text x="40"  y="195" fill="#6c6c9a" font-size="10" text-anchor="middle">May 29</text>
-            <text x="100" y="195" fill="#6c6c9a" font-size="10" text-anchor="middle">May 30</text>
-            <text x="160" y="195" fill="#6c6c9a" font-size="10" text-anchor="middle">May 31</text>
-            <text x="220" y="195" fill="#6c6c9a" font-size="10" text-anchor="middle">Jun 1</text>
-            <text x="280" y="195" fill="#6c6c9a" font-size="10" text-anchor="middle">Jun 2</text>
-            <text x="340" y="195" fill="#6c6c9a" font-size="10" text-anchor="middle">Jun 3</text>
-            <text x="420" y="195" fill="#fdcb6e" font-size="10" text-anchor="middle">Jun 4</text>
-            <!-- Values on last point -->
-            <text x="425" y="12" fill="#fdcb6e" font-size="11" font-weight="bold">234</text>
-          </svg>
-        </div>
+  <div id="chartBattles" class="chart-container" style="display:none;">
+    <div class="chart-title">戰鬥數趨勢（過去 30 天）</div>
+    <div class="chart-wrap"><svg class="chart-svg" id="svgBattles"></svg></div>
+  </div>
 
-        <!-- Battles by rarity bar chart -->
-        <div class="chart-section">
-          <div class="chart-title">BATTLES BY PET RARITY (WEEK)</div>
-          <svg width="100%" height="220" viewBox="0 0 320 220">
-            <!-- Bars: Common=1200, Rare=3400, Epic=2800, Legendary=1029 -->
-            <!-- max=3400, bar height max=160, scale=160/3400 -->
-            <!-- Common: 1200 * 160/3400 ≈ 56 -->
-            <!-- Rare: 3400 * 160/3400 = 160 -->
-            <!-- Epic: 2800 * 160/3400 ≈ 132 -->
-            <!-- Legendary: 1029 * 160/3400 ≈ 48 -->
-            <line x1="30" y1="170" x2="300" y2="170" stroke="#2d2d5a" stroke-width="1"/>
-            <!-- Common -->
-            <rect x="50"  y="114" width="45" height="56" fill="#b2bec3"/>
-            <text x="72"  y="108" fill="#b2bec3" font-size="11" text-anchor="middle">1,200</text>
-            <text x="72"  y="188" fill="#6c6c9a" font-size="10" text-anchor="middle">COMMON</text>
-            <!-- Rare -->
-            <rect x="115" y="10"  width="45" height="160" fill="#4ecdc4"/>
-            <text x="137" y="7"   fill="#4ecdc4" font-size="11" text-anchor="middle">3,400</text>
-            <text x="137" y="188" fill="#6c6c9a" font-size="10" text-anchor="middle">RARE</text>
-            <!-- Epic -->
-            <rect x="180" y="38"  width="45" height="132" fill="#a29bfe"/>
-            <text x="202" y="34"  fill="#a29bfe" font-size="11" text-anchor="middle">2,800</text>
-            <text x="202" y="188" fill="#6c6c9a" font-size="10" text-anchor="middle">EPIC</text>
-            <!-- Legendary -->
-            <rect x="245" y="122" width="45" height="48"  fill="#fdcb6e"/>
-            <text x="267" y="117" fill="#fdcb6e" font-size="11" text-anchor="middle">1,029</text>
-            <text x="267" y="188" fill="#6c6c9a" font-size="10" text-anchor="middle">LEGEND.</text>
-          </svg>
-        </div>
-      </div>
+  <div id="chartLeaderboard" class="chart-container" style="display:none;">
+    <div class="chart-title">Leaderboard UV（過去 30 天）</div>
+    <div class="chart-wrap"><svg class="chart-svg" id="svgLeaderboard"></svg></div>
+  </div>
 
-      <div class="chart-grid">
-        <!-- Rarity distribution pie chart -->
-        <div class="chart-section">
-          <div class="chart-title">RARITY DISTRIBUTION (TOTAL PETS)</div>
-          <div style="display:flex;align-items:center;gap:24px;">
-            <svg width="180" height="180" viewBox="0 0 180 180">
-              <!-- Pie: Common 45%, Rare 30%, Epic 20%, Legendary 5% -->
-              <!-- Using stroke-dasharray on circles trick -->
-              <!-- Circumference of r=70 circle: 2π×70 ≈ 440 -->
-              <!-- Common 45%: 198, Rare 30%: 132, Epic 20%: 88, Legendary 5%: 22 -->
-              <circle cx="90" cy="90" r="70" fill="transparent" stroke="#b2bec3"
-                stroke-width="36"
-                stroke-dasharray="198 440"
-                stroke-dashoffset="0"
-                transform="rotate(-90 90 90)"/>
-              <circle cx="90" cy="90" r="70" fill="transparent" stroke="#4ecdc4"
-                stroke-width="36"
-                stroke-dasharray="132 440"
-                stroke-dashoffset="-198"
-                transform="rotate(-90 90 90)"/>
-              <circle cx="90" cy="90" r="70" fill="transparent" stroke="#a29bfe"
-                stroke-width="36"
-                stroke-dasharray="88 440"
-                stroke-dashoffset="-330"
-                transform="rotate(-90 90 90)"/>
-              <circle cx="90" cy="90" r="70" fill="transparent" stroke="#fdcb6e"
-                stroke-width="36"
-                stroke-dasharray="22 440"
-                stroke-dashoffset="-418"
-                transform="rotate(-90 90 90)"/>
-              <circle cx="90" cy="90" r="52" fill="#1a1a2e"/>
-              <text x="90" y="86" text-anchor="middle" fill="#e8e8f0" font-size="13" font-weight="600">847</text>
-              <text x="90" y="100" text-anchor="middle" fill="#6c6c9a" font-size="10">PETS</text>
-            </svg>
-            <div style="display:flex;flex-direction:column;gap:10px;font-family:var(--font-ui);font-size:13px;">
-              <div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:14px;height:14px;background:#b2bec3;"></span><span style="color:#e8e8f0;">Common <span style="color:#6c6c9a;">45%</span></span></div>
-              <div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:14px;height:14px;background:#4ecdc4;"></span><span style="color:#e8e8f0;">Rare <span style="color:#6c6c9a;">30%</span></span></div>
-              <div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:14px;height:14px;background:#a29bfe;"></span><span style="color:#e8e8f0;">Epic <span style="color:#6c6c9a;">20%</span></span></div>
-              <div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:14px;height:14px;background:#fdcb6e;"></span><span style="color:#e8e8f0;">Legendary <span style="color:#6c6c9a;">5%</span></span></div>
-            </div>
-          </div>
-        </div>
+  <div id="chartEmail" class="chart-container" style="display:none;">
+    <div class="chart-title">SendGrid 發信成功率（過去 30 天）</div>
+    <div class="chart-wrap"><svg class="chart-svg" id="svgEmail"></svg></div>
+  </div>
+</main>
 
-        <!-- Top active pets -->
-        <div class="chart-section">
-          <div class="chart-title">TOP 10 ACTIVE PETS (BATTLES TODAY)</div>
-          <table class="top-pets-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>PET</th>
-                <th>RARITY</th>
-                <th>BATTLES</th>
-                <th>WIN%</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>Golden Flare</td><td><span class="admin-rarity rarity-legendary">★ LEGEND.</span></td><td>18</td><td style="color:var(--color-success)">83%</td></tr>
-              <tr><td>2</td><td>Void Stalker</td><td><span class="admin-rarity rarity-epic">◉ EPIC</span></td><td>15</td><td style="color:var(--color-success)">76%</td></tr>
-              <tr><td>3</td><td>Purple Storm</td><td><span class="admin-rarity rarity-epic">◉ EPIC</span></td><td>13</td><td style="color:var(--color-success)">71%</td></tr>
-              <tr><td>4</td><td>Teal Spark</td><td><span class="admin-rarity rarity-rare">◈ RARE</span></td><td>12</td><td style="color:var(--color-warning)">58%</td></tr>
-              <tr><td>5</td><td>Crystal Mane</td><td><span class="admin-rarity rarity-epic">◉ EPIC</span></td><td>11</td><td style="color:var(--color-warning)">64%</td></tr>
-              <tr><td>6</td><td>Iron Claw</td><td><span class="admin-rarity rarity-common">◆ COMMON</span></td><td>9</td><td style="color:var(--color-error)">33%</td></tr>
-              <tr><td>7</td><td>Ember Wing</td><td><span class="admin-rarity rarity-rare">◈ RARE</span></td><td>8</td><td style="color:var(--color-warning)">50%</td></tr>
-              <tr><td>8</td><td>Storm Drift</td><td><span class="admin-rarity rarity-epic">◉ EPIC</span></td><td>7</td><td style="color:var(--color-success)">71%</td></tr>
-              <tr><td>9</td><td>Frost Bite</td><td><span class="admin-rarity rarity-rare">◈ RARE</span></td><td>6</td><td style="color:var(--color-warning)">50%</td></tr>
-              <tr><td>10</td><td>Grey Pebble</td><td><span class="admin-rarity rarity-common">◆ COMMON</span></td><td>4</td><td style="color:var(--color-error)">25%</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div><!-- .admin-content -->
-  </div><!-- .admin-main -->
-</div><!-- .admin-layout -->
-
+<script src="assets/admin-mock.js"></script>
 <script>
-function setRange(btn, range) {
-  document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
-  btn.classList.add('active');
-  // In a real app: re-fetch data for range. For prototype: just acknowledge.
-  if (range === 'custom') {
-    var from = prompt('From date (YYYY-MM-DD):', '2026-04-01');
-    var to   = prompt('To date (YYYY-MM-DD):', '2026-05-05');
-    if (from && to) {
-      document.querySelector('.admin-page-title').textContent = '📈 Analytics: ' + from + ' → ' + to;
+  /* Generate deterministic mock time-series */
+  function makeSeries(base, variance, n) {
+    var out = [];
+    var v = base;
+    for (var i = 0; i < n; i++) {
+      v = Math.max(base * 0.5, Math.min(base * 1.5, v + (Math.random() - 0.5) * variance));
+      out.push(Math.round(v));
     }
+    return out;
   }
-}
-</script>
 
+  var N = 30;
+  var DATA = {
+    dau:         makeSeries(4200, 400, N),
+    battles:     makeSeries(8500, 900, N),
+    leaderboard: makeSeries(1200, 150, N),
+    email:       makeSeries(99,   1.5, N),
+  };
+
+  var FUNNEL = [
+    { label: 'Visits',       value: 18400, pct: 100  },
+    { label: 'Email submit', value: 11200, pct: 60.9 },
+    { label: 'Code verify',  value:  7800, pct: 42.4 },
+    { label: 'Claim',        value:  5100, pct: 27.7 },
+  ];
+
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    var labelEl = document.getElementById('currentUserLabel');
+    if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
+    var sidebar = document.getElementById('sidebarContainer');
+    if (sidebar) { sidebar.innerHTML = renderSidebar('analytics'); }
+
+    renderLineSVG('svgDau',         DATA.dau,         '#6c5ce7');
+    renderLineSVG('svgBattles',     DATA.battles,     '#00b894');
+    renderLineSVG('svgLeaderboard', DATA.leaderboard, '#fdcb6e');
+    renderLineSVG('svgEmail',       DATA.email,       '#74b9ff');
+    renderFunnel();
+  }
+
+  function renderLineSVG(svgId, series, color) {
+    var el = document.getElementById(svgId);
+    if (!el || series.length === 0) { return; }
+    var w = 800; var h = 130;
+    var minV = series.reduce(function (a, b) { return a < b ? a : b; }, series[0]);
+    var maxV = series.reduce(function (a, b) { return a > b ? a : b; }, series[0]);
+    var range = maxV - minV || 1;
+    var pad = { top: 10, right: 10, bottom: 24, left: 40 };
+    var iw = w - pad.left - pad.right;
+    var ih = h - pad.top - pad.bottom;
+    /* avoid divide-by-zero when series has a single point */
+    var xDenom = series.length > 1 ? series.length - 1 : 1;
+
+    function px(i) { return pad.left + (i / xDenom) * iw; }
+    function py(v) { return pad.top + ih - ((v - minV) / range) * ih; }
+
+    var pts = series.map(function (v, i) { return px(i) + ',' + py(v); }).join(' ');
+    var areaClose = px(series.length - 1) + ',' + (pad.top + ih) + ' ' + px(0) + ',' + (pad.top + ih);
+
+    var axisLabels = '';
+    var step = Math.max(1, Math.floor((series.length - 1) / 5));
+    for (var i = 0; i < series.length; i += step) {
+      axisLabels += '<text class="chart-label" x="' + px(i) + '" y="' + (h - 4) + '" text-anchor="middle">d-' + (series.length - 1 - i) + '</text>';
+    }
+
+    var yLabels = '<text class="chart-label" x="' + (pad.left - 4) + '" y="' + (pad.top + 4) + '" text-anchor="end">' + maxV + '</text>'
+      + '<text class="chart-label" x="' + (pad.left - 4) + '" y="' + (pad.top + ih) + '" text-anchor="end">' + minV + '</text>';
+
+    el.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    el.innerHTML = '<defs><linearGradient id="ag' + svgId + '" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.5"/>'
+      + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>'
+      + '</linearGradient></defs>'
+      + '<polyline class="chart-area" points="' + pts + ' ' + areaClose + '" style="fill:url(#ag' + svgId + ');" />'
+      + '<polyline class="chart-line" points="' + pts + '" style="stroke:' + color + ';"/>'
+      + axisLabels + yLabels;
+  }
+
+  function renderFunnel() {
+    var container = document.getElementById('funnelContainer');
+    if (!container) { return; }
+    container.innerHTML = FUNNEL.map(function (f) {
+      return '<div class="funnel-row">'
+        + '<div class="funnel-label">' + escapeHtml(f.label) + '</div>'
+        + '<div class="funnel-bar-wrap">'
+        + '<div class="funnel-bar" style="width:' + f.pct + '%">' + escapeHtml(String(f.value.toLocaleString())) + '</div>'
+        + '</div>'
+        + '<div style="width:48px;text-align:right;font-size:12px;color:var(--admin-text-dim);">' + escapeHtml(String(f.pct)) + '%</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  function showChart(key, tabEl) {
+    var map = { dau: 'chartDau', claims: 'chartClaims', battles: 'chartBattles', leaderboard: 'chartLeaderboard', email: 'chartEmail' };
+    Object.keys(map).forEach(function (k) {
+      var el = document.getElementById(map[k]);
+      if (el) { el.style.display = k === key ? 'block' : 'none'; }
+    });
+    document.querySelectorAll('.chart-tab').forEach(function (t) { t.classList.remove('active'); });
+    if (tabEl) { tabEl.classList.add('active'); }
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>

@@ -1,423 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Config — Pixel Pet Arena Admin</title>
-  <link rel="stylesheet" href="admin.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Runtime 設定 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+  <style>
+    .weight-row { display: grid; grid-template-columns: 120px 1fr 60px; gap: 12px; align-items: center; margin-bottom: 12px; }
+    .weight-label { font-size: 13px; }
+    input[type="range"] { width: 100%; accent-color: var(--admin-accent); }
+    .weight-total { font-size: 14px; font-weight: 700; }
+    .weight-total.ok { color: var(--admin-success); }
+    .weight-total.err { color: var(--admin-danger); }
+  </style>
 </head>
 <body>
-<div class="admin-layout">
-
-  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
-  <aside class="admin-sidebar">
-    <div class="sidebar-logo">
-      <span class="sidebar-logo-icon">⚙</span>
-      <div class="sidebar-logo-text">ADMIN<br>PORTAL</div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="../../index.html"       class="nav-link"><span class="nav-icon">▦</span> Dashboard</a>
-      <a href="pets.html"        class="nav-link"><span class="nav-icon">🐾</span> Pets</a>
-      <a href="leaderboard.html" class="nav-link"><span class="nav-icon">🏆</span> Leaderboard</a>
-      <div class="nav-section-label">System</div>
-      <a href="config.html"      class="nav-link active"><span class="nav-icon">⚙</span> Config</a>
-      <a href="analytics.html"   class="nav-link"><span class="nav-icon">📊</span> Analytics</a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-avatar">SA</div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name">superadmin</div>
-          <div class="sidebar-user-role">Super Admin</div>
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- ── MAIN ────────────────────────────────────────────── -->
-  <div class="admin-main">
-    <header class="admin-topbar">
-      <div class="topbar-left">
-        <span class="topbar-title">PIXEL PET ARENA ADMIN</span>
-        <span class="topbar-sep">/</span>
-        <span class="topbar-breadcrumb">Runtime Config</span>
-      </div>
-      <div class="topbar-right">
-        <span class="text-muted text-sm">Mon, Jun 04 2026 · 14:22 UTC</span>
-        <button class="btn-logout">⏻ LOGOUT</button>
-      </div>
-    </header>
-
-    <main class="admin-content">
-      <div class="page-header">
-        <h1 class="page-title">Runtime Config & Feature Flags</h1>
-        <p class="page-subtitle">Live configuration — changes take effect within 30 seconds</p>
-      </div>
-
-      <div class="alert alert-warning">
-        <span class="alert-icon">⚠</span>
-        <span>All config changes are logged in the Audit Log. Changes to <strong>ARENA_DAILY_LIMIT_PER_PET</strong> apply from the next UTC midnight reset.</span>
-      </div>
-
-      <!-- Runtime Config + Feature Flags side by side -->
-      <div class="two-col" style="margin-bottom:20px;">
-
-        <!-- Runtime Config -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <span class="admin-card-title">Runtime Config</span>
-            <button class="btn btn-primary btn-sm" id="saveRuntimeBtn" disabled onclick="saveRuntime()">
-              💾 Save Changes
-            </button>
-          </div>
-          <div class="admin-card-body" style="padding:0;">
-            <table class="config-table">
-              <tbody>
-                <tr>
-                  <td class="config-key">ARENA_MATCHMAKING_TIMEOUT_SEC</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_arena_timeout" value="30" min="5" max="300" oninput="markDirty('saveRuntimeBtn','cfg_arena_timeout')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_arena_timeout', 30, 'saveRuntimeBtn')">Reset</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="config-key">ARENA_DAILY_LIMIT_PER_PET</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_arena_daily" value="10" min="1" max="50" oninput="markDirty('saveRuntimeBtn','cfg_arena_daily')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_arena_daily', 10, 'saveRuntimeBtn')">Reset</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="config-key">TRAINING_ACTIONS_PER_DAY</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_training_actions" value="3" min="1" max="10" oninput="markDirty('saveRuntimeBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_training_actions', 3, 'saveRuntimeBtn')">Reset</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="config-key">TRAINING_RESET_UTC_HOUR</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_training_reset" value="0" min="0" max="23" oninput="markDirty('saveRuntimeBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_training_reset', 0, 'saveRuntimeBtn')">Reset</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="config-key">FOOD_BUFF_MAX_PER_DAY</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_food_buff" value="3" min="0" max="10" oninput="markDirty('saveRuntimeBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_food_buff', 3, 'saveRuntimeBtn')">Reset</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="config-key">CLAIM_OTP_EXPIRY_MIN</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_otp_expiry" value="15" min="1" max="60" oninput="markDirty('saveRuntimeBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_otp_expiry', 15, 'saveRuntimeBtn')">Reset</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Feature Flags -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <span class="admin-card-title">Feature Flags</span>
-            <span class="text-muted text-sm">Toggle — effective immediately</span>
-          </div>
-          <div class="admin-card-body">
-
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-name">FF_ARENA_SUMO</div>
-                <div class="toggle-note">Sumo battle mode (experimental)</div>
-              </div>
-              <div class="flex" style="align-items:center;">
-                <label class="admin-toggle" for="ff_sumo">
-                  <input type="checkbox" id="ff_sumo" onchange="toggleFF('FF_ARENA_SUMO', this.checked)">
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label text-muted" id="lbl_ff_sumo">OFF</span>
-              </div>
-            </div>
-
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-name">FF_MARKETPLACE</div>
-                <div class="toggle-note" style="color:var(--warning);">Requires DAU &gt; 1,000</div>
-              </div>
-              <div class="flex" style="align-items:center;">
-                <label class="admin-toggle" for="ff_marketplace">
-                  <input type="checkbox" id="ff_marketplace" onchange="toggleFF('FF_MARKETPLACE', this.checked)">
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label text-muted" id="lbl_ff_marketplace">OFF</span>
-              </div>
-            </div>
-
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-name">FF_GDPR_SELF_SERVICE</div>
-                <div class="toggle-note">Allow players to request data export / deletion</div>
-              </div>
-              <div class="flex" style="align-items:center;">
-                <label class="admin-toggle" for="ff_gdpr">
-                  <input type="checkbox" id="ff_gdpr" checked onchange="toggleFF('FF_GDPR_SELF_SERVICE', this.checked)">
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label text-success" id="lbl_ff_gdpr">ON</span>
-              </div>
-            </div>
-
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-name" style="color:var(--admin-red);">FF_MAINTENANCE_MODE</div>
-                <div class="toggle-note text-danger">Blocks all player actions immediately</div>
-              </div>
-              <div class="flex" style="align-items:center;">
-                <label class="admin-toggle toggle-danger" for="ff_maintenance">
-                  <input type="checkbox" id="ff_maintenance" onchange="toggleMaintenanceConfirm(this)">
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label text-muted" id="lbl_ff_maintenance">OFF</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Economy Config -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <span class="admin-card-title">Economy Config</span>
-          <button class="btn btn-primary btn-sm" id="saveEconBtn" disabled onclick="saveEcon()">
-            💾 Save Economy Config
-          </button>
-        </div>
-        <div class="admin-card-body" style="padding:0;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-            <table class="config-table" style="border-right:1px solid #0d0d1a;">
-              <thead>
-                <tr>
-                  <th style="font-family:var(--font-pixel);font-size:7px;color:var(--muted);padding:10px 12px;background:var(--bg);border-bottom:2px solid #0d0d1a;" colspan="3">
-                    Base Stats
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="config-key">BASE_STAT_MIN</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_stat_min" value="10" min="1" max="50" oninput="markDirty('saveEconBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_stat_min', 10, 'saveEconBtn')">Reset</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="config-key">BASE_STAT_MAX</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_stat_max" value="50" min="10" max="100" oninput="markDirty('saveEconBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_stat_max', 50, 'saveEconBtn')">Reset</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table class="config-table">
-              <thead>
-                <tr>
-                  <th style="font-family:var(--font-pixel);font-size:7px;color:var(--muted);padding:10px 12px;background:var(--bg);border-bottom:2px solid #0d0d1a;" colspan="3">
-                    Training Deltas
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="config-key">TRAINING_STAT_DELTA_MIN</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_delta_min" value="1" min="0" max="20" oninput="markDirty('saveEconBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_delta_min', 1, 'saveEconBtn')">Reset</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="config-key">TRAINING_STAT_DELTA_MAX</td>
-                  <td class="config-value-cell">
-                    <input type="number" class="config-value-input" id="cfg_delta_max" value="8" min="1" max="30" oninput="markDirty('saveEconBtn')">
-                  </td>
-                  <td class="config-actions-cell">
-                    <button class="btn btn-ghost btn-sm" onclick="resetField('cfg_delta_max', 8, 'saveEconBtn')">Reset</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </main>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
   </div>
-</div>
+</header>
+<div id="sidebarContainer"></div>
 
-<!-- ── MAINTENANCE CONFIRM MODAL ───────────────────────── -->
-<div class="modal-overlay" id="maintenanceModal">
-  <div class="modal-box" style="max-width:420px;">
-    <div class="modal-header">
-      <span class="modal-title" style="color:var(--admin-red);">⚠ Enable Maintenance Mode?</span>
-      <button class="modal-close" onclick="cancelMaintenance()">✕</button>
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">⚙️ Runtime 設定</h1>
+    <span class="page-subtitle">super_admin only — 變更會立即生效並寫入稽核記錄</span>
+  </div>
+
+  <div class="panel" style="max-width:600px;">
+    <div class="panel-header"><h2 class="panel-title">戰鬥設定</h2></div>
+
+    <div class="form-group">
+      <label>每分鐘最大戰鬥數（1–60）</label>
+      <input id="maxBattles" class="form-input" type="number" min="1" max="60" value="10" style="max-width:120px;" />
     </div>
-    <div class="modal-body">
-      <div class="alert alert-danger" style="margin-bottom:16px;">
-        <span class="alert-icon">🚨</span>
-        <span>This will <strong>immediately block all player actions</strong> across the entire platform.</span>
+
+    <div class="form-group">
+      <label>AI 對手啟用</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+        <label class="toggle-switch" style="position:relative;display:inline-block;width:44px;height:24px;">
+          <input type="checkbox" id="aiEnabled" checked style="opacity:0;width:0;height:0;" />
+          <span id="toggleTrack" style="position:absolute;inset:0;border-radius:12px;background:var(--admin-accent);cursor:pointer;transition:background 0.2s;">
+            <span id="toggleThumb" style="position:absolute;left:4px;top:4px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform 0.2s;transform:translateX(0);"></span>
+          </span>
+        </label>
+        <span id="aiLabel" style="font-size:13px;color:var(--admin-text-dim);">啟用</span>
       </div>
-      <p style="font-size:13px;color:var(--muted);line-height:1.6;">
-        All API requests will return 503. Active battles will be interrupted. Only disable for critical maintenance windows.
-      </p>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="cancelMaintenance()">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmMaintenance()">Enable Maintenance</button>
+  </div>
+
+  <div class="panel" style="max-width:600px;">
+    <div class="panel-header">
+      <h2 class="panel-title">稀有度生成權重</h2>
+      <span id="weightTotal" class="weight-total ok">加總：100%</span>
+    </div>
+    <p style="font-size:12px;color:var(--admin-text-dim);margin:0 0 16px;">四個滑桿必須加總恰好 100%</p>
+
+    <div class="weight-row">
+      <span class="weight-label">Common</span>
+      <input type="range" id="wCommon" min="0" max="100" value="60" oninput="syncWeight('Common')" />
+      <span id="vCommon" class="weight-total">60%</span>
+    </div>
+    <div class="weight-row">
+      <span class="weight-label">Rare</span>
+      <input type="range" id="wRare" min="0" max="100" value="25" oninput="syncWeight('Rare')" />
+      <span id="vRare" class="weight-total">25%</span>
+    </div>
+    <div class="weight-row">
+      <span class="weight-label">Epic</span>
+      <input type="range" id="wEpic" min="0" max="100" value="12" oninput="syncWeight('Epic')" />
+      <span id="vEpic" class="weight-total">12%</span>
+    </div>
+    <div class="weight-row">
+      <span class="weight-label">Legendary</span>
+      <input type="range" id="wLegendary" min="0" max="100" value="3" oninput="syncWeight('Legendary')" />
+      <span id="vLegendary" class="weight-total">3%</span>
+    </div>
+
+    <div id="weightError" style="color:var(--admin-danger);font-size:13px;display:none;">⚠️ 加總必須等於 100%（目前：<span id="weightSum">100</span>%）</div>
+  </div>
+
+  <div style="max-width:600px;">
+    <button class="btn btn-primary" onclick="openSaveConfirm()" id="saveBtn">儲存設定</button>
+  </div>
+</main>
+
+<!-- 二次確認 Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-card">
+    <h3>⚠️ 確認儲存 Runtime 設定</h3>
+    <p class="modal-desc">此操作將立即影響所有玩家的戰鬥體驗，請輸入您的密碼確認。</p>
+    <div class="form-group">
+      <label>確認密碼</label>
+      <input id="confirmPw" class="form-input" type="password" placeholder="輸入管理員密碼…" />
+    </div>
+    <div id="confirmPwError" class="error-msg" style="display:none;">密碼錯誤</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">取消</button>
+      <button class="btn btn-primary" onclick="doSave()">確認儲存</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div id="toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--surface);border:2px solid #0d0d1a;box-shadow:4px 4px 0 #0d0d1a;padding:12px 20px;font-family:var(--font-pixel);font-size:8px;color:var(--success);z-index:300;max-width:320px;"></div>
-
+<script src="assets/admin-mock.js"></script>
 <script>
-// Static map: flag key → {labelId, displayName}
-// All label element IDs and display strings are hardcoded — never derived from
-// runtime/user input — eliminating the XSS vector from dynamic ID construction.
-const FF_META = {
-  FF_ARENA_SUMO:       { labelId: 'lbl_ff_sumo',        display: 'FF_ARENA_SUMO' },
-  FF_MARKETPLACE:      { labelId: 'lbl_ff_marketplace', display: 'FF_MARKETPLACE' },
-  FF_GDPR_SELF_SERVICE:{ labelId: 'lbl_ff_gdpr',        display: 'FF_GDPR_SELF_SERVICE' },
-  FF_MAINTENANCE_MODE: { labelId: 'lbl_ff_maintenance', display: 'FF_MAINTENANCE_MODE' }
-};
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    var labelEl = document.getElementById('currentUserLabel');
+    if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
+    var sidebar = document.getElementById('sidebarContainer');
+    if (sidebar) { sidebar.innerHTML = renderSidebar('config'); }
 
-// Per-section dirty-field tracking: maps btnId → Set of dirty input element IDs.
-const dirtyFields = {};
-
-function markDirty(btnId, inputId) {
-  if (!dirtyFields[btnId]) dirtyFields[btnId] = new Set();
-  dirtyFields[btnId].add(inputId);
-  const btn = document.getElementById(btnId);
-  if (btn) btn.disabled = false;
-}
-
-function resetField(inputId, defaultVal, btnId) {
-  const input = document.getElementById(inputId);
-  if (input) input.value = defaultVal;
-  // Remove this field from the dirty set.
-  if (dirtyFields[btnId]) dirtyFields[btnId].delete(inputId);
-  // Only disable the button when no fields remain dirty for this section.
-  if (!dirtyFields[btnId] || dirtyFields[btnId].size === 0) {
-    const btn = document.getElementById(btnId);
-    if (btn) btn.disabled = true;
+    var aiCb = document.getElementById('aiEnabled');
+    if (aiCb) {
+      aiCb.addEventListener('change', function () {
+        var thumb = document.getElementById('toggleThumb');
+        var track = document.getElementById('toggleTrack');
+        var lbl = document.getElementById('aiLabel');
+        if (thumb) { thumb.style.transform = aiCb.checked ? 'translateX(20px)' : 'translateX(0)'; }
+        if (track) { track.style.background = aiCb.checked ? 'var(--admin-accent)' : 'var(--admin-border)'; }
+        if (lbl) { lbl.textContent = aiCb.checked ? '啟用' : '停用'; }
+      });
+    }
   }
-}
 
-function saveRuntime() {
-  const btnId = 'saveRuntimeBtn';
-  const btn = document.getElementById(btnId);
-  if (btn) { btn.disabled = true; btn.textContent = '✓ Saved'; }
-  // Clear dirty set after save.
-  dirtyFields[btnId] = new Set();
-  showToast('Runtime config saved. Propagating to workers…');
-  // Re-query the element inside the callback to avoid a stale closure reference.
-  setTimeout(() => {
-    const b = document.getElementById(btnId);
-    if (b) b.textContent = '💾 Save Changes';
-  }, 2000);
-}
+  function syncWeight(changed) {
+    var keys = ['Common', 'Rare', 'Epic', 'Legendary'];
+    var total = 0;
+    keys.forEach(function (k) {
+      var el = document.getElementById('w' + k);
+      var vEl = document.getElementById('v' + k);
+      if (el && vEl) { vEl.textContent = el.value + '%'; total += parseInt(el.value, 10) || 0; }
+    });
 
-function saveEcon() {
-  const btnId = 'saveEconBtn';
-  const btn = document.getElementById(btnId);
-  if (btn) { btn.disabled = true; btn.textContent = '✓ Saved'; }
-  dirtyFields[btnId] = new Set();
-  showToast('Economy config saved.');
-  setTimeout(() => {
-    const b = document.getElementById(btnId);
-    if (b) b.textContent = '💾 Save Economy Config';
-  }, 2000);
-}
+    var totalEl = document.getElementById('weightTotal');
+    var sumEl = document.getElementById('weightSum');
+    var errEl = document.getElementById('weightError');
+    var saveBtn = document.getElementById('saveBtn');
 
-function toggleFF(key, enabled) {
-  // Look up metadata from the static whitelist — never interpolate key into DOM IDs.
-  const meta = FF_META[key];
-  if (!meta) return; // unknown flag — silently ignore
-  const labelEl = document.getElementById(meta.labelId);
-  if (labelEl) {
-    labelEl.textContent = enabled ? 'ON' : 'OFF';
-    labelEl.className = 'toggle-label ' + (enabled ? 'text-success' : 'text-muted');
+    if (totalEl) {
+      totalEl.textContent = '加總：' + total + '%';
+      totalEl.className = 'weight-total ' + (total === 100 ? 'ok' : 'err');
+    }
+    if (sumEl) { sumEl.textContent = String(total); }
+    if (errEl) { errEl.style.display = total !== 100 ? 'block' : 'none'; }
+    if (saveBtn) { saveBtn.disabled = total !== 100; }
   }
-  // Use the hardcoded display name from the whitelist, not the raw key parameter.
-  showToast(meta.display + ' ' + (enabled ? 'enabled' : 'disabled'));
-}
 
-let pendingMaintenanceCheckbox = null;
-
-function toggleMaintenanceConfirm(checkbox) {
-  if (checkbox.checked) {
-    // Revert immediately; only actually enable after modal confirm
-    checkbox.checked = false;
-    pendingMaintenanceCheckbox = checkbox;
-    const modal = document.getElementById('maintenanceModal');
-    if (modal) modal.classList.add('open');
-  } else {
-    const lbl = document.getElementById('lbl_ff_maintenance');
-    if (lbl) { lbl.textContent = 'OFF'; lbl.className = 'toggle-label text-muted'; }
-    showToast('FF_MAINTENANCE_MODE disabled');
+  function openSaveConfirm() {
+    var total = 0;
+    ['Common', 'Rare', 'Epic', 'Legendary'].forEach(function (k) {
+      var el = document.getElementById('w' + k);
+      if (el) { total += parseInt(el.value, 10) || 0; }
+    });
+    if (total !== 100) { showToast('稀有度加總必須等於 100%', 'error'); return; }
+    var pwEl = document.getElementById('confirmPw');
+    var errEl = document.getElementById('confirmPwError');
+    if (pwEl) { pwEl.value = ''; }
+    if (errEl) { errEl.style.display = 'none'; }
+    openModal('confirmModal');
   }
-}
 
-function confirmMaintenance() {
-  if (pendingMaintenanceCheckbox) {
-    pendingMaintenanceCheckbox.checked = true;
-    pendingMaintenanceCheckbox = null;
+  function doSave() {
+    var pw = document.getElementById('confirmPw');
+    var errEl = document.getElementById('confirmPwError');
+    if (!pw) { return; }
+    if (pw.value !== 'Admin@2026') {
+      if (errEl) { errEl.style.display = 'block'; }
+      return;
+    }
+    if (errEl) { errEl.style.display = 'none'; }
+    closeModal('confirmModal');
+    showToast('Runtime 設定已儲存，稽核記錄已寫入', 'success');
   }
-  const lbl = document.getElementById('lbl_ff_maintenance');
-  if (lbl) { lbl.textContent = 'ON'; lbl.className = 'toggle-label text-danger'; }
-  closeModal('maintenanceModal');
-  showToast('⚠ MAINTENANCE MODE ENABLED — players blocked');
-}
 
-function cancelMaintenance() {
-  pendingMaintenanceCheckbox = null;
-  closeModal('maintenanceModal');
-}
-
-function closeModal(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.remove('open');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 3000);
-}
+  document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

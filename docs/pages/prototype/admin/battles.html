@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>戰鬥記錄 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
+  </div>
+</header>
+<div id="sidebarContainer"></div>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">⚔️ 戰鬥記錄</h1>
+    <span class="page-subtitle">Flag / Unflag 可疑戰鬥</span>
+  </div>
+
+  <div class="search-bar" style="grid-template-columns:2fr 1fr 1fr auto;">
+    <input id="searchInput" class="form-input" type="text" placeholder="搜尋 Match ID / 寵物名稱…" oninput="renderTable()" />
+    <select id="modeFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有模式</option>
+      <option value="RACE">RACE</option>
+      <option value="STRENGTH">STRENGTH</option>
+    </select>
+    <select id="flaggedFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有</option>
+      <option value="true">已旗標</option>
+      <option value="false">未旗標</option>
+    </select>
+    <button class="btn btn-primary" onclick="renderTable()">搜尋</button>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Match ID</th><th>Pet A</th><th>Pet B</th><th>勝者</th>
+        <th>模式</th><th>旗標</th><th>建立時間</th><th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="battlesBody"></tbody>
+  </table>
+  <div class="pagination" id="paginationWrap"></div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-card" style="max-width:520px;">
+    <h3>⚔️ 戰鬥詳情</h3>
+    <div id="detailContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('detailModal')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  var battles = ADMIN_MOCK.battles.map(function (b) { return Object.assign({}, b); });
+  var PAGE_SIZE = 20;
+  var currentPage = 1;
+
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    document.getElementById('currentUserLabel').textContent = u.username + ' (' + roleDisplayName(u.role) + ')';
+    document.getElementById('sidebarContainer').innerHTML = renderSidebar('battles');
+    renderTable();
+  }
+
+  function filtered() {
+    var q = (document.getElementById('searchInput').value || '').toLowerCase();
+    var mode = document.getElementById('modeFilter').value;
+    var flagged = document.getElementById('flaggedFilter').value;
+    return battles.filter(function (b) {
+      var matchQ = !q || b.id.toLowerCase().indexOf(q) !== -1
+        || b.pet_a.toLowerCase().indexOf(q) !== -1
+        || b.pet_b.toLowerCase().indexOf(q) !== -1;
+      var matchM = !mode || b.mode === mode;
+      var matchF = flagged === '' ? true : (flagged === 'true' ? b.flagged : !b.flagged);
+      return matchQ && matchM && matchF;
+    });
+  }
+
+  function renderTable() {
+    var data = filtered();
+    var start = (currentPage - 1) * PAGE_SIZE;
+    var page = data.slice(start, start + PAGE_SIZE);
+    var u = ADMIN_MOCK.currentUser;
+    var canMutate = u.role === 'super_admin' || u.role === 'moderator';
+    var tbody = document.getElementById('battlesBody');
+
+    tbody.innerHTML = page.map(function (b) {
+      var flaggedBadge = b.flagged
+        ? '<span class="status-badge flagged">⚑ Flagged</span>'
+        : '<span class="status-badge inactive">—</span>';
+      var actions = '';
+      if (canMutate) {
+        if (!b.flagged) {
+          actions += '<button class="icon-btn danger" onclick="doFlag(\'' + escapeHtml(b.id) + '\')">Flag</button>';
+        } else {
+          actions += '<button class="icon-btn success" onclick="doUnflag(\'' + escapeHtml(b.id) + '\')">Unflag</button>';
+        }
+      }
+      actions += '<button class="icon-btn" onclick="openDetail(\'' + escapeHtml(b.id) + '\')">詳情</button>';
+      return '<tr>'
+        + '<td class="mono">' + escapeHtml(b.id.slice(0, 8)) + '</td>'
+        + '<td>' + escapeHtml(b.pet_a) + '</td>'
+        + '<td>' + escapeHtml(b.pet_b) + '</td>'
+        + '<td><strong>' + escapeHtml(b.winner) + '</strong></td>'
+        + '<td><span class="status-badge ' + (b.mode === 'RACE' ? 'warning' : 'inactive') + '">' + escapeHtml(b.mode) + '</span></td>'
+        + '<td>' + flaggedBadge + '</td>'
+        + '<td>' + escapeHtml(b.created_at) + '</td>'
+        + '<td><div class="action-cell">' + actions + '</div></td>'
+        + '</tr>';
+    }).join('');
+
+    renderPagination(data.length);
+  }
+
+  function renderPagination(total) {
+    var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    var wrap = document.getElementById('paginationWrap');
+    var btns = '<button onclick="goPage(' + Math.max(1, currentPage - 1) + ')">‹</button>';
+    for (var i = 1; i <= totalPages; i++) {
+      btns += '<span class="page-num' + (i === currentPage ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</span>';
+    }
+    btns += '<button onclick="goPage(' + Math.min(totalPages, currentPage + 1) + ')">›</button>';
+    btns += '<span class="pagination-info">共 ' + total + ' 筆</span>';
+    wrap.innerHTML = btns;
+  }
+
+  function goPage(n) { currentPage = n; renderTable(); }
+
+  function doFlag(id) {
+    var b = battles.find(function (x) { return x.id === id; });
+    if (!b) { return; }
+    b.flagged = true;
+    b.flag_reason = '手動旗標';
+    renderTable();
+    showToast('已旗標戰鬥：' + id.slice(0, 8), 'warning');
+  }
+
+  function doUnflag(id) {
+    var b = battles.find(function (x) { return x.id === id; });
+    if (!b) { return; }
+    b.flagged = false;
+    b.flag_reason = null;
+    renderTable();
+    showToast('已移除旗標：' + id.slice(0, 8), 'success');
+  }
+
+  function openDetail(id) {
+    var b = battles.find(function (x) { return x.id === id; });
+    if (!b) { return; }
+    var content = document.getElementById('detailContent');
+    if (!content) { return; }
+    content.innerHTML = '<table class="data-table" style="margin-top:8px;"><tbody>'
+      + row('Match ID', '<span class="mono">' + escapeHtml(b.id) + '</span>')
+      + row('Pet A', escapeHtml(b.pet_a))
+      + row('Pet B', escapeHtml(b.pet_b))
+      + row('勝者', '<strong>' + escapeHtml(b.winner) + '</strong>')
+      + row('模式', escapeHtml(b.mode))
+      + row('旗標', b.flagged ? '⚑ Flagged' : '—')
+      + row('旗標原因', escapeHtml(b.flag_reason || '—'))
+      + row('建立時間', escapeHtml(b.created_at))
+      + '</tbody></table>';
+    openModal('detailModal');
+  }
+
+  function row(label, value) {
+    return '<tr><td style="color:var(--admin-text-dim);width:100px;">' + label + '</td><td>' + value + '</td></tr>';
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

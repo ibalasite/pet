@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feature Flags · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+  <style>
+    .toggle-wrap {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pill-toggle {
+      position: relative; width: 48px; height: 26px; flex-shrink: 0;
+    }
+    .pill-toggle input { opacity: 0; width: 0; height: 0; }
+    .pill-track {
+      position: absolute; inset: 0; border-radius: 13px;
+      background: var(--admin-border); cursor: pointer; transition: background 0.2s;
+    }
+    .pill-track::after {
+      content: ''; position: absolute; left: 4px; top: 4px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: transform 0.2s;
+    }
+    .pill-toggle input:checked + .pill-track { background: var(--admin-success); }
+    .pill-toggle input:checked + .pill-track::after { transform: translateX(22px); }
+  </style>
+</head>
+<body>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
+  </div>
+</header>
+<div id="sidebarContainer"></div>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">🚩 Feature Flag 管理</h1>
+    <span class="page-subtitle">super_admin only — 切換後立即影響所有用戶</span>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Flag ID</th><th>描述</th><th>目前狀態</th><th>最後修改</th><th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="flagsBody"></tbody>
+  </table>
+</main>
+
+<!-- Confirm Toggle Modal -->
+<div class="modal-overlay" id="toggleModal">
+  <div class="modal-card">
+    <h3 id="toggleModalTitle">確認切換 Feature Flag</h3>
+    <p class="modal-desc" id="toggleModalDesc"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="cancelToggle()">取消</button>
+      <button class="btn btn-primary" id="toggleConfirmBtn" onclick="confirmToggle()">確認</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  var flags = (ADMIN_MOCK.featureFlags || []).map(function (f) { return Object.assign({}, f); });
+  var pendingToggleIdx = null;
+
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    var labelEl = document.getElementById('currentUserLabel');
+    if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
+    var sidebar = document.getElementById('sidebarContainer');
+    if (sidebar) { sidebar.innerHTML = renderSidebar('config-flags'); }
+    renderTable();
+  }
+
+  function renderTable() {
+    var tbody = document.getElementById('flagsBody');
+    if (!tbody) { return; }
+
+    tbody.innerHTML = flags.map(function (f, idx) {
+      var statusBadge = f.enabled
+        ? '<span class="status-badge active">🟢 Enabled</span>'
+        : '<span class="status-badge inactive">🔴 Disabled</span>';
+      var toggleAction = '<button class="icon-btn" onclick="askToggle(' + idx + ')">'
+        + (f.enabled ? 'Disable' : 'Enable') + '</button>';
+      return '<tr>'
+        + '<td class="mono">' + escapeHtml(f.id) + '</td>'
+        + '<td>' + escapeHtml(f.desc) + '</td>'
+        + '<td>' + statusBadge + '</td>'
+        + '<td>' + escapeHtml(f.updated) + '</td>'
+        + '<td>' + toggleAction + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function askToggle(idx) {
+    if (typeof idx !== 'number' || idx < 0 || idx >= flags.length) { return; }
+    pendingToggleIdx = idx;
+    var f = flags[idx];
+    var action = f.enabled ? 'Disable' : 'Enable';
+    var titleEl = document.getElementById('toggleModalTitle');
+    var descEl = document.getElementById('toggleModalDesc');
+    var btnEl = document.getElementById('toggleConfirmBtn');
+    if (titleEl) { titleEl.textContent = '確認 ' + action + ' Flag'; }
+    if (descEl) {
+      descEl.textContent = action + ' [' + f.id + '] 將立即影響所有用戶的 '
+        + f.desc + ' 功能可用性。是否繼續？';
+    }
+    if (btnEl) { btnEl.textContent = '確認 ' + action; }
+    openModal('toggleModal');
+  }
+
+  function cancelToggle() {
+    pendingToggleIdx = null;
+    closeModal('toggleModal');
+  }
+
+  function confirmToggle() {
+    if (pendingToggleIdx === null || pendingToggleIdx < 0 || pendingToggleIdx >= flags.length) {
+      closeModal('toggleModal');
+      return;
+    }
+    var f = flags[pendingToggleIdx];
+    f.enabled = !f.enabled;
+    f.updated = new Date().toISOString().slice(0, 10);
+    pendingToggleIdx = null;
+    closeModal('toggleModal');
+    renderTable();
+    showToast('已更新 ' + f.id + '：' + (f.enabled ? 'Enabled' : 'Disabled'), 'success');
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

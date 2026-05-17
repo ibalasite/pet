@@ -1,236 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Audit Log · Pixel Pet Arena Admin</title>
+  <title>稽核日誌 · Pixel Pet Arena Admin</title>
   <link rel="stylesheet" href="assets/admin-style.css" />
 </head>
 <body>
-
 <header class="admin-topnav">
   <a href="../../index.html" class="back-link">← 文件站</a>
   <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
   <div class="topnav-right">
-    <span class="current-user">System Admin (super_admin)</span>
-    <button class="logout-btn" onclick="location.href='admin-login.html'">Logout</button>
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
   </div>
 </header>
+<div id="sidebarContainer"></div>
 
-<nav class="admin-sidebar">
-  <div class="sidebar-brand">🛡️ Admin Portal</div>
-  <ul class="sidebar-nav">
-    <li class="nav-item"><a href="../../admin-dashboard.html">📊 Dashboard</a></li>
-    <li class="nav-item"><a href="admin-users.html">👥 Users</a></li>
-    <li class="nav-item"><a href="admin-roles.html">🗝️ Roles</a></li>
-    <li class="nav-item active"><a href="admin-audit-log.html">📜 Audit Log</a></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>🐾 Pet Moderation</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>🏆 Leaderboard</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>⚙️ Runtime Config</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>📧 Email Monitor</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>📈 Analytics</span></li>
-  </ul>
-</nav>
-
-<main class="admin-main">
+<main class="admin-main" id="mainContent">
   <div class="page-header">
-    <h1 class="page-title">📜 Audit Log <span class="lock-icon" title="Read-only, immutable">🔒</span></h1>
-    <button class="btn btn-primary" onclick="exportAuditCsv()">⬇ Export CSV</button>
+    <h1 class="page-title">📜 稽核日誌</h1>
+    <button class="btn btn-primary" onclick="exportCSV()">⬇ 匯出 CSV</button>
   </div>
 
-  <!-- Filter bar -->
-  <div class="search-bar" style="grid-template-columns: repeat(4, 1fr) auto auto;">
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Date from</label>
-      <input type="date" id="dateFrom" class="form-input" />
-    </div>
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Date to</label>
-      <input type="date" id="dateTo" class="form-input" />
-    </div>
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Operator</label>
-      <input type="text" id="opSearch" class="form-input" placeholder="username or name" />
-    </div>
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Action type</label>
-      <select id="actionType" class="form-select">
-        <option value="">All actions</option>
-        <option>PET_BAN</option>
-        <option>PET_FLAG</option>
-        <option>PET_UNBAN</option>
-        <option>BATTLE_INVALIDATE</option>
-        <option>LEADERBOARD_EXCLUDE</option>
-        <option>USER_CREATE</option>
-        <option>USER_LOCK</option>
-        <option>ROLE_ASSIGN</option>
-        <option>CONFIG_CHANGE</option>
-        <option>AUDIT_VIEW</option>
-        <option>AUDIT_EXPORT</option>
-        <option>ANALYTICS_EXPORT</option>
-        <option>GDPR_PROCESS</option>
-        <option>EMAIL_RESEND</option>
-        <option>LOGIN_FAILED</option>
-      </select>
-    </div>
-    <button class="btn btn-primary" style="align-self: end;" onclick="applyAuditFilters()">Search</button>
-    <button class="btn btn-ghost" style="align-self: end;" onclick="resetAuditFilters()">Reset</button>
+  <div class="search-bar" style="grid-template-columns:1fr 1fr 1fr auto;">
+    <input id="searchInput" class="form-input" type="text" placeholder="搜尋操作員 / 動作 / 對象…" oninput="renderTable()" />
+    <select id="operatorFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有操作員</option>
+    </select>
+    <select id="actionFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有動作類型</option>
+      <option value="pet:ban">pet:ban</option>
+      <option value="pet:unban">pet:unban</option>
+      <option value="battle:flag">battle:flag</option>
+      <option value="battle:unflag">battle:unflag</option>
+      <option value="leaderboard:remove">leaderboard:remove</option>
+      <option value="config:runtime:update">config:runtime:update</option>
+      <option value="config:economy:update">config:economy:update</option>
+      <option value="config:flags:update">config:flags:update</option>
+      <option value="gdpr:process">gdpr:process</option>
+      <option value="gdpr:complete">gdpr:complete</option>
+    </select>
+    <button class="btn btn-primary" onclick="renderTable()">篩選</button>
   </div>
 
-  <!-- Table -->
-  <table class="data-table" id="auditTable">
+  <table class="data-table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Operator</th>
-        <th>Action</th>
-        <th>Target</th>
-        <th>IP</th>
-        <th>Timestamp</th>
-        <th>Result</th>
+        <th>ID</th><th>操作員</th><th>動作</th><th>對象</th><th>IP（masked）</th><th>時間</th><th>結果</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="auditBody"></tbody>
   </table>
-
-  <!-- Pagination -->
-  <div class="pagination" id="paginator"></div>
-
-  <p class="note">🔒 Audit logs are immutable. Records cannot be edited or deleted, and are retained for <strong>2 years</strong> per compliance policy. Export operations are themselves logged.</p>
+  <div class="pagination" id="paginationWrap"></div>
 </main>
+
+<!-- 403 for non-super_admin -->
+<div id="forbiddenBanner" style="display:none;padding:48px 32px;text-align:center;">
+  <div style="font-size:64px;">🔒</div>
+  <h2 style="margin:16px 0 8px;">存取受限</h2>
+  <p style="color:var(--admin-text-dim);">稽核日誌僅限 super_admin 存取</p>
+  <a href="admin-dashboard.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex;">返回控制台</a>
+</div>
 
 <script src="assets/admin-mock.js"></script>
 <script>
-  const PAGE_SIZE = 10;
-  let filtered = ADMIN_MOCK.auditLogs.slice();
-  let currentPage = 1;
+  var logs = (ADMIN_MOCK.auditLogs || []).map(function (l) { return Object.assign({}, l); });
+  var PAGE_SIZE = 20;
+  var currentPage = 1;
 
-  function renderAudit() {
-    const tbody = document.querySelector('#auditTable tbody');
-    tbody.textContent = '';
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    var labelEl = document.getElementById('currentUserLabel');
+    if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
+    var sidebar = document.getElementById('sidebarContainer');
+    if (sidebar) { sidebar.innerHTML = renderSidebar('audit'); }
 
-    const start = (currentPage - 1) * PAGE_SIZE;
-    const slice = filtered.slice(start, start + PAGE_SIZE);
-
-    slice.forEach((row) => {
-      const tr = document.createElement('tr');
-      tr.appendChild(td(row.id, 'mono'));
-      tr.appendChild(td(row.operator_name + ' (' + row.operator + ')'));
-      tr.appendChild(td(row.action, 'mono'));
-      tr.appendChild(td(row.target));
-      tr.appendChild(td(row.ip, 'mono'));
-      tr.appendChild(td(row.ts, 'mono'));
-
-      const resCell = document.createElement('td');
-      const badge = document.createElement('span');
-      badge.className = 'status-badge ' + (row.result === 'success' ? 'success' : 'failed');
-      badge.textContent = row.result;
-      resCell.appendChild(badge);
-      tr.appendChild(resCell);
-      tbody.appendChild(tr);
-    });
-
-    if (slice.length === 0) {
-      const tr = document.createElement('tr');
-      const cell = document.createElement('td');
-      cell.colSpan = 7;
-      cell.className = 'text-dim';
-      cell.style.textAlign = 'center';
-      cell.style.padding = '24px';
-      cell.textContent = 'No audit entries match the current filter.';
-      tr.appendChild(cell);
-      tbody.appendChild(tr);
+    if (u.role !== 'super_admin') {
+      var main = document.getElementById('mainContent');
+      var banned = document.getElementById('forbiddenBanner');
+      if (main) { main.style.display = 'none'; }
+      if (banned) { banned.style.display = 'block'; }
+      return;
     }
 
-    renderPaginator();
-  }
-
-  function td(text, cls) {
-    const el = document.createElement('td');
-    if (cls) el.className = cls;
-    el.textContent = text == null ? '—' : text;
-    return el;
-  }
-
-  function renderPaginator() {
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-    const pag = document.getElementById('paginator');
-    pag.textContent = '';
-
-    const prev = document.createElement('button');
-    prev.textContent = '‹ Prev';
-    prev.disabled = currentPage === 1;
-    prev.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderAudit(); }});
-    pag.appendChild(prev);
-
-    for (let i = 1; i <= totalPages; i++) {
-      const span = document.createElement('span');
-      span.className = 'page-num' + (i === currentPage ? ' active' : '');
-      span.textContent = i;
-      span.addEventListener('click', () => { currentPage = i; renderAudit(); });
-      pag.appendChild(span);
+    /* Populate operator filter */
+    var ops = [];
+    logs.forEach(function (l) {
+      if (ops.indexOf(l.operator) === -1) { ops.push(l.operator); }
+    });
+    var opSel = document.getElementById('operatorFilter');
+    if (opSel) {
+      ops.forEach(function (op) {
+        var opt = document.createElement('option');
+        opt.value = op;
+        opt.textContent = op;
+        opSel.appendChild(opt);
+      });
     }
 
-    const next = document.createElement('button');
-    next.textContent = 'Next ›';
-    next.disabled = currentPage === totalPages;
-    next.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderAudit(); }});
-    pag.appendChild(next);
+    renderTable();
+  }
 
-    const info = document.createElement('span');
-    info.className = 'pagination-info';
-    const start = (currentPage - 1) * PAGE_SIZE + 1;
-    const end   = Math.min(currentPage * PAGE_SIZE, filtered.length);
-    if (filtered.length === 0) {
-      info.textContent = '0 records';
-    } else {
-      info.textContent = currentPage + ' / ' + totalPages + ' (' + filtered.length + ' records, showing ' + start + '–' + end + ')';
+  function safeStr(v) { return v == null ? '' : String(v); }
+
+  function filtered() {
+    var q = (document.getElementById('searchInput').value || '').toLowerCase();
+    var op = document.getElementById('operatorFilter').value;
+    var action = document.getElementById('actionFilter').value;
+    return logs.filter(function (l) {
+      var matchQ = !q
+        || safeStr(l.operator).toLowerCase().indexOf(q) !== -1
+        || safeStr(l.action).toLowerCase().indexOf(q) !== -1
+        || safeStr(l.target).toLowerCase().indexOf(q) !== -1;
+      var matchOp = !op || l.operator === op;
+      var matchA = !action || l.action === action;
+      return matchQ && matchOp && matchA;
+    });
+  }
+
+  function renderTable() {
+    var data = filtered();
+    var start = (currentPage - 1) * PAGE_SIZE;
+    var page = data.slice(start, start + PAGE_SIZE);
+    var tbody = document.getElementById('auditBody');
+    if (!tbody) { return; }
+
+    if (page.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--admin-text-dim);padding:32px;">無符合條件的稽核記錄</td></tr>';
+      renderPagination(0);
+      return;
     }
-    pag.appendChild(info);
+
+    tbody.innerHTML = page.map(function (l) {
+      var resultClass = l.result === 'success' ? 'success' : 'failed';
+      return '<tr>'
+        + '<td class="mono">' + escapeHtml(String(l.id)) + '</td>'
+        + '<td>' + escapeHtml(l.operator) + '</td>'
+        + '<td><code style="font-size:11px;color:var(--admin-accent);">' + escapeHtml(l.action) + '</code></td>'
+        + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(l.target) + '</td>'
+        + '<td class="mono">' + escapeHtml(l.ip) + '</td>'
+        + '<td>' + escapeHtml(l.ts) + '</td>'
+        + '<td><span class="status-badge ' + resultClass + '">' + escapeHtml(l.result) + '</span></td>'
+        + '</tr>';
+    }).join('');
+
+    renderPagination(data.length);
   }
 
-  function applyAuditFilters() {
-    const from   = document.getElementById('dateFrom').value;
-    const to     = document.getElementById('dateTo').value;
-    const opKw   = (document.getElementById('opSearch').value || '').trim().toLowerCase();
-    const action = document.getElementById('actionType').value;
-
-    filtered = ADMIN_MOCK.auditLogs.filter((r) => {
-      if (from && r.ts.slice(0, 10) < from) return false;
-      if (to   && r.ts.slice(0, 10) > to)   return false;
-      if (opKw) {
-        const hay = (r.operator + ' ' + r.operator_name).toLowerCase();
-        if (hay.indexOf(opKw) === -1) return false;
-      }
-      if (action && r.action !== action) return false;
-      return true;
-    });
-    currentPage = 1;
-    renderAudit();
+  function renderPagination(total) {
+    var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    var wrap = document.getElementById('paginationWrap');
+    if (!wrap) { return; }
+    var btns = '<button onclick="goPage(' + Math.max(1, currentPage - 1) + ')">‹</button>';
+    for (var i = 1; i <= totalPages; i++) {
+      btns += '<span class="page-num' + (i === currentPage ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</span>';
+    }
+    btns += '<button onclick="goPage(' + Math.min(totalPages, currentPage + 1) + ')">›</button>';
+    btns += '<span class="pagination-info">共 ' + total + ' 筆</span>';
+    wrap.innerHTML = btns;
   }
 
-  function resetAuditFilters() {
-    document.getElementById('dateFrom').value = '';
-    document.getElementById('dateTo').value = '';
-    document.getElementById('opSearch').value = '';
-    document.getElementById('actionType').value = '';
-    filtered = ADMIN_MOCK.auditLogs.slice();
-    currentPage = 1;
-    renderAudit();
+  function goPage(n) { currentPage = n; renderTable(); }
+
+  function exportCSV() {
+    var data = filtered();
+    var header = ['ID', 'Operator', 'Action', 'Target', 'IP', 'Timestamp', 'Result'];
+    var rows = [header].concat(data.map(function (l) {
+      return [l.id, l.operator, l.action, l.target, l.ip, l.ts, l.result];
+    }));
+    downloadCSV('audit-log-' + new Date().toISOString().slice(0, 10) + '.csv', rows);
+    showToast('CSV 匯出成功', 'success');
   }
 
-  function exportAuditCsv() {
-    const headers = ['id', 'operator', 'operator_name', 'action', 'target', 'ip', 'timestamp', 'result', 'detail'];
-    const rows = [headers];
-    ADMIN_MOCK.auditLogs.forEach((r) => {
-      rows.push([r.id, r.operator, r.operator_name, r.action, r.target, r.ip, r.ts, r.result, r.detail || '']);
-    });
-    const filename = 'audit-log-' + new Date().toISOString().slice(0, 10) + '.csv';
-    downloadCSV(filename, rows);
-    showToast('⬇ Exported ' + (rows.length - 1) + ' audit rows to CSV', 'success');
-  }
-
-  renderAudit();
+  document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

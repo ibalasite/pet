@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOTP 設定 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+  <style>
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 2px;
+      width: 160px;
+      height: 160px;
+      margin: 16px auto;
+      background: #fff;
+      padding: 8px;
+      border-radius: 4px;
+    }
+    .qr-cell { border-radius: 1px; }
+    .qr-dark { background: #111; }
+    .qr-light { background: #fff; }
+    .backup-codes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .backup-code {
+      font-family: 'SF Mono', 'Menlo', monospace;
+      font-size: 13px;
+      padding: 6px 10px;
+      background: var(--admin-bg);
+      border: 1px solid var(--admin-border);
+      border-radius: var(--radius-sm);
+      color: var(--admin-text);
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    .secret-key {
+      font-family: 'SF Mono', 'Menlo', monospace;
+      background: var(--admin-bg);
+      border: 1px solid var(--admin-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 15px;
+      letter-spacing: 2px;
+      color: var(--admin-accent);
+      word-break: break-all;
+      cursor: pointer;
+    }
+    .step-indicator { display: flex; gap: 8px; margin-bottom: 20px; }
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .step-dot.active { background: var(--admin-accent); color: #fff; }
+    .step-dot.done { background: var(--admin-success); color: #fff; }
+    .step-dot.pending { background: var(--admin-surface-2); color: var(--admin-text-dim); }
+    .step-line { flex: 1; height: 2px; background: var(--admin-border); align-self: center; }
+  </style>
+</head>
+<body>
+
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+</header>
+
+<div class="login-shell">
+  <div class="login-card" style="max-width:480px;">
+
+    <div class="step-indicator">
+      <div class="step-dot" id="dot1">1</div>
+      <div class="step-line"></div>
+      <div class="step-dot" id="dot2">2</div>
+      <div class="step-line"></div>
+      <div class="step-dot" id="dot3">3</div>
+    </div>
+
+    <!-- Phase 1: QR + secret -->
+    <div id="phase1">
+      <h1>🔐 設定雙因素驗證</h1>
+      <p class="subtitle">首次登入需要設定 TOTP — 請使用 Google Authenticator 或 Authy 掃描下方 QR Code</p>
+
+      <div class="qr-grid" id="qrGrid"></div>
+
+      <p style="text-align:center;font-size:12px;color:var(--admin-text-dim);margin:0 0 8px;">或手動輸入 Secret Key：</p>
+      <div class="secret-key" id="secretKey" onclick="copySecret()" title="點擊複製">JBSWY3DPEHPK3PXP</div>
+      <p style="font-size:11px;color:var(--admin-text-dim);text-align:center;margin:4px 0 16px;">點擊複製</p>
+
+      <h3 style="font-size:13px;margin:0 0 8px;">備用碼（請妥善保存）</h3>
+      <div class="backup-codes" id="backupCodes"></div>
+      <p style="font-size:11px;color:var(--admin-text-dim);margin:4px 0 16px;">每組備用碼只能使用一次</p>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="goPhase2()">
+        我已掃描並記錄備用碼，繼續 →
+      </button>
+    </div>
+
+    <!-- Phase 2: 輸入第一個 TOTP 確認 -->
+    <div id="phase2" style="display:none;">
+      <h1>✅ 確認設定</h1>
+      <p class="subtitle">請輸入 Authenticator App 現在顯示的 6 位數字，確認設定成功</p>
+
+      <div id="phase2Error" class="error-msg">驗證碼錯誤，請確認 App 時間正確</div>
+
+      <div class="form-group">
+        <label>驗證碼</label>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
+          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
+          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
+          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
+          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
+          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" id="confirmBtn" onclick="doConfirm()">
+        確認啟用 TOTP
+      </button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="backPhase1()">
+        ← 返回
+      </button>
+
+      <div class="demo-hint">Demo 驗證碼：123456</div>
+    </div>
+
+  </div>
+</div>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  /* QR code pattern (simulated 10×10) */
+  var QR_PATTERN = [
+    1,1,1,1,1,1,1,0,1,0,
+    1,0,0,0,0,0,1,0,0,1,
+    1,0,1,1,1,0,1,0,1,0,
+    1,0,1,1,1,0,1,0,0,1,
+    1,0,1,1,1,0,1,0,1,1,
+    1,0,0,0,0,0,1,0,0,0,
+    1,1,1,1,1,1,1,0,1,0,
+    0,0,0,0,0,0,0,0,1,1,
+    1,0,1,1,0,1,0,0,1,0,
+    0,1,0,0,1,0,1,1,0,1,
+  ];
+
+  var BACKUP_CODES = [
+    'A1B2C3D4', 'E5F6G7H8', 'I9J0K1L2', 'M3N4O5P6',
+    'Q7R8S9T0', 'U1V2W3X4', 'Y5Z6A7B8', 'C9D0E1F2',
+  ];
+
+  var confirmPending = false;
+
+  function initPage() {
+    /* Render QR */
+    var grid = document.getElementById('qrGrid');
+    grid.innerHTML = '';
+    QR_PATTERN.forEach(function (v) {
+      var cell = document.createElement('div');
+      cell.className = 'qr-cell ' + (v ? 'qr-dark' : 'qr-light');
+      grid.appendChild(cell);
+    });
+
+    /* Render backup codes */
+    var container = document.getElementById('backupCodes');
+    container.innerHTML = '';
+    BACKUP_CODES.forEach(function (code) {
+      var div = document.createElement('div');
+      div.className = 'backup-code';
+      div.textContent = code;
+      container.appendChild(div);
+    });
+
+    updateDots(1);
+    wireDigits();
+  }
+
+  function updateDots(phase) {
+    var dot1 = document.getElementById('dot1');
+    var dot2 = document.getElementById('dot2');
+    var dot3 = document.getElementById('dot3');
+    if (!dot1 || !dot2 || !dot3) { return; }
+    dot1.className = 'step-dot ' + (phase > 1 ? 'done' : 'active');
+    dot2.className = 'step-dot ' + (phase === 2 ? 'active' : phase > 2 ? 'done' : 'pending');
+    dot3.className = 'step-dot ' + (phase === 3 ? 'active' : 'pending');
+  }
+
+  function copySecret() {
+    var el = document.getElementById('secretKey');
+    if (!el) { return; }
+    navigator.clipboard.writeText(el.textContent).then(function () {
+      showToast('Secret key 已複製', 'success');
+    });
+  }
+
+  function goPhase2() {
+    document.getElementById('phase1').style.display = 'none';
+    document.getElementById('phase2').style.display = 'block';
+    updateDots(2);
+    var firstDigit = document.querySelectorAll('.totp-digit')[0];
+    if (firstDigit) { firstDigit.focus(); }
+  }
+
+  function backPhase1() {
+    document.getElementById('phase2').style.display = 'none';
+    document.getElementById('phase1').style.display = 'block';
+    updateDots(1);
+    document.getElementById('phase2Error').classList.remove('show');
+    document.querySelectorAll('.totp-digit').forEach(function (el) { el.value = ''; });
+  }
+
+  function doConfirm() {
+    if (confirmPending) { return; }
+    var digits = document.querySelectorAll('.totp-digit');
+    var code = '';
+    digits.forEach(function (el) { code += el.value; });
+    var btn = document.getElementById('confirmBtn');
+    var errEl = document.getElementById('phase2Error');
+    if (!btn || !errEl) { return; }
+
+    errEl.classList.remove('show');
+    confirmPending = true;
+    btn.textContent = '驗證中…';
+    btn.disabled = true;
+
+    setTimeout(function () {
+      confirmPending = false;
+      btn.textContent = '確認啟用 TOTP';
+      btn.disabled = false;
+      if (code === '123456') {
+        updateDots(3);
+        showToast('TOTP 設定成功！正在跳轉…', 'success');
+        setTimeout(function () { location.href = 'admin-dashboard.html'; }, 1200);
+      } else {
+        errEl.classList.add('show');
+        digits.forEach(function (el) { el.value = ''; });
+        var first = digits[0];
+        if (first) { first.focus(); }
+      }
+    }, 400);
+  }
+
+  function wireDigits() {
+    var digits = document.querySelectorAll('.totp-digit');
+    digits.forEach(function (el, idx) {
+      el.addEventListener('input', function () {
+        var v = el.value.replace(/[^0-9]/g, '');
+        el.value = v.length > 0 ? v[0] : '';
+        if (el.value && idx < digits.length - 1) { digits[idx + 1].focus(); }
+        if (el.value && idx === digits.length - 1 && !confirmPending) {
+          var allFilled = Array.from(digits).every(function (d) { return d.value.length === 1; });
+          if (allFilled) { doConfirm(); }
+        }
+      });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' && el.value === '' && idx > 0) { digits[idx - 1].focus(); }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initPage);
+</script>
+</body>
+</html>

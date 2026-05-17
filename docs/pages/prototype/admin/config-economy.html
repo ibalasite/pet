@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Economy 設定 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
+  </div>
+</header>
+<div id="sidebarContainer"></div>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">💰 Economy 設定</h1>
+    <span class="page-subtitle">super_admin only — 食物 Buff 倍率與競技場入場費</span>
+  </div>
+
+  <div class="panel" style="max-width:600px;">
+    <div class="panel-header"><h2 class="panel-title">食物 Buff 倍率</h2></div>
+
+    <div class="form-group">
+      <label>Speed Boost 倍率（1.0–5.0）</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input id="speedMul" class="form-input" type="number" min="1.0" max="5.0" step="0.1" value="1.5" style="max-width:100px;" />
+        <span style="color:var(--admin-text-dim);">x</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Strength Boost 倍率（1.0–5.0）</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input id="strengthMul" class="form-input" type="number" min="1.0" max="5.0" step="0.1" value="1.5" style="max-width:100px;" />
+        <span style="color:var(--admin-text-dim);">x</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Stamina Boost 倍率（1.0–5.0）</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input id="staminaMul" class="form-input" type="number" min="1.0" max="5.0" step="0.1" value="1.5" style="max-width:100px;" />
+        <span style="color:var(--admin-text-dim);">x</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Buff 持續時間（小時）</label>
+      <input id="buffDuration" class="form-input" type="number" min="1" max="168" value="24" style="max-width:100px;" />
+    </div>
+  </div>
+
+  <div class="panel" style="max-width:600px;">
+    <div class="panel-header"><h2 class="panel-title">競技場設定</h2></div>
+
+    <div class="form-group">
+      <label>戰鬥冷卻時間（分鐘）</label>
+      <input id="arenaCooldown" class="form-input" type="number" min="1" max="60" value="5" style="max-width:100px;" />
+    </div>
+  </div>
+
+  <div style="max-width:600px;">
+    <button class="btn btn-primary" onclick="doSave()">儲存設定</button>
+  </div>
+</main>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    var labelEl = document.getElementById('currentUserLabel');
+    if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
+    var sidebar = document.getElementById('sidebarContainer');
+    if (sidebar) { sidebar.innerHTML = renderSidebar('config-economy'); }
+  }
+
+  function doSave() {
+    var fields = ['speedMul', 'strengthMul', 'staminaMul', 'buffDuration', 'arenaCooldown'];
+    var valid = true;
+    fields.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) { return; }
+      var v = parseFloat(el.value);
+      if (isNaN(v) || v <= 0) { valid = false; }
+    });
+    if (!valid) {
+      showToast('請填寫所有有效數值', 'error');
+      return;
+    }
+    showToast('Economy 設定已儲存，稽核記錄已寫入', 'success');
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

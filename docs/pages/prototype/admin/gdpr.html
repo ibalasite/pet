@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GDPR 佇列 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
+  </div>
+</header>
+<div id="sidebarContainer"></div>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">🔐 GDPR 請求佇列</h1>
+    <span class="page-subtitle">super_admin only — SLA 7 天內完成</span>
+  </div>
+
+  <div class="search-bar" style="grid-template-columns:1fr 1fr 1fr;">
+    <select id="typeFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有類型</option>
+      <option value="erasure">erasure</option>
+      <option value="data_access">data_access</option>
+      <option value="restrict">restrict</option>
+      <option value="object">object</option>
+      <option value="rectification">rectification</option>
+    </select>
+    <select id="statusFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有狀態</option>
+      <option value="pending">pending</option>
+      <option value="processing">processing</option>
+      <option value="completed">completed</option>
+      <option value="rejected">rejected</option>
+    </select>
+    <button class="btn btn-primary" onclick="renderTable()">篩選</button>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Request ID</th><th>類型</th><th>狀態</th>
+        <th>Email</th><th>提交時間</th><th>SLA Deadline</th><th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="gdprBody"></tbody>
+  </table>
+</main>
+
+<!-- Reject Reason Modal -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal-card">
+    <h3>❌ 拒絕 GDPR 請求</h3>
+    <p class="modal-desc">請輸入拒絕原因（必填）</p>
+    <div class="form-group">
+      <label>拒絕原因</label>
+      <textarea id="rejectReason" class="form-textarea" rows="3" placeholder="例：請求缺乏合法依據…"></textarea>
+    </div>
+    <div id="rejectError" class="error-msg" style="display:none;">請填寫拒絕原因</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('rejectModal')">取消</button>
+      <button class="btn btn-danger" onclick="confirmReject()">確認拒絕</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  var gdprList = (ADMIN_MOCK.gdprRequests || []).map(function (r) { return Object.assign({}, r); });
+  var rejectTargetId = null;
+
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    var labelEl = document.getElementById('currentUserLabel');
+    if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
+    var sidebar = document.getElementById('sidebarContainer');
+    if (sidebar) { sidebar.innerHTML = renderSidebar('gdpr'); }
+    renderTable();
+  }
+
+  function filtered() {
+    var type = document.getElementById('typeFilter').value;
+    var status = document.getElementById('statusFilter').value;
+    return gdprList.filter(function (r) {
+      return (!type || r.type === type) && (!status || r.status === status);
+    });
+  }
+
+  function renderTable() {
+    var data = filtered();
+    var tbody = document.getElementById('gdprBody');
+    if (!tbody) { return; }
+
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--admin-text-dim);padding:32px;">無符合條件的 GDPR 請求</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(function (r) {
+      var slaText = r.sla_urgent ? '⚠ ' + r.sla_deadline : r.sla_deadline;
+      var typeBadge = '<span class="status-badge ' + typeClass(r.type) + '">' + escapeHtml(r.type) + '</span>';
+      var statusBadge = '<span class="status-badge ' + escapeHtml(r.status) + '">' + escapeHtml(r.status) + '</span>';
+
+      /* GDPR IDs are alphanumeric+hyphen only (e.g. GDPR-2026-0051).
+         Strip to that safe subset before embedding in a JS string literal. */
+      var safeId = String(r.id).replace(/[^A-Za-z0-9\-]/g, '');
+
+      var actions = '';
+      if (r.status === 'pending') {
+        actions += '<button class="icon-btn" onclick="doProcess(\'' + safeId + '\')">處理</button>';
+        actions += '<button class="icon-btn danger" onclick="openRejectModal(\'' + safeId + '\')">拒絕</button>';
+      } else if (r.status === 'processing') {
+        actions += '<button class="icon-btn success" onclick="doComplete(\'' + safeId + '\')">完成</button>';
+        actions += '<button class="icon-btn danger" onclick="openRejectModal(\'' + safeId + '\')">拒絕</button>';
+      }
+
+      return '<tr>'
+        + '<td class="mono">' + escapeHtml(r.id) + '</td>'
+        + '<td>' + typeBadge + '</td>'
+        + '<td>' + statusBadge + '</td>'
+        + '<td class="mono">' + escapeHtml(r.email) + '</td>'
+        + '<td>' + escapeHtml(r.submitted) + '</td>'
+        + '<td class="' + (r.sla_urgent ? 'sla-urgent' : '') + '">' + escapeHtml(slaText) + '</td>'
+        + '<td><div class="action-cell">' + (actions || '—') + '</div></td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function typeClass(type) {
+    var map = {
+      erasure: 'locked',
+      data_access: 'warning',
+      restrict: 'inactive',
+      object: 'inactive',
+      rectification: 'success',
+    };
+    return map[type] || 'inactive';
+  }
+
+  function doProcess(id) {
+    var r = gdprList.find(function (x) { return x.id === id; });
+    if (!r) { return; }
+    r.status = 'processing';
+    renderTable();
+    showToast('GDPR 請求已設為處理中：' + id, 'success');
+  }
+
+  function doComplete(id) {
+    var r = gdprList.find(function (x) { return x.id === id; });
+    if (!r) { return; }
+    r.status = 'completed';
+    renderTable();
+    showToast('GDPR 請求已完成：' + id, 'success');
+  }
+
+  function openRejectModal(id) {
+    rejectTargetId = id;
+    var reasonEl = document.getElementById('rejectReason');
+    var errEl = document.getElementById('rejectError');
+    if (reasonEl) { reasonEl.value = ''; }
+    if (errEl) { errEl.style.display = 'none'; }
+    openModal('rejectModal');
+  }
+
+  function confirmReject() {
+    if (!rejectTargetId) { closeModal('rejectModal'); return; }
+    var reasonEl = document.getElementById('rejectReason');
+    var errEl = document.getElementById('rejectError');
+    var reason = reasonEl ? reasonEl.value.trim() : '';
+    if (!reason) {
+      if (errEl) { errEl.style.display = 'block'; }
+      return;
+    }
+    var r = gdprList.find(function (x) { return x.id === rejectTargetId; });
+    if (!r) {
+      showToast('找不到對應請求', 'error');
+      rejectTargetId = null;
+      closeModal('rejectModal');
+      return;
+    }
+    r.status = 'rejected';
+    rejectTargetId = null;
+    closeModal('rejectModal');
+    renderTable();
+    showToast('GDPR 請求已拒絕', 'warning');
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

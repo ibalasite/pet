@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>403 存取被拒 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+  <style>
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      gap: 20px;
+      padding: 40px 20px;
+    }
+    .error-code {
+      font-size: 96px;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      color: var(--admin-danger);
+      line-height: 1;
+      text-shadow: 0 0 40px rgba(232,124,124,0.4);
+      letter-spacing: 8px;
+    }
+    .error-icon {
+      font-size: 64px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .error-title {
+      font-size: 22px;
+      color: var(--admin-text);
+      font-weight: 600;
+      margin: 0;
+    }
+    .error-desc {
+      font-size: 14px;
+      color: var(--admin-text-dim);
+      max-width: 420px;
+      line-height: 1.7;
+      margin: 0;
+    }
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .error-detail {
+      background: var(--admin-surface);
+      border: 1px solid var(--admin-border);
+      border-radius: 6px;
+      padding: 14px 20px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      color: var(--admin-text-dim);
+      max-width: 480px;
+      text-align: left;
+    }
+    .error-detail .detail-label {
+      color: var(--admin-warning);
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body style="background: var(--admin-bg, #0f0f1e); margin:0;">
+
+<div class="error-page">
+  <div class="error-icon">🔒</div>
+  <div class="error-code">403</div>
+  <h1 class="error-title">存取被拒絕</h1>
+  <p class="error-desc">
+    您的帳號沒有存取此頁面的權限。如需存取，請聯繫 Super Admin 調整您的角色權限。
+  </p>
+
+  <div class="error-detail">
+    <div><span class="detail-label">路徑：</span><span id="reqPath">—</span></div>
+    <div><span class="detail-label">帳號：</span><span id="reqUser">—</span></div>
+    <div><span class="detail-label">角色：</span><span id="reqRole">—</span></div>
+    <div><span class="detail-label">時間：</span><span id="reqTime">—</span></div>
+  </div>
+
+  <div class="error-actions">
+    <button class="btn btn-ghost" onclick="history.back()">← 返回上頁</button>
+    <button class="btn btn-primary" onclick="location.href='admin-dashboard.html'">前往控制台</button>
+    <button class="btn btn-ghost" onclick="location.href='admin-login.html'" style="color: var(--admin-danger); border-color: var(--admin-danger);">登出</button>
+  </div>
+</div>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  document.getElementById('reqPath').textContent = document.referrer
+    ? new URL(document.referrer).pathname
+    : location.pathname;
+  document.getElementById('reqUser').textContent = ADMIN_MOCK.currentUser.username;
+  document.getElementById('reqRole').textContent = roleDisplayName(ADMIN_MOCK.currentUser.role);
+  document.getElementById('reqTime').textContent = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+</script>
+</body>
+</html>

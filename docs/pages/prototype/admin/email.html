@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email 監控 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
+  </div>
+</header>
+<div id="sidebarContainer"></div>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">📧 Email 監控</h1>
+    <span class="page-subtitle">SendGrid 健康監控</span>
+  </div>
+
+  <!-- KPI 卡片 -->
+  <section class="stats-grid" id="emailStats"></section>
+
+  <!-- Bounce 分類 -->
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-header"><h2 class="panel-title">Bounce 原因分類</h2></div>
+      <div id="bounceBreakdown"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><h2 class="panel-title">發信狀態分佈</h2></div>
+      <div id="statusBreakdown"></div>
+    </div>
+  </div>
+
+  <!-- 最近 10 封信件 -->
+  <div class="panel">
+    <div class="panel-header"><h2 class="panel-title">最近 10 封信件狀態</h2></div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Transaction ID</th><th>收件者</th><th>主旨</th><th>狀態</th><th>時間</th><th>Bounce 原因</th></tr>
+      </thead>
+      <tbody id="emailLogBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    if (!u) { return; }
+    var labelEl = document.getElementById('currentUserLabel');
+    if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
+    var sidebar = document.getElementById('sidebarContainer');
+    if (sidebar) { sidebar.innerHTML = renderSidebar('email'); }
+
+    renderKPI();
+    renderBounceBreakdown();
+    renderStatusBreakdown();
+    renderEmailLog();
+  }
+
+  function renderKPI() {
+    var s = ADMIN_MOCK.stats;
+    if (!s) { return; }
+    var successRate = s.email_success_rate != null ? s.email_success_rate : 0;
+    var bounceRate  = s.email_bounce_rate  != null ? s.email_bounce_rate  : 0;
+    var emailsToday = s.emails_today       != null ? s.emails_today       : 0;
+    var cards = [
+      { title: '發信成功率', value: successRate + '%', trend: '✓ 正常', trendClass: 'trend-up' },
+      { title: 'Bounce Rate', value: bounceRate + '%', trend: bounceRate > 2 ? '⚠ 偏高' : '✓ 正常', trendClass: bounceRate > 2 ? 'trend-down' : 'trend-up' },
+      { title: '今日發信數', value: emailsToday.toLocaleString(), trend: '↑ 12.3%', trendClass: 'trend-up' },
+    ];
+    var grid = document.getElementById('emailStats');
+    if (!grid) { return; }
+    grid.innerHTML = cards.map(function (c) {
+      return '<div class="stats-card">'
+        + '<div class="stat-title">' + escapeHtml(c.title) + '</div>'
+        + '<div class="stat-number">' + escapeHtml(String(c.value)) + '</div>'
+        + '<span class="stat-trend ' + c.trendClass + '">' + escapeHtml(c.trend) + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  function renderBounceBreakdown() {
+    var breakdown = [
+      { reason: '無效地址', count: 3, pct: 50 },
+      { reason: '信箱已滿', count: 2, pct: 33 },
+      { reason: '伺服器拒絕', count: 1, pct: 17 },
+    ];
+    var container = document.getElementById('bounceBreakdown');
+    if (!container) { return; }
+    container.innerHTML = breakdown.map(function (b) {
+      return '<div style="margin-bottom:12px;">'
+        + '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">'
+        + '<span>' + escapeHtml(b.reason) + '</span>'
+        + '<span style="color:var(--admin-text-dim);">' + escapeHtml(String(b.count)) + ' 次</span>'
+        + '</div>'
+        + '<div style="background:var(--admin-surface-2);border-radius:4px;height:8px;">'
+        + '<div style="width:' + b.pct + '%;background:var(--admin-danger);height:100%;border-radius:4px;"></div>'
+        + '</div></div>';
+    }).join('');
+  }
+
+  function renderStatusBreakdown() {
+    var logs = ADMIN_MOCK.emailLogs || [];
+    var counts = { delivered: 0, bounced: 0, failed: 0 };
+    logs.forEach(function (l) {
+      if (Object.prototype.hasOwnProperty.call(counts, l.status)) {
+        counts[l.status]++;
+      }
+    });
+    var total = logs.length || 1;
+    var items = [
+      { label: 'Delivered', key: 'delivered', color: 'var(--admin-success)' },
+      { label: 'Bounced',   key: 'bounced',   color: 'var(--admin-warning)' },
+      { label: 'Failed',    key: 'failed',    color: 'var(--admin-danger)'  },
+    ];
+    var container = document.getElementById('statusBreakdown');
+    if (!container) { return; }
+    container.innerHTML = items.map(function (item) {
+      var cnt = counts[item.key];
+      var pct = Math.round((cnt / total) * 100);
+      return '<div style="margin-bottom:12px;">'
+        + '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">'
+        + '<span>' + escapeHtml(item.label) + '</span>'
+        + '<span style="color:var(--admin-text-dim);">' + cnt + ' (' + pct + '%)</span>'
+        + '</div>'
+        + '<div style="background:var(--admin-surface-2);border-radius:4px;height:8px;">'
+        + '<div style="width:' + pct + '%;background:' + item.color + ';height:100%;border-radius:4px;"></div>'
+        + '</div></div>';
+    }).join('');
+  }
+
+  function renderEmailLog() {
+    var logs = (ADMIN_MOCK.emailLogs || []).slice(0, 10);
+    var tbody = document.getElementById('emailLogBody');
+    if (!tbody) { return; }
+    tbody.innerHTML = logs.map(function (l) {
+      var statusMap = { delivered: 'active', bounced: 'warning', failed: 'locked' };
+      var statusClass = statusMap[l.status] || 'inactive';
+      return '<tr>'
+        + '<td class="mono">' + escapeHtml(l.id) + '</td>'
+        + '<td class="mono">' + escapeHtml(l.to) + '</td>'
+        + '<td>' + escapeHtml(l.subject) + '</td>'
+        + '<td><span class="status-badge ' + statusClass + '">' + escapeHtml(l.status) + '</span></td>'
+        + '<td>' + escapeHtml(l.ts) + '</td>'
+        + '<td>' + escapeHtml(l.bounce_reason || '—') + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

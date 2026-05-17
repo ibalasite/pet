@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>可疑活動 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
+</head>
+<body>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
+  </div>
+</header>
+<div id="sidebarContainer"></div>
+
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">🚨 可疑活動</h1>
+  </div>
+
+  <div class="panel" style="border-left:4px solid var(--admin-warning);margin-bottom:20px;">
+    <p style="margin:0;color:var(--admin-warning);">
+      ⚠️ 下列寵物在過去 60 分鐘內戰鬥超過 50 次，疑似 bot 行為。請審核並採取行動。
+    </p>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Pet ID</th><th>名稱</th><th>60min 戰鬥數</th>
+        <th>已旗標戰鬥</th><th>擁有者 Email</th><th>偵測時間</th><th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="suspiciousBody"></tbody>
+  </table>
+</main>
+
+<script src="assets/admin-mock.js"></script>
+<script>
+  var suspiciousList = ADMIN_MOCK.suspiciousPets.map(function (p) { return Object.assign({}, p); });
+
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    document.getElementById('currentUserLabel').textContent = u.username + ' (' + roleDisplayName(u.role) + ')';
+    document.getElementById('sidebarContainer').innerHTML = renderSidebar('suspicious');
+
+    /* read_only sees this page but without mutate actions */
+    renderTable();
+  }
+
+  function renderTable() {
+    var u = ADMIN_MOCK.currentUser;
+    var canMutate = u.role === 'super_admin' || u.role === 'moderator';
+    var tbody = document.getElementById('suspiciousBody');
+
+    tbody.innerHTML = suspiciousList.map(function (p, idx) {
+      var danger = p.battle_count_60m >= 70 ? 'danger' : (p.battle_count_60m >= 60 ? 'warning' : '');
+      var countDisplay = '<strong style="color:' + (p.battle_count_60m >= 70 ? 'var(--admin-danger)' : p.battle_count_60m >= 60 ? 'var(--admin-warning)' : 'var(--admin-text)') + '">'
+        + escapeHtml(String(p.battle_count_60m)) + '</strong>';
+
+      var actions = '';
+      if (canMutate) {
+        actions += '<button class="icon-btn danger" onclick="doBanPet(' + idx + ')">Ban Pet</button>';
+        actions += '<button class="icon-btn" onclick="viewBattles(\'' + escapeHtml(p.pet_id) + '\')">查看戰鬥</button>';
+        actions += '<button class="icon-btn" onclick="doDismiss(' + idx + ')">Dismiss</button>';
+      }
+
+      return '<tr>'
+        + '<td class="mono">' + escapeHtml(p.pet_id.slice(0, 8)) + '</td>'
+        + '<td><strong>' + escapeHtml(p.pet_name) + '</strong></td>'
+        + '<td>' + countDisplay + '</td>'
+        + '<td><span class="status-badge ' + (p.flagged_battles > 5 ? 'flagged' : 'warning') + '">' + escapeHtml(String(p.flagged_battles)) + '</span></td>'
+        + '<td class="mono">' + escapeHtml(p.owner_email) + '</td>'
+        + '<td>' + escapeHtml(p.detected_at) + '</td>'
+        + '<td><div class="action-cell">' + actions + '</div></td>'
+        + '</tr>';
+    }).join('');
+
+    if (suspiciousList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--admin-text-dim);padding:32px;">✅ 目前無可疑活動</td></tr>';
+    }
+  }
+
+  function doBanPet(idx) {
+    var p = suspiciousList[idx];
+    if (!p) { return; }
+    showToast('已 Ban 寵物：' + p.pet_name, 'success');
+    suspiciousList.splice(idx, 1);
+    renderTable();
+  }
+
+  function viewBattles(petId) {
+    location.href = 'battles.html';
+  }
+
+  function doDismiss(idx) {
+    var p = suspiciousList[idx];
+    if (!p) { return; }
+    showToast('已移出可疑佇列：' + p.pet_name, 'success');
+    suspiciousList.splice(idx, 1);
+    renderTable();
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

@@ -1,516 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pet Management — Pixel Pet Arena Admin</title>
-  <link rel="stylesheet" href="admin.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>寵物管理 · Pixel Pet Arena Admin</title>
+  <link rel="stylesheet" href="assets/admin-style.css" />
 </head>
 <body>
-<div class="admin-layout">
-
-  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
-  <aside class="admin-sidebar">
-    <div class="sidebar-logo">
-      <span class="sidebar-logo-icon">⚙</span>
-      <div class="sidebar-logo-text">ADMIN<br>PORTAL</div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="../../index.html"       class="nav-link"><span class="nav-icon">▦</span> Dashboard</a>
-      <a href="pets.html"        class="nav-link active"><span class="nav-icon">🐾</span> Pets</a>
-      <a href="leaderboard.html" class="nav-link"><span class="nav-icon">🏆</span> Leaderboard</a>
-      <div class="nav-section-label">System</div>
-      <a href="config.html"      class="nav-link"><span class="nav-icon">⚙</span> Config</a>
-      <a href="analytics.html"   class="nav-link"><span class="nav-icon">📊</span> Analytics</a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-avatar">SA</div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name">superadmin</div>
-          <div class="sidebar-user-role">Super Admin</div>
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- ── MAIN ────────────────────────────────────────────── -->
-  <div class="admin-main">
-    <header class="admin-topbar">
-      <div class="topbar-left">
-        <span class="topbar-title">PIXEL PET ARENA ADMIN</span>
-        <span class="topbar-sep">/</span>
-        <span class="topbar-breadcrumb">Pets</span>
-      </div>
-      <div class="topbar-right">
-        <span class="text-muted text-sm">Mon, Jun 04 2026 · 14:22 UTC</span>
-        <button class="btn-logout">⏻ LOGOUT</button>
-      </div>
-    </header>
-
-    <main class="admin-content">
-      <div class="page-header flex-between">
-        <div>
-          <h1 class="page-title">Pet Management</h1>
-          <p class="page-subtitle">Search, inspect, and moderate pets</p>
-        </div>
-        <div class="flex gap-8">
-          <span class="badge badge-active" style="padding:6px 10px;">847 total</span>
-          <span class="admin-badge-banned badge" style="padding:6px 10px;">3 flagged</span>
-        </div>
-      </div>
-
-      <!-- Search & Filters -->
-      <div class="admin-card">
-        <div class="admin-card-body" style="padding:14px 20px;">
-          <div class="search-row">
-            <div class="search-input-wrap" style="flex:2;">
-              <span class="search-icon">🔍</span>
-              <input type="text" class="form-input" placeholder="Search by pet name, ID, or owner email…" id="searchInput" oninput="filterTable()">
-            </div>
-            <div style="min-width:160px;">
-              <select class="form-select" id="rarityFilter" onchange="filterTable()">
-                <option value="">All Rarities</option>
-                <option value="COMMON">Common</option>
-                <option value="RARE">Rare</option>
-                <option value="EPIC">Epic</option>
-                <option value="LEGENDARY">Legendary</option>
-              </select>
-            </div>
-            <div style="min-width:140px;">
-              <select class="form-select" id="statusFilter" onchange="filterTable()">
-                <option value="">All Statuses</option>
-                <option value="ACTIVE">Active</option>
-                <option value="BANNED">Banned</option>
-              </select>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Clear</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pet Table -->
-      <div class="admin-card">
-        <div class="admin-card-header">
-          <span class="admin-card-title">Pets</span>
-          <span class="text-muted text-sm" id="rowCount">Showing 8 pets</span>
-        </div>
-        <div class="admin-card-body" style="padding:0;overflow-x:auto;">
-          <table class="admin-table" id="petTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Pet Name</th>
-                <th>Rarity</th>
-                <th>Level</th>
-                <th>Owner</th>
-                <th>Created</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr data-name="Teal Spark" data-rarity="RARE" data-status="ACTIVE" data-owner="t***@example.com" data-id="pet-001">
-                <td><span class="code">pet-001…f4a2</span></td>
-                <td><strong>Teal Spark</strong></td>
-                <td><span class="badge badge-rare">RARE</span></td>
-                <td>7</td>
-                <td class="text-muted">t***@example.com</td>
-                <td class="text-muted text-sm">2026-05-12</td>
-                <td><span class="badge badge-active">ACTIVE</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-001','Teal Spark','RARE',7,'t***@example.com','2026-05-12','ACTIVE',28,35,42,18)">View</button>
-                    <button class="btn btn-danger btn-sm" onclick="openBanModal('pet-001','Teal Spark')">Ban</button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-name="Golden Flare" data-rarity="LEGENDARY" data-status="ACTIVE" data-owner="g***@gmail.com" data-id="pet-002">
-                <td><span class="code">pet-002…c8b1</span></td>
-                <td><strong>Golden Flare</strong></td>
-                <td><span class="badge badge-legendary">LEGENDARY</span></td>
-                <td>22</td>
-                <td class="text-muted">g***@gmail.com</td>
-                <td class="text-muted text-sm">2026-04-03</td>
-                <td><span class="badge badge-active">ACTIVE</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-002','Golden Flare','LEGENDARY',22,'g***@gmail.com','2026-04-03','ACTIVE',47,50,39,44)">View</button>
-                    <button class="btn btn-danger btn-sm" onclick="openBanModal('pet-002','Golden Flare')">Ban</button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-name="Purple Storm" data-rarity="EPIC" data-status="ACTIVE" data-owner="p***@yahoo.com" data-id="pet-003">
-                <td><span class="code">pet-003…a3d7</span></td>
-                <td><strong>Purple Storm</strong></td>
-                <td><span class="badge badge-epic">EPIC</span></td>
-                <td>14</td>
-                <td class="text-muted">p***@yahoo.com</td>
-                <td class="text-muted text-sm">2026-04-21</td>
-                <td><span class="badge badge-active">ACTIVE</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-003','Purple Storm','EPIC',14,'p***@yahoo.com','2026-04-21','ACTIVE',38,36,44,22)">View</button>
-                    <button class="btn btn-danger btn-sm" onclick="openBanModal('pet-003','Purple Storm')">Ban</button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-name="Grey Pebble" data-rarity="COMMON" data-status="ACTIVE" data-owner="a***@test.com" data-id="pet-004">
-                <td><span class="code">pet-004…e9f0</span></td>
-                <td><strong>Grey Pebble</strong></td>
-                <td><span class="badge badge-common">COMMON</span></td>
-                <td>3</td>
-                <td class="text-muted">a***@test.com</td>
-                <td class="text-muted text-sm">2026-05-30</td>
-                <td><span class="badge badge-active">ACTIVE</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-004','Grey Pebble','COMMON',3,'a***@test.com','2026-05-30','ACTIVE',12,14,11,10)">View</button>
-                    <button class="btn btn-danger btn-sm" onclick="openBanModal('pet-004','Grey Pebble')">Ban</button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-name="Void Stalker" data-rarity="EPIC" data-status="ACTIVE" data-owner="v***@example.com" data-id="pet-005">
-                <td><span class="code">pet-005…b2c4</span></td>
-                <td><strong>Void Stalker</strong></td>
-                <td><span class="badge badge-epic">EPIC</span></td>
-                <td>18</td>
-                <td class="text-muted">v***@example.com</td>
-                <td class="text-muted text-sm">2026-04-10</td>
-                <td><span class="badge badge-active">ACTIVE</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-005','Void Stalker','EPIC',18,'v***@example.com','2026-04-10','ACTIVE',44,40,48,26)">View</button>
-                    <button class="btn btn-danger btn-sm" onclick="openBanModal('pet-005','Void Stalker')">Ban</button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="row-banned" data-name="Neon Fang" data-rarity="RARE" data-status="BANNED" data-owner="n***@example.com" data-id="pet-006">
-                <td><span class="code" style="color:var(--admin-red);">pet-006…7e1d</span></td>
-                <td><strong>Neon Fang</strong></td>
-                <td><span class="badge badge-rare">RARE</span></td>
-                <td>9</td>
-                <td class="text-muted">n***@example.com</td>
-                <td class="text-muted text-sm">2026-05-05</td>
-                <td><span class="admin-badge-banned badge">BANNED</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-006','Neon Fang','RARE',9,'n***@example.com','2026-05-05','BANNED',30,27,35,15)">View</button>
-                    <button class="btn btn-success btn-sm" onclick="showToast('pet-006 unbanned')">Unban</button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-name="Crystal Mane" data-rarity="EPIC" data-status="ACTIVE" data-owner="c***@example.com" data-id="pet-007">
-                <td><span class="code">pet-007…4f3a</span></td>
-                <td><strong>Crystal Mane</strong></td>
-                <td><span class="badge badge-epic">EPIC</span></td>
-                <td>11</td>
-                <td class="text-muted">c***@example.com</td>
-                <td class="text-muted text-sm">2026-05-18</td>
-                <td><span class="badge badge-active">ACTIVE</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-007','Crystal Mane','EPIC',11,'c***@example.com','2026-05-18','ACTIVE',33,39,37,28)">View</button>
-                    <button class="btn btn-danger btn-sm" onclick="openBanModal('pet-007','Crystal Mane')">Ban</button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-name="Iron Claw" data-rarity="COMMON" data-status="ACTIVE" data-owner="i***@test.com" data-id="pet-008">
-                <td><span class="code">pet-008…9d5c</span></td>
-                <td><strong>Iron Claw</strong></td>
-                <td><span class="badge badge-common">COMMON</span></td>
-                <td>5</td>
-                <td class="text-muted">i***@test.com</td>
-                <td class="text-muted text-sm">2026-05-25</td>
-                <td><span class="badge badge-active">ACTIVE</span></td>
-                <td>
-                  <div class="flex gap-8">
-                    <button class="btn btn-ghost btn-sm" onclick="openPetModal('pet-008','Iron Claw','COMMON',5,'i***@test.com','2026-05-25','ACTIVE',18,22,14,12)">View</button>
-                    <button class="btn btn-danger btn-sm" onclick="openBanModal('pet-008','Iron Claw')">Ban</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </main>
+<header class="admin-topnav">
+  <a href="../../index.html" class="back-link">← 文件站</a>
+  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
+  <div class="topnav-right">
+    <span class="current-user" id="currentUserLabel"></span>
+    <button class="logout-btn" onclick="location.href='admin-login.html'">登出</button>
   </div>
-</div>
+</header>
+<div id="sidebarContainer"></div>
 
-<!-- ── PET DETAIL MODAL ─────────────────────────────────── -->
-<div class="modal-overlay" id="petModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title" id="modalPetName">Pet Details</span>
-      <button class="modal-close" onclick="closeModal('petModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="detail-grid">
-        <div class="detail-item">
-          <div class="detail-item-label">Pet ID</div>
-          <div class="detail-item-value mono" id="modalId"></div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item-label">Status</div>
-          <div class="detail-item-value" id="modalStatus"></div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item-label">Rarity</div>
-          <div class="detail-item-value" id="modalRarity"></div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item-label">Level</div>
-          <div class="detail-item-value" id="modalLevel"></div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item-label">Owner (masked)</div>
-          <div class="detail-item-value" id="modalOwner"></div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item-label">Created</div>
-          <div class="detail-item-value" id="modalCreated"></div>
-        </div>
-      </div>
-
-      <hr class="divider">
-      <div style="font-family:var(--font-pixel);font-size:8px;color:var(--muted);margin-bottom:10px;">BASE STATS</div>
-      <div id="modalStats"></div>
-
-      <hr class="divider">
-      <div style="font-family:var(--font-pixel);font-size:8px;color:var(--muted);margin-bottom:10px;">GENERATION META</div>
-      <div style="background:var(--bg);border:1px solid #0d0d1a;padding:12px;font-size:11px;font-family:monospace;color:var(--accent);line-height:1.7;" id="modalMeta"></div>
-
-      <hr class="divider">
-      <div style="font-family:var(--font-pixel);font-size:8px;color:var(--muted);margin-bottom:10px;">BATTLE HISTORY SUMMARY</div>
-      <div class="detail-grid" id="modalBattle"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('petModal')">Close</button>
-      <button class="btn btn-danger btn-sm" id="modalBanBtn" onclick="closeModal('petModal')">Ban This Pet</button>
-    </div>
+<main class="admin-main">
+  <div class="page-header">
+    <h1 class="page-title">🐾 寵物管理</h1>
+    <span class="page-subtitle">Ban / Unban 寵物帳號</span>
   </div>
-</div>
 
-<!-- ── BAN CONFIRM MODAL ───────────────────────────────── -->
+  <div class="search-bar" style="grid-template-columns:2fr 1fr 1fr auto;">
+    <input id="searchInput" class="form-input" type="text" placeholder="搜尋 Pet ID / 名稱…" oninput="renderTable()" />
+    <select id="rarityFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有稀有度</option>
+      <option>Common</option><option>Rare</option><option>Epic</option><option>Legendary</option>
+    </select>
+    <select id="statusFilter" class="form-select" onchange="renderTable()">
+      <option value="">所有狀態</option>
+      <option value="active">Active</option>
+      <option value="banned">Banned</option>
+    </select>
+    <button class="btn btn-primary" onclick="renderTable()">搜尋</button>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Pet ID</th><th>名稱</th><th>稀有度</th><th>等級</th>
+        <th>擁有者 Email</th><th>狀態</th><th>建立時間</th><th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="petsBody"></tbody>
+  </table>
+  <div class="pagination" id="paginationWrap"></div>
+</main>
+
+<!-- Ban Modal -->
 <div class="modal-overlay" id="banModal">
-  <div class="modal-box" style="max-width:400px;">
-    <div class="modal-header">
-      <span class="modal-title" style="color:var(--admin-red);">⚠ Confirm Ban</span>
-      <button class="modal-close" onclick="closeModal('banModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:13px;line-height:1.6;margin-bottom:16px;">
-        You are about to ban pet <strong id="banPetName" style="color:var(--admin-red);"></strong> (<span class="mono" id="banPetId"></span>).
-      </p>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">
-        This will immediately remove the pet from the leaderboard and prevent it from participating in battles. This action is logged.
-      </p>
-      <div class="form-group">
-        <label class="form-label">Ban Reason (required)</label>
-        <input type="text" class="form-input" id="banReason" placeholder="e.g. Abnormal win rate, suspected exploit…">
+  <div class="modal-card">
+    <h3>🚫 Ban 寵物</h3>
+    <p class="modal-desc">請輸入 Ban 原因（必填，最多 500 字）</p>
+    <div id="banTargetInfo" style="margin-bottom:10px;font-size:13px;color:var(--admin-text-dim);"></div>
+    <div class="form-group">
+      <label>Ban 原因</label>
+      <textarea id="banReasonInput" class="form-textarea" rows="4" maxlength="500" placeholder="請說明 ban 的具體原因…"></textarea>
+      <div style="text-align:right;font-size:11px;color:var(--admin-text-dim);margin-top:4px;">
+        <span id="banReasonCount">0</span> / 500
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('banModal')">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmBan()">Confirm Ban</button>
+    <div id="banReasonError" class="error-msg" style="display:none;">請填寫 Ban 原因</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('banModal')">取消</button>
+      <button class="btn btn-danger" onclick="confirmBan()">確認 Ban</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div id="toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--surface);border:2px solid #0d0d1a;box-shadow:4px 4px 0 #0d0d1a;padding:12px 20px;font-family:var(--font-pixel);font-size:8px;color:var(--success);z-index:300;max-width:320px;"></div>
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-card" style="max-width:520px;">
+    <h3>🔍 寵物詳情</h3>
+    <div id="detailContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('detailModal')">關閉</button>
+    </div>
+  </div>
+</div>
 
+<script src="assets/admin-mock.js"></script>
 <script>
-// Allowed rarity values — used to whitelist innerHTML insertions (no user data touches innerHTML)
-const RARITY_CLASS_MAP = {
-  COMMON:    'badge-common',
-  RARE:      'badge-rare',
-  EPIC:      'badge-epic',
-  LEGENDARY: 'badge-legendary'
-};
-// Allowed stat keys — fixed set, never derived from external input
-const STAT_KEYS = ['ATK', 'DEF', 'SPD', 'LCK'];
-const STAT_CLS  = ['atk', 'def', 'spd', 'lck'];
+  var pets = ADMIN_MOCK.pets.map(function (p) { return Object.assign({}, p); });
+  var banTargetId = null;
+  var PAGE_SIZE = 20;
+  var currentPage = 1;
 
-let currentBanId = '', currentBanName = '';
+  function init() {
+    var u = ADMIN_MOCK.currentUser;
+    document.getElementById('currentUserLabel').textContent = u.username + ' (' + roleDisplayName(u.role) + ')';
+    document.getElementById('sidebarContainer').innerHTML = renderSidebar('pets');
 
-/** Set text content safely on an element (null-safe). */
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = String(val);
-}
-
-function openPetModal(id, name, rarity, level, owner, created, status, atk, def, spd, lck) {
-  // All values come from inline onclick attributes in server-rendered HTML (no user-supplied
-  // free text). We still use textContent for all string data to prevent any XSS.
-  setText('modalPetName', name);
-  setText('modalId',      (id || '') + '…' + String(id || '').slice(-4));
-  setText('modalOwner',   owner);
-  setText('modalCreated', created);
-  setText('modalLevel',   level);
-
-  // Rarity: keyed lookup — only known badge class names reach innerHTML, never raw input.
-  const rarityEl = document.getElementById('modalRarity');
-  if (rarityEl) {
-    const cls = RARITY_CLASS_MAP[rarity] || 'badge-common';
-    const safeRarity = RARITY_CLASS_MAP[rarity] ? rarity : 'COMMON';
-    rarityEl.innerHTML = `<span class="badge ${cls}">${safeRarity}</span>`;
+    var textarea = document.getElementById('banReasonInput');
+    if (textarea) {
+      textarea.addEventListener('input', function () {
+        document.getElementById('banReasonCount').textContent = textarea.value.length;
+      });
+    }
+    renderTable();
   }
 
-  // Status: only two known states; no user data injected.
-  const statusEl = document.getElementById('modalStatus');
-  if (statusEl) {
-    statusEl.innerHTML = status === 'BANNED'
-      ? '<span class="admin-badge-banned badge">BANNED</span>'
-      : '<span class="badge badge-active">ACTIVE</span>';
-  }
-
-  // Stats: all values are numbers from hardcoded onclick attributes; clamped 0-100.
-  const statVals = [atk, def, spd, lck].map(v => Math.max(0, Math.min(100, Number(v) || 0)));
-  const statsEl = document.getElementById('modalStats');
-  if (statsEl) {
-    const fragment = document.createDocumentFragment();
-    STAT_KEYS.forEach((key, i) => {
-      const row = document.createElement('div');
-      row.className = 'stat-bar-row';
-      // Build DOM nodes — no innerHTML for variable data
-      const label = document.createElement('span');
-      label.className = 'stat-bar-label';
-      label.textContent = key;
-
-      const track = document.createElement('div');
-      track.className = 'stat-bar-track';
-      const fill = document.createElement('div');
-      fill.className = 'stat-bar-fill ' + STAT_CLS[i];
-      fill.style.width = (statVals[i] * 2) + '%';
-      track.appendChild(fill);
-
-      const valSpan = document.createElement('span');
-      valSpan.className = 'stat-bar-val';
-      valSpan.textContent = statVals[i];
-
-      row.append(label, track, valSpan);
-      fragment.appendChild(row);
-    });
-    statsEl.textContent = '';
-    statsEl.appendChild(fragment);
-  }
-
-  // Seed derived from id length-safe access; fallback to char-sum if id is short.
-  const safeId = String(id || '');
-  const seedChar = safeId.length >= 5 ? safeId.charCodeAt(4) : safeId.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
-  const seed = Math.abs(seedChar * 1337 + Number(level) * 7);
-
-  // Meta uses textContent — no XSS risk.
-  const metaEl = document.getElementById('modalMeta');
-  if (metaEl) {
-    metaEl.textContent = JSON.stringify({
-      seed: seed,
-      rarity: rarity,
-      palette_id: 'pal_' + (seed % 99).toString().padStart(3, '0'),
-      sprite_variant: (seed % 4) + 1,
-      generation: 1,
-      training_count: Number(level) * 3,
-      last_training_utc: String(created) + 'T08:' + (seed % 59).toString().padStart(2, '0') + ':00Z'
-    }, null, 2);
-  }
-
-  const wins   = Math.floor(Number(level) * 2.4);
-  const losses = Math.floor(Number(level) * 1.8);
-  const total  = wins + losses;
-  const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-
-  // Battle summary: build DOM nodes to avoid innerHTML with computed values.
-  const battleEl = document.getElementById('modalBattle');
-  if (battleEl) {
-    const cells = [
-      ['Total Battles', total,       ''],
-      ['Win Rate',      winRate + '%', ''],
-      ['Wins',          wins,          'text-success'],
-      ['Losses',        losses,        'text-danger']
-    ];
-    battleEl.textContent = '';
-    cells.forEach(([label, val, cls]) => {
-      const item = document.createElement('div');
-      item.className = 'detail-item';
-      const lbl = document.createElement('div');
-      lbl.className = 'detail-item-label';
-      lbl.textContent = label;
-      const v = document.createElement('div');
-      v.className = 'detail-item-value' + (cls ? ' ' + cls : '');
-      v.textContent = val;
-      item.append(lbl, v);
-      battleEl.appendChild(item);
+  function filtered() {
+    var q = (document.getElementById('searchInput').value || '').toLowerCase();
+    var rarity = document.getElementById('rarityFilter').value;
+    var status = document.getElementById('statusFilter').value;
+    return pets.filter(function (p) {
+      var matchQ = !q || p.id.toLowerCase().indexOf(q) !== -1 || p.name.toLowerCase().indexOf(q) !== -1;
+      var matchR = !rarity || p.rarity === rarity;
+      var matchS = !status || p.status === status;
+      return matchQ && matchR && matchS;
     });
   }
 
-  const banBtn = document.getElementById('modalBanBtn');
-  if (banBtn) banBtn.style.display = status === 'BANNED' ? 'none' : '';
+  function renderTable() {
+    var data = filtered();
+    var start = (currentPage - 1) * PAGE_SIZE;
+    var page = data.slice(start, start + PAGE_SIZE);
+    var u = ADMIN_MOCK.currentUser;
+    var canMutate = u.role === 'super_admin' || u.role === 'moderator';
+    var tbody = document.getElementById('petsBody');
 
-  const modal = document.getElementById('petModal');
-  if (modal) modal.classList.add('open');
-}
+    tbody.innerHTML = page.map(function (p) {
+      var statusClass = p.status === 'active' ? 'active' : 'banned';
+      var statusLabel = p.status === 'active' ? 'Active' : 'Banned';
+      var actions = '';
+      if (canMutate) {
+        if (p.status === 'active') {
+          actions += '<button class="icon-btn danger" onclick="openBanModal(\'' + escapeHtml(p.id) + '\')">Ban</button>';
+        } else {
+          actions += '<button class="icon-btn success" onclick="doUnban(\'' + escapeHtml(p.id) + '\')">Unban</button>';
+        }
+      }
+      actions += '<button class="icon-btn" onclick="openDetail(\'' + escapeHtml(p.id) + '\')">詳情</button>';
+      return '<tr>'
+        + '<td class="mono">' + escapeHtml(p.id.slice(0, 8)) + '</td>'
+        + '<td><strong>' + escapeHtml(p.name) + '</strong></td>'
+        + '<td>' + escapeHtml(p.rarity) + '</td>'
+        + '<td>' + escapeHtml(String(p.level)) + '</td>'
+        + '<td class="mono">' + escapeHtml(p.owner_email) + '</td>'
+        + '<td><span class="status-badge ' + statusClass + '">' + statusLabel + '</span></td>'
+        + '<td>' + escapeHtml(p.created_at) + '</td>'
+        + '<td><div class="action-cell">' + actions + '</div></td>'
+        + '</tr>';
+    }).join('');
 
-function openBanModal(id, name) {
-  currentBanId = id;
-  currentBanName = name;
-  document.getElementById('banPetName').textContent = name;
-  document.getElementById('banPetId').textContent = id;
-  document.getElementById('banReason').value = '';
-  document.getElementById('banModal').classList.add('open');
-}
-
-function confirmBan() {
-  const reason = document.getElementById('banReason').value.trim();
-  if (!reason) {
-    document.getElementById('banReason').style.borderColor = 'var(--admin-red)';
-    return;
+    renderPagination(data.length);
   }
-  closeModal('banModal');
-  showToast(`${currentBanName} (${currentBanId}) has been banned.`);
-}
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+  function renderPagination(total) {
+    var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    var wrap = document.getElementById('paginationWrap');
+    var btns = '<button onclick="goPage(' + Math.max(1, currentPage - 1) + ')">‹</button>';
+    for (var i = 1; i <= totalPages; i++) {
+      btns += '<span class="page-num' + (i === currentPage ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</span>';
+    }
+    btns += '<button onclick="goPage(' + Math.min(totalPages, currentPage + 1) + ')">›</button>';
+    btns += '<span class="pagination-info">共 ' + total + ' 筆（每頁 ' + PAGE_SIZE + '）</span>';
+    wrap.innerHTML = btns;
+  }
 
-function filterTable() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const rf = document.getElementById('rarityFilter').value;
-  const sf = document.getElementById('statusFilter').value;
-  const rows = document.querySelectorAll('#petTable tbody tr');
-  let visible = 0;
-  rows.forEach(row => {
-    const name = (row.dataset.name||'').toLowerCase();
-    const rarity = row.dataset.rarity||'';
-    const status = row.dataset.status||'';
-    const owner = (row.dataset.owner||'').toLowerCase();
-    const id = (row.dataset.id||'').toLowerCase();
-    const matchQ = !q || name.includes(q) || owner.includes(q) || id.includes(q);
-    const matchR = !rf || rarity === rf;
-    const matchS = !sf || status === sf;
-    const show = matchQ && matchR && matchS;
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  document.getElementById('rowCount').textContent = `Showing ${visible} pet${visible!==1?'s':''}`;
-}
+  function goPage(n) { currentPage = n; renderTable(); }
 
-function clearFilters() {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('rarityFilter').value = '';
-  document.getElementById('statusFilter').value = '';
-  filterTable();
-}
+  function openBanModal(id) {
+    banTargetId = id;
+    var p = pets.find(function (x) { return x.id === id; });
+    if (!p) { return; }
+    var info = document.getElementById('banTargetInfo');
+    var input = document.getElementById('banReasonInput');
+    var counter = document.getElementById('banReasonCount');
+    var errEl = document.getElementById('banReasonError');
+    if (info) { info.textContent = '目標：' + p.name + '（' + p.id.slice(0, 8) + '）'; }
+    if (input) { input.value = ''; }
+    if (counter) { counter.textContent = '0'; }
+    if (errEl) { errEl.style.display = 'none'; }
+    openModal('banModal');
+  }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 3000);
-}
+  function confirmBan() {
+    var input = document.getElementById('banReasonInput');
+    var errEl = document.getElementById('banReasonError');
+    var reason = input ? input.value.trim() : '';
+    if (!reason) {
+      if (errEl) { errEl.style.display = 'block'; }
+      return;
+    }
+    if (errEl) { errEl.style.display = 'none'; }
+    var p = pets.find(function (x) { return x.id === banTargetId; });
+    if (!p) { return; }
+    p.status = 'banned';
+    p.ban_reason = reason;
+    closeModal('banModal');
+    renderTable();
+    showToast('已 Ban 寵物：' + p.name, 'success');
+  }
+
+  function doUnban(id) {
+    var p = pets.find(function (x) { return x.id === id; });
+    if (!p) { return; }
+    p.status = 'active';
+    p.ban_reason = null;
+    renderTable();
+    showToast('已 Unban 寵物：' + p.name, 'success');
+  }
+
+  function openDetail(id) {
+    var p = pets.find(function (x) { return x.id === id; });
+    if (!p) { return; }
+    var content = document.getElementById('detailContent');
+    if (!content) { return; }
+    content.innerHTML = '<table class="data-table" style="margin-top:8px;"><tbody>'
+      + row('Pet ID', '<span class="mono">' + escapeHtml(p.id) + '</span>')
+      + row('名稱', escapeHtml(p.name))
+      + row('稀有度', escapeHtml(p.rarity))
+      + row('等級', escapeHtml(String(p.level)))
+      + row('擁有者 Email', '<span class="mono">' + escapeHtml(p.owner_email) + '</span>')
+      + row('狀態', escapeHtml(p.status))
+      + row('Ban 原因', escapeHtml(p.ban_reason || '—'))
+      + row('建立時間', escapeHtml(p.created_at))
+      + '</tbody></table>';
+    openModal('detailModal');
+  }
+
+  function row(label, value) {
+    return '<tr><td style="color:var(--admin-text-dim);width:120px;">' + label + '</td><td>' + value + '</td></tr>';
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
