@@ -2,7 +2,7 @@
   "index.html": {
     "url": "index.html",
     "title": "pet 文件中心",
-    "excerpt": "Pixel Pet Arena\n[][gh-actions]\n\n\n\n\n\n[][align-report]\n[gh-actions]: https://github.com/tobala/pet/actions\n[align-report]: docs/pages/align-report.html\n"
+    "excerpt": "pixel-pet-arena\nZero-account HTML5 pixel pet arena — claim your unique procedurally-generated pet via email and battle on the global leaderboard, no s"
   },
   "idea.html": {
     "url": "idea.html",
@@ -32,7 +32,7 @@
   "edd.html": {
     "url": "edd.html",
     "title": "工程設計文件 (EDD)",
-    "excerpt": "EDD — Engineering Design Document\nDocument Control\n\n欄位內容\nDOC-IDEDD-PIXEL-PET-ARENA-20260503\n產品名稱Pixel Pet Arena\n文件版本v2.1\n狀態DRAFT\n作者AI Generated (gendo"
+    "excerpt": "EDD — Engineering Design Document\nDocument Control\n\n欄位內容\nDOC-IDEDD-PIXEL-PET-ARENA-20260503\n產品名稱Pixel Pet Arena\n文件版本v2.2\n狀態DRAFT\n作者AI Generated (gendo"
   },
   "arch.html": {
     "url": "arch.html",
@@ -67,7 +67,7 @@
   "client_impl.html": {
     "url": "client_impl.html",
     "title": "客戶端實作規格",
-    "excerpt": "CLIENT_IMPL — Client Implementation Specification\nDocument Control\n\nFieldContent\nDOC-IDCLIENT_IMPL-PIXEL-PET-ARENA-20260503\nProject Namepixel-pet-aren"
+    "excerpt": "CLIENT_IMPL — Client Implementation Specification（客戶端實作規格書）\nDocument Control\n\nFieldContent\nDOC-IDCLIENT_IMPL-PIXEL-PET-ARENA-20260517\nProject NamePixe"
   },
   "constants.html": {
     "url": "constants.html",
@@ -87,7 +87,7 @@
   "local_deploy.html": {
     "url": "local_deploy.html",
     "title": "本地部署指南",
-    "excerpt": "Local Development Setup — pixel-pet-arena\nThis guide walks a developer joining the project for the first time through every step required to run all t"
+    "excerpt": "LOCAL_DEPLOY — Local Development Deployment Guide (Rancher Desktop + Kubernetes)\nDocument Control\n\nFieldValue\nDOC-IDLOCAL_DEPLOY-PIXEL-PET-ARENA-20260"
   },
   "rtm.html": {
     "url": "rtm.html",
@@ -102,7 +102,7 @@
   "admin_impl.html": {
     "url": "admin_impl.html",
     "title": "Admin Impl",
-    "excerpt": "ADMIN_IMPL — Admin Portal Implementation Specification\nDocument Control\n\nFieldContent\nDOC-IDADMIN_IMPL-PIXEL-PET-ARENA-20260503\nProject Namepixel-pet-"
+    "excerpt": "Admin Portal Implementation Specification — Pixel Pet Arena\nDocument Control\n\n欄位內容\nDOC-IDADMIN-PIXEL-PET-ARENA-20260517\nAdmin 技術棧Vue 3 + Element Plus "
   },
   "align-report.html": {
     "url": "align-report.html",
