@@ -666,6 +666,10 @@ p { margin: 0 0 var(--space-3); }
   display: flex; align-items: center; gap: var(--space-3);
   font-size: var(--fs-small);
 }
+.banner--info {
+  border-color: var(--info, #74b9ff);
+  background: color-mix(in srgb, var(--info, #74b9ff) 12%, transparent);
+}
 .banner--warning { border-color: var(--warning); }
 .banner--error { border-color: var(--error); animation: slideInDown 250ms var(--ease-expo); }
 .banner--success { border-color: var(--success); }
@@ -938,6 +942,63 @@ p { margin: 0 0 var(--space-3); }
 .food-item button:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* PF-08: url-copy-box */
+.url-copy-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 2px solid var(--border-default);
+  border-radius: 0;
+  padding: 8px 12px;
+  margin: 12px 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  overflow: hidden;
+}
+.url-copy-box code {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* PF-10: food-glow */
+.food-glow {
+  animation: legendaryGlow 0.6s ease-out;
+}
+
+/* PF-11: row-highlight */
+.row-highlight {
+  animation: fadeIn 0.3s ease-out;
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+}
+
+/* PF-16: copy-icon-check */
+.copy-icon-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+.copy-icon-check:active {
+  transform: scale(0.9);
+}
+
+/* PF-13: gate-icon */
+.gate-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-right: 4px;
+  vertical-align: middle;
 }
 
 /* Reduced motion */

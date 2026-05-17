@@ -6,7 +6,7 @@
   "max_rounds": 99,
   "client_type": "game",
   "client_type_source": "confirmed",
-  "last_updated": "2026-05-16T12:27:58Z",
+  "last_updated": "2026-05-17T19:43:05Z",
   "has_admin_backend": true,
   "review_strategy": "exhaustive",
   "stop_condition": "finding=0（無上限）",
@@ -18,8 +18,8 @@
     "ALIGN-VERIFY": true,
     "CONTRACTS": true,
     "MOCK": true,
-    "PROTOTYPE": true,
-    "HTML": true
+    "HTML": true,
+    "PROTOTYPE": true
   },
   "completed_steps": [
     "UML",
@@ -29,7 +29,6 @@
     "ALIGN-VERIFY",
     "CONTRACTS",
     "MOCK",
-    "PROTOTYPE",
     "HTML",
     "PRD",
     "CONSTANTS",
@@ -37,7 +36,6 @@
     "IDEA",
     "RESOURCE",
     "AUDIO",
-    "LOCAL_DEPLOY",
     "VDD",
     "RTM",
     "CICD",
@@ -51,10 +49,12 @@
     "DRYRUN",
     "API",
     "ANIM",
-    "ADMIN_IMPL",
-    "CLIENT_IMPL",
     "SCHEMA",
-    "BDD-server"
+    "BDD-server",
+    "EDD",
+    "LOCAL_DEPLOY",
+    "CLIENT_IMPL",
+    "PROTOTYPE"
   ],
   "last_completed": "BDD-server",
   "pipeline_hash": "49f8456caade9b87",
@@ -143,20 +143,6 @@
       "terminate_reason": "zero_finding",
       "quality_status": "passed"
     },
-    "LOCAL_DEPLOY": {
-      "rounds_done": 2,
-      "max_rounds": 99,
-      "strategy": "exhaustive",
-      "last_finding_total": 0,
-      "last_CHM": [
-        0,
-        0,
-        0
-      ],
-      "terminated": true,
-      "terminate_reason": "zero_finding",
-      "quality_status": "passed"
-    },
     "VDD": {
       "terminated": true,
       "terminate_reason": "zero_finding",
@@ -229,16 +215,6 @@
       "terminate_reason": "gen-only rebuild",
       "rounds_done": 0
     },
-    "ADMIN_IMPL": {
-      "terminated": true,
-      "terminate_reason": "gen-only rebuild",
-      "rounds_done": 0
-    },
-    "CLIENT_IMPL": {
-      "terminated": true,
-      "terminate_reason": "gen-only rebuild",
-      "rounds_done": 0
-    },
     "SCHEMA": {
       "rounds_done": 1,
       "max_rounds": 99,
@@ -280,6 +256,25 @@
       "terminated": true,
       "terminate_reason": "zero_finding",
       "quality_status": "passed"
+    },
+    "LOCAL_DEPLOY": {
+      "rounds_done": 2,
+      "max_rounds": 99,
+      "strategy": "exhaustive",
+      "last_finding_total": 0,
+      "last_CHM": [
+        0,
+        0,
+        0
+      ],
+      "terminated": true,
+      "terminate_reason": "zero_finding",
+      "quality_status": "passed"
+    },
+    "CLIENT_IMPL": {
+      "rounds_done": 2,
+      "terminated": true,
+      "terminate_reason": "finding_total=0"
     }
   },
   "step_specifications": {
@@ -454,5 +449,7 @@
     "dryrun_engine_version": "v2.0.0"
   },
   "lang_stack": "TypeScript / Fastify 4 + Phaser 3 + PostgreSQL + Redis",
-  "lang_stack_locked": true
+  "lang_stack_locked": true,
+  "client_engine": "Phaser 3 over HTML5 Canvas",
+  "client_engine_locked": true
 }

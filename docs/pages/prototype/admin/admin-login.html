@@ -1,186 +1,174 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>登入 · Pixel Pet Arena Admin</title>
-  <link rel="stylesheet" href="assets/admin-style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — Pixel Pet Arena</title>
+  <link href="assets/admin-style.css" rel="stylesheet">
+  <style>
+    .totp-section { display: none; margin-top: 0.5rem; }
+    .totp-section.visible { display: block; }
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 12px;
+      color: var(--admin-text-muted);
+    }
+    .step { padding: 3px 10px; border-radius: 99px; background: #f3f4f6; color: var(--admin-text-muted); font-weight: 600; }
+    .step.active { background: var(--admin-accent); color: #fff; }
+    .step-arrow { color: #d1d5db; }
+    .totp-digits {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 0.5rem 0 1rem;
+    }
+    .totp-digits input {
+      width: 44px;
+      height: 52px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      border: 1.5px solid var(--admin-border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color var(--duration-fast);
+    }
+    .totp-digits input:focus { border-color: var(--admin-accent); box-shadow: 0 0 0 3px rgba(45,158,245,0.12); }
+  </style>
 </head>
 <body>
+<div class="login-page">
+  <!-- Back to docs link -->
+  <div class="login-back">
+    <a href="../../index.html" class="back-link">← 文件站</a>
+  </div>
 
-<header class="admin-topnav">
-  <a href="../../index.html" class="back-link">← 文件站</a>
-  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
-</header>
-
-<div class="login-shell">
   <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🛡️</div>
+      <h1>Pixel Pet Arena</h1>
+      <p>Admin Portal — 請先驗證身份</p>
+    </div>
 
-    <!-- Step 1: 帳密 -->
-    <div id="step1">
-      <h1>🛡️ 管理員登入</h1>
-      <p class="subtitle">Pixel Pet Arena Admin Portal v2.0</p>
+    <!-- Step Indicator -->
+    <div class="step-indicator" id="stepIndicator">
+      <span class="step active" id="step1Dot">① 帳號密碼</span>
+      <span class="step-arrow">→</span>
+      <span class="step" id="step2Dot">② TOTP 驗證</span>
+    </div>
 
-      <div id="step1Error" class="error-msg">帳號或密碼錯誤，請重試</div>
-
+    <!-- Step 1: Credentials -->
+    <div id="credSection">
       <div class="form-group">
-        <label for="username">帳號</label>
-        <input id="username" class="form-input" type="text" placeholder="admin" autocomplete="username" />
+        <label for="username">用戶名稱</label>
+        <input type="text" id="username" class="form-control" placeholder="superadmin" value="superadmin" autocomplete="username">
       </div>
       <div class="form-group">
         <label for="password">密碼</label>
-        <div class="password-wrap">
-          <input id="password" class="form-input" type="password" placeholder="••••••••" autocomplete="current-password" />
-          <button class="toggle-pw" type="button" onclick="togglePw()" title="顯示/隱藏密碼">👁</button>
+        <div class="input-wrap">
+          <input type="password" id="password" class="form-control" placeholder="••••••••" value="Admin@2026" autocomplete="current-password">
+          <button class="toggle-pw" type="button" onclick="togglePw()" title="顯示密碼">👁</button>
         </div>
       </div>
-
-      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="step1Btn" onclick="doStep1()">
+      <div class="checkbox-row">
+        <input type="checkbox" id="remember" checked>
+        <label for="remember" style="font-weight:400">記住帳號</label>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" id="loginBtn" onclick="doLogin()">
         登入
       </button>
-
-      <div class="demo-hint">
-        步驟一：帳號 admin / 密碼 Admin@2026<br>
-        步驟二 TOTP：123456
-      </div>
-      <div class="footer">Pixel Pet Arena · Admin Portal v2.0</div>
     </div>
 
-    <!-- Step 2: TOTP -->
-    <div id="step2" style="display:none;">
-      <h1>🔐 雙因素驗證</h1>
-      <p class="subtitle">請輸入 Authenticator App 顯示的 6 位數字</p>
-
-      <div id="step2Error" class="error-msg">驗證碼錯誤，請重試</div>
-
-      <div class="form-group">
-        <label>TOTP 驗證碼</label>
-        <div id="totpInputs" style="display:flex;gap:8px;margin-top:8px;">
-          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
-          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
-          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
-          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
-          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
-          <input class="form-input totp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="text-align:center;font-size:22px;font-weight:700;width:48px;height:54px;padding:0;" />
-        </div>
+    <!-- Step 2: TOTP (revealed after step 1) -->
+    <div class="totp-section" id="totpSection">
+      <p style="font-size:13px;color:var(--admin-text-secondary);margin-bottom:0.75rem;text-align:center">
+        請輸入驗證器 App 上的 6 位數字
+      </p>
+      <div class="totp-digits">
+        <input type="text" maxlength="1" id="t0" oninput="totpNext(this,1)" onkeydown="totpBack(event,this,null)">
+        <input type="text" maxlength="1" id="t1" oninput="totpNext(this,2)" onkeydown="totpBack(event,this,0)">
+        <input type="text" maxlength="1" id="t2" oninput="totpNext(this,3)" onkeydown="totpBack(event,this,1)">
+        <input type="text" maxlength="1" id="t3" oninput="totpNext(this,4)" onkeydown="totpBack(event,this,2)">
+        <input type="text" maxlength="1" id="t4" oninput="totpNext(this,5)" onkeydown="totpBack(event,this,3)">
+        <input type="text" maxlength="1" id="t5" oninput="totpSubmit()" onkeydown="totpBack(event,this,4)">
       </div>
-
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" id="step2Btn" onclick="doStep2()">
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" id="totpBtn" onclick="verifyTotp()">
         驗證並登入
       </button>
-      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="backToStep1()">
-        ← 返回帳密
-      </button>
-
-      <div class="demo-hint">Demo TOTP 驗證碼：123456</div>
+      <p style="text-align:center;margin-top:0.75rem">
+        <a href="#" onclick="backToCred()" style="font-size:12.5px;color:var(--admin-text-muted)">← 返回帳號密碼</a>
+      </p>
     </div>
 
+    <!-- Hint -->
+    <div class="login-hint">
+      <strong>🔑 示範帳號</strong>
+      用戶名：<code>superadmin</code> &nbsp;|&nbsp; 密碼：<code>Admin@2026</code><br>
+      TOTP：輸入任意 6 位數字即可通過（Prototype 模式）
+    </div>
   </div>
 </div>
 
-<script src="assets/admin-mock.js"></script>
 <script>
-  function togglePw() {
-    var pw = document.getElementById('password');
-    if (!pw) { return; }
-    pw.type = pw.type === 'password' ? 'text' : 'password';
+function togglePw() {
+  const pw = document.getElementById('password');
+  pw.type = pw.type === 'password' ? 'text' : 'password';
+}
+
+function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 驗證中…';
+  setTimeout(() => {
+    // Reveal TOTP step
+    document.getElementById('credSection').style.display = 'none';
+    document.getElementById('totpSection').classList.add('visible');
+    document.getElementById('step1Dot').classList.remove('active');
+    document.getElementById('step2Dot').classList.add('active');
+    document.getElementById('t0').focus();
+  }, 300);
+}
+
+function backToCred() {
+  document.getElementById('credSection').style.display = 'block';
+  document.getElementById('totpSection').classList.remove('visible');
+  document.getElementById('step1Dot').classList.add('active');
+  document.getElementById('step2Dot').classList.remove('active');
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = false;
+  btn.innerHTML = '登入';
+}
+
+function totpNext(el, nextIdx) {
+  if (el.value && nextIdx <= 5) {
+    document.getElementById('t' + nextIdx).focus();
   }
+}
 
-  function doStep1() {
-    var username = document.getElementById('username').value.trim();
-    var password = document.getElementById('password').value;
-    var btn = document.getElementById('step1Btn');
-    var errEl = document.getElementById('step1Error');
-
-    errEl.classList.remove('show');
-    btn.textContent = '驗證中…';
-    btn.disabled = true;
-
-    setTimeout(function () {
-      btn.textContent = '登入';
-      btn.disabled = false;
-      if (username === 'admin' && password === 'Admin@2026') {
-        document.getElementById('step1').style.display = 'none';
-        document.getElementById('step2').style.display = 'block';
-        setTimeout(function () {
-          document.querySelectorAll('.totp-digit')[0].focus();
-        }, 50);
-      } else {
-        errEl.classList.add('show');
-      }
-    }, 400);
+function totpBack(event, el, prevIdx) {
+  if (event.key === 'Backspace' && !el.value && prevIdx !== null) {
+    document.getElementById('t' + prevIdx).focus();
   }
+}
 
-  function backToStep1() {
-    document.getElementById('step2').style.display = 'none';
-    document.getElementById('step1').style.display = 'block';
-    document.getElementById('step2Error').classList.remove('show');
-    document.querySelectorAll('.totp-digit').forEach(function (el) { el.value = ''; });
-  }
+function totpSubmit() {
+  // auto-submit when last digit entered
+  const code = [0,1,2,3,4,5].map(i => document.getElementById('t'+i).value).join('');
+  if (code.length === 6) setTimeout(verifyTotp, 120);
+}
 
-  function doStep2() {
-    if (step2Pending) { return; }
-    step2Pending = true;
-
-    var digits = document.querySelectorAll('.totp-digit');
-    var code = '';
-    digits.forEach(function (el) { code += el.value; });
-    var btn = document.getElementById('step2Btn');
-    var errEl = document.getElementById('step2Error');
-
-    errEl.classList.remove('show');
-    btn.textContent = '驗證中…';
-    btn.disabled = true;
-
-    setTimeout(function () {
-      step2Pending = false;
-      btn.textContent = '驗証並登入';
-      btn.disabled = false;
-      if (code === '123456') {
-        location.href = 'admin-dashboard.html';
-      } else {
-        errEl.classList.add('show');
-        digits.forEach(function (el) { el.value = ''; });
-        digits[0].focus();
-      }
-    }, 400);
-  }
-
-  var step2Pending = false;
-
-  document.addEventListener('DOMContentLoaded', function () {
-    var digits = document.querySelectorAll('.totp-digit');
-
-    digits.forEach(function (el, idx) {
-      el.addEventListener('input', function () {
-        // enforce exactly one digit
-        var v = el.value.replace(/[^0-9]/g, '');
-        el.value = v.length > 0 ? v[0] : '';
-
-        if (el.value && idx < digits.length - 1) {
-          digits[idx + 1].focus();
-        }
-        // auto-submit only when all six digits are filled and not already pending
-        if (el.value && idx === digits.length - 1 && !step2Pending) {
-          var allFilled = Array.from(digits).every(function (d) { return d.value.length === 1; });
-          if (allFilled) { doStep2(); }
-        }
-      });
-
-      el.addEventListener('keydown', function (e) {
-        if (e.key === 'Backspace' && el.value === '' && idx > 0) {
-          digits[idx - 1].focus();
-        }
-      });
-    });
-
-    var pwField = document.getElementById('password');
-    if (pwField) {
-      pwField.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { doStep1(); }
-      });
-    }
-  });
+function verifyTotp() {
+  const btn = document.getElementById('totpBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 驗證中…';
+  setTimeout(() => {
+    location.href = 'admin-dashboard.html';
+  }, 400);
+}
 </script>
 </body>
 </html>

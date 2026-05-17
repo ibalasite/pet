@@ -96,11 +96,19 @@
 
 <script src="assets/admin-mock.js"></script>
 <script>
-  document.getElementById('reqPath').textContent = document.referrer
-    ? new URL(document.referrer).pathname
-    : location.pathname;
-  document.getElementById('reqUser').textContent = ADMIN_MOCK.currentUser.username;
-  document.getElementById('reqRole').textContent = roleDisplayName(ADMIN_MOCK.currentUser.role);
+  /* ── Role label resolution: allowlisted only, no raw role fallback ── */
+  var ROLE_LABELS = { super_admin: '超級管理員', moderator: '內容審查員', read_only: '唯讀分析師' };
+  var currentUser = (ADMIN_MOCK && ADMIN_MOCK.currentUser) || {};
+  var rawRole     = typeof currentUser.role === 'string' ? currentUser.role : '';
+  var roleLabel   = Object.prototype.hasOwnProperty.call(ROLE_LABELS, rawRole) ? ROLE_LABELS[rawRole] : '(unknown role)';
+
+  var reqPath = location.pathname;
+  if (document.referrer) {
+    try { reqPath = new URL(document.referrer).pathname; } catch (_) { /* malformed referrer — keep location.pathname */ }
+  }
+  document.getElementById('reqPath').textContent = reqPath;
+  document.getElementById('reqUser').textContent = typeof currentUser.username === 'string' ? currentUser.username : '(unknown)';
+  document.getElementById('reqRole').textContent = roleLabel;
   document.getElementById('reqTime').textContent = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 </script>
 </body>

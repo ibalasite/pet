@@ -32,6 +32,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Interactive Demos](#interactive-demos)
 - [Core Features](#core-features)
 - [System Architecture](#system-architecture)
 - [Tech Stack](#tech-stack)
@@ -68,6 +69,18 @@ The project is governed by the upstream documents below; every design decision m
 | [ADMIN_IMPL](docs/ADMIN_IMPL.md) | Admin portal spec — RBAC v2.0 (super_admin / moderator / read_only) |
 
 See [System Architecture](#system-architecture) below and [Documentation](#documentation) for the full HTML reference site.
+
+---
+
+## Interactive Demos
+
+> Open these in a browser — no server required, all mock data built in.
+
+| Demo | Link | Description |
+|------|------|-------------|
+| 🎮 Player Prototype | [docs/pages/prototype/index.html](docs/pages/prototype/index.html) | 13 clickable screens — landing, pet claim, training, arena, leaderboard, GDPR |
+| 🔌 API Explorer | [docs/pages/prototype/api-explorer/index.html](docs/pages/prototype/api-explorer/index.html) | Postman-style mock API — 10 endpoints across Auth / Pets / Training / Arena / Leaderboard |
+| 🛡️ Admin Portal | [docs/pages/prototype/admin/index.html](docs/pages/prototype/admin/index.html) | RBAC v2.0 admin UI — super_admin / moderator / read_only; TOTP MFA login flow |
 
 ---
 
@@ -400,7 +413,7 @@ The full documentation suite is generated into a static HTML site at **`docs/pag
 | API | [docs/API.md](docs/API.md) | [API.html](docs/pages/API.html) | REST API endpoints, schemas, error codes |
 | SCHEMA | [docs/SCHEMA.md](docs/SCHEMA.md) | [SCHEMA.html](docs/pages/SCHEMA.html) | Database table definitions and ERD |
 | BDD | [features/](features/) | [BDD.html](docs/pages/BDD.html) | Gherkin feature files and living docs |
-| Prototype | [docs/pages/prototype/](docs/pages/prototype/) | Interactive | 10 player screens + 7 admin screens + API Explorer |
+| Prototype | [docs/pages/prototype/](docs/pages/prototype/) | Interactive | 13 player screens + 6 admin pages + API Explorer (10 endpoints) |
 
 ---
 
