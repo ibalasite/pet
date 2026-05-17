@@ -1,365 +1,598 @@
 <!--
-  DOC-ID:  README-PIXEL-PET-ARENA-20260516
-  Version: v1.8
+  DOC-ID:  README-PIXEL-PET-ARENA-20260518
+  Version: v2.0
   Status:  DRAFT
   Author:  AI Generated (gendoc readme)
-  Date:    2026-05-16
+  Date:    2026-05-18
   Upstream docs:
-    - docs/IDEA.md, docs/BRD.md, docs/PRD.md, docs/PDD.md
-    - docs/EDD.md, docs/ARCH.md, docs/API.md, docs/SCHEMA.md
-    - docs/test-plan.md, features/, features/client/
-    - docs/RUNBOOK.md, docs/LOCAL_DEPLOY.md, docs/ALIGN_REPORT.md
+    - BRD:          docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503 v1.2)
+    - PRD:          docs/PRD.md   (Product Requirements)
+    - PDD:          docs/PDD.md   (Product Design)
+    - EDD:          docs/EDD.md   (Engineering Design)
+    - API:          docs/API.md   (REST API Reference)
+    - SCHEMA:       docs/SCHEMA.md
+    - ADMIN_IMPL:   docs/ADMIN_IMPL.md (v2.0 — RBAC: super_admin / moderator / read_only)
+  Change log:
+    v1.0  2026-05-11  AI Generated (gendoc readme)  Initial draft
+    v2.0  2026-05-18  AI Generated (gendoc readme)  Rebuilt — ADMIN_IMPL v2.0 RBAC update
 -->
 
-# Pixel Pet Arena
+# pixel-pet-arena
 
-[![CI](https://img.shields.io/badge/CI-passing-brightgreen)][gh-actions]
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node 20](https://img.shields.io/badge/node-20%20LTS-green)](https://nodejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)](https://www.typescriptlang.org)
-[![Phaser 3](https://img.shields.io/badge/Phaser-3-orange)](https://phaser.io)
-[![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-blue)](https://postgresql.org)
-[![AI Gencode Ready](https://img.shields.io/badge/AI_Gencode_Ready-100%25_EXCELLENT-brightgreen)][align-report]
+> Zero-account HTML5 pixel pet arena — claim your unique procedurally-generated pet via email and battle on the global leaderboard, no sign-up required.
 
-[gh-actions]: https://github.com/tobala/pet/actions
-[align-report]: docs/pages/align-report.html
+[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-blue?logo=github-actions)](https://github.com/pixel-pet-arena/pixel-pet-arena/actions)
+[![Coverage](https://img.shields.io/badge/coverage-80%25%2B-brightgreen)](docs/test-plan.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-20%20LTS-339933?logo=node.js)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Core Features](#core-features)
+- [System Architecture](#system-architecture)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [API Quick Reference](#api-quick-reference)
+- [Directory Structure](#directory-structure)
+- [Documentation](#documentation)
+- [Testing](#testing)
+- [Development Workflow](#development-workflow)
+- [Troubleshooting](#troubleshooting)
+- [Security Policy](#security-policy)
+- [Architecture Quick Reference](#architecture-quick-reference)
+- [Contributing](#contributing)
+- [Code of Conduct](#code-of-conduct)
+- [License](#license)
 
 ---
 
 ## Overview
 
-**Pixel Pet Arena** 是全球首款「零帳號門檻 Email 認領制」HTML5 像素寵物競技平台。玩家無需創建帳號即可即時獲得一隻程序化生成的獨一無二像素寵物，透過 Email OTP 認領後即擁有永久所有權，並可進行訓練、競技、交易。
+**pixel-pet-arena** is a browser-native HTML5 pixel art pet game where players receive a unique procedurally-generated pet just by opening the page — no account, no app download. Pets are claimed via email OTP and accessed through a permanent URL token on any device.
 
-平台以 React 18 + Phaser 3（Player App）+ Vue 3（Admin Portal）+ Fastify 4 + TypeScript 5 + PostgreSQL 15 + Redis 構建，支援 GDPR 合規、COPPA 年齡確認、500 RPS 峰值負載、99.9% 月度 SLO。AI Gencode Readiness 達 **100%（EXCELLENT）**，文件完備度 25/25，BDD 覆蓋 Server 122 scenarios + Client 133 scenarios。
+It was built to solve **the "account-creation drop-off" barrier in casual games** — a gap that matters to mobile-first casual players because the friction of sign-up eliminates the majority of spontaneous engagement before it starts.
+
+The project is governed by the upstream documents below; every design decision maps to a tracked requirement:
+
+| Document | Purpose |
+|----------|---------|
+| [BRD](docs/BRD.md) | Business goals, success metrics, stakeholder sign-off |
+| [PRD](docs/PRD.md) | User stories, acceptance criteria, priority tiers |
+| [PDD](docs/PDD.md) | UX flows, pixel art design system, interaction specs |
+| [EDD](docs/EDD.md) | Architecture decisions, technology choices, data models |
+| [ADMIN_IMPL](docs/ADMIN_IMPL.md) | Admin portal spec — RBAC v2.0 (super_admin / moderator / read_only) |
+
+See [System Architecture](#system-architecture) below and [Documentation](#documentation) for the full HTML reference site.
 
 ---
 
-## 核心功能
+## Core Features
 
-- **零帳號訪客瀏覽**：任何人開啟 URL 即可看到隨機像素寵物（Phaser 3 Canvas 即時渲染）
-- **程序化像素生成**：>10 億種 Sprite 組合（體型 × 眼睛 × 紋理 × 飾件 × 調色盤），每隻 Pet 唯一
-- **Email Magic-Link 認領**：OTP 密碼 Email + URL Token，無需密碼帳號，72h TTL 安全設計
-- **寵物訓練系統**：速度 / 力量 / 耐力三維度成長；特殊食物 Buff 強化訓練效率
-- **競技場對決**：1v1 即時配對賽事，Battle Engine 依三維數值計算勝負，有精彩回放
-- **排行榜系統**：Redis Sorted Set 即時排名；每日快照持久化歷史數據
-- **Marketplace 交易**：寵物 NFT-like P2P 交易所（Feature Flag FF_MARKETPLACE，含反翻炒保護）
-- **Admin 後台**：Vue 3 管理入口，含 TOTP 2FA、GDPR 刪除請求、違規寵物封禁、稀有度設定
+**P0 — Ships for v1.0:**
+
+- **Zero-Account Pet Discovery** — Guest players receive a randomly generated pixel pet on first visit; pixel attributes (color, pattern, rarity) are seeded from the browser fingerprint + server entropy.
+- **Email Claim Flow** — Players claim ownership by entering their email; a 6-digit OTP is sent, and the pet becomes permanently linked to that address via AES-256-GCM encrypted storage + URL token.
+- **Training & Feeding System** — Pet stats (speed, strength, endurance) are grown through timed training actions; food items apply temporary buffs with configurable multipliers.
+- **Arena Racing Competition** — Players enter 1v1 / 3-way races where battle outcome is determined by stat comparison + seeded RNG; rate-limited to prevent abuse.
+- **Global Leaderboard** — Real-time rankings by arena score, served from Redis with PostgreSQL read-replica fallback; leaderboard page generates ≥ 20% of total DAU sessions.
+- **Battle Records Page** — Each pet has a shareable battle history URL; records are sortable by date, opponent, and outcome — a key viral sharing mechanism (promoted to P0 per BRD §5.3).
+- **Admin Portal** — Vue 3 + Element Plus admin interface with TOTP MFA; RBAC roles: `super_admin` / `moderator` / `read_only`; covers pet moderation, economy config, GDPR, analytics, and audit log.
 
 ---
 
-## 系統架構
+## System Architecture
+
+### C4 Level 1 — System Context
 
 ```mermaid
 graph TB
     subgraph Actors
         Guest["Guest Player<br/>(no account)"]
-        Owner["Pet Owner<br/>(email-claimed, URL token)"]
-        Comp["Competitive Player<br/>(token + arena)"]
-        AdminOp["Admin Operator<br/>(TOTP session)"]
+        Owner["Pet Owner<br/>(email-claimed)"]
+        Comp["Competitor<br/>(arena player)"]
+        Admin["Admin Operator<br/>(super_admin / moderator / read_only)"]
         Job["System Scheduled Jobs<br/>(cron / cleanup)"]
     end
 
     subgraph "Pixel Pet Arena Platform"
-        PPA["pixel-pet-arena<br/>HTML5 browser game + REST API + Admin Portal<br/>(React 18 + Phaser 3 / Vue 3 / Fastify 4 / Node 20)"]
+        PPA["pixel-pet-arena<br/>HTML5 browser game + REST API + Admin Portal"]
     end
 
     subgraph "External Systems"
-        SG["SendGrid v3 API<br/>(transactional email, primary)"]
-        SMTP["Nodemailer SMTP<br/>(email fallback after 3 failures)"]
+        SG["SendGrid<br/>(transactional email)"]
+        SMTP["Nodemailer SMTP<br/>(email fallback)"]
         SB["Supabase<br/>(PostgreSQL 15 managed)"]
-        UP["Upstash Redis<br/>(serverless cache + leaderboard)"]
-        VC["Vercel Edge CDN<br/>(static SPA bundles + global PoP)"]
+        UP["Upstash Redis<br/>(serverless cache)"]
+        VC["Vercel CDN<br/>(static assets)"]
         S3["S3-compatible Storage<br/>(DB backups)"]
-        Social["Social Share<br/>(Open Graph / battle result cards)"]
+        DD["Datadog / Grafana Cloud<br/>(observability)"]
     end
 
-    Guest -->|"HTTPS / browse pet preview"| PPA
+    Guest -->|"HTTPS / browse"| PPA
     Owner -->|"HTTPS / pet URL token"| PPA
     Comp -->|"HTTPS / arena interactions"| PPA
-    AdminOp -->|"HTTPS / admin session (TOTP 2FA)"| PPA
-    Job -->|"cron triggers (GDPR erasure, leaderboard snapshot)"| PPA
+    Admin -->|"HTTPS / admin session + TOTP"| PPA
+    Job -->|"cron triggers"| PPA
 
-    PPA -->|"send OTP claim email"| SG
-    SG -.->|"fallback after 3 failures"| SMTP
-    PPA -->|"persist all durable data"| SB
-    PPA -->|"cache + leaderboard sorted set + rate-limit counters"| UP
-    PPA -->|"static assets served via"| VC
-    SB -->|"daily automated backup"| S3
-    PPA -->|"battle result social cards"| Social
+    PPA -->|"send claim email"| SG
+    PPA -->|"fallback after 3 failures"| SMTP
+    PPA -->|"persist data"| SB
+    PPA -->|"cache + leaderboard + rate-limit"| UP
+    PPA -->|"static assets"| VC
+    SB -->|"daily backup"| S3
+    PPA -->|"logs / metrics / traces"| DD
+```
+
+### C4 Level 2 — Container Diagram
+
+```mermaid
+graph TB
+    Browser["Player Browser<br/>(React 18 + Phaser 3)"]
+    AdminBrowser["Admin Browser<br/>(Vue 3 + Element Plus)"]
+
+    subgraph "Edge / CDN Layer"
+        CDN["Vercel Global CDN<br/>(static SPA bundles)"]
+        LB["Nginx LB / Vercel Edge<br/>(TLS, X-Real-IP, rate-limit headers)"]
+    end
+
+    subgraph "Application Tier (Railway)"
+        API1["API Replica 1<br/>(Fastify 4 / Node 20)"]
+        API2["API Replica 2<br/>(Fastify 4 / Node 20)"]
+        W1["Worker Replica 1<br/>(GDPR erasure / leaderboard snapshot / cleanup)"]
+        W2["Worker Replica 2<br/>(idempotent backup)"]
+    end
+
+    subgraph "Data Tier"
+        PG_P["PostgreSQL Primary<br/>(Supabase managed)"]
+        PG_R["PostgreSQL Read Replica<br/>(leaderboard / public reads)"]
+        REDIS_P["Redis Primary<br/>(Upstash)"]
+        REDIS_S["Redis Replica<br/>(Upstash Sentinel)"]
+    end
+
+    subgraph "External Services"
+        SG["SendGrid v3 API"]
+        SMTP["SMTP fallback"]
+        S3["S3 backups"]
+    end
+
+    Browser --> CDN
+    AdminBrowser --> CDN
+    CDN --> LB
+    LB --> API1
+    LB --> API2
+    API1 --> PG_P
+    API2 --> PG_P
+    API1 --> REDIS_P
+    API2 --> REDIS_P
+    API1 --> SG
+    API1 --> SMTP
+    W1 --> PG_P
+    W1 --> REDIS_P
+    W2 --> PG_P
+    W2 --> S3
+    PG_P -.-> PG_R
+    REDIS_P -.-> REDIS_S
 ```
 
 ---
 
 ## Tech Stack
 
-| 層次 | 技術 | 版本 / 說明 |
-|------|------|------------|
-| **Frontend (Player)** | React 18 + Phaser 3 + Vite | HTML5 SPA；Phaser 3 Canvas 渲染像素寵物 |
-| **Frontend (Admin)** | Vue 3 + Element Plus + Vite | 資料密集管理後台；與 Player App 設計隔離 |
-| **Backend** | Node.js 20 LTS + Fastify 4 + TypeScript 5 | REST API；JSON Schema / Zod 驗證；WebSocket-ready |
-| **Database** | PostgreSQL 15 (Supabase managed) | 主要持久化；Row-level Security；分區 arena_matches |
-| **Cache / Leaderboard** | Upstash Redis (serverless) | Sorted Set 排行榜；rate-limit counters；Admin session |
-| **Email (Primary)** | SendGrid v3 API | OTP claim email；fallback 至 Nodemailer SMTP |
-| **CDN** | Vercel Edge CDN | 靜態 SPA bundle 全球分發；Edge PoP |
-| **Storage** | S3-compatible | PostgreSQL 每日備份 |
-| **Game Engine** | Phaser 3 | Sprite 組件拼裝；像素動畫；Battle Canvas |
-| **Auth** | Email OTP + URL Token (SHA-256 hashed) | 無傳統密碼帳號；Admin 另配 TOTP 2FA |
-| **Testing** | Vitest + Cucumber.js + Playwright | Unit / BDD Integration / E2E |
-| **CI/CD** | GitHub Actions + Docker Compose | PR Gate → Staging → Production |
+| Layer | Technology | Notes |
+|-------|-----------|-------|
+| **Player Frontend** | React 18 + Phaser 3 + Vite + TypeScript 5 | HTML5 Canvas game engine; pixel art rendering; SPA served via Vercel CDN |
+| **Admin Frontend** | Vue 3 + Element Plus + Vite + TypeScript 5 | Data-dense admin portal; TOTP MFA; RBAC: super_admin / moderator / read_only |
+| **Backend API** | Fastify 4 + Node.js 20 LTS + TypeScript 5 | REST API; Zod schema validation; port 3000 (local) / 8080 (prod) |
+| **Database** | PostgreSQL 15 (Supabase managed) | Primary + Read Replica (leaderboard / public reads); daily S3 backups |
+| **Cache / Rate-limit** | Upstash Redis (serverless) | Leaderboard sorted sets; OTP TTL; rate-limit counters; Primary + Sentinel HA |
+| **Email** | SendGrid v3 + Nodemailer SMTP fallback | Transactional OTP claim emails; fallback after 3 SendGrid failures |
+| **CDN / Hosting** | Vercel (frontend) + Railway (API + Workers) | Global edge for static SPA bundles; Railway for stateful application tier |
+| **CI / CD** | GitHub Actions | Lint → type-check → test → build → deploy pipeline |
+| **Observability** | Datadog / Grafana Cloud | Structured JSON logs + Prometheus metrics + OpenTelemetry traces |
+| **Testing** | Jest + Playwright + Cucumber | Unit/integration (Jest); E2E (Playwright); BDD (Cucumber/Gherkin) |
 
 ---
 
-## 快速啟動
+## Quick Start
 
-### Docker（推薦 — 零本地環境依賴）
+### Prerequisites (all paths)
+
+- [Git](https://git-scm.com/) 2.40+
+- An `.env` file — copy from `.env.example` (see [Environment Variables](#environment-variables))
+
+---
+
+### Docker (Recommended)
 
 ```bash
-git clone https://github.com/tobala/pet.git pixel-pet-arena
+git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
 cd pixel-pet-arena
-cp .env.example .env.local
-# 填入 JWT_SECRET / EMAIL_ENCRYPTION_KEY（見環境變數表）
+
+# Configure environment
+cp .env.example .env
+# Edit .env — set DATABASE_URL, REDIS_URL, JWT_SECRET, SENDGRID_API_KEY, EMAIL_ENCRYPTION_KEY
+
+# Start all services (API + PostgreSQL + Redis)
 docker compose up -d
-open http://localhost:3001   # Player App
-open http://localhost:3002   # Admin Portal
-open http://localhost:3000   # API
+
+# Verify services are healthy
+docker compose ps
+# Expected: all services show "running (healthy)"
 ```
 
-### macOS / Linux（本地開發）
+Verify the API is responding:
 
 ```bash
-# Prerequisites: Node.js 20+, npm 10+, Docker (for PostgreSQL + Redis)
-git clone https://github.com/tobala/pet.git pixel-pet-arena
+curl http://localhost:3000/health
+# {"status":"ok","version":"1.0.0"}
+```
+
+Player app: `http://localhost:5173` | Admin portal: `http://localhost:5174`
+
+---
+
+### macOS / Linux (Native)
+
+**Prerequisites:** Node.js 20+ ([nvm](https://github.com/nvm-sh/nvm) recommended), PostgreSQL 15+, Redis 7+
+
+```bash
+git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
 cd pixel-pet-arena
+
+# Install dependencies
 npm install
-cp .env.example .env.local
-# 啟動 Supabase local + Redis
-npx supabase start
-docker run -d -p 6379:6379 redis:7-alpine
-# 資料庫 Migration
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your local database and Redis credentials
+# Minimum required: DATABASE_URL, REDIS_URL, JWT_SECRET, SENDGRID_API_KEY, EMAIL_ENCRYPTION_KEY
+
+# Run database migrations
 npm run db:migrate
-# 啟動全部服務（concurrently）
+
+# Seed development data (optional)
+npm run db:seed
+
+# Start the development servers (API + Player + Admin)
 npm run dev
 ```
 
-訪問：
-- Player App: http://localhost:3001
-- Admin Portal: http://localhost:3002
-- API: http://localhost:3000
-- Supabase Studio: http://localhost:54323
+Expected output:
 
-### Windows（PowerShell）
-
-```powershell
-# Prerequisites: Node.js 20+, Docker Desktop for Windows
-git clone https://github.com/tobala/pet.git pixel-pet-arena
-Set-Location pixel-pet-arena
-npm install
-Copy-Item .env.example .env.local
-# 填入必填環境變數（見下表）
-docker compose up -d
-Start-Process "http://localhost:3001"
+```
+[pixel-pet-arena/api]    Listening on http://localhost:3000
+[pixel-pet-arena/player] Local: http://localhost:5173
+[pixel-pet-arena/admin]  Local: http://localhost:5174
+[pixel-pet-arena/api]    Database: connected (PostgreSQL 15)
+[pixel-pet-arena/api]    Redis: connected (Upstash / localhost:6379)
 ```
 
 ---
 
-## 環境變數表
+### Windows (PowerShell)
 
-| 變數 | 說明 | 必填 | 預設值 |
-|------|------|:----:|--------|
-| `POSTGRES_DB` | PostgreSQL 資料庫名稱 | ✅ | `pixel_pet_arena` |
-| `DATABASE_URL` | PostgreSQL 連接字串 | ✅ | — |
-| `REDIS_URL` | Redis 連接字串 | ✅ | `redis://localhost:6379` |
-| `JWT_SECRET` | TOTP setup token 簽名金鑰（base64url 64 bytes）| ✅ | — |
-| `SENDGRID_API_KEY` | SendGrid v3 API Key | ✅ | `any-dummy-string-for-local` |
-| `EMAIL_ENCRYPTION_KEY` | Email AES-256-GCM 加密金鑰（hex 32 bytes）| ✅ | — |
-| `ADMIN_TOTP_ISSUER` | Authenticator App 顯示名稱 | — | `pixel-pet-arena-local` |
-| `FF_MARKETPLACE` | Feature Flag：Marketplace 交易所 | — | `false` |
-| `FF_ARENA_SUMO` | Feature Flag：Arena 相撲模式 | — | `true` |
-| `FF_RARITY_DISPLAY` | Feature Flag：稀有度顯示 | — | `true` |
-| `FF_PET_GENERATION` | Feature Flag：Pet 生成 | — | `true` |
-| `FF_ADMIN_PORTAL` | Feature Flag：Admin 後台 | — | `true` |
-| `VITE_API_BASE_URL` | Player/Admin 前端呼叫 API 基礎 URL | — | `http://localhost:3000` |
+> **Recommendation:** Use [WSL 2](https://learn.microsoft.com/windows/wsl/install) + Docker Desktop for the smoothest Windows experience. The commands below work in PowerShell 7+ natively.
 
-> 生成金鑰：`node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))"`（JWT_SECRET）
-> 生成加密金鑰：`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`（EMAIL_ENCRYPTION_KEY）
+```powershell
+git clone https://github.com/pixel-pet-arena/pixel-pet-arena.git
+Set-Location pixel-pet-arena
 
----
+# Install dependencies
+npm install
 
-## API 快速參考
+# Configure environment
+Copy-Item .env.example .env
+# Open .env in your editor — fill in DATABASE_URL, JWT_SECRET, etc.
 
-| Method | Endpoint | 說明 |
-|--------|----------|------|
-| `POST` | `/api/v1/claim` | 啟動 Email Claim OTP（發送 OTP 至信箱）|
-| `POST` | `/api/v1/claim/verify` | 驗證 OTP，發行 Pet URL Token |
-| `POST` | `/api/v1/claim/recover` | Token 遺失恢復（重發至信箱）|
-| `GET`  | `/api/v1/pets/random` | 訪客取得隨機 Pet 預覽（無需認證）|
-| `GET`  | `/api/v1/pets/:petId` | 取得 Pet 詳細資訊 |
+# Run database migrations
+npm run db:migrate
 
-> 完整 API 規格：[docs/API.md](docs/API.md) | [HTML](docs/pages/api.html)
+# Start development servers
+npm run dev
+```
+
+Verify the API:
+
+```powershell
+Invoke-RestMethod http://localhost:3000/health
+```
 
 ---
 
-## 目錄結構
+## Environment Variables
+
+Copy `.env.example` to your service-specific `.env.local` files before starting. The API validates all required variables at startup and exits with a clear error if any are missing.
+
+| Variable | Service | Description | Required | Default |
+|----------|---------|-------------|----------|---------|
+| `DATABASE_URL` | API | PostgreSQL connection string (from `supabase start`) | Yes | — |
+| `REDIS_URL` | API | Redis / Upstash connection string | Yes | `redis://localhost:6379` |
+| `JWT_SECRET` | API | TOTP setup token signer (64-byte base64url) | Yes | — |
+| `SENDGRID_API_KEY` | API | SendGrid v3 API key (use any string locally) | Yes | `any-dummy-string-for-local` |
+| `EMAIL_ENCRYPTION_KEY` | API | AES-256-GCM key for email storage (32-byte hex) | Yes | — |
+| `ADMIN_TOTP_ISSUER` | API | Issuer name shown in authenticator app | No | `pixel-pet-arena-local` |
+| `FF_MARKETPLACE` | API | Enable pet trading marketplace (Phase 3) | No | `false` |
+| `FF_ARENA_SUMO` | API | Enable sumo arena mode (P1) | No | `true` |
+| `FF_RARITY_DISPLAY` | API | Show rarity badges (P1) | No | `true` |
+| `FF_PET_GENERATION` | API | Enable procedural pet generation | No | `true` |
+| `FF_ADMIN_PORTAL` | API | Enable admin portal routes | No | `true` |
+| `VITE_API_BASE_URL` | Player/Admin | API base URL for frontend | No | `http://localhost:3000` |
+
+See `.env.example` for the full annotated list.
+
+---
+
+## API Quick Reference
+
+All endpoints are prefixed with `/api/v1`. Player endpoints use `X-Pet-Token: <pet_url_token>` for pet-owner auth. Admin endpoints use `Authorization: Bearer <admin_session_token>` with TOTP-verified sessions.
+
+| Method + Path | Auth | Description |
+|---------------|------|-------------|
+| `POST /api/v1/claim` | None | Initiate email claim — send OTP to email, bind to petId |
+| `POST /api/v1/claim/verify` | None | Verify OTP and generate permanent pet URL token |
+| `GET /api/v1/pets/random` | None | Get a random unclaimed pet for guest display |
+| `GET /api/v1/pets/:petId` | None / Pet Token | Get pet details; token unlocks owner fields |
+| `POST /api/v1/arena/enter` | Pet Token | Enter arena with pet; returns battle result |
+| `GET /api/v1/leaderboard` | None | Global leaderboard (paginated, Redis-cached) |
+| `GET /api/v1/pets/:petId/battles` | None | Pet battle records (shareable, public) |
+
+For full request/response schemas, error codes, rate limits, and admin API see:
+
+- Markdown source: [docs/API.md](docs/API.md)
+- HTML online: [docs/pages/API.html](docs/pages/API.html)
+
+---
+
+## Directory Structure
 
 ```
 pixel-pet-arena/
-├── apps/                          # (gencode 後生成)
-│   ├── api/                       # Fastify 4 + TypeScript 後端
-│   ├── player/                    # React 18 + Phaser 3 Player App
-│   └── admin/                     # Vue 3 + Element Plus Admin Portal
-├── docs/                          # 25 份規格文件
-│   ├── BRD.md / PRD.md / PDD.md   # 業務 / 產品需求
-│   ├── EDD.md / ARCH.md           # 工程設計 / 架構
-│   ├── API.md / SCHEMA.md         # 介面 / 資料模型
-│   ├── FRONTEND.md / CLIENT_IMPL.md / ADMIN_IMPL.md
-│   ├── test-plan.md / RTM.md      # 測試計劃 / 需求追溯
-│   ├── LOCAL_DEPLOY.md            # 本地開發環境
-│   ├── RUNBOOK.md                 # 運維手冊
-│   ├── ALIGN_REPORT.md            # 對齊掃描報告（Dim0-6）
-│   ├── CICD.md                    # CI/CD 流水線
-│   └── pages/                     # HTML 文件網站
-│       ├── index.html
-│       └── assets/ (style.css, app.js)
-├── features/                      # BDD Server Scenarios (13 files, 122 scenarios)
-│   └── client/                    # BDD Client Scenarios (10 files, 133 scenarios)
-├── docs/blueprint/scaffold/       # AI Gencode 骨架（stub，待實作）
-├── docs/diagrams/                 # PlantUML 圖表
-├── docs/contracts/                # API Contract 規格
-├── .env.example                   # 環境變數範本
-└── README.md                      # 本文件
+├── .github/                   # GitHub Actions workflows and PR templates
+│   └── workflows/
+│       ├── ci.yml             # Lint → typecheck → test → build on every PR
+│       └── deploy.yml         # Deploy to Railway (API) + Vercel (frontend)
+├── docs/                      # Markdown source for all design documents
+│   ├── BRD.md                 # Business Requirements Document
+│   ├── PRD.md                 # Product Requirements Document
+│   ├── PDD.md                 # Product Design Document
+│   ├── EDD.md                 # Engineering Design Document
+│   ├── ADMIN_IMPL.md          # Admin Portal Implementation Spec (v2.0)
+│   ├── API.md                 # REST API reference
+│   ├── SCHEMA.md              # Database schema reference
+│   ├── ARCH.md                # Architecture Decision Records
+│   ├── FRONTEND.md            # Player frontend component spec
+│   ├── LOCAL_DEPLOY.md        # Local development setup guide
+│   └── pages/                 # Generated HTML documentation site
+│       ├── index.html         # Documentation home page
+│       ├── prototype/         # Interactive HTML prototype (17 screens)
+│       │   ├── index.html     # Player prototype (10 screens)
+│       │   ├── admin/         # Admin portal prototype (18 HTML files)
+│       │   └── api-explorer/  # API Explorer (mock responses)
+│       └── assets/            # CSS + JS for docs site
+├── features/                  # BDD Gherkin feature files (Cucumber)
+│   ├── claim_flow.feature     # Email claim E2E scenarios
+│   ├── arena.feature          # Arena battle scenarios
+│   └── client/                # Client-side E2E feature files
+├── docker-compose.yml         # Local multi-service stack (API + PostgreSQL + Redis)
+├── cucumber.js                # Cucumber BDD runner config
+└── .env.example               # Annotated environment variable template
 ```
 
 ---
 
-## 文件索引
+## Documentation
 
-| 文件 | 說明 | HTML |
-|------|------|------|
-| [BRD.md](docs/BRD.md) | 商業需求文件 | [→](docs/pages/brd.html) |
-| [PRD.md](docs/PRD.md) | 產品需求文件 + User Stories | [→](docs/pages/prd.html) |
-| [PDD.md](docs/PDD.md) | 產品設計規格（UI/UX） | [→](docs/pages/pdd.html) |
-| [VDD.md](docs/VDD.md) | 視覺設計規格（Design Token） | [→](docs/pages/vdd.html) |
-| [EDD.md](docs/EDD.md) | 工程設計文件（技術選型、API、Schema） | [→](docs/pages/edd.html) |
-| [ARCH.md](docs/ARCH.md) | 架構設計（C4 + Mermaid） | [→](docs/pages/arch.html) |
-| [API.md](docs/API.md) | REST API 規格（Fastify Routes） | [→](docs/pages/api.html) |
-| [SCHEMA.md](docs/SCHEMA.md) | 資料庫 Schema（PostgreSQL DDL） | [→](docs/pages/schema.html) |
-| [FRONTEND.md](docs/FRONTEND.md) | 前端技術設計（React + Phaser 3） | [→](docs/pages/frontend.html) |
-| [CLIENT_IMPL.md](docs/CLIENT_IMPL.md) | 前端實作細節（Phaser Scene、State） | [→](docs/pages/client-impl.html) |
-| [ADMIN_IMPL.md](docs/ADMIN_IMPL.md) | Admin Portal 實作規格 | [→](docs/pages/admin-impl.html) |
-| [test-plan.md](docs/test-plan.md) | 測試計劃（Unit / BDD / E2E） | [→](docs/pages/test-plan.html) |
-| [RTM.md](docs/RTM.md) | 需求追溯矩陣 | [→](docs/pages/rtm.html) |
-| [LOCAL_DEPLOY.md](docs/LOCAL_DEPLOY.md) | 本地 K8s / Docker 開發環境 | [→](docs/pages/local-deploy.html) |
-| [RUNBOOK.md](docs/RUNBOOK.md) | 運維手冊（SLO、告警、Oncall） | [→](docs/pages/runbook.html) |
-| [ALIGN_REPORT.md](docs/ALIGN_REPORT.md) | 六維度對齊掃描報告 | [→](docs/pages/align-report.html) |
-| [BDD Server features/](features/) | 13 files / 122 scenarios | — |
-| [BDD Client features/client/](features/client/) | 10 files / 133 scenarios | — |
+The full documentation suite is generated into a static HTML site at **`docs/pages/`**.
+
+| Document | Markdown Source | HTML | Description |
+|----------|----------------|------|-------------|
+| BRD | [docs/BRD.md](docs/BRD.md) | [BRD.html](docs/pages/BRD.html) | Business goals, ROI analysis, stakeholder sign-off |
+| PRD | [docs/PRD.md](docs/PRD.md) | [PRD.html](docs/pages/PRD.html) | User stories, acceptance criteria, priority tiers |
+| PDD | [docs/PDD.md](docs/PDD.md) | [PDD.html](docs/pages/PDD.html) | UX flows, pixel art design system, component specs |
+| EDD | [docs/EDD.md](docs/EDD.md) | [EDD.html](docs/pages/EDD.html) | Architecture, tech choices, data models |
+| ADMIN_IMPL | [docs/ADMIN_IMPL.md](docs/ADMIN_IMPL.md) | [ADMIN_IMPL.html](docs/pages/ADMIN_IMPL.html) | Admin portal spec — RBAC v2.0 |
+| ARCH | [docs/ARCH.md](docs/ARCH.md) | [ARCH.html](docs/pages/ARCH.html) | Architecture Decision Records (ADRs) |
+| API | [docs/API.md](docs/API.md) | [API.html](docs/pages/API.html) | REST API endpoints, schemas, error codes |
+| SCHEMA | [docs/SCHEMA.md](docs/SCHEMA.md) | [SCHEMA.html](docs/pages/SCHEMA.html) | Database table definitions and ERD |
+| BDD | [features/](features/) | [BDD.html](docs/pages/BDD.html) | Gherkin feature files and living docs |
+| Prototype | [docs/pages/prototype/](docs/pages/prototype/) | Interactive | 10 player screens + 7 admin screens + API Explorer |
 
 ---
 
-## 測試
+## Testing
+
+### Run All Tests
 
 ```bash
-# 單元測試
-npm run test:unit
-
-# BDD Integration 測試（Cucumber.js）
-npm run test:bdd
-
-# E2E 測試（Playwright）
-npm run test:e2e
-
-# 完整測試套件（含覆蓋率）
 npm test
-
-# 覆蓋率報告
-npm run test:coverage
 ```
 
-| 測試類型 | 工具 | 目標覆蓋率 |
-|---------|------|-----------|
-| Unit | Vitest + TypeScript | ≥ 80% |
-| BDD Integration | Cucumber.js + real PostgreSQL | 122 Server + 133 Client scenarios |
-| E2E | Playwright | 關鍵 User Flows 全覆蓋 |
+### Generate Coverage Report
 
-> 測試計劃詳見 [docs/test-plan.md](docs/test-plan.md)
+```bash
+npm run test:coverage
+# Report written to coverage/lcov-report/index.html
+```
+
+Coverage target: **80% lines, branches, functions** — CI fails if coverage drops below this threshold.
+
+### Individual Test Types
+
+```bash
+# Unit tests only
+npm run test:unit
+
+# Integration tests (requires DATABASE_URL and REDIS_URL in .env)
+npm run test:integration
+
+# BDD / Cucumber feature tests
+npm run test:bdd
+
+# End-to-end tests (requires running app)
+npm run test:e2e
+```
+
+### Test Stack
+
+| Type | Tool | Scope |
+|------|------|-------|
+| Unit | Jest | Domain services, utility functions, Fastify route handlers |
+| Integration | Jest + Supertest | API endpoints with real PostgreSQL + Redis (Docker-based) |
+| BDD | Cucumber + Gherkin | Business scenario coverage — see `features/` |
+| E2E | Playwright | Critical player flows: claim → train → arena → leaderboard |
 
 ---
 
-## 已知限制
+## Development Workflow
 
-1. **純文件期（AI Gencode 前置狀態）**：`apps/` 目錄尚未實作，`docs/blueprint/scaffold/` 為 AI 骨架（所有方法為 `throw new Error('Not implemented')`）。執行 gencode 流程後解除。
-2. **D1-01：LOCAL_DEPLOY Worker container 缺失**：`docker-compose.yml` 缺少 `pixel-pet-arena-worker` 服務；port 3001 assignment 衝突需修正（P0）。
-3. **D4-09：gdpr-ui.feature 不存在**：`features/client/` 缺少 GDPR 設定頁 E2E Scenario（FRONTEND.md §10 映射目標，P0）。
-4. **D4-03：RTM Scenario 計數過時**：RTM 記錄 Server BDD 82 scenarios，實際已達 122（P0，可自動修復）。
-5. **D1-02：Sprite 尺寸三方矛盾**：VDD 規格 64×64px / EDD 定義 32×32px / FRONTEND 乘以 ×2 scale。需三方文件對齊（P1）。
+### Branch Strategy
 
-> 詳細對齊分析：[docs/ALIGN_REPORT.md](docs/ALIGN_REPORT.md)（AI Gencode Readiness: **100% EXCELLENT**）
+| Branch | Purpose | Direct Push |
+|--------|---------|-------------|
+| `main` | Production-ready code, tagged releases | No — PR only |
+| `develop` | Integration branch; staging deploys from here | No — PR only |
+| `feature/ticket-description` | New features | Yes (author) |
+| `fix/ticket-description` | Bug fixes | Yes (author) |
+| `chore/ticket-description` | Tooling and maintenance | Yes (author) |
+
+### Commit Message Format
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <short summary in imperative mood>
+
+[optional body — what and why, not how]
+
+[optional footer — BREAKING CHANGE, closes #issue]
+```
+
+Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `perf`, `ci`
+
+Examples:
+```
+feat(arena): add per-match RNG seed logging for replay debugging
+fix(claim): reject OTP verify requests with expired tokens (15 min TTL)
+docs(readme): rebuild for ADMIN_IMPL v2.0 RBAC update
+```
+
+### Pull Request Checklist
+
+Before requesting review:
+
+- [ ] All CI checks are green (lint, type-check, tests)
+- [ ] Coverage has not dropped below 80%
+- [ ] `docs/API.md` updated for any new/changed endpoints
+- [ ] Feature flags documented in `.env.example` for any new FF_ variables
+- [ ] `ADMIN_IMPL.md` updated if admin portal behavior changes
 
 ---
 
-## Changelog
+## Troubleshooting
 
-請見 [GitHub Releases](https://github.com/tobala/pet/releases) 或 [CICD.md](docs/CICD.md)。
-
----
-
-## License
-
-MIT © 2026 Pixel Pet Arena Contributors. 詳見 [LICENSE](LICENSE)。
-
----
-
-## 開發說明
-
-> 本文件由 [gendoc](https://github.com/ibalasite/gendoc) v3.8.0 自動生成（`/gendoc readme`）。
-> 上游文件包含 BRD / PRD / PDD / EDD / ARCH / API / SCHEMA / FRONTEND / test-plan / ALIGN_REPORT。
-> 如需手動更新，請優先修改上游文件後重新執行 `/gendoc readme`，以保持文件一致性。
+| Problem | Likely Cause | Solution |
+|---------|-------------|----------|
+| `Error: connect ECONNREFUSED localhost:5432` on API startup | PostgreSQL not running or `DATABASE_URL` wrong | Start PostgreSQL (`docker compose up db -d`), verify `DATABASE_URL` in `.env`, run `npm run db:migrate` |
+| `Error: Redis connection refused` | Redis not running or `REDIS_URL` misconfigured | Start Redis (`docker compose up redis -d`), confirm `REDIS_URL` in `.env` |
+| `401 Unauthorized` on `/api/v1/claim` | Missing or wrong request format | Check `Content-Type: application/json` header; verify `petId` is a valid UUID of an unclaimed pet |
+| Admin TOTP fails — "Invalid OTP code" | Clock drift between server and authenticator | Ensure server time is NTP-synced; the TOTP window is ±1 step (30s) |
+| `FF_PET_GENERATION=false` — pet display shows blank | Feature flag disabled | Set `FF_PET_GENERATION=true` in `.env` and restart the API |
+| Leaderboard returns stale data | Redis cache TTL not expired | Clear Redis key `leaderboard:global:*` or wait for the 60s TTL; in dev use `redis-cli FLUSHDB` |
+| Email OTP not received | SendGrid key invalid or Supabase Inbucket not running | Check `SENDGRID_API_KEY`; in local dev, view captured emails at `http://localhost:54324` (Supabase Inbucket) |
 
 ---
 
 ## Security Policy
 
-### Supported Versions
+如發現安全漏洞，請**不要**透過公開 Issue 回報。
 
-| Version | Supported |
-|---------|-----------|
-| `main` branch | ✅ |
-| Tagged releases | ✅ |
-| Older branches | ❌ |
+**負責任揭露（Responsible Disclosure）：**
+- 發送 Email 至：`security@pixel-pet-arena.example.com`
+- 或使用 GitHub 私人漏洞回報：Security Advisories
 
-### Responsible Disclosure SLA
+**回應承諾（SLA）：**
 
-| Severity | Response Time | Fix SLA |
-|----------|:-------------:|:-------:|
-| **Critical** | 24h | **72h** |
-| **High** | 48h | **7 days** |
-| **Medium** | 5 business days | **90 days** |
-| **Low** | Best effort | Best effort |
+| 嚴重等級 | 初始回應 | 修補目標 | 公開披露 |
+|---------|---------|---------|---------|
+| Critical | 24 小時 | 72 小時 | 修補後 7 日 |
+| High | 48 小時 | 7 日 | 修補後 14 日 |
+| Medium | 5 個工作日 | 90 日 | 修補後 90 日 |
 
-回報安全問題請寄：**security@pixel-pet-arena.example.com**（請勿於 GitHub Issues 公開漏洞）
+詳見 [SECURITY.md](SECURITY.md)
 
 ---
 
 ## Architecture Quick Reference
 
-| 決策 | 選擇 | 原因 |
-|------|------|------|
-| **Auth Model** | Email OTP + URL Token（無密碼帳號） | 零門檻訪客轉換；Email Magic Link 業界驗證（Notion/Linear） |
-| **Game Engine** | Phaser 3（WebGL Canvas） | 像素藝術渲染 + 互動；Vite HMR 加速開發；itch.io 生態驗證 |
-| **Backend Runtime** | Node.js 20 + Fastify 4 | 500 RPS 投影負載已足夠；TypeScript 統一 monorepo；低 ops 成本 |
-| **Leaderboard** | Upstash Redis Sorted Set | O(log N) 即時排名；Serverless 彈性；每日快照持久化 |
-| **Admin Stack** | Vue 3 + Element Plus（獨立於 Player） | 資料密集 Admin UI 與 Phaser 像素設計系統隔離；降低 coupling |
+| 關鍵決策 | 選擇 | 文件 |
+|---------|------|------|
+| API 範式 | REST (Fastify 4 + Zod validation) | [docs/ARCH.md](docs/ARCH.md) |
+| 資料庫 | PostgreSQL 15 via Supabase (managed HA) | [docs/SCHEMA.md](docs/SCHEMA.md) |
+| 認證機制 | Email OTP → URL token (players); TOTP + session (admin) | [docs/EDD.md](docs/EDD.md#authentication) |
+| Admin RBAC | 3-tier: `super_admin` / `moderator` / `read_only` | [docs/ADMIN_IMPL.md](docs/ADMIN_IMPL.md) |
+| 前端架構 | React 18 + Phaser 3 (player) + Vue 3 + Element Plus (admin) — dual-stack separation | [docs/EDD.md](docs/EDD.md#tech-stack) |
 
-> ADR 詳見 [docs/ARCH.md §9 Architecture Decision Records](docs/ARCH.md) | [docs/EDD.md §1.1](docs/EDD.md)
+主要 ADR（Architecture Decision Records）：[docs/ARCH.md](docs/ARCH.md)
+
+---
+
+## Contributing
+
+Contributions are welcome. Please read this section before submitting a pull request.
+
+### Fork and PR Flow
+
+1. Fork the repository on GitHub
+2. Create a feature branch from `develop`: `git checkout -b feature/your-feature develop`
+3. Write tests first (TDD) — the test suite must stay green
+4. Commit using the Conventional Commits format
+5. Open a PR against `develop` (not `main`)
+6. Address all review feedback
+
+### Code Style
+
+- Code is formatted by **Prettier** on save
+- Lint rules: **ESLint** with TypeScript rules
+- Type-checking: `npm run typecheck` — CI blocks on type errors
+- CSS/styling: no Tailwind utility classes on game canvas components
+
+### Issue Templates
+
+Use GitHub issue templates:
+
+- **Bug report** — reproduction steps, expected vs actual behavior, environment details
+- **Feature request** — problem statement, proposed solution, acceptance criteria
 
 ---
 
 ## Code of Conduct
 
-本專案遵循 [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)。
+本專案採用 [Contributor Covenant](https://www.contributor-covenant.org/) v2.1 作為行為準則。
+詳見 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
-所有貢獻者、維護者及社群成員均應遵守此行為準則。回報違規行為請聯繫 **conduct@pixel-pet-arena.example.com**。
+如有違規事宜，請聯繫 `conduct@pixel-pet-arena.example.com`
 
 ---
 
-*README v1.8 — 2026-05-16 — AI Gencode Readiness: 100% EXCELLENT（25/25 文件完備）*
+## License
+
+MIT License
+
+Copyright (c) 2026 pixel-pet-arena contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+See [LICENSE](LICENSE) for the full text.
+
+---
+
+> *This README is auto-generated by [gendoc](https://github.com/ibalasite/gendoc) — edit upstream documents (BRD / PRD / EDD / ADMIN_IMPL) to trigger a regeneration via `/gendoc readme`.*
