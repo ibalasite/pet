@@ -18,8 +18,7 @@
     "ALIGN-VERIFY": true,
     "CONTRACTS": true,
     "MOCK": true,
-    "HTML": true,
-    "PROTOTYPE": true
+    "HTML": true
   },
   "completed_steps": [
     "UML",
