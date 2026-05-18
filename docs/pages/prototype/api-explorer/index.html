@@ -883,11 +883,15 @@
         <h2>pixel-pet-arena API Explorer</h2>
         <p>選擇左側 Endpoint 開始試打 — 所有回應均為 JavaScript Mock，無需真實伺服器</p>
         <div class="welcome-grid">
-          <span class="welcome-pill">Auth</span>
-          <span class="welcome-pill">Pets</span>
-          <span class="welcome-pill">Training</span>
-          <span class="welcome-pill">Arena</span>
+          <span class="welcome-pill">Pet Claims &amp; Recovery</span>
+          <span class="welcome-pill">Pet Management</span>
+          <span class="welcome-pill">Arena &amp; Battles</span>
           <span class="welcome-pill">Leaderboard</span>
+          <span class="welcome-pill">GDPR Self-Service</span>
+          <span class="welcome-pill">Marketplace</span>
+          <span class="welcome-pill">Admin Auth</span>
+          <span class="welcome-pill">Admin Configuration</span>
+          <span class="welcome-pill">Admin Analytics &amp; Audit</span>
         </div>
       </div>
     </main>
@@ -950,41 +954,85 @@
           total_training_actions: 180,
           training_actions_today: 2,
           last_trained_at: "2026-05-18T08:00:00Z"
+        },
+        {
+          id: "d4e5f6a1-0000-0000-0000-000000000004",
+          seed: 1827364590,
+          rarity: "UNCOMMON",
+          pet_name: "Shadowpounce",
+          stat_speed: 54,
+          stat_strength: 49,
+          stat_stamina: 60,
+          level: 7,
+          is_banned: false,
+          claimed_at: "2026-04-28T16:00:00Z",
+          color_palette: ["#2d3436","#636e72"],
+          owner_token: "dGVzdHRva2VuU0hBRE9XUE9VTkNFMTIzNDU2Nzg",
+          total_training_actions: 70,
+          training_actions_today: 0,
+          last_trained_at: "2026-05-15T12:00:00Z"
+        },
+        {
+          id: "e5f6a1b2-0000-0000-0000-000000000005",
+          seed: 9182736450,
+          rarity: "COMMON",
+          pet_name: "Pebbleback",
+          stat_speed: 33,
+          stat_strength: 28,
+          stat_stamina: 45,
+          level: 4,
+          is_banned: false,
+          claimed_at: "2026-05-01T10:00:00Z",
+          color_palette: ["#b2bec3","#dfe6e9"],
+          owner_token: "dGVzdHRva2VuUEVCQkxFQkFDSzEyMzQ1Njc4OTA",
+          total_training_actions: 40,
+          training_actions_today: 1,
+          last_trained_at: "2026-05-18T07:00:00Z"
         }
       ],
-      arenaMatches: [
-        {
-          id: "m001",
-          pet_a_id: "a1b2c3d4-0000-0000-0000-000000000001",
-          pet_b_id: "b2c3d4e5-0000-0000-0000-000000000002",
-          mode: "RACE",
-          winner_pet_id: "a1b2c3d4-0000-0000-0000-000000000001",
-          is_ai_opponent: false,
-          completed_at: "2026-05-17T15:00:00Z"
-        },
-        {
-          id: "m002",
-          pet_a_id: "a1b2c3d4-0000-0000-0000-000000000001",
-          pet_b_id: "c3d4e5f6-0000-0000-0000-000000000003",
-          mode: "SUMO",
-          winner_pet_id: "c3d4e5f6-0000-0000-0000-000000000003",
-          is_ai_opponent: false,
-          completed_at: "2026-05-16T14:00:00Z"
-        },
-        {
-          id: "m003",
-          pet_a_id: "b2c3d4e5-0000-0000-0000-000000000002",
-          pet_b_id: "AI",
-          mode: "RACE",
-          winner_pet_id: "b2c3d4e5-0000-0000-0000-000000000002",
-          is_ai_opponent: true,
-          completed_at: "2026-05-16T10:00:00Z"
-        }
+      matches: [
+        { id: "m001", pet_a_id: "a1b2c3d4-0000-0000-0000-000000000001", pet_b_id: "b2c3d4e5-0000-0000-0000-000000000002", mode: "RACE", winner_pet_id: "a1b2c3d4-0000-0000-0000-000000000001", is_ai_opponent: false, completed_at: "2026-05-17T15:00:00Z", result_log: [{"round":1,"event":"speed_check","outcome":"pet_a_wins"},{"round":2,"event":"endurance","outcome":"draw"},{"round":3,"event":"final_sprint","outcome":"pet_a_wins"}] },
+        { id: "m002", pet_a_id: "a1b2c3d4-0000-0000-0000-000000000001", pet_b_id: "c3d4e5f6-0000-0000-0000-000000000003", mode: "SUMO", winner_pet_id: "c3d4e5f6-0000-0000-0000-000000000003", is_ai_opponent: false, completed_at: "2026-05-16T14:00:00Z", result_log: [{"round":1,"event":"push","outcome":"pet_b_wins"}] },
+        { id: "m003", pet_a_id: "b2c3d4e5-0000-0000-0000-000000000002", pet_b_id: "AI", mode: "RACE", winner_pet_id: "b2c3d4e5-0000-0000-0000-000000000002", is_ai_opponent: true, completed_at: "2026-05-16T10:00:00Z", result_log: [{"round":1,"event":"sprint","outcome":"pet_a_wins"}] },
+        { id: "m004", pet_a_id: "c3d4e5f6-0000-0000-0000-000000000003", pet_b_id: "AI", mode: "SUMO", winner_pet_id: "AI", is_ai_opponent: true, completed_at: "2026-05-15T09:00:00Z", result_log: [{"round":1,"event":"push","outcome":"ai_wins"}] }
       ],
       leaderboard: [
         { rank: 1, pet_id: "a1b2c3d4-0000-0000-0000-000000000001", pet_name: "Blazewing",    rarity: "LEGENDARY", level: 23, score: 9841, win_rate: 0.87 },
         { rank: 2, pet_id: "c3d4e5f6-0000-0000-0000-000000000003", pet_name: "Stonecrusher", rarity: "EPIC",      level: 18, score: 8012, win_rate: 0.74 },
-        { rank: 3, pet_id: "b2c3d4e5-0000-0000-0000-000000000002", pet_name: "Tidecrawler",  rarity: "RARE",      level: 9,  score: 5234, win_rate: 0.60 }
+        { rank: 3, pet_id: "b2c3d4e5-0000-0000-0000-000000000002", pet_name: "Tidecrawler",  rarity: "RARE",      level: 9,  score: 5234, win_rate: 0.60 },
+        { rank: 4, pet_id: "d4e5f6a1-0000-0000-0000-000000000004", pet_name: "Shadowpounce", rarity: "UNCOMMON",  level: 7,  score: 4120, win_rate: 0.55 },
+        { rank: 5, pet_id: "e5f6a1b2-0000-0000-0000-000000000005", pet_name: "Pebbleback",   rarity: "COMMON",    level: 4,  score: 2390, win_rate: 0.44 }
+      ],
+      listings: [
+        { id: "lst-001", pet_id: "d4e5f6a1-0000-0000-0000-000000000004", seller_token: "dGVzdHRva2VuU0VMTEVSMTIzNDU2Nzg5MDEyMzQ", price_tokens: 250, listed_at: "2026-05-15T10:00:00Z", expires_at: "2026-05-22T10:00:00Z", status: "ACTIVE" },
+        { id: "lst-002", pet_id: "e5f6a1b2-0000-0000-0000-000000000005", seller_token: "dGVzdHRva2VuU0VMTEVSQUJDREVGMTIzNDU2Nzg", price_tokens: 80, listed_at: "2026-05-16T09:00:00Z", expires_at: "2026-05-23T09:00:00Z", status: "ACTIVE" }
+      ],
+      adminUsers: [
+        { id: "adm-001", email: "superadmin@pixel-pet-arena.com", role: "SUPERADMIN", totp_enabled: true, created_at: "2026-01-01T00:00:00Z", last_login: "2026-05-18T08:00:00Z" },
+        { id: "adm-002", email: "moderator@pixel-pet-arena.com",  role: "MODERATOR",  totp_enabled: true, created_at: "2026-02-15T00:00:00Z", last_login: "2026-05-17T22:00:00Z" },
+        { id: "adm-003", email: "viewer@pixel-pet-arena.com",     role: "VIEWER",     totp_enabled: false, created_at: "2026-03-10T00:00:00Z", last_login: "2026-05-16T14:00:00Z" }
+      ],
+      adminSessions: {},
+      gdprRequests: [
+        { id: "gdpr-001", pet_id: "a1b2c3d4-0000-0000-0000-000000000001", type: "EXPORT", status: "PENDING",    submitted_at: "2026-05-17T10:00:00Z" },
+        { id: "gdpr-002", pet_id: "b2c3d4e5-0000-0000-0000-000000000002", type: "DELETE", status: "IN_REVIEW",  submitted_at: "2026-05-14T08:00:00Z" },
+        { id: "gdpr-003", pet_id: "e5f6a1b2-0000-0000-0000-000000000005", type: "EXPORT", status: "COMPLETED",  submitted_at: "2026-05-10T12:00:00Z" }
+      ],
+      featureFlags: [
+        { key: "FF_MARKETPLACE", enabled: false, description: "Enable NFT-style marketplace listing and purchasing", rollout_pct: 0 },
+        { key: "FF_ARENA_SUMO",  enabled: true,  description: "Enable Sumo battle mode in Arena", rollout_pct: 100 },
+        { key: "FF_TRAINING_V2", enabled: false, description: "New training algorithm with dynamic stat gains", rollout_pct: 10 },
+        { key: "FF_LEADERBOARD_SEASONS", enabled: true, description: "Seasonal leaderboard reset mechanism", rollout_pct: 100 }
+      ],
+      suspicious: [
+        { pet_id: "d4e5f6a1-0000-0000-0000-000000000004", reason: "Abnormal training frequency (50 actions/hour)", score: 87, flagged_at: "2026-05-17T11:00:00Z", status: "UNDER_REVIEW" },
+        { pet_id: "e5f6a1b2-0000-0000-0000-000000000005", reason: "Multiple IP addresses in single session", score: 62, flagged_at: "2026-05-16T15:00:00Z", status: "CLEARED" }
+      ],
+      auditLogs: [
+        { id: "log-001", admin_id: "adm-001", action: "BAN_PET",       target: "d4e5f6a1-0000-0000-0000-000000000004", ts: "2026-05-17T12:00:00Z", ip: "203.0.113.10" },
+        { id: "log-002", admin_id: "adm-002", action: "RESET_SCORE",   target: "e5f6a1b2-0000-0000-0000-000000000005", ts: "2026-05-16T16:00:00Z", ip: "203.0.113.11" },
+        { id: "log-003", admin_id: "adm-001", action: "UPDATE_FLAG",   target: "FF_ARENA_SUMO",                        ts: "2026-05-15T09:30:00Z", ip: "203.0.113.10" },
+        { id: "log-004", admin_id: "adm-003", action: "VIEW_EXPORT",   target: "gdpr-003",                             ts: "2026-05-12T10:00:00Z", ip: "203.0.113.12" }
       ],
       claimSessions: {}
     };
@@ -1009,10 +1057,10 @@
     // ─────────────────────────────────────────
     var GROUPS = [
       {
-        id: "auth",
-        name: "Auth",
-        label: "認證",
-        color: "#2d9ef5",
+        id: "claims",
+        name: "Pet Claims & Recovery",
+        label: "認領與恢復",
+        color: "#6c5ce7",
         endpoints: [
           {
             id: "claim_init",
@@ -1021,25 +1069,19 @@
             summary: "發起 Email Claim",
             desc: "向指定 email 發送 6 位數 OTP，並綁定至特定未認領寵物。Rate limit: 5 次/小時/email。",
             auth_required: false,
-            auth_optional: false,
             params: [],
-            body: JSON.stringify({ email: "player@example.com", petId: "a1b2c3d4-0000-0000-0000-000000000001", ageConfirmed: true }, null, 2),
+            body: JSON.stringify({ email: "player@example.com", petId: "550e8400-e29b-41d4-a716-446655440001", ageConfirmed: true }, null, 2),
             possible_responses: [
-              { status: 200, desc: "成功發起 Claim，回傳 claimId 與 OTP 過期時間", body: { success: true, data: { claimId: "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f", expiresAt: "2026-05-18T12:15:00Z" }, error: null } },
+              { status: 200, desc: "成功 — 回傳 claimId + OTP 過期時間", body: { success: true, data: { claimId: "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f", expiresAt: "2026-05-18T12:15:00Z" }, error: null } },
               { status: 400, desc: "AGE_CONFIRMATION_REQUIRED", body: { success: false, data: null, error: { code: "AGE_CONFIRMATION_REQUIRED", message: "ageConfirmed must be true (COPPA compliance)." } } },
-              { status: 400, desc: "ALREADY_CLAIMED", body: { success: false, data: null, error: { code: "ALREADY_CLAIMED", message: "The pet with petId is already owned." } } },
+              { status: 400, desc: "ALREADY_CLAIMED", body: { success: false, data: null, error: { code: "ALREADY_CLAIMED", message: "Pet is already owned." } } },
               { status: 404, desc: "PET_NOT_FOUND", body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given petId." } } },
               { status: 429, desc: "RATE_LIMIT_EXCEEDED", body: { success: false, data: null, error: { code: "RATE_LIMIT_EXCEEDED", message: "Hourly claim attempt limit exceeded." } } }
             ],
             mock_fn: function(params, body, token) {
-              if (!body.email || !body.petId) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "email and petId are required." } } };
-              if (body.ageConfirmed !== true) return { status: 400, body: { success: false, data: null, error: { code: "AGE_CONFIRMATION_REQUIRED", message: "ageConfirmed must be true (COPPA compliance)." } } };
-              var pet = MOCK_DB.pets.filter(function(p){ return p.id === body.petId; })[0];
-              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given petId." } } };
-              var claimId = "7f3d9a1c-b2e4-4f88-9c6a-" + Date.now().toString().slice(-12);
-              var expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-              MOCK_DB.claimSessions[claimId] = { email: body.email, petId: body.petId, code: "482917", expiresAt: expiresAt };
-              return { status: 200, body: { success: true, data: { claimId: claimId, expiresAt: expiresAt }, error: null } };
+              if (!body || !body.email || !body.petId) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "email and petId are required." } } };
+              if (body.ageConfirmed !== true) return { status: 400, body: { success: false, data: null, error: { code: "AGE_CONFIRMATION_REQUIRED", message: "ageConfirmed must be true." } } };
+              return { status: 200, body: { success: true, data: { claimId: "7f3d9a1c-b2e4-4f88-9c6a-" + Date.now().toString().slice(-12), expiresAt: new Date(Date.now() + 900000).toISOString() }, error: null } };
             }
           },
           {
@@ -1047,266 +1089,235 @@
             method: "POST",
             path: "/api/v1/claim/verify",
             summary: "驗證 OTP 取得 Token",
-            desc: "提交 claimId 與 6 位 OTP，驗證成功後取得 petToken（僅此一次傳輸，請立即儲存）。",
+            desc: "提交 claimId 與 6 位 OTP，驗證成功後取得 petToken（僅此一次傳輸）。",
             auth_required: false,
-            auth_optional: false,
             params: [],
             body: JSON.stringify({ claimId: "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f", code: "482917" }, null, 2),
             possible_responses: [
-              { status: 200, desc: "驗證成功，回傳 petToken (僅此一次)", body: { success: true, data: { petToken: "dGVzdHRva2VuMTIzNDU2Nzg5MDEyMzQ1Njc4OTA", petId: "a1b2c3d4-0000-0000-0000-000000000001", petUrl: "https://pixel-pet-arena.com/pet/a1b2c3d4-0000-0000-0000-000000000001?token=dGVzdHRva2VuMTIzNDU2Nzg5MDEyMzQ1Njc4OTA" }, error: null } },
-              { status: 400, desc: "INVALID_CODE — OTP 不符", body: { success: false, data: null, error: { code: "INVALID_CODE", message: "Code does not match the stored hash." } } },
-              { status: 400, desc: "CODE_EXPIRED — OTP 已過 15 分鐘", body: { success: false, data: null, error: { code: "CODE_EXPIRED", message: "OTP has passed the 15-minute expiry window." } } },
-              { status: 404, desc: "NOT_FOUND — claimId 不存在", body: { success: false, data: null, error: { code: "NOT_FOUND", message: "claimId does not exist or has expired." } } },
-              { status: 429, desc: "MAX_ATTEMPTS_REACHED", body: { success: false, data: null, error: { code: "MAX_ATTEMPTS_REACHED", message: "10-attempt session limit reached." } } }
+              { status: 200, desc: "驗證成功 — 回傳 petToken（僅一次）", body: { success: true, data: { petToken: "eyJwZXRJZCI6ImExYjJjM2Q0IiwidHlwZSI6InBldF9hY2Nlc3MifQ", petId: "550e8400-e29b-41d4-a716-446655440001", petUrl: "https://pixel-pet-arena.com/pet/550e8400-e29b-41d4-a716-446655440001" }, error: null } },
+              { status: 400, desc: "INVALID_CODE", body: { success: false, data: null, error: { code: "INVALID_CODE", message: "Code does not match." } } },
+              { status: 400, desc: "CODE_EXPIRED", body: { success: false, data: null, error: { code: "CODE_EXPIRED", message: "OTP has passed the 15-minute expiry." } } },
+              { status: 404, desc: "NOT_FOUND", body: { success: false, data: null, error: { code: "NOT_FOUND", message: "claimId does not exist." } } }
             ],
             mock_fn: function(params, body, token) {
-              if (!body.claimId || !body.code) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "claimId and code are required." } } };
-              var session = MOCK_DB.claimSessions[body.claimId];
-              if (!session) return { status: 404, body: { success: false, data: null, error: { code: "NOT_FOUND", message: "claimId does not exist or has expired." } } };
-              if (new Date(session.expiresAt) < new Date()) return { status: 400, body: { success: false, data: null, error: { code: "CODE_EXPIRED", message: "OTP has passed the 15-minute expiry window." } } };
-              if (body.code !== session.code) return { status: 400, body: { success: false, data: null, error: { code: "INVALID_CODE", message: "Code does not match the stored hash." } } };
-              var pet = MOCK_DB.pets.filter(function(p){ return p.id === session.petId; })[0];
-              var petToken = pet ? pet.owner_token : "dGVzdHRva2VuR2VuZXJhdGVkTW9jaw";
-              delete MOCK_DB.claimSessions[body.claimId];
-              return { status: 200, body: { success: true, data: { petToken: petToken, petId: session.petId, petUrl: "https://pixel-pet-arena.com/pet/" + session.petId + "?token=" + petToken }, error: null } };
+              if (!body || !body.claimId || !body.code) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "claimId and code are required." } } };
+              if (body.code === "482917") return { status: 200, body: { success: true, data: { petToken: "eyJwZXRJZCI6ImExYjJjM2Q0IiwidHlwZSI6InBldF9hY2Nlc3MifQ", petId: "550e8400-e29b-41d4-a716-446655440001", petUrl: "https://pixel-pet-arena.com/pet/550e8400-e29b-41d4-a716-446655440001" }, error: null } };
+              return { status: 400, body: { success: false, data: null, error: { code: "INVALID_CODE", message: "Code does not match." } } };
+            }
+          },
+          {
+            id: "claim_recover",
+            method: "POST",
+            path: "/api/v1/claim/recover",
+            summary: "恢復遺失 Token",
+            desc: "向 email 發送恢復 OTP，找回遺失的寵物 URL。無論 email/petId 是否匹配均回傳 200（防止帳號枚舉）。",
+            auth_required: false,
+            params: [],
+            body: JSON.stringify({ email: "player@example.com", petId: "550e8400-e29b-41d4-a716-446655440001" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "已發送恢復 OTP（無論是否匹配）", body: { success: true, data: { recoveryId: "a9c8b7d6-e5f4-3210-9876-543210fedcba", expiresAt: "2026-05-18T12:30:00Z" }, error: null } },
+              { status: 429, desc: "RATE_LIMIT_EXCEEDED", body: { success: false, data: null, error: { code: "RATE_LIMIT_EXCEEDED", message: "Hourly recovery attempt limit exceeded." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              return { status: 200, body: { success: true, data: { recoveryId: "a9c8b7d6-e5f4-3210-" + Date.now().toString().slice(-4) + "-543210fedcba", expiresAt: new Date(Date.now() + 900000).toISOString() }, error: null } };
             }
           }
         ]
       },
       {
         id: "pets",
-        name: "Pets",
-        label: "寵物",
-        color: "#6c5ce7",
+        name: "Pet Management",
+        label: "寵物管理",
+        color: "#00b894",
         endpoints: [
           {
             id: "pets_random",
             method: "GET",
             path: "/api/v1/pets/random",
             summary: "取得隨機未認領寵物",
-            desc: "生成一個新的未認領隨機寵物供訪客展示，保留 24 小時後自動清除。每次呼叫產生不同寵物。",
+            desc: "回傳一隻隨機未認領的寵物（含 seed 和 rarity），用於 Landing 頁展示。Rate limit: 30/min。",
             auth_required: false,
-            auth_optional: false,
             params: [],
+            body: null,
             possible_responses: [
-              { status: 200, desc: "成功回傳隨機未認領寵物", body: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440099", seed: 7381923847561029, rarity: "RARE", petName: "Crimson Vexor", stats: { speed: 10, strength: 10, stamina: 10, level: 1 }, generationMeta: { body: "lizard", head: "horned", colorPalette: "crimson_gold", accessory: "cape", rarityTrait: "shimmering_scales", pattern: "diagonal_stripe" }, reservedUntil: "2026-05-19T12:00:00Z" }, error: null } }
+              { status: 200, desc: "成功 — 回傳隨機寵物資料", body: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440001", seed: 7293847162, rarity: "EPIC", petName: "Violet Drifter", generationMeta: { body: "round", head: "big_ears", colorPalette: ["#a29bfe","#6c5ce7"], accessory: "scarf", pattern: "striped" } }, error: null } },
+              { status: 503, desc: "SERVICE_UNAVAILABLE", body: { success: false, data: null, error: { code: "SERVICE_UNAVAILABLE", message: "No available pets." } } }
             ],
             mock_fn: function(params, body, token) {
-              var rarities = ["COMMON","COMMON","COMMON","COMMON","COMMON","COMMON","RARE","RARE","RARE","EPIC","EPIC","LEGENDARY"];
-              var names = ["Crimson Vexor","Shadow Pounce","Iron Bristle","Volt Striker","Mossy Clump","Ember Fang","Crystal Thorn","Neon Howl","Glacial Bite","Dusk Prowler","Silver Fang","Lava Stomp"];
-              var rarity = rarities[Math.floor(Math.random() * rarities.length)];
-              var name = names[Math.floor(Math.random() * names.length)];
-              var seed = Math.floor(Math.random() * 9999999999);
-              var uid = "550e8400-e29b-41d4-a716-" + Math.floor(Math.random() * 999999999999).toString().padStart(12, '0');
-              return { status: 200, body: { success: true, data: { id: uid, seed: seed, rarity: rarity, petName: name, stats: { speed: 10, strength: 10, stamina: 10, level: 1 }, generationMeta: { body: "lizard", head: "horned", colorPalette: "crimson_gold", accessory: "cape", rarityTrait: "shimmering_scales", pattern: "diagonal_stripe" }, reservedUntil: new Date(Date.now() + 24*60*60*1000).toISOString() }, error: null } };
+              var rarities = ["COMMON","COMMON","COMMON","RARE","RARE","EPIC","LEGENDARY"];
+              var r = rarities[Math.floor(Math.random() * rarities.length)];
+              var pet = MOCK_DB.pets.filter(function(p){ return !p.owner_token || p.owner_token === ""; })[0] || MOCK_DB.pets[Math.floor(Math.random() * MOCK_DB.pets.length)];
+              return { status: 200, body: { success: true, data: { id: pet.id, seed: pet.seed, rarity: pet.rarity, petName: pet.pet_name, generationMeta: { body: "round", head: "standard", colorPalette: pet.color_palette, accessory: "none", pattern: "solid" } }, error: null } };
             }
           },
           {
             id: "pets_get",
             method: "GET",
             path: "/api/v1/pets/:petId",
-            summary: "取得寵物資料",
-            desc: "查詢寵物公開資料。提供有效 petToken 時，isOwner 欄位返回 true，可確認所有權。",
-            auth_required: true,
-            auth_optional: true,
+            summary: "取得寵物詳情",
+            desc: "取得寵物完整資料。若寵物已被認領，需提供 Bearer token。",
+            auth_required: false,
             params: [
-              { name: "petId", location: "path", type: "string (UUID)", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "目標寵物的 UUID" }
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
+            body: null,
             possible_responses: [
-              { status: 200, desc: "成功回傳寵物資料", body: { success: true, data: { id: "a1b2c3d4-0000-0000-0000-000000000001", seed: 8472910563, rarity: "LEGENDARY", petName: "Blazewing", stats: { speed: 78, strength: 65, stamina: 82, level: 23 }, isOwner: true, claimedAt: "2026-04-10T09:15:00Z", isNeglected: false }, error: null } },
-              { status: 404, desc: "PET_NOT_FOUND", body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given ID." } } }
+              { status: 200, desc: "成功 — 回傳寵物詳情", body: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440001", seed: 7293847162, rarity: "EPIC", petName: "Violet Drifter", statSpeed: 62, statStrength: 45, statStamina: 71, level: 7, totalTrainingActions: 68, lastTrainedAt: "2026-05-17T14:23:00Z", isBanned: false, generationMeta: { body: "round", head: "big_ears", colorPalette: ["#a29bfe","#6c5ce7"], accessory: "scarf", pattern: "striped" } }, error: null } },
+              { status: 401, desc: "UNAUTHORIZED — 寵物已認領，需 token", body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Pet is claimed. Bearer token required." } } },
+              { status: 404, desc: "PET_NOT_FOUND", body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found." } } }
             ],
             mock_fn: function(params, body, token) {
               var pet = MOCK_DB.pets.filter(function(p){ return p.id === params.petId; })[0];
-              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given ID." } } };
-              var isOwner = !!(token && token === pet.owner_token);
-              var daysSince = (Date.now() - new Date(pet.last_trained_at).getTime()) / 86400000;
-              return { status: 200, body: { success: true, data: { id: pet.id, seed: pet.seed, rarity: pet.rarity, petName: pet.pet_name, stats: { speed: pet.stat_speed, strength: pet.stat_strength, stamina: pet.stat_stamina, level: pet.level }, isOwner: isOwner, claimedAt: pet.claimed_at, isNeglected: daysSince > 3 }, error: null } };
+              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found." } } };
+              return { status: 200, body: { success: true, data: { id: pet.id, seed: pet.seed, rarity: pet.rarity, petName: pet.pet_name, statSpeed: pet.stat_speed, statStrength: pet.stat_strength, statStamina: pet.stat_stamina, level: pet.level, totalTrainingActions: pet.total_training_actions, lastTrainedAt: pet.last_trained_at, isBanned: pet.is_banned, generationMeta: { body: "round", head: "standard", colorPalette: pet.color_palette, accessory: "none", pattern: "solid" } }, error: null } };
             }
           },
           {
-            id: "pets_battles",
+            id: "pets_stats",
             method: "GET",
-            path: "/api/v1/arena/history/:petId",
-            summary: "取得寵物戰績",
-            desc: "回傳指定寵物最近 20 場競技場對戰紀錄及勝率統計。Public endpoint，無需認證。",
-            auth_required: false,
-            auth_optional: false,
+            path: "/api/v1/pets/:petId/stats",
+            summary: "取得寵物統計資料",
+            desc: "取得寵物的訓練歷史、戰鬥記錄摘要和 buff 狀態。Bearer token 必填。",
+            auth_required: true,
             params: [
-              { name: "petId", location: "path", type: "string (UUID)", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "目標寵物的 UUID" }
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
+            body: null,
             possible_responses: [
-              { status: 200, desc: "成功回傳戰績與統計", body: { success: true, data: { petId: "a1b2c3d4-0000-0000-0000-000000000001", battles: [{ matchId: "m001", mode: "RACE", opponentPetId: "b2c3d4e5-0000-0000-0000-000000000002", isAiOpponent: false, result: "WIN", completedAt: "2026-05-17T15:00:00Z" }], summary: { wins: 1, losses: 1, winRate: 0.5 } }, error: null } },
-              { status: 404, desc: "PET_NOT_FOUND", body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given ID." } } }
+              { status: 200, desc: "成功 — 回傳統計資料", body: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440001", totalBattles: 42, wins: 28, losses: 14, winRate: 0.67, activeBuffs: [{ buffStat: "speed", magnitude: 5, expiresAt: "2026-05-19T00:00:00Z" }], trainingActionsToday: 1, trainingActionsRemaining: 2 }, error: null } },
+              { status: 401, desc: "UNAUTHORIZED", body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } }
             ],
             mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
               var pet = MOCK_DB.pets.filter(function(p){ return p.id === params.petId; })[0];
-              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given ID." } } };
-              var battles = MOCK_DB.arenaMatches.filter(function(m){ return m.pet_a_id === params.petId || m.pet_b_id === params.petId; }).map(function(m) {
-                return {
-                  matchId: m.id,
-                  mode: m.mode,
-                  opponentPetId: m.is_ai_opponent ? null : (m.pet_a_id === params.petId ? m.pet_b_id : m.pet_a_id),
-                  isAiOpponent: m.is_ai_opponent,
-                  result: m.winner_pet_id === params.petId ? "WIN" : "LOSS",
-                  completedAt: m.completed_at
-                };
-              });
-              var wins = battles.filter(function(b){ return b.result === "WIN"; }).length;
-              var losses = battles.length - wins;
-              return { status: 200, body: { success: true, data: { petId: params.petId, battles: battles, summary: { wins: wins, losses: losses, winRate: battles.length ? parseFloat((wins / battles.length).toFixed(3)) : 0 } }, error: null } };
+              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "Not found." } } };
+              return { status: 200, body: { success: true, data: { petId: pet.id, totalBattles: 42, wins: 28, losses: 14, winRate: 0.67, activeBuffs: [], trainingActionsToday: 1, trainingActionsRemaining: 2 }, error: null } };
             }
-          }
-        ]
-      },
-      {
-        id: "training",
-        name: "Training",
-        label: "訓練",
-        color: "#00b894",
-        endpoints: [
+          },
           {
-            id: "train",
+            id: "pets_train",
             method: "POST",
             path: "/api/v1/pets/:petId/train",
-            summary: "執行訓練動作",
-            desc: "對已認領寵物執行一次訓練，提升指定屬性 1–3 點。每日最多 3 次（UTC 00:00 重置）。需要 petToken。",
+            summary: "訓練寵物",
+            desc: "執行訓練動作（RUN/STRENGTH/STAMINA），每隻寵物每 UTC 天最多 3 次。Bearer token 必填。",
             auth_required: true,
-            auth_optional: false,
             params: [
-              { name: "petId", location: "path", type: "string (UUID)", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "目標寵物的 UUID" }
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
             body: JSON.stringify({ trainingType: "RUN" }, null, 2),
-            body_enums: { trainingType: ["RUN", "STRENGTH", "STAMINA"] },
             possible_responses: [
-              { status: 200, desc: "訓練成功，回傳更新後的 stats", body: { success: true, data: { updatedStats: { speed: 80, strength: 65, stamina: 82, level: 23 }, statDelta: 2, actionsRemainingToday: 2 }, error: null } },
-              { status: 400, desc: "TRAINING_LIMIT_REACHED — 今日已用完 3 次", body: { success: false, data: null, error: { code: "TRAINING_LIMIT_REACHED", message: "All 3 daily training actions have been used." } } },
-              { status: 400, desc: "STAT_AT_MAXIMUM — 屬性已達 100", body: { success: false, data: null, error: { code: "STAT_AT_MAXIMUM", message: "Target stat is already at maximum (100)." } } },
-              { status: 401, desc: "UNAUTHORIZED", body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token." } } },
-              { status: 403, desc: "NOT_OWNER", body: { success: false, data: null, error: { code: "NOT_OWNER", message: "Token does not belong to this pet's owner." } } }
+              { status: 200, desc: "成功 — 訓練完成，回傳 stat 更新", body: { success: true, data: { trainingType: "RUN", statDelta: 2, statAfter: 64, remainingActionsToday: 2 }, error: null } },
+              { status: 429, desc: "DAILY_LIMIT_REACHED", body: { success: false, data: null, error: { code: "DAILY_LIMIT_REACHED", message: "3 training actions per day reached." } } }
             ],
             mock_fn: function(params, body, token) {
-              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token." } } };
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
               var pet = MOCK_DB.pets.filter(function(p){ return p.id === params.petId; })[0];
-              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given ID." } } };
-              if (token !== pet.owner_token) return { status: 403, body: { success: false, data: null, error: { code: "NOT_OWNER", message: "Token does not belong to this pet's owner." } } };
-              if (pet.is_banned) return { status: 403, body: { success: false, data: null, error: { code: "PET_BANNED", message: "This pet has been banned." } } };
-              if (!body.trainingType || ["RUN","STRENGTH","STAMINA"].indexOf(body.trainingType) === -1) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "trainingType must be RUN, STRENGTH, or STAMINA." } } };
-              if (pet.training_actions_today >= 3) return { status: 400, body: { success: false, data: null, error: { code: "TRAINING_LIMIT_REACHED", message: "All 3 daily training actions have been used." } } };
-              var statMap = { RUN: "stat_speed", STRENGTH: "stat_strength", STAMINA: "stat_stamina" };
-              var statKey = statMap[body.trainingType];
-              if (pet[statKey] >= 100) return { status: 400, body: { success: false, data: null, error: { code: "STAT_AT_MAXIMUM", message: "Target stat is already at maximum (100)." } } };
+              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "Pet not found." } } };
+              var dailyUsed = pet.training_actions_today || 0;
+              if (dailyUsed >= 3) return { status: 429, body: { success: false, data: null, error: { code: "DAILY_LIMIT_REACHED", message: "3 training actions per day reached." } } };
+              var typeMap = { "RUN": "stat_speed", "STRENGTH": "stat_strength", "STAMINA": "stat_stamina" };
+              var trainingType = (body && body.trainingType) || "RUN";
+              var statKey = typeMap[trainingType] || "stat_speed";
               var delta = Math.floor(Math.random() * 3) + 1;
-              pet[statKey] = Math.min(100, pet[statKey] + delta);
-              pet.training_actions_today += 1;
-              pet.total_training_actions += 1;
-              pet.level = Math.min(100, Math.floor(pet.total_training_actions / 10));
-              return { status: 200, body: { success: true, data: { updatedStats: { speed: pet.stat_speed, strength: pet.stat_strength, stamina: pet.stat_stamina, level: pet.level }, statDelta: delta, actionsRemainingToday: 3 - pet.training_actions_today }, error: null } };
+              var statAfter = Math.min(100, (pet[statKey] || 60) + delta);
+              pet.training_actions_today = dailyUsed + 1;
+              return { status: 200, body: { success: true, data: { trainingType: trainingType, statDelta: delta, statAfter: statAfter, remainingActionsToday: 3 - (dailyUsed + 1) }, error: null } };
             }
           },
           {
-            id: "feed",
+            id: "pets_feed",
             method: "POST",
             path: "/api/v1/pets/:petId/feed",
             summary: "餵食寵物",
-            desc: "對已認領寵物施加 Food Buff，給予臨時（預設 24 小時）或永久屬性提升。需要 petToken。",
+            desc: "使用食物道具對寵物施加 stat buff。Bearer token 必填。",
             auth_required: true,
-            auth_optional: false,
             params: [
-              { name: "petId", location: "path", type: "string (UUID)", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "目標寵物的 UUID" }
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
-            body: JSON.stringify({ buffType: "protein_shake", stat: "strength", magnitude: 5, isPermanent: false }, null, 2),
-            body_enums: { stat: ["speed", "strength", "stamina"] },
+            body: JSON.stringify({ foodType: "speed_kibble" }, null, 2),
             possible_responses: [
-              { status: 200, desc: "餵食成功，回傳 buff 資訊", body: { success: true, data: { updatedStats: { speed: 78, strength: 70, stamina: 82 }, buffApplied: { stat: "strength", magnitude: 5, isPermanent: false, expiresAt: "2026-05-19T12:00:00Z" } }, error: null } },
-              { status: 400, desc: "STAT_AT_MAXIMUM", body: { success: false, data: null, error: { code: "STAT_AT_MAXIMUM", message: "Target stat is already at 100." } } },
-              { status: 401, desc: "UNAUTHORIZED", body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token." } } },
-              { status: 403, desc: "NOT_OWNER", body: { success: false, data: null, error: { code: "NOT_OWNER", message: "Token does not belong to this pet's owner." } } }
+              { status: 200, desc: "成功 — Buff 已套用", body: { success: true, data: { foodType: "speed_kibble", buffStat: "speed", magnitude: 5, isPermanent: false, expiresAt: "2026-05-19T00:00:00Z" }, error: null } },
+              { status: 400, desc: "FOOD_NOT_IN_INVENTORY", body: { success: false, data: null, error: { code: "FOOD_NOT_IN_INVENTORY", message: "Not in inventory." } } }
             ],
             mock_fn: function(params, body, token) {
-              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token." } } };
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              var VALID_FOODS = { "speed_kibble": { buffStat: "speed", magnitude: 5 }, "strength_biscuit": { buffStat: "strength", magnitude: 5 }, "stamina_jerky": { buffStat: "stamina", magnitude: 5 }, "mega_kibble": { buffStat: "speed", magnitude: 10 } };
+              var foodType = body && body.foodType;
+              if (!foodType || !VALID_FOODS[foodType]) return { status: 400, body: { success: false, data: null, error: { code: "FOOD_NOT_IN_INVENTORY", message: "Food type not found in inventory." } } };
               var pet = MOCK_DB.pets.filter(function(p){ return p.id === params.petId; })[0];
-              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given ID." } } };
-              if (token !== pet.owner_token) return { status: 403, body: { success: false, data: null, error: { code: "NOT_OWNER", message: "Token does not belong to this pet's owner." } } };
-              if (!body.stat || ["speed","strength","stamina"].indexOf(body.stat) === -1) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "stat must be speed, strength, or stamina." } } };
-              var statKey = "stat_" + body.stat;
-              if (pet[statKey] >= 100) return { status: 400, body: { success: false, data: null, error: { code: "STAT_AT_MAXIMUM", message: "Target stat is already at 100." } } };
-              var mag = parseInt(body.magnitude) || 5;
-              pet[statKey] = Math.min(100, pet[statKey] + mag);
-              var expiresAt = body.isPermanent ? null : new Date(Date.now() + 24*60*60*1000).toISOString();
-              return { status: 200, body: { success: true, data: { updatedStats: { speed: pet.stat_speed, strength: pet.stat_strength, stamina: pet.stat_stamina }, buffApplied: { stat: body.stat, magnitude: mag, isPermanent: !!body.isPermanent, expiresAt: expiresAt } }, error: null } };
+              var food = VALID_FOODS[foodType];
+              var statKey = "stat_" + food.buffStat;
+              var currentStat = pet ? (pet[statKey] || 60) : 60;
+              var magnitudeApplied = Math.min(food.magnitude, 100 - currentStat);
+              return { status: 200, body: { success: true, data: { foodType: foodType, buffStat: food.buffStat, magnitude: magnitudeApplied, statAfter: currentStat + magnitudeApplied, isPermanent: false, expiresAt: new Date(Date.now() + 86400000).toISOString() }, error: null } };
             }
           }
         ]
       },
       {
         id: "arena",
-        name: "Arena",
+        name: "Arena & Battles",
         label: "競技場",
-        color: "#e87c7c",
+        color: "#fdcb6e",
         endpoints: [
           {
             id: "arena_enter",
             method: "POST",
             path: "/api/v1/arena/enter",
-            summary: "進入競技場",
-            desc: "將已認領寵物加入配對隊列。Long-polling 等待最多 30 秒尋找對手。若 acceptAI:true 且無對手，立即對戰 AI。需要 petToken。",
+            summary: "進入競技場（匹配或 AI）",
+            desc: "進入對戰佇列。30 秒超時自動匹配 AI（若 acceptAI=true）。Bearer token 必填。",
             auth_required: true,
-            auth_optional: false,
             params: [],
-            body: JSON.stringify({ petId: "a1b2c3d4-0000-0000-0000-000000000001", mode: "RACE", acceptAI: true }, null, 2),
-            body_enums: { mode: ["RACE", "SUMO"] },
+            body: JSON.stringify({ mode: "RACE", acceptAI: false }, null, 2),
             possible_responses: [
-              { status: 200, desc: "戰鬥完成，回傳 matchId 與結果", body: { success: true, data: { matchId: "m001", result: "WIN", opponentPetId: "b2c3d4e5-0000-0000-0000-000000000002", isAiOpponent: false, statDelta: 3, newLeaderboardScore: 9841 }, error: null } },
-              { status: 401, desc: "UNAUTHORIZED", body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token." } } },
-              { status: 403, desc: "PET_BANNED", body: { success: false, data: null, error: { code: "PET_BANNED", message: "Pet has been banned and cannot enter the arena." } } },
-              { status: 408, desc: "MATCHMAKING_TIMEOUT", body: { success: false, data: null, error: { code: "MATCHMAKING_TIMEOUT", message: "No opponent found within 30 seconds. Try again or enable AI opponent." } } },
-              { status: 429, desc: "RATE_LIMIT_EXCEEDED — 超過每小時 10 場限制", body: { success: false, data: null, error: { code: "RATE_LIMIT_EXCEEDED", message: "Hourly battle limit exceeded." } } }
+              { status: 200, desc: "成功 — 對戰結果", body: { success: true, data: { matchId: "aa111111-bb22-cc33-dd44-ee5555555555", mode: "RACE", isAiOpponent: false, petAId: "550e8400-e29b-41d4-a716-446655440001", petBId: "550e8400-e29b-41d4-a716-446655440002", winnerId: "550e8400-e29b-41d4-a716-446655440001", durationSeconds: 8, completedAt: "2026-05-18T10:30:00Z" }, error: null } },
+              { status: 429, desc: "ARENA_RATE_LIMIT", body: { success: false, data: null, error: { code: "ARENA_RATE_LIMIT", message: "Arena rate limit exceeded (10/hr)." } } }
             ],
             mock_fn: function(params, body, token) {
-              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Missing or invalid pet token." } } };
-              var pet = MOCK_DB.pets.filter(function(p){ return p.id === body.petId; })[0];
-              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "No pet found with the given petId." } } };
-              if (token !== pet.owner_token) return { status: 403, body: { success: false, data: null, error: { code: "NOT_OWNER", message: "Token does not own the given petId." } } };
-              if (pet.is_banned) return { status: 403, body: { success: false, data: null, error: { code: "PET_BANNED", message: "Pet has been banned and cannot enter the arena." } } };
-              if (["RACE","SUMO"].indexOf(body.mode) === -1) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "mode must be RACE or SUMO." } } };
-              var opponents = MOCK_DB.pets.filter(function(p){ return p.id !== pet.id && !p.is_banned; });
-              var isAiOpponent = opponents.length === 0 || Math.random() < 0.2;
-              var opponent = isAiOpponent ? null : opponents[Math.floor(Math.random() * opponents.length)];
-              var petScore = pet.stat_speed + pet.stat_strength + pet.stat_stamina + (Math.random() * 30 - 15);
-              var oppScore = isAiOpponent ? (Math.random() * 200 + 50) : (opponent.stat_speed + opponent.stat_strength + opponent.stat_stamina + (Math.random() * 30 - 15));
-              var won = petScore >= oppScore;
-              var matchId = "m" + (MOCK_DB.arenaMatches.length + 1).toString().padStart(3, '0');
-              MOCK_DB.arenaMatches.push({ id: matchId, pet_a_id: pet.id, pet_b_id: isAiOpponent ? "AI" : opponent.id, mode: body.mode, winner_pet_id: won ? pet.id : (isAiOpponent ? "AI" : opponent.id), is_ai_opponent: isAiOpponent, completed_at: new Date().toISOString() });
-              var lb = MOCK_DB.leaderboard.filter(function(e){ return e.pet_id === pet.id; })[0];
-              var newScore = lb ? (won ? lb.score + Math.floor(Math.random() * 200 + 100) : Math.max(0, lb.score - Math.floor(Math.random() * 50))) : 100;
-              if (lb) lb.score = newScore;
-              return { status: 200, body: { success: true, data: { matchId: matchId, result: won ? "WIN" : "LOSS", opponentPetId: isAiOpponent ? null : opponent.id, isAiOpponent: isAiOpponent, statDelta: Math.floor(Math.random() * 5) + 1, newLeaderboardScore: newScore }, error: null } };
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              var mode = (body && body.mode) || "RACE";
+              var won = Math.random() > 0.4;
+              return { status: 200, body: { success: true, data: { matchId: "aa111111-bb22-cc33-dd44-" + Date.now().toString().slice(-12), mode: mode, isAiOpponent: body && body.acceptAI, petAId: "550e8400-e29b-41d4-a716-446655440001", petBId: won ? "550e8400-e29b-41d4-a716-446655440002" : "550e8400-e29b-41d4-a716-446655440003", winnerId: won ? "550e8400-e29b-41d4-a716-446655440001" : "550e8400-e29b-41d4-a716-446655440002", durationSeconds: Math.floor(Math.random() * 10) + 5, completedAt: new Date().toISOString() }, error: null } };
             }
           },
           {
-            id: "arena_result",
+            id: "arena_match",
             method: "GET",
             path: "/api/v1/arena/match/:matchId",
-            summary: "取得戰鬥結果",
-            desc: "查詢已完成競技場對戰的完整記錄，包含 battleLog 事件序列（可用於重播）。Public endpoint。",
+            summary: "取得對戰結果",
+            desc: "依 matchId 取得對戰詳情，包含雙方 stat 和 battle log。",
             auth_required: false,
-            auth_optional: false,
             params: [
-              { name: "matchId", location: "path", type: "string", required: true, default: "m001", desc: "競技場對戰 ID（例：m001, m002, m003）" }
+              { name: "matchId", location: "path", type: "string", required: true, default: "m001", desc: "對戰 UUID" }
             ],
+            body: null,
             possible_responses: [
-              { status: 200, desc: "成功回傳完整對戰紀錄", body: { success: true, data: { matchId: "m001", mode: "RACE", petA: { petId: "a1b2c3d4-0000-0000-0000-000000000001", petName: "Blazewing", rarity: "LEGENDARY", level: 23 }, petB: { petId: "b2c3d4e5-0000-0000-0000-000000000002", petName: "Tidecrawler", rarity: "RARE", level: 9 }, winnerId: "a1b2c3d4-0000-0000-0000-000000000001", battleLog: [{ event: "start", tick: 0 }, { event: "speed_check", petA: 78, petB: 62, tick: 1 }, { event: "finish", winnerId: "a1b2c3d4-0000-0000-0000-000000000001", tick: 9 }], completedAt: "2026-05-17T15:00:00Z" }, error: null } },
-              { status: 404, desc: "NOT_FOUND — Match 不存在", body: { success: false, data: null, error: { code: "NOT_FOUND", message: "No match with the given matchId." } } }
+              { status: 200, desc: "成功 — 對戰詳情", body: { success: true, data: { matchId: "aa111111-bb22-cc33-dd44-ee5555555555", mode: "RACE", petAId: "550e8400-e29b-41d4-a716-446655440001", petBId: "550e8400-e29b-41d4-a716-446655440002", winnerId: "550e8400-e29b-41d4-a716-446655440001", statDeltaA: 5, statDeltaB: 0, durationSeconds: 8, battleLog: [{ round: 1, actorId: "a", action: "sprint", statUsed: "speed", value: 67 }, { round: 2, actorId: "b", action: "sprint", statUsed: "speed", value: 52 }], completedAt: "2026-05-18T10:30:00Z" }, error: null } },
+              { status: 404, desc: "MATCH_NOT_FOUND", body: { success: false, data: null, error: { code: "MATCH_NOT_FOUND", message: "Match not found." } } }
             ],
             mock_fn: function(params, body, token) {
-              var match = MOCK_DB.arenaMatches.filter(function(m){ return m.id === params.matchId; })[0];
-              if (!match) return { status: 404, body: { success: false, data: null, error: { code: "NOT_FOUND", message: "No match with the given matchId." } } };
-              var petA = MOCK_DB.pets.filter(function(p){ return p.id === match.pet_a_id; })[0] || { id: match.pet_a_id, pet_name: "Unknown", rarity: "COMMON", level: 1, stat_speed: 50 };
-              var petBData = MOCK_DB.pets.filter(function(p){ return p.id === match.pet_b_id; })[0];
-              var petBObj = petBData ? { petId: petBData.id, petName: petBData.pet_name, rarity: petBData.rarity, level: petBData.level } : (match.is_ai_opponent ? { petId: null, petName: "AI Opponent", rarity: "EPIC", level: 10 } : { petId: match.pet_b_id, petName: "Unknown", rarity: "COMMON", level: 1 });
-              var statKey = match.mode === "RACE" ? "stat_speed" : "stat_strength";
-              return { status: 200, body: { success: true, data: { matchId: match.id, mode: match.mode, petA: { petId: petA.id, petName: petA.pet_name, rarity: petA.rarity, level: petA.level }, petB: petBObj, winnerId: match.winner_pet_id, battleLog: [{ event: "start", tick: 0 }, { event: match.mode === "RACE" ? "speed_check" : "strength_check", petA: petA[statKey] || 50, petB: petBData ? petBData[statKey] : 45, tick: 1 }, { event: "finish", winnerId: match.winner_pet_id, tick: Math.floor(Math.random() * 10) + 5 }], completedAt: match.completed_at }, error: null } };
+              var match = MOCK_DB.matches.filter(function(m){ return m.id === params.matchId; })[0];
+              if (!match) return { status: 404, body: { success: false, data: null, error: { code: "MATCH_NOT_FOUND", message: "Match not found." } } };
+              return { status: 200, body: { success: true, data: { matchId: match.id, mode: match.mode, petAId: match.pet_a_id, petBId: match.pet_b_id, winnerId: match.winner_pet_id, isAiOpponent: match.is_ai_opponent, statDeltaA: 0, statDeltaB: 0, durationSeconds: 8, battleLog: match.result_log, completedAt: match.completed_at }, error: null } };
+            }
+          },
+          {
+            id: "arena_history",
+            method: "GET",
+            path: "/api/v1/arena/history/:petId",
+            summary: "取得寵物戰鬥記錄",
+            desc: "取得指定寵物的最近 20 場對戰記錄（公開可見）。",
+            auth_required: false,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" },
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼（每頁 20 筆）" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功 — 對戰歷史列表", body: { success: true, data: { battles: [{ matchId: "aa111111-bb22-cc33-dd44-ee5555555555", mode: "RACE", result: "WIN", opponentId: "550e8400-e29b-41d4-a716-446655440002", completedAt: "2026-05-18T10:30:00Z" }], total: 42 }, error: null, meta: { page: 1, limit: 20, total: 42 } } }
+            ],
+            mock_fn: function(params, body, token) {
+              return { status: 200, body: { success: true, data: { battles: MOCK_DB.matches.slice(0, 5).map(function(m){ return { matchId: m.id, mode: m.mode, result: m.winner_pet_id === params.petId ? "WIN" : "LOSS", opponentId: m.pet_b_id || m.pet_a_id, completedAt: m.completed_at }; }), total: 42 }, error: null, meta: { page: parseInt(params.page) || 1, limit: 20, total: 42 } } };
             }
           }
         ]
@@ -1315,40 +1326,929 @@
         id: "leaderboard",
         name: "Leaderboard",
         label: "排行榜",
-        color: "#fdcb6e",
+        color: "#4ecdc4",
         endpoints: [
           {
-            id: "leaderboard_global",
+            id: "leaderboard_get",
             method: "GET",
             path: "/api/v1/leaderboard",
-            summary: "全球排行榜",
-            desc: "回傳全球前 100 名寵物排行榜。資料來源 Redis sorted set，最多延遲 30 秒。支援 rarity 過濾與分頁。",
+            summary: "取得排行榜（Top 100）",
+            desc: "取得全域排行榜前 100 名，支援 rarity 篩選和分頁。快取 30 秒。",
             auth_required: false,
-            auth_optional: false,
             params: [
-              { name: "rarity", location: "query", type: "string", required: false, default: "", desc: "依稀有度過濾", enum: ["", "COMMON", "RARE", "EPIC", "LEGENDARY"] },
-              { name: "page",   location: "query", type: "integer", required: false, default: "1",   desc: "頁碼（從 1 開始）" },
-              { name: "limit",  location: "query", type: "integer", required: false, default: "100", desc: "每頁筆數，最大 100" }
+              { name: "rarity", location: "query", type: "string", required: false, default: "", desc: "按稀有度篩選", enum: ["", "COMMON", "RARE", "EPIC", "LEGENDARY"] },
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" },
+              { name: "limit", location: "query", type: "integer", required: false, default: "100", desc: "每頁筆數（最大 100）" }
             ],
+            body: null,
             possible_responses: [
-              { status: 200, desc: "成功回傳排行榜（含 meta 分頁資訊）", body: { success: true, data: { entries: [{ rank: 1, petId: "a1b2c3d4-0000-0000-0000-000000000001", petName: "Blazewing", rarity: "LEGENDARY", level: 23, score: 9841, winRate: 0.87 }], lastUpdated: "2026-05-18T10:00:00Z" }, error: null, meta: { total: 3, page: 1, limit: 100 } } },
-              { status: 400, desc: "VALIDATION_ERROR — 無效的 rarity", body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Invalid rarity value." } } }
+              { status: 200, desc: "成功 — 排行榜資料", body: { success: true, data: { entries: [{ rank: 1, petId: "550e8400-e29b-41d4-a716-446655440001", petName: "Violet Drifter", rarity: "EPIC", level: 12, score: 9840, winRate: 0.82 }, { rank: 2, petId: "550e8400-e29b-41d4-a716-446655440002", petName: "Golden Titan", rarity: "LEGENDARY", level: 15, score: 9200, winRate: 0.78 }], lastUpdated: "2026-05-18T10:00:00Z" }, error: null, meta: { total: 847, page: 1, limit: 100 } } }
             ],
             mock_fn: function(params, body, token) {
-              var valid = ["","COMMON","RARE","EPIC","LEGENDARY"];
-              if (params.rarity && valid.indexOf(params.rarity) === -1) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "Invalid rarity value. Must be COMMON, RARE, EPIC, or LEGENDARY." } } };
-              var entries = MOCK_DB.leaderboard.map(function(e){ return { rank: e.rank, petId: e.pet_id, petName: e.pet_name, rarity: e.rarity, level: e.level, score: e.score, winRate: e.win_rate }; });
+              var entries = MOCK_DB.leaderboard;
               if (params.rarity) entries = entries.filter(function(e){ return e.rarity === params.rarity; });
-              var page = parseInt(params.page) || 1;
-              var limit = Math.min(parseInt(params.limit) || 100, 100);
-              var start = (page - 1) * limit;
-              var paged = entries.slice(start, start + limit);
-              return { status: 200, body: { success: true, data: { entries: paged, lastUpdated: new Date().toISOString() }, error: null, meta: { total: entries.length, page: page, limit: limit } } };
+              return { status: 200, body: { success: true, data: { entries: entries.slice(0, 10).map(function(e){ return { rank: e.rank, petId: e.pet_id, petName: e.pet_name, rarity: e.rarity, level: e.level, score: e.score, winRate: e.win_rate }; }), lastUpdated: new Date().toISOString() }, error: null, meta: { total: entries.length, page: parseInt(params.page) || 1, limit: 100 } } };
+            }
+          },
+          {
+            id: "leaderboard_rank",
+            method: "GET",
+            path: "/api/v1/leaderboard/rank/:petId",
+            summary: "取得指定寵物排名",
+            desc: "取得指定寵物的全域排名和分數（公開可見）。",
+            auth_required: false,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功 — 排名資訊", body: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440001", rank: 7, score: 8420, totalRanked: 847 }, error: null } },
+              { status: 404, desc: "NOT_RANKED", body: { success: false, data: null, error: { code: "NOT_RANKED", message: "Pet has not entered any arena battles." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              var entry = MOCK_DB.leaderboard.filter(function(e){ return e.pet_id === params.petId; })[0];
+              if (!entry) return { status: 404, body: { success: false, data: null, error: { code: "NOT_RANKED", message: "Not ranked." } } };
+              return { status: 200, body: { success: true, data: { petId: entry.pet_id, rank: entry.rank, score: entry.score, totalRanked: 847 }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "gdpr",
+        name: "GDPR Self-Service",
+        label: "隱私請求",
+        color: "#a29bfe",
+        endpoints: [
+          {
+            id: "gdpr_request",
+            method: "POST",
+            path: "/api/v1/gdpr/request",
+            summary: "提交 GDPR 請求",
+            desc: "提交 GDPR 隱私請求（刪除/存取/限制/反對/更正）。Bearer token 必填。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ requestType: "erasure" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "成功 — 請求已受理", body: { success: true, data: { requestId: "gdpr-1111-2222-3333-444444444444", requestType: "erasure", status: "pending", submittedAt: "2026-05-18T10:00:00Z", slaDeadline: "2026-05-25T10:00:00Z" }, error: null } },
+              { status: 409, desc: "PENDING_REQUEST_EXISTS", body: { success: false, data: null, error: { code: "PENDING_REQUEST_EXISTS", message: "An active request already exists." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              return { status: 200, body: { success: true, data: { requestId: "gdpr-" + Date.now(), requestType: (body && body.requestType) || "erasure", status: "pending", submittedAt: new Date().toISOString(), slaDeadline: new Date(Date.now() + 7 * 86400000).toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "gdpr_status",
+            method: "GET",
+            path: "/api/v1/gdpr/request/status",
+            summary: "查詢 GDPR 請求狀態",
+            desc: "查詢最新一筆 GDPR 請求的處理狀態。Bearer token 必填。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功 — 請求狀態", body: { success: true, data: { requestId: "gdpr-1111-2222-3333-444444444444", requestType: "erasure", status: "processing", submittedAt: "2026-05-18T10:00:00Z", completedAt: null, slaDeadline: "2026-05-25T10:00:00Z" }, error: null } },
+              { status: 404, desc: "NO_ACTIVE_REQUEST", body: { success: false, data: null, error: { code: "NO_ACTIVE_REQUEST", message: "No GDPR request found." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              return { status: 200, body: { success: true, data: { requestId: "gdpr-1111-2222-3333-444444444444", requestType: "erasure", status: "processing", submittedAt: "2026-05-17T10:00:00Z", completedAt: null, slaDeadline: "2026-05-24T10:00:00Z" }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "marketplace",
+        name: "Marketplace",
+        label: "交易市場",
+        color: "#e87c7c",
+        endpoints: [
+          {
+            id: "marketplace_listings",
+            method: "GET",
+            path: "/api/v1/marketplace/listings",
+            summary: "取得市場掛單列表",
+            desc: "取得目前所有掛單（需 FF_MARKETPLACE feature flag 啟用）。",
+            auth_required: false,
+            params: [
+              { name: "rarity", location: "query", type: "string", required: false, default: "", desc: "按稀有度篩選", enum: ["", "COMMON", "RARE", "EPIC", "LEGENDARY"] },
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功 — 掛單列表", body: { success: true, data: { listings: [{ listingId: "list-0001-0000-0000-000000000001", petId: "550e8400-e29b-41d4-a716-446655440002", petName: "Golden Titan", rarity: "LEGENDARY", level: 15, priceCredits: 5000, listedAt: "2026-05-17T08:00:00Z" }], total: 8 }, error: null, meta: { page: 1, limit: 20, total: 8 } } },
+              { status: 503, desc: "FEATURE_DISABLED", body: { success: false, data: null, error: { code: "FEATURE_DISABLED", message: "FF_MARKETPLACE is disabled." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              var ff = MOCK_DB.featureFlags.filter(function(f){ return f.key === "FF_MARKETPLACE"; })[0];
+              if (!ff || !ff.enabled) return { status: 503, body: { success: false, data: null, error: { code: "FEATURE_DISABLED", message: "FF_MARKETPLACE is disabled." } } };
+              var mappedListings = MOCK_DB.listings.map(function(l){ var p = MOCK_DB.pets.filter(function(x){ return x.id === l.pet_id; })[0] || {}; return { listingId: l.id, petId: l.pet_id, petName: p.pet_name || "Unknown", rarity: p.rarity || "COMMON", level: p.level || 1, priceCredits: l.price_tokens, listedAt: l.listed_at, expiresAt: l.expires_at, status: l.status }; }); return { status: 200, body: { success: true, data: { listings: mappedListings, total: mappedListings.length }, error: null, meta: { page: 1, limit: 20, total: mappedListings.length } } };
+            }
+          },
+          {
+            id: "marketplace_create",
+            method: "POST",
+            path: "/api/v1/marketplace/listings",
+            summary: "建立掛單",
+            desc: "掛出寵物至市場。7 天鎖定期內不可取消。需 Bearer token。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ petId: "550e8400-e29b-41d4-a716-446655440001", priceCredits: 1200 }, null, 2),
+            possible_responses: [
+              { status: 201, desc: "建立成功", body: { success: true, data: { listingId: "list-0002-0000-0000-000000000002", petId: "550e8400-e29b-41d4-a716-446655440001", priceCredits: 1200, status: "active", listedAt: "2026-05-18T10:00:00Z", antiFlipDeadline: "2026-05-25T10:00:00Z" }, error: null } },
+              { status: 400, desc: "ACTIVE_LISTING_EXISTS", body: { success: false, data: null, error: { code: "ACTIVE_LISTING_EXISTS", message: "Pet already listed." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              return { status: 201, body: { success: true, data: { listingId: "list-" + Date.now(), petId: body && body.petId, priceCredits: body && body.priceCredits, status: "active", listedAt: new Date().toISOString(), antiFlipDeadline: new Date(Date.now() + 7 * 86400000).toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "marketplace_cancel",
+            method: "DELETE",
+            path: "/api/v1/marketplace/listings/:listingId",
+            summary: "取消掛單",
+            desc: "取消市場掛單（7 天鎖定期內禁止）。需 Bearer token。",
+            auth_required: true,
+            params: [
+              { name: "listingId", location: "path", type: "string", required: true, default: "lst-001", desc: "掛單 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功取消", body: { success: true, data: { listingId: "list-0001-0000-0000-000000000001", status: "cancelled" }, error: null } },
+              { status: 403, desc: "ANTI_FLIP_LOCK", body: { success: false, data: null, error: { code: "ANTI_FLIP_LOCK", message: "Cannot cancel within 7-day anti-flip period." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              return { status: 200, body: { success: true, data: { listingId: params.listingId, status: "cancelled" }, error: null } };
+            }
+          },
+          {
+            id: "marketplace_buy",
+            method: "POST",
+            path: "/api/v1/marketplace/listings/:listingId/buy",
+            summary: "購買掛單",
+            desc: "買入市場掛單的寵物（5% 手續費）。需 Bearer token。",
+            auth_required: true,
+            params: [
+              { name: "listingId", location: "path", type: "string", required: true, default: "lst-001", desc: "掛單 UUID" }
+            ],
+            body: JSON.stringify({ confirmFee: true }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "交易成功", body: { success: true, data: { transactionId: "txn-1111-2222-3333-444444444444", petId: "550e8400-e29b-41d4-a716-446655440002", priceCredits: 5000, feeCredits: 250, newPetToken: "newTokenXYZ" }, error: null } },
+              { status: 404, desc: "LISTING_NOT_FOUND", body: { success: false, data: null, error: { code: "LISTING_NOT_FOUND", message: "Listing is not active." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              var listing = MOCK_DB.listings.filter(function(l){ return l.id === params.listingId && l.status === "ACTIVE"; })[0];
+              if (!listing) return { status: 404, body: { success: false, data: null, error: { code: "LISTING_NOT_FOUND", message: "Listing not found." } } };
+              return { status: 200, body: { success: true, data: { transactionId: "txn-" + Date.now(), petId: listing.pet_id, priceCredits: listing.price_tokens, feeCredits: Math.floor(listing.price_tokens * 0.05), newPetToken: "newToken_" + Date.now() }, error: null } };
+            }
+          },
+          {
+            id: "marketplace_history",
+            method: "GET",
+            path: "/api/v1/marketplace/history/:petId",
+            summary: "取得寵物市場交易歷史",
+            desc: "取得寵物的歷史市場交易記錄。",
+            auth_required: false,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { transactions: [{ transactionId: "txn-1111", priceCredits: 800, feeCredits: 40, completedAt: "2026-05-10T08:00:00Z" }] }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              return { status: 200, body: { success: true, data: { transactions: [] }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_auth",
+        name: "Admin Auth",
+        label: "管理員認證",
+        color: "#ff7675",
+        endpoints: [
+          {
+            id: "admin_login",
+            method: "POST",
+            path: "/admin/api/auth/login",
+            summary: "管理員登入",
+            desc: "使用帳密登入 Admin Portal，取得 sessionToken（有效 8 小時）。IP Rate limit: 10 次/15 分鐘。",
+            auth_required: false,
+            params: [],
+            body: JSON.stringify({ username: "admin", password: "Admin@2026" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "登入成功 — 回傳 sessionToken", body: { success: true, data: { sessionToken: "admin_sess_eyJhbGciOiJIUzI1NiJ9.admin.demo", adminId: "admin-uuid-0001", role: "super_admin", expiresAt: "2026-05-18T22:00:00Z" }, error: null } },
+              { status: 401, desc: "INVALID_CREDENTIALS", body: { success: false, data: null, error: { code: "INVALID_CREDENTIALS", message: "Invalid username or password." } } },
+              { status: 423, desc: "ACCOUNT_LOCKED", body: { success: false, data: null, error: { code: "ACCOUNT_LOCKED", message: "Account locked for 30 minutes after 10 failed attempts." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!body) return { status: 400, body: { success: false, data: null, error: { code: "VALIDATION_ERROR", message: "username and password required." } } };
+              if (body.username === "admin" && body.password === "Admin@2026") {
+                return { status: 200, body: { success: true, data: { sessionToken: "admin_sess_eyJhbGciOiJIUzI1NiJ9.admin.demo", adminId: "admin-uuid-0001", role: "super_admin", expiresAt: new Date(Date.now() + 8 * 3600000).toISOString() }, error: null } };
+              }
+              return { status: 401, body: { success: false, data: null, error: { code: "INVALID_CREDENTIALS", message: "Invalid username or password." } } };
+            }
+          },
+          {
+            id: "admin_logout",
+            method: "POST",
+            path: "/admin/api/auth/logout",
+            summary: "管理員登出",
+            desc: "撤銷 sessionToken，强制重新登入。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功登出", body: { success: true, data: { message: "Logged out successfully." }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              return { status: 200, body: { success: true, data: { message: "Logged out successfully." }, error: null } };
+            }
+          },
+          {
+            id: "admin_totp_setup",
+            method: "POST",
+            path: "/admin/api/auth/totp/setup",
+            summary: "設定 TOTP（首次登入）",
+            desc: "為管理員帳號初始化 TOTP 兩因素驗證，回傳 QR code URI。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功 — 回傳 QR code URI", body: { success: true, data: { totpUri: "otpauth://totp/PixelPetArena:admin?secret=JBSWY3DPEHPK3PXP&issuer=PixelPetArena", qrCodeDataUrl: "data:image/png;base64,iVBORw0KGgoAAAANS..." }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session token required." } } };
+              return { status: 200, body: { success: true, data: { totpUri: "otpauth://totp/PixelPetArena:admin?secret=JBSWY3DPEHPK3PXP&issuer=PixelPetArena", qrCodeDataUrl: "data:image/png;base64,(QR_CODE_DATA)" }, error: null } };
+            }
+          },
+          {
+            id: "admin_totp_verify",
+            method: "POST",
+            path: "/admin/api/auth/totp/verify",
+            summary: "驗證 TOTP 碼",
+            desc: "驗證 TOTP 一次性碼（30 秒有效，±1 滑窗），完成二因素驗證。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ totpCode: "123456" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "驗證通過", body: { success: true, data: { verified: true }, error: null } },
+              { status: 401, desc: "INVALID_TOTP", body: { success: false, data: null, error: { code: "INVALID_TOTP", message: "TOTP code is invalid or expired." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session token required." } } };
+              if (body && body.totpCode && body.totpCode.length === 6) return { status: 200, body: { success: true, data: { verified: true }, error: null } };
+              return { status: 401, body: { success: false, data: null, error: { code: "INVALID_TOTP", message: "TOTP code is invalid or expired." } } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_roles",
+        name: "Admin User Roles",
+        label: "角色管理",
+        color: "#6c5ce7",
+        endpoints: [
+          {
+            id: "admin_roles_list",
+            method: "GET",
+            path: "/admin/api/roles",
+            summary: "列出管理員帳號",
+            desc: "列出所有管理員帳號（含角色）。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { admins: [{ adminId: "admin-uuid-0001", username: "admin", role: "super_admin", deactivatedAt: null }, { adminId: "admin-uuid-0002", username: "alice", role: "moderator", deactivatedAt: null }, { adminId: "admin-uuid-0003", username: "reader", role: "read_only", deactivatedAt: null }] }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { admins: MOCK_DB.adminUsers.map(function(a){ return { adminId: a.id, username: a.email.split("@")[0], role: a.role.toLowerCase(), totpEnabled: a.totp_enabled, createdAt: a.created_at, lastLogin: a.last_login, deactivatedAt: null }; }) }, error: null } };
+            }
+          },
+          {
+            id: "admin_roles_create",
+            method: "POST",
+            path: "/admin/api/roles",
+            summary: "建立管理員帳號",
+            desc: "建立新管理員帳號並指派角色。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ username: "charlie", password: "Temp@1234", role: "moderator" }, null, 2),
+            possible_responses: [
+              { status: 201, desc: "建立成功", body: { success: true, data: { adminId: "admin-uuid-0004", username: "charlie", role: "moderator", createdAt: "2026-05-18T10:00:00Z" }, error: null } },
+              { status: 409, desc: "USERNAME_TAKEN", body: { success: false, data: null, error: { code: "USERNAME_TAKEN", message: "Username already exists." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 201, body: { success: true, data: { adminId: "admin-uuid-" + Date.now(), username: body && body.username, role: body && body.role, createdAt: new Date().toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "admin_roles_delete",
+            method: "DELETE",
+            path: "/admin/api/roles/:adminId",
+            summary: "停用管理員帳號",
+            desc: "軟刪除（停用）指定管理員帳號。不可停用自己。需 super_admin。",
+            auth_required: true,
+            params: [
+              { name: "adminId", location: "path", type: "string", required: true, default: "admin-uuid-0003", desc: "管理員 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功停用", body: { success: true, data: { adminId: "admin-uuid-0003", deactivatedAt: "2026-05-18T10:00:00Z" }, error: null } },
+              { status: 403, desc: "CANNOT_SELF_DEACTIVATE", body: { success: false, data: null, error: { code: "CANNOT_SELF_DEACTIVATE", message: "Cannot deactivate your own account." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              if (params.adminId === "admin-uuid-0001") return { status: 403, body: { success: false, data: null, error: { code: "CANNOT_SELF_DEACTIVATE", message: "Cannot deactivate your own account." } } };
+              return { status: 200, body: { success: true, data: { adminId: params.adminId, deactivatedAt: new Date().toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "admin_roles_totp_reset",
+            method: "POST",
+            path: "/admin/api/roles/:adminId/totp/reset",
+            summary: "重置管理員 TOTP",
+            desc: "強制重置指定管理員的 TOTP 設定，要求其下次登入重新設定。需 super_admin。",
+            auth_required: true,
+            params: [
+              { name: "adminId", location: "path", type: "string", required: true, default: "admin-uuid-0002", desc: "管理員 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功重置", body: { success: true, data: { adminId: "admin-uuid-0002", totpReset: true }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { adminId: params.adminId, totpReset: true }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_pets",
+        name: "Admin Pet Management",
+        label: "寵物管理",
+        color: "#fd79a8",
+        endpoints: [
+          {
+            id: "admin_pets_list",
+            method: "GET",
+            path: "/admin/api/pets",
+            summary: "列出寵物（Admin）",
+            desc: "取得所有寵物列表，支援搜尋和分頁。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "q", location: "query", type: "string", required: false, default: "", desc: "搜尋關鍵字（petName）" },
+              { name: "rarity", location: "query", type: "string", required: false, default: "", desc: "稀有度篩選", enum: ["", "COMMON", "RARE", "EPIC", "LEGENDARY"] },
+              { name: "isBanned", location: "query", type: "boolean", required: false, default: "", desc: "是否被封禁", enum: ["", "true", "false"] },
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" },
+              { name: "limit", location: "query", type: "integer", required: false, default: "20", desc: "每頁筆數" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { pets: [{ id: "550e8400-e29b-41d4-a716-446655440001", petName: "Violet Drifter", rarity: "EPIC", level: 7, isBanned: false, claimedAt: "2026-05-10T08:00:00Z" }], total: 50 }, error: null, meta: { page: 1, limit: 20, total: 50 } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              var pets = MOCK_DB.pets;
+              if (params.q) pets = pets.filter(function(p){ return p.pet_name && p.pet_name.toLowerCase().indexOf(params.q.toLowerCase()) !== -1; });
+              if (params.rarity) pets = pets.filter(function(p){ return p.rarity === params.rarity; });
+              if (params.isBanned === "true") pets = pets.filter(function(p){ return p.is_banned; });
+              else if (params.isBanned === "false") pets = pets.filter(function(p){ return !p.is_banned; });
+              var mappedPets = pets.slice(0, 20).map(function(p){ return { id: p.id, petName: p.pet_name, rarity: p.rarity, statSpeed: p.stat_speed, statStrength: p.stat_strength, statStamina: p.stat_stamina, level: p.level, isBanned: p.is_banned, claimedAt: p.claimed_at }; }); return { status: 200, body: { success: true, data: { pets: mappedPets, total: pets.length }, error: null, meta: { page: 1, limit: 20, total: pets.length } } };
+            }
+          },
+          {
+            id: "admin_pets_get",
+            method: "GET",
+            path: "/admin/api/pets/:petId",
+            summary: "取得寵物詳情（Admin）",
+            desc: "取得寵物完整詳情（含 email hash、封禁記錄）。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440001", petName: "Violet Drifter", rarity: "EPIC", statSpeed: 62, statStrength: 45, statStamina: 71, level: 7, isBanned: false, bannedReason: null, claimedAt: "2026-05-10T08:00:00Z", emailHash: "a1b2c3d4e5f6...truncated" }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              var pet = MOCK_DB.pets.filter(function(p){ return p.id === params.petId; })[0];
+              if (!pet) return { status: 404, body: { success: false, data: null, error: { code: "PET_NOT_FOUND", message: "Not found." } } };
+              return { status: 200, body: { success: true, data: { id: pet.id, petName: pet.pet_name, rarity: pet.rarity, statSpeed: pet.stat_speed, statStrength: pet.stat_strength, statStamina: pet.stat_stamina, level: pet.level, isBanned: pet.is_banned, bannedReason: null, claimedAt: pet.claimed_at, emailHash: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }, error: null } };
+            }
+          },
+          {
+            id: "admin_pets_update",
+            method: "PUT",
+            path: "/admin/api/pets/:petId",
+            summary: "更新寵物資料（Admin）",
+            desc: "修改寵物的 petName 或 generation_meta。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
+            ],
+            body: JSON.stringify({ petName: "Silver Phantom" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "更新成功", body: { success: true, data: { id: "550e8400-e29b-41d4-a716-446655440001", petName: "Silver Phantom", updatedAt: "2026-05-18T10:00:00Z" }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { id: params.petId, petName: body && body.petName, updatedAt: new Date().toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "admin_pets_ban",
+            method: "POST",
+            path: "/admin/api/pets/:petId/ban",
+            summary: "封禁寵物",
+            desc: "封禁寵物（移出排行榜、禁止對戰）。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
+            ],
+            body: JSON.stringify({ reason: "Suspicious automated farming — >200 battles in 2 hours" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "封禁成功", body: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440001", isBanned: true, bannedAt: "2026-05-18T10:00:00Z" }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { petId: params.petId, isBanned: true, bannedReason: body && body.reason, bannedAt: new Date().toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "admin_pets_unban",
+            method: "POST",
+            path: "/admin/api/pets/:petId/unban",
+            summary: "解除封禁寵物",
+            desc: "解除寵物封禁，恢復對戰和排行榜資格。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "解禁成功", body: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440001", isBanned: false }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { petId: params.petId, isBanned: false }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_battles",
+        name: "Admin Battles & Moderation",
+        label: "對戰管理",
+        color: "#e17055",
+        endpoints: [
+          {
+            id: "admin_battles_list",
+            method: "GET",
+            path: "/admin/api/battles",
+            summary: "列出對戰記錄（Admin）",
+            desc: "取得對戰記錄，支援日期範圍和 isFlagged 篩選。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "from", location: "query", type: "string", required: false, default: "2026-05-01", desc: "開始日期（ISO 8601）" },
+              { name: "to", location: "query", type: "string", required: false, default: "2026-05-18", desc: "結束日期（ISO 8601）" },
+              { name: "isFlagged", location: "query", type: "boolean", required: false, default: "", desc: "只顯示旗標記錄", enum: ["", "true", "false"] },
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { battles: [{ matchId: "aa111111-bb22-cc33-dd44-ee5555555555", mode: "RACE", petAId: "550e8400-e29b-41d4-a716-446655440001", petBId: "550e8400-e29b-41d4-a716-446655440002", winnerId: "550e8400-e29b-41d4-a716-446655440001", isFlagged: false, completedAt: "2026-05-18T10:00:00Z" }], total: 40 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              var matches = MOCK_DB.matches;
+              if (params.isFlagged === "true") matches = matches.filter(function(m){ return !!m.is_flagged; });
+              var mapped = matches.map(function(m){ return { matchId: m.id, mode: m.mode, petAId: m.pet_a_id, petBId: m.pet_b_id, winnerId: m.winner_pet_id, isAiOpponent: m.is_ai_opponent, isFlagged: !!m.is_flagged, completedAt: m.completed_at }; }); return { status: 200, body: { success: true, data: { battles: mapped, total: mapped.length }, error: null } };
+            }
+          },
+          {
+            id: "admin_battles_flag",
+            method: "POST",
+            path: "/admin/api/battles/:matchId/flag",
+            summary: "標記對戰記錄",
+            desc: "標記對戰記錄為可疑（Append-only 審計）。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "matchId", location: "path", type: "string", required: true, default: "m001", desc: "對戰 UUID" }
+            ],
+            body: JSON.stringify({ reason: "Suspicious rapid-fire battles" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "成功標記", body: { success: true, data: { matchId: "aa111111-bb22-cc33-dd44-ee5555555555", isFlagged: true, flaggedAt: "2026-05-18T10:00:00Z" }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { matchId: params.matchId, isFlagged: true, flaggedAt: new Date().toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "admin_battles_unflag",
+            method: "DELETE",
+            path: "/admin/api/battles/:matchId/flag",
+            summary: "取消標記對戰",
+            desc: "移除對戰的可疑旗標。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "matchId", location: "path", type: "string", required: true, default: "m001", desc: "對戰 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功取消標記", body: { success: true, data: { matchId: "aa111111-bb22-cc33-dd44-ee5555555555", isFlagged: false }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { matchId: params.matchId, isFlagged: false }, error: null } };
+            }
+          },
+          {
+            id: "admin_suspicious",
+            method: "GET",
+            path: "/admin/api/suspicious",
+            summary: "可疑活動列表",
+            desc: "取得系統自動偵測的可疑寵物活動（>50 battles/60min rolling window）。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "threshold", location: "query", type: "integer", required: false, default: "50", desc: "每小時對戰數門檻（預設 50）" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { suspicious: [{ petId: "550e8400-e29b-41d4-a716-446655440004", petName: "Shadow Runner", battlesInLastHour: 73, detectedAt: "2026-05-18T09:45:00Z" }], total: 1 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              var mappedSus = MOCK_DB.suspicious.map(function(s){ var p = MOCK_DB.pets.filter(function(x){ return x.id === s.pet_id; })[0] || {}; return { petId: s.pet_id, petName: p.pet_name || "Unknown", reason: s.reason, score: s.score, detectedAt: s.flagged_at, status: s.status }; }); return { status: 200, body: { success: true, data: { suspicious: mappedSus, total: mappedSus.length }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_leaderboard",
+        name: "Admin Leaderboard",
+        label: "排行榜管理",
+        color: "#00cec9",
+        endpoints: [
+          {
+            id: "admin_leaderboard_list",
+            method: "GET",
+            path: "/admin/api/leaderboard",
+            summary: "排行榜（Admin 視圖）",
+            desc: "取得完整排行榜（最多 500 名），含封禁狀態。需 moderator+。",
+            auth_required: true,
+            params: [
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { entries: [{ rank: 1, petId: "550e8400-e29b-41d4-a716-446655440001", petName: "Violet Drifter", score: 9840, winRate: 0.82, rarity: "EPIC", level: 12, isBanned: false }], total: 500 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              var mapped = MOCK_DB.leaderboard.map(function(e){ return { rank: e.rank, petId: e.pet_id, petName: e.pet_name, score: e.score, winRate: e.win_rate, rarity: e.rarity, level: e.level, isBanned: false }; }); return { status: 200, body: { success: true, data: { entries: mapped, total: mapped.length }, error: null } };
+            }
+          },
+          {
+            id: "admin_leaderboard_remove",
+            method: "DELETE",
+            path: "/admin/api/leaderboard/:petId",
+            summary: "移除排行榜寵物",
+            desc: "強制從排行榜移除指定寵物（不封禁）。需 super_admin。",
+            auth_required: true,
+            params: [
+              { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功移除", body: { success: true, data: { petId: "550e8400-e29b-41d4-a716-446655440001", removedFromLeaderboard: true }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { petId: params.petId, removedFromLeaderboard: true }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_config",
+        name: "Admin Configuration",
+        label: "系統配置",
+        color: "#74b9ff",
+        endpoints: [
+          {
+            id: "admin_config_runtime_get",
+            method: "GET",
+            path: "/admin/api/config/runtime",
+            summary: "讀取 Runtime 參數",
+            desc: "取得目前的 runtime 可調參數（對戰速率、稀有度權重等）。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { maxBattlesPerHour: 10, rarityWeights: { COMMON: 60, RARE: 25, EPIC: 12, LEGENDARY: 3 }, matchmakingTimeoutSeconds: 30, aiOpponentEnabled: true }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { maxBattlesPerHour: 10, rarityWeights: { COMMON: 60, RARE: 25, EPIC: 12, LEGENDARY: 3 }, matchmakingTimeoutSeconds: 30, aiOpponentEnabled: true }, error: null } };
+            }
+          },
+          {
+            id: "admin_config_runtime_put",
+            method: "PUT",
+            path: "/admin/api/config/runtime",
+            summary: "更新 Runtime 參數",
+            desc: "更新 runtime 參數（熱更新，無需重啟）。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ maxBattlesPerHour: 15, matchmakingTimeoutSeconds: 45 }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "成功更新", body: { success: true, data: { updated: true, appliedAt: "2026-05-18T10:00:00Z" }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { updated: true, appliedAt: new Date().toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "admin_config_economy_get",
+            method: "GET",
+            path: "/admin/api/config/economy",
+            summary: "讀取 Economy 配置",
+            desc: "取得食物 buff 倍率和競技場費用配置。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { foodBuffMultipliers: { speed_kibble: 5, strength_biscuit: 4, stamina_jerky: 3, mega_kibble: 10 }, arenaEntryCost: 0, arenaCooldownSeconds: 360 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { foodBuffMultipliers: { speed_kibble: 5, strength_biscuit: 4, stamina_jerky: 3, mega_kibble: 10 }, arenaEntryCost: 0, arenaCooldownSeconds: 360 }, error: null } };
+            }
+          },
+          {
+            id: "admin_config_economy_put",
+            method: "PUT",
+            path: "/admin/api/config/economy",
+            summary: "更新 Economy 配置",
+            desc: "更新食物 buff 倍率和競技場費用配置。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ foodBuffMultipliers: { speed_kibble: 6 }, arenaCooldownSeconds: 300 }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "成功更新", body: { success: true, data: { updated: true }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { updated: true }, error: null } };
+            }
+          },
+          {
+            id: "admin_config_flags_get",
+            method: "GET",
+            path: "/admin/api/config/flags",
+            summary: "讀取 Feature Flags",
+            desc: "取得所有 feature flag 狀態。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { flags: [{ name: "FF_MARKETPLACE", enabled: false, description: "Marketplace feature gate", rolloutPct: 0 }, { name: "FF_ARENA_SUMO", enabled: true, description: "Sumo battle mode", rolloutPct: 100 }, { name: "FF_TRAINING_V2", enabled: false, description: "New training algorithm", rolloutPct: 10 }, { name: "FF_LEADERBOARD_SEASONS", enabled: true, description: "Seasonal leaderboard reset", rolloutPct: 100 }] }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { flags: MOCK_DB.featureFlags.map(function(f){ return { name: f.key, enabled: f.enabled, description: f.description, rolloutPct: f.rollout_pct }; }) }, error: null } };
+            }
+          },
+          {
+            id: "admin_config_flags_put",
+            method: "PUT",
+            path: "/admin/api/config/flags/:flag",
+            summary: "更新 Feature Flag",
+            desc: "啟用或停用指定 feature flag。需 super_admin。",
+            auth_required: true,
+            params: [
+              { name: "flag", location: "path", type: "string", required: true, default: "FF_MARKETPLACE", desc: "Feature flag 名稱", enum: ["FF_MARKETPLACE", "FF_ARENA_SUMO", "FF_TRAINING_V2", "FF_LEADERBOARD_SEASONS"] }
+            ],
+            body: JSON.stringify({ enabled: true }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "成功更新", body: { success: true, data: { flag: "FF_MARKETPLACE", enabled: true }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { flag: params.flag, enabled: body && body.enabled }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_gdpr",
+        name: "Admin GDPR Queue",
+        label: "GDPR 佇列",
+        color: "#b2bec3",
+        endpoints: [
+          {
+            id: "admin_gdpr_list",
+            method: "GET",
+            path: "/admin/api/gdpr",
+            summary: "列出 GDPR 請求佇列",
+            desc: "取得 GDPR 請求列表，支援狀態篩選。需 super_admin。",
+            auth_required: true,
+            params: [
+              { name: "status", location: "query", type: "string", required: false, default: "", desc: "狀態篩選", enum: ["", "pending", "processing", "completed", "failed"] }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { requests: [{ requestId: "gdpr-1111-2222-3333-444444444444", requestType: "erasure", status: "pending", submittedAt: "2026-05-17T10:00:00Z", slaDeadline: "2026-05-24T10:00:00Z" }], total: 4 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              var reqs = MOCK_DB.gdprRequests;
+              if (params.status) reqs = reqs.filter(function(r){ return r.status === params.status.toUpperCase(); });
+              var mappedReqs = reqs.map(function(r){ return { requestId: r.id, requestType: r.type, status: r.status, submittedAt: r.submitted_at, slaDeadline: new Date(new Date(r.submitted_at).getTime() + 7*86400000).toISOString(), petId: r.pet_id }; }); return { status: 200, body: { success: true, data: { requests: mappedReqs, total: mappedReqs.length }, error: null } };
+            }
+          },
+          {
+            id: "admin_gdpr_delete",
+            method: "POST",
+            path: "/admin/api/gdpr/delete",
+            summary: "執行 GDPR 刪除",
+            desc: "手動觸發 GDPR 刪除程序（erasure 請求）。需 super_admin。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ requestId: "gdpr-1111-2222-3333-444444444444" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "成功觸發", body: { success: true, data: { requestId: "gdpr-1111-2222-3333-444444444444", status: "processing", triggeredAt: "2026-05-18T10:00:00Z" }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { requestId: body && body.requestId, status: "processing", triggeredAt: new Date().toISOString() }, error: null } };
+            }
+          },
+          {
+            id: "admin_gdpr_patch",
+            method: "PATCH",
+            path: "/admin/api/gdpr/:requestId",
+            summary: "更新 GDPR 請求狀態",
+            desc: "更新 GDPR 請求的處理狀態（processing → completed/failed）。需 super_admin。",
+            auth_required: true,
+            params: [
+              { name: "requestId", location: "path", type: "string", required: true, default: "gdpr-1111-2222-3333-444444444444", desc: "GDPR 請求 UUID" }
+            ],
+            body: JSON.stringify({ status: "completed" }, null, 2),
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { requestId: "gdpr-1111-2222-3333-444444444444", status: "completed", completedAt: "2026-05-18T10:00:00Z" }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { requestId: params.requestId, status: body && body.status, completedAt: new Date().toISOString() }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "admin_analytics",
+        name: "Admin Analytics & Audit",
+        label: "數據與審計",
+        color: "#55efc4",
+        endpoints: [
+          {
+            id: "admin_dashboard",
+            method: "GET",
+            path: "/admin/api/dashboard",
+            summary: "Admin 儀表板數據",
+            desc: "取得儀表板 KPI 統計（用戶數、對戰量、活躍度等）。需 read_only+。",
+            auth_required: true,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { totalPets: 847, claimedPets: 312, activePets: 198, totalBattles: 15420, battlesToday: 234, leaderboardEntries: 500, suspiciousCount: 3, pendingGdpr: 2 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { totalPets: 847, claimedPets: 312, activePets: 198, totalBattles: 15420, battlesToday: 234, leaderboardEntries: 500, suspiciousCount: 3, pendingGdpr: 2 }, error: null } };
+            }
+          },
+          {
+            id: "admin_analytics_get",
+            method: "GET",
+            path: "/admin/api/analytics",
+            summary: "Analytics 資料",
+            desc: "取得時序分析資料（日/週/月維度）。需 read_only+。",
+            auth_required: true,
+            params: [
+              { name: "from", location: "query", type: "string", required: false, default: "2026-05-11", desc: "開始日期（ISO 8601）" },
+              { name: "to", location: "query", type: "string", required: false, default: "2026-05-18", desc: "結束日期（ISO 8601）" },
+              { name: "granularity", location: "query", type: "string", required: false, default: "day", desc: "粒度", enum: ["hour", "day", "week"] }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { series: [{ date: "2026-05-17", newClaims: 12, battles: 185, activePets: 98 }, { date: "2026-05-18", newClaims: 7, battles: 234, activePets: 112 }] }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { series: [{ date: "2026-05-17", newClaims: 12, battles: 185, activePets: 98 }, { date: "2026-05-18", newClaims: 7, battles: 234, activePets: 112 }] }, error: null } };
+            }
+          },
+          {
+            id: "admin_audit",
+            method: "GET",
+            path: "/admin/api/audit",
+            summary: "稽核日誌",
+            desc: "取得管理員操作的稽核日誌（2 年保留）。需 super_admin。",
+            auth_required: true,
+            params: [
+              { name: "adminId", location: "query", type: "string", required: false, default: "", desc: "按管理員篩選" },
+              { name: "from", location: "query", type: "string", required: false, default: "2026-05-01", desc: "開始日期" },
+              { name: "to", location: "query", type: "string", required: false, default: "2026-05-18", desc: "結束日期" },
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { logs: [{ id: 1, adminId: "admin-uuid-0001", action: "pets.ban", targetEntity: "Pet", targetId: "550e8400-e29b-41d4-a716-446655440004", detail: { reason: "Bot farming" }, createdAt: "2026-05-18T09:00:00Z" }], total: 42 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              var logs = MOCK_DB.auditLogs.map(function(l){ return { id: l.id, adminId: l.admin_id, action: l.action, targetId: l.target, ip: l.ip, createdAt: l.ts }; }); return { status: 200, body: { success: true, data: { logs: logs, total: logs.length }, error: null } };
+            }
+          },
+          {
+            id: "admin_email_monitor",
+            method: "GET",
+            path: "/admin/api/email/monitor",
+            summary: "Email 寄送監控",
+            desc: "取得最近 Email 寄送記錄（OTP claim/recovery emails）。需 read_only+。",
+            auth_required: true,
+            params: [
+              { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" },
+              { name: "status", location: "query", type: "string", required: false, default: "", desc: "狀態篩選", enum: ["", "sent", "failed", "bounced"] }
+            ],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "成功", body: { success: true, data: { emails: [{ id: "email-0001", recipientHash: "sha256:a1b2...", type: "claim_otp", status: "sent", sentAt: "2026-05-18T09:00:00Z" }, { id: "email-0002", recipientHash: "sha256:c3d4...", type: "recovery_otp", status: "sent", sentAt: "2026-05-18T08:30:00Z" }], total: 89 }, error: null } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Admin session required." } } };
+              return { status: 200, body: { success: true, data: { emails: [{ id: "email-0001", recipientHash: "sha256:a1b2c3d4...", type: "claim_otp", status: "sent", sentAt: new Date(Date.now() - 3600000).toISOString() }, { id: "email-0002", recipientHash: "sha256:e5f6a7b8...", type: "recovery_otp", status: "sent", sentAt: new Date(Date.now() - 7200000).toISOString() }], total: 89 }, error: null } };
+            }
+          }
+        ]
+      },
+      {
+        id: "system",
+        name: "System",
+        label: "系統",
+        color: "#636e72",
+        endpoints: [
+          {
+            id: "health",
+            method: "GET",
+            path: "/health",
+            summary: "服務健康檢查",
+            desc: "回傳服務健康狀態和各依賴組件狀態。公開端點，無需認證。",
+            auth_required: false,
+            params: [],
+            body: null,
+            possible_responses: [
+              { status: 200, desc: "所有組件健康", body: { status: "ok", version: "1.1.0", timestamp: "2026-05-18T10:00:00Z", components: { database: "ok", redis: "ok", email_service: "ok", phaser_cdn: "ok" } } },
+              { status: 503, desc: "一或多個組件不健康", body: { status: "degraded", version: "1.1.0", timestamp: "2026-05-18T10:00:00Z", components: { database: "ok", redis: "error", email_service: "ok", phaser_cdn: "ok" } } }
+            ],
+            mock_fn: function(params, body, token) {
+              return { status: 200, body: { status: "ok", version: "1.1.0", timestamp: new Date().toISOString(), components: { database: "ok", redis: "ok", email_service: "ok", phaser_cdn: "ok" } } };
+            }
+          },
+          {
+            id: "train_legacy",
+            method: "POST",
+            path: "/train",
+            summary: "訓練（舊版路由）",
+            desc: "已棄用的訓練路由，重定向至 /api/v1/pets/:petId/train。保留向後相容。",
+            auth_required: true,
+            params: [],
+            body: JSON.stringify({ petId: "550e8400-e29b-41d4-a716-446655440001", trainingType: "RUN" }, null, 2),
+            possible_responses: [
+              { status: 301, desc: "重定向至新路由", body: { message: "Redirecting to /api/v1/pets/:petId/train" } },
+              { status: 410, desc: "DEPRECATED", body: { success: false, data: null, error: { code: "DEPRECATED", message: "Use POST /api/v1/pets/:petId/train instead." } } }
+            ],
+            mock_fn: function(params, body, token) {
+              if (!token) return { status: 401, body: { success: false, data: null, error: { code: "UNAUTHORIZED", message: "Bearer token required." } } };
+              return { status: 410, body: { success: false, data: null, error: { code: "DEPRECATED", message: "Use POST /api/v1/pets/:petId/train instead." } } };
             }
           }
         ]
       }
     ];
+
 
     // Flatten for lookup
     var ALL_ENDPOINTS = [];

@@ -242,6 +242,8 @@
       };
     }
 
+    playBGM(id) { return this.startBGM(id); }
+
     stopBGM() {
       if (!this.ctx || !this.bgmGain) return;
       const t0 = this.ctx.currentTime;

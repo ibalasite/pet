@@ -356,7 +356,7 @@ function renderScreen03() {
         <div id="code-digits" class="code-digits">
           ${[0,1,2,3,4,5].map(i => `<input class="code-digit" maxlength="1" inputmode="numeric" data-idx="${i}" autocomplete="one-time-code">`).join('')}
         </div>
-        <p class="card-meta text-center">Demo code: <strong class="text-accent">${escapeHTML(window.MOCK ? window.MOCK.otp_code : '847291')}</strong></p>
+        <p class="card-meta text-center" style="font-size:11px;opacity:0.6">&#9432; Demo only — OTP shown for testing. Production OTPs are never echoed.<br>Demo code: <strong>${escapeHTML(window.MOCK ? window.MOCK.otp_code : '847291')}</strong></p>
         <div class="modal-actions" style="margin-top:20px;">
           <button class="btn btn-ghost" onclick="resendOtp()">Resend Code</button>
           <button class="btn" onclick="verifyOtp()">Verify →</button>
@@ -1431,7 +1431,7 @@ function renderRecoveryStep() {
     <div id="recovery-digits" class="code-digits">
       ${[0,1,2,3,4,5].map(i => `<input class="code-digit" maxlength="1" inputmode="numeric" data-idx="${i}">`).join('')}
     </div>
-    <p class="card-meta text-center">Demo code: <strong class="text-accent">${window.MOCK ? window.MOCK.otp_code : '847291'}</strong></p>
+    <p class="card-meta text-center" style="font-size:11px;opacity:0.6">&#9432; Demo only — OTP shown for testing. Production OTPs are never echoed.<br>Demo code: <strong>${window.MOCK ? window.MOCK.otp_code : '847291'}</strong></p>
     <div class="modal-actions" style="margin-top:16px;">
       <button class="btn btn-ghost" onclick="RecoveryState.step=1;refreshRecovery();">← Re-enter email</button>
       <button class="btn" onclick="recoveryVerify()">Recover →</button>
