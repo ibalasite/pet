@@ -743,6 +743,22 @@ export class PetCanvasEngine {
 }</code></pre>
 <p><strong>Key isolation rules</strong>:</p>
 <ul><li><code>PetCanvasEngine.ts</code> is the only file that imports <code>phaser</code>.</li><li>Phaser is loaded via dynamic <code>import()</code> so it is excluded from the main bundle.</li><li><code>ArenaScene.tsx</code> for battle animations follows the same pattern — a separate Phaser scene dynamically loaded when the arena route is entered.</li></ul>
+<p><strong>Audio Integration (see AUDIO.md §5.2)</strong>: <code>PetCanvasEngine</code> triggers the following 12 audio events via Phaser&#x27;s sound system during gameplay interactions:</p>
+<table>
+<tr><th>Event Key</th><th>SFX File</th><th>Trigger</th></tr>
+<tr><td><code>pet:tap</code></td><td>pet-tap-pop.mp3</td><td>Pet canvas click/tap</td></tr>
+<tr><td><code>ui:button-click</code></td><td>pet-tap-click.mp3</td><td>UI button interactions</td></tr>
+<tr><td><code>training:start</code></td><td>training-start.mp3</td><td>Training action button</td></tr>
+<tr><td><code>training:complete</code></td><td>training-success.mp3</td><td>Stat increase confirmed</td></tr>
+<tr><td><code>stat:display</code></td><td>stat-ding.mp3</td><td>&quot;+X Speed&quot; toast appears</td></tr>
+<tr><td><code>arena:start</code></td><td>arena-start.mp3</td><td>Match animation begins</td></tr>
+<tr><td><code>arena:victory</code></td><td>arena-victory.mp3</td><td>Victory result displayed</td></tr>
+<tr><td><code>arena:defeat</code></td><td>arena-defeat.mp3</td><td>Defeat result displayed</td></tr>
+<tr><td><code>leaderboard:rankup</code></td><td>leaderboard-rankup.mp3</td><td>Rank improved</td></tr>
+<tr><td><code>claim:email-sent</code></td><td>claim-success.mp3</td><td>OTP email confirmed</td></tr>
+<tr><td><code>rate-limit:breach</code></td><td>rate-limit-warning.mp3</td><td>Rate limit message shown</td></tr>
+<tr><td><code>food-buff:applied</code></td><td>food-buff.mp3</td><td>Buff active badge shown</td></tr>
+</table>
 <h3 id="24-state-management">2.4 State Management</h3>
 <p>Four tiers of state, each with a distinct tool (EDD §8.2):</p>
 <table>

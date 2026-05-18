@@ -1,236 +1,327 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Audit Log · Pixel Pet Arena Admin</title>
-  <link rel="stylesheet" href="assets/admin-style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Log — Pixel Pet Arena Admin</title>
+  <link href="assets/admin-style.css" rel="stylesheet">
 </head>
 <body>
 
 <header class="admin-topnav">
-  <a href="../../index.html" class="back-link">← 文件站</a>
-  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
-  <div class="topnav-right">
-    <span class="current-user">System Admin (super_admin)</span>
-    <button class="logout-btn" onclick="location.href='admin-login.html'">Logout</button>
-  </div>
+  <div class="topnav-brand">🛡️ <span>Pixel Pet Arena</span> Admin</div>
+  <nav class="topnav-actions">
+    <a href="../../../index.html" class="back-link">← 文件站</a>
+    <span class="topnav-user">👤 Super Admin</span>
+    <button class="btn btn-sm btn-secondary" id="logoutBtn">登出</button>
+  </nav>
 </header>
 
-<nav class="admin-sidebar">
-  <div class="sidebar-brand">🛡️ Admin Portal</div>
-  <ul class="sidebar-nav">
-    <li class="nav-item"><a href="../../admin-dashboard.html">📊 Dashboard</a></li>
-    <li class="nav-item"><a href="admin-users.html">👥 Users</a></li>
-    <li class="nav-item"><a href="admin-roles.html">🗝️ Roles</a></li>
-    <li class="nav-item active"><a href="admin-audit-log.html">📜 Audit Log</a></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>🐾 Pet Moderation</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>🏆 Leaderboard</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>⚙️ Runtime Config</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>📧 Email Monitor</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>📈 Analytics</span></li>
-  </ul>
-</nav>
+<div class="admin-layout">
+  <div id="sidebarMount"></div>
 
-<main class="admin-main">
-  <div class="page-header">
-    <h1 class="page-title">📜 Audit Log <span class="lock-icon" title="Read-only, immutable">🔒</span></h1>
-    <button class="btn btn-primary" onclick="exportAuditCsv()">⬇ Export CSV</button>
-  </div>
+  <main class="admin-main">
+    <!-- RBAC: super_admin only — shown by default for prototype -->
+    <div id="auditContent">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Audit Log</h1>
+          <p class="page-subtitle">所有 admin 操作記錄 — 2 年保留 · GDPR Art. 30</p>
+        </div>
+        <button class="btn btn-primary" id="exportCsvBtn">⬇ 匯出 CSV</button>
+      </div>
 
-  <!-- Filter bar -->
-  <div class="search-bar" style="grid-template-columns: repeat(4, 1fr) auto auto;">
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Date from</label>
-      <input type="date" id="dateFrom" class="form-input" />
+      <!-- Filter Bar -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header">
+          <h2>篩選條件</h2>
+          <button class="btn btn-ghost btn-sm" id="clearFiltersBtn">清除篩選</button>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="searchInput" class="form-control search-input"
+                 placeholder="搜尋操作員 / 動作 / 對象…">
+          <select id="actorFilter" class="form-control">
+            <option value="">所有操作員</option>
+            <option value="superadmin">superadmin</option>
+            <option value="mod_alice">mod_alice</option>
+            <option value="mod_bob">mod_bob</option>
+          </select>
+          <select id="typeFilter" class="form-control">
+            <option value="">所有類型</option>
+            <option value="write">write（mutation）</option>
+            <option value="config">config（設定變更）</option>
+            <option value="gdpr">gdpr（法遵）</option>
+            <option value="auth">auth（認證）</option>
+            <option value="read">read（查詢）</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Audit Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2>操作記錄</h2>
+          <span class="text-muted" id="recordCountLabel"></span>
+        </div>
+        <div class="data-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>時間</th>
+                <th>操作員</th>
+                <th>動作</th>
+                <th>對象</th>
+                <th>IP Hash</th>
+                <th>詳情</th>
+              </tr>
+            </thead>
+            <tbody id="auditBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="paginationWrap"></div>
+      </div>
     </div>
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Date to</label>
-      <input type="date" id="dateTo" class="form-input" />
-    </div>
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Operator</label>
-      <input type="text" id="opSearch" class="form-input" placeholder="username or name" />
-    </div>
-    <div>
-      <label class="text-dim" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;">Action type</label>
-      <select id="actionType" class="form-select">
-        <option value="">All actions</option>
-        <option>PET_BAN</option>
-        <option>PET_FLAG</option>
-        <option>PET_UNBAN</option>
-        <option>BATTLE_INVALIDATE</option>
-        <option>LEADERBOARD_EXCLUDE</option>
-        <option>USER_CREATE</option>
-        <option>USER_LOCK</option>
-        <option>ROLE_ASSIGN</option>
-        <option>CONFIG_CHANGE</option>
-        <option>AUDIT_VIEW</option>
-        <option>AUDIT_EXPORT</option>
-        <option>ANALYTICS_EXPORT</option>
-        <option>GDPR_PROCESS</option>
-        <option>EMAIL_RESEND</option>
-        <option>LOGIN_FAILED</option>
-      </select>
-    </div>
-    <button class="btn btn-primary" style="align-self: end;" onclick="applyAuditFilters()">Search</button>
-    <button class="btn btn-ghost" style="align-self: end;" onclick="resetAuditFilters()">Reset</button>
-  </div>
 
-  <!-- Table -->
-  <table class="data-table" id="auditTable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Operator</th>
-        <th>Action</th>
-        <th>Target</th>
-        <th>IP</th>
-        <th>Timestamp</th>
-        <th>Result</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <!-- Pagination -->
-  <div class="pagination" id="paginator"></div>
-
-  <p class="note">🔒 Audit logs are immutable. Records cannot be edited or deleted, and are retained for <strong>2 years</strong> per compliance policy. Export operations are themselves logged.</p>
-</main>
+    <!-- 403 banner for non-super_admin (hidden by default in prototype) -->
+    <div id="forbiddenBanner" style="display:none">
+      <div class="empty-state" style="padding:5rem 1rem">
+        <div class="empty-icon">🔒</div>
+        <p style="font-size:18px;font-weight:700;color:var(--admin-text-primary);margin-bottom:0.5rem">稽核日誌僅限 super_admin 存取</p>
+        <p>您的角色沒有查看此頁面的權限。</p>
+        <div style="margin-top:1.5rem">
+          <button class="btn btn-primary" onclick="location.href='admin-dashboard.html'">返回控制台</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
 
 <script src="assets/admin-mock.js"></script>
 <script>
+(function () {
+  'use strict';
+
+  const SAFE_PAGES = { 'admin-login.html': 'admin-login.html' };
+  function safeNav(page) { if (SAFE_PAGES[page]) location.href = SAFE_PAGES[page]; }
+
+  if (typeof ADMIN_MOCK === 'undefined' || typeof renderSidebar === 'undefined') {
+    console.error('admin-mock.js not loaded'); return;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────── */
+  const sidebarMount = document.getElementById('sidebarMount');
+  if (sidebarMount && sidebarMount.parentNode) {
+    sidebarMount.parentNode.replaceChild(renderSidebar('audit'), sidebarMount);
+  }
+
+  /* ── Logout ─────────────────────────────────────────────── */
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', function () { safeNav('admin-login.html'); });
+
+  /* ── RBAC guard (prototype: super_admin shown by default) ── */
+  const currentRole = ADMIN_MOCK.currentUser && ADMIN_MOCK.currentUser.role;
+  if (currentRole !== 'super_admin') {
+    const auditContent   = document.getElementById('auditContent');
+    const forbiddenBanner = document.getElementById('forbiddenBanner');
+    if (auditContent)    auditContent.style.display    = 'none';
+    if (forbiddenBanner) forbiddenBanner.style.display = 'block';
+    return;
+  }
+
+  /* ── Data ────────────────────────────────────────────────── */
   const PAGE_SIZE = 10;
-  let filtered = ADMIN_MOCK.auditLogs.slice();
   let currentPage = 1;
+  const logs = ADMIN_MOCK.auditLogs;
 
-  function renderAudit() {
-    const tbody = document.querySelector('#auditTable tbody');
-    tbody.textContent = '';
+  /* ── Action type classifier (mirrors actionTag() in admin-mock.js) */
+  function actionType(action) {
+    if (typeof action !== 'string') return 'write';
+    if (action.startsWith('auth.'))   return 'auth';
+    if (action.startsWith('config.')) return 'config';
+    if (action.startsWith('gdpr.'))   return 'gdpr';
+    if (action === 'audit.read' || action.endsWith('.read')) return 'read';
+    return 'write';
+  }
 
+  /* ── Filtering ───────────────────────────────────────────── */
+  function filtered() {
+    const q      = (document.getElementById('searchInput').value || '').toLowerCase();
+    const actor  = document.getElementById('actorFilter').value;
+    const type   = document.getElementById('typeFilter').value;
+
+    return logs.filter(function (l) {
+      const matchQ = !q ||
+        String(l.actor  || '').toLowerCase().includes(q) ||
+        String(l.action || '').toLowerCase().includes(q) ||
+        String(l.target || '').toLowerCase().includes(q) ||
+        String(l.detail || '').toLowerCase().includes(q);
+      const matchActor = !actor || l.actor === actor;
+      const matchType  = !type  || actionType(l.action) === type;
+      return matchQ && matchActor && matchType;
+    });
+  }
+
+  /* ── Table render ────────────────────────────────────────── */
+  function renderTable() {
+    const data  = filtered();
     const start = (currentPage - 1) * PAGE_SIZE;
-    const slice = filtered.slice(start, start + PAGE_SIZE);
+    const page  = data.slice(start, start + PAGE_SIZE);
+    const tbody = document.getElementById('auditBody');
+    const countLabel = document.getElementById('recordCountLabel');
 
-    slice.forEach((row) => {
+    if (countLabel) countLabel.textContent = '共 ' + data.length + ' 筆';
+    if (!tbody) return;
+    tbody.innerHTML = '';  // safe clear — no user data in innerHTML
+
+    if (page.length === 0) {
       const tr = document.createElement('tr');
-      tr.appendChild(td(row.id, 'mono'));
-      tr.appendChild(td(row.operator_name + ' (' + row.operator + ')'));
-      tr.appendChild(td(row.action, 'mono'));
-      tr.appendChild(td(row.target));
-      tr.appendChild(td(row.ip, 'mono'));
-      tr.appendChild(td(row.ts, 'mono'));
+      const td = document.createElement('td');
+      td.colSpan = 7;
+      td.style.cssText = 'text-align:center;color:var(--admin-text-muted);padding:2.5rem';
+      td.textContent = '無符合條件的稽核記錄';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      renderPagination(0);
+      return;
+    }
 
-      const resCell = document.createElement('td');
-      const badge = document.createElement('span');
-      badge.className = 'status-badge ' + (row.result === 'success' ? 'success' : 'failed');
-      badge.textContent = row.result;
-      resCell.appendChild(badge);
-      tr.appendChild(resCell);
+    page.forEach(function (log) {
+      const tr = document.createElement('tr');
+
+      function td(text, cls) {
+        const el = document.createElement('td');
+        if (cls) el.className = cls;
+        el.textContent = String(text === null || text === undefined ? '' : text);
+        return el;
+      }
+
+      // ID
+      tr.appendChild(td('#' + log.id, 'font-mono text-muted'));
+
+      // timestamp
+      const tdTs = td(log.ts, 'font-mono text-muted');
+      tdTs.style.whiteSpace = 'nowrap';
+      tr.appendChild(tdTs);
+
+      // actor
+      const tdActor = document.createElement('td');
+      const strong  = document.createElement('strong');
+      strong.textContent = String(log.actor || '');
+      tdActor.appendChild(strong);
+      tr.appendChild(tdActor);
+
+      // action — actionTag() returns HTMLElement
+      const tdAction = document.createElement('td');
+      if (typeof actionTag === 'function') {
+        const tag = actionTag(log.action);
+        if (tag instanceof HTMLElement) { tdAction.appendChild(tag); }
+        else { tdAction.textContent = String(log.action || ''); }
+      } else {
+        tdAction.textContent = String(log.action || '');
+      }
+      tr.appendChild(tdAction);
+
+      // target
+      const tdTarget = td(log.target, 'font-mono');
+      tdTarget.style.maxWidth = '180px';
+      tdTarget.style.overflow = 'hidden';
+      tdTarget.style.textOverflow = 'ellipsis';
+      tdTarget.style.whiteSpace = 'nowrap';
+      tr.appendChild(tdTarget);
+
+      // ip_hash
+      tr.appendChild(td(log.ip_hash, 'font-mono text-muted'));
+
+      // detail
+      const tdDetail = td(log.detail, 'text-muted');
+      tdDetail.style.maxWidth = '240px';
+      tdDetail.style.overflow = 'hidden';
+      tdDetail.style.textOverflow = 'ellipsis';
+      tdDetail.style.whiteSpace = 'nowrap';
+      tr.appendChild(tdDetail);
+
       tbody.appendChild(tr);
     });
 
-    if (slice.length === 0) {
-      const tr = document.createElement('tr');
-      const cell = document.createElement('td');
-      cell.colSpan = 7;
-      cell.className = 'text-dim';
-      cell.style.textAlign = 'center';
-      cell.style.padding = '24px';
-      cell.textContent = 'No audit entries match the current filter.';
-      tr.appendChild(cell);
-      tbody.appendChild(tr);
+    renderPagination(data.length);
+  }
+
+  /* ── Pagination ──────────────────────────────────────────── */
+  function renderPagination(total) {
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const wrap = document.getElementById('paginationWrap');
+    if (!wrap) return;
+    wrap.innerHTML = '';  // static structure — no user data
+
+    function makeBtn(label, page, disabled, active) {
+      const btn = document.createElement('button');
+      btn.className = 'page-btn' + (active ? ' active' : '');
+      btn.disabled  = disabled;
+      btn.textContent = label;
+      if (!disabled) btn.addEventListener('click', function () { goPage(page); });
+      return btn;
     }
 
-    renderPaginator();
-  }
-
-  function td(text, cls) {
-    const el = document.createElement('td');
-    if (cls) el.className = cls;
-    el.textContent = text == null ? '—' : text;
-    return el;
-  }
-
-  function renderPaginator() {
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-    const pag = document.getElementById('paginator');
-    pag.textContent = '';
-
-    const prev = document.createElement('button');
-    prev.textContent = '‹ Prev';
-    prev.disabled = currentPage === 1;
-    prev.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderAudit(); }});
-    pag.appendChild(prev);
-
+    wrap.appendChild(makeBtn('‹', currentPage - 1, currentPage <= 1, false));
     for (let i = 1; i <= totalPages; i++) {
-      const span = document.createElement('span');
-      span.className = 'page-num' + (i === currentPage ? ' active' : '');
-      span.textContent = i;
-      span.addEventListener('click', () => { currentPage = i; renderAudit(); });
-      pag.appendChild(span);
+      wrap.appendChild(makeBtn(String(i), i, false, i === currentPage));
     }
-
-    const next = document.createElement('button');
-    next.textContent = 'Next ›';
-    next.disabled = currentPage === totalPages;
-    next.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderAudit(); }});
-    pag.appendChild(next);
+    wrap.appendChild(makeBtn('›', currentPage + 1, currentPage >= totalPages, false));
 
     const info = document.createElement('span');
-    info.className = 'pagination-info';
-    const start = (currentPage - 1) * PAGE_SIZE + 1;
-    const end   = Math.min(currentPage * PAGE_SIZE, filtered.length);
-    if (filtered.length === 0) {
-      info.textContent = '0 records';
-    } else {
-      info.textContent = currentPage + ' / ' + totalPages + ' (' + filtered.length + ' records, showing ' + start + '–' + end + ')';
-    }
-    pag.appendChild(info);
+    info.className = 'text-muted';
+    info.style.cssText = 'font-size:12px;margin-left:0.5rem';
+    info.textContent = '共 ' + total + ' 筆';
+    wrap.appendChild(info);
   }
 
-  function applyAuditFilters() {
-    const from   = document.getElementById('dateFrom').value;
-    const to     = document.getElementById('dateTo').value;
-    const opKw   = (document.getElementById('opSearch').value || '').trim().toLowerCase();
-    const action = document.getElementById('actionType').value;
+  function goPage(n) { currentPage = n; renderTable(); }
 
-    filtered = ADMIN_MOCK.auditLogs.filter((r) => {
-      if (from && r.ts.slice(0, 10) < from) return false;
-      if (to   && r.ts.slice(0, 10) > to)   return false;
-      if (opKw) {
-        const hay = (r.operator + ' ' + r.operator_name).toLowerCase();
-        if (hay.indexOf(opKw) === -1) return false;
+  /* ── Filter listeners ────────────────────────────────────── */
+  ['searchInput', 'actorFilter', 'typeFilter'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', function () { currentPage = 1; renderTable(); });
+  });
+
+  const clearBtn = document.getElementById('clearFiltersBtn');
+  if (clearBtn) clearBtn.addEventListener('click', function () {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('actorFilter').value  = '';
+    document.getElementById('typeFilter').value   = '';
+    currentPage = 1;
+    renderTable();
+  });
+
+  /* ── CSV Export ──────────────────────────────────────────── */
+  const exportBtn = document.getElementById('exportCsvBtn');
+  if (exportBtn) exportBtn.addEventListener('click', function () {
+    const data = filtered();
+    const header = ['ID', 'Timestamp', 'Actor', 'Action', 'Target', 'IP_Hash', 'Detail'];
+    const rows = [header].concat(data.map(function (l) {
+      // CSV-escape helper: wrap in quotes, double internal quotes
+      function csvCell(v) {
+        const s = String(v === null || v === undefined ? '' : v);
+        return '"' + s.replace(/"/g, '""') + '"';
       }
-      if (action && r.action !== action) return false;
-      return true;
-    });
-    currentPage = 1;
-    renderAudit();
-  }
+      return [l.id, l.ts, l.actor, l.action, l.target, l.ip_hash, l.detail].map(csvCell);
+    }));
 
-  function resetAuditFilters() {
-    document.getElementById('dateFrom').value = '';
-    document.getElementById('dateTo').value = '';
-    document.getElementById('opSearch').value = '';
-    document.getElementById('actionType').value = '';
-    filtered = ADMIN_MOCK.auditLogs.slice();
-    currentPage = 1;
-    renderAudit();
-  }
+    const csv = rows.map(function (r) { return r.join(','); }).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'audit-log-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
 
-  function exportAuditCsv() {
-    const headers = ['id', 'operator', 'operator_name', 'action', 'target', 'ip', 'timestamp', 'result', 'detail'];
-    const rows = [headers];
-    ADMIN_MOCK.auditLogs.forEach((r) => {
-      rows.push([r.id, r.operator, r.operator_name, r.action, r.target, r.ip, r.ts, r.result, r.detail || '']);
-    });
-    const filename = 'audit-log-' + new Date().toISOString().slice(0, 10) + '.csv';
-    downloadCSV(filename, rows);
-    showToast('⬇ Exported ' + (rows.length - 1) + ' audit rows to CSV', 'success');
-  }
-
-  renderAudit();
+  /* ── Initial render ──────────────────────────────────────── */
+  renderTable();
+}());
 </script>
 </body>
 </html>

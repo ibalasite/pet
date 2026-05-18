@@ -1,361 +1,456 @@
-/* ==========================================================
-   Pixel Pet Arena — Admin Portal Mock Data
-   Used by all admin-*.html prototype pages.
-   ========================================================== */
+/* ============================================================
+   Pixel Pet Arena — Admin Portal Mock Data v2.0
+   RBAC Roles: super_admin / moderator / read_only
+   Source: ADMIN_IMPL.md §1.3 + §5.1 (EDD §9.6)
+
+   SECURITY NOTE: All DOM helper functions (renderSidebar,
+   roleBadge, statusBadge, actionTag) return HTMLElement nodes
+   built exclusively via createElement/textContent — never via
+   string interpolation — so they are XSS-safe by construction.
+   Callers must use appendChild(), not innerHTML, to insert them.
+   ============================================================ */
+
+'use strict';
+
+/* ── Internal: XSS-safe escaper for callers that must use innerHTML ── */
+function _esc(val) {
+  const span = document.createElement('span');
+  span.textContent = (val === null || val === undefined) ? '' : String(val);
+  return span.innerHTML; // entity-encoded, safe to splice into HTML
+}
+
+/* ── Allowlists (code-level enforcement) ─────────────────── */
+const _ALLOWED_ROLES   = new Set(['super_admin', 'moderator', 'read_only']);
+const _ALLOWED_STATUS  = new Set(['active', 'inactive', 'locked', 'pending', 'resolved', 'flagged', 'banned', 'processing', 'completed', 'rejected', 'warning']);
+const _ALLOWED_ACTIVE  = new Set(['dashboard', 'users', 'roles', 'audit', 'analytics', 'pets', 'battles', 'leaderboard', 'suspicious', 'config', 'gdpr', 'email']);
+const _ACTION_CLS_MAP  = { 'auth.': 'auth', 'config.': 'config', 'gdpr.': 'gdpr' };
 
 const ADMIN_MOCK = {
+
+  /* ── Current Logged-in Admin ────────────────────────────── */
   currentUser: {
     id: 1,
-    username: 'admin',
-    name: 'System Admin',
-    email: 'admin@pixelpet.arena',
+    username: 'superadmin',
+    name: 'Super Admin',
     role: 'super_admin',
-    role_display: 'Super Admin',
     mfa_enabled: true,
-    last_login: '2026-05-11 09:23:11',
+    last_login: '2026-05-18 09:00'
   },
 
+  /* ── Admin Users (8 records) ────────────────────────────── */
   users: [
-    {
-      id: 1,
-      username: 'admin',
-      name: 'System Admin',
-      email: 'admin@pixelpet.arena',
-      role: 'super_admin',
-      status: 'active',
-      mfa_enabled: true,
-      last_login: '2026-05-11 09:23:11',
-      created_at: '2025-08-01 00:00:00',
-    },
-    {
-      id: 2,
-      username: 'alice',
-      name: 'Alice Chen',
-      email: 'alice@pixelpet.arena',
-      role: 'moderator',
-      status: 'active',
-      mfa_enabled: true,
-      last_login: '2026-05-11 08:51:42',
-      created_at: '2025-09-15 10:24:00',
-    },
-    {
-      id: 3,
-      username: 'bob',
-      name: 'Bob Tanaka',
-      email: 'bob@pixelpet.arena',
-      role: 'moderator',
-      status: 'active',
-      mfa_enabled: true,
-      last_login: '2026-05-10 22:18:09',
-      created_at: '2025-09-20 14:11:00',
-    },
-    {
-      id: 4,
-      username: 'carol',
-      name: 'Carol Singh',
-      email: 'carol@pixelpet.arena',
-      role: 'moderator',
-      status: 'active',
-      mfa_enabled: false,
-      last_login: '2026-05-11 07:02:33',
-      created_at: '2025-10-04 09:00:00',
-    },
-    {
-      id: 5,
-      username: 'dave',
-      name: 'Dave Müller',
-      email: 'dave@pixelpet.arena',
-      role: 'auditor',
-      status: 'active',
-      mfa_enabled: true,
-      last_login: '2026-05-10 16:45:21',
-      created_at: '2025-10-18 11:30:00',
-    },
-    {
-      id: 6,
-      username: 'eve',
-      name: 'Eve Johansson',
-      email: 'eve@pixelpet.arena',
-      role: 'auditor',
-      status: 'active',
-      mfa_enabled: true,
-      last_login: '2026-05-09 14:22:50',
-      created_at: '2025-11-02 08:45:00',
-    },
-    {
-      id: 7,
-      username: 'frank',
-      name: 'Frank Oliveira',
-      email: 'frank@pixelpet.arena',
-      role: 'support_agent',
-      status: 'locked',
-      mfa_enabled: false,
-      last_login: '2026-04-28 11:10:00',
-      created_at: '2025-12-01 13:00:00',
-      lock_reason: '5 failed login attempts',
-    },
-    {
-      id: 8,
-      username: 'grace',
-      name: 'Grace Park',
-      email: 'grace@pixelpet.arena',
-      role: 'analyst',
-      status: 'active',
-      mfa_enabled: true,
-      last_login: '2026-05-11 06:14:08',
-      created_at: '2026-01-14 10:00:00',
-    },
+    { id:1, username:'superadmin',   name:'Super Admin',  email:'super@pixel-pet.io',  role:'super_admin', status:'active',   mfa_enabled: true,  last_login:'2026-05-18 09:00' },
+    { id:2, username:'mod_alice',    name:'Alice Chen',   email:'alice@pixel-pet.io',  role:'moderator',   status:'active',   mfa_enabled: true,  last_login:'2026-05-18 08:30' },
+    { id:3, username:'mod_bob',      name:'Bob Wang',     email:'bob@pixel-pet.io',    role:'moderator',   status:'active',   mfa_enabled: true,  last_login:'2026-05-17 17:00' },
+    { id:4, username:'reader_carol', name:'Carol Liu',    email:'carol@pixel-pet.io',  role:'read_only',   status:'active',   mfa_enabled: false, last_login:'2026-05-17 14:00' },
+    { id:5, username:'mod_dave',     name:'Dave Lee',     email:'dave@pixel-pet.io',   role:'moderator',   status:'inactive', mfa_enabled: true,  last_login:'2026-05-10 11:00' },
+    { id:6, username:'reader_eve',   name:'Eve Huang',    email:'eve@pixel-pet.io',    role:'read_only',   status:'active',   mfa_enabled: false, last_login:'2026-05-16 10:30' },
+    { id:7, username:'mod_frank',    name:'Frank Zhao',   email:'frank@pixel-pet.io',  role:'moderator',   status:'locked',   mfa_enabled: false, last_login:'2026-05-01 09:00' },
+    { id:8, username:'reader_grace', name:'Grace Wu',     email:'grace@pixel-pet.io',  role:'read_only',   status:'active',   mfa_enabled: false, last_login:'2026-05-18 07:55' }
   ],
 
+  /* ── RBAC Roles (v2.0) ──────────────────────────────────── */
   roles: [
     {
       id: 'super_admin',
-      display: 'Super Admin',
-      description: 'Full system access. Can manage roles, users, runtime config, and review every audit log.',
+      display_name: '超級管理員',
+      description: '擁有所有 /admin/api/* 端點存取權，包含 GDPR、Config、Role 管理與 Audit Log。系統內唯一完整授權角色。',
       user_count: 1,
-      color_class: 'super',
       permissions: [
-        'pet.view', 'pet.ban', 'pet.flag', 'pet.unban',
-        'leaderboard.view', 'leaderboard.adjust', 'leaderboard.exclude',
-        'battle.view', 'battle.invalidate',
-        'user.view', 'user.create', 'user.edit', 'user.lock', 'user.unlock', 'user.delete',
-        'role.view', 'role.assign', 'role.create', 'role.edit', 'role.delete',
-        'audit.view', 'audit.export',
-        'config.view', 'config.edit',
-        'email.view', 'email.resend',
-        'analytics.view', 'analytics.export',
-        'gdpr.view', 'gdpr.process',
-      ],
+        'pet.update', 'pet.ban', 'pet.unban',
+        'arena_match.flag', 'arena_match.unflag',
+        'leaderboard.remove',
+        'config.runtime.update', 'config.economy.update', 'config.flag.toggle',
+        'gdpr.delete', 'gdpr.update',
+        'admin_user.create', 'admin_user.deactivate', 'admin_user.totp_reset',
+        'audit.read', 'dashboard.read', 'analytics.read', 'email.read'
+      ]
     },
     {
       id: 'moderator',
-      display: 'Moderator',
-      description: 'Pet, leaderboard, and battle moderation. Cannot manage admin users or runtime config.',
+      display_name: '內容審查員',
+      description: '可存取 Dashboard、Pets 列表/ban/unban、排行榜、戰鬥旗標、可疑佇列、Email 監控與 Analytics。不可存取 Config、GDPR、角色管理或 Audit Log。',
+      user_count: 4,
+      permissions: [
+        'pet.ban', 'pet.unban',
+        'arena_match.flag', 'arena_match.unflag',
+        'leaderboard.remove',
+        'dashboard.read', 'analytics.read', 'email.read'
+      ]
+    },
+    {
+      id: 'read_only',
+      display_name: '唯讀分析師',
+      description: '可存取所有 GET endpoints（Dashboard、Pets、排行榜、戰鬥記錄、Email 監控、Analytics）。無任何 mutation 權限；不可存取 Audit Log、角色管理或 GDPR。',
       user_count: 3,
-      color_class: 'moderator',
       permissions: [
-        'pet.view', 'pet.ban', 'pet.flag', 'pet.unban',
-        'leaderboard.view', 'leaderboard.adjust', 'leaderboard.exclude',
-        'battle.view', 'battle.invalidate',
-        'user.view',
-        'audit.view',
-      ],
-    },
-    {
-      id: 'auditor',
-      display: 'Auditor',
-      description: 'Read-only access plus audit log export. Cannot mutate any state.',
-      user_count: 2,
-      color_class: 'auditor',
-      permissions: [
-        'pet.view',
-        'leaderboard.view',
-        'battle.view',
-        'user.view',
-        'role.view',
-        'audit.view', 'audit.export',
-        'config.view',
-        'email.view',
-        'analytics.view',
-      ],
-    },
-    {
-      id: 'support_agent',
-      display: 'Support Agent',
-      description: 'GDPR queue and email delivery monitoring. Limited customer-facing tools.',
-      user_count: 1,
-      color_class: 'support',
-      permissions: [
-        'user.view',
-        'gdpr.view', 'gdpr.process',
-        'email.view', 'email.resend',
-        'audit.view',
-      ],
-    },
-    {
-      id: 'analyst',
-      display: 'Analyst',
-      description: 'Analytics dashboards and read-only data exports. No moderation rights.',
-      user_count: 1,
-      color_class: 'analyst',
-      permissions: [
-        'pet.view',
-        'leaderboard.view',
-        'battle.view',
-        'user.view',
-        'analytics.view', 'analytics.export',
-      ],
-    },
+        'dashboard.read', 'analytics.read', 'email.read'
+      ]
+    }
   ],
 
-  permissions: [
-    { module: 'pet', action: 'view', desc: 'View pet profiles and history' },
-    { module: 'pet', action: 'ban', desc: 'Ban pets violating ToS' },
-    { module: 'pet', action: 'flag', desc: 'Flag pets for review' },
-    { module: 'pet', action: 'unban', desc: 'Reverse ban / unban pets' },
-    { module: 'leaderboard', action: 'view', desc: 'View arena leaderboard' },
-    { module: 'leaderboard', action: 'adjust', desc: 'Manually adjust ELO entries' },
-    { module: 'leaderboard', action: 'exclude', desc: 'Exclude entries from public board' },
-    { module: 'battle', action: 'view', desc: 'View battle records' },
-    { module: 'battle', action: 'invalidate', desc: 'Invalidate disputed battles' },
-    { module: 'user', action: 'view', desc: 'View end-user accounts' },
-    { module: 'user', action: 'create', desc: 'Create admin users' },
-    { module: 'user', action: 'edit', desc: 'Edit admin user details' },
-    { module: 'user', action: 'lock', desc: 'Lock admin accounts' },
-    { module: 'user', action: 'unlock', desc: 'Unlock admin accounts' },
-    { module: 'user', action: 'delete', desc: 'Delete admin accounts' },
-    { module: 'role', action: 'view', desc: 'View roles' },
-    { module: 'role', action: 'assign', desc: 'Assign roles to users' },
-    { module: 'role', action: 'create', desc: 'Create custom roles' },
-    { module: 'role', action: 'edit', desc: 'Edit role permissions' },
-    { module: 'role', action: 'delete', desc: 'Delete custom roles' },
-    { module: 'audit', action: 'view', desc: 'View audit log' },
-    { module: 'audit', action: 'export', desc: 'Export audit log to CSV' },
-    { module: 'config', action: 'view', desc: 'View runtime config' },
-    { module: 'config', action: 'edit', desc: 'Modify runtime tunables' },
-    { module: 'email', action: 'view', desc: 'View email delivery dashboard' },
-    { module: 'email', action: 'resend', desc: 'Resend bounced emails' },
-    { module: 'analytics', action: 'view', desc: 'View analytics dashboards' },
-    { module: 'analytics', action: 'export', desc: 'Export analytics reports' },
-    { module: 'gdpr', action: 'view', desc: 'View GDPR data requests' },
-    { module: 'gdpr', action: 'process', desc: 'Process erasure / export requests' },
+  /* ── Pets (20 records) ─────────────────────────────────── */
+  pets: [
+    { id:'pet-0001', petName:'FlameWing',   rarity:'Legendary', level:45, ownerEmailMasked:'alice@pixel-pet.io',  isBanned:false, banReason:null,             createdAt:'2026-01-10 08:00' },
+    { id:'pet-0002', petName:'ShadowFang',  rarity:'Epic',      level:38, ownerEmailMasked:'bob@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-01-15 10:30' },
+    { id:'pet-0003', petName:'VoidCrawler', rarity:'Epic',      level:41, ownerEmailMasked:'carol@pixel-pet.io',  isBanned:true,  banReason:'bot detected',   createdAt:'2026-02-02 09:15' },
+    { id:'pet-0004', petName:'TerraShell',  rarity:'Rare',      level:27, ownerEmailMasked:'dave@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-02-14 14:20' },
+    { id:'pet-0005', petName:'StormWing',   rarity:'Legendary', level:50, ownerEmailMasked:'eve@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-02-20 11:45' },
+    { id:'pet-0006', petName:'GlacierBear', rarity:'Rare',      level:22, ownerEmailMasked:'frank@pixel-pet.io',  isBanned:false, banReason:null,             createdAt:'2026-03-01 09:30' },
+    { id:'pet-0007', petName:'NeonProwler', rarity:'Common',    level:15, ownerEmailMasked:'grace@pixel-pet.io',  isBanned:false, banReason:null,             createdAt:'2026-03-10 16:00' },
+    { id:'pet-0008', petName:'LavaToad',    rarity:'Uncommon',  level:18, ownerEmailMasked:'henry@pixel-pet.io',  isBanned:true,  banReason:'tos violation',  createdAt:'2026-03-15 13:00' },
+    { id:'pet-0009', petName:'CrystalDrake',rarity:'Epic',      level:35, ownerEmailMasked:'iris@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-03-22 10:10' },
+    { id:'pet-0010', petName:'ThunderBoar', rarity:'Rare',      level:30, ownerEmailMasked:'jake@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-04-01 08:45' },
+    { id:'pet-0011', petName:'MistRaven',   rarity:'Uncommon',  level:19, ownerEmailMasked:'kate@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-04-08 12:30' },
+    { id:'pet-0012', petName:'IronGolem',   rarity:'Legendary', level:48, ownerEmailMasked:'leo@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-04-12 15:20' },
+    { id:'pet-0013', petName:'CoralSerpent',rarity:'Rare',      level:25, ownerEmailMasked:'mia@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-04-18 09:00' },
+    { id:'pet-0014', petName:'DustWalker',  rarity:'Common',    level:12, ownerEmailMasked:'noah@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-04-25 11:15' },
+    { id:'pet-0015', petName:'EmberFox',    rarity:'Uncommon',  level:21, ownerEmailMasked:'olivia@pixel-pet.io', isBanned:false, banReason:null,             createdAt:'2026-05-02 14:00' },
+    { id:'pet-0016', petName:'TideStalker', rarity:'Epic',      level:40, ownerEmailMasked:'paul@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-05-05 10:45' },
+    { id:'pet-0017', petName:'BoulderBrute',rarity:'Rare',      level:28, ownerEmailMasked:'quinn@pixel-pet.io',  isBanned:true,  banReason:'suspicious win', createdAt:'2026-05-08 08:30' },
+    { id:'pet-0018', petName:'VenomSprite', rarity:'Uncommon',  level:16, ownerEmailMasked:'rose@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-05-10 17:00' },
+    { id:'pet-0019', petName:'ArcticWolf',  rarity:'Epic',      level:37, ownerEmailMasked:'sam@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-05-13 09:20' },
+    { id:'pet-0020', petName:'SunSphinx',   rarity:'Legendary', level:46, ownerEmailMasked:'tina@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-05-15 11:30' }
   ],
 
-  auditLogs: [
-    { id: 18001, operator: 'admin',  operator_name: 'System Admin',   action: 'CONFIG_CHANGE',     target: 'arena.matchmaking.elo_window',   ip: '10.20.30.40',  ts: '2026-05-11 09:24:55', result: 'success', detail: 'Adjusted from 200 to 250' },
-    { id: 18000, operator: 'alice',  operator_name: 'Alice Chen',     action: 'PET_BAN',           target: 'pet#3045 (RoarBeast)',           ip: '10.20.30.41',  ts: '2026-05-11 09:18:02', result: 'success', detail: 'Inappropriate name' },
-    { id: 17999, operator: 'bob',    operator_name: 'Bob Tanaka',     action: 'PET_FLAG',          target: 'pet#3102 (xxx_fart_xxx)',        ip: '10.20.30.42',  ts: '2026-05-11 09:01:39', result: 'success', detail: 'Suspected slur' },
-    { id: 17998, operator: 'admin',  operator_name: 'System Admin',   action: 'USER_CREATE',       target: 'admin_user#9 (henry)',           ip: '10.20.30.40',  ts: '2026-05-11 08:47:21', result: 'success', detail: 'Created with role analyst' },
-    { id: 17997, operator: 'frank',  operator_name: 'Frank Oliveira', action: 'LOGIN_FAILED',      target: 'frank',                          ip: '203.0.113.7',  ts: '2026-05-11 08:30:11', result: 'failed',  detail: 'Wrong TOTP — 5th attempt' },
-    { id: 17996, operator: 'admin',  operator_name: 'System Admin',   action: 'USER_LOCK',         target: 'admin_user#7 (frank)',           ip: '10.20.30.40',  ts: '2026-05-11 08:31:02', result: 'success', detail: 'Auto-locked after 5 failures' },
-    { id: 17995, operator: 'carol',  operator_name: 'Carol Singh',    action: 'BATTLE_INVALIDATE', target: 'battle#88712',                   ip: '10.20.30.43',  ts: '2026-05-10 22:14:08', result: 'success', detail: 'Bot abuse confirmed' },
-    { id: 17994, operator: 'dave',   operator_name: 'Dave Müller',    action: 'AUDIT_EXPORT',      target: 'audit_log range=14d',            ip: '10.20.30.44',  ts: '2026-05-10 16:45:55', result: 'success', detail: '342 rows exported' },
-    { id: 17993, operator: 'grace',  operator_name: 'Grace Park',     action: 'ANALYTICS_EXPORT',  target: 'dau_report 2026-05',             ip: '10.20.30.46',  ts: '2026-05-10 11:20:14', result: 'success', detail: 'CSV download' },
-    { id: 17992, operator: 'admin',  operator_name: 'System Admin',   action: 'ROLE_ASSIGN',       target: 'admin_user#8 (grace) → analyst', ip: '10.20.30.40',  ts: '2026-05-09 18:02:39', result: 'success', detail: 'Promoted from support_agent' },
-    { id: 17991, operator: 'eve',    operator_name: 'Eve Johansson',  action: 'AUDIT_VIEW',        target: 'audit_log filter=ROLE_ASSIGN',   ip: '10.20.30.45',  ts: '2026-05-09 14:21:09', result: 'success', detail: 'Compliance report' },
-    { id: 17990, operator: 'alice',  operator_name: 'Alice Chen',     action: 'PET_UNBAN',         target: 'pet#2814 (NekoSan)',             ip: '10.20.30.41',  ts: '2026-05-09 10:11:48', result: 'success', detail: 'False positive resolved' },
-    { id: 17989, operator: 'frank',  operator_name: 'Frank Oliveira', action: 'GDPR_PROCESS',      target: 'gdpr_req#GDPR-2026-0042',        ip: '10.20.30.47',  ts: '2026-05-08 16:33:21', result: 'success', detail: 'Data export delivered' },
-    { id: 17988, operator: 'frank',  operator_name: 'Frank Oliveira', action: 'EMAIL_RESEND',      target: 'tx#tx-20260508-77891',           ip: '10.20.30.47',  ts: '2026-05-08 09:18:55', result: 'success', detail: 'Bounced — soft bounce retry' },
-    { id: 17987, operator: 'bob',    operator_name: 'Bob Tanaka',     action: 'LEADERBOARD_EXCLUDE',target: 'pet#1207 (HackerCat)',          ip: '10.20.30.42',  ts: '2026-05-07 20:47:33', result: 'success', detail: 'ELO manipulation detected' },
-    { id: 17986, operator: 'admin',  operator_name: 'System Admin',   action: 'CONFIG_CHANGE',     target: 'email.smtp.timeout_ms',          ip: '10.20.30.40',  ts: '2026-05-06 11:55:02', result: 'success', detail: '5000 → 8000' },
-    { id: 17985, operator: 'carol',  operator_name: 'Carol Singh',    action: 'PET_BAN',           target: 'pet#2901 (BadWord_McGee)',       ip: '10.20.30.43',  ts: '2026-05-04 14:21:40', result: 'success', detail: 'Profanity filter override' },
-    { id: 17984, operator: 'admin',  operator_name: 'System Admin',   action: 'ROLE_ASSIGN',       target: 'admin_user#3 (bob) → moderator', ip: '10.20.30.40',  ts: '2026-04-28 09:12:02', result: 'success', detail: 'Onboarding complete' },
+  /* ── Battles (15 records) ───────────────────────────────── */
+  battles: [
+    { id:'match-10921', petAId:'FlameWing',    petBId:'ShadowFang',    winnerId:'FlameWing',    mode:'RACE',    isFlagged:true,  flagReason:'suspicious win rate',  createdAt:'2026-05-18 08:44' },
+    { id:'match-10920', petAId:'StormWing',    petBId:'TerraShell',    winnerId:'StormWing',    mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-18 08:30' },
+    { id:'match-10919', petAId:'CrystalDrake', petBId:'ThunderBoar',   winnerId:'CrystalDrake', mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-18 08:15' },
+    { id:'match-10918', petAId:'IronGolem',    petBId:'MistRaven',     winnerId:'IronGolem',    mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-18 07:50' },
+    { id:'match-10917', petAId:'TideStalker',  petBId:'VoidCrawler',   winnerId:'TideStalker',  mode:'RACE',    isFlagged:true,  flagReason:'>50 battles/60min',    createdAt:'2026-05-18 07:30' },
+    { id:'match-10916', petAId:'EmberFox',     petBId:'DustWalker',    winnerId:'EmberFox',     mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 22:10' },
+    { id:'match-10915', petAId:'ArcticWolf',   petBId:'VenomSprite',   winnerId:'ArcticWolf',   mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 21:45' },
+    { id:'match-10914', petAId:'SunSphinx',    petBId:'GlacierBear',   winnerId:'SunSphinx',    mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 20:00' },
+    { id:'match-10913', petAId:'CoralSerpent', petBId:'BoulderBrute',  winnerId:'CoralSerpent', mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 18:30' },
+    { id:'match-10912', petAId:'NeonProwler',  petBId:'LavaToad',      winnerId:'NeonProwler',  mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 17:00' },
+    { id:'match-10911', petAId:'FlameWing',    petBId:'IronGolem',     winnerId:'IronGolem',    mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 16:00' },
+    { id:'match-10910', petAId:'StormWing',    petBId:'ArcticWolf',    winnerId:'StormWing',    mode:'BATTLE',  isFlagged:true,  flagReason:'anomalous win rate',   createdAt:'2026-05-17 15:20' },
+    { id:'match-10909', petAId:'CrystalDrake', petBId:'TideStalker',   winnerId:'TideStalker',  mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 14:40' },
+    { id:'match-10908', petAId:'TerraShell',   petBId:'EmberFox',      winnerId:'TerraShell',   mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 13:10' },
+    { id:'match-10907', petAId:'SunSphinx',    petBId:'MistRaven',     winnerId:'SunSphinx',    mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 12:00' }
   ],
 
+  /* ── Leaderboard (10 records) ───────────────────────────── */
+  leaderboard: [
+    { rank:1,  petName:'StormWing',    rarity:'Legendary', owner:'player_eve',   arenaScore:9820, winRate:0.91, suspicious:false },
+    { rank:2,  petName:'IronGolem',    rarity:'Legendary', owner:'player_leo',   arenaScore:9741, winRate:0.88, suspicious:false },
+    { rank:3,  petName:'SunSphinx',    rarity:'Legendary', owner:'player_tina',  arenaScore:9655, winRate:0.86, suspicious:false },
+    { rank:4,  petName:'FlameWing',    rarity:'Legendary', owner:'player_alice', arenaScore:9480, winRate:0.84, suspicious:false },
+    { rank:5,  petName:'TideStalker',  rarity:'Epic',      owner:'player_paul',  arenaScore:9120, winRate:0.82, suspicious:true  },
+    { rank:6,  petName:'CrystalDrake', rarity:'Epic',      owner:'player_iris',  arenaScore:8990, winRate:0.79, suspicious:false },
+    { rank:7,  petName:'ArcticWolf',   rarity:'Epic',      owner:'player_sam',   arenaScore:8820, winRate:0.77, suspicious:false },
+    { rank:8,  petName:'VoidCrawler',  rarity:'Epic',      owner:'player_carol', arenaScore:8650, winRate:0.75, suspicious:true  },
+    { rank:9,  petName:'ThunderBoar',  rarity:'Rare',      owner:'player_jake',  arenaScore:8410, winRate:0.72, suspicious:false },
+    { rank:10, petName:'ShadowFang',   rarity:'Epic',      owner:'player_bob',   arenaScore:8200, winRate:0.70, suspicious:false }
+  ],
+
+  /* ── Suspicious Pets (3 records) ────────────────────────── */
+  suspiciousPets: [
+    { petId:'pet-0003', petName:'VoidCrawler', battleCount60m:78, flaggedBattles:8, ownerEmailMasked:'carol@pixel-pet.io', detectedAt:'2026-05-18 07:30' },
+    { petId:'pet-0005', petName:'StormWing',   battleCount60m:65, flaggedBattles:6, ownerEmailMasked:'eve@pixel-pet.io',   detectedAt:'2026-05-17 22:15' },
+    { petId:'pet-0016', petName:'TideStalker', battleCount60m:62, flaggedBattles:5, ownerEmailMasked:'paul@pixel-pet.io',  detectedAt:'2026-05-17 20:00' }
+  ],
+
+  /* ── Email Logs (10 records) ─────────────────────────────── */
+  emailLogs: [
+    { id:'EMail-1001', to:'alice@pixel-pet.io',  subject:'Welcome to Pixel Pet Arena',         status:'delivered', ts:'2026-05-18 09:00', bounce_reason:null },
+    { id:'EMail-1002', to:'bob@pixel-pet.io',    subject:'Your pet StormWing reached Rank #2!', status:'delivered', ts:'2026-05-18 08:55', bounce_reason:null },
+    { id:'EMail-1003', to:'bad@invalid.com',     subject:'Arena Weekly Digest',                 status:'bounced',   ts:'2026-05-18 08:30', bounce_reason:'User unknown' },
+    { id:'EMail-1004', to:'carol@pixel-pet.io',  subject:'Ban Notice: VoidCrawler',             status:'delivered', ts:'2026-05-18 08:15', bounce_reason:null },
+    { id:'EMail-1005', to:'dave@pixel-pet.io',   subject:'Account Inactive Warning',            status:'delivered', ts:'2026-05-17 22:00', bounce_reason:null },
+    { id:'EMail-1006', to:'eve@pixel-pet.io',    subject:'Suspicious Activity Detected',        status:'delivered', ts:'2026-05-17 20:10', bounce_reason:null },
+    { id:'EMail-1007', to:'noserver@ghost.io',   subject:'Arena Weekly Digest',                 status:'failed',    ts:'2026-05-17 18:00', bounce_reason:'Connection timeout' },
+    { id:'EMail-1008', to:'frank@pixel-pet.io',  subject:'Account Locked Notification',         status:'delivered', ts:'2026-05-17 15:30', bounce_reason:null },
+    { id:'EMail-1009', to:'grace@pixel-pet.io',  subject:'New Admin Account Created',           status:'delivered', ts:'2026-05-17 12:00', bounce_reason:null },
+    { id:'EMail-1010', to:'iris@pixel-pet.io',   subject:'GDPR Erasure Request Received',       status:'delivered', ts:'2026-05-16 17:45', bounce_reason:null }
+  ],
+
+  /* ── Feature Flags (8 records) ─────────────────────────── */
+  featureFlags: [
+    { id:'FF_MARKETPLACE',    desc:'寵物交易市場功能',               enabled:false, updated:'2026-05-17 14:00' },
+    { id:'FF_ARENA_RANKED',   desc:'排名賽系統',                     enabled:true,  updated:'2026-05-10 09:00' },
+    { id:'FF_DAILY_QUEST',    desc:'每日任務系統',                   enabled:true,  updated:'2026-04-28 11:30' },
+    { id:'FF_FUSION',         desc:'寵物融合功能（Beta）',           enabled:false, updated:'2026-05-01 15:00' },
+    { id:'FF_LEADERBOARD_V2', desc:'新排行榜 UI（A/B 測試）',       enabled:true,  updated:'2026-05-12 10:15' },
+    { id:'FF_NOTIFICATION',   desc:'站內推播通知',                   enabled:true,  updated:'2026-05-15 08:00' },
+    { id:'FF_AI_MATCHMAKER',  desc:'AI 智能配對系統（實驗性）',     enabled:false, updated:'2026-05-05 16:00' },
+    { id:'FF_SEASONAL_EVENT', desc:'限時節日活動框架',               enabled:true,  updated:'2026-05-18 07:00' }
+  ],
+
+  /* ── GDPR Requests (6 records) ──────────────────────────── */
+  gdprRequests: [
+    { id:'GDPR-2026-0017', type:'erasure',     status:'resolved',   email:'user9021@example.com', submitted:'2026-05-15 10:00', sla_deadline:'2026-05-29', sla_urgent:false },
+    { id:'GDPR-2026-0018', type:'data_access', status:'pending',    email:'user8812@example.com', submitted:'2026-05-17 09:30', sla_deadline:'2026-05-31', sla_urgent:false },
+    { id:'GDPR-2026-0019', type:'erasure',     status:'pending',    email:'user7705@example.com', submitted:'2026-05-18 07:00', sla_deadline:'2026-05-21', sla_urgent:true  },
+    { id:'GDPR-2026-0020', type:'restrict',    status:'processing', email:'user6644@example.com', submitted:'2026-05-16 14:00', sla_deadline:'2026-05-30', sla_urgent:false },
+    { id:'GDPR-2026-0021', type:'data_access', status:'pending',    email:'user5533@example.com', submitted:'2026-05-18 08:00', sla_deadline:'2026-05-20', sla_urgent:true  },
+    { id:'GDPR-2026-0022', type:'object',      status:'resolved',   email:'user4422@example.com', submitted:'2026-05-14 11:00', sla_deadline:'2026-05-28', sla_urgent:false }
+  ],
+
+  /* ── Dashboard Stats ────────────────────────────────────── */
   stats: {
-    total_users: 8,
-    active_users: 6,
-    locked_users: 1,
-    inactive_users: 1,
-    total_roles: 5,
-    audit_today: 7,
-    audit_month: 89,
-    suspicious_pets_today: 3,
-    gdpr_pending: 2,
-    email_bounce_rate: 1.2,
-    last_refresh: '2026-05-11 09:30',
+    totalUsers:        8,
+    activeUsers:       6,
+    lockedUsers:       1,
+    totalPets:         1247,
+    battlesToday:      189,
+    suspiciousFlags:   3,
+    emailSuccessRate:  92,
+    email_bounce_rate:  2,
+    emails_today:       47
   },
 
-  pets: [
-    { id: 3045, name: 'RoarBeast',     emoji: '🐉', owner: 'user#11023', status: 'banned',  flagged_reason: 'Inappropriate name', flagged_at: '2026-05-11 09:18' },
-    { id: 3102, name: 'xxx_fart_xxx',  emoji: '🐱', owner: 'user#11198', status: 'flagged', flagged_reason: 'Suspected slur',     flagged_at: '2026-05-11 09:01' },
-    { id: 3110, name: 'GiantPickle',   emoji: '🐸', owner: 'user#11201', status: 'flagged', flagged_reason: 'Auto-flag: profanity score 0.87', flagged_at: '2026-05-11 08:42' },
-    { id: 3088, name: 'NormalDoggo',   emoji: '🐶', owner: 'user#11154', status: 'flagged', flagged_reason: 'User report x3',     flagged_at: '2026-05-10 22:14' },
-    { id: 2901, name: 'BadWord_McGee', emoji: '🦊', owner: 'user#10987', status: 'banned',  flagged_reason: 'Profanity override', flagged_at: '2026-05-04 14:21' },
-    { id: 2814, name: 'NekoSan',       emoji: '🐈', owner: 'user#10845', status: 'active',  flagged_reason: 'Unbanned (false positive)', flagged_at: '2026-05-09 10:11' },
-    { id: 2780, name: 'PixelDragon',   emoji: '🐲', owner: 'user#10823', status: 'active',  flagged_reason: '—', flagged_at: '—' },
-    { id: 2755, name: 'Munchkin',      emoji: '🐹', owner: 'user#10798', status: 'active',  flagged_reason: '—', flagged_at: '—' },
-    { id: 1207, name: 'HackerCat',     emoji: '😼', owner: 'user#9123',  status: 'flagged', flagged_reason: 'ELO manipulation',   flagged_at: '2026-05-07 20:47' },
-    { id: 999,  name: 'OldFriend',     emoji: '🐰', owner: 'user#8001',  status: 'active',  flagged_reason: '—', flagged_at: '—' },
-    { id: 750,  name: 'Goldfishie',    emoji: '🐠', owner: 'user#7541',  status: 'active',  flagged_reason: '—', flagged_at: '—' },
-    { id: 612,  name: 'BananaBear',    emoji: '🐻', owner: 'user#7299',  status: 'flagged', flagged_reason: 'User report x2',     flagged_at: '2026-05-11 06:55' },
-  ],
-
-  battles: [
-    { id: 88712, attacker: 'pet#1207 (HackerCat)', defender: 'pet#2780 (PixelDragon)', winner: 'pet#1207', status: 'invalidated', ts: '2026-05-10 22:08:14' },
-    { id: 88711, attacker: 'pet#2814 (NekoSan)',   defender: 'pet#999 (OldFriend)',    winner: 'pet#2814', status: 'valid',       ts: '2026-05-10 21:55:00' },
-    { id: 88710, attacker: 'pet#2780 (PixelDragon)', defender: 'pet#612 (BananaBear)', winner: 'pet#2780', status: 'valid',       ts: '2026-05-10 21:30:42' },
-  ],
-
-  gdprRequests: [
-    { id: 'GDPR-2026-0044', user_id: 'user#12345', type: 'erasure',  submitted: '2026-05-10 18:22', status: 'pending',     deadline: '2026-06-09', assignee: '—' },
-    { id: 'GDPR-2026-0043', user_id: 'user#12108', type: 'export',   submitted: '2026-05-09 11:08', status: 'pending',     deadline: '2026-06-08', assignee: '—' },
-    { id: 'GDPR-2026-0042', user_id: 'user#11942', type: 'export',   submitted: '2026-05-07 09:14', status: 'in_progress', deadline: '2026-06-06', assignee: 'frank' },
-    { id: 'GDPR-2026-0041', user_id: 'user#11804', type: 'erasure',  submitted: '2026-05-04 14:50', status: 'completed',   deadline: '2026-06-03', assignee: 'frank' },
-  ],
+  /* ── Audit Logs (15 records) ────────────────────────────── */
+  auditLogs: [
+    { id:1,  actor:'superadmin', action:'pet.ban',               target:'pet#3847',       ip_hash:'a1b2c3', ts:'2026-05-18 08:58', detail:'ban reason: bot detected' },
+    { id:2,  actor:'mod_alice',  action:'arena_match.flag',      target:'match#10921',    ip_hash:'d4e5f6', ts:'2026-05-18 08:45', detail:'suspicious win rate' },
+    { id:3,  actor:'superadmin', action:'config.runtime.update', target:'battle_rate',    ip_hash:'a1b2c3', ts:'2026-05-18 08:30', detail:'rate: 5 → 6 battles/min' },
+    { id:4,  actor:'mod_bob',    action:'leaderboard.remove',    target:'pet#2201',       ip_hash:'g7h8i9', ts:'2026-05-18 08:15', detail:'anomalous ranking entry' },
+    { id:5,  actor:'mod_alice',  action:'pet.unban',             target:'pet#1055',       ip_hash:'d4e5f6', ts:'2026-05-18 07:50', detail:'ban appeal approved' },
+    { id:6,  actor:'superadmin', action:'gdpr.delete',           target:'user#u_9021',    ip_hash:'a1b2c3', ts:'2026-05-17 22:10', detail:'erasure request #GDR-017' },
+    { id:7,  actor:'superadmin', action:'admin_user.create',     target:'reader_grace',   ip_hash:'a1b2c3', ts:'2026-05-17 20:00', detail:'role: read_only' },
+    { id:8,  actor:'mod_alice',  action:'arena_match.unflag',    target:'match#10780',    ip_hash:'d4e5f6', ts:'2026-05-17 18:33', detail:'reviewed — false positive' },
+    { id:9,  actor:'superadmin', action:'config.economy.update', target:'arena_fee',      ip_hash:'a1b2c3', ts:'2026-05-17 16:45', detail:'fee: 50 → 40 coins' },
+    { id:10, actor:'mod_bob',    action:'pet.ban',               target:'pet#4412',       ip_hash:'g7h8i9', ts:'2026-05-17 15:20', detail:'ban reason: tos violation' },
+    { id:11, actor:'superadmin', action:'config.flag.toggle',    target:'FF_MARKETPLACE', ip_hash:'a1b2c3', ts:'2026-05-17 14:00', detail:'enabled → disabled' },
+    { id:12, actor:'mod_alice',  action:'arena_match.flag',      target:'match#10651',    ip_hash:'d4e5f6', ts:'2026-05-17 12:30', detail:'>50 battles/60min' },
+    { id:13, actor:'superadmin', action:'admin_user.totp_reset', target:'mod_frank',      ip_hash:'a1b2c3', ts:'2026-05-17 11:05', detail:'TOTP device change request' },
+    { id:14, actor:'superadmin', action:'admin_user.deactivate', target:'mod_dave',       ip_hash:'a1b2c3', ts:'2026-05-17 09:40', detail:'account inactive 30 days' },
+    { id:15, actor:'mod_bob',    action:'pet.unban',             target:'pet#3300',       ip_hash:'g7h8i9', ts:'2026-05-16 17:22', detail:'ban duration expired' }
+  ]
 };
 
-/* ==========================================================
-   Shared helpers used by all pages
-   ========================================================== */
+/* ============================================================
+   DOM Helper Functions — return HTMLElement nodes, never strings.
+   XSS-safe by construction: all user-visible text set via
+   .textContent; CSS classes come from allowlisted constants only.
+   ============================================================ */
 
-function showToast(message, variant) {
-  variant = variant || 'success';
-  let container = document.querySelector('.toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.className = 'toast-container';
-    document.body.appendChild(container);
+/**
+ * Render the sidebar navigation as a <nav> DOM node.
+ * @param {string} active - one of: 'dashboard' | 'users' | 'roles' | 'audit'
+ * @returns {HTMLElement}
+ */
+function renderSidebar(active) {
+  const safeActive = _ALLOWED_ACTIVE.has(active) ? active : '';
+
+  const nav = document.createElement('nav');
+  nav.className = 'admin-sidebar';
+
+  // Brand
+  const brand = document.createElement('div');
+  brand.className = 'sidebar-brand';
+  brand.textContent = '🛡️ Admin Portal';
+  nav.appendChild(brand);
+
+  // Nav sections — 3-section structure: Primary / Moderation / Tools
+  const sections = [
+    {
+      label: '主要功能',
+      entries: [
+        { key: 'dashboard',  href: 'admin-dashboard.html', icon: '📊', label: 'Dashboard' },
+        { key: 'users',      href: 'admin-users.html',     icon: '👥', label: 'Users' },
+        { key: 'roles',      href: 'admin-roles.html',     icon: '🗝️', label: 'Roles' },
+        { key: 'audit',      href: 'admin-audit-log.html', icon: '📜', label: 'Audit Log' }
+      ]
+    },
+    {
+      label: '待辦事項',
+      entries: [
+        { key: 'suspicious', href: 'suspicious.html', icon: '⚠️', label: 'Suspicious' },
+        { key: 'gdpr',       href: 'gdpr.html',       icon: '🔏', label: 'GDPR' },
+        { key: 'email',      href: 'email.html',      icon: '📧', label: 'Email' }
+      ]
+    },
+    {
+      label: '工具',
+      entries: [
+        { key: 'pets',        href: 'pets.html',        icon: '🐾', label: 'Pets' },
+        { key: 'battles',     href: 'battles.html',     icon: '⚔️', label: 'Battles' },
+        { key: 'leaderboard', href: 'leaderboard.html', icon: '🏆', label: 'Leaderboard' },
+        { key: 'config',      href: 'config.html',      icon: '⚙️', label: 'Config' },
+        { key: 'analytics',   href: 'analytics.html',   icon: '📈', label: 'Analytics' }
+      ]
+    }
+  ];
+
+  sections.forEach(function (section) {
+    // Section heading
+    const sectionHead = document.createElement('div');
+    sectionHead.className = 'sidebar-section-label';
+    sectionHead.textContent = section.label;   // textContent — not innerHTML
+    nav.appendChild(sectionHead);
+
+    const ul = document.createElement('ul');
+    ul.className = 'sidebar-nav';
+    section.entries.forEach(function (e) {
+      const li = document.createElement('li');
+      li.className = 'nav-item' + (e.key === safeActive ? ' active' : '');
+      const a = document.createElement('a');
+      a.href = e.href;                           // static string — no interpolation
+      a.textContent = e.icon + ' ' + e.label;   // textContent — not innerHTML
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    nav.appendChild(ul);
+  });
+
+  // Footer — username from ADMIN_MOCK (set via textContent)
+  const footer = document.createElement('div');
+  footer.className = 'sidebar-footer';
+
+  const userDiv = document.createElement('div');
+  userDiv.className = 'sidebar-user';
+  userDiv.textContent = '👤 ' + ADMIN_MOCK.currentUser.name; // textContent, not innerHTML
+
+  const logoutBtn = document.createElement('button');
+  logoutBtn.textContent = '登出';
+  logoutBtn.addEventListener('click', function () {
+    location.href = 'admin-login.html';
+  });
+
+  footer.appendChild(userDiv);
+  footer.appendChild(logoutBtn);
+  nav.appendChild(footer);
+
+  return nav;
+}
+
+/**
+ * Return a role badge <span> DOM node.
+ * CSS class chosen from allowlist; label set via textContent.
+ * @param {string} role
+ * @returns {HTMLElement}
+ */
+function roleBadge(role) {
+  const labels = { super_admin: 'Super Admin', moderator: 'Moderator', read_only: 'Read Only' };
+  const span = document.createElement('span');
+  // Only apply class when role is in the allowlist
+  span.className = 'role-badge' + (_ALLOWED_ROLES.has(role) ? ' ' + role : '');
+  span.textContent = _ALLOWED_ROLES.has(role) ? labels[role] : _esc(role);
+  return span;
+}
+
+/**
+ * Return a status badge <span> DOM node.
+ * @param {string} status
+ * @returns {HTMLElement}
+ */
+function statusBadge(status) {
+  const icons = { active: '🟢', inactive: '⚪', locked: '🔴', pending: '🟡', resolved: '🟢', flagged: '🟡', banned: '🔴' };
+  const span = document.createElement('span');
+  span.className = 'status-badge' + (_ALLOWED_STATUS.has(status) ? ' ' + status : '');
+  span.textContent = (icons[status] || '') + ' ' + (_ALLOWED_STATUS.has(status) ? status : '');
+  return span;
+}
+
+/**
+ * Return an action tag <span> DOM node.
+ * CSS class derived purely from string prefix matching (no data interpolation).
+ * @param {string} action
+ * @returns {HTMLElement}
+ */
+function actionTag(action) {
+  let cls = 'write';
+  if (typeof action === 'string') {
+    if (action.startsWith('auth.'))    cls = 'auth';
+    else if (action.startsWith('config.')) cls = 'config';
+    else if (action.startsWith('gdpr.'))   cls = 'gdpr';
+    else if (action === 'audit.read' || action.endsWith('.read')) cls = 'read';
   }
-  const toast = document.createElement('div');
-  toast.className = 'toast ' + variant;
-  toast.textContent = message;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.add('fade-out');
-    setTimeout(() => toast.remove(), 250);
-  }, 2500);
+  const span = document.createElement('span');
+  span.className = 'action-tag ' + cls; // cls is from our own if-chain, never from input
+  span.textContent = typeof action === 'string' ? action : '';
+  return span;
 }
 
+/**
+ * Convenience: append a DOM node or esc()-encoded string into a table cell.
+ * @param {HTMLTableCellElement} td
+ * @param {HTMLElement|string} content
+ */
+function setCell(td, content) {
+  if (content instanceof HTMLElement) {
+    td.appendChild(content);
+  } else {
+    td.textContent = String(content === null || content === undefined ? '' : content);
+  }
+}
+
+/* ── PF-01: escapeHtml alias (DOM-based, same as _esc) ───── */
+function escapeHtml(val) {
+  const span = document.createElement('span');
+  span.textContent = (val === null || val === undefined) ? '' : String(val);
+  return span.innerHTML;
+}
+
+/* ── PF-02: roleDisplayName helper ───────────────────────── */
+const _ROLE_DISPLAY = { super_admin: 'Super Admin', moderator: 'Moderator', read_only: 'Read Only' };
+function roleDisplayName(role) { return _ROLE_DISPLAY[role] || String(role || ''); }
+
+/* ── Shared UI helpers ────────────────────────────────────── */
+
+/**
+ * Show a toast notification.
+ * @param {string} msg
+ * @param {'success'|'warning'|'error'|'info'} [type]
+ */
+function showToast(msg, type) {
+  var TYPE_COLORS = { success: '#10b981', warning: '#f59e0b', error: '#e87c7c', info: '#2d9ef5' };
+  var color = TYPE_COLORS[type] || TYPE_COLORS.info;
+
+  var toast = document.createElement('div');
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.style.cssText = [
+    'position:fixed', 'bottom:24px', 'right:24px', 'z-index:9999',
+    'background:' + color, 'color:#fff', 'padding:10px 18px',
+    'border-radius:8px', 'font-size:13.5px', 'box-shadow:0 4px 16px rgba(0,0,0,0.25)',
+    'max-width:340px', 'word-break:break-word',
+    'opacity:0', 'transition:opacity 0.2s ease'
+  ].join(';');
+  toast.textContent = String(msg === null || msg === undefined ? '' : msg);
+
+  document.body.appendChild(toast);
+  requestAnimationFrame(function () { toast.style.opacity = '1'; });
+  setTimeout(function () {
+    toast.style.opacity = '0';
+    setTimeout(function () { if (toast.parentNode) { toast.parentNode.removeChild(toast); } }, 250);
+  }, 3000);
+}
+
+/**
+ * Open a modal overlay by element ID.
+ * @param {string} id
+ */
 function openModal(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.add('open');
+  if (typeof id !== 'string') { return; }
+  var el = document.getElementById(id);
+  if (el) { el.classList.add('open'); }
 }
 
+/**
+ * Close a modal overlay by element ID.
+ * @param {string} id
+ */
 function closeModal(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.remove('open');
+  if (typeof id !== 'string') { return; }
+  var el = document.getElementById(id);
+  if (el) { el.classList.remove('open'); }
 }
 
-function escapeHtml(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function roleDisplay(roleId) {
-  const r = ADMIN_MOCK.roles.find((x) => x.id === roleId);
-  return r ? r.display : roleId;
-}
-
-function roleColorClass(roleId) {
-  const r = ADMIN_MOCK.roles.find((x) => x.id === roleId);
-  return r ? r.color_class : 'auditor';
-}
-
-/* CSV download for audit-log page */
-function downloadCSV(filename, rows) {
-  const csvRows = rows.map((row) =>
-    row
-      .map((cell) => {
-        const s = String(cell == null ? '' : cell);
-        if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-        return s;
-      })
-      .join(',')
-  );
-  const csv = csvRows.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+/* ── Expose globals ───────────────────────────────────────── */
+window.ADMIN_MOCK        = ADMIN_MOCK;
+window.renderSidebar     = renderSidebar;
+window.roleBadge         = roleBadge;
+window.statusBadge       = statusBadge;
+window.actionTag         = actionTag;
+window.setCell           = setCell;
+window._esc              = _esc;
+window.escapeHtml        = escapeHtml;
+window.roleDisplayName   = roleDisplayName;
+window.showToast         = showToast;
+window.openModal         = openModal;
+window.closeModal        = closeModal;

@@ -462,846 +462,1096 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#admin-moderationfeature">admin-moderation.feature</a></li><li><a class="toc__link" href="#admin-search-performancefeature">admin-search-performance.feature</a></li><li><a class="toc__link" href="#arena-battlefeature">arena-battle.feature</a></li><li><a class="toc__link" href="#battle-recordsfeature">battle-records.feature</a></li><li><a class="toc__link" href="#claim-flowfeature">claim-flow.feature</a></li><li><a class="toc__link" href="#economy-configfeature">economy-config.feature</a></li><li><a class="toc__link" href="#gdpr-erasurefeature">gdpr-erasure.feature</a></li><li><a class="toc__link" href="#leaderboardfeature">leaderboard.feature</a></li><li><a class="toc__link" href="#rarity-distributionfeature">rarity-distribution.feature</a></li><li><a class="toc__link" href="#suspicious-detectionfeature">suspicious-detection.feature</a></li><li><a class="toc__link" href="#trading-systemfeature">trading-system.feature</a></li><li><a class="toc__link" href="#training-foodfeature">training-food.feature</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#admin-authfeature">admin-auth.feature</a></li><li><a class="toc__link" href="#admin-moderationfeature">admin-moderation.feature</a></li><li><a class="toc__link" href="#admin-search-performancefeature">admin-search-performance.feature</a></li><li><a class="toc__link" href="#arena-battlefeature">arena-battle.feature</a></li><li><a class="toc__link" href="#battle-recordsfeature">battle-records.feature</a></li><li><a class="toc__link" href="#claim-flowfeature">claim-flow.feature</a></li><li><a class="toc__link" href="#economy-configfeature">economy-config.feature</a></li><li><a class="toc__link" href="#gdpr-erasurefeature">gdpr-erasure.feature</a></li><li><a class="toc__link" href="#leaderboardfeature">leaderboard.feature</a></li><li><a class="toc__link" href="#rarity-distributionfeature">rarity-distribution.feature</a></li><li><a class="toc__link" href="#suspicious-detectionfeature">suspicious-detection.feature</a></li><li><a class="toc__link" href="#trading-systemfeature">trading-system.feature</a></li><li><a class="toc__link" href="#training-foodfeature">training-food.feature</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
-    <main class="doc-content"><h2 id="admin-moderationfeature">admin-moderation.feature</h2>
-<pre><code class="language-gherkin">Feature: Admin Moderation — Pet Banning and Battle Flagging
+    <main class="doc-content"><h2 id="admin-authfeature">admin-auth.feature</h2>
+<pre><code class="language-gherkin">@p0
+Feature: Admin Authentication (US-ADMIN-AUTH-001)
+  As a platform administrator
+  I want to authenticate securely using password and TOTP
+  So that the admin portal is protected against unauthorised access
+
+  @TC-E2E-ADMIN-AUTH-001-01 @contract @smoke
+  Scenario: Successful TOTP login returns session cookie
+    Given an admin account &quot;admin-auth-001&quot; exists with a valid password and TOTP secret configured
+    When the admin submits correct credentials and a valid TOTP code for &quot;admin-auth-001&quot;
+    Then the response status is 200
+    And the response sets a &quot;admin-session&quot; cookie with HttpOnly and Secure flags
+
+  @TC-E2E-ADMIN-AUTH-001-02 @contract
+  Scenario: Wrong password returns 401
+    Given an admin account &quot;admin-auth-001&quot; exists with a valid password and TOTP secret configured
+    When the admin submits an incorrect password for &quot;admin-auth-001&quot;
+    Then the response status is 401
+    And the response body error code is &quot;INVALID_CREDENTIALS&quot;
+    And no session cookie is set
+
+  @TC-E2E-ADMIN-AUTH-001-03 @contract
+  Scenario: Account locked after 10 consecutive failures returns 403 ACCOUNT_LOCKED with unlockedAt
+    Given an admin account &quot;admin-auth-002&quot; has failed login 10 times consecutively
+    When the admin submits any credentials for &quot;admin-auth-002&quot;
+    Then the response status is 403
+    And the response body error code is &quot;ACCOUNT_LOCKED&quot;
+    And the response body contains an &quot;unlockedAt&quot; field
+
+  @TC-E2E-ADMIN-AUTH-001-04 @contract
+  Scenario: First login without TOTP configured returns 403 TOTP_SETUP_REQUIRED
+    Given an admin account &quot;admin-auth-003&quot; exists with a valid password but no TOTP secret configured
+    When the admin submits correct password credentials for &quot;admin-auth-003&quot;
+    Then the response status is 403
+    And the response body error code is &quot;TOTP_SETUP_REQUIRED&quot;
+    And no session cookie is set
+
+  @TC-E2E-ADMIN-AUTH-001-05 @contract
+  Scenario: Logout invalidates session cookie
+    Given an admin &quot;admin-auth-001&quot; is authenticated with a valid session cookie
+    When the admin sends POST /admin/api/auth/logout
+    Then the response status is 200
+    And the response clears the &quot;admin-session&quot; cookie
+    And subsequent requests using the old session cookie return 401
+</code></pre>
+<h2 id="admin-moderationfeature">admin-moderation.feature</h2>
+<pre><code class="language-gherkin">@p0
+Feature: Admin Moderation — Pet Banning and Leaderboard Management (US-ADMIN-001, US-ADMIN-002)
   As an admin moderator
-  I want to ban disruptive pets and flag suspicious battles
-  So that the game environment remains fair and enjoyable
+  I want to ban disruptive pets and manage leaderboard integrity
+  So that the arena remains fair for all players
 
-  @TC-SRV-MOD-001
-  Scenario: Moderator bans pet with reason
-    Given a pet with is_banned = false
-    And a moderator_alice with role = &#x27;moderator&#x27;
-    When POST /admin/api/pets/:petId/ban is called with reason = &quot;Automated bot behavior detected: 52 battles in 60-minute window&quot;
-    Then the system returns HTTP 200
-    And pets.is_banned is updated to true
-    And pets.banned_at is set to current timestamp
-    And pets.banned_reason is stored (max 500 characters)
-    And an audit_log entry is created with:
-      | Field | Value |
-      | admin_id | moderator_alice.id |
-      | action | pet.ban |
-      | target_type | pet |
-      | target_id | pet_id |
-      | detail | {&quot;reason&quot;: &quot;...&quot;, &quot;previous_is_banned&quot;: false} |
+  Background:
+    Given a moderator admin &quot;admin-mod-001&quot; is authenticated with a valid session cookie
 
-  @TC-SRV-MOD-002
-  Scenario: Banned pet removed from leaderboard within SLA
-    Given a pet currently ranked 15th on the leaderboard
-    When POST /admin/api/pets/:petId/ban is called
-    Then within 5 minutes (leaderboard_ban_reflection_time_minutes):
-      | Check | Expected |
-      | Redis ZRANK | returns null |
-      | GET /api/v1/leaderboard | pet is not in top 100 |
-      | pet appearance | pet is removed from results |
+  @TC-E2E-MOD-001-01 @contract @smoke
+  Scenario: Admin bans a pet and it is removed from the leaderboard
+    Given pet &quot;pet-mod-001&quot; exists with is_banned false
+    And pet &quot;pet-mod-001&quot; exists in the Redis sorted set &quot;leaderboard:global&quot; at rank 15
+    When the admin sends POST /admin/api/pets/pet-mod-001/ban with reason &quot;bot activity detected: 52 battles in 60 minutes&quot;
+    Then the response status is 200
+    And the database pets row for &quot;pet-mod-001&quot; has is_banned true
+    And the database pets row for &quot;pet-mod-001&quot; has banned_reason set
+    And the Redis sorted set &quot;leaderboard:global&quot; does NOT contain &quot;pet-mod-001&quot;
+    And the database admin_audit_log has a row with action &quot;BAN&quot; and admin_id &quot;admin-mod-001&quot; and target_id &quot;pet-mod-001&quot;
 
-  @TC-SRV-MOD-003
-  Scenario: Banned pet blocked from arena entry
-    Given a pet with is_banned = true
-    And the pet owner with a valid petToken
-    When POST /api/v1/arena/enter is called with the banned pet&#x27;s ID
-    Then the system returns HTTP 403 with error code PET_BANNED
-    And the matchmaking entry is NOT created
-    And error message is &quot;This pet has been banned from the arena&quot;
+  @TC-E2E-MOD-001-02
+  Scenario: Admin ban fails gracefully when database write fails
+    Given pet &quot;pet-mod-002&quot; exists with is_banned false
+    And pet &quot;pet-mod-002&quot; is in the Redis sorted set &quot;leaderboard:global&quot;
+    And the database is configured to reject writes for this scenario
+    When the admin sends POST /admin/api/pets/pet-mod-002/ban with reason &quot;test failure&quot;
+    Then the response status is 500 or 503
+    And the database pets row for &quot;pet-mod-002&quot; still has is_banned false
+    And the Redis sorted set &quot;leaderboard:global&quot; still contains &quot;pet-mod-002&quot;
 
-  @TC-SRV-MOD-004
-  Scenario: Moderator unbans pet
-    Given a pet with is_banned = true and a ban reason on file
-    When POST /admin/api/pets/:petId/unban is called with reason = &quot;Manual review confirmed legitimate play&quot;
-    Then the system returns HTTP 200
-    And pets.is_banned is updated to false
-    And pets.banned_reason is cleared (set to NULL)
-    And pets.banned_at is NOT reset (immutable for audit)
-    And an audit_log entry is created with action = &quot;pet.unban&quot;
+  @TC-E2E-MOD-001-03
+  Scenario: Admin ban reason exceeding 500 characters is rejected
+    Given pet &quot;pet-mod-001&quot; exists with is_banned false
+    When the admin sends POST /admin/api/pets/pet-mod-001/ban with a reason of 501 characters
+    Then the response status is 400
+    And the response body error code is &quot;VALIDATION_ERROR&quot;
+    And the database pets row for &quot;pet-mod-001&quot; still has is_banned false
 
-  @TC-SRV-MOD-005
-  Scenario: Unban requires moderator role
-    Given a read_only admin user
-    When POST /admin/api/pets/:petId/unban is called
-    Then the system returns HTTP 403 with error code FORBIDDEN
-    And error message is &quot;Your role does not have permission for this action&quot;
-    And the ban status is NOT changed
+  @TC-E2E-MOD-001-04 @contract
+  Scenario: Banning a nonexistent pet returns 404
+    When the admin sends POST /admin/api/pets/nonexistent-pet-uuid/ban with reason &quot;test&quot;
+    Then the response status is 404
+    And the response body error code is &quot;PET_NOT_FOUND&quot;
 
-  @TC-SRV-MOD-006
-  Scenario: Flag suspicious battle with reason
-    Given a completed arena_match with matchId &quot;match-uuid-001&quot;
-    And a moderator with role = &#x27;moderator&#x27;
-    When POST /admin/api/battles/:matchId/flag is called with reason = &quot;Abnormally fast victory; possible stat manipulation&quot;
-    Then the system returns HTTP 200
-    And arena_matches.is_flagged is updated to true
-    And arena_matches.flagged_at is set to current timestamp
-    And an audit_log entry is created with action = &quot;arena_match.flag&quot;
+  @TC-E2E-MOD-002-01 @contract @smoke
+  Scenario: Admin views top 500 pets with hourly battle counts for moderation
+    Given the database contains 500 pets with varying arena_matches counts in the last hour
+    When the admin sends GET /admin/api/pets with limit 500
+    Then the response status is 200
+    And the response body &quot;data&quot; array contains pet entries with petId rarity level and recent battle counts
 
-  @TC-SRV-MOD-007
-  Scenario: Unflag battle
-    Given a flagged battle with is_flagged = true
-    When DELETE /admin/api/battles/:matchId/flag is called with reason = &quot;Manual review confirmed legitimate outcome&quot;
-    Then the system returns HTTP 200
-    And arena_matches.is_flagged is updated to false
-    And arena_matches.flagged_at is cleared (set to NULL)
-    And an audit_log entry is created with action = &quot;arena_match.unflag&quot;
+  @TC-E2E-MOD-002-02
+  Scenario: Leaderboard moderation removal takes effect within 5 minutes
+    Given pet &quot;pet-mod-004&quot; exists in the Redis sorted set &quot;leaderboard:global&quot; at rank 3
+    When the admin sends POST /admin/api/pets/pet-mod-004/ban with reason &quot;cheating&quot;
+    Then the response status is 200
+    And the Redis sorted set &quot;leaderboard:global&quot; does NOT contain &quot;pet-mod-004&quot;
+    And a GET request to /api/v1/leaderboard returns entries that do not include &quot;pet-mod-004&quot;
 
-  @TC-SRV-MOD-008
-  Scenario: Only moderator+ can flag battles
-    Given a read_only admin user
-    And a battle to flag
-    When POST /admin/api/battles/:matchId/flag is called
-    Then the system returns HTTP 403 with error code FORBIDDEN
-    And the battle remains unflagged
+  @TC-E2E-MOD-002-03
+  Scenario: Leaderboard removal fails gracefully when Redis is unavailable
+    Given pet &quot;pet-mod-005&quot; exists with is_banned false
+    And pet &quot;pet-mod-005&quot; is in the Redis sorted set &quot;leaderboard:global&quot;
+    And Redis is unavailable
+    When the admin sends POST /admin/api/pets/pet-mod-005/ban with reason &quot;bot&quot;
+    Then the response status is 500 or 503
+    And the database pets row for &quot;pet-mod-005&quot; still has is_banned false
 
-  @TC-SRV-MOD-009
-  Scenario: Admin can view flagged battles list
-    Given 25 flagged battles and 100 unflagged battles in the database
-    When GET /admin/api/battles?flagged=true is called
-    Then the system returns HTTP 200 with:
-      | Field | Value |
-      | battles | filtered to flagged = true only |
-      | meta.total | 25 |
-    And each battle includes: matchId, petAId, petBId, winnerId, is_flagged
+  @TC-E2E-MOD-002-04 @contract
+  Scenario: Read-only admin cannot perform ban action
+    Given a read_only admin &quot;admin-readonly-001&quot; is authenticated with a valid session cookie
+    When the read_only admin sends POST /admin/api/pets/pet-mod-001/ban with reason &quot;test&quot;
+    Then the response status is 403
+    And the response body error code is &quot;FORBIDDEN&quot;
+    And the database pets row for &quot;pet-mod-001&quot; is unchanged
 
-  @TC-SRV-MOD-010
-  Scenario: Ban reason stored with character limit
-    Given a moderator with a 600-character ban reason (exceeds 500-char limit)
-    When POST /admin/api/pets/:petId/ban is called
-    Then the system returns HTTP 400 with error code VALIDATION_ERROR
-    And error message indicates &quot;Reason must not exceed 500 characters&quot;
-    And no ban is applied
-
-  @TC-SRV-MOD-011
-  Scenario: Audit log captures all ban/unban/flag operations
-    Given a moderator performs: ban pet_A, flag battle_B, unban pet_C
-    When GET /admin/api/audit?limit=10 is called
-    Then at least 3 audit_log entries exist with:
-      | action | admin_id | target_type | target_id | detail |
-      | pet.ban | moderator.id | pet | pet_A.id | {...} |
-      | arena_match.flag | moderator.id | arena_match | battle_B.id | {...} |
-      | pet.unban | moderator.id | pet | pet_C.id | {...} |
+  @TC-E2E-MOD-002-05
+  Scenario: Audit log records every admin mutation in sequence
+    Given pet &quot;pet-audit-001&quot; exists with is_banned false
+    And the admin has previously banned &quot;pet-audit-001&quot; with reason &quot;audit test&quot;
+    And the admin has previously unbanned &quot;pet-audit-001&quot; with reason &quot;audit test unban&quot;
+    When the admin sends GET /admin/api/audit with limit 10
+    Then the response status is 200
+    And the response body contains at least 2 audit log entries for &quot;pet-audit-001&quot;
+    And the entries include actions &quot;BAN&quot; and &quot;UNBAN&quot; with admin_id &quot;admin-mod-001&quot; in sequence
 </code></pre>
 <h2 id="admin-search-performancefeature">admin-search-performance.feature</h2>
-<pre><code class="language-gherkin">Feature: Admin Search Performance SLA (US-ADMIN-001)
-  As an admin
+<pre><code class="language-gherkin">@p0
+Feature: Admin Pet Search Performance (US-ADMIN-001)
+  As an admin operator
   I want to search through pet records quickly
-  So that moderation tasks complete within reasonable time
+  So that moderation tasks complete within the 2-second SLA
 
-  @TC-SRV-SRCH-001
-  Scenario: Search returns results within 2 seconds for 1 million pet records
-    Given the database contains 1,000,000 pet records
-    And search index on (owner_email, pet_name, status) is active
-    And the index covers the filtering conditions (status in BANNED, FLAGGED; rarity in EPIC, LEGENDARY; created_after)
-    When an admin searches for pets matching query &quot;rare&quot; with filters:
-      | Filter | Value |
-      | status | BANNED or FLAGGED |
-      | rarity | Epic or Legendary |
-      | created_after | 2026-01-01 |
-    Then the search returns results within 2 seconds
-    And the result set includes up to 50 matching records
-    And pagination cursor is provided for additional results
-    And search logs query time, result count, and index hit rate for monitoring
+  Background:
+    Given a moderator admin &quot;admin-mod-001&quot; is authenticated with a valid session cookie
+    And the database contains at least 1000000 pets rows
 
-  @TC-SRV-SRCH-002
-  Scenario: Search performance consistent across query patterns
-    Given the admin search index is active
-    When multiple search queries are executed:
-      | Query Pattern | Expected Time |
-      | Single filter (status=BANNED) | &lt; 500ms |
-      | Dual filter (status + rarity) | &lt; 1s |
-      | Triple filter (status + rarity + date) | &lt; 2s |
-      | Full-text search on pet_name | &lt; 1.5s |
-    Then all queries return within the specified time envelope
-    And P95 latency remains consistent across the test run
+  @TC-E2E-ADMIN-SRCH-001-01 @contract @smoke
+  Scenario: Admin search by exact pet ID returns within 2 seconds
+    Given a pet with id &quot;pet-search-target-001&quot; exists in the database
+    When the admin sends GET /admin/api/pets with search param &quot;pet-search-target-001&quot;
+    Then the response status is 200
+    And the response body &quot;data&quot; array contains &quot;pet-search-target-001&quot;
+    And the response was received within 2000 milliseconds
 
-  @TC-SRV-SRCH-003
-  Scenario: Search does not cause table-level locks
-    Given concurrent search queries are running (admin1 searches, admin2 searches)
-    When both searches are executed simultaneously
-    Then both complete within 2 seconds
-    And neither query blocks the other
-    And no &quot;table is locked&quot; errors are returned
-    And query logs show no lock contention
+  @TC-E2E-ADMIN-SRCH-001-02 @contract
+  Scenario: Admin search returns paginated pet list with all required fields
+    When the admin sends GET /admin/api/pets with page 1 and limit 20
+    Then the response status is 200
+    And each entry in the response body &quot;data&quot; array has petId rarity level arenaRecord createdAt fields
+    And the response meta contains total page and limit fields
 
-  @TC-SRV-SRCH-004
-  Scenario: Search with no results returns quickly
-    Given a query that matches zero pets (e.g., rarity=NONEXISTENT)
-    When the query is executed
-    Then the response returns within 500ms
-    And an empty result set is returned
-    And error message indicates &quot;No results found&quot; (not a database error)
+  @TC-E2E-ADMIN-SRCH-001-03 @contract
+  Scenario: Admin search for nonexistent pet ID returns empty result
+    When the admin sends GET /admin/api/pets with search param &quot;nonexistent-00000000-0000-0000-0000-000000000000&quot;
+    Then the response status is 200
+    And the response body &quot;data&quot; array is empty
+    And the response meta field &quot;total&quot; is 0
 
-  @TC-SRV-SRCH-005
-  Scenario: Search index hit rate is monitored
-    Given the admin performs 100 searches over a 5-minute period
-    When the search log is analyzed
-    Then index_hit_rate &gt;= 95% (at least 95 queries used the index)
-    And any index scans (sequential table scans) are logged as warnings
-    And DBA is alerted if hit_rate drops below 90%
+  @TC-E2E-ADMIN-SRCH-001-04
+  Scenario: Admin pet list returns pets with masked owner email in response
+    Given a pet &quot;pet-search-target-002&quot; exists with owner email &quot;owner@example.com&quot; stored encrypted
+    When the admin sends GET /admin/api/pets with search param &quot;pet-search-target-002&quot;
+    Then the response status is 200
+    And the response body entry for &quot;pet-search-target-002&quot; does not contain a plaintext email field
 
-  @TC-SRV-SRCH-006
-  Scenario: Large result sets paginated efficiently
-    Given a search returns 5000 matching records
-    When the first page (50 records) is requested
-    Then the response returns within 2 seconds
-    When the pagination cursor is used to fetch page 2
-    Then the next page also returns within 2 seconds
-    And cursor-based pagination does not require recalculating the entire result set
+  @TC-E2E-ADMIN-SRCH-001-05 @contract
+  Scenario: Unauthenticated admin search is rejected
+    When an unauthenticated GET request is made to /admin/api/pets
+    Then the response status is 401
+    And the response body error code is &quot;UNAUTHORIZED&quot;
+
+  @TC-E2E-ADMIN-SRCH-001-06 @contract
+  Scenario: Read-only admin can view pet list but cannot perform mutations
+    Given a read_only admin &quot;admin-readonly-001&quot; is authenticated with a valid session cookie
+    When the read_only admin sends GET /admin/api/pets with page 1 and limit 10
+    Then the response status is 200
+    And the response body &quot;data&quot; is a non-empty array
 </code></pre>
 <h2 id="arena-battlefeature">arena-battle.feature</h2>
-<pre><code class="language-gherkin">Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
+<pre><code class="language-gherkin">@p0 @smoke
+Feature: Arena Battle System (US-ARENA-001, US-ARENA-002)
+  As a competitive player
+  I want to enter my pet in arena battles
+  So that I can earn battle records and climb the leaderboard
 
-  @TC-SRV-ARENA-001
+  Background:
+    Given pet &quot;pet-alpha&quot; with speed 60 strength 40 stamina 50 level 5 exists and is owned with token &quot;token-alpha&quot;
+    And pet &quot;pet-beta&quot; with speed 55 strength 45 stamina 48 level 4 exists and is owned with token &quot;token-beta&quot;
+
+  @TC-E2E-ARENA-001-01 @contract @smoke
   Scenario: Two pets match and complete a Race battle
-    Given pet &quot;alpha-token-abc&quot; and pet &quot;beta-token-xyz&quot; are both in the matchmaking queue
-    And both pets have valid speed stats recorded in the database
-    When the matchmaking service pairs the two pets via ZPOPMIN from the Redis queue
-    Then a Race battle record is created with status &quot;IN_PROGRESS&quot; and mode &quot;RACE&quot;
-    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
-    And the pet with the higher effective speed (base stat plus up to ±15% random modifier) is recorded as the winner
-    And both pets receive updated win/loss counts in their profiles
+    Given pet &quot;pet-alpha&quot; has 0 battles this hour in Redis key &quot;rl:arena:pet-alpha&quot;
+    And pet &quot;pet-beta&quot; has 0 battles this hour in Redis key &quot;rl:arena:pet-beta&quot;
+    When &quot;token-alpha&quot; sends POST /api/v1/arena/enter with petId &quot;pet-alpha&quot; mode &quot;RACE&quot; and acceptAI false
+    And &quot;token-beta&quot; sends POST /api/v1/arena/enter with petId &quot;pet-beta&quot; mode &quot;RACE&quot; and acceptAI false
+    Then the response for &quot;pet-alpha&quot; has status 200
+    And the response body contains a &quot;matchId&quot; field
+    And the response body &quot;result&quot; is &quot;WIN&quot; or &quot;LOSS&quot;
+    And the database table arena_matches has a row with both &quot;pet-alpha&quot; and &quot;pet-beta&quot; and mode &quot;RACE&quot;
 
-  @TC-SRV-ARENA-002
-  Scenario: AI fallback when no real opponent is available after timeout
-    Given pet &quot;alpha-token-abc&quot; has entered the matchmaking queue via POST /api/v1/arena/enter and is the only pet present
-    And (arena_matchmaking_timeout_seconds = 30) seconds pass without a second pet joining
-    When the matchmaking service triggers the AI fallback logic
-    Then a Race battle is created pairing &quot;alpha-token-abc&quot; against an AI bot opponent
-    And the battle record includes is_ai_opponent = true
-    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
+  @TC-E2E-ARENA-001-02 @smoke
+  Scenario: AI fallback resolves when no human opponent found within 30 seconds
+    Given pet &quot;pet-alpha&quot; has 0 battles this hour in Redis key &quot;rl:arena:pet-alpha&quot;
+    And no other pet is in the matchmaking queue for mode &quot;RACE&quot;
+    When &quot;token-alpha&quot; sends POST /api/v1/arena/enter with petId &quot;pet-alpha&quot; mode &quot;RACE&quot; and acceptAI true
+    Then the response status is 200
+    And the response body field &quot;isAiOpponent&quot; is true
+    And the database table arena_matches has a row with &quot;pet-alpha&quot; and is_ai_opponent true
 
-  @TC-SRV-ARENA-003
-  Scenario: Arena rate limit prevents excessive battles per hour
-    Given pet &quot;alpha-token-abc&quot; has already completed (arena_rate_limit_battles_per_hour_default = 10) battles within the current hour
-    When pet &quot;alpha-token-abc&quot; attempts to enter the matchmaking queue via POST /api/v1/arena/enter
-    Then the server responds with HTTP 429
-    And the response body contains error code &quot;RATE_LIMIT_EXCEEDED&quot;
-    And pet &quot;alpha-token-abc&quot; is not added to the matchmaking queue
+  @TC-E2E-ARENA-001-03 @contract
+  Scenario: Matchmaking timeout returns 408 when acceptAI is false
+    Given pet &quot;pet-alpha&quot; has 0 battles this hour in Redis key &quot;rl:arena:pet-alpha&quot;
+    And no other pet is in the matchmaking queue for mode &quot;RACE&quot;
+    When &quot;token-alpha&quot; sends POST /api/v1/arena/enter with petId &quot;pet-alpha&quot; mode &quot;RACE&quot; and acceptAI false
+    Then the response status is 408
+    And the response body error code is &quot;MATCHMAKING_TIMEOUT&quot;
+    And the Redis counter &quot;rl:arena:pet-alpha&quot; is NOT incremented
 
-  @TC-SRV-ARENA-004
-  Scenario: Sumo mode resolves outcome using strength stat instead of speed
-    Given pet &quot;sumo-token-001&quot; with strength 85 and speed 40 is queued for a Sumo battle
-    And pet &quot;sumo-token-002&quot; with strength 60 and speed 90 is queued for a Sumo battle
-    When the matchmaking service pairs the two pets for a Sumo match
-    Then a Sumo battle record is created with mode &quot;SUMO&quot;
-    And the battle resolves within (arena_match_duration_max_seconds = 15) seconds
-    And &quot;sumo-token-001&quot; is recorded as the winner because its strength stat is higher
-    And the outcome is determined solely by the raw strength stat with no random modifier applied
+  @TC-E2E-ARENA-001-04 @smoke
+  Scenario: Arena rate limit blocks entry after 10 battles per hour
+    Given pet &quot;pet-alpha&quot; has 10 battles this hour in Redis key &quot;rl:arena:pet-alpha&quot;
+    When &quot;token-alpha&quot; sends POST /api/v1/arena/enter with petId &quot;pet-alpha&quot; mode &quot;RACE&quot; and acceptAI true
+    Then the response status is 429
+    And the response body error code is &quot;RATE_LIMIT_EXCEEDED&quot;
+    And the response header &quot;Retry-After&quot; is present
+    And pet &quot;pet-alpha&quot; is not added to the matchmaking queue
 
-  @TC-SRV-ARENA-005
-  Scenario: Player receives HTTP 429 when exceeding 10 battles per hour limit
-    Given a player has played 10 battles in the current hour
-    When the player attempts to start another battle via POST /api/v1/arena/enter
-    Then the API returns HTTP 429 Too Many Requests
-    And the response includes a Retry-After header with value in seconds
-    And the response body contains the message &quot;Battle rate limit exceeded. Please wait [countdown] minutes before your next battle.&quot;
-    And the client displays a countdown timer showing remaining wait time
-    And the countdown is accurate within ±5 seconds
+  @TC-E2E-ARENA-001-05
+  Scenario: Battle outcome is deterministic with the same seed
+    Given pet &quot;pet-gamma&quot; with speed 50 strength 30 stamina 40 level 3 exists and is owned with token &quot;token-gamma&quot;
+    And pet &quot;pet-delta&quot; with speed 45 strength 35 stamina 38 level 3 exists and is owned with token &quot;token-delta&quot;
+    And the battle engine is seeded with fixed random_seed 12345
+    When battle outcome is calculated for &quot;pet-gamma&quot; vs &quot;pet-delta&quot; in mode &quot;RACE&quot; twice
+    Then both calculations return the same winnerId
+    And both battleLog event sequences are identical
 
-  @TC-SRV-ARENA-006
-  Scenario: Battle outcome is deterministic with same seed
-    Given petA (stat_speed = 50) and petB (stat_speed = 45) battle with fixed random_seed = 12345
-    When the battle is calculated twice independently
-    Then both calculations return the same winner and stat_delta values
-    And battleLog event sequences are identical
-    And the outcome can be replayed deterministically for viewing
+  @TC-E2E-ARENA-001-06 @contract
+  Scenario: Banned pet cannot enter arena
+    Given the pet &quot;pet-alpha&quot; is banned with is_banned true in the database
+    When &quot;token-alpha&quot; sends POST /api/v1/arena/enter with petId &quot;pet-alpha&quot; mode &quot;RACE&quot; and acceptAI false
+    Then the response status is 403
+    And the response body error code is &quot;PET_BANNED&quot;
 
-  @TC-SRV-ARENA-007
-  Scenario: Arena entry with authentication failures
-    Given a request to POST /api/v1/arena/enter WITHOUT authentication header
-    When the request is submitted
-    Then the system returns HTTP 401 with error code UNAUTHORIZED
-    And no matchmaking entry is created
+  @TC-E2E-ARENA-001-07 @contract
+  Scenario: Unauthenticated arena entry is rejected
+    When an unauthenticated POST request is made to /api/v1/arena/enter with petId &quot;pet-alpha&quot; mode &quot;RACE&quot;
+    Then the response status is 401
+    And the response body error code is &quot;UNAUTHORIZED&quot;
+
+  @TC-E2E-ARENA-001-08 @contract
+  Scenario: Token that does not own the pet is rejected
+    When &quot;token-beta&quot; sends POST /api/v1/arena/enter with petId &quot;pet-alpha&quot; mode &quot;RACE&quot; and acceptAI false
+    Then the response status is 403
+    And the response body error code is &quot;NOT_OWNER&quot;
+
+  @TC-E2E-ARENA-001-09 @contract
+  Scenario: Battle record is publicly readable by match ID
+    Given an arena match &quot;match-001&quot; exists with winnerId &quot;pet-alpha&quot; and mode &quot;RACE&quot;
+    When a GET request is made to /api/v1/arena/match/match-001 without authentication
+    Then the response status is 200
+    And the response body field &quot;matchId&quot; is &quot;match-001&quot;
+    And the response body field &quot;mode&quot; is &quot;RACE&quot;
+    And the response body field &quot;winnerId&quot; is &quot;pet-alpha&quot;
+
+  @TC-E2E-ARENA-001-10 @contract
+  Scenario: Battle history returns last 20 battles for a pet
+    Given pet &quot;pet-alpha&quot; has 25 arena_matches records in the database
+    When a GET request is made to /api/v1/arena/history/pet-alpha without authentication
+    Then the response status is 200
+    And the response body &quot;battles&quot; array contains exactly 20 entries
+    And each entry has fields: matchId mode opponentPetId result completedAt
+
+  @TC-E2E-ARENA-001-11
+  Scenario: Pet banned by moderator cannot enter arena
+    Given pet &quot;pet-mod-003&quot; exists with is_banned true
+    And the pet owner holds token &quot;token-mod-003&quot;
+    When &quot;token-mod-003&quot; sends POST /api/v1/arena/enter with petId &quot;pet-mod-003&quot; mode &quot;RACE&quot; and acceptAI false
+    Then the response status is 403
+    And the response body error code is &quot;PET_BANNED&quot;
+
+  @TC-E2E-ARENA-002-01 @contract
+  Scenario: Sumo mode resolves using strength stat not speed
+    Given pet &quot;pet-sumo-strong&quot; with speed 30 strength 90 stamina 50 level 4 exists and is owned with token &quot;token-sumo-strong&quot;
+    And pet &quot;pet-sumo-fast&quot; with speed 90 strength 30 stamina 50 level 4 exists and is owned with token &quot;token-sumo-fast&quot;
+    And both pets have 0 battles this hour
+    And the battle engine is seeded with fixed random_seed 99999
+    When &quot;token-sumo-strong&quot; sends POST /api/v1/arena/enter with petId &quot;pet-sumo-strong&quot; mode &quot;SUMO&quot; and acceptAI false
+    And &quot;token-sumo-fast&quot; sends POST /api/v1/arena/enter with petId &quot;pet-sumo-fast&quot; mode &quot;SUMO&quot; and acceptAI false
+    Then the database arena_matches row has mode &quot;SUMO&quot;
+    And the battle record winnerId is &quot;pet-sumo-strong&quot; reflecting the higher strength stat
 </code></pre>
 <h2 id="battle-recordsfeature">battle-records.feature</h2>
-<pre><code class="language-gherkin">Feature: Battle Records API and History (US-RECORD-001)
+<pre><code class="language-gherkin">@p0 @smoke
+Feature: Battle Records Page (US-RECORD-001)
+  As a pet owner
+  I want to share my pet&#x27;s battle records via a public URL
+  So that I can show off wins and attract new players
 
-  @TC-SRV-REC-001
-  Scenario: Battle records page returns last 20 battles with pagination
-    Given a player has 45 public battle records
-    When the player requests GET /api/v1/arena/history/:petId
-    Then the API returns the 20 most recent battles
-    And the response includes a pagination cursor for the next batch
-    And each battle record includes: match_id, opponent_pet_id, result (WIN/LOSS), reward, timestamp
-    And the response structure includes meta.total = 45 and meta.hasMore = true
+  Background:
+    Given pet &quot;pet-record-001&quot; with rarity &quot;RARE&quot; and petName &quot;Crimson Vexor&quot; exists in the database
+    And pet &quot;pet-record-001&quot; has 20 arena_matches records with mode &quot;RACE&quot; and mixed Win/Loss results
 
-  @TC-SRV-REC-002
-  Scenario: Battle records page with fewer than 20 records shows all records
-    Given a player has 8 public battle records
-    When the player requests GET /api/v1/arena/history/:petId
-    Then the API returns all 8 records
-    And the response indicates &quot;hasMore&quot;: false or no pagination cursor
-    And total_count = 8
+  @TC-E2E-RECORD-001-01 @contract @smoke
+  Scenario: Battle records endpoint returns last 20 battles publicly without auth
+    When a GET request is made to /api/v1/arena/history/pet-record-001 without authentication
+    Then the response status is 200
+    And the response body &quot;battles&quot; array contains exactly 20 entries
+    And each entry has fields: matchId mode opponentPetId isAiOpponent result completedAt
+    And the response body &quot;summary&quot; contains wins losses and winRate fields
 
-  @TC-SRV-REC-003
-  Scenario: Battle records pagination cursor for next batch
-    Given a player has 45 battle records
-    And the first page returned 20 records with pagination_cursor = &quot;offset_20&quot;
-    When the client requests GET /api/v1/arena/history/:petId?cursor=offset_20
-    Then the API returns battles 21-40 (next 20 records)
-    And a new pagination_cursor is provided for the next batch
-    And the response includes meta.hasMore = true
+  @TC-E2E-RECORD-001-02
+  Scenario: Battle records with fewer than 20 battles returns only available entries
+    Given pet &quot;pet-record-002&quot; with rarity &quot;COMMON&quot; and petName &quot;Sand Crawler&quot; exists in the database
+    And pet &quot;pet-record-002&quot; has 8 arena_matches records
+    When a GET request is made to /api/v1/arena/history/pet-record-002 without authentication
+    Then the response status is 200
+    And the response body &quot;battles&quot; array contains exactly 8 entries
 
-  @TC-SRV-REC-004
-  Scenario: Open Graph meta tags are correctly generated for a battle record
-    Given a battle was fought between Pet A (Rare, 12 wins) and Pet B (Common, 3 wins)
-    When the battle record page is rendered as a social share link
-    Then the meta tags include:
-      | Tag | Value |
-      | og:title | &quot;Pet A vs Pet B&quot; |
-      | og:image | [sprite_image_url] |
-      | og:description | &quot;Pet A won with 12 total wins&quot; |
-      | og:url | https://pixel-pet-arena.com/battles/[match_id] |
-      | og:type | website |
-    And all OG URLs are absolute and properly encoded
-    And og:image points to a valid image URL with correct dimensions (1200x630 recommended)
+  @TC-E2E-RECORD-001-03
+  Scenario: Battle records with more than 20 battles returns cap of 20
+    Given pet &quot;pet-record-003&quot; with rarity &quot;EPIC&quot; and petName &quot;Thunder Drake&quot; exists in the database
+    And pet &quot;pet-record-003&quot; has 25 arena_matches records in the database
+    When a GET request is made to /api/v1/arena/history/pet-record-003 without authentication
+    Then the response status is 200
+    And the response body &quot;battles&quot; array contains exactly 20 entries
 
-  @TC-SRV-REC-005
-  Scenario: Battle record details include all required fields
-    Given a battle record from GET /api/v1/arena/history/:petId
-    When the response is parsed
-    Then each battle record contains:
-      | Field | Type | Presence |
-      | match_id | UUID | required |
-      | opponent_pet_id | UUID | required |
-      | opponent_name | string | required |
-      | opponent_rarity | enum | required |
-      | result | WIN\|LOSS | required |
-      | reward_xp | integer | required |
-      | reward_coins | integer | required |
-      | timestamp | ISO-8601 | required |
-      | mode | RACE\|SUMO | required |
-    And no sensitive fields (opponent owner email) are exposed
+  @TC-E2E-RECORD-001-04 @contract
+  Scenario: Battle records endpoint returns 404 for nonexistent pet
+    When a GET request is made to /api/v1/arena/history/nonexistent-pet-uuid without authentication
+    Then the response status is 404
+    And the response body error code is &quot;PET_NOT_FOUND&quot;
 
-  @TC-SRV-REC-006
-  Scenario: Battle records endpoint enforces public access without authentication
-    Given a battle record for a pet with public_battles = true
-    When GET /api/v1/arena/history/:petId is called WITHOUT Authorization header
-    Then HTTP 200 is returned
-    And the battle records are visible to any visitor
-    And no authentication is required
+  @TC-E2E-RECORD-001-05
+  Scenario: Battle records include AI opponent entries flagged correctly
+    Given pet &quot;pet-record-001&quot; has an arena_matches record where is_ai_opponent is true and opponent_pet_id is null
+    When a GET request is made to /api/v1/arena/history/pet-record-001 without authentication
+    Then the response status is 200
+    And at least one entry in the &quot;battles&quot; array has isAiOpponent true and opponentPetId null
 
-  @TC-SRV-REC-007
-  Scenario: AI opponent battles are marked in battle records
-    Given a battle record where opponent is an AI-generated pet
-    When GET /api/v1/arena/history/:petId is called
-    Then the response includes is_ai_opponent = true
-    And opponent_pet_id is NULL or omitted for AI battles
-    And opponent_name indicates AI status (e.g., &quot;AI Bot&quot; or &quot;Computer&quot;)
+  @TC-E2E-RECORD-001-06 @contract
+  Scenario: Individual match record is publicly readable by matchId
+    Given an arena match &quot;match-record-001&quot; exists with winnerId &quot;pet-record-001&quot; mode &quot;RACE&quot; and completedAt &quot;2026-05-01T12:00:00Z&quot;
+    When a GET request is made to /api/v1/arena/match/match-record-001 without authentication
+    Then the response status is 200
+    And the response body field &quot;matchId&quot; is &quot;match-record-001&quot;
+    And the response body &quot;battleLog&quot; is a non-empty array of events
+
+  @TC-E2E-RECORD-001-07 @contract
+  Scenario: Match record returns 404 for nonexistent matchId
+    When a GET request is made to /api/v1/arena/match/nonexistent-match-uuid without authentication
+    Then the response status is 404
+    And the response body error code is &quot;NOT_FOUND&quot;
+
+  @TC-E2E-RECORD-001-08 @contract
+  Scenario: Battle records response contains all fields needed for Open Graph card generation
+    Given a pet &quot;pet-og-001&quot; with battle history of 10 wins and 5 losses
+    When a visitor requests the arena history for &quot;pet-og-001&quot;
+    Then the response status is 200
+    And the response body &quot;summary&quot; contains wins losses and winRate
+    And the response body contains petName rarity and a sprite reference for social sharing
 </code></pre>
 <h2 id="claim-flowfeature">claim-flow.feature</h2>
-<pre><code class="language-gherkin">Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
+<pre><code class="language-gherkin">@p0 @smoke
+Feature: Email Claim Flow (US-AUTH-001, US-AUTH-002)
   As a guest player
   I want to claim a randomly generated pet with my email address
   So that I can access the pet across devices and sessions
 
-  @TC-SRV-CLAIM-001
-  Scenario: Guest successfully claims a pet via email OTP happy path
-    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
-    And the guest has already requested an OTP via POST /api/v1/claim/request and received a (claim_code_digits = 6)-digit code at &quot;player@example.com&quot;
-    When the guest POSTs the correct 6-digit code via POST /api/v1/claim/verify within (claim_code_expiry_minutes = 15) minutes
-    Then the server links the email to the pet token and responds with HTTP 200
-    And the pets record has owner_token_hash populated and the claim_codes record has used_at set
+  Background:
+    Given a seeded unclaimed pet with id &quot;pet-001&quot; exists in the database
 
-  @TC-SRV-CLAIM-002
-  Scenario: Claim code expires after the configured window
-    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
-    And the server issued a (claim_code_digits = 6)-digit OTP to &quot;player@example.com&quot;
-    When the guest POSTs the correct OTP via POST /api/v1/claim/verify after (claim_code_expiry_minutes = 15) minutes have elapsed
-    Then the server responds with HTTP 400
-    And the response body contains error code &quot;CODE_EXPIRED&quot;
+  @TC-E2E-AUTH-001-01 @contract @smoke
+  Scenario: Guest successfully initiates claim and receives OTP
+    Given the pet &quot;pet-001&quot; has no owner_token_hash set
+    When the guest sends POST /api/v1/claim with email &quot;player@example.com&quot; petId &quot;pet-001&quot; and ageConfirmed true
+    Then the response status is 200
+    And the response body contains a &quot;claimId&quot; field
+    And the response body contains an &quot;expiresAt&quot; field 15 minutes in the future
 
-  @TC-SRV-CLAIM-003
-  Scenario: Claim rate limit blocks requests after the hourly threshold
-    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
-    And the guest has already requested (auth_rate_limit_claim_attempts_per_hour = 5) OTP codes within the current hour
-    When the guest submits a sixth claim request for &quot;player@example.com&quot;
-    Then the server responds with HTTP 429
-    And the response body contains error code &quot;RATE_LIMIT_EXCEEDED&quot;
-    And the Retry-After header is present
+  @TC-E2E-AUTH-001-02 @contract @smoke
+  Scenario: Guest verifies OTP and receives pet access token
+    Given a claim record with id &quot;claim-001&quot; exists for pet &quot;pet-001&quot; with a valid 6-digit code &quot;482917&quot;
+    And the claim code &quot;482917&quot; has not expired
+    When the guest sends POST /api/v1/claim/verify with claimId &quot;claim-001&quot; and code &quot;482917&quot;
+    Then the response status is 200
+    And the response body contains a &quot;petToken&quot; field with at least 32 bytes of base64url data
+    And the response body contains a &quot;petUrl&quot; field
+    And the database record for pet &quot;pet-001&quot; has owner_token_hash populated
+    And the claim code record has used_at set
 
-  @TC-SRV-CLAIM-004
-  Scenario: One-time claim code cannot be reused after first verification
-    Given a guest holds a valid pet access token of at least (pet_access_token_min_bytes = 32) bytes
-    And the server issued a (claim_code_digits = 6)-digit OTP to &quot;player@example.com&quot;
-    And the guest successfully verified the OTP on the first attempt
-    When the guest POSTs the same OTP a second time via POST /api/v1/claim/verify
-    Then the server responds with HTTP 400
-    And the response body contains error code &quot;INVALID_CODE&quot;
+  @TC-E2E-AUTH-001-03 @smoke
+  Scenario: Claim code expires after 15 minutes
+    Given a claim record with id &quot;claim-002&quot; exists for pet &quot;pet-001&quot; with code &quot;111111&quot;
+    And the claim code &quot;111111&quot; expired 1 second ago
+    When the guest sends POST /api/v1/claim/verify with claimId &quot;claim-002&quot; and code &quot;111111&quot;
+    Then the response status is 400
+    And the response body error code is &quot;CODE_EXPIRED&quot;
 
-  @TC-SRV-CLAIM-005
-  Scenario: Claim initiation requires age confirmation
-    Given a guest with an unclaimed pet
-    When the guest submits a claim request with email &quot;player@example.com&quot; and ageConfirmed = false
-    Then the system returns HTTP 400 with error code AGE_CONFIRMATION_REQUIRED
-    And the pet remains unclaimed
+  @TC-E2E-AUTH-001-04
+  Scenario: One-time claim code cannot be reused
+    Given a claim record with id &quot;claim-003&quot; exists for pet &quot;pet-001&quot; with code &quot;222222&quot;
+    And the claim code &quot;222222&quot; was already used at &quot;2026-05-01T10:00:00Z&quot;
+    When the guest sends POST /api/v1/claim/verify with claimId &quot;claim-003&quot; and code &quot;222222&quot;
+    Then the response status is 400
+    And the response body error code is &quot;INVALID_CODE&quot;
 
-  @TC-SRV-CLAIM-006
-  Scenario: Pet already claimed by another player prevents re-claim
-    Given a pet that is already claimed (owner_token_hash is set, claimed_at is set)
-    When a guest submits a new claim request with a different email
-    Then the system returns HTTP 400 with error code ALREADY_CLAIMED
-    And the existing owner&#x27;s token remains valid
+  @TC-E2E-AUTH-001-05
+  Scenario: Claim initiation blocked when ageConfirmed is false
+    Given the pet &quot;pet-001&quot; has no owner_token_hash set
+    When the guest sends POST /api/v1/claim with email &quot;player@example.com&quot; petId &quot;pet-001&quot; and ageConfirmed false
+    Then the response status is 400
+    And the response body error code is &quot;AGE_CONFIRMATION_REQUIRED&quot;
+    And the pet &quot;pet-001&quot; still has no owner_token_hash in the database
 
-  @TC-SRV-CLAIM-007
-  Scenario: Claim code entry enforces fail-closed rate limit on Redis unavailability
-    Given Redis is unavailable (connection refused or timeout)
-    When a POST /api/v1/claim/verify request is submitted with a code
-    Then the system returns HTTP 503 Service Unavailable
-    And the claim is NOT completed
-    And an alert is logged for Redis connectivity failure
-    And no session is created
+  @TC-E2E-AUTH-001-06
+  Scenario: Claim blocked when pet is already owned
+    Given the pet &quot;pet-001&quot; is already claimed with owner_token_hash &quot;existing-hash-abc&quot;
+    When the guest sends POST /api/v1/claim with email &quot;other@example.com&quot; petId &quot;pet-001&quot; and ageConfirmed true
+    Then the response status is 400
+    And the response body error code is &quot;ALREADY_CLAIMED&quot;
 
-  @TC-SRV-CLAIM-008
-  Scenario: Email enumeration prevention — timing attack defense with ±50ms variance
-    Given a test harness makes 100 claim requests with valid pet IDs at time series T_valid[]
-    And the harness makes 100 claim requests with invalid pet IDs at time series T_invalid[]
-    When the responses are measured (time from request submission to HTTP 200 reception)
-    Then response_time_valid[i] ∈ [50ms, 300ms] for all i (typical network + processing)
-    And response_time_invalid[i] ∈ [50ms, 300ms] for all i (same range as valid requests)
-    And |response_time_valid[i] - response_time_invalid[i]| &lt;= 50ms for ≥95% of request pairs
-    And the timing difference is attributable to network jitter, not business logic branching
-    And statistical t-test (paired samples, α=0.05) shows no significant difference between valid and invalid response times
+  @TC-E2E-AUTH-001-07
+  Scenario: Claim rate limit blocks after 5 attempts per hour
+    Given the Redis rate-limit counter &quot;rl:claim:{email_hash}&quot; for email &quot;spammer@example.com&quot; is at 5
+    When the guest sends POST /api/v1/claim with email &quot;spammer@example.com&quot; petId &quot;pet-001&quot; and ageConfirmed true
+    Then the response status is 429
+    And the response body error code is &quot;RATE_LIMIT_EXCEEDED&quot;
+    And the response header &quot;Retry-After&quot; is present
+
+  @TC-E2E-AUTH-001-08
+  Scenario: OTP entry is fail-closed when Redis is unavailable
+    Given Redis is unavailable
+    And a claim record with id &quot;claim-004&quot; exists for pet &quot;pet-001&quot; with code &quot;333333&quot;
+    When the guest sends POST /api/v1/claim/verify with claimId &quot;claim-004&quot; and code &quot;333333&quot;
+    Then the response status is 503 or 429
+    And the pet &quot;pet-001&quot; still has no owner_token_hash in the database
+
+  @TC-E2E-AUTH-001-09a
+  Scenario: Email enumeration prevention — registered email returns standard claim response
+    Given the pet &quot;pet-001&quot; has no owner_token_hash set
+    And the email &quot;registered@example.com&quot; is already associated with a claim identity in the database
+    When the guest sends POST /api/v1/claim with email &quot;registered@example.com&quot; petId &quot;pet-001&quot; and ageConfirmed true
+    Then the response status is 200
+    And the response body contains a &quot;claimId&quot; field
+
+  @TC-E2E-AUTH-001-09b
+  Scenario: Email enumeration prevention — unregistered email returns identical response shape
+    Given the pet &quot;pet-001&quot; has no owner_token_hash set
+    When the guest sends POST /api/v1/claim with email &quot;unknown@example.com&quot; petId &quot;pet-001&quot; and ageConfirmed true
+    Then the response status is 200
+    And the response body contains a &quot;claimId&quot; field
+    And both responses have identical JSON structure regardless of email registration status
+
+  @TC-E2E-AUTH-001-10
+  Scenario: Claim initiation returns 404 when petId does not exist
+    When the guest sends POST /api/v1/claim with email &quot;any@example.com&quot; petId &quot;nonexistent-pet-uuid&quot; and ageConfirmed true
+    Then the response status is 404
+    And the response body error code is &quot;PET_NOT_FOUND&quot;
+
+  @TC-E2E-AUTH-002-01 @contract
+  Scenario: Pet recovery flow issues new token and blacklists old one
+    Given the pet &quot;pet-001&quot; is already claimed with owner_token_hash &quot;old-hash-xyz&quot;
+    When the guest sends POST /api/v1/claim/recover with email &quot;player@example.com&quot; and petId &quot;pet-001&quot;
+    Then the response status is 200
+    And the response body contains a &quot;claimId&quot; field
+    And the old token hash &quot;old-hash-xyz&quot; is added to Redis blacklist key &quot;token:blacklist:old-hash-xyz&quot;
+
+  @TC-E2E-AUTH-002-02 @contract
+  Scenario: Accessing pet via invalid URL token returns 404
+    When a GET request is made to /api/v1/pets/nonexistent-invalid-uuid without authentication
+    Then the response status is 404
+    And the response body error code is &quot;PET_NOT_FOUND&quot;
 </code></pre>
 <h2 id="economy-configfeature">economy-config.feature</h2>
-<pre><code class="language-gherkin">@US-ADMIN-006
-Feature: Game Economy Configuration — Admin-tunable design parameters (US-ADMIN-006)
+<pre><code class="language-gherkin">@p1
+Feature: Game Economy Configuration (US-ADMIN-006)
   As a Super Admin
   I want to adjust game economy design parameters through the admin portal
   So that I can tune the player economy without requiring an engineering deployment
 
   Background:
-    Given a Super Admin &quot;alice&quot; is authenticated with role = &#x27;super_admin&#x27;
-    And the admin portal session is active and within the 4-hour inactivity window
+    Given a super_admin &quot;admin-super-001&quot; is authenticated with a valid session cookie
+    And the database config_economy row has food_buff_speed_multiplier 1.0 and arena_entry_cooldown_minutes 10
 
-  @TC-SRV-ECO-001
-  Scenario: Super Admin edits economy parameters within allowed ranges (AC-018-1)
-    Given the Game Economy Configuration module is open
-    When the Super Admin submits PUT /admin/api/config/economy with payload:
-      | Field                       | New Value |
-      | food_buff_speed_multiplier  | 1.5       |
-      | food_buff_strength_multiplier | 2.0     |
-      | arena_entry_cooldown_minutes  | 15      |
-      | arena_entry_cost_credits      | 2       |
-    Then the system returns HTTP 200
-    And the response includes the updated config_economy values
-    And each numeric value is validated against its allowed range:
-      | Field                          | Range            |
-      | food_buff_*_multiplier         | float 0.5–5.0    |
-      | arena_entry_cooldown_minutes   | integer 0–60     |
-      | arena_entry_cost_credits       | integer 0–10     |
+  @TC-E2E-ECO-001-01 @contract @smoke
+  Scenario: Super Admin updates food buff multiplier within allowed range
+    When the admin sends PUT /admin/api/config/economy with food_buff_speed_multiplier 1.5
+    Then the response status is 200
+    And the response body field &quot;food_buff_speed_multiplier&quot; is 1.5
+    And the database config_economy row has food_buff_speed_multiplier 1.5
+    And the database admin_audit_log has a row with action &quot;CONFIG_UPDATE&quot; field &quot;food_buff_speed_multiplier&quot; old_value &quot;1.0&quot; new_value &quot;1.5&quot; and admin_id &quot;admin-super-001&quot;
 
-  @TC-SRV-ECO-002
-  Scenario: Out-of-range edit rejected with VALIDATION_ERROR (AC-018-1)
-    Given the Game Economy Configuration module is open
-    When the Super Admin submits PUT /admin/api/config/economy with food_buff_speed_multiplier = 9.9
-    Then the system returns HTTP 400 with error code VALIDATION_ERROR
-    And error message indicates the allowed range &quot;0.5–5.0&quot;
-    And no audit_log entry is created
-    And no config_economy row is updated
+  @TC-E2E-ECO-001-02 @contract
+  Scenario: Economy config update rejected when value is out of allowed range
+    When the admin sends PUT /admin/api/config/economy with food_buff_speed_multiplier 9.9
+    Then the response status is 400
+    And the response body error code is &quot;OUT_OF_RANGE&quot;
+    And the database config_economy row still has food_buff_speed_multiplier 1.0
+    And no new row is added to admin_audit_log for this attempt
 
-  @TC-SRV-ECO-003
-  Scenario: Configuration change requires preview confirmation (AC-018-2)
-    Given a pending change of arena_entry_cost_credits from 0 to 5
-    When the Super Admin requests POST /admin/api/config/economy/preview with the change set
-    Then the system returns HTTP 200 with a preview payload showing:
-      | Field                     | old_value | new_value |
-      | arena_entry_cost_credits  | 0         | 5         |
-    And no value is persisted until POST /admin/api/config/economy/confirm is called with the preview token
-    And confirmation token expires after 5 minutes
+  @TC-E2E-ECO-001-03
+  Scenario: Updated economy config takes effect within 5 minutes via cache refresh
+    Given the admin has updated food_buff_strength_multiplier to 2.0 successfully
+    When the config cache is refreshed
+    And &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/feed with buffType &quot;power_mushroom&quot; stat &quot;strength&quot; magnitude 3 and isPermanent false
+    Then the applied buff magnitude reflects the 2.0 multiplier
 
-  @TC-SRV-ECO-004
-  Scenario: Saved configuration takes effect within 5 minutes via cache refresh (AC-018-3)
-    Given the Super Admin saves a confirmed change setting arena_entry_cooldown_minutes = 30
-    When the API server receives the next /api/v1/arena/enter request after 5 minutes (config_cache_refresh_max_minutes)
-    Then the new cooldown value is applied without any service restart
-    And subsequent rate-limit checks use the new 30-minute cooldown
-    And no in-flight battles are interrupted by the change
+  @TC-E2E-ECO-001-04
+  Scenario: Audit log captures full change context for every economy config edit
+    When the admin sends PUT /admin/api/config/economy with arena_entry_cooldown_minutes 30
+    Then the response status is 200
+    And the database admin_audit_log has a row with action &quot;CONFIG_UPDATE&quot; and admin_id &quot;admin-super-001&quot; and old_value containing &quot;10&quot; and new_value containing &quot;30&quot;
 
-  @TC-SRV-ECO-005
-  Scenario: Audit log captures full change context for every economy edit (AC-018-4)
-    Given the Super Admin &quot;alice&quot; saves food_buff_strength_multiplier from 1.0 to 2.0
-    When GET /admin/api/audit?action=config.economy&amp;limit=1 is called
-    Then the most recent audit_log entry contains:
-      | Field        | Value                                              |
-      | admin_id     | alice.id                                           |
-      | action       | config.economy                                     |
-      | target_type  | config_economy                                     |
-      | target_id    | food_buff_strength_multiplier                      |
-      | detail       | {&quot;previous_value&quot;: 1.0, &quot;new_value&quot;: 2.0}          |
-    And the audit row is append-only (no UPDATE or DELETE permitted)
+  @TC-E2E-ECO-001-05 @contract
+  Scenario: Moderator role cannot edit economy parameters
+    Given a moderator admin &quot;admin-mod-001&quot; is authenticated with a valid session cookie
+    When the moderator sends PUT /admin/api/config/economy with food_buff_speed_multiplier 2.0
+    Then the response status is 403
+    And the response body error code is &quot;FORBIDDEN&quot;
+    And the database config_economy row is unchanged
 
-  @TC-SRV-ECO-006
-  Scenario: Non-Super-Admin role is forbidden from editing economy parameters
-    Given a moderator &quot;bob&quot; with role = &#x27;moderator&#x27;
-    When bob calls PUT /admin/api/config/economy with any payload
-    Then the system returns HTTP 403 with error code FORBIDDEN
-    And the existing config_economy values are unchanged
-    And an audit_log entry is created with action = &quot;config.economy.denied&quot; capturing the actor and attempted change
+  @TC-E2E-ECO-001-06 @contract
+  Scenario: Unauthenticated economy config request is rejected
+    When an unauthenticated PUT request is made to /admin/api/config/economy with food_buff_speed_multiplier 1.5
+    Then the response status is 401
+    And the response body error code is &quot;UNAUTHORIZED&quot;
+
+  @TC-E2E-RUNTIME-001-01 @contract
+  Scenario: Super Admin updates max_battles_per_hour from 20 to 200
+    When the admin sends PUT /admin/api/config/runtime with max_battles_per_hour 200
+    Then the response status is 200
+    And the response body field &quot;max_battles_per_hour&quot; is 200
+    And the database config_runtime row has max_battles_per_hour 200
+    And the database admin_audit_log has a row with action &quot;CONFIG_UPDATE&quot; and admin_id &quot;admin-super-001&quot; and old_value containing &quot;20&quot; and new_value containing &quot;200&quot;
+
+  @TC-E2E-RUNTIME-001-02 @contract
+  Scenario: Out-of-range max_battles_per_hour value 51 returns 400 OUT_OF_RANGE
+    When the admin sends PUT /admin/api/config/runtime with max_battles_per_hour 51
+    Then the response status is 400
+    And the response body error code is &quot;OUT_OF_RANGE&quot;
+    And the database config_runtime row is unchanged
+
+  @TC-E2E-RUNTIME-001-03 @contract
+  Scenario: Rarity weights summing to 99 percent returns 400 VALIDATION_ERROR
+    When the admin sends PUT /admin/api/config/runtime with rarity weights summing to 99 percent
+    Then the response status is 400
+    And the response body error code is &quot;VALIDATION_ERROR&quot;
+    And the database config_runtime row is unchanged
+
+  @TC-E2E-ECO-001-07
+  Scenario Outline: Food buff multiplier boundary values are validated
+    When the admin sends PUT /admin/api/config/economy with food_buff_speed_multiplier &lt;value&gt;
+    Then the response status is &lt;expected_status&gt;
+
+    Examples:
+      | value | expected_status |
+      | 0.5   | 200             |
+      | 5.0   | 200             |
+      | 0.49  | 400             |
+      | 5.01  | 400             |
 </code></pre>
 <h2 id="gdpr-erasurefeature">gdpr-erasure.feature</h2>
-<pre><code class="language-gherkin">Feature: GDPR Data Erasure (US-AUTH-002, US-ADMIN-004)
+<pre><code class="language-gherkin">@p0
+Feature: GDPR Data Erasure (US-AUTH-002, US-ADMIN-004)
+  As a pet owner exercising GDPR rights
+  I want to request erasure of my personal data
+  So that my email is removed while my pet history is preserved
 
-  @TC-SRV-GDPR-001
-  Scenario: Player requests email erasure and email_encrypted is nulled within the SLA
-    Given a pet owner with pet token &quot;owner-token-gdpr&quot; has a linked email &quot;erasure@example.com&quot; stored in email_encrypted
-    When the owner submits a GDPR erasure request to POST /api/v1/gdpr/request with body { &quot;type&quot;: &quot;erasure&quot; }
-    Then the server enqueues an erasure job and responds with HTTP 202
-    And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column is set to NULL
+  Background:
+    Given a claimed pet &quot;pet-gdpr-001&quot; exists owned by claim identity &quot;identity-gdpr-001&quot; with email encrypted in claim_identities
+    And the pet owner holds token &quot;token-gdpr-001&quot; associated with &quot;pet-gdpr-001&quot;
 
-  @TC-SRV-GDPR-002
-  Scenario: Super admin processes GDPR deletion via the admin portal
-    Given a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
-    And a GDPR deletion request exists for pet token &quot;owner-token-gdpr-admin&quot;
-    When the admin submits a deletion action via POST /admin/api/gdpr/delete with the email hash and a reason
-    Then the server enqueues an erasure job and responds with HTTP 202
-    And within (gdpr_email_hashing_internal_sla_hours = 24) hours the email_encrypted column for &quot;owner-token-gdpr-admin&quot; is set to NULL
-    And an entry is written to admin_audit_log with action &quot;GDPR_DELETE&quot; and the admin_id and ip_address_hash populated
+  @TC-E2E-GDPR-001-01 @contract @smoke
+  Scenario: Player submits GDPR erasure request and receives 202 with jobId
+    When &quot;token-gdpr-001&quot; sends POST /api/v1/gdpr/request with type &quot;erasure&quot;
+    Then the response status is 202
+    And the response body contains a &quot;jobId&quot; field
+    And the database table gdpr_requests has a row with status &quot;pending&quot; for &quot;identity-gdpr-001&quot;
 
-  @TC-SRV-GDPR-003
-  Scenario: GDPR email deletion completes within internal SLA and reports within external SLA
-    Given a player requests account deletion via email
-    When the GDPR request is processed
-    Then the email_encrypted column is set to NULL within (gdpr_email_hashing_internal_sla_hours = 24) hours
-    And the player receives deletion confirmation email within (gdpr_deletion_external_sla_days = 7) days
-    And all personal data is either:
-      - Anonymized (pet names → &quot;Pet #123&quot;, player name removed)
-      - Deleted (claim codes, session tokens)
-      - Archived (audit logs for fraud detection, encrypted and no longer linked to player)
+  @TC-E2E-GDPR-001-02
+  Scenario: Email encrypted column is nulled within the internal SLA
+    Given a gdpr_requests row exists for &quot;identity-gdpr-001&quot; with status &quot;pending&quot;
+    When the GDPR background job processes the erasure for &quot;identity-gdpr-001&quot;
+    Then the database claim_identities row for &quot;identity-gdpr-001&quot; has email_encrypted set to null
+    And the database claim_identities row for &quot;identity-gdpr-001&quot; retains a non-null email_hash
+    And the gdpr_requests row status is &quot;completed&quot;
 
-  @TC-SRV-GDPR-004
-  Scenario: Player submits GDPR erasure request
-    Given a pet owner with a claimed pet and linked claim_identity_id
-    And a valid petToken for the pet
-    When POST /api/v1/gdpr/request is called with type = &quot;erasure&quot;
-    Then the system returns HTTP 202 with jobId and &quot;Your GDPR request has been received...&quot; message
-    And a gdpr_requests row is created with status = &#x27;pending&#x27;
+  @TC-E2E-GDPR-001-03
+  Scenario: Erased pet is removed from Redis leaderboard
+    Given pet &quot;pet-gdpr-001&quot; exists in the Redis sorted set &quot;leaderboard:global&quot;
+    And the GDPR background job processes the erasure for &quot;identity-gdpr-001&quot;
+    When a GET request is made to /api/v1/leaderboard without authentication
+    Then &quot;pet-gdpr-001&quot; does NOT appear in the response &quot;data.entries&quot; array
 
-  @TC-SRV-GDPR-005
-  Scenario: GDPR-erased email cannot be re-registered immediately
-    Given an email &quot;erased@example.com&quot; that has been GDPR-deleted
-    And the email_hash is retained in claim_identities
-    When a new claim attempt is submitted with email = &quot;erased@example.com&quot;
-    Then the system rejects the claim request
+  @TC-E2E-GDPR-001-04
+  Scenario: Email hash is retained to prevent re-registration after erasure
+    Given a gdpr_requests row exists for &quot;identity-gdpr-001&quot; with status &quot;completed&quot;
+    And the claim_identities row for &quot;identity-gdpr-001&quot; has email_encrypted null and email_hash set
+    And a new unclaimed pet &quot;pet-fresh-001&quot; exists in the database
+    When the same email is submitted in POST /api/v1/claim with petId &quot;pet-fresh-001&quot; and ageConfirmed true
+    Then the database lookup finds the retained email_hash and prevents a duplicate identity
 
-  @TC-SRV-GDPR-006
-  Scenario: Erased pet displays with pseudonymous owner
-    Given a pet whose owner email has been erased
-    And the pet still has an arena history with visible battles
-    When GET /api/v1/pets/:petId is called
-    Then the pet data is returned (not deleted)
-    And owner email is not displayed
+  @TC-E2E-GDPR-001-05 @contract
+  Scenario: Player checks GDPR request status with matching identity
+    Given a gdpr_requests row &quot;job-gdpr-001&quot; exists for &quot;identity-gdpr-001&quot; with status &quot;processing&quot;
+    When &quot;token-gdpr-001&quot; sends GET /api/v1/gdpr/request/status with jobId &quot;job-gdpr-001&quot;
+    Then the response status is 200
+    And the response body field &quot;status&quot; is &quot;processing&quot;
+    And the response body contains &quot;submittedAt&quot; and &quot;requestType&quot; fields
 
-  @TC-SRV-GDPR-007
-  Scenario: Player checks GDPR request status
-    Given a submitted GDPR erasure request with jobId = &quot;job-uuid-001&quot;
-    And the player&#x27;s petToken that initiated the request
-    When GET /api/v1/gdpr/request/status?jobId=job-uuid-001 is called
-    Then the system returns HTTP 200 with status, submittedAt, and completedAt fields
+  @TC-E2E-GDPR-001-06 @contract
+  Scenario: GDPR status check forbidden for a different identity
+    Given a gdpr_requests row &quot;job-gdpr-other&quot; exists for a different claim identity
+    When &quot;token-gdpr-001&quot; sends GET /api/v1/gdpr/request/status with jobId &quot;job-gdpr-other&quot;
+    Then the response status is 403
+    And the response body error code is &quot;FORBIDDEN&quot;
 
-  @TC-SRV-GDPR-008
-  Scenario: GDPR request status transitions
-    Given a GDPR erasure request initially in &#x27;pending&#x27; status
-    When the background job begins processing
-    Then status transitions to &#x27;processing&#x27;
-    When the background job completes successfully
-    Then status transitions to &#x27;completed&#x27; and completed_at is set
+  @TC-E2E-GDPR-001-07 @contract
+  Scenario: GDPR status check returns 404 for nonexistent jobId
+    When &quot;token-gdpr-001&quot; sends GET /api/v1/gdpr/request/status with jobId &quot;nonexistent-job-uuid&quot;
+    Then the response status is 404
+    And the response body error code is &quot;NOT_FOUND&quot;
+
+  @TC-E2E-GDPR-001-08 @contract
+  Scenario: Unauthenticated GDPR request is rejected
+    When an unauthenticated POST request is made to /api/v1/gdpr/request with type &quot;erasure&quot;
+    Then the response status is 401
+    And the response body error code is &quot;UNAUTHORIZED&quot;
+
+  @TC-E2E-GDPR-001-09
+  Scenario: Super admin processes GDPR deletion via admin portal and audit log is written
+    Given a super_admin session cookie is set for admin user &quot;admin-super-001&quot;
+    And a gdpr_requests row &quot;job-gdpr-admin-001&quot; exists for &quot;identity-gdpr-001&quot; with status &quot;pending&quot;
+    When the admin sends POST /admin/api/gdpr/job-gdpr-admin-001/process
+    Then the response status is 200
+    And the database claim_identities row for &quot;identity-gdpr-001&quot; has email_encrypted set to null
+    And the database admin_audit_log has a row with action &quot;GDPR_DELETION&quot; and admin_id &quot;admin-super-001&quot;
+
+  @TC-E2E-GDPR-001-10
+  Scenario: Erased pet page still loads with pseudonymous data
+    Given the erasure for &quot;identity-gdpr-001&quot; is complete and email_encrypted is null
+    When a GET request is made to /api/v1/pets/pet-gdpr-001 without authentication
+    Then the response status is 200
+    And the response body does not contain any email field
+    And the response body &quot;id&quot; field is &quot;pet-gdpr-001&quot;
 </code></pre>
 <h2 id="leaderboardfeature">leaderboard.feature</h2>
-<pre><code class="language-gherkin">Feature: Global Leaderboard (US-BOARD-001, US-ADMIN-002)
+<pre><code class="language-gherkin">@p0 @smoke
+Feature: Global Leaderboard (US-BOARD-001)
+  As a competitive player
+  I want to view a global leaderboard ranking all pets by performance
+  So that I have a clear goal to work toward
 
-  @TC-SRV-BOARD-001
-  Scenario: Leaderboard falls back to PostgreSQL snapshot when Redis is unavailable
-    Given the Redis Upstash instance is unreachable
-    And a PostgreSQL snapshot of leaderboard scores exists from the last sync
-    When a client requests GET /api/v1/leaderboard
-    Then the server responds with HTTP 200 using the PostgreSQL snapshot data
-    And the response body contains &quot;degraded&quot;: true
+  Background:
+    Given the Redis sorted set &quot;leaderboard:global&quot; contains 150 entries with varying scores
 
-  @TC-SRV-BOARD-002
-  Scenario: Leaderboard score is updated within the configured lag window after a battle
-    Given pet &quot;fast-pet-token&quot; completes a Race battle and wins
-    And the win increments the battles_won counter on pet &quot;fast-pet-token&quot; in the pets table
-    When the leaderboard sync job runs against Redis using ZRANGE REV WITHSCORES
-    Then the updated score for &quot;fast-pet-token&quot; is visible in GET /api/v1/leaderboard within (leaderboard_update_lag_max_seconds = 30) seconds
-    And &quot;fast-pet-token&quot; appears at the correct rank position
+  @TC-E2E-BOARD-001-01 @contract @smoke
+  Scenario: Leaderboard returns top 100 pets publicly without authentication
+    When a GET request is made to /api/v1/leaderboard without authentication
+    Then the response status is 200
+    And the response body &quot;data.entries&quot; array contains exactly 100 entries
+    And each entry has fields: rank petId petName rarity level score winRate
+    And entries are ordered by score descending
+    And the response meta contains total page and limit fields
 
-  @TC-SRV-BOARD-003
-  Scenario: Admin ban removes pet from leaderboard within the reflection time
-    Given pet &quot;cheating-pet-token&quot; currently holds rank 3 on the leaderboard
-    And a super admin is authenticated with a valid httpOnly SameSite=Strict admin session cookie
-    When the admin issues a ban action via POST /admin/api/pets/cheating-pet-token/ban with a moderation reason under (admin_moderation_reason_max_chars = 500) characters
-    Then &quot;cheating-pet-token&quot; is removed from the Redis leaderboard sorted set
-    And within (leaderboard_ban_reflection_time_minutes = 5) minutes the pet no longer appears in GET /api/v1/leaderboard responses
-    And an entry is written to admin_audit_log with action &quot;BAN&quot; and detail containing the moderation reason
-
-  @TC-SRV-BOARD-004
-  Scenario: Leaderboard displays top 100 pets publicly
-    Given 200 pets with varying leaderboard scores in Redis leaderboard:global sorted set
-    When GET /api/v1/leaderboard with page=1, limit=100 is called without authentication
-    Then the system returns HTTP 200 with entries.length = 100
-    And each entry contains: rank, petId, petName, rarity, level, score, winRate
-    And entries are sorted by score descending (highest rank first)
-    And meta fields include total leaderboard size, page number, and limit
-
-  @TC-SRV-BOARD-005
+  @TC-E2E-BOARD-001-02
   Scenario: Leaderboard filterable by rarity tier
-    Given the leaderboard contains pets of all rarity tiers (COMMON, RARE, EPIC, LEGENDARY)
-    When GET /api/v1/leaderboard?rarity=EPIC is called
-    Then only EPIC-rarity pets are returned in the entries array
-    And meta.total reflects the filtered count
+    Given the Redis sorted set &quot;leaderboard:global&quot; contains pets of all rarity tiers
+    When a GET request is made to /api/v1/leaderboard with query param rarity=EPIC without authentication
+    Then the response status is 200
+    And all entries in &quot;data.entries&quot; have rarity &quot;EPIC&quot;
 
-  @TC-SRV-BOARD-006
-  Scenario: Leaderboard score calculation from formula
-    Given a pet with win_rate = 0.75, battles_played = 40, level = 5
-    When arena_score is calculated using: win_rate × battles_played × level_multiplier(5)
-    Then this score is used for leaderboard ranking
+  @TC-E2E-BOARD-001-03 @contract
+  Scenario: Individual pet rank is returned publicly
+    Given a pet &quot;pet-rank-042&quot; with score 87.4 exists in the leaderboard at rank 42
+    When a GET request is made to /api/v1/leaderboard/rank/pet-rank-042 without authentication
+    Then the response status is 200
+    And the response body field &quot;rank&quot; is 42
+    And the response body field &quot;score&quot; is 87.4
 
-  @TC-SRV-BOARD-007
-  Scenario: Pet rank query for individual pet
-    Given a pet with petId &quot;pet-uuid-005&quot; ranked 42nd on the leaderboard
-    When GET /api/v1/leaderboard/rank/pet-uuid-005 is called without authentication
-    Then the system returns HTTP 200 with rank = 42 and the calculated_score_value
+  @TC-E2E-BOARD-001-04 @contract
+  Scenario: Pet rank returns 404 for nonexistent pet
+    When a GET request is made to /api/v1/leaderboard/rank/nonexistent-pet-uuid without authentication
+    Then the response status is 404
+    And the response body error code is &quot;PET_NOT_FOUND&quot;
 
-  @TC-SRV-BOARD-008
-  Scenario: Erased GDPR pet removed from leaderboard
-    Given a pet belonging to a user who submitted GDPR erasure request
-    And the pet is currently ranked on the leaderboard
-    When the GDPR erasure background job completes
-    Then Redis ZREM is called to remove the pet from leaderboard:global
-    And subsequent GET /api/v1/leaderboard queries no longer include that pet
+  @TC-E2E-BOARD-001-05
+  Scenario: Leaderboard falls back to PostgreSQL snapshot when Redis is unavailable
+    Given Redis is unavailable
+    And the database table leaderboard_snapshots has a recent row with valid leaderboard data
+    When a GET request is made to /api/v1/leaderboard without authentication
+    Then the response status is 200
+    And the response body field &quot;degraded&quot; is true
+    And the response body &quot;data.entries&quot; is a non-empty array
+
+  @TC-E2E-BOARD-001-06
+  Scenario: Leaderboard score is updated within 30 seconds after a battle
+    Given pet &quot;pet-board-001&quot; completes a winning Race battle
+    And the battle result is persisted in arena_matches
+    When the leaderboard sync job is triggered
+    Then the Redis sorted set &quot;leaderboard:global&quot; contains &quot;pet-board-001&quot; with an updated score
+
+  @TC-E2E-BOARD-001-07
+  Scenario: Banned pet is removed from leaderboard within 5 minutes
+    Given pet &quot;pet-board-002&quot; exists in the Redis sorted set &quot;leaderboard:global&quot; at rank 10
+    And an admin session cookie is set for a moderator admin user
+    When the admin sends POST /admin/api/pets/pet-board-002/ban with reason &quot;bot activity detected&quot;
+    Then the response status is 200
+    And the Redis sorted set &quot;leaderboard:global&quot; does NOT contain &quot;pet-board-002&quot;
+    And the database admin_audit_log has a row with action &quot;BAN&quot; and pet_id &quot;pet-board-002&quot;
+
+  @TC-E2E-BOARD-001-08
+  Scenario: Leaderboard validation error for invalid rarity filter
+    When a GET request is made to /api/v1/leaderboard with query param rarity=INVALID without authentication
+    Then the response status is 400
+    And the response body error code is &quot;VALIDATION_ERROR&quot;
+
+  @TC-E2E-BOARD-001-09 @contract
+  Scenario: Owner can retrieve their pet rank even when outside top 100
+    Given a claimed pet &quot;pet-board-low&quot; with a valid owner token and rank outside top 100
+    When the owner requests the rank for &quot;pet-board-low&quot; via the leaderboard rank API
+    Then the response status is 200
+    And the response body contains rank greater than 100 and the current score
 </code></pre>
 <h2 id="rarity-distributionfeature">rarity-distribution.feature</h2>
-<pre><code class="language-gherkin">@US-PET-002 @US-RARITY-001
-Feature: Pet Rarity Distribution Algorithm (US-PET-002, US-RARITY-001)
-  As a game designer
-  I want to verify that pet rarity follows the specified probability distribution
-  So that players get a balanced experience without gaming the system
+<pre><code class="language-gherkin">@p1
+Feature: Pet Rarity Distribution and Display (US-PET-002, US-RARITY-001)
+  As a collector
+  I want each pet to have a verifiable rarity score
+  So that I can trust that Legendary pets are genuinely rare
 
-  @TC-SRV-RARITY-001
-  Scenario: Pet generation follows 60-25-12-3 rarity distribution
-    Given a test harness generates 10000 pets
-    When the generation completes
-    Then the distribution is within acceptable bounds:
-      | Rarity    | Target | Min   | Max   |
-      | Common    | 60%    | 58%   | 62%   |
-      | Rare      | 25%    | 23%   | 27%   |
-      | Epic      | 12%    | 10%   | 14%   |
-      | Legendary | 3%     | 1.5%  | 4.5%  |
-    And the chi-square test (α=0.05) confirms distribution is not statistically biased
-    And no single rarity bucket deviates more than 2 percentage points from target
+  @TC-E2E-PET-001-01 @smoke @contract
+  Scenario: Random pet generation returns a complete pet object
+    Given no active reservation exists for seed &quot;pet-seed-rnd-001&quot;
+    When a visitor requests a random pet from the generation API
+    Then the response status is 200
+    And the response body contains id seed rarity petName and stats
+    And the response body contains generationMeta with algorithm version rarity roll and collision count
+    And the response body contains reservedUntil timestamp
 
-  @TC-SRV-RARITY-002
-  Scenario: Individual rarity probabilities sum to 100%
-    Given the rarity weights are defined as:
-      | Rarity    | Weight |
-      | Common    | 0.60   |
-      | Rare      | 0.25   |
-      | Epic      | 0.12   |
-      | Legendary | 0.03   |
+  @TC-E2E-PET-001-02 @contract
+  Scenario: Random pet generation returns 503 when generation pool is exhausted
+    Given the database pets table already contains seeds matching the first 3 generated seeds
+    When a visitor requests a random pet from the generation API
+    Then the response status is 503
+    And the response body error code is &quot;INTERNAL_SERVER_ERROR&quot;
+
+  @TC-E2E-RARITY-001-01
+  Scenario: Pet generation follows the 60-25-12-3 rarity distribution within tolerance
+    Given the pet generation algorithm uses the constants: Common 60% Rare 25% Epic 12% Legendary 3%
+    When the pet generation algorithm is applied to 10000 unique seeds
+    Then the Common count is between 5800 and 6200
+    And the Rare count is between 2300 and 2700
+    And the Epic count is between 1000 and 1400
+    And the Legendary count is between 150 and 450
+
+  @TC-E2E-RARITY-001-02
+  Scenario: Rarity weights sum to exactly 100 percent
+    Given the rarity weights are Common 60 Rare 25 Epic 12 Legendary 3
     When the weights are summed
-    Then the total equals 1.00 (100%)
-    And no negative or inverted weights are present
+    Then the total is exactly 100
 
-  @TC-SRV-RARITY-003
-  Scenario: Rarity seed determinism with same random seed
-    Given a pet generation request with random_seed = 12345
-    When the pet is generated and rarity is determined
-    And a second pet is generated with the same random_seed = 12345
-    Then both pets have the SAME rarity value
-    And the rarity determination is reproducible
+  @TC-E2E-RARITY-001-03
+  Scenario: Rarity is deterministic for the same seed
+    Given the pet generation algorithm uses the constants: Common 60% Rare 25% Epic 12% Legendary 3%
+    When the pet generation algorithm is applied to seed 12345
+    And the pet generation algorithm is applied to seed 12345 a second time
+    Then both results return the same rarity value
 
-  @TC-SRV-RARITY-004
-  Scenario: Rarity distribution holds across population samples
-    Given multiple samples of 5000 pets each
-    When the rarity distribution is calculated for each sample
-    Then each sample distribution remains within the acceptable bounds
-    And no sample exhibits statistical anomalies (e.g., all Legendary)
+  @TC-E2E-RARITY-001-04 @contract
+  Scenario: Random pet API response includes rarity field with valid tier
+    When a GET request is made to /api/v1/pets/random without authentication
+    Then the response status is 200
+    And the response body &quot;data.rarity&quot; is one of &quot;COMMON&quot; &quot;RARE&quot; &quot;EPIC&quot; &quot;LEGENDARY&quot;
+    And the response body &quot;data.generationMeta&quot; contains all 6 dimension fields
 
-  @TC-SRV-RARITY-005
-  Scenario: Legendary rarity cap enforcement
-    Given a large batch of 50000 pets is generated
-    When the rarity distribution is calculated
-    Then Legendary rarity count remains within the acceptable bounds: 1.5% to 4.5%
-    And the 3% baseline (1500 pets) is maintained as the expected value
-    And statistical variance is due to random distribution, not algorithm bias
+  @TC-E2E-RARITY-001-05 @contract
+  Scenario: Pet API returns rarity for claimed pet
+    Given pet &quot;pet-rare-001&quot; with rarity &quot;RARE&quot; exists in the database
+    When a GET request is made to /api/v1/pets/pet-rare-001 without authentication
+    Then the response status is 200
+    And the response body &quot;data.rarity&quot; is &quot;RARE&quot;
+
+  @TC-E2E-RARITY-001-06 @contract
+  Scenario: Leaderboard entries include rarity field for filtering
+    Given the Redis sorted set &quot;leaderboard:global&quot; contains pets with rarity &quot;LEGENDARY&quot;
+    When a GET request is made to /api/v1/leaderboard with query param rarity=LEGENDARY without authentication
+    Then the response status is 200
+    And all entries in &quot;data.entries&quot; have rarity &quot;LEGENDARY&quot;
+
+  @TC-E2E-RARITY-001-07
+  Scenario: Pet generation collision retry works up to 3 attempts then returns 503
+    Given the database pets table already contains seeds matching the first 3 generated seeds
+    When a GET request is made to /api/v1/pets/random without authentication
+    Then the response status is 503
+    And the response body error code is &quot;INTERNAL_SERVER_ERROR&quot;
+
+  @TC-E2E-RARITY-001-08
+  Scenario: Pet generation combination space exceeds 1 billion distinct combinations
+    Given the generation algorithm dimension counts are known from constants
+    When the total combination space is calculated as body_count times head_count times color_palette_count times accessory_count times rarity_trait_count times pattern_count
+    Then the product exceeds 1000000000
 </code></pre>
 <h2 id="suspicious-detectionfeature">suspicious-detection.feature</h2>
-<pre><code class="language-gherkin">Feature: Suspicious Battle Detection (US-ADMIN-005)
+<pre><code class="language-gherkin">@p0
+Feature: Suspicious Battle Detection (US-ADMIN-005)
+  As an admin moderator
+  I want the system to auto-flag pets exceeding battle thresholds
+  So that bot activity is surfaced for review without disrupting legitimate players
 
-  @TC-SRV-SUSP-001
-  Scenario: Pet is auto-flagged SUSPICIOUS after exceeding the battle threshold in the detection window
-    Given pet &quot;spammer-token-001&quot; has completed more than (bot_detection_battles_threshold = 50) battles within the last (bot_detection_window_minutes = 60) minutes
-    When the background detection job evaluates battle counts for all active pets
-    Then pet &quot;spammer-token-001&quot; status is updated to &quot;SUSPICIOUS&quot; in the database
-    And a moderation alert is created in the admin review queue for &quot;spammer-token-001&quot;
-    And no automatic ban is applied — the pet remains able to battle until a moderator acts
+  Background:
+    Given a moderator admin &quot;admin-mod-001&quot; is authenticated with a valid session cookie
 
-  @TC-SRV-SUSP-002
-  Scenario: Moderator reviews a SUSPICIOUS pet and submits an arena ban with a reason
-    Given a moderator is authenticated with a valid httpOnly SameSite=Strict admin session cookie
-    And pet &quot;spammer-token-001&quot; has status &quot;SUSPICIOUS&quot; in the moderation queue
-    When the moderator submits a ban action via POST /admin/api/pets/spammer-token-001/ban with reason &quot;Automated rapid-fire battles consistent with scripted bot behaviour&quot;
-    And the reason text is fewer than (admin_moderation_reason_max_chars = 500) characters
-    Then the pet status is updated to &quot;BANNED&quot; in the database
-    And an entry is written to admin_audit_log with action &quot;BAN&quot;, admin_id, ip_address_hash, and the reason in the detail JSONB column
-    And the server responds with HTTP 200
+  @TC-E2E-SUSP-001-01 @smoke
+  Scenario: Pet auto-flagged after exceeding 50 battles in 60-minute window
+    Given pet &quot;pet-susp-001&quot; exists with is_banned false
+    And pet &quot;pet-susp-001&quot; has 51 arena_matches rows with completedAt within the last 60 minutes
+    When the suspicious activity detection job runs
+    Then the database pets row for &quot;pet-susp-001&quot; has suspicious_flag set to true
+    And the database admin_audit_log has a row with action &quot;AUTO_FLAG&quot; and target_id &quot;pet-susp-001&quot;
+    And pet &quot;pet-susp-001&quot; is still able to enter arena battles (no automatic ban)
 
-  @TC-SRV-SUSP-003
-  Scenario: Banned pet cannot enter future arena matches
-    Given pet &quot;banned-token-002&quot; has status &quot;BANNED&quot; in the database
-    When &quot;banned-token-002&quot; attempts to join the matchmaking queue via POST /api/v1/arena/enter
-    Then the server responds with HTTP 403
-    And the response body contains error code &quot;PET_BANNED&quot;
-    And &quot;banned-token-002&quot; is not added to the Redis matchmaking sorted set
+  @TC-E2E-SUSP-001-02
+  Scenario: Pet NOT flagged when battle count is exactly at the threshold
+    Given pet &quot;pet-susp-002&quot; exists with is_banned false
+    And pet &quot;pet-susp-002&quot; has exactly 50 arena_matches rows with completedAt within the last 60 minutes
+    When the suspicious activity detection job runs
+    Then the database pets row for &quot;pet-susp-002&quot; does NOT have suspicious_flag set to true
+
+  @TC-E2E-SUSP-001-03 @contract
+  Scenario: Admin can view suspicious pets list
+    Given pet &quot;pet-susp-001&quot; has suspicious_flag true in the database
+    When the admin sends GET /admin/api/suspicious
+    Then the response status is 200
+    And &quot;pet-susp-001&quot; appears in the response data with a SUSPICIOUS badge
+
+  @TC-E2E-SUSP-001-04
+  Scenario: Moderator reviews suspicious pet and submits ban
+    Given pet &quot;pet-susp-001&quot; has suspicious_flag true in the database
+    And pet &quot;pet-susp-001&quot; is in the Redis sorted set &quot;leaderboard:global&quot;
+    When the admin sends POST /admin/api/pets/pet-susp-001/ban with reason &quot;Automated rapid-fire battles consistent with bot behavior&quot;
+    Then the response status is 200
+    And the database pets row for &quot;pet-susp-001&quot; has is_banned true
+    And the Redis sorted set &quot;leaderboard:global&quot; does NOT contain &quot;pet-susp-001&quot;
+    And the database admin_audit_log has a row with action &quot;BAN&quot; and admin_id &quot;admin-mod-001&quot; and reason containing &quot;bot behavior&quot;
+
+  @TC-E2E-SUSP-001-05
+  Scenario: Suspicious analytics event is emitted for auto-flagged pet
+    Given pet &quot;pet-susp-003&quot; has 52 arena_matches rows in the last 60 minutes
+    When the suspicious activity detection job runs
+    Then a &quot;suspicious_pet_flagged&quot; analytics event is emitted with pet_id &quot;pet-susp-003&quot; and battles_in_window 52
+
+  @TC-E2E-SUSP-001-06 @contract
+  Scenario: Detection job does not flag pets outside the rolling window
+    Given pet &quot;pet-susp-004&quot; has 55 arena_matches rows all with completedAt older than 60 minutes
+    When the suspicious activity detection job runs
+    Then the database pets row for &quot;pet-susp-004&quot; does NOT have suspicious_flag set to true
+
+  @TC-E2E-SUSP-001-07 @contract
+  Scenario: Banned pet is rejected from arena entry
+    Given pet &quot;pet-susp-005&quot; exists with is_banned true
+    And the pet owner holds token &quot;token-susp-005&quot;
+    When &quot;token-susp-005&quot; sends POST /api/v1/arena/enter with petId &quot;pet-susp-005&quot; mode &quot;RACE&quot; and acceptAI false
+    Then the response status is 403
+    And the response body error code is &quot;PET_BANNED&quot;
+    And pet &quot;pet-susp-005&quot; is not added to the matchmaking queue
 </code></pre>
 <h2 id="trading-systemfeature">trading-system.feature</h2>
-<pre><code class="language-gherkin">@US-TRADE-001 @FF_MARKETPLACE
-Feature: Marketplace Trading System — Pet Sales and Anti-Flip Protection (US-TRADE-001) [FF_MARKETPLACE]
-  As a pet owner
-  I want to list my pet for sale in the marketplace
-  So that I can trade pets with other players
+<pre><code class="language-gherkin">@p2 @FF_MARKETPLACE
+Feature: Pet Trading Marketplace (US-TRADE-001)
+  As a pet owner with surplus pets
+  I want to list my pet for trade and accept offers from other players
+  So that I can exchange pets and build my ideal collection
 
-  @TC-SRV-TRADE-001
-  Scenario: Feature flag controls marketplace access
-    Given FF_MARKETPLACE = false (feature disabled)
-    When POST /api/v1/marketplace/listings is called with a valid petToken
-    Then the system returns HTTP 403 with error code FEATURE_DISABLED
-    And error message is &quot;The marketplace feature is not currently available&quot;
-    When FF_MARKETPLACE is set to true
-    And the same request is resubmitted
-    Then the system returns HTTP 201 with created listing
+  Background:
+    Given the feature flag FF_MARKETPLACE is enabled
+    And pet &quot;pet-trade-seller&quot; with level 5 rarity &quot;RARE&quot; exists and is owned with token &quot;token-seller&quot;
+    And pet &quot;pet-trade-buyer&quot; with level 3 rarity &quot;COMMON&quot; exists and is owned with token &quot;token-buyer&quot;
 
-  @TC-SRV-TRADE-002
-  Scenario: Create marketplace listing with price validation
-    Given a pet owned by player A with petToken_A
-    And pet stats: level = 5, rarity = RARE
-    And minimum price formula: (level × 100) + (rarity_multiplier × 500) = (5 × 100) + (2 × 500) = 1500
-    When POST /api/v1/marketplace/listings is called with price_credits = 2000
-    Then the system returns HTTP 201 with:
-      | Field | Value |
-      | id | listing_uuid |
-      | status | active |
-      | price_credits | 2000 |
-      | listed_at | ISO-8601 timestamp |
-    And marketplace_listings row is created in PostgreSQL
+  @TC-E2E-TRADE-001-01 @contract
+  Scenario: Feature flag disabled returns FEATURE_DISABLED error
+    Given the feature flag FF_MARKETPLACE is disabled
+    When &quot;token-seller&quot; sends POST /api/v1/marketplace/listings with petId &quot;pet-trade-seller&quot; price 1200 description &quot;Well trained&quot;
+    Then the response status is 403
+    And the response body error code is &quot;FEATURE_DISABLED&quot;
 
-  @TC-SRV-TRADE-003
-  Scenario: Listing price below minimum rejected
-    Given a pet with minimum required price = 1500 credits
-    When POST /api/v1/marketplace/listings is called with price_credits = 1400
-    Then the system returns HTTP 400 with error code VALIDATION_ERROR
-    And error message indicates minimum price requirement
-    And no listing is created
+  @TC-E2E-TRADE-001-02 @contract @smoke
+  Scenario: Seller creates a marketplace listing at or above minimum price
+    Given the minimum price for &quot;pet-trade-seller&quot; is 1500 based on level 5 and rarity multiplier 2
+    When &quot;token-seller&quot; sends POST /api/v1/marketplace/listings with petId &quot;pet-trade-seller&quot; price 1500 description &quot;Ready to sell&quot;
+    Then the response status is 201
+    And the response body contains a &quot;listingId&quot; field
+    And the response body field &quot;petId&quot; is &quot;pet-trade-seller&quot;
+    And the database marketplace_listings has a row for &quot;pet-trade-seller&quot; with status &quot;active&quot;
 
-  @TC-SRV-TRADE-004
-  Scenario: Anti-flip protection prevents rapid re-listing
-    Given a pet sold in marketplace_transactions 3 days ago (within 7-day anti-flip window)
-    And the same pet is owned by a new buyer (marketplace_trade_antiflip_protection_days = 7)
-    When POST /api/v1/marketplace/listings is called to list the pet again
-    Then the system returns HTTP 400 with error code VALIDATION_ERROR
-    And error message is &quot;This pet cannot be re-listed within 7 days of purchase&quot;
-    And no new listing is created
+  @TC-E2E-TRADE-001-03 @contract
+  Scenario: Listing price below minimum formula is rejected
+    Given the minimum price for &quot;pet-trade-seller&quot; is 1500
+    When &quot;token-seller&quot; sends POST /api/v1/marketplace/listings with petId &quot;pet-trade-seller&quot; price 1400 description &quot;Cheap&quot;
+    Then the response status is 400
+    And the response body error code is &quot;VALIDATION_ERROR&quot;
+    And no marketplace_listings row is created
 
-  @TC-SRV-TRADE-005
-  Scenario: Purchase listing transfers ownership and applies platform fee
-    Given an active listing with price_credits = 1000 owned by seller_A
-    And buyer_B with a valid petToken and sufficient credits
-    And platform fee = 5% of price (trade_transaction_fee_percent = 5)
-    When POST /api/v1/marketplace/listings/:listingId/buy is called with buyer_B&#x27;s token
-    Then the system returns HTTP 200
-    And marketplace_transactions record is created with:
-      | Field | Value |
-      | listing_id | listing_uuid |
-      | pet_id | pet_uuid |
-      | price_credits | 1000 |
-      | fee_credits | FLOOR(1000 × 0.05) = 50 |
-      | seller_token_hash | SHA-256(seller_A_token) |
-      | buyer_token_hash | SHA-256(buyer_B_token) |
-      | completed_at | current timestamp |
-    And marketplace_listings.status is updated to &#x27;sold&#x27;
-    And marketplace_listings.completed_at is set
-    And seller_A receives 950 credits (1000 - 50 fee)
-    And buyer_B receives ownership of the pet
+  @TC-E2E-TRADE-001-04 @contract
+  Scenario: Anti-flip protection prevents re-listing within 7 days of purchase
+    Given pet &quot;pet-trade-seller&quot; was purchased from marketplace 3 days ago by the current owner
+    When &quot;token-seller&quot; sends POST /api/v1/marketplace/listings with petId &quot;pet-trade-seller&quot; price 1500 description &quot;Relisting&quot;
+    Then the response status is 400
+    And the response body error code is &quot;VALIDATION_ERROR&quot;
 
-  @TC-SRV-TRADE-006
-  Scenario: Cancel active listing
-    Given an active listing created by player_A
-    When DELETE /api/v1/marketplace/listings/:listingId is called with player_A&#x27;s petToken
-    Then the system returns HTTP 200
-    And marketplace_listings.status is updated to &#x27;cancelled&#x27;
-    And marketplace_listings.completed_at is set to NOW()
-    And the pet remains owned by player_A
+  @TC-E2E-TRADE-001-05 @contract @smoke
+  Scenario: Buyer purchases listing with atomic ownership transfer and 5 percent fee
+    Given an active listing &quot;listing-001&quot; for &quot;pet-trade-seller&quot; at price 1000
+    When &quot;token-buyer&quot; sends POST /api/v1/marketplace/listings/listing-001/buy
+    Then the response status is 200
+    And the response body field &quot;platformFee&quot; is 50
+    And the response body field &quot;sellerProceeds&quot; is 950
+    And the database marketplace_listings row for &quot;listing-001&quot; has status &quot;sold&quot;
+    And the database pets row for &quot;pet-trade-seller&quot; has owner_token_hash matching &quot;token-buyer&quot;
+    And the database marketplace_transactions has a row with transactionId and price 1000 and platformFee 50
 
-  @TC-SRV-TRADE-007
-  Scenario: Only listing owner can cancel
-    Given an active listing owned by player_A with listingId &quot;list-001&quot;
-    And player_B with a different petToken
-    When DELETE /api/v1/marketplace/listings/list-001 is called with player_B&#x27;s token
-    Then the system returns HTTP 403 with error code NOT_OWNER
-    And the listing remains active
+  @TC-E2E-TRADE-001-06
+  Scenario: Seller cancels active listing
+    Given an active listing &quot;listing-002&quot; for &quot;pet-trade-seller&quot;
+    When &quot;token-seller&quot; sends DELETE /api/v1/marketplace/listings/listing-002
+    Then the response status is 200
+    And the database marketplace_listings row for &quot;listing-002&quot; has status &quot;cancelled&quot;
+    And the database pets row for &quot;pet-trade-seller&quot; still has owner_token_hash matching &quot;token-seller&quot;
 
-  @TC-SRV-TRADE-008
-  Scenario: Purchase endpoint requires buyer authentication
-    Given an active listing
-    When POST /api/v1/marketplace/listings/:listingId/buy is called WITHOUT authentication
-    Then the system returns HTTP 401 with error code UNAUTHORIZED
-    And the listing is not marked as sold
+  @TC-E2E-TRADE-001-07 @contract
+  Scenario: Non-owner cannot cancel listing
+    Given an active listing &quot;listing-003&quot; for &quot;pet-trade-seller&quot;
+    When &quot;token-buyer&quot; sends DELETE /api/v1/marketplace/listings/listing-003
+    Then the response status is 403
+    And the response body error code is &quot;NOT_OWNER&quot;
+    And the database marketplace_listings row for &quot;listing-003&quot; still has status &quot;active&quot;
 
-  @TC-SRV-TRADE-009
-  Scenario: Browse marketplace listings
-    Given 50 active marketplace listings with varying prices and rarities
-    When GET /api/v1/marketplace/listings?page=1&amp;limit=20&amp;sortBy=price&amp;order=asc is called
-    Then the system returns HTTP 200 with:
-      | Field | Value |
-      | listings.length | 20 |
-      | meta.total | 50 |
-      | meta.page | 1 |
-    And listings are sorted by price ascending (lowest to highest)
-    And each listing includes pet summary: petId, rarity, level, owner name (masked)
+  @TC-E2E-TRADE-001-08 @contract
+  Scenario: Unauthenticated purchase attempt is rejected
+    Given an active listing &quot;listing-004&quot; for &quot;pet-trade-seller&quot;
+    When an unauthenticated POST request is made to /api/v1/marketplace/listings/listing-004/buy
+    Then the response status is 401
+    And the response body error code is &quot;UNAUTHORIZED&quot;
+    And the database marketplace_listings row for &quot;listing-004&quot; still has status &quot;active&quot;
 
-  @TC-SRV-TRADE-010
-  Scenario: Trade history private to pet owner
-    Given a pet with completed sale in marketplace_transactions
-    And the pet is now owned by a new buyer
-    When GET /api/v1/marketplace/history/:petId is called without authentication
-    Then the system returns HTTP 401 with error code UNAUTHORIZED
-    When GET /api/v1/marketplace/history/:petId is called with current owner&#x27;s petToken
-    Then the system returns HTTP 200 with complete transaction history
-    And includes: price_credits, fee_credits, seller_name (masked), completed_at
-    And transaction history is private to current owner only
+  @TC-E2E-TRADE-001-09 @contract
+  Scenario: Browse marketplace listings is public
+    Given 25 active marketplace_listings rows exist in the database
+    When a GET request is made to /api/v1/marketplace/listings with page 1 and limit 20 without authentication
+    Then the response status is 200
+    And the response body &quot;data.listings&quot; array contains exactly 20 entries
+    And the response meta field &quot;total&quot; is 25
+
+  @TC-E2E-TRADE-001-10a @contract
+  Scenario: Unauthenticated trade history request returns 401
+    Given pet &quot;pet-trade-seller&quot; has one marketplace_transactions record
+    When a GET request is made to /api/v1/marketplace/history/pet-trade-seller without authentication
+    Then the response status is 401
+    And the response body error code is &quot;UNAUTHORIZED&quot;
+
+  @TC-E2E-TRADE-001-10b @contract
+  Scenario: Authenticated owner can retrieve their own trade history
+    Given pet &quot;pet-trade-seller&quot; has one marketplace_transactions record
+    When &quot;token-seller&quot; sends GET /api/v1/marketplace/history/pet-trade-seller
+    Then the response status is 200
+    And the response body &quot;data.trades&quot; is a non-empty array
 </code></pre>
 <h2 id="training-foodfeature">training-food.feature</h2>
-<pre><code class="language-gherkin">Feature: Training and Food System (US-TRAIN-001, US-FOOD-001)
+<pre><code class="language-gherkin">@p0 @smoke
+Feature: Pet Training and Food System (US-TRAIN-001, US-FOOD-001)
+  As a pet owner
+  I want to train my pet daily and feed it special food items
+  So that its stats improve and it performs better in arena battles
 
-  @TC-SRV-TRAIN-001
-  Scenario: Training action increments a stat within bounds and enforces the daily action cap
-    Given pet &quot;trainee-token-001&quot; has used 0 training actions today
-    When the owner submits a training request via POST /api/v1/training with body { &quot;training_type&quot;: &quot;STRENGTH&quot; } for &quot;trainee-token-001&quot;
-    Then the server increments the strength stat by a value between (training_stat_points_min = 1) and (training_stat_points_max = 3) points
-    And a training_logs row is written for &quot;trainee-token-001&quot; bringing today&#x27;s training log count to 1
-    When the owner submits two more valid POST /api/v1/training requests for &quot;trainee-token-001&quot; on the same day
-    Then the count of training_logs rows today for &quot;trainee-token-001&quot; reaches (training_actions_per_day = 3)
-    When the owner submits a fourth POST /api/v1/training request for &quot;trainee-token-001&quot; on the same day
-    Then the server responds with HTTP 400 and error code &quot;TRAINING_LIMIT_REACHED&quot;
+  Background:
+    Given pet &quot;pet-train-001&quot; with speed 20 strength 20 stamina 20 level 2 exists and is owned with token &quot;token-train-001&quot;
 
-  @TC-SRV-TRAIN-002
-  Scenario: Level formula computes deterministically from accumulated stat sum
-    Given pet &quot;leveler-token-001&quot; has a stat triplet (speed=20, strength=10, stamina=5) summing to 35 stat points
-    When the level computation runs for &quot;leveler-token-001&quot;
-    Then pet.level equals FLOOR(35 / (pet_level_formula_divisor = 10)) = 3
-    When pet &quot;leveler-token-001&quot; later reaches a stat sum of 1050
-    Then pet.level equals MIN(FLOOR(1050 / 10), pet_level_max = 100) = 100
-    And the level value never exceeds (pet_level_max = 100)
+  @TC-E2E-TRAIN-001-01 @contract @smoke
+  Scenario: Training action increments the correct stat within bounds
+    Given pet &quot;pet-train-001&quot; has 0 training actions today
+    When &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/train with trainingType &quot;RUN&quot;
+    Then the response status is 200
+    And the response body &quot;updatedStats.speed&quot; is between 21 and 23
+    And the response body &quot;statDelta&quot; is between 1 and 3
+    And the response body &quot;actionsRemainingToday&quot; is 2
+    And the database pets row for &quot;pet-train-001&quot; has stat_speed between 21 and 23
 
-  @TC-SRV-TRAIN-003
-  Scenario: Temporary food buff applies bonus stat during an arena battle and expires after duration
-    Given pet &quot;buffed-pet-token&quot; has a base speed stat of 50
-    And a food buff of (food_buff_example_temp_amount_stat_points = 5) speed points has been applied to &quot;buffed-pet-token&quot; via POST /api/v1/food/apply with the food_buffs row recording expires_at (food_buff_example_temp_duration_hours = 24) hours from now
-    When a Race battle begins for &quot;buffed-pet-token&quot; within the buff duration window
-    Then the battle engine reads &quot;buffed-pet-token&quot; effective speed as 55 for the duration of that match
-    And the opponent pet&#x27;s stats are read without any buff modifier
-    When (food_buff_example_temp_duration_hours = 24) hours have elapsed since the buff was applied
-    Then the food_buffs row for &quot;buffed-pet-token&quot; has expired_at set to a non-null timestamp and &quot;buffed-pet-token&quot; effective speed reverts to the base value of 50
+  @TC-E2E-TRAIN-001-02 @smoke
+  Scenario: Daily training limit of 3 actions is enforced
+    Given pet &quot;pet-train-001&quot; has 3 training_logs rows for today in the database
+    When &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/train with trainingType &quot;STAMINA&quot;
+    Then the response status is 400
+    And the response body error code is &quot;TRAINING_LIMIT_REACHED&quot;
+
+  @TC-E2E-TRAIN-001-03
+  Scenario: Training blocked when target stat is already at maximum of 100
+    Given the database pets row for &quot;pet-train-001&quot; has stat_speed 100
+    When &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/train with trainingType &quot;RUN&quot;
+    Then the response status is 400
+    And the response body error code is &quot;STAT_AT_MAXIMUM&quot;
+
+  @TC-E2E-TRAIN-001-04 @contract
+  Scenario: Unauthenticated training request is rejected
+    When an unauthenticated POST request is made to /api/v1/pets/pet-train-001/train with trainingType &quot;RUN&quot;
+    Then the response status is 401
+    And the response body error code is &quot;UNAUTHORIZED&quot;
+
+  @TC-E2E-TRAIN-001-05 @contract
+  Scenario: Training with wrong owner token is rejected
+    Given pet &quot;pet-other-001&quot; exists and is owned with token &quot;token-other-001&quot;
+    When &quot;token-other-001&quot; sends POST /api/v1/pets/pet-train-001/train with trainingType &quot;STRENGTH&quot;
+    Then the response status is 403
+    And the response body error code is &quot;NOT_OWNER&quot;
+
+  @TC-E2E-TRAIN-001-06
+  Scenario: Pet stats and training summary are returned via stats endpoint
+    Given pet &quot;pet-train-001&quot; has 2 training_logs rows for today in the database
+    When a GET request is made to /api/v1/pets/pet-train-001/stats without authentication
+    Then the response status is 200
+    And the response body &quot;trainingActionsToday&quot; is 2
+    And the response body &quot;actionsRemainingToday&quot; is 1
+    And the response body &quot;stats&quot; contains speed strength stamina and level fields
+
+  @TC-E2E-FOOD-001-01 @contract @smoke
+  Scenario: Temporary food buff is applied and reflected in stats
+    Given pet &quot;pet-train-001&quot; has 0 active food_buffs rows in the database
+    When &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/feed with buffType &quot;speed_berry&quot; stat &quot;speed&quot; magnitude 5 and isPermanent false
+    Then the response status is 200
+    And the response body &quot;buffApplied.stat&quot; is &quot;speed&quot;
+    And the response body &quot;buffApplied.magnitude&quot; is 5
+    And the response body &quot;buffApplied.isPermanent&quot; is false
+    And the response body &quot;buffApplied.expiresAt&quot; is a non-null ISO 8601 timestamp
+    And the database food_buffs row for &quot;pet-train-001&quot; has expires_at set
+
+  @TC-E2E-FOOD-001-02
+  Scenario: Permanent food buff increments base stat with no expiry
+    When &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/feed with buffType &quot;power_mushroom&quot; stat &quot;strength&quot; magnitude 3 and isPermanent true
+    Then the response status is 200
+    And the response body &quot;buffApplied.isPermanent&quot; is true
+    And the response body &quot;buffApplied.expiresAt&quot; is null
+    And the database pets row for &quot;pet-train-001&quot; has stat_strength incremented by 3
+
+  @TC-E2E-FOOD-001-03
+  Scenario: Feeding food buff blocked when target stat is already at maximum of 100
+    Given the database pets row for &quot;pet-train-001&quot; has stat_strength 100
+    When &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/feed with buffType &quot;power_mushroom&quot; stat &quot;strength&quot; magnitude 3 and isPermanent true
+    Then the response status is 400
+    And the response body error code is &quot;STAT_AT_MAXIMUM&quot;
+    And the database food_buffs table has no new row for &quot;pet-train-001&quot;
+
+  @TC-E2E-FOOD-001-04
+  Scenario: Active temporary food buff is included in pet stats response
+    Given pet &quot;pet-train-001&quot; has an active food_buffs row with stat &quot;speed&quot; magnitude 5 expires_at 24 hours from now
+    When a GET request is made to /api/v1/pets/pet-train-001/stats without authentication
+    Then the response status is 200
+    And the response body &quot;activeFoodBuffs&quot; array contains one entry with stat &quot;speed&quot; magnitude 5 and isPermanent false
+
+  @TC-E2E-FOOD-001-05
+  Scenario: Active food buff stat is included in arena battle effective stat calculation
+    Given pet &quot;pet-train-001&quot; has base stat_speed 50
+    And pet &quot;pet-train-001&quot; has an active food_buffs row with stat &quot;speed&quot; magnitude 5 expires_at 24 hours from now
+    And pet &quot;pet-other-001&quot; exists and is owned with token &quot;token-other-001&quot;
+    And both pets have 0 battles this hour
+    When &quot;token-train-001&quot; sends POST /api/v1/arena/enter with petId &quot;pet-train-001&quot; mode &quot;RACE&quot; and acceptAI false
+    And &quot;token-other-001&quot; sends POST /api/v1/arena/enter with petId &quot;pet-other-001&quot; mode &quot;RACE&quot; and acceptAI false
+    Then the arena_matches row for the completed battle has a battleLog referencing effective speed 55 for &quot;pet-train-001&quot;
+
+  @TC-E2E-TRAIN-001-07
+  Scenario Outline: Training type maps to the correct stat
+    Given pet &quot;pet-train-001&quot; has 0 training actions today
+    When &quot;token-train-001&quot; sends POST /api/v1/pets/pet-train-001/train with trainingType &quot;&lt;type&gt;&quot;
+    Then the response status is 200
+    And the response body &quot;updatedStats.&lt;stat&gt;&quot; is greater than 20
+
+    Examples:
+      | type     | stat     |
+      | RUN      | speed    |
+      | STRENGTH | strength |
+      | STAMINA  | stamina  |
 </code></pre></main>
   </div>
   <script type="module">

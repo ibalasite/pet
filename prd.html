@@ -1428,10 +1428,10 @@
 <tr><td><code>stat_stamina</code></td><td>pets</td><td>SMALLINT</td><td>NOT NULL, DEFAULT 10, CHECK (1-100)</td><td>Base stamina stat</td></tr>
 <tr><td><code>level</code></td><td>pets</td><td>SMALLINT</td><td>NOT NULL, DEFAULT 1, CHECK (1-100)</td><td>Derived from total training actions completed; formula: FLOOR(total_training_actions / 10) capped at 100; used in leaderboard composite score and trade price formula</td></tr>
 <tr><td><code>owner_email_hash</code></td><td>pets</td><td>VARCHAR(64)</td><td>NULLABLE</td><td>SHA-256 hash of owner email; NULL if unclaimed</td></tr>
-<tr><td><code>access_token_hash</code></td><td>pet_access_tokens</td><td>VARCHAR(64)</td><td>UNIQUE, NOT NULL</td><td>SHA-256 hash of the unique URL token</td></tr>
-<tr><td><code>claim_code</code></td><td>claim_tokens</td><td>VARCHAR(6)</td><td>NOT NULL</td><td>6-digit numeric code</td></tr>
-<tr><td><code>claim_code_expires_at</code></td><td>claim_tokens</td><td>TIMESTAMPTZ</td><td>NOT NULL</td><td>15 minutes from creation</td></tr>
-<tr><td><code>claim_code_used</code></td><td>claim_tokens</td><td>BOOLEAN</td><td>NOT NULL, DEFAULT FALSE</td><td>Prevents token reuse</td></tr>
+<tr><td><code>owner_token_hash</code></td><td>pets</td><td>VARCHAR(64)</td><td>UNIQUE, NOT NULL</td><td>SHA-256 hash of the pet access token; stored in pets table (not a separate table)</td></tr>
+<tr><td><code>code_hash</code></td><td>claim_codes</td><td>VARCHAR(64)</td><td>NOT NULL</td><td>SHA-256 hash of the 6-digit OTP code</td></tr>
+<tr><td><code>expires_at</code></td><td>claim_codes</td><td>TIMESTAMPTZ</td><td>NOT NULL</td><td>OTP expiry: created_at + 15 minutes</td></tr>
+<tr><td><code>used_at</code></td><td>claim_codes</td><td>TIMESTAMPTZ</td><td>NULLABLE</td><td>NULL until OTP is successfully validated; set on first successful use to prevent reuse</td></tr>
 <tr><td><code>battle_outcome</code></td><td>battle_records</td><td>ENUM</td><td>NOT NULL</td><td>&#x27;WIN&#x27;, &#x27;LOSS&#x27;, &#x27;DRAW&#x27;</td></tr>
 <tr><td><code>is_ai_match</code></td><td>battle_records</td><td>BOOLEAN</td><td>NOT NULL, DEFAULT FALSE</td><td>True if opponent was AI</td></tr>
 <tr><td><code>arena_mode</code></td><td>battle_records</td><td>ENUM</td><td>NOT NULL</td><td>&#x27;RACE&#x27;, &#x27;SUMO&#x27;</td></tr>

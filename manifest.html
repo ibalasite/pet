@@ -482,15 +482,15 @@
 <p>本文件（MANIFEST.md）是 gendoc pipeline 的<strong>執行前清單</strong>，在任何文件實際生成之前產出。</p>
 <p>它回答三個問題：</p>
 <ol><li><strong>量化錨點是什麼？</strong>（§2.1）— 從上游文件萃取的數字，成為所有下游品質規則的基礎</li><li><strong>哪些步驟要跑？</strong>（§2.2）— 依 pipeline.json 條件篩選，明確標示 Active / Skipped</li><li><strong>每步驗收標準是什麼？</strong>（§4）— gate-check 將逐步核對，不符即失敗</li></ol>
-<blockquote><p>修改本文件等同於修改驗收標準。若需調整某步驟的量化門檻，應在 DRYRUN 步驟重新執行，而非直接手動編輯本文件的 <code>{{PLACEHOLDER}}</code> 外的值。</p></blockquote>
+<blockquote><p>修改本文件等同於修改驗收標準。若需調整某步驟的量化門檻，應在 DRYRUN 步驟重新執行，而非直接手動編輯本文件的量化錨點數值。</p></blockquote>
 <hr>
 <h2 id="2-execution-context執行環境">§2 Execution Context（執行環境）</h2>
 <h3 id="21-system-parameters系統量化錨點">§2.1 System Parameters（系統量化錨點）</h3>
 <p>以下數值由 DRYRUN 生成步驟從上游文件自動計算，是<strong>所有下游步驟 gate-check 的量化基準</strong>。</p>
 <table>
 <tr><th>參數</th><th>值</th><th>說明</th></tr>
-<tr><td><code>entity_count</code></td><td>40</td><td>EDD.md classDiagram 中的 class 數量（grep -cE &#x27;^\s*class\s+[A-Za-z]&#x27; docs/EDD.md）；影響 SCHEMA min_table_count</td></tr>
-<tr><td><code>rest_endpoint_count</code></td><td>33</td><td>EDD.md 中的 REST 端點數（§5 API tables + inline refs，deduplicated，排除流程圖縮寫 POST /claim）；影響 API min_endpoint_count</td></tr>
+<tr><td><code>entity_count</code></td><td>42</td><td>EDD.md classDiagram 中的 class 數量（grep -c &#x27;^\s*class &#x27;）；影響 SCHEMA min_table_count</td></tr>
+<tr><td><code>rest_endpoint_count</code></td><td>34</td><td>EDD.md 中的 REST 端點數（&lt;&lt;REST&gt;&gt;、&lt;&lt;Interface&gt;&gt;、HTTP 動詞）；若計算結果 &lt; 5，使用保守預設值 10（避免過低門檻無意義）；影響 API min_endpoint_count</td></tr>
 <tr><td><code>user_story_count</code></td><td>18</td><td>PRD.md 中 US- 標題數量（grep -c &#x27;^## US-\</td><td>^### US-&#x27;）；影響 RTM min_row_count、BDD min_scenario_count</td></tr>
 <tr><td><code>arch_layer_count</code></td><td>19</td><td>ARCH.md §3 Tech Stack 表格非標頭列數（最小值 4）；影響 test-plan min_h2_sections</td></tr>
 </table>
@@ -541,7 +541,7 @@
 <blockquote><p>Status 值：<code>PENDING</code>（尚未執行）、<code>DONE</code>（已完成）、<code>FAILED</code>（未達品質門檻）</p></blockquote>
 <hr>
 <h2 id="4-per-step-completeness-standards逐步完整性標準">§4 Per-Step Completeness Standards（逐步完整性標準）</h2>
-<p>以下每行定義 gate-check 在驗收該步驟輸出時的最低要求。所有帶 <code>{{PLACEHOLDER}}</code> 的欄位在 DRYRUN 生成時由量化錨點計算填入。</p>
+<p>以下每行定義 gate-check 在驗收該步驟輸出時的最低要求。所有量化門檻欄位在 DRYRUN 生成時由上游文件錨點計算填入。</p>
 <table>
 <tr><th>Step ID</th><th>Output File</th><th>Min §Sections</th><th>Quantitative Rules</th><th>Anti-Fake Rules</th></tr>
 <tr><td>IDEA</td><td>docs/IDEA.md</td><td>3</td><td>至少 1 個 Persona 卡片；Elevator Pitch 不得為空</td><td>no_bare_placeholder；no_trivial_entity_names</td></tr>
@@ -552,7 +552,7 @@
 <tr><td>VDD</td><td>docs/VDD.md</td><td>4</td><td>至少 5 個 Design Token；Color Palette 不得為空</td><td>no_bare_placeholder</td></tr>
 <tr><td>EDD</td><td>docs/EDD.md</td><td>8</td><td>§3.3 不含 placeholder；§7 SCALE 含具體數字；UML 9 大圖已生成</td><td>no_bare_placeholder；no_duplicate_paragraphs_150；min_section_words_30</td></tr>
 <tr><td>ARCH</td><td>docs/ARCH.md</td><td>6</td><td>C4 L1/L2/L3 三圖均存在；§14 ADR ≥ 1 條目；§15 12 項 NFR 均已驗證</td><td>no_bare_placeholder；no_duplicate_paragraphs_150</td></tr>
-<tr><td>API</td><td>docs/API.md</td><td>5</td><td>min_endpoint_count = max(28, 5)；含 Authentication / Error Codes / Rate Limiting 章節</td><td>no_bare_placeholder；required_keywords_per_section</td></tr>
+<tr><td>API</td><td>docs/API.md</td><td>5</td><td>min_endpoint_count = max(34, 5)；含 Authentication / Error Codes / Rate Limiting 章節</td><td>no_bare_placeholder；required_keywords_per_section</td></tr>
 <tr><td>SCHEMA</td><td>docs/SCHEMA.md</td><td>4</td><td>min_table_count = max(42, 3)；含 Indexes / Migration 章節</td><td>no_bare_placeholder；no_trivial_entity_names</td></tr>
 <tr><td>FRONTEND</td><td>docs/FRONTEND.md</td><td>4</td><td>至少 3 個 Component；E2E 覆蓋範圍不得為空</td><td>no_bare_placeholder</td></tr>
 <tr><td>AUDIO</td><td>docs/AUDIO.md</td><td>3</td><td>BGM/SFX 清單至少各 1 項；音效觸發邏輯不得為空</td><td>no_bare_placeholder</td></tr>
@@ -571,8 +571,8 @@
 <tr><td>DEVELOPER_GUIDE</td><td>docs/DEVELOPER_GUIDE.md</td><td>3</td><td>日常操作命令 ≥ 5 條；Make targets 不得為空</td><td>no_bare_placeholder</td></tr>
 <tr><td>UML-CICD</td><td>docs/diagrams/cicd-*.md</td><td>—</td><td>5 張 CI/CD UML 圖全部存在</td><td>no_bare_placeholder</td></tr>
 <tr><td>ALIGN</td><td>docs/ALIGN_REPORT.md</td><td>3</td><td>CRITICAL 問題數 = 0；HIGH 問題數 = 0（或已全部 FIX）</td><td>no_bare_placeholder</td></tr>
-<tr><td>CONTRACTS</td><td>docs/blueprint/contracts/</td><td>—</td><td>openapi.yaml 通過 openapi-spec-validator；path 數量 ≥ max(28, 5)</td><td>no_bare_placeholder</td></tr>
-<tr><td>MOCK</td><td>docs/blueprint/mock/</td><td>—</td><td>main.py --check 可成功啟動；Mock endpoint 數量 ≥ max(28, 5)</td><td>no_bare_placeholder</td></tr>
+<tr><td>CONTRACTS</td><td>docs/blueprint/contracts/</td><td>—</td><td>openapi.yaml 通過 openapi-spec-validator；path 數量 ≥ max(34, 5)</td><td>no_bare_placeholder</td></tr>
+<tr><td>MOCK</td><td>docs/blueprint/mock/</td><td>—</td><td>main.py --check 可成功啟動；Mock endpoint 數量 ≥ max(34, 5)</td><td>no_bare_placeholder</td></tr>
 <tr><td>PROTOTYPE</td><td>docs/pages/prototype/</td><td>—</td><td>index.html 存在且可瀏覽；至少 3 個 Screen 頁面</td><td>no_bare_placeholder</td></tr>
 <tr><td>HTML</td><td>docs/pages/</td><td>—</td><td>index.html 存在；所有 docs/*.md 均有對應連結</td><td>no_bare_placeholder</td></tr>
 </table>
@@ -581,7 +581,7 @@
 <p>gate-check 在驗收每份輸出文件時，除量化規則外，還會執行以下五條<strong>防偽造規則</strong>。任一規則失敗即視為 FAILED。（JSON key 使用底線+數字格式，如 <code>min_section_words_30</code>）</p>
 <table>
 <tr><th>規則名稱</th><th>觸發條件</th><th>說明</th></tr>
-<tr><td><strong>no_bare_placeholder</strong></td><td>文件中殘留未替換的 <code>{{...}}</code> 語法</td><td>所有 <code>{{PLACEHOLDER}}</code> 必須在生成時替換為真實內容。殘留 placeholder 代表生成不完整，等同於「空白填表」。</td></tr>
+<tr><td><strong>no_bare_placeholder</strong></td><td>文件中殘留未替換的雙花括號語法（如 <code>{</code> + <code>{...}</code> + <code>}</code>）</td><td>所有動態欄位必須在生成時替換為真實內容。殘留未替換欄位代表生成不完整，等同於「空白填表」。</td></tr>
 <tr><td><strong>min_section_words_30</strong></td><td>任何 <code>##</code> 或 <code>###</code> 章節的正文字數不足 30 字</td><td>每個非標題章節的實質內容不得少於 30 個字（中英文均計）。避免「章節標題存在但內容為空」的偽完成。</td></tr>
 <tr><td><strong>no_duplicate_paragraphs_150</strong></td><td>文件中存在兩段以上完全相同且長度 ≥ 150 字元的段落</td><td>禁止跨章節複製貼上。相同段落出現 ≥ 2 次代表 AI 以重複填充代替實質內容，屬偽造。</td></tr>
 <tr><td><strong>required_keywords_per_section</strong></td><td>特定章節缺少必要關鍵字（依步驟類型定義）</td><td>例如：API.md 的 Authentication 章節必須包含 <code>Bearer</code> 或 <code>API Key</code>；Error Codes 章節必須包含 <code>4xx</code> 或 <code>5xx</code>。缺少關鍵字代表章節為空洞佔位。</td></tr>

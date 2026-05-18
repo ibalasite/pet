@@ -1,261 +1,450 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roles · Pixel Pet Arena Admin</title>
-  <link rel="stylesheet" href="assets/admin-style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roles — Pixel Pet Arena Admin</title>
+  <link href="assets/admin-style.css" rel="stylesheet">
 </head>
 <body>
 
 <header class="admin-topnav">
-  <a href="../../index.html" class="back-link">← 文件站</a>
-  <span class="topnav-title">🛡️ Pixel Pet Arena Admin</span>
-  <div class="topnav-right">
-    <span class="current-user">System Admin (super_admin)</span>
-    <button class="logout-btn" onclick="location.href='admin-login.html'">Logout</button>
-  </div>
+  <div class="topnav-brand">🛡️ <span>Pixel Pet Arena</span> Admin</div>
+  <nav class="topnav-actions">
+    <a href="../../../index.html" class="back-link">← 文件站</a>
+    <span class="topnav-user">👤 Super Admin</span>
+    <button class="btn btn-sm btn-secondary" id="logoutBtn">登出</button>
+  </nav>
 </header>
 
-<nav class="admin-sidebar">
-  <div class="sidebar-brand">🛡️ Admin Portal</div>
-  <ul class="sidebar-nav">
-    <li class="nav-item"><a href="../../admin-dashboard.html">📊 Dashboard</a></li>
-    <li class="nav-item"><a href="admin-users.html">👥 Users</a></li>
-    <li class="nav-item active"><a href="admin-roles.html">🗝️ Roles</a></li>
-    <li class="nav-item"><a href="admin-audit-log.html">📜 Audit Log</a></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>🐾 Pet Moderation</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>🏆 Leaderboard</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>⚙️ Runtime Config</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>📧 Email Monitor</span></li>
-    <li class="nav-item disabled" title="Coming Soon"><span>📈 Analytics</span></li>
-  </ul>
-</nav>
+<div class="admin-layout">
+  <div id="sidebarMount"></div>
 
-<main class="admin-main">
-  <div class="page-header">
-    <h1 class="page-title">🗝️ Role Management</h1>
-    <button class="btn btn-primary" onclick="openModal('newRoleModal')">+ New Role</button>
+  <main class="admin-main">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Roles</h1>
+        <p class="page-subtitle">RBAC 角色管理 — v2.0 三角色系統</p>
+      </div>
+      <button class="btn btn-primary" id="addUserBtn">+ 新增 Admin 用戶</button>
+    </div>
+
+    <!-- Role Cards -->
+    <div class="roles-grid" id="rolesGrid"></div>
+
+    <!-- Cross-Role Permission Matrix — ADMIN_IMPL v2.0 §1.3 -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header">
+        <h2>權限對照表</h2>
+        <span class="text-muted" style="font-size:12px">ADMIN_IMPL v2.0 §1.3</span>
+      </div>
+      <div class="data-table-wrap">
+        <table id="permMatrix">
+          <thead>
+            <tr>
+              <th>功能 / 操作</th>
+              <th style="text-align:center">🔴 Super Admin</th>
+              <th style="text-align:center">🟡 Moderator</th>
+              <th style="text-align:center">🔵 Read Only</th>
+            </tr>
+          </thead>
+          <tbody id="permMatrixBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Users Table -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Admin 用戶列表</h2>
+        <span class="text-muted" id="userCountLabel"></span>
+      </div>
+      <div class="data-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>用戶名</th>
+              <th>姓名</th>
+              <th>Email</th>
+              <th>角色</th>
+              <th>狀態</th>
+              <th>MFA</th>
+              <th>最後登入</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>新增 Admin 用戶</h3>
+      <button class="modal-close" id="closeAddModalBtn">✕</button>
+    </div>
+    <p style="font-size:12.5px;color:var(--admin-text-secondary);margin-bottom:1rem">
+      新用戶首次登入時需完成 TOTP 設定
+    </p>
+    <div class="form-group">
+      <label for="newUsername">帳號</label>
+      <input type="text" id="newUsername" class="form-control" placeholder="英文小寫帳號（3–32 字元）" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label for="newPassword">初始密碼</label>
+      <input type="password" id="newPassword" class="form-control" placeholder="至少 12 字元" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label for="newRole">角色</label>
+      <select id="newRole" class="form-control">
+        <option value="moderator">內容審查員 (moderator)</option>
+        <option value="read_only">唯讀分析師 (read_only)</option>
+      </select>
+    </div>
+    <p id="addUserError" style="display:none;color:var(--admin-danger);font-size:12.5px;margin-top:-0.5rem"></p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="cancelAddModalBtn">取消</button>
+      <button class="btn btn-primary" id="confirmAddBtn">建立帳號</button>
+    </div>
   </div>
+</div>
 
-  <div class="role-grid" id="roleGrid"></div>
-</main>
-
-<!-- New Role Modal -->
-<div class="modal-overlay" id="newRoleModal" role="dialog" aria-modal="true" aria-labelledby="newRoleTitle">
-  <div class="modal-card">
-    <h3 id="newRoleTitle">+ New Role</h3>
-    <p class="modal-desc">Custom roles inherit no permissions by default. Enable permissions after creation.</p>
-    <form id="newRoleForm" onsubmit="return submitNewRole(event)">
-      <div class="form-group">
-        <label for="newRoleId">Role ID</label>
-        <input type="text" id="newRoleId" class="form-input mono" required pattern="[a-z_]{3,32}" placeholder="content_lead" />
-      </div>
-      <div class="form-group">
-        <label for="newRoleDisplay">Display name</label>
-        <input type="text" id="newRoleDisplay" class="form-input" required placeholder="Content Lead" />
-      </div>
-      <div class="form-group">
-        <label for="newRoleDesc">Description</label>
-        <textarea id="newRoleDesc" class="form-textarea" rows="3" required placeholder="What can this role do?"></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('newRoleModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Create role</button>
-      </div>
-    </form>
+<!-- TOTP Reset Confirm Modal -->
+<div class="modal-overlay" id="totpResetModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>重置 TOTP</h3>
+      <button class="modal-close" id="closeTotpModalBtn">✕</button>
+    </div>
+    <p id="totpResetDesc" style="font-size:13.5px;color:var(--admin-text-secondary);line-height:1.6"></p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="cancelTotpBtn">取消</button>
+      <button class="btn btn-danger" id="confirmTotpBtn">確認重置</button>
+    </div>
   </div>
 </div>
 
 <script src="assets/admin-mock.js"></script>
 <script>
-  // Build a per-role mutable permission set so toggling is local to this page.
-  const rolePermissionState = {};
-  ADMIN_MOCK.roles.forEach((r) => {
-    rolePermissionState[r.id] = new Set(r.permissions);
-  });
+(function () {
+  'use strict';
 
-  // Group permissions by module for chip layout
-  function permissionsByModule() {
-    const map = {};
-    ADMIN_MOCK.permissions.forEach((p) => {
-      if (!map[p.module]) map[p.module] = [];
-      map[p.module].push(p);
-    });
-    return map;
+  const SAFE_PAGES = { 'admin-login.html': 'admin-login.html' };
+  function safeNav(page) { if (SAFE_PAGES[page]) location.href = SAFE_PAGES[page]; }
+
+  if (typeof ADMIN_MOCK === 'undefined' || typeof renderSidebar === 'undefined') {
+    console.error('admin-mock.js not loaded'); return;
   }
 
-  function moduleLabel(mod) {
-    const labels = {
-      pet:         '🐾 Pet',
-      leaderboard: '🏆 Leaderboard',
-      battle:      '⚔️ Battle',
-      user:        '👥 User',
-      role:        '🗝️ Role',
-      audit:       '📜 Audit',
-      config:      '⚙️ Config',
-      email:       '📧 Email',
-      analytics:   '📈 Analytics',
-      gdpr:        '🛡️ GDPR',
-    };
-    return labels[mod] || mod;
+  /* ── Sidebar ────────────────────────────────────────────── */
+  const sidebarMount = document.getElementById('sidebarMount');
+  if (sidebarMount && sidebarMount.parentNode) {
+    sidebarMount.parentNode.replaceChild(renderSidebar('roles'), sidebarMount);
   }
 
-  function renderRoleCards() {
-    const grid = document.getElementById('roleGrid');
-    grid.textContent = '';
+  /* ── Logout ─────────────────────────────────────────────── */
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', function () { safeNav('admin-login.html'); });
 
-    ADMIN_MOCK.roles.forEach((role) => {
+  /* ── Local users copy (mutable for prototype) ───────────── */
+  const users = ADMIN_MOCK.users.map(function (u) { return Object.assign({}, u); });
+
+  /* ── User count label ───────────────────────────────────── */
+  const countLabel = document.getElementById('userCountLabel');
+  if (countLabel) countLabel.textContent = users.length + ' 位成員';
+
+  /* ── Roles Grid ─────────────────────────────────────────── */
+  const rolesGrid = document.getElementById('rolesGrid');
+  if (rolesGrid) {
+    ADMIN_MOCK.roles.forEach(function (r) {
+      // Card container
       const card = document.createElement('div');
       card.className = 'role-card';
-      card.dataset.roleId = role.id;
 
-      // Head
-      const head = document.createElement('div');
-      head.className = 'role-card-head';
+      // Card header
+      const header = document.createElement('div');
+      header.className = 'role-card-header';
 
-      const titleWrap = document.createElement('div');
-      const tag = document.createElement('span');
-      tag.className = 'role-tag ' + role.color_class;
-      tag.textContent = role.id;
-      const h = document.createElement('h3');
-      h.style.marginTop = '8px';
-      h.textContent = role.display;
-      titleWrap.appendChild(tag);
-      titleWrap.appendChild(h);
+      const nameEl = document.createElement('div');
+      nameEl.className = 'role-card-name';
+      nameEl.textContent = r.display_name;
 
-      const editBtn = document.createElement('button');
-      editBtn.className = 'btn';
-      editBtn.textContent = 'Edit Permissions';
-      editBtn.addEventListener('click', () => togglePanel(role.id));
+      const badgeEl = roleBadge(r.id);  // HTMLElement from admin-mock.js
+      header.appendChild(nameEl);
+      header.appendChild(badgeEl);
+      card.appendChild(header);
 
-      head.appendChild(titleWrap);
-      head.appendChild(editBtn);
-      card.appendChild(head);
-
-      // Description + meta
-      const desc = document.createElement('p');
-      desc.className = 'text-dim';
-      desc.style.fontSize = '12px';
-      desc.style.margin = '0 0 12px';
-      desc.textContent = role.description;
-      card.appendChild(desc);
-
+      // Meta
       const meta = document.createElement('div');
-      meta.className = 'role-meta';
-      meta.appendChild(document.createTextNode('Assigned users: '));
-      const count = document.createElement('span');
-      count.className = 'role-user-count';
-      count.textContent = role.user_count;
-      meta.appendChild(count);
-      meta.appendChild(document.createTextNode(' · permissions: '));
-      const permCount = document.createElement('span');
-      permCount.className = 'role-user-count';
-      permCount.textContent = rolePermissionState[role.id].size;
-      meta.appendChild(permCount);
+      meta.className = 'role-card-meta';
+      meta.textContent = r.user_count + ' 位用戶';
       card.appendChild(meta);
 
-      // Permission panel (collapsed)
-      const panel = document.createElement('div');
-      panel.className = 'permission-panel';
-      panel.id = 'panel-' + role.id;
+      // Description
+      const desc = document.createElement('div');
+      desc.className = 'role-card-desc';
+      desc.textContent = r.description;
+      card.appendChild(desc);
 
-      const grouped = permissionsByModule();
-      Object.keys(grouped).forEach((mod) => {
-        const group = document.createElement('div');
-        group.className = 'permission-group';
-        const h4 = document.createElement('h4');
-        h4.textContent = moduleLabel(mod);
-        group.appendChild(h4);
+      // Permissions toggle
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'btn btn-ghost btn-sm';
+      toggleBtn.style.fontSize = '12px';
+      toggleBtn.textContent = '▼ 查看權限';
+      card.appendChild(toggleBtn);
 
-        const chips = document.createElement('div');
-        chips.className = 'permission-chips';
-        grouped[mod].forEach((perm) => {
-          const key = perm.module + '.' + perm.action;
-          const chip = document.createElement('button');
-          chip.type = 'button';
-          chip.className = 'permission-chip';
-          chip.title = perm.desc;
-          chip.textContent = key;
-          if (rolePermissionState[role.id].has(key)) {
-            chip.classList.add('enabled');
-          }
-          chip.addEventListener('click', () => {
-            const set = rolePermissionState[role.id];
-            if (set.has(key)) {
-              set.delete(key);
-              chip.classList.remove('enabled');
-              showToast('Revoked ' + key + ' for ' + role.display, 'warning');
-            } else {
-              set.add(key);
-              chip.classList.add('enabled');
-              showToast('Granted ' + key + ' for ' + role.display, 'success');
-            }
-            permCount.textContent = set.size;
-          });
-          chips.appendChild(chip);
-        });
-        group.appendChild(chips);
-        panel.appendChild(group);
+      // Permission panel
+      const permPanel = document.createElement('div');
+      permPanel.className = 'role-perm-panel';
+
+      const permList = document.createElement('div');
+      permList.className = 'permission-list';
+      r.permissions.forEach(function (p) {
+        const chip = document.createElement('span');
+        chip.className = 'permission-chip enabled';
+        chip.textContent = p;
+        permList.appendChild(chip);
+      });
+      permPanel.appendChild(permList);
+      card.appendChild(permPanel);
+
+      // Toggle interaction
+      toggleBtn.addEventListener('click', function () {
+        const isOpen = permPanel.classList.toggle('open');
+        toggleBtn.textContent = isOpen ? '▲ 收起權限' : '▼ 查看權限';
       });
 
-      const saveRow = document.createElement('div');
-      saveRow.className = 'flex-end';
-      saveRow.style.marginTop = '16px';
-      const cancel = document.createElement('button');
-      cancel.className = 'btn btn-ghost';
-      cancel.textContent = 'Collapse';
-      cancel.addEventListener('click', () => togglePanel(role.id));
-      const save = document.createElement('button');
-      save.className = 'btn btn-success';
-      save.textContent = 'Save Changes';
-      save.addEventListener('click', () => {
-        showToast('✅ Role permissions updated for ' + role.display, 'success');
-      });
-      saveRow.appendChild(cancel);
-      saveRow.appendChild(save);
-      panel.appendChild(saveRow);
-
-      card.appendChild(panel);
-      grid.appendChild(card);
+      rolesGrid.appendChild(card);
     });
   }
 
-  function togglePanel(roleId) {
-    const panel = document.getElementById('panel-' + roleId);
-    if (!panel) return;
-    panel.classList.toggle('open');
+  /* ── Permission Matrix — ADMIN_IMPL v2.0 §1.3 ──────────── */
+  (function renderPermMatrix() {
+    var tbody = document.getElementById('permMatrixBody');
+    if (!tbody) { return; }
+
+    var MATRIX = [
+      { label: 'Dashboard / Analytics 讀取',   sa: true,  mod: true,  ro: true  },
+      { label: 'Email 監控讀取',                sa: true,  mod: true,  ro: true  },
+      { label: '寵物列表讀取',                  sa: true,  mod: true,  ro: true  },
+      { label: '戰鬥記錄讀取',                  sa: true,  mod: true,  ro: true  },
+      { label: '排行榜讀取',                    sa: true,  mod: true,  ro: true  },
+      { label: 'pet.ban / pet.unban',           sa: true,  mod: true,  ro: false },
+      { label: 'arena_match.flag / unflag',     sa: true,  mod: true,  ro: false },
+      { label: 'leaderboard.remove',            sa: true,  mod: true,  ro: false },
+      { label: 'config.runtime / economy / flag', sa: true, mod: false, ro: false },
+      { label: 'gdpr.delete / gdpr.update',    sa: true,  mod: false, ro: false },
+      { label: 'admin_user.create / deactivate', sa: true, mod: false, ro: false },
+      { label: 'admin_user.totp_reset',         sa: true,  mod: false, ro: false },
+      { label: 'audit.read',                    sa: true,  mod: false, ro: false }
+    ];
+
+    var TICK = '✅'; var CROSS = '❌';
+
+    MATRIX.forEach(function (row) {
+      var tr = document.createElement('tr');
+
+      var tdLabel = document.createElement('td');
+      tdLabel.style.fontWeight = '500';
+      tdLabel.textContent = row.label;
+      tr.appendChild(tdLabel);
+
+      [row.sa, row.mod, row.ro].forEach(function (allowed) {
+        var td = document.createElement('td');
+        td.style.textAlign = 'center';
+        td.style.fontSize = '16px';
+        td.textContent = allowed ? TICK : CROSS;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }());
+
+  /* ── Users Table ─────────────────────────────────────────── */
+  let totpResetTargetId = null;
+
+  function renderUsersTable() {
+    const tbody = document.getElementById('usersBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';  // safe clear — no user data used here
+
+    users.forEach(function (u) {
+      const tr = document.createElement('tr');
+
+      function td(text, cls) {
+        const el = document.createElement('td');
+        if (cls) el.className = cls;
+        el.textContent = String(text === null || text === undefined ? '' : text);
+        return el;
+      }
+
+      // ID
+      tr.appendChild(td('#' + u.id, 'font-mono text-muted'));
+
+      // username
+      const tdU = document.createElement('td');
+      const code = document.createElement('code');
+      code.style.fontSize = '13px';
+      code.textContent = String(u.username || '');
+      tdU.appendChild(code);
+      tr.appendChild(tdU);
+
+      // name
+      tr.appendChild(td(u.name));
+
+      // email
+      tr.appendChild(td(u.email, 'text-muted font-mono'));
+
+      // role badge
+      const tdRole = document.createElement('td');
+      const badge = roleBadge(u.role);
+      if (badge instanceof HTMLElement) { tdRole.appendChild(badge); }
+      else { tdRole.textContent = String(u.role || ''); }
+      tr.appendChild(tdRole);
+
+      // status badge
+      const tdStatus = document.createElement('td');
+      const sbadge = statusBadge(u.status);
+      if (sbadge instanceof HTMLElement) { tdStatus.appendChild(sbadge); }
+      else { tdStatus.textContent = String(u.status || ''); }
+      tr.appendChild(tdStatus);
+
+      // MFA
+      const tdMfa = document.createElement('td');
+      const mfaSpan = document.createElement('span');
+      mfaSpan.className = 'status-badge ' + (u.mfa_enabled ? 'active' : 'pending');
+      mfaSpan.textContent = u.mfa_enabled ? '✓ 啟用' : '✗ 未設';
+      tdMfa.appendChild(mfaSpan);
+      tr.appendChild(tdMfa);
+
+      // last_login
+      tr.appendChild(td(u.last_login, 'font-mono text-muted'));
+
+      // actions
+      const tdAct = document.createElement('td');
+      tdAct.style.whiteSpace = 'nowrap';
+
+      if (u.role !== 'super_admin') {
+        const totpBtn = document.createElement('button');
+        totpBtn.className = 'btn btn-sm btn-ghost';
+        totpBtn.style.marginRight = '4px';
+        totpBtn.textContent = 'TOTP 重置';
+        totpBtn.addEventListener('click', (function (userId) {
+          return function () { openTotpReset(userId); };
+        }(u.id)));
+        tdAct.appendChild(totpBtn);
+      } else {
+        const dash = document.createElement('span');
+        dash.className = 'text-muted';
+        dash.textContent = '—';
+        tdAct.appendChild(dash);
+      }
+      tr.appendChild(tdAct);
+
+      tbody.appendChild(tr);
+    });
   }
 
-  function submitNewRole(e) {
-    e.preventDefault();
-    const id      = document.getElementById('newRoleId').value.trim();
-    const display = document.getElementById('newRoleDisplay').value.trim();
-    const desc    = document.getElementById('newRoleDesc').value.trim();
+  /* ── Add User Modal ─────────────────────────────────────── */
+  const addUserModal    = document.getElementById('addUserModal');
+  const addUserBtn      = document.getElementById('addUserBtn');
+  const closeAddBtn     = document.getElementById('closeAddModalBtn');
+  const cancelAddBtn    = document.getElementById('cancelAddModalBtn');
+  const confirmAddBtn   = document.getElementById('confirmAddBtn');
+  const addUserError    = document.getElementById('addUserError');
 
-    if (ADMIN_MOCK.roles.some((r) => r.id === id)) {
-      showToast('Role ID "' + id + '" already exists.', 'error');
-      return false;
+  function openAddModal()  { if (addUserModal) addUserModal.classList.add('open'); }
+  function closeAddModal() {
+    if (addUserModal) addUserModal.classList.remove('open');
+    if (addUserError) { addUserError.style.display = 'none'; addUserError.textContent = ''; }
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newPassword').value = '';
+  }
+
+  if (addUserBtn)    addUserBtn.addEventListener('click', openAddModal);
+  if (closeAddBtn)   closeAddBtn.addEventListener('click', closeAddModal);
+  if (cancelAddBtn)  cancelAddBtn.addEventListener('click', closeAddModal);
+  if (addUserModal)  addUserModal.addEventListener('click', function (e) { if (e.target === addUserModal) closeAddModal(); });
+
+  if (confirmAddBtn) confirmAddBtn.addEventListener('click', function () {
+    const username = (document.getElementById('newUsername').value || '').trim();
+    const password = document.getElementById('newPassword').value || '';
+    const role     = document.getElementById('newRole').value;
+
+    if (!username || !/^[a-z0-9_]{3,32}$/.test(username)) {
+      addUserError.textContent = '帳號格式錯誤（3–32 位英文小寫 / 數字 / 底線）';
+      addUserError.style.display = 'block';
+      return;
+    }
+    if (!password || password.length < 12) {
+      addUserError.textContent = '密碼至少 12 字元';
+      addUserError.style.display = 'block';
+      return;
+    }
+    if (users.some(function (u) { return u.username === username; })) {
+      addUserError.textContent = '帳號已存在';
+      addUserError.style.display = 'block';
+      return;
     }
 
-    ADMIN_MOCK.roles.push({
-      id: id,
-      display: display,
-      description: desc,
-      user_count: 0,
-      color_class: 'auditor',
-      permissions: [],
+    const newId = users.reduce(function (max, u) { return u.id > max ? u.id : max; }, 0) + 1;
+    users.push({
+      id: newId, username: username, name: username,
+      email: username + '@pixel-pet.io',
+      role: role, status: 'active', mfa_enabled: false,
+      last_login: '—'
     });
-    rolePermissionState[id] = new Set();
+    closeAddModal();
+    renderUsersTable();
+    if (countLabel) countLabel.textContent = users.length + ' 位成員';
+    alert('已建立帳號：' + username + '（Prototype 模式，未實際寫入）');
+  });
 
-    document.getElementById('newRoleForm').reset();
-    closeModal('newRoleModal');
-    renderRoleCards();
-    showToast('✅ Role created: ' + display, 'success');
-    return false;
+  /* ── TOTP Reset Modal ───────────────────────────────────── */
+  const totpResetModal  = document.getElementById('totpResetModal');
+  const closeTotpBtn    = document.getElementById('closeTotpModalBtn');
+  const cancelTotpBtn   = document.getElementById('cancelTotpBtn');
+  const confirmTotpBtn  = document.getElementById('confirmTotpBtn');
+  const totpResetDesc   = document.getElementById('totpResetDesc');
+
+  function openTotpReset(userId) {
+    const u = users.find(function (x) { return x.id === userId; });
+    if (!u) return;
+    totpResetTargetId = userId;
+    if (totpResetDesc) {
+      // textContent — no user data in innerHTML
+      totpResetDesc.textContent = '將重置 ' + u.username + ' 的 TOTP，下次登入時需重新掃描 QR Code。此操作不可撤銷。';
+    }
+    if (totpResetModal) totpResetModal.classList.add('open');
   }
 
-  renderRoleCards();
+  function closeTotpModal() {
+    if (totpResetModal) totpResetModal.classList.remove('open');
+    totpResetTargetId = null;
+  }
+
+  if (closeTotpBtn)   closeTotpBtn.addEventListener('click', closeTotpModal);
+  if (cancelTotpBtn)  cancelTotpBtn.addEventListener('click', closeTotpModal);
+  if (totpResetModal) totpResetModal.addEventListener('click', function (e) { if (e.target === totpResetModal) closeTotpModal(); });
+
+  if (confirmTotpBtn) confirmTotpBtn.addEventListener('click', function () {
+    if (totpResetTargetId === null) { closeTotpModal(); return; }
+    const u = users.find(function (x) { return x.id === totpResetTargetId; });
+    if (u) u.mfa_enabled = false;
+    closeTotpModal();
+    renderUsersTable();
+    alert('TOTP 已重置，用戶下次登入需重新設定（Prototype 模式）');
+  });
+
+  /* ── Initial render ─────────────────────────────────────── */
+  renderUsersTable();
+}());
 </script>
 </body>
 </html>

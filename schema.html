@@ -462,34 +462,35 @@
 <a class="sidebar__link" href="puml--diagrams-puml-state-pet.html">State Pet</a>
 <a class="sidebar__link" href="puml--diagrams-puml-usecase-diagram.html">Usecase Diagram</a>
 </details>
-</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-概述">1. 概述</a></li><li><a class="toc__link toc__link--h3" href="#11-schema-boundary-declaration">1.1 Schema Boundary Declaration</a></li><li><a class="toc__link" href="#2-通用欄位規範">2. 通用欄位規範</a></li><li><a class="toc__link toc__link--h3" href="#21-命名慣例">2.1 命名慣例</a></li><li><a class="toc__link toc__link--h3" href="#22-所有資料表必含的基礎欄位">2.2 所有資料表必含的基礎欄位</a></li><li><a class="toc__link toc__link--h3" href="#23-主鍵-id-策略">2.3 主鍵 ID 策略</a></li><li><a class="toc__link toc__link--h3" href="#24-軟刪除模式soft-delete">2.4 軟刪除模式（Soft Delete）</a></li><li><a class="toc__link" href="#3-資料表定義">3. 資料表定義</a></li><li><a class="toc__link toc__link--h3" href="#31-claim_identities--identity-bc-owns-this-table">3.1 claim_identities — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#32-pets--pet-bc-owns-this-table">3.2 pets — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#33-claim_codes--identity-bc-owns-this-table">3.3 claim_codes — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#34-arena_matches--arena-bc-owns-this-table">3.4 arena_matches — Arena BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#35-leaderboard_snapshots--leaderboard-bc-owns-this-table">3.5 leaderboard_snapshots — Leaderboard BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#36-training_logs--pet-bc-owns-this-table">3.6 training_logs — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#37-food_buffs--pet-bc-owns-this-table">3.7 food_buffs — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#38-marketplace_listings--marketplace-bc-owns-this-table">3.8 marketplace_listings — Marketplace BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#39-marketplace_transactions--marketplace-bc-owns-this-table">3.9 marketplace_transactions — Marketplace BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#310-admin_users--admin-bc-owns-this-table">3.10 admin_users — Admin BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#311-audit_logs--admin-bc-owns-this-table">3.11 audit_logs — Admin BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#312-gdpr_requests--identity-bc-owns-this-table">3.12 gdpr_requests — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#313-enums">3.13 Enums</a></li><li><a class="toc__link" href="#4-正規化規則normalization-rules">4. 正規化規則（Normalization Rules）</a></li><li><a class="toc__link toc__link--h3" href="#41-各正規化形式說明">4.1 各正規化形式說明</a></li><li><a class="toc__link toc__link--h3" href="#42-刻意反正規化intentional-denormalization">4.2 刻意反正規化（Intentional Denormalization）</a></li><li><a class="toc__link" href="#5-索引策略indexing-strategy">5. 索引策略（Indexing Strategy）</a></li><li><a class="toc__link toc__link--h3" href="#51-何時建立索引">5.1 何時建立索引</a></li><li><a class="toc__link toc__link--h3" href="#52-索引類型選用表">5.2 索引類型選用表</a></li><li><a class="toc__link toc__link--h3" href="#53-複合索引欄位順序規則">5.3 複合索引欄位順序規則</a></li><li><a class="toc__link toc__link--h3" href="#54-partial-index-應用">5.4 Partial Index 應用</a></li><li><a class="toc__link toc__link--h3" href="#55-索引膨脹index-bloat監控">5.5 索引膨脹（Index Bloat）監控</a></li><li><a class="toc__link" href="#6-稽核與合規audit--compliance">6. 稽核與合規（Audit &amp;amp; Compliance）</a></li><li><a class="toc__link toc__link--h3" href="#61-標準稽核日誌表">6.1 標準稽核日誌表</a></li><li><a class="toc__link toc__link--h3" href="#62-自動稽核-patternapplication-layer">6.2 自動稽核 Pattern（Application Layer）</a></li><li><a class="toc__link toc__link--h3" href="#63-gdpr--個資保護">6.3 GDPR / 個資保護</a></li><li><a class="toc__link" href="#7-效能設計performance-design">7. 效能設計（Performance Design）</a></li><li><a class="toc__link toc__link--h3" href="#71-查詢效能基準表">7.1 查詢效能基準表</a></li><li><a class="toc__link toc__link--h3" href="#72-n1-查詢防護">7.2 N+1 查詢防護</a></li><li><a class="toc__link toc__link--h3" href="#73-連線池大小公式">7.3 連線池大小公式</a></li><li><a class="toc__link toc__link--h3" href="#74-read-replica-路由規則">7.4 Read Replica 路由規則</a></li><li><a class="toc__link" href="#8-migration-策略migration-strategy">8. Migration 策略（Migration Strategy）</a></li><li><a class="toc__link toc__link--h3" href="#81-命名規範">8.1 命名規範</a></li><li><a class="toc__link toc__link--h3" href="#82-零停機-migration-模式expand-contract-pattern">8.2 零停機 Migration 模式（Expand-Contract Pattern）</a></li><li><a class="toc__link toc__link--h3" href="#83-大表新增欄位4-步驟無鎖流程">8.3 大表新增欄位（4 步驟無鎖流程）</a></li><li><a class="toc__link toc__link--h3" href="#84-各-migration-類型的-rollback-策略">8.4 各 Migration 類型的 Rollback 策略</a></li><li><a class="toc__link toc__link--h3" href="#85-migration-測試檢查清單">8.5 Migration 測試檢查清單</a></li><li><a class="toc__link" href="#9-資料完整性約束data-integrity-constraints">9. 資料完整性約束（Data Integrity Constraints）</a></li><li><a class="toc__link toc__link--h3" href="#91-外鍵-on-delete-行為選用">9.1 外鍵 ON DELETE 行為選用</a></li><li><a class="toc__link toc__link--h3" href="#92-check-約束範例">9.2 CHECK 約束範例</a></li><li><a class="toc__link toc__link--h3" href="#93-unique-約束-vs-unique-index">9.3 Unique 約束 vs Unique Index</a></li><li><a class="toc__link toc__link--h3" href="#94-延遲約束deferred-constraints">9.4 延遲約束（Deferred Constraints）</a></li><li><a class="toc__link toc__link--h3" href="#95-跨-bc-fk-禁止spring-modulith-hc-1">9.5 跨 BC FK 禁止（Spring Modulith HC-1）</a></li><li><a class="toc__link" href="#10-分區策略sharding--partitioning">10. 分區策略（Sharding &amp;amp; Partitioning）</a></li><li><a class="toc__link toc__link--h3" href="#101-分區策略決策矩陣">10.1 分區策略決策矩陣</a></li><li><a class="toc__link toc__link--h3" href="#102-分區鍵選擇準則">10.2 分區鍵選擇準則</a></li><li><a class="toc__link toc__link--h3" href="#103-分區範例規劃中">10.3 分區範例（規劃中）</a></li><li><a class="toc__link toc__link--h3" href="#104-跨分區查詢注意事項">10.4 跨分區查詢注意事項</a></li><li><a class="toc__link" href="#11-備份與復原backup--recovery">11. 備份與復原（Backup &amp;amp; Recovery）</a></li><li><a class="toc__link toc__link--h3" href="#111-備份策略表">11.1 備份策略表</a></li><li><a class="toc__link toc__link--h3" href="#112-point-in-time-recoverypitr設定">11.2 Point-in-Time Recovery（PITR）設定</a></li><li><a class="toc__link toc__link--h3" href="#113-備份驗證程序">11.3 備份驗證程序</a></li><li><a class="toc__link" href="#12-redis-key-schema">12. Redis Key Schema</a></li><li><a class="toc__link toc__link--h3" href="#121-rate-limit-counters">12.1 Rate Limit Counters</a></li><li><a class="toc__link toc__link--h3" href="#122-arena-matchmaking-queue">12.2 Arena Matchmaking Queue</a></li><li><a class="toc__link toc__link--h3" href="#123-session-storage">12.3 Session Storage</a></li><li><a class="toc__link toc__link--h3" href="#124-leaderboard-sorted-set">12.4 Leaderboard Sorted Set</a></li><li><a class="toc__link toc__link--h3" href="#125-config-cache">12.5 Config Cache</a></li><li><a class="toc__link" href="#13-data-retention-policy">13. Data Retention Policy</a></li><li><a class="toc__link toc__link--h3" href="#131-schema-刪除安全模式schema-deletion-safety">13.1 Schema 刪除安全模式（Schema Deletion Safety）</a></li><li><a class="toc__link" href="#14-er-diagram">14. ER Diagram</a></li><li><a class="toc__link" href="#15-資料量估算">15. 資料量估算</a></li><li><a class="toc__link" href="#16-敏感資料清單sensitive-data-inventory">16. 敏感資料清單（Sensitive Data Inventory）</a></li><li><a class="toc__link" href="#17-multi-tenancy-data-isolation-strategies">17. Multi-Tenancy Data Isolation Strategies</a></li><li><a class="toc__link" href="#18-schema-審查檢查清單">18. Schema 審查檢查清單</a></li><li><a class="toc__link toc__link--h3" href="#命名與結構">命名與結構</a></li><li><a class="toc__link toc__link--h3" href="#正規化與完整性">正規化與完整性</a></li><li><a class="toc__link toc__link--h3" href="#索引">索引</a></li><li><a class="toc__link toc__link--h3" href="#安全與合規">安全與合規</a></li><li><a class="toc__link toc__link--h3" href="#效能">效能</a></li><li><a class="toc__link toc__link--h3" href="#migration">Migration</a></li><li><a class="toc__link toc__link--h3" href="#稽核與監控">稽核與監控</a></li><li><a class="toc__link toc__link--h3" href="#ha--replication--read-write-split必查">HA / Replication / Read-Write Split（必查）</a></li><li><a class="toc__link toc__link--h3" href="#bounded-context-隔離spring-modulith-hc-1必查">Bounded Context 隔離（Spring Modulith HC-1，必查）</a></li><li><a class="toc__link" href="#19-indexes--performance-notescross-reference">19. Indexes &amp;amp; Performance Notes（Cross-Reference）</a></li><li><a class="toc__link toc__link--h3" href="#191-partial-indexes-總覽">19.1 Partial Indexes 總覽</a></li><li><a class="toc__link toc__link--h3" href="#192-composite-indexes">19.2 Composite Indexes</a></li><li><a class="toc__link toc__link--h3" href="#193-single-column-support-indexes">19.3 Single-Column Support Indexes</a></li><li><a class="toc__link toc__link--h3" href="#194-hot-path-query-patterns">19.4 Hot-Path Query Patterns</a></li><li><a class="toc__link" href="#20-database-observability--health-monitoring">20. Database Observability &amp;amp; Health Monitoring</a></li><li><a class="toc__link toc__link--h3" href="#201-關鍵監控查詢">20.1 關鍵監控查詢</a></li><li><a class="toc__link toc__link--h3" href="#202-alerting-thresholds">20.2 Alerting Thresholds</a></li><li><a class="toc__link toc__link--h3" href="#203-replica-lag-監控與降級">20.3 Replica Lag 監控與降級</a></li><li><a class="toc__link toc__link--h3" href="#204-health-check-端點">20.4 Health Check 端點</a></li><li><a class="toc__link toc__link--h3" href="#205-datadog-dashboard-配置">20.5 Datadog Dashboard 配置</a></li></ul></div>
+</div></div><div class="sidebar__panel" data-panel="toc" role="tabpanel"><ul class="toc-list"><li><a class="toc__link" href="#document-control">Document Control</a></li><li><a class="toc__link" href="#change-log">Change Log</a></li><li><a class="toc__link" href="#1-概述">1. 概述</a></li><li><a class="toc__link toc__link--h3" href="#11-schema-boundary-declaration">1.1 Schema Boundary Declaration</a></li><li><a class="toc__link" href="#2-通用欄位規範">2. 通用欄位規範</a></li><li><a class="toc__link toc__link--h3" href="#21-命名慣例">2.1 命名慣例</a></li><li><a class="toc__link toc__link--h3" href="#22-所有資料表必含的基礎欄位">2.2 所有資料表必含的基礎欄位</a></li><li><a class="toc__link toc__link--h3" href="#23-主鍵-id-策略">2.3 主鍵 ID 策略</a></li><li><a class="toc__link toc__link--h3" href="#24-軟刪除模式soft-delete">2.4 軟刪除模式（Soft Delete）</a></li><li><a class="toc__link" href="#3-資料表定義">3. 資料表定義</a></li><li><a class="toc__link toc__link--h3" href="#31-claim_identities--identity-bc-owns-this-table">3.1 claim_identities — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#32-pets--pet-bc-owns-this-table">3.2 pets — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#33-claim_codes--identity-bc-owns-this-table">3.3 claim_codes — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#34-arena_matches--arena-bc-owns-this-table">3.4 arena_matches — Arena BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#35-leaderboard_snapshots--leaderboard-bc-owns-this-table">3.5 leaderboard_snapshots — Leaderboard BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#36-training_logs--pet-bc-owns-this-table">3.6 training_logs — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#37-food_buffs--pet-bc-owns-this-table">3.7 food_buffs — Pet BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#38-marketplace_listings--marketplace-bc-owns-this-table">3.8 marketplace_listings — Marketplace BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#39-marketplace_transactions--marketplace-bc-owns-this-table">3.9 marketplace_transactions — Marketplace BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#310-admin_users--admin-bc-owns-this-table">3.10 admin_users — Admin BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#311-audit_logs--admin-bc-owns-this-table">3.11 audit_logs — Admin BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#312-gdpr_requests--identity-bc-owns-this-table">3.12 gdpr_requests — Identity BC owns this table</a></li><li><a class="toc__link toc__link--h3" href="#313-enums">3.13 Enums</a></li><li><a class="toc__link" href="#4-正規化規則normalization-rules">4. 正規化規則（Normalization Rules）</a></li><li><a class="toc__link toc__link--h3" href="#41-各正規化形式說明">4.1 各正規化形式說明</a></li><li><a class="toc__link toc__link--h3" href="#42-刻意反正規化intentional-denormalization">4.2 刻意反正規化（Intentional Denormalization）</a></li><li><a class="toc__link" href="#5-索引策略indexing-strategy">5. 索引策略（Indexing Strategy）</a></li><li><a class="toc__link toc__link--h3" href="#51-何時建立索引">5.1 何時建立索引</a></li><li><a class="toc__link toc__link--h3" href="#52-索引類型選用表">5.2 索引類型選用表</a></li><li><a class="toc__link toc__link--h3" href="#53-複合索引欄位順序規則">5.3 複合索引欄位順序規則</a></li><li><a class="toc__link toc__link--h3" href="#54-partial-index-應用">5.4 Partial Index 應用</a></li><li><a class="toc__link toc__link--h3" href="#55-索引膨脹index-bloat監控">5.5 索引膨脹（Index Bloat）監控</a></li><li><a class="toc__link" href="#6-稽核與合規audit--compliance">6. 稽核與合規（Audit &amp;amp; Compliance）</a></li><li><a class="toc__link toc__link--h3" href="#61-標準稽核日誌表">6.1 標準稽核日誌表</a></li><li><a class="toc__link toc__link--h3" href="#62-自動稽核-patternapplication-layer">6.2 自動稽核 Pattern（Application Layer）</a></li><li><a class="toc__link toc__link--h3" href="#63-gdpr--個資保護">6.3 GDPR / 個資保護</a></li><li><a class="toc__link" href="#7-效能設計performance-design">7. 效能設計（Performance Design）</a></li><li><a class="toc__link toc__link--h3" href="#71-查詢效能基準表">7.1 查詢效能基準表</a></li><li><a class="toc__link toc__link--h3" href="#72-n1-查詢防護">7.2 N+1 查詢防護</a></li><li><a class="toc__link toc__link--h3" href="#73-連線池大小公式">7.3 連線池大小公式</a></li><li><a class="toc__link toc__link--h3" href="#74-read-replica-路由規則">7.4 Read Replica 路由規則</a></li><li><a class="toc__link" href="#8-migration-策略migration-strategy">8. Migration 策略（Migration Strategy）</a></li><li><a class="toc__link toc__link--h3" href="#81-migration-実作清單migration-implementation-list">8.1 Migration 実作清單（Migration Implementation List）</a></li><li><a class="toc__link toc__link--h3" href="#82-零停機-migration-模式expand-contract-pattern">8.2 零停機 Migration 模式（Expand-Contract Pattern）</a></li><li><a class="toc__link toc__link--h3" href="#83-大表新增欄位4-步驟無鎖流程">8.3 大表新增欄位（4 步驟無鎖流程）</a></li><li><a class="toc__link toc__link--h3" href="#84-各-migration-類型的-rollback-策略">8.4 各 Migration 類型的 Rollback 策略</a></li><li><a class="toc__link toc__link--h3" href="#85-migration-測試檢查清單">8.5 Migration 測試檢查清單</a></li><li><a class="toc__link" href="#9-資料完整性約束data-integrity-constraints">9. 資料完整性約束（Data Integrity Constraints）</a></li><li><a class="toc__link toc__link--h3" href="#91-外鍵-on-delete-行為選用">9.1 外鍵 ON DELETE 行為選用</a></li><li><a class="toc__link toc__link--h3" href="#92-check-約束範例">9.2 CHECK 約束範例</a></li><li><a class="toc__link toc__link--h3" href="#93-unique-約束-vs-unique-index">9.3 Unique 約束 vs Unique Index</a></li><li><a class="toc__link toc__link--h3" href="#94-延遲約束deferred-constraints">9.4 延遲約束（Deferred Constraints）</a></li><li><a class="toc__link toc__link--h3" href="#95-跨-bc-fk-禁止spring-modulith-hc-1">9.5 跨 BC FK 禁止（Spring Modulith HC-1）</a></li><li><a class="toc__link" href="#10-分區策略sharding--partitioning">10. 分區策略（Sharding &amp;amp; Partitioning）</a></li><li><a class="toc__link toc__link--h3" href="#101-分區策略決策矩陣">10.1 分區策略決策矩陣</a></li><li><a class="toc__link toc__link--h3" href="#102-分區鍵選擇準則">10.2 分區鍵選擇準則</a></li><li><a class="toc__link toc__link--h3" href="#103-分區範例規劃中">10.3 分區範例（規劃中）</a></li><li><a class="toc__link toc__link--h3" href="#104-跨分區查詢注意事項">10.4 跨分區查詢注意事項</a></li><li><a class="toc__link" href="#11-備份與復原backup--recovery">11. 備份與復原（Backup &amp;amp; Recovery）</a></li><li><a class="toc__link toc__link--h3" href="#111-備份策略表">11.1 備份策略表</a></li><li><a class="toc__link toc__link--h3" href="#112-point-in-time-recoverypitr設定">11.2 Point-in-Time Recovery（PITR）設定</a></li><li><a class="toc__link toc__link--h3" href="#113-備份驗證程序">11.3 備份驗證程序</a></li><li><a class="toc__link" href="#12-redis-key-schema">12. Redis Key Schema</a></li><li><a class="toc__link toc__link--h3" href="#121-rate-limit-counters">12.1 Rate Limit Counters</a></li><li><a class="toc__link toc__link--h3" href="#122-arena-matchmaking-queue">12.2 Arena Matchmaking Queue</a></li><li><a class="toc__link toc__link--h3" href="#123-session-storage">12.3 Session Storage</a></li><li><a class="toc__link toc__link--h3" href="#124-leaderboard-sorted-set">12.4 Leaderboard Sorted Set</a></li><li><a class="toc__link toc__link--h3" href="#125-config-cache">12.5 Config Cache</a></li><li><a class="toc__link" href="#13-data-retention-policy">13. Data Retention Policy</a></li><li><a class="toc__link toc__link--h3" href="#131-schema-刪除安全模式schema-deletion-safety">13.1 Schema 刪除安全模式（Schema Deletion Safety）</a></li><li><a class="toc__link" href="#14-er-diagram">14. ER Diagram</a></li><li><a class="toc__link" href="#15-資料量估算">15. 資料量估算</a></li><li><a class="toc__link" href="#16-敏感資料清單sensitive-data-inventory">16. 敏感資料清單（Sensitive Data Inventory）</a></li><li><a class="toc__link" href="#17-multi-tenancy-data-isolation-strategies">17. Multi-Tenancy Data Isolation Strategies</a></li><li><a class="toc__link" href="#18-schema-審查檢查清單">18. Schema 審查檢查清單</a></li><li><a class="toc__link toc__link--h3" href="#命名與結構">命名與結構</a></li><li><a class="toc__link toc__link--h3" href="#正規化與完整性">正規化與完整性</a></li><li><a class="toc__link toc__link--h3" href="#索引">索引</a></li><li><a class="toc__link toc__link--h3" href="#安全與合規">安全與合規</a></li><li><a class="toc__link toc__link--h3" href="#效能">效能</a></li><li><a class="toc__link toc__link--h3" href="#migration">Migration</a></li><li><a class="toc__link toc__link--h3" href="#稽核與監控">稽核與監控</a></li><li><a class="toc__link toc__link--h3" href="#ha--replication--read-write-split必查">HA / Replication / Read-Write Split（必查）</a></li><li><a class="toc__link toc__link--h3" href="#bounded-context-隔離spring-modulith-hc-1必查">Bounded Context 隔離（Spring Modulith HC-1，必查）</a></li><li><a class="toc__link" href="#19-indexes--performance-notescross-reference">19. Indexes &amp;amp; Performance Notes（Cross-Reference）</a></li><li><a class="toc__link toc__link--h3" href="#191-partial-indexes-總覽">19.1 Partial Indexes 總覽</a></li><li><a class="toc__link toc__link--h3" href="#192-composite-indexes">19.2 Composite Indexes</a></li><li><a class="toc__link toc__link--h3" href="#193-single-column-support-indexes">19.3 Single-Column Support Indexes</a></li><li><a class="toc__link toc__link--h3" href="#194-hot-path-query-patterns">19.4 Hot-Path Query Patterns</a></li><li><a class="toc__link" href="#20-database-observability--health-monitoring">20. Database Observability &amp;amp; Health Monitoring</a></li><li><a class="toc__link toc__link--h3" href="#201-關鍵監控查詢">20.1 關鍵監控查詢</a></li><li><a class="toc__link toc__link--h3" href="#202-alerting-thresholds">20.2 Alerting Thresholds</a></li><li><a class="toc__link toc__link--h3" href="#203-replica-lag-監控與降級">20.3 Replica Lag 監控與降級</a></li><li><a class="toc__link toc__link--h3" href="#204-health-check-端點">20.4 Health Check 端點</a></li><li><a class="toc__link toc__link--h3" href="#205-datadog-dashboard-配置">20.5 Datadog Dashboard 配置</a></li><li><a class="toc__link" href="#seed-data">Seed Data</a></li><li><a class="toc__link" href="#admin-seed-sql">Admin Seed SQL</a></li><li><a class="toc__link toc__link--h3" href="#env-注入說明">ENV 注入說明</a></li><li><a class="toc__link toc__link--h3" href="#首次登入-totp-enrollment-流程">首次登入 TOTP Enrollment 流程</a></li><li><a class="toc__link toc__link--h3" href="#account-lockout">Account Lockout</a></li></ul></div>
     </aside>
     <div class="sidebar-resizer" id="sidebarResizer"></div>
     <main class="doc-content"><h1 id="schema--database-schema-design-document">SCHEMA — Database Schema Design Document</h1>
 <h2 id="document-control">Document Control</h2>
 <table>
-<tr><th>欄位</th><th>值</th></tr>
-<tr><td>Document ID</td><td><code>SCHEMA-PIXEL-PET-ARENA-20260510</code></td></tr>
-<tr><td>Version</td><td><code>2.0</code></td></tr>
-<tr><td>Status</td><td>Draft</td></tr>
-<tr><td>Classification</td><td>Internal</td></tr>
-<tr><td>Owner</td><td>Database Architect / Data Engineering Lead</td></tr>
-<tr><td><strong>Owning Bounded Context / Service</strong></td><td><strong>Modular Monolith spanning 6 BCs (Identity / Pet / Arena / Leaderboard / Marketplace / Admin)</strong>; per HC-1 each BC owns its own tables (see §1.1). The PostgreSQL instance is logically partitioned by BC ownership; cross-BC FKs at the DB level are forbidden and are enforced as application-layer ID-only references.</td></tr>
-<tr><td>Created</td><td>2026-05-03</td></tr>
-<tr><td>Last Updated</td><td>2026-05-10</td></tr>
-<tr><td>Upstream EDD</td><td><a href="edd.html" target="_blank" rel="noopener">docs/EDD.md</a></td></tr>
-<tr><td>Upstream Constants</td><td><a href="constants.html" target="_blank" rel="noopener">docs/CONSTANTS.md</a></td></tr>
-<tr><td>Upstream API</td><td><a href="api.html" target="_blank" rel="noopener">docs/API.md</a></td></tr>
-<tr><td>Database</td><td>PostgreSQL 15+ (Supabase managed)</td></tr>
-<tr><td>Cache / KV</td><td>Redis 7+ (Upstash serverless)</td></tr>
-<tr><td>Source of Truth</td><td>All migrations must be reviewed against this document before merge.</td></tr>
-<tr><td>Changelog</td><td><a href="#change-log">See Change Log</a></td></tr>
+<tr><th>欄位</th><th>值</th><th>說明</th><th>責任方</th></tr>
+<tr><td>Document ID</td><td><code>SCHEMA-PIXEL-PET-ARENA-20260510</code></td><td>Unique doc identifier</td><td>Database Architect</td></tr>
+<tr><td>Version</td><td><code>3.0</code></td><td>Semantic version</td><td>Database Architect</td></tr>
+<tr><td>Status</td><td>Draft</td><td>Draft / In Review / Approved</td><td>Database Architect</td></tr>
+<tr><td>Classification</td><td>Internal</td><td>Internal / Confidential</td><td>Data Engineering Lead</td></tr>
+<tr><td>Owner</td><td>Database Architect / Data Engineering Lead</td><td>Document owner</td><td>—</td></tr>
+<tr><td><strong>Owning Bounded Context / Service</strong></td><td><strong>Modular Monolith spanning 6 BCs (Identity / Pet / Arena / Leaderboard / Marketplace / Admin)</strong></td><td>Per HC-1 each BC owns its own tables (see §1.1); cross-BC FKs forbidden at DB level</td><td>Software Architect</td></tr>
+<tr><td>Created</td><td>2026-05-03</td><td>Initial creation date</td><td>Database Architect</td></tr>
+<tr><td>Last Updated</td><td>2026-05-16</td><td>Date of last revision</td><td>Database Architect</td></tr>
+<tr><td>Upstream EDD</td><td><a href="edd.html" target="_blank" rel="noopener">docs/EDD.md</a></td><td>Engineering Design Document</td><td>Backend Architect</td></tr>
+<tr><td>Upstream Constants</td><td><a href="constants.html" target="_blank" rel="noopener">docs/CONSTANTS.md</a></td><td>Shared constants reference</td><td>Backend Architect</td></tr>
+<tr><td>Upstream API</td><td><a href="api.html" target="_blank" rel="noopener">docs/API.md</a></td><td>API specification</td><td>Backend Architect</td></tr>
+<tr><td>Database</td><td>PostgreSQL 15+ (Supabase managed)</td><td>Primary RDBMS</td><td>Infrastructure</td></tr>
+<tr><td>Cache / KV</td><td>Redis 7+ (Upstash serverless)</td><td>In-memory cache + rate limit</td><td>Infrastructure</td></tr>
+<tr><td>Source of Truth</td><td>All migrations must be reviewed against this document before merge.</td><td>Migration governance rule</td><td>Database Architect</td></tr>
+<tr><td>Changelog</td><td><a href="#change-log">See Change Log</a></td><td>Version history</td><td>Database Architect</td></tr>
 </table>
 <h2 id="change-log">Change Log</h2>
 <table>
 <tr><th>Version</th><th>Date</th><th>Author</th><th>Summary</th></tr>
 <tr><td>1.0</td><td>2026-05-03</td><td>Database Architect</td><td>Initial schema design (12 PostgreSQL tables + Redis key map + retention table).</td></tr>
 <tr><td>2.0</td><td>2026-05-10</td><td>Database Architect</td><td><strong>Full rewrite</strong> to align with <code>templates/SCHEMA.md</code>: added §1.1 Schema Boundary Declaration (HC-1 BC ownership), §2.1–§2.4 generic conventions (naming, base columns, ID strategy, soft-delete), §4 normalization rules + intentional denormalization, §5 indexing strategy reference, §6 audit &amp; GDPR procedures, §7 performance design (query SLO table, N+1 protection, pool sizing, replica routing), §8 migration strategy, §9 integrity constraints (with §9.5 cross-BC FK audit and ID-only conversion plan), §10 partitioning strategy, §11 backup &amp; PITR, §14 Mermaid ER diagram, §15 Multi-Tenancy declaration. All 12 existing tables retained verbatim with added BC-Ownership headers and dual-format (markdown column table → CREATE TABLE) presentation. Existing Redis key map renumbered to §12; existing Retention table renumbered to §13.</td></tr>
+<tr><td>3.0</td><td>2026-05-16</td><td>Database Architect</td><td><strong>Bug fixes + spec compliance</strong>: (1) §8.1 rewritten from naming-convention notes to full Migration 実作清單 table (V001–V021 with file name, description, owner BC, notes); (2) Seed Data section fully rewritten — all INSERTs now use actual column names matching §3 DDLs (removed non-existent <code>claim_token_hash</code>, <code>status</code>, <code>pet_species</code>, <code>stat_gained</code>, <code>stat_before</code>, <code>trained_at</code>, <code>buff_type</code>, <code>multiplier</code>, <code>pet_a_stat_snapshot</code>, <code>pet_b_stat_snapshot</code>, <code>duration_ms</code>, individual leaderboard columns; replaced with correct column names <code>code_hash</code>, <code>stat_delta</code>, <code>stat_after</code>, <code>completed_at</code>, <code>food_type</code>, <code>buff_stat</code>, <code>magnitude</code>, <code>record_expires_at</code>, <code>duration_seconds</code>, <code>battle_log</code>, <code>entries</code> JSONB array); (3) Admin Seed SQL fixed — removed non-existent <code>status</code> column from <code>admin_users</code> INSERT.</td></tr>
 </table>
 <hr>
 <h2 id="1-概述">1. 概述</h2>
@@ -497,11 +498,11 @@
 <h3 id="11-schema-boundary-declaration">1.1 Schema Boundary Declaration</h3>
 <blockquote><p><strong>Spring Modulith 硬約束（HC-1）：每個 Bounded Context 擁有且只擁有自己的 tables；跨 BC 資料存取只能透過對方的 Public API 或 Domain Event，絕對禁止 DB-level JOIN 或 FK 跨越 BC 邊界。</strong></p></blockquote>
 <table>
-<tr><th>欄位</th><th>值</th></tr>
-<tr><td><strong>Multi-Tenancy 策略</strong></td><td><strong>Single-Tenant SaaS</strong>（單一公開遊戲，全體玩家共用一份 DB；無 tenant 隔離需求）</td></tr>
-<tr><td><strong>Schema 命名空間</strong></td><td><code>public</code>（單一邏輯 schema；BC 邊界由 module ownership table + 應用層強制）</td></tr>
-<tr><td><strong>本 SCHEMA 涵蓋的 BC</strong></td><td>Identity / Pet / Arena / Leaderboard / Marketplace / Admin（共 6 個 BC）</td></tr>
-<tr><td><strong>本 SCHEMA 不涵蓋</strong></td><td>不擁有任何外部第三方 schema（SendGrid、Vercel、Upstash、Supabase 等以 API 呼叫存取）</td></tr>
+<tr><th>欄位</th><th>值</th><th>說明</th><th>相關章節</th></tr>
+<tr><td><strong>Multi-Tenancy 策略</strong></td><td><strong>Single-Tenant SaaS</strong></td><td>單一公開遊戲，全體玩家共用一份 DB；無 tenant 隔離需求</td><td>§17</td></tr>
+<tr><td><strong>Schema 命名空間</strong></td><td><code>public</code></td><td>單一邏輯 schema；BC 邊界由 module ownership table + 應用層強制</td><td>§1.1.1</td></tr>
+<tr><td><strong>本 SCHEMA 涵蓋的 BC</strong></td><td>Identity / Pet / Arena / Leaderboard / Marketplace / Admin（共 6 個 BC）</td><td>每 BC 唯一擁有一組 table；見 §1.1.1</td><td>§1.1.1</td></tr>
+<tr><td><strong>本 SCHEMA 不涵蓋</strong></td><td>不擁有任何外部第三方 schema</td><td>SendGrid、Vercel、Upstash、Supabase 等以 API 呼叫存取</td><td>EDD §3.4</td></tr>
 </table>
 <h4 id="111-bc-ownership-table與-edd-34-對齊">1.1.1 BC Ownership Table（與 EDD §3.4 對齊）</h4>
 <p>每個 BC 唯一擁有一組 table。任何模組都不得 SELECT / INSERT / UPDATE / DELETE 自己 BC 以外的 table；跨 BC 讀取必須透過對方暴露的 Application Service 或訂閱 Domain Event。</p>
@@ -512,7 +513,7 @@
 <tr><td><strong>Arena</strong></td><td><code>arena_matches</code></td><td><code>matchmaking:queue:<em></code>, <code>rl:arena:</em></code></td><td><code>ArenaMatchStarted</code>, <code>ArenaMatchCompleted</code></td></tr>
 <tr><td><strong>Leaderboard</strong></td><td><code>leaderboard_snapshots</code></td><td><code>leaderboard:global</code> (Redis sorted set 為主)</td><td><code>LeaderboardUpdated</code>, <code>LeaderboardEntryRemoved</code></td></tr>
 <tr><td><strong>Marketplace</strong> <em>(P2 / FF_MARKETPLACE)</em></td><td><code>marketplace_listings</code>, <code>marketplace_transactions</code></td><td>—</td><td><code>ListingCreated</code>, <code>ListingCancelled</code>, <code>TradeCompleted</code></td></tr>
-<tr><td><strong>Admin</strong></td><td><code>admin_users</code>, <code>audit_logs</code></td><td><code>session:admin:<em></code>, <code>rl:admin:</em></code>, <code>rl:admin_login:<em></code>, <code>token:blacklist:</em></code>, <code>config:runtime</code></td><td><code>AdminUserCreated</code>, <code>AdminActionLogged</code>, <code>SuspiciousPetFlagged</code></td></tr>
+<tr><td><strong>Admin</strong></td><td><code>admin_users</code>, <code>audit_logs</code></td><td><code>session:admin:<em></code>, <code>rl:admin:</em></code>, <code>rl:admin_login:<em></code>, <code>token:blacklist:</em></code>, <code>config:runtime</code>, <code>config:economy</code></td><td><code>AdminUserCreated</code>, <code>AdminActionLogged</code>, <code>SuspiciousPetFlagged</code></td></tr>
 </table>
 <h4 id="112-external-cross-bc-reference-auditfk--id-only-轉換">1.1.2 External Cross-BC Reference Audit（FK ↔ ID-only 轉換）</h4>
 <p><strong>判斷一個 column 是否屬於 cross-BC FK</strong>：若 column 所在 table 的 owning BC 與被引用 table 的 owning BC 不同，則該 FK 跨 BC，<strong>必須移除 DB-level FK 約束，改為 application-layer ID-only reference</strong>。所有跨 BC FK 在表 SQL 中保留 column 但移除 <code>FOREIGN KEY</code> 約束（或保留為「documented exception」並由 ADR 記錄）。</p>
@@ -537,17 +538,17 @@
 <h2 id="2-通用欄位規範">2. 通用欄位規範</h2>
 <h3 id="21-命名慣例">2.1 命名慣例</h3>
 <table>
-<tr><th>類別</th><th>規則</th><th>範例</th></tr>
-<tr><td>資料表名稱</td><td><code>snake_case</code>，<strong>複數</strong>（pet-arena 採英文複數約定，如 <code>pets</code>、<code>arena_matches</code>）</td><td><code>pets</code>, <code>arena_matches</code>, <code>claim_codes</code></td></tr>
-<tr><td>欄位名稱</td><td><code>snake_case</code>，小寫</td><td><code>pet_name</code>, <code>created_at</code>, <code>email_hash</code></td></tr>
-<tr><td>Boolean 欄位</td><td>以 <code>is_</code> / <code>has_</code> / <code>can_</code> 為前綴（或語意化動詞如 <code>flagged_at</code> 配對 <code>is_flagged</code>）</td><td><code>is_banned</code>, <code>is_flagged</code>, <code>is_ai_opponent</code>, <code>is_permanent</code></td></tr>
-<tr><td>Enum 欄位</td><td>以 PostgreSQL <code>ENUM</code> type 表示；type 名稱以 <code>_enum</code> 為後綴</td><td><code>rarity_enum</code>, <code>arena_mode_enum</code>, <code>gdpr_request_status_enum</code></td></tr>
-<tr><td>外鍵欄位</td><td>參照表名稱<strong>單數</strong> + <code>_id</code>（如 <code>pets</code> → <code>pet_id</code>）</td><td><code>pet_id</code>, <code>claim_identity_id</code>, <code>listing_id</code>, <code>admin_id</code></td></tr>
-<tr><td>索引名稱</td><td><code>idx_{table}_{columns}</code>（縮寫可接受，如 <code>_history</code>）</td><td><code>idx_pets_rarity</code>, <code>idx_arena_matches_pet_a_history</code></td></tr>
-<tr><td>唯一索引</td><td><code>uq_{table}<em>{columns}</code> 或 <code>idx</em>{table}_{columns}</code> 並標註 UNIQUE</td><td><code>uq_pets_seed</code>, <code>uq_admin_users_username</code>, <code>uq_marketplace_transactions_listing</code></td></tr>
-<tr><td>外鍵約束</td><td><code>fk_{table}_{ref}</code></td><td><code>fk_pets_claim_identity</code>, <code>fk_audit_logs_admin</code></td></tr>
-<tr><td>主鍵約束</td><td><code>pk_{table}</code></td><td><code>pk_pets</code>, <code>pk_audit_logs</code></td></tr>
-<tr><td>CHECK 約束</td><td><code>chk_{table}_{semantic}</code></td><td><code>chk_pet_stat_speed_range</code>, <code>chk_arena_match_winner_is_combatant</code></td></tr>
+<tr><th>類別</th><th>規則</th><th>範例</th><th>禁止事項</th></tr>
+<tr><td>資料表名稱</td><td><code>snake_case</code>，<strong>複數</strong>（pet-arena 採英文複數約定，如 <code>pets</code>、<code>arena_matches</code>）</td><td><code>pets</code>, <code>arena_matches</code>, <code>claim_codes</code></td><td><code>tbl_</code> 前綴；中文 identifier</td></tr>
+<tr><td>欄位名稱</td><td><code>snake_case</code>，小寫</td><td><code>pet_name</code>, <code>created_at</code>, <code>email_hash</code></td><td>中文 / 全形字元；保留字（<code>type</code>、<code>order</code>、<code>value</code>）</td></tr>
+<tr><td>Boolean 欄位</td><td>以 <code>is_</code> / <code>has_</code> / <code>can_</code> 為前綴（或語意化動詞如 <code>flagged_at</code> 配對 <code>is_flagged</code>）</td><td><code>is_banned</code>, <code>is_flagged</code>, <code>is_ai_opponent</code>, <code>is_permanent</code></td><td>無前綴的 bare Boolean（<code>banned</code>、<code>active</code>）</td></tr>
+<tr><td>Enum 欄位</td><td>以 PostgreSQL <code>ENUM</code> type 表示；type 名稱以 <code>_enum</code> 為後綴</td><td><code>rarity_enum</code>, <code>arena_mode_enum</code>, <code>gdpr_request_status_enum</code></td><td>VARCHAR 替代 ENUM（降低類型安全）</td></tr>
+<tr><td>外鍵欄位</td><td>參照表名稱<strong>單數</strong> + <code>_id</code>（如 <code>pets</code> → <code>pet_id</code>）</td><td><code>pet_id</code>, <code>claim_identity_id</code>, <code>listing_id</code>, <code>admin_id</code></td><td>不一致縮寫；複數形（<code>pets_id</code>）</td></tr>
+<tr><td>索引名稱</td><td><code>idx_{table}_{columns}</code>（縮寫可接受，如 <code>_history</code>）</td><td><code>idx_pets_rarity</code>, <code>idx_arena_matches_pet_a_history</code></td><td>無前綴；過長無語意縮寫</td></tr>
+<tr><td>唯一索引</td><td><code>uq_{table}<em>{columns}</code> 或 <code>idx</em>{table}_{columns}</code> 並標註 UNIQUE</td><td><code>uq_pets_seed</code>, <code>uq_admin_users_username</code>, <code>uq_marketplace_transactions_listing</code></td><td>混用兩種前綴</td></tr>
+<tr><td>外鍵約束</td><td><code>fk_{table}_{ref}</code></td><td><code>fk_pets_claim_identity</code>, <code>fk_audit_logs_admin</code></td><td>無前綴；<code>foreignkey_</code> 前綴</td></tr>
+<tr><td>主鍵約束</td><td><code>pk_{table}</code></td><td><code>pk_pets</code>, <code>pk_audit_logs</code></td><td>無前綴；<code>primary_</code> 前綴</td></tr>
+<tr><td>CHECK 約束</td><td><code>chk_{table}_{semantic}</code></td><td><code>chk_pet_stat_speed_range</code>, <code>chk_arena_match_winner_is_combatant</code></td><td>無語意後綴（如 <code>chk1</code>）</td></tr>
 </table>
 <p><strong>禁止</strong>：</p>
 <ul><li>保留字作為欄位名稱（<code>name</code> 例外，因 <code>pet_name</code> 已加前綴；不得單獨用 <code>value</code>、<code>type</code>、<code>order</code>）</li><li><code>tbl_</code> 前綴</li><li>不一致縮寫</li><li>中文 / 全形字元於 identifier</li></ul>
@@ -560,24 +561,24 @@ updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()                  -- 應用層更
 <ul><li><code>audit_logs.id</code> 使用 <code>BIGSERIAL</code>（單調遞增以保稽核順序；不對外暴露）</li><li><code>arena_matches</code>、<code>marketplace_transactions</code>、<code>training_logs</code>、<code>food_buffs</code>、<code>leaderboard_snapshots</code>、<code>gdpr_requests</code> 為 append-only 或極少更新；<code>updated_at</code> 仍保留以追蹤狀態翻轉時刻</li><li><code>gdpr_requests</code> 沒有獨立 <code>created_at</code>，以 <code>submitted_at</code> 取代（業務語意明確）</li><li><code>claim_codes</code> append-only；不含 <code>updated_at</code></li></ul>
 <h3 id="23-主鍵-id-策略">2.3 主鍵 ID 策略</h3>
 <table>
-<tr><th>策略</th><th>適用情境</th><th>本專案使用</th></tr>
-<tr><td><code>UUID v4</code> (<code>gen_random_uuid()</code>)</td><td>外部暴露的 Resource ID（API 路徑、URL）</td><td><strong>預設</strong>：<code>pets</code>、<code>claim_identities</code>、<code>claim_codes</code>、<code>arena_matches</code>、<code>leaderboard_snapshots</code>、<code>training_logs</code>、<code>food_buffs</code>、<code>marketplace_listings</code>、<code>marketplace_transactions</code>、<code>admin_users</code>、<code>gdpr_requests</code></td></tr>
-<tr><td><code>BIGSERIAL</code></td><td>純內部表，需要嚴格時序、不可暴露</td><td><code>audit_logs</code>（單調遞增；admin 介面僅依時間排序，不暴露 ID）</td></tr>
-<tr><td><code>ULID</code></td><td>需時序的外部 ID</td><td>暫不使用</td></tr>
-<tr><td><code>UUID v7</code></td><td>PostgreSQL 17+ 時序 UUID</td><td>本專案 PG 15，待後續升級評估</td></tr>
+<tr><th>策略</th><th>適用情境</th><th>本專案使用</th><th>升級路徑</th></tr>
+<tr><td><code>UUID v4</code> (<code>gen_random_uuid()</code>)</td><td>外部暴露的 Resource ID（API 路徑、URL）</td><td><strong>預設</strong>：<code>pets</code>、<code>claim_identities</code>、<code>claim_codes</code>、<code>arena_matches</code>、<code>leaderboard_snapshots</code>、<code>training_logs</code>、<code>food_buffs</code>、<code>marketplace_listings</code>、<code>marketplace_transactions</code>、<code>admin_users</code>、<code>gdpr_requests</code></td><td>未來可遷移至 UUID v7（PG 17+）</td></tr>
+<tr><td><code>BIGSERIAL</code></td><td>純內部表，需要嚴格時序、不可暴露</td><td><code>audit_logs</code>（單調遞增；admin 介面僅依時間排序，不暴露 ID）</td><td>超過 2^63 理論上限（實務不會觸達）</td></tr>
+<tr><td><code>ULID</code></td><td>需時序的外部 ID</td><td>暫不使用</td><td>有庫支援時可評估</td></tr>
+<tr><td><code>UUID v7</code></td><td>PostgreSQL 17+ 時序 UUID</td><td>本專案 PG 15，待後續升級評估</td><td>PG 17 升級後優先評估替換 UUID v4</td></tr>
 </table>
 <p><strong>決策規則</strong>：</p>
 <ul><li>對外可見資源 → UUID v4</li><li>內部稽核 / log → BIGSERIAL</li><li>高寫入時序資料（&gt;100k row/day）→ 評估 UUID v7（PG 升級後）</li></ul>
 <h3 id="24-軟刪除模式soft-delete">2.4 軟刪除模式（Soft Delete）</h3>
 <p>本專案僅 <code>admin_users</code> 採軟刪除（<code>deactivated_at</code>）。其餘 table 採以下策略：</p>
 <table>
-<tr><th>Table</th><th>刪除策略</th><th>理由</th></tr>
-<tr><td><code>admin_users</code></td><td><strong>軟刪除</strong> (<code>deactivated_at</code>)</td><td><code>audit_logs.admin_id</code> FK 必須保留 actor 紀錄；硬刪會違反稽核完整性</td></tr>
-<tr><td><code>pets</code></td><td><strong>硬刪除</strong>（GDPR erasure 路徑） + status flag (<code>is_banned</code>)</td><td>GDPR 個資刪除權；用 <code>erase_user_pii</code> procedure（見 §6.3）</td></tr>
-<tr><td><code>claim_identities</code></td><td><strong>匿名化</strong>（PII 清空 + retention metadata 保留）</td><td>GDPR Art.17 + 法規舉證；保留行為以稽核 erasure 完成</td></tr>
-<tr><td><code>claim_codes</code></td><td><strong>硬刪除</strong>（72h 後 background job）</td><td>OTP 短生命週期；超過 72h 無業務價值</td></tr>
-<tr><td><code>arena_matches</code> / <code>training_logs</code> / <code>food_buffs</code></td><td><strong>保留</strong>（append-only） + <code>is_flagged</code> flag</td><td>行為稽核 / 防作弊取證</td></tr>
-<tr><td><code>marketplace_listings</code> / <code>marketplace_transactions</code></td><td><strong>保留</strong>（append-only；status 翻轉）</td><td>財務稽核</td></tr>
+<tr><th>Table</th><th>刪除策略</th><th>理由</th><th>Retention 章節</th></tr>
+<tr><td><code>admin_users</code></td><td><strong>軟刪除</strong> (<code>deactivated_at</code>)</td><td><code>audit_logs.admin_id</code> FK 必須保留 actor 紀錄；硬刪會違反稽核完整性</td><td>§13</td></tr>
+<tr><td><code>pets</code></td><td><strong>硬刪除</strong>（GDPR erasure 路徑） + status flag (<code>is_banned</code>)</td><td>GDPR 個資刪除權；用 <code>erase_user_pii</code> procedure（見 §6.3）</td><td>§6.3</td></tr>
+<tr><td><code>claim_identities</code></td><td><strong>匿名化</strong>（PII 清空 + retention metadata 保留）</td><td>GDPR Art.17 + 法規舉證；保留行為以稽核 erasure 完成</td><td>§6.3</td></tr>
+<tr><td><code>claim_codes</code></td><td><strong>硬刪除</strong>（72h 後 background job）</td><td>OTP 短生命週期；超過 72h 無業務價值</td><td>§13</td></tr>
+<tr><td><code>arena_matches</code> / <code>training_logs</code> / <code>food_buffs</code></td><td><strong>保留</strong>（append-only） + <code>is_flagged</code> flag</td><td>行為稽核 / 防作弊取證</td><td>§13</td></tr>
+<tr><td><code>marketplace_listings</code> / <code>marketplace_transactions</code></td><td><strong>保留</strong>（append-only；status 翻轉）</td><td>財務稽核</td><td>§13</td></tr>
 <tr><td><code>leaderboard_snapshots</code></td><td><strong>滾動硬刪</strong>（12 個月 retention）</td><td>歷史報表，無 PII</td></tr>
 <tr><td><code>audit_logs</code></td><td><strong>滾動硬刪</strong>（2 年 retention） + <code>ip_address_hash</code> 90 天清空</td><td>GDPR Art.30 合規上限 + IP retention</td></tr>
 <tr><td><code>gdpr_requests</code></td><td><strong>保留</strong>（合規舉證）</td><td>法規要求</td></tr>
@@ -1345,11 +1346,11 @@ CREATE TYPE gdpr_request_status_enum AS ENUM (
 <h2 id="4-正規化規則normalization-rules">4. 正規化規則（Normalization Rules）</h2>
 <h3 id="41-各正規化形式說明">4.1 各正規化形式說明</h3>
 <table>
-<tr><th>正規化</th><th>要求</th><th>本專案合規檢查</th></tr>
-<tr><td>1NF</td><td>每欄位為原子值；無重複欄位組</td><td>✅ — <code>generation_meta</code>、<code>battle_log</code>、<code>entries</code>、<code>detail</code>、<code>totp_backup_codes_hash</code> 為 JSONB（PostgreSQL 原生 JSONB type 視為「semi-structured atomic value」），非重複欄位組</td></tr>
-<tr><td>2NF</td><td>非主鍵欄位完全依賴主鍵（單欄主鍵下自動成立）</td><td>✅ — 所有主鍵為單欄 UUID 或 BIGSERIAL</td></tr>
-<tr><td>3NF</td><td>非主鍵欄位不依賴其他非主鍵欄位</td><td>✅（除 §4.2 列出的刻意反正規化）</td></tr>
-<tr><td>BCNF</td><td>每個決定因子皆為候選鍵</td><td>✅ — 所有決定因子（如 <code>pets.seed</code>、<code>admin_users.username</code>）皆為 UNIQUE 候選鍵</td></tr>
+<tr><th>正規化</th><th>要求</th><th>常見違反</th><th>本專案合規檢查</th></tr>
+<tr><td>1NF</td><td>每欄位為原子值；無重複欄位組</td><td><code>tag1</code>、<code>tag2</code>、<code>tag3</code> 三欄</td><td>✅ — <code>generation_meta</code>、<code>battle_log</code>、<code>entries</code>、<code>detail</code>、<code>totp_backup_codes_hash</code> 為 JSONB（PostgreSQL 原生 JSONB type 視為「semi-structured atomic value」），非重複欄位組</td></tr>
+<tr><td>2NF</td><td>非主鍵欄位完全依賴主鍵（單欄主鍵下自動成立）</td><td>複合主鍵中只依賴其中一個欄位</td><td>✅ — 所有主鍵為單欄 UUID 或 BIGSERIAL</td></tr>
+<tr><td>3NF</td><td>非主鍵欄位不依賴其他非主鍵欄位</td><td><code>city</code> 依賴 <code>zip_code</code> 而非 <code>user_id</code></td><td>✅（除 §4.2 列出的刻意反正規化）</td></tr>
+<tr><td>BCNF</td><td>每個決定因子皆為候選鍵</td><td>複合候選鍵之間的依賴</td><td>✅ — 所有決定因子（如 <code>pets.seed</code>、<code>admin_users.username</code>）皆為 UNIQUE 候選鍵</td></tr>
 </table>
 <p><strong>1NF 範例</strong>：</p>
 <ul><li><code>pets.generation_meta</code> 為 JSONB — 6 維度物件而非 6 個分散欄位（<code>body</code>、<code>head</code>、<code>color_palette</code>、<code>accessory</code>、<code>rarity_trait</code>、<code>pattern</code>）。理由：sprite 生成 metadata 變動頻繁；scheme 演進不需 ALTER TABLE。</li><li><code>arena_matches.battle_log</code> 為 JSONB array — 戰鬥事件序列長度變動，不適合多欄位。</li><li><code>audit_logs.detail</code> 為 JSONB — 不同 action shape 差異大；多態結構。</li></ul>
@@ -1377,13 +1378,13 @@ CREATE TYPE gdpr_request_status_enum AS ENUM (
 FROM pets;</code></pre>
 <h3 id="52-索引類型選用表">5.2 索引類型選用表</h3>
 <table>
-<tr><th>索引類型</th><th>適用情境</th><th>本專案使用範例</th></tr>
-<tr><td><strong>B-tree</strong>（預設）</td><td>等值、範圍、排序；大多數場景</td><td>全部 <code>idx_*</code> 索引預設 B-tree</td></tr>
-<tr><td><strong>Hash</strong></td><td>僅等值，PG 10+ 持久化</td><td>暫不使用（B-tree 已足）</td></tr>
-<tr><td><strong>GIN</strong></td><td>JSONB containment、tsvector 全文搜尋、陣列</td><td>評估中：<code>pets.generation_meta</code> 可能加 GIN（若 admin search by accessory）</td></tr>
-<tr><td><strong>GiST</strong></td><td>範圍類型、地理</td><td>不使用</td></tr>
-<tr><td><strong>BRIN</strong></td><td>物理有序的超大表（時序）</td><td>候選：<code>audit_logs (created_at)</code> 達 1 億筆時 BRIN 替代 B-tree</td></tr>
-<tr><td><strong>SP-GiST</strong></td><td>非平衡樹結構</td><td>不使用</td></tr>
+<tr><th>索引類型</th><th>適用情境</th><th>本專案使用範例</th><th>觸發門檻</th></tr>
+<tr><td><strong>B-tree</strong>（預設）</td><td>等值、範圍、排序；大多數場景</td><td>全部 <code>idx_*</code> 索引預設 B-tree</td><td>通用</td></tr>
+<tr><td><strong>Hash</strong></td><td>僅等值，PG 10+ 持久化</td><td>暫不使用（B-tree 已足）</td><td>大量 hash-only 等值查詢</td></tr>
+<tr><td><strong>GIN</strong></td><td>JSONB containment、tsvector 全文搜尋、陣列</td><td>評估中：<code>pets.generation_meta</code> 可能加 GIN（若 admin search by accessory）</td><td>JSONB 結構查詢</td></tr>
+<tr><td><strong>GiST</strong></td><td>範圍類型、地理</td><td>不使用</td><td>地理 / 範圍資料</td></tr>
+<tr><td><strong>BRIN</strong></td><td>物理有序的超大表（時序）</td><td>候選：<code>audit_logs (created_at)</code> 達 1 億筆時 BRIN 替代 B-tree</td><td>&gt; 1 億筆時序資料</td></tr>
+<tr><td><strong>SP-GiST</strong></td><td>非平衡樹結構</td><td>不使用</td><td>IP 範圍、特殊結構</td></tr>
 </table>
 <h3 id="53-複合索引欄位順序規則">5.3 複合索引欄位順序規則</h3>
 <pre><code class="">(等值欄位) → (高選擇性欄位) → (範圍欄位) → (排序欄位)</code></pre>
@@ -1590,14 +1591,14 @@ export const pgPool = new Pool({
 <h3 id="74-read-replica-路由規則">7.4 Read Replica 路由規則</h3>
 <p>Supabase 提供 1 個 read replica；application layer 用兩個獨立 pool（primary + replica）路由：</p>
 <table>
-<tr><th>查詢類型</th><th>路由</th><th>範例</th></tr>
-<tr><td>寫入（INSERT / UPDATE / DELETE）</td><td><strong>Primary</strong></td><td>claim verify, training, arena enter, pet ban, admin login</td></tr>
-<tr><td>即時讀取（write-after-read 場景）</td><td><strong>Primary</strong></td><td>領取後立即 GET pet（避免 lag）</td></tr>
-<tr><td>Public pet page</td><td><strong>Replica</strong></td><td><code>GET /api/v1/pets/:petId</code> 對 guest preview</td></tr>
-<tr><td>Leaderboard public read</td><td><strong>Replica</strong>（次要） + Redis（主要）</td><td><code>GET /api/v1/leaderboard</code> 走 Redis；replica 用於 fallback degraded mode（Redis 失效）</td></tr>
-<tr><td>Admin list views</td><td><strong>Replica</strong></td><td><code>GET /admin/api/pets</code>, <code>GET /admin/api/battles</code></td></tr>
-<tr><td>報表 / 分析</td><td><strong>Replica</strong></td><td>leaderboard_snapshots historical</td></tr>
-<tr><td>背景 job 查詢</td><td><strong>Replica</strong></td><td>GDPR erasure job pet listing</td></tr>
+<tr><th>查詢類型</th><th>路由</th><th>範例</th><th>Lag 容忍度</th></tr>
+<tr><td>寫入（INSERT / UPDATE / DELETE）</td><td><strong>Primary</strong></td><td>claim verify, training, arena enter, pet ban, admin login</td><td>無（一致性必須）</td></tr>
+<tr><td>即時讀取（write-after-read 場景）</td><td><strong>Primary</strong></td><td>領取後立即 GET pet（避免 lag）</td><td>0（需 read-your-writes）</td></tr>
+<tr><td>Public pet page</td><td><strong>Replica</strong></td><td><code>GET /api/v1/pets/:petId</code> 對 guest preview</td><td>≤ 1 s</td></tr>
+<tr><td>Leaderboard public read</td><td><strong>Replica</strong>（次要） + Redis（主要）</td><td><code>GET /api/v1/leaderboard</code> 走 Redis；replica 用於 fallback degraded mode（Redis 失效）</td><td>≤ 30 s（SLO）</td></tr>
+<tr><td>Admin list views</td><td><strong>Replica</strong></td><td><code>GET /admin/api/pets</code>, <code>GET /admin/api/battles</code></td><td>≤ 1 s</td></tr>
+<tr><td>報表 / 分析</td><td><strong>Replica</strong></td><td>leaderboard_snapshots historical</td><td>可接受非即時</td></tr>
+<tr><td>背景 job 查詢</td><td><strong>Replica</strong></td><td>GDPR erasure job pet listing</td><td>≤ 1 s</td></tr>
 </table>
 <pre><code class="language-typescript">// db-router.ts
 export const dbPrimary = new Pool({ connectionString: process.env.DATABASE_URL_PRIMARY, min: 10, max: 30 });
@@ -1605,16 +1606,149 @@ export const dbReplica = new Pool({ connectionString: process.env.DATABASE_URL_R
 <p><strong>Replica lag 預算</strong>：≤ 1 秒（Supabase 同步複製）。Lag &gt; 1s 觸發 Datadog alert；&gt; 30s 切回 primary。</p>
 <hr>
 <h2 id="8-migration-策略migration-strategy">8. Migration 策略（Migration Strategy）</h2>
-<h3 id="81-命名規範">8.1 命名規範</h3>
-<p>格式：<code>YYYYMMDDHHMMSS_description.sql</code>（Drizzle / golang-migrate 風格）。例：</p>
-<pre><code class="">20260503000001_init_enums.sql
-20260503000002_create_claim_identities.sql
-20260503000003_create_pets.sql
-20260503000004_create_claim_codes.sql
-...
-20260503000020_drop_cross_bc_fks.sql       -- HC-1 cleanup migration</code></pre>
-<p><strong>規則</strong>：</p>
-<ul><li>snake_case description；動詞優先（<code>create_</code>, <code>add_</code>, <code>drop_</code>, <code>rename_</code>, <code>alter_</code>）</li><li>每個 migration 一件邏輯事</li><li>同時撰寫 UP 與 DOWN（<code>*.down.sql</code>）</li><li>migration 不可直接 <code>DROP TABLE</code>，必須走 §13.1 安全刪除流程</li></ul>
+<h3 id="81-migration-実作清單migration-implementation-list">8.1 Migration 実作清單（Migration Implementation List）</h3>
+<p><strong>命名規範</strong>：格式 <code>YYYYMMDDHHMMSS_description.sql</code>（Drizzle / golang-migrate 風格）。每個 migration 一件邏輯事；同時撰寫 UP 與 DOWN（<code>*.down.sql</code>）；snake_case description；動詞優先（<code>create_</code>, <code>add_</code>, <code>drop_</code>, <code>rename_</code>, <code>alter_</code>）；migration 不可直接 <code>DROP TABLE</code>，必須走 §13.1 安全刪除流程。</p>
+<table>
+<tr><th>#</th><th>Migration 檔名</th><th>說明</th><th>Owner BC</th><th>備註</th></tr>
+<tr><td>V001</td><td><code>20260503000001_init_enums.sql</code></td><td>建立所有 PostgreSQL ENUM types（rarity_enum, arena_mode_enum, training_type_enum, buff_stat_enum, listing_status_enum, admin_role_enum, gdpr_request_type_enum, gdpr_request_status_enum）</td><td>Cross-BC</td><td><strong>必須先執行</strong>；所有 table migration 依賴</td></tr>
+<tr><td>V002</td><td><code>20260503000002_create_claim_identities.sql</code></td><td>建立 <code>claim_identities</code> 表 + <code>uq_claim_identities_email_hash</code></td><td>Identity</td><td>§3.1</td></tr>
+<tr><td>V003</td><td><code>20260503000003_create_pets.sql</code></td><td>建立 <code>pets</code> 表 + <code>uq_pets_seed</code> + 所有 CHECK constraints + 暫時 cross-BC FK <code>fk_pets_claim_identity</code>（HC-1 待 V020 移除）</td><td>Pet</td><td>§3.2；依賴 V002</td></tr>
+<tr><td>V004</td><td><code>20260503000004_create_claim_codes.sql</code></td><td>建立 <code>claim_codes</code> 表 + 暫時 cross-BC FK <code>fk_claim_codes_pet</code>（HC-1 待 V020 移除） + CHECK constraints</td><td>Identity</td><td>§3.3；依賴 V003</td></tr>
+<tr><td>V005</td><td><code>20260503000005_create_arena_matches.sql</code></td><td>建立 <code>arena_matches</code> 表 + 暫時 cross-BC FKs <code>fk_arena_matches_pet_a/pet_b/winner</code>（HC-1 待 V020 移除）+ CHECK constraints</td><td>Arena</td><td>§3.4；依賴 V003</td></tr>
+<tr><td>V006</td><td><code>20260503000006_create_leaderboard_snapshots.sql</code></td><td>建立 <code>leaderboard_snapshots</code> 表</td><td>Leaderboard</td><td>§3.5</td></tr>
+<tr><td>V007</td><td><code>20260503000007_create_training_logs.sql</code></td><td>建立 <code>training_logs</code> 表 + same-BC FK <code>fk_training_logs_pet</code> (CASCADE) + CHECK constraints</td><td>Pet</td><td>§3.6；依賴 V003</td></tr>
+<tr><td>V008</td><td><code>20260503000008_create_food_buffs.sql</code></td><td>建立 <code>food_buffs</code> 表 + same-BC FK <code>fk_food_buffs_pet</code> (CASCADE) + CHECK constraints</td><td>Pet</td><td>§3.7；依賴 V003</td></tr>
+<tr><td>V009</td><td><code>20260503000009_create_marketplace_listings.sql</code></td><td>建立 <code>marketplace_listings</code> 表 + 暫時 cross-BC FK <code>fk_marketplace_listings_pet</code>（HC-1 待 V020 移除）+ CHECK constraints + partial unique index</td><td>Marketplace</td><td>§3.8；依賴 V003</td></tr>
+<tr><td>V010</td><td><code>20260503000010_create_marketplace_transactions.sql</code></td><td>建立 <code>marketplace_transactions</code> 表 + same-BC FK <code>fk_marketplace_transactions_listing</code> (RESTRICT) + 暫時 cross-BC FK <code>fk_marketplace_transactions_pet</code>（HC-1 待 V020 移除）+ <code>uq_marketplace_transactions_listing</code></td><td>Marketplace</td><td>§3.9；依賴 V009</td></tr>
+<tr><td>V011</td><td><code>20260503000011_create_admin_users.sql</code></td><td>建立 <code>admin_users</code> 表 + <code>uq_admin_users_username</code> + CHECK constraints</td><td>Admin</td><td>§3.10</td></tr>
+<tr><td>V012</td><td><code>20260503000012_create_audit_logs.sql</code></td><td>建立 <code>audit_logs</code> 表（BIGSERIAL PK）+ same-BC FK <code>fk_audit_logs_admin</code> (RESTRICT)</td><td>Admin</td><td>§3.11；依賴 V011</td></tr>
+<tr><td>V013</td><td><code>20260503000013_create_gdpr_requests.sql</code></td><td>建立 <code>gdpr_requests</code> 表 + same-BC FK <code>fk_gdpr_requests_identity</code> (RESTRICT) + 暫時 cross-BC FK <code>fk_gdpr_requests_initiating_pet</code>（HC-1 待 V020 移除）+ CHECK constraints</td><td>Identity</td><td>§3.12；依賴 V002、V003</td></tr>
+<tr><td>V014</td><td><code>20260503000014_create_indexes_identity.sql</code></td><td>建立 Identity BC indexes：<code>idx_claim_identities_deletion</code>, <code>idx_claim_codes_pet_id</code>, <code>idx_claim_codes_email_hash</code>, <code>idx_claim_codes_expires_at</code>, <code>idx_claim_codes_created_at</code>, <code>idx_claim_codes_used_at</code></td><td>Identity</td><td>§3.1、§3.3</td></tr>
+<tr><td>V015</td><td><code>20260503000015_create_indexes_pet.sql</code></td><td>建立 Pet BC indexes：<code>idx_pets_rarity</code>, <code>idx_pets_claimed_at</code>, <code>idx_pets_is_banned</code>, <code>idx_pets_owner_token_hash</code>, <code>idx_pets_last_trained_at</code>, <code>idx_pets_claim_identity</code>, <code>idx_pets_reserved_until</code>, <code>idx_training_logs_completed_at</code>, <code>idx_food_buffs_pet_id</code>, <code>idx_food_buffs_record_expires</code></td><td>Pet</td><td>§3.2、§3.6、§3.7</td></tr>
+<tr><td>V016</td><td><code>20260503000016_create_indexes_arena.sql</code></td><td>建立 Arena BC indexes：<code>idx_arena_matches_completed_at</code>, <code>idx_arena_matches_winner</code>, <code>idx_arena_matches_pet_a_history</code>, <code>idx_arena_matches_pet_b_history</code>, <code>idx_arena_matches_is_flagged</code></td><td>Arena</td><td>§3.4</td></tr>
+<tr><td>V017</td><td><code>20260503000017_create_indexes_leaderboard.sql</code></td><td>建立 Leaderboard BC indexes：<code>idx_leaderboard_snapshots_time</code></td><td>Leaderboard</td><td>§3.5</td></tr>
+<tr><td>V018</td><td><code>20260503000018_create_indexes_marketplace.sql</code></td><td>建立 Marketplace BC indexes：<code>idx_marketplace_listings_pet</code>, <code>idx_marketplace_listings_status</code>, <code>idx_marketplace_listings_listed_at</code>, <code>idx_marketplace_listings_active_pet</code> (unique partial), <code>idx_marketplace_listings_expires_at</code>, <code>idx_marketplace_transactions_completed</code>, <code>idx_marketplace_transactions_pet_completed</code></td><td>Marketplace</td><td>§3.8、§3.9</td></tr>
+<tr><td>V019</td><td><code>20260503000019_create_indexes_admin.sql</code></td><td>建立 Admin BC indexes：<code>idx_audit_logs_created_at</code>, <code>idx_audit_logs_admin_id</code>, <code>idx_audit_logs_ip_hash_cleanup</code>, <code>idx_gdpr_requests_identity</code>, <code>idx_gdpr_requests_status</code>, <code>idx_gdpr_requests_initiating_pet</code></td><td>Admin / Identity</td><td>§3.11、§3.12</td></tr>
+<tr><td>V020</td><td><code>20260520000001_drop_cross_bc_fks.sql</code></td><td><strong>HC-1 cleanup</strong>：移除所有 cross-BC DB-level FK constraints（見 §1.1.2）；加 <code>COMMENT ON COLUMN</code> 標注 HC-1 ID-only 策略：<code>fk_pets_claim_identity</code>, <code>fk_claim_codes_pet</code>, <code>fk_arena_matches_pet_a</code>, <code>fk_arena_matches_pet_b</code>, <code>fk_arena_matches_winner</code>, <code>fk_marketplace_listings_pet</code>, <code>fk_marketplace_transactions_pet</code>, <code>fk_gdpr_requests_initiating_pet</code></td><td>Cross-BC</td><td>Expand-Contract Phase 3（§8.2）；需先完成 application-layer 雙寫驗證 7 天</td></tr>
+<tr><td>V021</td><td><code>20260520000002_add_column_comments.sql</code></td><td>補全所有 <code>COMMENT ON COLUMN</code> 及 <code>COMMENT ON TABLE</code>（確保 pg_dump schema 文件完整）</td><td>Cross-BC</td><td>可選；不影響功能；推薦在 staging 環境驗證後執行</td></tr>
+</table>
+<blockquote><p><strong>執行順序強制</strong>：V001 → V002 → V003 → … → V019（V001–V019 無嚴格順序約束，但需在 V020 前全部完成）→ V020 → V021。CI migration runner（<code>pnpm run migrate:up</code>）依檔名時間戳排序自動執行。</p></blockquote>
+<h4 id="811-down-migration-sqlrollback">8.1.1 Down Migration SQL（Rollback）</h4>
+<p>每個 UP migration 對應一個 <code>*.down.sql</code>；下方列出關鍵 rollback SQL：</p>
+<pre><code class="language-sql">-- V001.down.sql — DROP all ENUM types（必須在所有 table DOWN 執行完後）
+DROP TYPE IF EXISTS gdpr_request_status_enum;
+DROP TYPE IF EXISTS gdpr_request_type_enum;
+DROP TYPE IF EXISTS admin_role_enum;
+DROP TYPE IF EXISTS listing_status_enum;
+DROP TYPE IF EXISTS buff_stat_enum;
+DROP TYPE IF EXISTS training_type_enum;
+DROP TYPE IF EXISTS arena_mode_enum;
+DROP TYPE IF EXISTS rarity_enum;
+
+-- V002.down.sql
+DROP TABLE IF EXISTS claim_identities;
+
+-- V003.down.sql
+DROP TABLE IF EXISTS pets;
+
+-- V004.down.sql
+DROP TABLE IF EXISTS claim_codes;
+
+-- V005.down.sql
+DROP TABLE IF EXISTS arena_matches;
+
+-- V006.down.sql
+DROP TABLE IF EXISTS leaderboard_snapshots;
+
+-- V007.down.sql
+DROP TABLE IF EXISTS training_logs;
+
+-- V008.down.sql
+DROP TABLE IF EXISTS food_buffs;
+
+-- V009.down.sql
+DROP TABLE IF EXISTS marketplace_listings;
+
+-- V010.down.sql
+DROP TABLE IF EXISTS marketplace_transactions;
+
+-- V011.down.sql
+DROP TABLE IF EXISTS admin_users;
+
+-- V012.down.sql
+DROP TABLE IF EXISTS audit_logs;
+
+-- V013.down.sql
+DROP TABLE IF EXISTS gdpr_requests;
+
+-- V014.down.sql — DROP Identity BC indexes
+DROP INDEX IF EXISTS idx_claim_identities_deletion;
+DROP INDEX IF EXISTS idx_claim_codes_pet_id;
+DROP INDEX IF EXISTS idx_claim_codes_email_hash;
+DROP INDEX IF EXISTS idx_claim_codes_expires_at;
+DROP INDEX IF EXISTS idx_claim_codes_created_at;
+DROP INDEX IF EXISTS idx_claim_codes_used_at;
+
+-- V015.down.sql — DROP Pet BC indexes
+DROP INDEX IF EXISTS idx_pets_rarity;
+DROP INDEX IF EXISTS idx_pets_claimed_at;
+DROP INDEX IF EXISTS idx_pets_is_banned;
+DROP INDEX IF EXISTS idx_pets_owner_token_hash;
+DROP INDEX IF EXISTS idx_pets_last_trained_at;
+DROP INDEX IF EXISTS idx_pets_claim_identity;
+DROP INDEX IF EXISTS idx_pets_reserved_until;
+DROP INDEX IF EXISTS idx_training_logs_completed_at;
+DROP INDEX IF EXISTS idx_food_buffs_pet_id;
+DROP INDEX IF EXISTS idx_food_buffs_record_expires;
+
+-- V016.down.sql — DROP Arena BC indexes
+DROP INDEX IF EXISTS idx_arena_matches_completed_at;
+DROP INDEX IF EXISTS idx_arena_matches_winner;
+DROP INDEX IF EXISTS idx_arena_matches_pet_a_history;
+DROP INDEX IF EXISTS idx_arena_matches_pet_b_history;
+DROP INDEX IF EXISTS idx_arena_matches_is_flagged;
+
+-- V017.down.sql — DROP Leaderboard BC indexes
+DROP INDEX IF EXISTS idx_leaderboard_snapshots_time;
+
+-- V018.down.sql — DROP Marketplace BC indexes
+DROP INDEX IF EXISTS idx_marketplace_listings_pet;
+DROP INDEX IF EXISTS idx_marketplace_listings_status;
+DROP INDEX IF EXISTS idx_marketplace_listings_listed_at;
+DROP INDEX IF EXISTS idx_marketplace_listings_active_pet;
+DROP INDEX IF EXISTS idx_marketplace_listings_expires_at;
+DROP INDEX IF EXISTS idx_marketplace_transactions_completed;
+DROP INDEX IF EXISTS idx_marketplace_transactions_pet_completed;
+
+-- V019.down.sql — DROP Admin BC indexes
+DROP INDEX IF EXISTS idx_audit_logs_created_at;
+DROP INDEX IF EXISTS idx_audit_logs_admin_id;
+DROP INDEX IF EXISTS idx_audit_logs_ip_hash_cleanup;
+DROP INDEX IF EXISTS idx_gdpr_requests_identity;
+DROP INDEX IF EXISTS idx_gdpr_requests_status;
+DROP INDEX IF EXISTS idx_gdpr_requests_initiating_pet;
+
+-- V020.down.sql — Restore cross-BC FKs（Rollback: add FK constraints back）
+ALTER TABLE pets ADD CONSTRAINT fk_pets_claim_identity
+    FOREIGN KEY (claim_identity_id) REFERENCES claim_identities(id) ON DELETE SET NULL;
+ALTER TABLE claim_codes ADD CONSTRAINT fk_claim_codes_pet
+    FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE;
+ALTER TABLE arena_matches ADD CONSTRAINT fk_arena_matches_pet_a
+    FOREIGN KEY (pet_a_id) REFERENCES pets(id) ON DELETE RESTRICT;
+ALTER TABLE arena_matches ADD CONSTRAINT fk_arena_matches_pet_b
+    FOREIGN KEY (pet_b_id) REFERENCES pets(id) ON DELETE SET NULL;
+ALTER TABLE arena_matches ADD CONSTRAINT fk_arena_matches_winner
+    FOREIGN KEY (winner_pet_id) REFERENCES pets(id) ON DELETE SET NULL;
+ALTER TABLE marketplace_listings ADD CONSTRAINT fk_marketplace_listings_pet
+    FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT;
+ALTER TABLE marketplace_transactions ADD CONSTRAINT fk_marketplace_transactions_pet
+    FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE RESTRICT;
+ALTER TABLE gdpr_requests ADD CONSTRAINT fk_gdpr_requests_initiating_pet
+    FOREIGN KEY (initiating_pet_id) REFERENCES pets(id) ON DELETE SET NULL;
+
+-- V021.down.sql — No-op（COMMENTs are non-destructive; drop not needed）
+-- COMMENT ON TABLE / COLUMN comments can be safely left; no rollback action required.</code></pre>
+<blockquote><p><strong>Rollback 執行順序</strong>：與 UP 相反（先 drop 有 FK 依賴的表）。INDEX DOWN 先於 TABLE DOWN。V014–V019 DROP INDEX 先於 V013–V002 DROP TABLE。V001 DROP ENUM 最後執行。</p></blockquote>
 <h3 id="82-零停機-migration-模式expand-contract-pattern">8.2 零停機 Migration 模式（Expand-Contract Pattern）</h3>
 <p><strong>HC-1 cross-BC FK 移除示例</strong>：</p>
 <pre><code class="">Phase 1 (Expand)   → 新增 application-layer cross-BC 一致性驗證（DataLoader、ID validation）
@@ -1655,14 +1789,14 @@ ALTER TABLE arena_matches
 SELECT COUNT(*) FROM arena_matches WHERE region IS NULL;  -- 應為 0</code></pre>
 <h3 id="84-各-migration-類型的-rollback-策略">8.4 各 Migration 類型的 Rollback 策略</h3>
 <table>
-<tr><th>Migration 類型</th><th>Rollback 難度</th><th>策略</th></tr>
-<tr><td>新增資料表</td><td>低</td><td>DOWN: <code>DROP TABLE</code></td></tr>
-<tr><td>新增欄位</td><td>低</td><td>DOWN: <code>DROP COLUMN</code>（注意有資料需先備份）</td></tr>
-<tr><td>重命名欄位</td><td>中</td><td>雙欄位 + view 轉接；分兩個 migration</td></tr>
-<tr><td>刪除欄位</td><td>高</td><td>先標記 <code><em>deprecated</em>*</code>；下個版本才刪</td></tr>
-<tr><td>資料型別變更</td><td>高</td><td>新欄位 + 應用層雙寫 + cutover；舊欄位廢棄</td></tr>
-<tr><td>跨 BC FK 移除</td><td>中</td><td>DOWN: <code>ADD CONSTRAINT</code>（如資料一致則可逆）</td></tr>
-<tr><td>索引</td><td>低</td><td>DOWN: <code>DROP INDEX CONCURRENTLY</code></td></tr>
+<tr><th>Migration 類型</th><th>Rollback 難度</th><th>策略</th><th>前置備份需求</th></tr>
+<tr><td>新增資料表</td><td>低</td><td>DOWN: <code>DROP TABLE IF EXISTS</code></td><td>否</td></tr>
+<tr><td>新增欄位</td><td>低</td><td>DOWN: <code>ALTER TABLE ... DROP COLUMN IF EXISTS</code>（注意有資料需先備份）</td><td>否（新欄位無舊資料）</td></tr>
+<tr><td>重命名欄位</td><td>中</td><td>雙欄位 + view 轉接；分兩個 migration</td><td>否（保留原欄位）</td></tr>
+<tr><td>刪除欄位</td><td>高</td><td>先標記 <code><em>deprecated</em>*</code>；下個版本才刪</td><td><strong>是</strong>（備份後才刪）</td></tr>
+<tr><td>資料型別變更</td><td>高</td><td>新欄位 + 應用層雙寫 + cutover；舊欄位廢棄</td><td><strong>是</strong></td></tr>
+<tr><td>跨 BC FK 移除</td><td>中</td><td>DOWN: <code>ALTER TABLE ... ADD CONSTRAINT ...</code>（如資料一致則可逆）</td><td>否（ADD CONSTRAINT 可恢復）</td></tr>
+<tr><td>索引</td><td>低</td><td>DOWN: <code>DROP INDEX CONCURRENTLY</code></td><td>否</td></tr>
 </table>
 <h3 id="85-migration-測試檢查清單">8.5 Migration 測試檢查清單</h3>
 <ul><li style="list-style:none"><input type="checkbox" disabled> UP migration 在乾淨 DB 執行成功</li><li style="list-style:none"><input type="checkbox" disabled> DOWN migration 能完整還原（除 §13.1 標示為 irreversible 的）</li><li style="list-style:none"><input type="checkbox" disabled> 在含有 staging 資料量的環境測試過執行時間</li><li style="list-style:none"><input type="checkbox" disabled> 確認不持有超過 3 秒的 table lock（<code>pg_locks</code> 監控）</li><li style="list-style:none"><input type="checkbox" disabled> EXPLAIN ANALYZE 新增 / 修改的高頻查詢，確認使用正確索引</li><li style="list-style:none"><input type="checkbox" disabled> FK 約束未被破壞（cross-BC 為刻意移除，需有對應 application layer 驗證 commit）</li><li style="list-style:none"><input type="checkbox" disabled> CI lint：無 <code>DROP TABLE</code>（除走 §13.1 流程）、無 <code>ALTER COLUMN ... TYPE</code>（除 expand-contract pattern）</li></ul>
@@ -1723,9 +1857,9 @@ CHECK (pet_b_id IS NULL OR pet_b_id != pet_a_id)
 CHECK ((is_permanent = TRUE AND expires_at IS NULL) OR (is_permanent = FALSE AND expires_at IS NOT NULL))</code></pre>
 <h3 id="93-unique-約束-vs-unique-index">9.3 Unique 約束 vs Unique Index</h3>
 <table>
-<tr><th>方式</th><th>本專案使用</th></tr>
-<tr><td><code>UNIQUE</code> 約束（DDL 層）</td><td><code>pets.seed</code>, <code>admin_users.username</code>, <code>marketplace_transactions.listing_id</code>, <code>claim_identities.email_hash</code></td></tr>
-<tr><td><code>CREATE UNIQUE INDEX</code> 含 WHERE</td><td><code>idx_marketplace_listings_active_pet (pet_id) WHERE status = &#x27;active&#x27;</code> — 業務級唯一（同 pet 不可同時兩筆 active listing）</td></tr>
+<tr><th>方式</th><th>語義差異</th><th>本專案使用</th><th>適用條件</th></tr>
+<tr><td><code>UNIQUE</code> 約束（DDL 層）</td><td>宣告式，DDL 層語意明確</td><td><code>pets.seed</code>, <code>admin_users.username</code>, <code>marketplace_transactions.listing_id</code>, <code>claim_identities.email_hash</code></td><td>簡單欄位或欄位組合</td></tr>
+<tr><td><code>CREATE UNIQUE INDEX</code> 含 WHERE</td><td>支援 Partial、函式表達式</td><td><code>idx_marketplace_listings_active_pet (pet_id) WHERE status = &#x27;active&#x27;</code> — 業務級唯一（同 pet 不可同時兩筆 active listing）</td><td>含 WHERE 條件、大小寫不敏感、需 CONCURRENTLY</td></tr>
 </table>
 <p>理由：簡單欄位用 UNIQUE 約束（DDL 語意明確）；含 partial 條件用 UNIQUE INDEX。</p>
 <h3 id="94-延遲約束deferred-constraints">9.4 延遲約束（Deferred Constraints）</h3>
@@ -1833,11 +1967,11 @@ supabase db restore --project-ref pixel-pet-arena-prod \
 <ul><li style="margin-left:1.5rem"><code>SELECT COUNT(*) FROM pets WHERE is_banned = FALSE</code></li><li style="margin-left:1.5rem"><code>SELECT COUNT(*) FROM arena_matches WHERE completed_at &gt;= NOW() - INTERVAL &#x27;24 hours&#x27;</code></li><li style="margin-left:1.5rem"><code>SELECT MAX(snapshot_time) FROM leaderboard_snapshots</code></li></ul>
 <ol><li>記錄 RTO / RPO 實測值</li></ol>
 <table>
-<tr><th>指標</th><th>目標</th><th>SLO 來源</th></tr>
-<tr><td>RTO（PITR）</td><td>≤ 4 小時</td><td>EDD §3.6.3</td></tr>
-<tr><td>RPO（PITR）</td><td>≤ 5 分鐘（WAL archive 頻率）</td><td>EDD §3.6.3</td></tr>
-<tr><td>RTO（DB primary auto-failover）</td><td>≤ 60 秒</td><td>EDD §3.6.3（<code>db_autofailover_time_seconds = 60</code>）</td></tr>
-<tr><td>RPO（synchronous standby）</td><td>0 秒</td><td>EDD §3.6.3</td></tr>
+<tr><th>指標</th><th>目標</th><th>SLO 來源</th><th>最近驗證日期</th></tr>
+<tr><td>RTO（PITR）</td><td>≤ 4 小時</td><td>EDD §3.6.3</td><td>每月 DR drill</td></tr>
+<tr><td>RPO（PITR）</td><td>≤ 5 分鐘（WAL archive 頻率）</td><td>EDD §3.6.3</td><td>每月 DR drill</td></tr>
+<tr><td>RTO（DB primary auto-failover）</td><td>≤ 60 秒</td><td>EDD §3.6.3（<code>db_autofailover_time_seconds = 60</code>）</td><td>Supabase SLA</td></tr>
+<tr><td>RPO（synchronous standby）</td><td>0 秒</td><td>EDD §3.6.3</td><td>同步複寫</td></tr>
 </table>
 <hr>
 <h2 id="12-redis-key-schema">12. Redis Key Schema</h2>
@@ -1950,6 +2084,7 @@ ZCARD leaderboard:global                                                    # �
 <table>
 <tr><th>Key</th><th>TTL</th><th>Value</th><th>Notes</th></tr>
 <tr><td><code>config:runtime</code></td><td>300 s</td><td>JSON blob</td><td>Runtime 配置（arena rate limit、rarity weights 等）；refresh 每 5 min (<code>config_cache_refresh_time_minutes = 5</code>)。Mutations via <code>PUT /admin/api/config/{runtime,economy}</code> 在此 window 內生效。</td></tr>
+<tr><td><code>config:economy</code></td><td>300 s</td><td>JSON blob</td><td>Economy 配置（marketplace fee rate、food buff multiplier、credit rewards 等）；refresh 每 5 min。Mutations via <code>PUT /admin/api/config/economy</code> invalidate this key.</td></tr>
 </table>
 <p><strong>Redis CLI 命令範例</strong>：</p>
 <pre><code class="language-redis"># 寫入 runtime config（admin 修改後 + 載入時 cache）
@@ -1965,27 +2100,27 @@ DEL config:runtime</code></pre>
 <hr>
 <h2 id="13-data-retention-policy">13. Data Retention Policy</h2>
 <table>
-<tr><th>Table / Key Pattern</th><th>Retention</th><th>Source Constant</th></tr>
-<tr><td><code>pets</code></td><td>Indefinite（直至 GDPR erasure / admin delete）</td><td>—</td></tr>
-<tr><td><code>claim_identities</code></td><td>Indefinite；<code>email_encrypted</code> 在抹除請求後 7 天清空</td><td><code>gdpr_email_deletion_window_days = 7</code></td></tr>
-<tr><td><code>claim_codes</code></td><td>72h post-creation 或 <code>used_at</code>（取較晚者）後刪除</td><td><code>claim_token_cleanup_ttl_hours = 72</code></td></tr>
-<tr><td><code>arena_matches</code></td><td>Indefinite（稽核不可變；最近 20 場公開顯示）</td><td><code>arena_battle_records_display_count = 20</code></td></tr>
-<tr><td><code>training_logs</code></td><td>Indefinite（行為稽核；feeds <code>total_training_actions</code>）</td><td>—</td></tr>
-<tr><td><code>leaderboard_snapshots</code></td><td>Rolling 12 個月</td><td><code>leaderboard_snapshot_retention_months = 12</code></td></tr>
-<tr><td><code>food_buffs</code></td><td>30 天 post-<code>consumed_at</code>（<code>record_expires_at</code> cleanup job）</td><td><code>food_buff_record_retention_days = 30</code></td></tr>
-<tr><td><code>marketplace_listings</code></td><td>Indefinite（被 transaction RESTRICT 引用）</td><td>—</td></tr>
-<tr><td><code>marketplace_transactions</code></td><td>Indefinite（財務稽核）</td><td>—</td></tr>
-<tr><td><code>admin_users</code></td><td>Indefinite（<code>audit_logs</code> FK；軟刪 <code>deactivated_at</code>）</td><td>—</td></tr>
-<tr><td><code>audit_logs</code></td><td>2 年（GDPR Art.30 合規）</td><td><code>admin_audit_log_retention_years = 2</code></td></tr>
-<tr><td><code>audit_logs.ip_address_hash</code></td><td>90 天（背景 job 清空）</td><td><code>ip_address_log_retention_days = 90</code></td></tr>
-<tr><td><code>gdpr_requests</code></td><td>Indefinite（法規舉證）</td><td>—</td></tr>
-<tr><td>Unclaimed <code>pets</code>（guest preview）</td><td><code>reserved_until &lt; NOW() AND owner_token_hash IS NULL</code> 由 background job 清理</td><td><code>pet_reservation_ttl_hours = 24</code></td></tr>
-<tr><td><code>rl:*</code> Redis counters</td><td>Per-key TTL（60–3600 s）</td><td>各 <code>rate_limits.*</code> 常數</td></tr>
-<tr><td><code>session:admin:*</code></td><td>14400 s inactivity / 28800 s absolute</td><td><code>admin_session_inactivity_expiry_hours = 4</code> / <code>admin_session_absolute_expiry_hours = 8</code></td></tr>
-<tr><td><code>token:blacklist:*</code></td><td>259200 s</td><td><code>claim_token_cleanup_ttl_hours = 72</code></td></tr>
-<tr><td><code>leaderboard:global</code></td><td>無 expiry；ban / GDPR 觸發 <code>ZREM</code></td><td>—</td></tr>
-<tr><td><code>matchmaking:queue:*</code></td><td>無 key TTL；stale entries（&gt; 30s + grace）由 consumer 丟棄</td><td><code>arena_matchmaking_timeout_seconds = 30</code></td></tr>
-<tr><td><code>config:runtime</code></td><td>300 s rolling TTL</td><td><code>config_cache_refresh_time_minutes = 5</code></td></tr>
+<tr><th>Table / Key Pattern</th><th>Retention</th><th>Source Constant</th><th>刪除方式</th></tr>
+<tr><td><code>pets</code></td><td>Indefinite（直至 GDPR erasure / admin delete）</td><td>—</td><td>GDPR erasure job（硬刪）</td></tr>
+<tr><td><code>claim_identities</code></td><td>Indefinite；<code>email_encrypted</code> 在抹除請求後 7 天清空</td><td><code>gdpr_email_deletion_window_days = 7</code></td><td>匿名化（保留行，清 PII）</td></tr>
+<tr><td><code>claim_codes</code></td><td>72h post-creation 或 <code>used_at</code>（取較晚者）後刪除</td><td><code>claim_token_cleanup_ttl_hours = 72</code></td><td>background job 硬刪</td></tr>
+<tr><td><code>arena_matches</code></td><td>Indefinite（稽核不可變；最近 20 場公開顯示）</td><td><code>arena_battle_records_display_count = 20</code></td><td>永久保留</td></tr>
+<tr><td><code>training_logs</code></td><td>Indefinite（行為稽核；feeds <code>total_training_actions</code>）</td><td>—</td><td>永久保留</td></tr>
+<tr><td><code>leaderboard_snapshots</code></td><td>Rolling 12 個月</td><td><code>leaderboard_snapshot_retention_months = 12</code></td><td>背景 job 硬刪（滾動）</td></tr>
+<tr><td><code>food_buffs</code></td><td>30 天 post-<code>consumed_at</code>（<code>record_expires_at</code> cleanup job）</td><td><code>food_buff_record_retention_days = 30</code></td><td>背景 job 硬刪</td></tr>
+<tr><td><code>marketplace_listings</code></td><td>Indefinite（被 transaction RESTRICT 引用）</td><td>—</td><td>永久保留</td></tr>
+<tr><td><code>marketplace_transactions</code></td><td>Indefinite（財務稽核）</td><td>—</td><td>永久保留</td></tr>
+<tr><td><code>admin_users</code></td><td>Indefinite（<code>audit_logs</code> FK；軟刪 <code>deactivated_at</code>）</td><td>—</td><td>軟刪（deactivated_at）</td></tr>
+<tr><td><code>audit_logs</code></td><td>2 年（GDPR Art.30 合規）</td><td><code>admin_audit_log_retention_years = 2</code></td><td>背景 job 硬刪（滾動）</td></tr>
+<tr><td><code>audit_logs.ip_address_hash</code></td><td>90 天（背景 job 清空）</td><td><code>ip_address_log_retention_days = 90</code></td><td>UPDATE 設 NULL</td></tr>
+<tr><td><code>gdpr_requests</code></td><td>Indefinite（法規舉證）</td><td>—</td><td>永久保留</td></tr>
+<tr><td>Unclaimed <code>pets</code>（guest preview）</td><td><code>reserved_until &lt; NOW() AND owner_token_hash IS NULL</code> 由 background job 清理</td><td><code>pet_reservation_ttl_hours = 24</code></td><td>背景 job 硬刪</td></tr>
+<tr><td><code>rl:*</code> Redis counters</td><td>Per-key TTL（60–3600 s）</td><td>各 <code>rate_limits.*</code> 常數</td><td>Redis TTL 自動過期</td></tr>
+<tr><td><code>session:admin:*</code></td><td>14400 s inactivity / 28800 s absolute</td><td><code>admin_session_inactivity_expiry_hours = 4</code> / <code>admin_session_absolute_expiry_hours = 8</code></td><td>Redis TTL / DEL</td></tr>
+<tr><td><code>token:blacklist:*</code></td><td>259200 s</td><td><code>claim_token_cleanup_ttl_hours = 72</code></td><td>Redis TTL 自動過期</td></tr>
+<tr><td><code>leaderboard:global</code></td><td>無 expiry；ban / GDPR 觸發 <code>ZREM</code></td><td>—</td><td><code>ZREM</code> on ban / GDPR</td></tr>
+<tr><td><code>matchmaking:queue:*</code></td><td>無 key TTL；stale entries（&gt; 30s + grace）由 consumer 丟棄</td><td><code>arena_matchmaking_timeout_seconds = 30</code></td><td>Consumer 丟棄 / <code>ZREMRANGEBYSCORE</code></td></tr>
+<tr><td><code>config:runtime</code></td><td>300 s rolling TTL</td><td><code>config_cache_refresh_time_minutes = 5</code></td><td>Redis TTL 自動過期</td></tr>
 </table>
 <blockquote><p><strong>GDPR Right to Erasure 實作細節</strong>：見 §6.3。</p></blockquote>
 <h3 id="131-schema-刪除安全模式schema-deletion-safety">13.1 Schema 刪除安全模式（Schema Deletion Safety）</h3>
@@ -2195,11 +2330,11 @@ DROP TABLE _deprecated_old_feature_table_20260510;</code></pre>
 </table>
 <p><strong>敏感程度分類</strong>：</p>
 <table>
-<tr><th>程度</th><th>類型</th><th>處理</th></tr>
-<tr><td>最高</td><td>password、TOTP secret</td><td>bcrypt / AES-256；不可備份至非加密存儲</td></tr>
-<tr><td>高</td><td>email、IP</td><td>hash / 加密；retention 上限</td></tr>
-<tr><td>中</td><td>token hash</td><td>SHA-256；隨業務</td></tr>
-<tr><td>低</td><td>pet stats、battle log</td><td>標準保護</td></tr>
+<tr><th>程度</th><th>類型</th><th>處理</th><th>存取限制</th></tr>
+<tr><td>最高</td><td>password、TOTP secret</td><td>bcrypt / AES-256；不可備份至非加密存儲</td><td>僅系統；永不回傳至 API</td></tr>
+<tr><td>高</td><td>email、IP</td><td>hash / 加密；retention 上限</td><td>僅 GDPR 流程；IP 90 天清空</td></tr>
+<tr><td>中</td><td>token hash</td><td>SHA-256；隨業務</td><td>僅 auth hot path</td></tr>
+<tr><td>低</td><td>pet stats、battle log</td><td>標準保護</td><td>Public API 可讀</td></tr>
 </table>
 <hr>
 <h2 id="17-multi-tenancy-data-isolation-strategies">17. Multi-Tenancy Data Isolation Strategies</h2>
@@ -2208,10 +2343,10 @@ DROP TABLE _deprecated_old_feature_table_20260510;</code></pre>
 <ul><li>pixel-pet-arena 為單一公開遊戲，全體玩家共享 leaderboard / marketplace</li><li>無 B2B 客戶或租戶隔離合規需求</li><li>Player 之間隔離由 <code>owner_token_hash</code> 驗證（pet ownership）保證；無需 schema-level isolation</li><li>Admin 透過 RBAC 限制（<code>admin_role_enum</code>）</li></ul>
 <p><strong>比較表</strong>：</p>
 <table>
-<tr><th>策略</th><th>是否適用本產品</th><th>理由</th></tr>
-<tr><td>Shared DB + 共用 Schema（RLS）</td><td>❌</td><td>無 tenant 概念；application-level pet ownership 已足</td></tr>
-<tr><td>Shared DB + Schema-per-Tenant</td><td>❌</td><td>過度設計</td></tr>
-<tr><td>DB-per-Tenant</td><td>❌</td><td>過度設計</td></tr>
+<tr><th>策略</th><th>是否適用本產品</th><th>理由</th><th>未來評估門檻</th></tr>
+<tr><td>Shared DB + 共用 Schema（RLS）</td><td>❌</td><td>無 tenant 概念；application-level pet ownership 已足</td><td>B2B 多租戶需求時引入</td></tr>
+<tr><td>Shared DB + Schema-per-Tenant</td><td>❌</td><td>過度設計</td><td>中型 B2B SaaS 時考慮</td></tr>
+<tr><td>DB-per-Tenant</td><td>❌</td><td>過度設計</td><td>企業合規要求時評估</td></tr>
 </table>
 <p><strong>未來企業版（B2B 多遊戲）規劃</strong>：若衍生為「私營小型遊戲服務」，將引入 <code>tenant_id</code> + RLS pattern；目前為 v3 路線圖，本 SCHEMA 不規劃。</p>
 <hr>
@@ -2384,12 +2519,223 @@ async function getReplicaConnection(): Promise&lt;Pool&gt; {
 <h3 id="205-datadog-dashboard-配置">20.5 Datadog Dashboard 配置</h3>
 <ul><li><strong>Dashboard</strong>：<code>pixel-pet-arena / Database Health</code></li><li><strong>核心 widget</strong>：connections / slow queries top 20 / replication lag / dead tuple ratio / disk usage</li><li><strong>告警通道</strong>：</li><li style="margin-left:1.0rem">Warning → Slack <code>#oncall-pet-arena</code></li><li style="margin-left:1.0rem">Critical → PagerDuty + Slack <code>#sev1</code></li><li><strong>SLO Burn Rate</strong>：API P95 latency 由 §7.1 的 query SLO 推導；burn rate &gt; 2x → ticket；&gt; 10x → page</li></ul>
 <hr>
-<p>GEN_RESULT:</p>
-<p>step_id: SCHEMA</p>
-<p>type: SCHEMA</p>
-<p>files_generated: docs/SCHEMA.md</p>
-<p>sections_completed: 20</p>
-<p>self_check_passed: true</p></main>
+<hr>
+<h2 id="seed-data">Seed Data</h2>
+<blockquote><p><strong>目的</strong>：讓 AI codegen 工具能直接使用 seed 資料初始化本地資料庫，無需人工推導測試資料。</p></blockquote>
+<blockquote><p>執行前提：所有 migration 已完成（pnpm run migrate:up）</p></blockquote>
+<pre><code class="language-sql">-- ===== Seed Data（本地開發 + CI 測試用）=====
+-- 執行順序：依 BC ownership 與 FK 依賴關係排列
+
+-- BC: Identity — claim_identities
+-- 欄位：id, email_hash, email_encrypted, deletion_requested_at, created_at, updated_at
+INSERT INTO claim_identities (id, email_hash, email_encrypted, deletion_requested_at, created_at, updated_at) VALUES
+  (&#x27;11111111-0000-0000-0000-000000000001&#x27;,
+   &#x27;a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3&#x27;,
+   NULL, NULL, NOW(), NOW()),
+  (&#x27;11111111-0000-0000-0000-000000000002&#x27;,
+   &#x27;b3a8e0e1f9ab1bfe3a36f231f676f78bb28a2234cbc35a38ae7f1f6b1f1f4c5d&#x27;,
+   NULL, NULL, NOW() - INTERVAL &#x27;30 days&#x27;, NOW() - INTERVAL &#x27;7 days&#x27;);
+
+-- BC: Pet — pets（依賴 claim_identities via cross-BC ID-only）
+-- 欄位：id, seed, rarity, pet_name, stat_speed, stat_strength, stat_stamina,
+--       level, total_training_actions, last_trained_at, owner_token_hash, claimed_at,
+--       claim_identity_id, reserved_until, is_banned, banned_reason, banned_at,
+--       generation_meta, created_at, updated_at
+INSERT INTO pets (
+  id, seed, rarity, pet_name,
+  stat_speed, stat_strength, stat_stamina,
+  level, total_training_actions, last_trained_at,
+  owner_token_hash, claimed_at, claim_identity_id,
+  reserved_until, is_banned, banned_reason, banned_at,
+  generation_meta, created_at, updated_at
+) VALUES
+  -- Pet 1: claimed pet (FluffBall), trained to level 9
+  (&#x27;22222222-0000-0000-0000-000000000001&#x27;,
+   123456789, &#x27;RARE&#x27;, &#x27;FluffBall&#x27;,
+   55, 40, 45,
+   9, 90, NOW() - INTERVAL &#x27;1 day&#x27;,
+   &#x27;a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2&#x27;,
+   NOW() - INTERVAL &#x27;7 days&#x27;, &#x27;11111111-0000-0000-0000-000000000001&#x27;,
+   NULL, FALSE, NULL, NULL,
+   &#x27;{&quot;body&quot;:&quot;round&quot;,&quot;head&quot;:&quot;big&quot;,&quot;color_palette&quot;:&quot;blue&quot;,&quot;accessory&quot;:&quot;hat&quot;,&quot;rarity_trait&quot;:&quot;shiny&quot;,&quot;pattern&quot;:&quot;stripe&quot;}&#x27;,
+   NOW() - INTERVAL &#x27;8 days&#x27;, NOW() - INTERVAL &#x27;1 day&#x27;),
+  -- Pet 2: unclaimed guest preview pet (ZapMaster)
+  (&#x27;22222222-0000-0000-0000-000000000002&#x27;,
+   987654321, &#x27;COMMON&#x27;, &#x27;ZapMaster&#x27;,
+   10, 10, 10,
+   1, 0, NULL,
+   NULL, NULL, NULL,
+   NOW() + INTERVAL &#x27;20 hours&#x27;, FALSE, NULL, NULL,
+   &#x27;{&quot;body&quot;:&quot;slim&quot;,&quot;head&quot;:&quot;small&quot;,&quot;color_palette&quot;:&quot;red&quot;,&quot;accessory&quot;:&quot;none&quot;,&quot;rarity_trait&quot;:&quot;normal&quot;,&quot;pattern&quot;:&quot;plain&quot;}&#x27;,
+   NOW(), NOW()),
+  -- Pet 3: banned pet (BannedPet), claimed, level 100
+  (&#x27;22222222-0000-0000-0000-000000000003&#x27;,
+   111222333, &#x27;LEGENDARY&#x27;, &#x27;BannedPet&#x27;,
+   80, 90, 85,
+   100, 1000, NOW() - INTERVAL &#x27;31 days&#x27;,
+   &#x27;f9e8d7c6b5a4f9e8d7c6b5a4f9e8d7c6b5a4f9e8d7c6b5a4f9e8d7c6b5a4f9e8&#x27;,
+   NOW() - INTERVAL &#x27;60 days&#x27;, &#x27;11111111-0000-0000-0000-000000000002&#x27;,
+   NULL, TRUE, &#x27;Bot detected: 150 battles in 60 min window.&#x27;, NOW() - INTERVAL &#x27;30 days&#x27;,
+   &#x27;{&quot;body&quot;:&quot;heavy&quot;,&quot;head&quot;:&quot;horned&quot;,&quot;color_palette&quot;:&quot;gold&quot;,&quot;accessory&quot;:&quot;crown&quot;,&quot;rarity_trait&quot;:&quot;glowing&quot;,&quot;pattern&quot;:&quot;star&quot;}&#x27;,
+   NOW() - INTERVAL &#x27;60 days&#x27;, NOW() - INTERVAL &#x27;30 days&#x27;);
+
+-- BC: Identity — claim_codes（依賴 pets via cross-BC ID-only）
+-- 欄位：id, pet_id, email_hash, code_hash, expires_at, used_at, attempts, created_at
+INSERT INTO claim_codes (id, pet_id, email_hash, code_hash, expires_at, used_at, attempts, created_at) VALUES
+  -- Active OTP for Pet 2 (unclaimed)
+  (&#x27;33333333-0000-0000-0000-000000000001&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000002&#x27;,
+   &#x27;a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3&#x27;,
+   &#x27;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&#x27;,
+   NOW() + INTERVAL &#x27;15 minutes&#x27;, NULL, 0, NOW()),
+  -- Used OTP for Pet 1 (already claimed, historical)
+  (&#x27;33333333-0000-0000-0000-000000000002&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;,
+   &#x27;a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3&#x27;,
+   &#x27;ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb&#x27;,
+   NOW() - INTERVAL &#x27;7 days&#x27; + INTERVAL &#x27;15 minutes&#x27;,
+   NOW() - INTERVAL &#x27;7 days&#x27;, 1, NOW() - INTERVAL &#x27;7 days&#x27;);
+
+-- BC: Arena — arena_matches（依賴 pets via cross-BC ID-only）
+-- 欄位：id, pet_a_id, pet_b_id, is_ai_opponent, mode, winner_pet_id,
+--       random_seed, stat_delta_a, stat_delta_b, duration_seconds,
+--       battle_log, is_flagged, flagged_at, completed_at, updated_at
+INSERT INTO arena_matches (
+  id, pet_a_id, pet_b_id, is_ai_opponent, mode, winner_pet_id,
+  random_seed, stat_delta_a, stat_delta_b, duration_seconds,
+  battle_log, is_flagged, flagged_at, completed_at, updated_at
+) VALUES
+  -- Match 1: RACE, Pet 1 wins
+  (&#x27;44444444-0000-0000-0000-000000000001&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000003&#x27;,
+   FALSE, &#x27;RACE&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;,
+   7654321, 5, 0, 8,
+   &#x27;[{&quot;tick&quot;:1,&quot;event&quot;:&quot;start&quot;},{&quot;tick&quot;:8,&quot;event&quot;:&quot;finish&quot;,&quot;winner&quot;:&quot;pet_a&quot;}]&#x27;,
+   FALSE, NULL, NOW() - INTERVAL &#x27;1 hour&#x27;, NOW() - INTERVAL &#x27;1 hour&#x27;),
+  -- Match 2: SUMO, Pet 3 wins, flagged for bot detection
+  (&#x27;44444444-0000-0000-0000-000000000002&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000003&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;,
+   FALSE, &#x27;SUMO&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000003&#x27;,
+   1122334, 0, 3, 12,
+   &#x27;[{&quot;tick&quot;:1,&quot;event&quot;:&quot;start&quot;},{&quot;tick&quot;:12,&quot;event&quot;:&quot;finish&quot;,&quot;winner&quot;:&quot;pet_a&quot;}]&#x27;,
+   TRUE, NOW() - INTERVAL &#x27;2 days&#x27; + INTERVAL &#x27;5 minutes&#x27;,
+   NOW() - INTERVAL &#x27;2 days&#x27;, NOW() - INTERVAL &#x27;2 days&#x27; + INTERVAL &#x27;5 minutes&#x27;);
+
+-- BC: Leaderboard — leaderboard_snapshots
+-- 欄位：id, snapshot_time, entries (JSONB array), created_at
+-- entries 結構：[{rank, pet_id, pet_name, score, win_rate, rarity, level}]
+INSERT INTO leaderboard_snapshots (id, snapshot_time, entries, created_at) VALUES
+  (&#x27;55555555-0000-0000-0000-000000000001&#x27;,
+   NOW(),
+   &#x27;[
+     {&quot;rank&quot;:1,&quot;pet_id&quot;:&quot;22222222-0000-0000-0000-000000000001&quot;,&quot;pet_name&quot;:&quot;FluffBall&quot;,&quot;score&quot;:9850.0,&quot;win_rate&quot;:0.833,&quot;rarity&quot;:&quot;RARE&quot;,&quot;level&quot;:9},
+     {&quot;rank&quot;:2,&quot;pet_id&quot;:&quot;22222222-0000-0000-0000-000000000003&quot;,&quot;pet_name&quot;:&quot;BannedPet&quot;,&quot;score&quot;:8200.0,&quot;win_rate&quot;:0.900,&quot;rarity&quot;:&quot;LEGENDARY&quot;,&quot;level&quot;:100}
+   ]&#x27;::jsonb,
+   NOW());
+
+-- BC: Pet — training_logs（依賴 pets, same-BC FK）
+-- 欄位：id, pet_id, training_type, stat_delta, stat_after, completed_at
+INSERT INTO training_logs (id, pet_id, training_type, stat_delta, stat_after, completed_at) VALUES
+  (&#x27;66666666-0000-0000-0000-000000000001&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;, &#x27;RUN&#x27;, 2, 55, NOW() - INTERVAL &#x27;1 day&#x27;),
+  (&#x27;66666666-0000-0000-0000-000000000002&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;, &#x27;STAMINA&#x27;, 3, 45, NOW() - INTERVAL &#x27;2 days&#x27;),
+  (&#x27;66666666-0000-0000-0000-000000000003&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;, &#x27;STRENGTH&#x27;, 1, 40, NOW() - INTERVAL &#x27;3 days&#x27;);
+
+-- BC: Pet — food_buffs（依賴 pets, same-BC FK）
+-- 欄位：id, pet_id, food_type, buff_stat, magnitude, is_permanent,
+--       expires_at, consumed_at, record_expires_at
+INSERT INTO food_buffs (
+  id, pet_id, food_type, buff_stat, magnitude, is_permanent,
+  expires_at, consumed_at, record_expires_at
+) VALUES
+  -- Active temporary speed buff for Pet 1
+  (&#x27;77777777-0000-0000-0000-000000000001&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;,
+   &#x27;speed_berry&#x27;, &#x27;speed&#x27;, 5, FALSE,
+   NOW() + INTERVAL &#x27;4 hours&#x27;,
+   NOW(),
+   NOW() + INTERVAL &#x27;30 days&#x27;),
+  -- Expired stamina buff for Pet 1 (historical record, still within 30-day retention)
+  (&#x27;77777777-0000-0000-0000-000000000002&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000001&#x27;,
+   &#x27;iron_kibble&#x27;, &#x27;stamina&#x27;, 3, FALSE,
+   NOW() - INTERVAL &#x27;1 day&#x27;,
+   NOW() - INTERVAL &#x27;2 days&#x27;,
+   NOW() + INTERVAL &#x27;28 days&#x27;);
+
+-- BC: Identity — gdpr_requests（依賴 claim_identities, same-BC FK）
+-- 欄位：id, claim_identity_id, initiating_pet_id, request_type, status,
+--       submitted_at, completed_at, updated_at, admin_notes
+INSERT INTO gdpr_requests (
+  id, claim_identity_id, initiating_pet_id,
+  request_type, status, submitted_at, completed_at, updated_at, admin_notes
+) VALUES
+  (&#x27;99999999-0000-0000-0000-000000000001&#x27;,
+   &#x27;11111111-0000-0000-0000-000000000002&#x27;,
+   &#x27;22222222-0000-0000-0000-000000000003&#x27;,
+   &#x27;erasure&#x27;, &#x27;pending&#x27;,
+   NOW(), NULL, NOW(), NULL);</code></pre>
+<hr>
+<h2 id="admin-seed-sql">Admin Seed SQL</h2>
+<blockquote><p><strong>目的</strong>：建立初始 admin 帳號；<code>has_admin_backend = true</code>，<code>admin_users</code> 含 <code>totp_secret_encrypted</code> → TOTP MFA 強制初始化。</p></blockquote>
+<pre><code class="language-sql">-- ===== Admin Bootstrap Seed（has_admin_backend=true）=====
+-- 執行前提：所有 migration 已完成
+-- ENV 設定：見下方「ENV 注入說明」
+
+-- admin_users 欄位：id, username, password_hash, totp_secret_encrypted,
+--   totp_backup_codes_hash, role, last_login_at, failed_attempts, locked_until,
+--   deactivated_at, created_at, updated_at
+-- 注意：無 status 欄位；軟刪除使用 deactivated_at（NULL = active）
+INSERT INTO admin_users (
+  id, username, password_hash, totp_secret_encrypted,
+  role, created_at, updated_at
+) VALUES (
+  gen_random_uuid(),
+  &#x27;admin&#x27;,
+  &#x27;${ADMIN_PASSWORD_HASH}&#x27;,          -- bcrypt(work_factor=12)，由 ENV 注入
+  &#x27;${ADMIN_TOTP_SECRET_ENCRYPTED}&#x27;,  -- AES-256-GCM 加密的 TOTP secret，由 ENV 注入
+  &#x27;super_admin&#x27;,
+  NOW(),
+  NOW()
+);</code></pre>
+<h3 id="env-注入說明">ENV 注入說明</h3>
+<pre><code class="language-bash"># 1. 生成 bcrypt 密碼 hash
+node -e &quot;const bcrypt = require(&#x27;bcryptjs&#x27;); bcrypt.hash(process.env.ADMIN_PASSWORD, 12).then(h =&gt; console.log(&#x27;ADMIN_PASSWORD_HASH=&#x27; + h))&quot;
+
+# 2. 生成 TOTP secret
+node -e &quot;
+const speakeasy = require(&#x27;speakeasy&#x27;);
+const s = speakeasy.generateSecret({ name: &#x27;Pixel Pet Arena Admin&#x27; });
+console.log(&#x27;ADMIN_TOTP_SECRET=&#x27; + s.base32);
+console.log(&#x27;ADMIN_TOTP_QR_URI=&#x27; + s.otpauth_url);
+&quot;
+
+# 3. AES-256-GCM 加密 TOTP secret
+node -e &quot;
+const crypto = require(&#x27;crypto&#x27;);
+const key = Buffer.from(process.env.ADMIN_TOTP_ENCRYPTION_KEY, &#x27;hex&#x27;);
+const iv = crypto.randomBytes(12);
+const cipher = crypto.createCipheriv(&#x27;aes-256-gcm&#x27;, key, iv);
+let enc = cipher.update(process.env.ADMIN_TOTP_SECRET, &#x27;utf8&#x27;, &#x27;hex&#x27;) + cipher.final(&#x27;hex&#x27;);
+const tag = cipher.getAuthTag().toString(&#x27;hex&#x27;);
+console.log(&#x27;ADMIN_TOTP_SECRET_ENCRYPTED=&#x27; + iv.toString(&#x27;hex&#x27;) + &#x27;:&#x27; + enc + &#x27;:&#x27; + tag);
+&quot;</code></pre>
+<h3 id="首次登入-totp-enrollment-流程">首次登入 TOTP Enrollment 流程</h3>
+<pre><code class="">1. POST /admin/api/auth/login（username + password）
+2. 若 totp_secret_encrypted IS NULL → HTTP 403 TOTP_SETUP_REQUIRED + setupToken
+3. POST /admin/api/auth/totp/setup（setupToken）→ QR URI
+4. 掃描 QR（Google Authenticator / Authy）→ 6-digit TOTP
+5. POST /admin/api/auth/totp/verify（TOTP code）→ session 建立
+6. 後續每次登入：password → TOTP → Redis session（2-step）</code></pre>
+<h3 id="account-lockout">Account Lockout</h3>
+<pre><code class="">連續 10 次失敗 → locked_until = NOW() + INTERVAL &#x27;30 minutes&#x27;
+手動解鎖：POST /admin/api/roles/:adminId/totp/reset（需 super_admin）</code></pre></main>
   </div>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
