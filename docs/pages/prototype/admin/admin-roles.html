@@ -32,6 +32,27 @@
     <!-- Role Cards -->
     <div class="roles-grid" id="rolesGrid"></div>
 
+    <!-- Cross-Role Permission Matrix — ADMIN_IMPL v2.0 §1.3 -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header">
+        <h2>權限對照表</h2>
+        <span class="text-muted" style="font-size:12px">ADMIN_IMPL v2.0 §1.3</span>
+      </div>
+      <div class="data-table-wrap">
+        <table id="permMatrix">
+          <thead>
+            <tr>
+              <th>功能 / 操作</th>
+              <th style="text-align:center">🔴 Super Admin</th>
+              <th style="text-align:center">🟡 Moderator</th>
+              <th style="text-align:center">🔵 Read Only</th>
+            </tr>
+          </thead>
+          <tbody id="permMatrixBody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Admin Users Table -->
     <div class="card">
       <div class="card-header">
@@ -201,6 +222,49 @@
       rolesGrid.appendChild(card);
     });
   }
+
+  /* ── Permission Matrix — ADMIN_IMPL v2.0 §1.3 ──────────── */
+  (function renderPermMatrix() {
+    var tbody = document.getElementById('permMatrixBody');
+    if (!tbody) { return; }
+
+    var MATRIX = [
+      { label: 'Dashboard / Analytics 讀取',   sa: true,  mod: true,  ro: true  },
+      { label: 'Email 監控讀取',                sa: true,  mod: true,  ro: true  },
+      { label: '寵物列表讀取',                  sa: true,  mod: true,  ro: true  },
+      { label: '戰鬥記錄讀取',                  sa: true,  mod: true,  ro: true  },
+      { label: '排行榜讀取',                    sa: true,  mod: true,  ro: true  },
+      { label: 'pet.ban / pet.unban',           sa: true,  mod: true,  ro: false },
+      { label: 'arena_match.flag / unflag',     sa: true,  mod: true,  ro: false },
+      { label: 'leaderboard.remove',            sa: true,  mod: true,  ro: false },
+      { label: 'config.runtime / economy / flag', sa: true, mod: false, ro: false },
+      { label: 'gdpr.delete / gdpr.update',    sa: true,  mod: false, ro: false },
+      { label: 'admin_user.create / deactivate', sa: true, mod: false, ro: false },
+      { label: 'admin_user.totp_reset',         sa: true,  mod: false, ro: false },
+      { label: 'audit.read',                    sa: true,  mod: false, ro: false }
+    ];
+
+    var TICK = '✅'; var CROSS = '❌';
+
+    MATRIX.forEach(function (row) {
+      var tr = document.createElement('tr');
+
+      var tdLabel = document.createElement('td');
+      tdLabel.style.fontWeight = '500';
+      tdLabel.textContent = row.label;
+      tr.appendChild(tdLabel);
+
+      [row.sa, row.mod, row.ro].forEach(function (allowed) {
+        var td = document.createElement('td');
+        td.style.textAlign = 'center';
+        td.style.fontSize = '16px';
+        td.textContent = allowed ? TICK : CROSS;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }());
 
   /* ── Users Table ─────────────────────────────────────────── */
   let totpResetTargetId = null;

@@ -28,7 +28,7 @@
     <select id="modeFilter" class="form-select" onchange="renderTable()">
       <option value="">所有模式</option>
       <option value="RACE">RACE</option>
-      <option value="STRENGTH">STRENGTH</option>
+      <option value="BATTLE">BATTLE</option>
     </select>
     <select id="flaggedFilter" class="form-select" onchange="renderTable()">
       <option value="">所有</option>
@@ -70,7 +70,7 @@
   function init() {
     var u = ADMIN_MOCK.currentUser;
     document.getElementById('currentUserLabel').textContent = u.username + ' (' + roleDisplayName(u.role) + ')';
-    document.getElementById('sidebarContainer').innerHTML = renderSidebar('battles');
+    var sc = document.getElementById('sidebarContainer'); if (sc) { sc.replaceWith(renderSidebar('battles')); }
     renderTable();
   }
 

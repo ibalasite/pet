@@ -59,7 +59,7 @@
     var labelEl = document.getElementById('currentUserLabel');
     if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
     var sidebar = document.getElementById('sidebarContainer');
-    if (sidebar) { sidebar.innerHTML = renderSidebar('email'); }
+    if (sidebar) { sidebar.replaceWith(renderSidebar('email')); }
 
     renderKPI();
     renderBounceBreakdown();

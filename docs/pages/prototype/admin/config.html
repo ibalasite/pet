@@ -113,7 +113,7 @@
     var labelEl = document.getElementById('currentUserLabel');
     if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
     var sidebar = document.getElementById('sidebarContainer');
-    if (sidebar) { sidebar.innerHTML = renderSidebar('config'); }
+    if (sidebar) { sidebar.replaceWith(renderSidebar('config')); }
 
     var aiCb = document.getElementById('aiEnabled');
     if (aiCb) {
@@ -169,7 +169,7 @@
     var pw = document.getElementById('confirmPw');
     var errEl = document.getElementById('confirmPwError');
     if (!pw) { return; }
-    if (pw.value !== 'Admin@2026') {
+    if (pw.value.length < 8) { /* prototype stub — any 8+ char password accepted */
       if (errEl) { errEl.style.display = 'block'; }
       return;
     }

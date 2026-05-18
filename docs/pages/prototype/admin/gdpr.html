@@ -37,6 +37,7 @@
       <option value="pending">pending</option>
       <option value="processing">processing</option>
       <option value="completed">completed</option>
+      <option value="resolved">resolved</option>
       <option value="rejected">rejected</option>
     </select>
     <button class="btn btn-primary" onclick="renderTable()">篩選</button>
@@ -80,7 +81,7 @@
     var labelEl = document.getElementById('currentUserLabel');
     if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
     var sidebar = document.getElementById('sidebarContainer');
-    if (sidebar) { sidebar.innerHTML = renderSidebar('gdpr'); }
+    if (sidebar) { sidebar.replaceWith(renderSidebar('gdpr')); }
     renderTable();
   }
 

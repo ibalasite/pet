@@ -104,9 +104,7 @@
     { label: 'Claim',        value:  5100, pct: 27.7 },
   ];
 
-  /* Role display name helper (ADMIN_IMPL §1.3 v2.0 names) */
-  var ROLE_LABELS = { super_admin: 'Super Admin', moderator: 'Moderator', read_only: 'Read Only' };
-  function roleDisplayName(role) { return ROLE_LABELS[role] || role; }
+  /* roleDisplayName is provided by admin-mock.js window.roleDisplayName */
 
   /* Safe navigation allowlist */
   var SAFE_PAGES = { 'admin-login.html': 'admin-login.html' };

@@ -46,7 +46,7 @@
   function init() {
     var u = ADMIN_MOCK.currentUser;
     document.getElementById('currentUserLabel').textContent = u.username + ' (' + roleDisplayName(u.role) + ')';
-    document.getElementById('sidebarContainer').innerHTML = renderSidebar('suspicious');
+    var sc = document.getElementById('sidebarContainer'); if (sc) { sc.replaceWith(renderSidebar('suspicious')); }
 
     /* read_only sees this page but without mutate actions */
     renderTable();

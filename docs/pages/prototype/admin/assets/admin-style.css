@@ -27,6 +27,7 @@
   --admin-text-dim: var(--admin-text-muted);
   --admin-bg: var(--admin-content-bg);
   --admin-surface: var(--admin-card-bg);
+  --admin-surface-2: #f3f4f6;
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -331,8 +332,10 @@ tbody tr:last-child td { border-bottom: none; }
 .status-badge.locked   { background: #fee2e2; color: #991b1b; }
 .status-badge.pending  { background: #fef3c7; color: #92400e; }
 .status-badge.resolved { background: #dcfce7; color: #166534; }
-.status-badge.flagged  { background: #fef3c7; color: #92400e; }
-.status-badge.banned   { background: #fee2e2; color: #991b1b; }
+.status-badge.flagged     { background: #fef3c7; color: #92400e; }
+.status-badge.banned      { background: #fee2e2; color: #991b1b; }
+.status-badge.processing  { background: #dbeafe; color: #1e40af; }
+.status-badge.completed   { background: #dcfce7; color: #166534; }
 
 /* ── Role Badges — v2.0 (super_admin / moderator / read_only) */
 .role-badge {
@@ -675,6 +678,208 @@ select.form-control { cursor: pointer; }
   font-size: 13px;
   color: var(--admin-text-secondary);
   margin-bottom: 1rem;
+}
+
+/* ── Missing utility classes (F8) ────────────────────────── */
+
+/* data-table — used directly on <table> elements */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.data-table th,
+.data-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--admin-border);
+  vertical-align: middle;
+}
+.data-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--admin-text-secondary);
+}
+.data-table tbody tr:hover { background: #f9fafb; }
+
+/* mono — inline monospace spans (alias for font-mono) */
+.mono { font-family: "SF Mono", "Consolas", monospace; font-size: 12.5px; }
+
+/* form-input / form-select / form-textarea — aliases for form-control */
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--admin-text-primary);
+  transition: border-color var(--duration-fast);
+  font-family: inherit;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px rgba(45,158,245,0.12);
+}
+.form-input::placeholder,
+.form-textarea::placeholder { color: var(--admin-text-muted); }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+/* icon-btn — small action buttons in table cells */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+  white-space: nowrap;
+}
+.icon-btn:hover { background: #f3f4f6; color: var(--admin-text-primary); }
+.icon-btn.danger  { border-color: var(--admin-danger); color: var(--admin-danger); }
+.icon-btn.danger:hover  { background: #fee2e2; }
+.icon-btn.success { border-color: var(--admin-success); color: var(--admin-success); }
+.icon-btn.success:hover { background: #dcfce7; }
+.icon-btn.warning { border-color: var(--admin-warning); color: var(--admin-warning); }
+.icon-btn.warning:hover { background: #fef3c7; }
+
+/* action-cell — table cell containing icon-btn groups */
+.action-cell { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+/* search-bar — filter/search row above tables */
+.search-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* modal-card / modal-desc / modal-actions — inside modal-box */
+.modal-card  { padding: 1rem 0; }
+.modal-desc  { font-size: 13.5px; color: var(--admin-text-secondary); margin-bottom: 1rem; line-height: 1.6; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid var(--admin-border); }
+
+/* stats-card / stat-title / stat-number / stat-trend — email.html KPI cards */
+.stats-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stat-title  { font-size: 12px; font-weight: 600; color: var(--admin-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-number { font-size: 28px; font-weight: 700; color: var(--admin-text-primary); line-height: 1; }
+.stat-trend  { font-size: 12px; }
+.trend-up    { color: var(--admin-success); }
+.trend-down  { color: var(--admin-danger); }
+
+/* error-msg — inline form validation messages */
+.error-msg { font-size: 12px; color: var(--admin-danger); margin-top: 4px; display: none; }
+
+/* sla-urgent — urgent SLA deadline highlight (gdpr.html) */
+.sla-urgent { color: var(--admin-danger); font-weight: 600; }
+
+/* row-suspicious — highlighted row for suspicious entries (leaderboard.html) */
+.row-suspicious { background: #fff7ed !important; }
+.row-suspicious:hover { background: #ffedd5 !important; }
+
+/* pagination-info / page-num — pagination controls */
+.pagination-info { font-size: 13px; color: var(--admin-text-muted); margin-left: 8px; }
+.page-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  font-size: 13px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: #fff;
+  color: var(--admin-text-secondary);
+  transition: background var(--duration-fast);
+}
+.page-num:hover    { background: #f3f4f6; }
+.page-num.active   { background: var(--admin-accent); color: #fff; border-color: var(--admin-accent); }
+
+/* two-col — 2-column layout grid */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* status badge additional variants */
+.status-badge.warning  { background: #fef3c7; color: #92400e; }
+.status-badge.rejected { background: #fee2e2; color: #991b1b; }
+
+/* ── topnav aliases (F14) ─────────────────────────────────── */
+.topnav-title  { flex: 1; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+.topnav-right  { display: flex; align-items: center; gap: 0.75rem; }
+.current-user  { font-size: 13px; color: var(--admin-sidebar-text); }
+.logout-btn {
+  padding: 5px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--admin-sidebar-text);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+.logout-btn:hover { background: var(--admin-sidebar-hover); color: #fff; }
+
+/* ── panel (F15) — card alias for pages that use .panel ───── */
+.panel {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+}
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.panel-title  { font-size: 15px; font-weight: 600; color: var(--admin-text-primary); }
+
+/* ── totp-setup.html classes (F17) ───────────────────────── */
+.login-shell {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d1117 0%, #111827 50%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--admin-text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+.demo-hint {
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  color: #075985;
+  text-align: center;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────── */

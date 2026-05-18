@@ -75,7 +75,7 @@
     var labelEl = document.getElementById('currentUserLabel');
     if (labelEl) { labelEl.textContent = u.username + ' (' + roleDisplayName(u.role) + ')'; }
     var sidebar = document.getElementById('sidebarContainer');
-    if (sidebar) { sidebar.innerHTML = renderSidebar('config-flags'); }
+    if (sidebar) { sidebar.replaceWith(renderSidebar('config')); }
     renderTable();
   }
 

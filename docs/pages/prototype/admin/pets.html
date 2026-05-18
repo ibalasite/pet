@@ -91,7 +91,7 @@
   function init() {
     var u = ADMIN_MOCK.currentUser;
     document.getElementById('currentUserLabel').textContent = u.username + ' (' + roleDisplayName(u.role) + ')';
-    document.getElementById('sidebarContainer').innerHTML = renderSidebar('pets');
+    var sc = document.getElementById('sidebarContainer'); if (sc) { sc.replaceWith(renderSidebar('pets')); }
 
     var textarea = document.getElementById('banReasonInput');
     if (textarea) {
