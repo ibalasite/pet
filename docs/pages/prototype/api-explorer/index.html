@@ -1005,7 +1005,8 @@
       ],
       listings: [
         { id: "lst-001", pet_id: "d4e5f6a1-0000-0000-0000-000000000004", seller_token: "dGVzdHRva2VuU0VMTEVSMTIzNDU2Nzg5MDEyMzQ", price_tokens: 250, listed_at: "2026-05-15T10:00:00Z", expires_at: "2026-05-22T10:00:00Z", status: "ACTIVE" },
-        { id: "lst-002", pet_id: "e5f6a1b2-0000-0000-0000-000000000005", seller_token: "dGVzdHRva2VuU0VMTEVSQUJDREVGMTIzNDU2Nzg", price_tokens: 80, listed_at: "2026-05-16T09:00:00Z", expires_at: "2026-05-23T09:00:00Z", status: "ACTIVE" }
+        { id: "lst-002", pet_id: "e5f6a1b2-0000-0000-0000-000000000005", seller_token: "dGVzdHRva2VuU0VMTEVSQUJDREVGMTIzNDU2Nzg", price_tokens: 80, listed_at: "2026-05-16T09:00:00Z", expires_at: "2026-05-23T09:00:00Z", status: "ACTIVE" },
+        { id: "lst-003", pet_id: "c3d4e5f6-0000-0000-0000-000000000003", seller_token: "MOCK_SELLER_TOKEN_LST003", price_tokens: 600, listed_at: "2026-05-18T07:00:00Z", expires_at: "2026-05-25T07:00:00Z", status: "ACTIVE" }
       ],
       adminUsers: [
         { id: "adm-001", email: "superadmin@pixel-pet-arena.com", role: "SUPERADMIN", totp_enabled: true, created_at: "2026-01-01T00:00:00Z", last_login: "2026-05-18T08:00:00Z" },
@@ -1026,7 +1027,8 @@
       ],
       suspicious: [
         { pet_id: "d4e5f6a1-0000-0000-0000-000000000004", reason: "Abnormal training frequency (50 actions/hour)", score: 87, flagged_at: "2026-05-17T11:00:00Z", status: "UNDER_REVIEW" },
-        { pet_id: "e5f6a1b2-0000-0000-0000-000000000005", reason: "Multiple IP addresses in single session", score: 62, flagged_at: "2026-05-16T15:00:00Z", status: "CLEARED" }
+        { pet_id: "e5f6a1b2-0000-0000-0000-000000000005", reason: "Multiple IP addresses in single session", score: 62, flagged_at: "2026-05-16T15:00:00Z", status: "CLEARED" },
+        { pet_id: "c3d4e5f6-0000-0000-0000-000000000003", reason: "Win-rate spike: 18 consecutive wins within 2 hours", score: 74, flagged_at: "2026-05-18T06:30:00Z", status: "UNDER_REVIEW" }
       ],
       auditLogs: [
         { id: "log-001", admin_id: "adm-001", action: "BAN_PET",       target: "d4e5f6a1-0000-0000-0000-000000000004", ts: "2026-05-17T12:00:00Z", ip: "203.0.113.10" },
@@ -1069,6 +1071,7 @@
             summary: "發起 Email Claim",
             desc: "向指定 email 發送 6 位數 OTP，並綁定至特定未認領寵物。Rate limit: 5 次/小時/email。",
             auth_required: false,
+            mock_entity: 'claimSessions',
             params: [],
             body: JSON.stringify({ email: "player@example.com", petId: "550e8400-e29b-41d4-a716-446655440001", ageConfirmed: true }, null, 2),
             possible_responses: [
@@ -1091,6 +1094,7 @@
             summary: "驗證 OTP 取得 Token",
             desc: "提交 claimId 與 6 位 OTP，驗證成功後取得 petToken（僅此一次傳輸）。",
             auth_required: false,
+            mock_entity: 'claimSessions',
             params: [],
             body: JSON.stringify({ claimId: "7f3d9a1c-b2e4-4f88-9c6a-1a2b3c4d5e6f", code: "482917" }, null, 2),
             possible_responses: [
@@ -1112,6 +1116,7 @@
             summary: "恢復遺失 Token",
             desc: "向 email 發送恢復 OTP，找回遺失的寵物 URL。無論 email/petId 是否匹配均回傳 200（防止帳號枚舉）。",
             auth_required: false,
+            mock_entity: 'claimSessions',
             params: [],
             body: JSON.stringify({ email: "player@example.com", petId: "550e8400-e29b-41d4-a716-446655440001" }, null, 2),
             possible_responses: [
@@ -1137,6 +1142,7 @@
             summary: "取得隨機未認領寵物",
             desc: "回傳一隻隨機未認領的寵物（含 seed 和 rarity），用於 Landing 頁展示。Rate limit: 30/min。",
             auth_required: false,
+            mock_entity: 'pets',
             params: [],
             body: null,
             possible_responses: [
@@ -1157,6 +1163,7 @@
             summary: "取得寵物詳情",
             desc: "取得寵物完整資料。若寵物已被認領，需提供 Bearer token。",
             auth_required: false,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1179,6 +1186,7 @@
             summary: "取得寵物統計資料",
             desc: "取得寵物的訓練歷史、戰鬥記錄摘要和 buff 狀態。Bearer token 必填。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1201,6 +1209,7 @@
             summary: "訓練寵物",
             desc: "執行訓練動作（RUN/STRENGTH/STAMINA），每隻寵物每 UTC 天最多 3 次。Bearer token 必填。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1231,6 +1240,7 @@
             summary: "餵食寵物",
             desc: "使用食物道具對寵物施加 stat buff。Bearer token 必填。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1267,6 +1277,7 @@
             summary: "進入競技場（匹配或 AI）",
             desc: "進入對戰佇列。30 秒超時自動匹配 AI（若 acceptAI=true）。Bearer token 必填。",
             auth_required: true,
+            mock_entity: 'matches',
             params: [],
             body: JSON.stringify({ mode: "RACE", acceptAI: false }, null, 2),
             possible_responses: [
@@ -1287,6 +1298,7 @@
             summary: "取得對戰結果",
             desc: "依 matchId 取得對戰詳情，包含雙方 stat 和 battle log。",
             auth_required: false,
+            mock_entity: 'matches',
             params: [
               { name: "matchId", location: "path", type: "string", required: true, default: "m001", desc: "對戰 UUID" }
             ],
@@ -1308,6 +1320,7 @@
             summary: "取得寵物戰鬥記錄",
             desc: "取得指定寵物的最近 20 場對戰記錄（公開可見）。",
             auth_required: false,
+            mock_entity: 'matches',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" },
               { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼（每頁 20 筆）" }
@@ -1335,6 +1348,7 @@
             summary: "取得排行榜（Top 100）",
             desc: "取得全域排行榜前 100 名，支援 rarity 篩選和分頁。快取 30 秒。",
             auth_required: false,
+            mock_entity: 'leaderboard',
             params: [
               { name: "rarity", location: "query", type: "string", required: false, default: "", desc: "按稀有度篩選", enum: ["", "COMMON", "RARE", "EPIC", "LEGENDARY"] },
               { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" },
@@ -1357,6 +1371,7 @@
             summary: "取得指定寵物排名",
             desc: "取得指定寵物的全域排名和分數（公開可見）。",
             auth_required: false,
+            mock_entity: 'leaderboard',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1386,6 +1401,7 @@
             summary: "提交 GDPR 請求",
             desc: "提交 GDPR 隱私請求（刪除/存取/限制/反對/更正）。Bearer token 必填。",
             auth_required: true,
+            mock_entity: 'gdprRequests',
             params: [],
             body: JSON.stringify({ requestType: "erasure" }, null, 2),
             possible_responses: [
@@ -1404,6 +1420,7 @@
             summary: "查詢 GDPR 請求狀態",
             desc: "查詢最新一筆 GDPR 請求的處理狀態。Bearer token 必填。",
             auth_required: true,
+            mock_entity: 'gdprRequests',
             params: [],
             body: null,
             possible_responses: [
@@ -1430,6 +1447,7 @@
             summary: "取得市場掛單列表",
             desc: "取得目前所有掛單（需 FF_MARKETPLACE feature flag 啟用）。",
             auth_required: false,
+            mock_entity: 'listings',
             params: [
               { name: "rarity", location: "query", type: "string", required: false, default: "", desc: "按稀有度篩選", enum: ["", "COMMON", "RARE", "EPIC", "LEGENDARY"] },
               { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" }
@@ -1452,6 +1470,7 @@
             summary: "建立掛單",
             desc: "掛出寵物至市場。7 天鎖定期內不可取消。需 Bearer token。",
             auth_required: true,
+            mock_entity: 'listings',
             params: [],
             body: JSON.stringify({ petId: "550e8400-e29b-41d4-a716-446655440001", priceCredits: 1200 }, null, 2),
             possible_responses: [
@@ -1470,6 +1489,7 @@
             summary: "取消掛單",
             desc: "取消市場掛單（7 天鎖定期內禁止）。需 Bearer token。",
             auth_required: true,
+            mock_entity: 'listings',
             params: [
               { name: "listingId", location: "path", type: "string", required: true, default: "lst-001", desc: "掛單 UUID" }
             ],
@@ -1490,6 +1510,7 @@
             summary: "購買掛單",
             desc: "買入市場掛單的寵物（5% 手續費）。需 Bearer token。",
             auth_required: true,
+            mock_entity: 'listings',
             params: [
               { name: "listingId", location: "path", type: "string", required: true, default: "lst-001", desc: "掛單 UUID" }
             ],
@@ -1512,6 +1533,7 @@
             summary: "取得寵物市場交易歷史",
             desc: "取得寵物的歷史市場交易記錄。",
             auth_required: false,
+            mock_entity: 'listings',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1538,6 +1560,7 @@
             summary: "管理員登入",
             desc: "使用帳密登入 Admin Portal，取得 sessionToken（有效 8 小時）。IP Rate limit: 10 次/15 分鐘。",
             auth_required: false,
+            mock_entity: null,
             params: [],
             body: JSON.stringify({ username: "admin", password: "Admin@2026" }, null, 2),
             possible_responses: [
@@ -1560,6 +1583,7 @@
             summary: "管理員登出",
             desc: "撤銷 sessionToken，强制重新登入。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: null,
             possible_responses: [
@@ -1576,6 +1600,7 @@
             summary: "設定 TOTP（首次登入）",
             desc: "為管理員帳號初始化 TOTP 兩因素驗證，回傳 QR code URI。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: null,
             possible_responses: [
@@ -1593,6 +1618,7 @@
             summary: "驗證 TOTP 碼",
             desc: "驗證 TOTP 一次性碼（30 秒有效，±1 滑窗），完成二因素驗證。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: JSON.stringify({ totpCode: "123456" }, null, 2),
             possible_responses: [
@@ -1620,6 +1646,7 @@
             summary: "列出管理員帳號",
             desc: "列出所有管理員帳號（含角色）。需 super_admin。",
             auth_required: true,
+            mock_entity: 'adminUsers',
             params: [],
             body: null,
             possible_responses: [
@@ -1637,6 +1664,7 @@
             summary: "建立管理員帳號",
             desc: "建立新管理員帳號並指派角色。需 super_admin。",
             auth_required: true,
+            mock_entity: 'adminUsers',
             params: [],
             body: JSON.stringify({ username: "charlie", password: "Temp@1234", role: "moderator" }, null, 2),
             possible_responses: [
@@ -1655,6 +1683,7 @@
             summary: "停用管理員帳號",
             desc: "軟刪除（停用）指定管理員帳號。不可停用自己。需 super_admin。",
             auth_required: true,
+            mock_entity: 'adminUsers',
             params: [
               { name: "adminId", location: "path", type: "string", required: true, default: "admin-uuid-0003", desc: "管理員 UUID" }
             ],
@@ -1676,6 +1705,7 @@
             summary: "重置管理員 TOTP",
             desc: "強制重置指定管理員的 TOTP 設定，要求其下次登入重新設定。需 super_admin。",
             auth_required: true,
+            mock_entity: 'adminUsers',
             params: [
               { name: "adminId", location: "path", type: "string", required: true, default: "admin-uuid-0002", desc: "管理員 UUID" }
             ],
@@ -1703,6 +1733,7 @@
             summary: "列出寵物（Admin）",
             desc: "取得所有寵物列表，支援搜尋和分頁。需 moderator+。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "q", location: "query", type: "string", required: false, default: "", desc: "搜尋關鍵字（petName）" },
               { name: "rarity", location: "query", type: "string", required: false, default: "", desc: "稀有度篩選", enum: ["", "COMMON", "RARE", "EPIC", "LEGENDARY"] },
@@ -1731,6 +1762,7 @@
             summary: "取得寵物詳情（Admin）",
             desc: "取得寵物完整詳情（含 email hash、封禁記錄）。需 moderator+。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1752,6 +1784,7 @@
             summary: "更新寵物資料（Admin）",
             desc: "修改寵物的 petName 或 generation_meta。需 moderator+。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1771,6 +1804,7 @@
             summary: "封禁寵物",
             desc: "封禁寵物（移出排行榜、禁止對戰）。需 moderator+。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1790,6 +1824,7 @@
             summary: "解除封禁寵物",
             desc: "解除寵物封禁，恢復對戰和排行榜資格。需 moderator+。",
             auth_required: true,
+            mock_entity: 'pets',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1817,6 +1852,7 @@
             summary: "列出對戰記錄（Admin）",
             desc: "取得對戰記錄，支援日期範圍和 isFlagged 篩選。需 moderator+。",
             auth_required: true,
+            mock_entity: 'matches',
             params: [
               { name: "from", location: "query", type: "string", required: false, default: "2026-05-01", desc: "開始日期（ISO 8601）" },
               { name: "to", location: "query", type: "string", required: false, default: "2026-05-18", desc: "結束日期（ISO 8601）" },
@@ -1841,6 +1877,7 @@
             summary: "標記對戰記錄",
             desc: "標記對戰記錄為可疑（Append-only 審計）。需 moderator+。",
             auth_required: true,
+            mock_entity: 'matches',
             params: [
               { name: "matchId", location: "path", type: "string", required: true, default: "m001", desc: "對戰 UUID" }
             ],
@@ -1860,6 +1897,7 @@
             summary: "取消標記對戰",
             desc: "移除對戰的可疑旗標。需 moderator+。",
             auth_required: true,
+            mock_entity: 'matches',
             params: [
               { name: "matchId", location: "path", type: "string", required: true, default: "m001", desc: "對戰 UUID" }
             ],
@@ -1879,6 +1917,7 @@
             summary: "可疑活動列表",
             desc: "取得系統自動偵測的可疑寵物活動（>50 battles/60min rolling window）。需 moderator+。",
             auth_required: true,
+            mock_entity: 'suspicious',
             params: [
               { name: "threshold", location: "query", type: "integer", required: false, default: "50", desc: "每小時對戰數門檻（預設 50）" }
             ],
@@ -1906,6 +1945,7 @@
             summary: "排行榜（Admin 視圖）",
             desc: "取得完整排行榜（最多 500 名），含封禁狀態。需 moderator+。",
             auth_required: true,
+            mock_entity: 'leaderboard',
             params: [
               { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" }
             ],
@@ -1925,6 +1965,7 @@
             summary: "移除排行榜寵物",
             desc: "強制從排行榜移除指定寵物（不封禁）。需 super_admin。",
             auth_required: true,
+            mock_entity: 'leaderboard',
             params: [
               { name: "petId", location: "path", type: "string", required: true, default: "a1b2c3d4-0000-0000-0000-000000000001", desc: "寵物 UUID" }
             ],
@@ -1952,6 +1993,7 @@
             summary: "讀取 Runtime 參數",
             desc: "取得目前的 runtime 可調參數（對戰速率、稀有度權重等）。需 super_admin。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: null,
             possible_responses: [
@@ -1969,6 +2011,7 @@
             summary: "更新 Runtime 參數",
             desc: "更新 runtime 參數（熱更新，無需重啟）。需 super_admin。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: JSON.stringify({ maxBattlesPerHour: 15, matchmakingTimeoutSeconds: 45 }, null, 2),
             possible_responses: [
@@ -1986,6 +2029,7 @@
             summary: "讀取 Economy 配置",
             desc: "取得食物 buff 倍率和競技場費用配置。需 super_admin。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: null,
             possible_responses: [
@@ -2003,6 +2047,7 @@
             summary: "更新 Economy 配置",
             desc: "更新食物 buff 倍率和競技場費用配置。需 super_admin。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: JSON.stringify({ foodBuffMultipliers: { speed_kibble: 6 }, arenaCooldownSeconds: 300 }, null, 2),
             possible_responses: [
@@ -2020,6 +2065,7 @@
             summary: "讀取 Feature Flags",
             desc: "取得所有 feature flag 狀態。需 super_admin。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: null,
             possible_responses: [
@@ -2037,6 +2083,7 @@
             summary: "更新 Feature Flag",
             desc: "啟用或停用指定 feature flag。需 super_admin。",
             auth_required: true,
+            mock_entity: null,
             params: [
               { name: "flag", location: "path", type: "string", required: true, default: "FF_MARKETPLACE", desc: "Feature flag 名稱", enum: ["FF_MARKETPLACE", "FF_ARENA_SUMO", "FF_TRAINING_V2", "FF_LEADERBOARD_SEASONS"] }
             ],
@@ -2064,6 +2111,7 @@
             summary: "列出 GDPR 請求佇列",
             desc: "取得 GDPR 請求列表，支援狀態篩選。需 super_admin。",
             auth_required: true,
+            mock_entity: 'gdprRequests',
             params: [
               { name: "status", location: "query", type: "string", required: false, default: "", desc: "狀態篩選", enum: ["", "pending", "processing", "completed", "failed"] }
             ],
@@ -2085,6 +2133,7 @@
             summary: "執行 GDPR 刪除",
             desc: "手動觸發 GDPR 刪除程序（erasure 請求）。需 super_admin。",
             auth_required: true,
+            mock_entity: 'gdprRequests',
             params: [],
             body: JSON.stringify({ requestId: "gdpr-1111-2222-3333-444444444444" }, null, 2),
             possible_responses: [
@@ -2102,6 +2151,7 @@
             summary: "更新 GDPR 請求狀態",
             desc: "更新 GDPR 請求的處理狀態（processing → completed/failed）。需 super_admin。",
             auth_required: true,
+            mock_entity: 'gdprRequests',
             params: [
               { name: "requestId", location: "path", type: "string", required: true, default: "gdpr-1111-2222-3333-444444444444", desc: "GDPR 請求 UUID" }
             ],
@@ -2129,6 +2179,7 @@
             summary: "Admin 儀表板數據",
             desc: "取得儀表板 KPI 統計（用戶數、對戰量、活躍度等）。需 read_only+。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: null,
             possible_responses: [
@@ -2146,6 +2197,7 @@
             summary: "Analytics 資料",
             desc: "取得時序分析資料（日/週/月維度）。需 read_only+。",
             auth_required: true,
+            mock_entity: null,
             params: [
               { name: "from", location: "query", type: "string", required: false, default: "2026-05-11", desc: "開始日期（ISO 8601）" },
               { name: "to", location: "query", type: "string", required: false, default: "2026-05-18", desc: "結束日期（ISO 8601）" },
@@ -2167,6 +2219,7 @@
             summary: "稽核日誌",
             desc: "取得管理員操作的稽核日誌（2 年保留）。需 super_admin。",
             auth_required: true,
+            mock_entity: 'auditLogs',
             params: [
               { name: "adminId", location: "query", type: "string", required: false, default: "", desc: "按管理員篩選" },
               { name: "from", location: "query", type: "string", required: false, default: "2026-05-01", desc: "開始日期" },
@@ -2189,6 +2242,7 @@
             summary: "Email 寄送監控",
             desc: "取得最近 Email 寄送記錄（OTP claim/recovery emails）。需 read_only+。",
             auth_required: true,
+            mock_entity: null,
             params: [
               { name: "page", location: "query", type: "integer", required: false, default: "1", desc: "頁碼" },
               { name: "status", location: "query", type: "string", required: false, default: "", desc: "狀態篩選", enum: ["", "sent", "failed", "bounced"] }
@@ -2217,6 +2271,7 @@
             summary: "服務健康檢查",
             desc: "回傳服務健康狀態和各依賴組件狀態。公開端點，無需認證。",
             auth_required: false,
+            mock_entity: null,
             params: [],
             body: null,
             possible_responses: [
@@ -2234,6 +2289,7 @@
             summary: "訓練（舊版路由）",
             desc: "已棄用的訓練路由，重定向至 /api/v1/pets/:petId/train。保留向後相容。",
             auth_required: true,
+            mock_entity: null,
             params: [],
             body: JSON.stringify({ petId: "550e8400-e29b-41d4-a716-446655440001", trainingType: "RUN" }, null, 2),
             possible_responses: [

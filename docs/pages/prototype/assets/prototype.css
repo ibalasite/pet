@@ -58,6 +58,15 @@
   --space-6: 24px;
   --space-12: 48px;
 
+  /* ---- Extended palette ---- */
+  --primary-dark: #6a4ba8;
+  --primary-light: #8e6dd2;
+  --success-text: #0d2a23;
+  --error-text: #2a0d0d;
+  --info-light: #b4dcff;
+  --error-light: #ffb4b4;
+  --success-light: #6dffd1;
+
   /* ---- Motion ---- */
   --duration-fast: 120ms;
   --duration-normal: 300ms;
@@ -120,7 +129,7 @@ p { margin: 0 0 var(--space-3); }
   transform: translate(-1px, -1px);
 }
 #proto-nav .nav-link--docs { background: var(--primary); border-color: var(--primary); }
-#proto-nav .nav-link--admin { background: #6a4ba8; border-color: #8e6dd2; }
+#proto-nav .nav-link--admin { background: var(--primary-dark); border-color: var(--primary-light); }
 #proto-nav #breadcrumb {
   font-family: var(--font-display); font-size: 10px;
   color: var(--accent);
@@ -198,8 +207,8 @@ p { margin: 0 0 var(--space-3); }
 .btn:active { transform: translate(2px, 2px); box-shadow: var(--button-shadow-active); }
 .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .btn-secondary { background: var(--surface-overlay); color: var(--text-primary); }
-.btn-success { background: var(--success); color: #0d2a23; }
-.btn-danger { background: var(--error); color: #2a0d0d; }
+.btn-success { background: var(--success); color: var(--success-text); }
+.btn-danger { background: var(--error); color: var(--error-text); }
 .btn-ghost { background: transparent; box-shadow: none; border-color: var(--border-default); }
 .btn-ghost:hover { border-color: var(--primary); box-shadow: var(--button-shadow); }
 .btn-large { padding: 18px 28px; font-size: 14px; }
@@ -280,7 +289,7 @@ p { margin: 0 0 var(--space-3); }
 .pet-canvas--epic { border-color: var(--rarity-epic); box-shadow: inset 0 0 18px rgba(162,155,254,0.25); animation: epicShimmer 3000ms ease-in-out infinite; }
 .pet-canvas--rare { border-color: var(--rarity-rare); }
 .pet-canvas--common { border-color: var(--rarity-common); }
-.pet-canvas--neglect { filter: grayscale(0.7) brightness(0.7); }
+.pet-canvas--neglect { filter: grayscale(0.7) brightness(0.7); transition: filter 600ms ease-out; }
 
 /* Pet animations */
 .pet-anim-hop { animation: petHop 300ms var(--ease-expo); }
@@ -327,9 +336,9 @@ p { margin: 0 0 var(--space-3); }
   transition: width 800ms var(--ease-expo);
   position: relative;
 }
-.stat-bar__fill--speed { background: linear-gradient(90deg, var(--info) 0%, #b4dcff 100%); }
-.stat-bar__fill--strength { background: linear-gradient(90deg, var(--error) 0%, #ffb4b4 100%); }
-.stat-bar__fill--stamina { background: linear-gradient(90deg, var(--success) 0%, #6dffd1 100%); }
+.stat-bar__fill--speed { background: linear-gradient(90deg, var(--info) 0%, var(--info-light) 100%); }
+.stat-bar__fill--strength { background: linear-gradient(90deg, var(--error) 0%, var(--error-light) 100%); }
+.stat-bar__fill--stamina { background: linear-gradient(90deg, var(--success) 0%, var(--success-light) 100%); }
 .stat-bar__fill::after {
   content: '';
   position: absolute; inset: 0;
@@ -549,7 +558,7 @@ p { margin: 0 0 var(--space-3); }
   font-family: var(--font-display); font-size: 12px;
 }
 .wizard-step--active { background: var(--primary); color: var(--text-primary); border-color: var(--primary); }
-.wizard-step--done { background: var(--success); color: #0d2a23; border-color: var(--success); }
+.wizard-step--done { background: var(--success); color: var(--success-text); border-color: var(--success); }
 .wizard-line { flex: 0 0 24px; height: 2px; background: var(--border-default); align-self: center; }
 
 /* Training cards */

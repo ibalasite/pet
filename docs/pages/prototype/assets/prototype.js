@@ -33,6 +33,22 @@ function safeJSId(s) {
   return String(s || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
 }
 
+/* ----- CSS variable reader ----- */
+function cssVar(name, fallback) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
+/* Particle color palette derived from CSS design tokens */
+function particleColors() {
+  return [
+    cssVar('--accent',  '#fdcb6e'),
+    cssVar('--primary-light', '#a29bfe'),
+    cssVar('--success', '#00b894'),
+    cssVar('--info',    '#7cb4e8'),
+  ];
+}
+
 /* ----- Toast ----- */
 function toast(msg, type = 'success') {
   const c = $('#toast-container');
@@ -246,7 +262,7 @@ function onMountScreen01() {
       void sprite.offsetWidth;
       sprite.classList.add('pet-anim-hop');
       if (window.audioEngine) window.audioEngine.playSFX('SFX-001-pet-tap-pop');
-      if (window.fxEngine) window.fxEngine.emitBurstAt(petEl, { count: 5, size: 3, colors: ['#fdcb6e','#a29bfe','#00b894'] });
+      if (window.fxEngine) window.fxEngine.emitBurstAt(petEl, { count: 5, size: 3, colors: particleColors() });
     });
   }
   // anim-06 + anim-07: claim CTA pulse + slide-in
@@ -512,7 +528,7 @@ function onMountScreen04() {
       setTimeout(() => {
         window.fxEngine.emitBurstAt(petEl, {
           count: 24, char: '★',
-          colors: ['#fdcb6e', '#a29bfe', '#00b894', '#7cb4e8'],
+          colors: particleColors(),
           speed: 6, life: 1500
         });
       }, 150);
@@ -699,7 +715,7 @@ function onMyPetClick() {
   void sprite.offsetWidth;
   sprite.classList.add('pet-anim-hop');
   if (window.audioEngine) window.audioEngine.playSFX('SFX-001-pet-tap-pop');
-  if (window.fxEngine) window.fxEngine.emitBurstAt(canvas, { count: 5, size: 3, colors: ['#fdcb6e','#a29bfe','#00b894'] });
+  if (window.fxEngine) window.fxEngine.emitBurstAt(canvas, { count: 5, size: 3, colors: particleColors() });
 }
 window.onMyPetClick = onMyPetClick;
 
@@ -869,7 +885,7 @@ function doTrain(actionId, stat) {
     // anim-03: "+X Stat" float-up
     if (window.fxEngine) {
       window.fxEngine.spawnFloater($('#training-pet'), `+1 ${stat.toUpperCase()}`);
-      window.fxEngine.emitBurstAt($('#training-pet'), { count: 8, char: '+', size: 3, colors: ['#00b894','#fdcb6e'] });
+      window.fxEngine.emitBurstAt($('#training-pet'), { count: 8, char: '+', size: 3, colors: particleColors() });
     }
 
     toast(`+1 ${stat.toUpperCase()} applied! 💪`);
@@ -881,7 +897,7 @@ function doTrain(actionId, stat) {
           const r = tp.getBoundingClientRect();
           window.fxEngine.emitBurst(r.left + r.width/2, r.top + r.height/2, {
             count: 32, char: '✨',
-            colors: ['#fdcb6e','#a29bfe','#00b894'],
+            colors: particleColors(),
             speed: 7, life: 1600
           });
         }
@@ -1014,7 +1030,10 @@ function acceptAI() {
   if (status) status.innerHTML = `<div class="banner banner--success"><span>✅</span><span>AI matched! Battle starting...</span></div>`;
   // anim-08: 3-2-1 countdown
   arenaCountdown(() => {
-    router.navigate('screen-10', { battleId: 'm003', isWin: true });
+    const isWin = Math.random() < 0.6;
+    // m003 = win against AI, m002 = loss to opponent (demonstrates both outcomes)
+    const battleId = isWin ? 'm003' : 'm002';
+    router.navigate('screen-10', { battleId, isWin });
   });
 }
 window.dismissAI = dismissAI;
@@ -1135,7 +1154,7 @@ function sharePage() {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => toast('Page URL copied!'));
   } else { toast('URL: ' + url); }
-  if (window.fxEngine) window.fxEngine.emitBurst(window.innerWidth/2, 80, { count: 10, char: '🔗' });
+  if (window.fxEngine) window.fxEngine.emitBurst(window.innerWidth/2, 80, { count: 10, char: '🔗', colors: particleColors() });
 }
 window.sharePage = sharePage;
 
@@ -1277,27 +1296,76 @@ function onMountScreen10(ctx) {
   const battleId = (ctx && ctx.battleId) || 'm001';
   const battle = M.battles.find(b => b.id === battleId) || M.battles[0];
   const isWin = ctx && ctx.isWin !== undefined ? ctx.isWin : (battle.winner === M.currentPet.pet_name);
-  setTimeout(() => {
-    if (isWin) {
-      if (window.audioEngine) window.audioEngine.playSFX('SFX-007-arena-victory');
-      // anim-09: WIN particle explosion — 24 gold 2×2px squares
-      const banner = $('#battle-banner');
-      if (banner && window.fxEngine) {
-        window.fxEngine.emitBurstAt(banner, {
-          count: 24, size: 4,
-          colors: ['#fdcb6e','#fdcb6e','#a29bfe','#00b894'],
-          speed: 7, life: 1600
+
+  // anim-11: arena battle animation — 3 rounds of attack/hit sequences before result
+  const myCombatant = $('#my-combatant');
+  const oppCombatant = myCombatant ? myCombatant.parentElement.querySelector('.combatant-card:not(#my-combatant)') : null;
+  const mySprite = myCombatant ? myCombatant.querySelector('.pet-sprite') : null;
+  const oppSprite = oppCombatant ? oppCombatant.querySelector('.pet-sprite') : null;
+
+  // Hide result banner initially; reveal after animation sequence
+  const banner = $('#battle-banner');
+  if (banner) banner.style.visibility = 'hidden';
+
+  function runRound(done) {
+    // My pet attacks
+    if (mySprite) { mySprite.classList.remove('pet-anim-attack'); void mySprite.offsetWidth; mySprite.classList.add('pet-anim-attack'); }
+    const t1 = setTimeout(() => {
+      // Opponent receives hit
+      if (oppSprite) { oppSprite.classList.remove('pet-anim-hit'); void oppSprite.offsetWidth; oppSprite.classList.add('pet-anim-hit'); }
+      const t2 = setTimeout(() => {
+        // Opponent counter-attacks
+        if (oppSprite) { oppSprite.classList.remove('pet-anim-attack'); void oppSprite.offsetWidth; oppSprite.classList.add('pet-anim-attack'); }
+        const t3 = setTimeout(() => {
+          // My pet receives hit
+          if (mySprite) { mySprite.classList.remove('pet-anim-hit'); void mySprite.offsetWidth; mySprite.classList.add('pet-anim-hit'); }
+          const t4 = setTimeout(done, 300);
+          router.registerTimer(t4);
+        }, 300);
+        router.registerTimer(t3);
+      }, 300);
+      router.registerTimer(t2);
+    }, 350);
+    router.registerTimer(t1);
+  }
+
+  // Chain 3 rounds, then reveal result banner with appropriate effects
+  const tR1 = setTimeout(() => {
+    runRound(() => {
+      const tR2 = setTimeout(() => {
+        runRound(() => {
+          const tR3 = setTimeout(() => {
+            runRound(() => {
+              const tReveal = setTimeout(() => {
+                if (banner) banner.style.visibility = '';
+                if (isWin) {
+                  if (window.audioEngine) window.audioEngine.playSFX('SFX-007-arena-victory');
+                  // anim-09: WIN particle explosion — 24 gold 2×2px squares
+                  if (banner && window.fxEngine) {
+                    window.fxEngine.emitBurstAt(banner, {
+                      count: 24, size: 4,
+                      colors: [cssVar('--accent', '#fdcb6e'), ...particleColors()],
+                      speed: 7, life: 1600
+                    });
+                  }
+                  const title = $('#result-title');
+                  if (title) { title.style.animation = 'none'; void title.offsetWidth; title.style.animation = 'scalePop 600ms cubic-bezier(0.16,1,0.3,1)'; }
+                } else {
+                  if (window.audioEngine) window.audioEngine.playSFX('SFX-008-arena-defeat');
+                  // anim-10: LOSS darkening
+                  if (banner) { banner.style.animation = 'none'; void banner.offsetWidth; banner.style.animation = 'fadeIn 800ms ease-out'; }
+                }
+              }, 200);
+              router.registerTimer(tReveal);
+            });
+          }, 200);
+          router.registerTimer(tR3);
         });
-      }
-      const title = $('#result-title');
-      if (title) { title.style.animation = 'none'; void title.offsetWidth; title.style.animation = 'scalePop 600ms cubic-bezier(0.16,1,0.3,1)'; }
-    } else {
-      if (window.audioEngine) window.audioEngine.playSFX('SFX-008-arena-defeat');
-      // anim-10: LOSS darkening
-      const banner = $('#battle-banner');
-      if (banner) { banner.style.animation = 'none'; void banner.offsetWidth; banner.style.animation = 'fadeIn 800ms ease-out'; }
-    }
+      }, 200);
+      router.registerTimer(tR2);
+    });
   }, 200);
+  router.registerTimer(tR1);
 }
 
 function shareBattle(battleId) {
@@ -1305,7 +1373,7 @@ function shareBattle(battleId) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(() => toast('Battle URL copied!'));
   } else { toast('URL: ' + url); }
-  if (window.fxEngine) window.fxEngine.emitBurstAt($('#share-battle-btn'), { count: 8, char: '✦', colors: ['#fdcb6e'] });
+  if (window.fxEngine) window.fxEngine.emitBurstAt($('#share-battle-btn'), { count: 8, char: '✦', colors: [cssVar('--accent', '#fdcb6e')] });
 }
 window.shareBattle = shareBattle;
 
@@ -1504,7 +1572,7 @@ function recoveryVerify() {
         <button class="btn w-full" onclick="router.navigate('screen-05')">→ Go to My Pet</button>
       </div>
     `;
-    if (window.fxEngine) window.fxEngine.emitBurst(window.innerWidth/2, window.innerHeight/2, { count: 16, char: '🔑', colors: ['#fdcb6e'], speed: 5 });
+    if (window.fxEngine) window.fxEngine.emitBurst(window.innerWidth/2, window.innerHeight/2, { count: 16, char: '🔑', colors: [cssVar('--accent', '#fdcb6e')], speed: 5 });
   }
   RecoveryState.step = 1;
   RecoveryState.email = '';

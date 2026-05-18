@@ -85,7 +85,7 @@ See [System Architecture](#system-architecture) below and [Documentation](#docum
 | Demo | Link | Description |
 |------|------|-------------|
 | 🎮 Player Prototype | [docs/pages/prototype/index.html](docs/pages/prototype/index.html) | 13 clickable screens — landing, pet claim, training, arena, leaderboard, GDPR |
-| 🔌 API Explorer | [docs/pages/prototype/api-explorer/index.html](docs/pages/prototype/api-explorer/index.html) | Postman-style mock API — 10 endpoints across Auth / Pets / Training / Arena / Leaderboard |
+| 🔌 API Explorer | [docs/pages/prototype/api-explorer/index.html](docs/pages/prototype/api-explorer/index.html) | Postman-style mock API — 54 endpoints across Claims, Pets, Arena, Leaderboard, Marketplace, GDPR, Admin |
 | 🛡️ Admin Portal | [docs/pages/prototype/admin/index.html](docs/pages/prototype/admin/index.html) | RBAC v2.0 admin UI — super_admin / moderator / read_only; TOTP MFA login flow |
 
 ---
@@ -388,8 +388,8 @@ pixel-pet-arena/
 │   ├── LOCAL_DEPLOY.md        # Local development setup guide
 │   └── pages/                 # Generated HTML documentation site
 │       ├── index.html         # Documentation home page
-│       ├── prototype/         # Interactive HTML prototype (17 screens)
-│       │   ├── index.html     # Player prototype (10 screens)
+│       ├── prototype/         # Interactive HTML prototype (13 screens)
+│       │   ├── index.html     # Player prototype (13 screens)
 │       │   ├── admin/         # Admin portal prototype (18 HTML files)
 │       │   └── api-explorer/  # API Explorer (mock responses)
 │       └── assets/            # CSS + JS for docs site
@@ -419,7 +419,7 @@ The full documentation suite is generated into a static HTML site at **`docs/pag
 | API | [docs/API.md](docs/API.md) | [API.html](docs/pages/API.html) | REST API endpoints, schemas, error codes |
 | SCHEMA | [docs/SCHEMA.md](docs/SCHEMA.md) | [SCHEMA.html](docs/pages/SCHEMA.html) | Database table definitions and ERD |
 | BDD | [features/](features/) | [BDD.html](docs/pages/BDD.html) | Gherkin feature files and living docs |
-| Prototype | [docs/pages/prototype/](docs/pages/prototype/) | Interactive | 13 player screens + 6 admin pages + API Explorer (10 endpoints) |
+| Prototype | [docs/pages/prototype/](docs/pages/prototype/) | Interactive | 13 player screens + 18 admin pages + API Explorer (54 endpoints) |
 
 ---
 

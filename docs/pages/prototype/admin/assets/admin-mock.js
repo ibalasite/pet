@@ -245,34 +245,57 @@ function renderSidebar(active) {
   brand.textContent = '🛡️ Admin Portal';
   nav.appendChild(brand);
 
-  // Nav list — static entries (no external data interpolated)
-  const entries = [
-    { key: 'dashboard',   href: 'admin-dashboard.html', icon: '📊', label: 'Dashboard' },
-    { key: 'users',       href: 'admin-users.html',     icon: '👥', label: 'Users' },
-    { key: 'roles',       href: 'admin-roles.html',     icon: '🗝️', label: 'Roles' },
-    { key: 'audit',       href: 'admin-audit-log.html', icon: '📜', label: 'Audit Log' },
-    { key: 'pets',        href: 'pets.html',            icon: '🐾', label: 'Pets' },
-    { key: 'battles',     href: 'battles.html',         icon: '⚔️', label: 'Battles' },
-    { key: 'leaderboard', href: 'leaderboard.html',     icon: '🏆', label: 'Leaderboard' },
-    { key: 'suspicious',  href: 'suspicious.html',      icon: '⚠️', label: 'Suspicious' },
-    { key: 'config',      href: 'config.html',          icon: '⚙️', label: 'Config' },
-    { key: 'gdpr',        href: 'gdpr.html',            icon: '🔏', label: 'GDPR' },
-    { key: 'email',       href: 'email.html',           icon: '📧', label: 'Email' },
-    { key: 'analytics',   href: 'analytics.html',       icon: '📈', label: 'Analytics' }
+  // Nav sections — 3-section structure: Primary / Moderation / Tools
+  const sections = [
+    {
+      label: '主要功能',
+      entries: [
+        { key: 'dashboard',  href: 'admin-dashboard.html', icon: '📊', label: 'Dashboard' },
+        { key: 'users',      href: 'admin-users.html',     icon: '👥', label: 'Users' },
+        { key: 'roles',      href: 'admin-roles.html',     icon: '🗝️', label: 'Roles' },
+        { key: 'audit',      href: 'admin-audit-log.html', icon: '📜', label: 'Audit Log' }
+      ]
+    },
+    {
+      label: '待辦事項',
+      entries: [
+        { key: 'suspicious', href: 'suspicious.html', icon: '⚠️', label: 'Suspicious' },
+        { key: 'gdpr',       href: 'gdpr.html',       icon: '🔏', label: 'GDPR' },
+        { key: 'email',      href: 'email.html',      icon: '📧', label: 'Email' }
+      ]
+    },
+    {
+      label: '工具',
+      entries: [
+        { key: 'pets',        href: 'pets.html',        icon: '🐾', label: 'Pets' },
+        { key: 'battles',     href: 'battles.html',     icon: '⚔️', label: 'Battles' },
+        { key: 'leaderboard', href: 'leaderboard.html', icon: '🏆', label: 'Leaderboard' },
+        { key: 'config',      href: 'config.html',      icon: '⚙️', label: 'Config' },
+        { key: 'analytics',   href: 'analytics.html',   icon: '📈', label: 'Analytics' }
+      ]
+    }
   ];
 
-  const ul = document.createElement('ul');
-  ul.className = 'sidebar-nav';
-  entries.forEach(function (e) {
-    const li = document.createElement('li');
-    li.className = 'nav-item' + (e.key === safeActive ? ' active' : '');
-    const a = document.createElement('a');
-    a.href = e.href;                           // static string — no interpolation
-    a.textContent = e.icon + ' ' + e.label;   // textContent — not innerHTML
-    li.appendChild(a);
-    ul.appendChild(li);
+  sections.forEach(function (section) {
+    // Section heading
+    const sectionHead = document.createElement('div');
+    sectionHead.className = 'sidebar-section-label';
+    sectionHead.textContent = section.label;   // textContent — not innerHTML
+    nav.appendChild(sectionHead);
+
+    const ul = document.createElement('ul');
+    ul.className = 'sidebar-nav';
+    section.entries.forEach(function (e) {
+      const li = document.createElement('li');
+      li.className = 'nav-item' + (e.key === safeActive ? ' active' : '');
+      const a = document.createElement('a');
+      a.href = e.href;                           // static string — no interpolation
+      a.textContent = e.icon + ' ' + e.label;   // textContent — not innerHTML
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    nav.appendChild(ul);
   });
-  nav.appendChild(ul);
 
   // Footer — username from ADMIN_MOCK (set via textContent)
   const footer = document.createElement('div');
