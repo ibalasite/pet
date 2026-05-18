@@ -6,7 +6,7 @@
   "max_rounds": 99,
   "client_type": "game",
   "client_type_source": "confirmed",
-  "last_updated": "2026-05-17T19:43:05Z",
+  "last_updated": "2026-05-18T13:41:41Z",
   "has_admin_backend": true,
   "review_strategy": "exhaustive",
   "stop_condition": "finding=0（無上限）",
@@ -52,9 +52,10 @@
     "EDD",
     "LOCAL_DEPLOY",
     "CLIENT_IMPL",
-    "PROTOTYPE"
+    "PROTOTYPE",
+    "DRYRUN"
   ],
-  "last_completed": "BDD-server",
+  "last_completed": "DRYRUN",
   "pipeline_hash": "49f8456caade9b87",
   "review_progress": {
     "PRD": {
