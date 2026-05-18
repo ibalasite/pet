@@ -1,6 +1,6 @@
 {
   "min_table_count": 42,
-  "min_columns_per_table": 4,
+  "min_columns_per_table": 5,
   "min_h2_sections": 3,
   "max_placeholder_count": 0
 }
