@@ -805,11 +805,11 @@ def admin_config_flags_get(session: Optional[str] = Header(None, alias="Cookie")
     return ok(load_json("config_flags.json"))
 
 
-@app.put("/admin/api/config/flags/{name}", tags=["admin-config"])
-def admin_config_flag_toggle(name: str, body: ConfigFlagUpdate, session: Optional[str] = Header(None, alias="Cookie")) -> dict:
+@app.put("/admin/api/config/flags/{flag}", tags=["admin-config"])
+def admin_config_flag_toggle(flag: str, body: ConfigFlagUpdate, session: Optional[str] = Header(None, alias="Cookie")) -> dict:
     """API.md 6.6 - Toggle a single feature toggle."""
     require_admin_session(session, "super_admin")
-    return ok({"name": name, "enabled": body.enabled, "auditLogId": "12362"})
+    return ok({"name": flag, "enabled": body.enabled, "auditLogId": "12362"})
 
 
 @app.get("/admin/api/gdpr", tags=["admin-gdpr"])
