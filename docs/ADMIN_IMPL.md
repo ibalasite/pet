@@ -1389,8 +1389,10 @@ export const useAuthStore = defineStore('auth', () => {
   // === Getters ===
   /**
    * Token 模式：HttpOnly Cookie（見 §5.4）
-   * 因此前端不持有 access token 字串；isAuthenticated 透過後端 me 端點驗證
-   * 注意：sessionExpiresAt 為輔助欄位，僅作 UI 倒數提示，不作為授權判斷依據
+   * 因此前端不持有 access token 字串；isAuthenticated 僅依賴 in-memory store 中
+   * adminId + adminRole 是否齊備（由 login response 一次性下發；頁面刷新後重置 → 強制 re-login）。
+   * 注意：sessionExpiresAt 為輔助欄位，僅作 UI 倒數提示，不作為授權判斷依據；
+   *       後端 Fastify preHandler 才是 authoritative 權限來源（§16.3）。
    */
   const isAuthenticated = computed(() => !!adminId.value && !!adminRole.value)
 
