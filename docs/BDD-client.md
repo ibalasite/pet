@@ -8,9 +8,9 @@
 
 ## Overview
 
-This document summarizes the 9 client-side BDD feature files that specify the frontend UI/UX, user flows, and component behavior for pixel-pet-arena. These specifications ensure the player app and admin portal conform to PRD acceptance criteria and design requirements.
+This document summarizes the 10 client-side BDD feature files that specify the frontend UI/UX, user flows, and component behavior for pixel-pet-arena. These specifications ensure the player app and admin portal conform to PRD acceptance criteria and design requirements.
 
-**Total Coverage:** 9 client features, 50+ scenarios, 10 PRD user stories linked
+**Total Coverage:** 10 client features, 133 scenarios, 10 PRD user stories linked
 
 ---
 

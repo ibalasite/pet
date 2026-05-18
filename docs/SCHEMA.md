@@ -64,7 +64,7 @@
 | **Arena** | `arena_matches` | `matchmaking:queue:*`, `rl:arena:*` | `ArenaMatchStarted`, `ArenaMatchCompleted` |
 | **Leaderboard** | `leaderboard_snapshots` | `leaderboard:global` (Redis sorted set 為主) | `LeaderboardUpdated`, `LeaderboardEntryRemoved` |
 | **Marketplace** *(P2 / FF_MARKETPLACE)* | `marketplace_listings`, `marketplace_transactions` | — | `ListingCreated`, `ListingCancelled`, `TradeCompleted` |
-| **Admin** | `admin_users`, `audit_logs` | `session:admin:*`, `rl:admin:*`, `rl:admin_login:*`, `token:blacklist:*`, `config:runtime` | `AdminUserCreated`, `AdminActionLogged`, `SuspiciousPetFlagged` |
+| **Admin** | `admin_users`, `audit_logs` | `session:admin:*`, `rl:admin:*`, `rl:admin_login:*`, `token:blacklist:*`, `config:runtime`, `config:economy` | `AdminUserCreated`, `AdminActionLogged`, `SuspiciousPetFlagged` |
 
 #### 1.1.2 External Cross-BC Reference Audit（FK ↔ ID-only 轉換）
 
@@ -2023,6 +2023,7 @@ ZCARD leaderboard:global                                                    # �
 | Key | TTL | Value | Notes |
 |-----|-----|-------|-------|
 | `config:runtime` | 300 s | JSON blob | Runtime 配置（arena rate limit、rarity weights 等）；refresh 每 5 min (`config_cache_refresh_time_minutes = 5`)。Mutations via `PUT /admin/api/config/{runtime,economy}` 在此 window 內生效。 |
+| `config:economy` | 300 s | JSON blob | Economy 配置（marketplace fee rate、food buff multiplier、credit rewards 等）；refresh 每 5 min。Mutations via `PUT /admin/api/config/economy` invalidate this key. |
 
 **Redis CLI 命令範例**：
 

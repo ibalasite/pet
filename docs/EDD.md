@@ -415,7 +415,7 @@ graph LR
 | **Arena** | `arena_matches` | `matchmaking:queue:*`, `rl:arena:*` | `ArenaMatchStarted`, `ArenaMatchCompleted` |
 | **Leaderboard** | `leaderboard_snapshots` | `leaderboard:global` (Redis sorted set 為主) | `LeaderboardUpdated`, `LeaderboardEntryRemoved` |
 | **Marketplace** *(P2 / FF_MARKETPLACE)* | `marketplace_listings`, `marketplace_transactions` | — | `ListingCreated`, `ListingCancelled`, `TradeCompleted` |
-| **Admin** | `admin_users`, `audit_logs` | `session:admin:*`, `rl:admin:*`, `rl:admin_login:*` | `AdminUserCreated`, `AdminActionLogged`, `SuspiciousPetFlagged` |
+| **Admin** | `admin_users`, `audit_logs` | `session:admin:*`, `rl:admin:*`, `rl:admin_login:*`, `config:runtime`, `config:economy` | `AdminUserCreated`, `AdminActionLogged`, `SuspiciousPetFlagged` |
 
 #### Context Map
 
@@ -452,25 +452,25 @@ graph TB
 
 | Environment | Purpose | DB | Redis | Domain | Auto-deploy |
 |-------------|---------|----|----|--------|-------------|
-| `development` | Local dev | PostgreSQL Docker (port 54322) | Redis Docker (port 6379) | `localhost` | n/a |
+| `development` | Local dev | PostgreSQL K8s StatefulSet (port-forward :5432) | Redis K8s StatefulSet (port-forward :6379) | `localhost` | n/a |
 | `staging` | Pre-prod 驗證 | Supabase staging | Upstash staging | `staging.pixel-pet-arena.com` | Yes (push to main) |
 | `production` | Live 服務 | Supabase production (HA) | Upstash production (HA) | `pixel-pet-arena.com` | Manual approval |
 
 #### §3.5b Service Port Matrix
 
-| Service | Local (host) | Local container | Staging | Production | k8s service port | 真相來源 |
-|---------|-------------|----------------|---------|-----------|------------------|---------|
+> **注意**：Local 環境為 K8s（k3s/Rancher Desktop），透過 `kubectl port-forward` 存取；Supabase local CLI 不再使用。詳見 LOCAL_DEPLOY §12。
+
+| Service | Local (kubectl port-forward) | K8s container port | Staging | Production | k8s service port | 真相來源 |
+|---------|------------------------------|-------------------|---------|-----------|------------------|---------|
 | Player frontend (Vite dev) | 5173 | — | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
 | Admin frontend (Vite dev) | 5174 | — | n/a (Vercel CDN) | n/a (Vercel CDN) | n/a | LOCAL_DEPLOY §3 |
-| API server (Fastify) | 3000 | 3000 | 8080 | 8080 | 8080 | EDD §10.1 |
-| Worker (Fastify side process) | 3001 | 3001 | 8081 | 8081 | 8081 | EDD §10.1 |
-| PostgreSQL (Supabase local) | 54322 | 5432 | n/a (managed) | n/a (managed) | 5432 | LOCAL_DEPLOY §6 |
-| Supabase API gateway | 54321 | 8000 | managed | managed | n/a | LOCAL_DEPLOY §6 |
-| Supabase Studio | 54323 | 3000 | managed | managed | n/a | LOCAL_DEPLOY §6 |
-| Inbucket (local email) | 54324 | 9000 | n/a | n/a | n/a | LOCAL_DEPLOY §6 |
+| API server (Fastify) | 8080 | 8080 | 8080 | 8080 | 8080 | LOCAL_DEPLOY §12 |
+| Worker (Fastify side process) | 8081 | 8081 | 8081 | 8081 | 8081 | EDD §10.1 |
+| PostgreSQL (K8s StatefulSet) | 5432 | 5432 | n/a (managed) | n/a (managed) | 5432 | LOCAL_DEPLOY §12 |
+| Mailpit (local email) | 8025 | 8025 | n/a | n/a | n/a | LOCAL_DEPLOY §12 |
 | Redis | 6379 | 6379 | n/a (Upstash REST) | n/a (Upstash REST) | 6379 | LOCAL_DEPLOY §3 |
 
-任何 port 變動必須同步更新 `docs/LOCAL_DEPLOY.md`、`docker-compose.yml`、helm chart `values.yaml`、CI/CD env 檔。
+任何 port 變動必須同步更新 `docs/LOCAL_DEPLOY.md`、helm chart `values.yaml`、CI/CD env 檔。
 
 #### §3.5c K8s 資源規格（HPA / PDB / Resources）
 

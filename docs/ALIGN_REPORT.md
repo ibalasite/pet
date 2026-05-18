@@ -1,8 +1,8 @@
 ---
 doc-type: ALIGN
-version: 2.1.0
+version: 2.2.0
 description: 全局對齊掃描報告 — pixel-pet-arena 六維度文件↔程式碼↔測試對齊問題清單（只列問題，不修復）
-generated: 2026-05-16
+generated: 2026-05-18
 ---
 
 # ALIGN_REPORT — 全局對齊掃描報告
@@ -56,7 +56,7 @@ BDD：`features/` — 13 個 server .feature 檔（122 個場景）；`features/
 
 ---
 
-### [HIGH] D1-01 — LOCAL_DEPLOY: EDD Worker container 缺失，Port 3001 衝突
+### [HIGH] [FIXED: align-fix 2026-05-19] D1-01 — LOCAL_DEPLOY: EDD Worker container 缺失，Port 3001 衝突
 
 **來源**：EDD §3.5b + ARCH §3.7.2 → LOCAL_DEPLOY.md
 
@@ -109,7 +109,7 @@ US-ADMIN-003（Runtime Parameter Tuning）有 3 個 AC；RTM 備注「covered vi
 
 ---
 
-### [MEDIUM] D1-05 — BDD-server→RTM: claim-flow.feature 場景數不符（8 vs 13）
+### [MEDIUM] [FIXED: align-fix 2026-05-19] D1-05 — BDD-server→RTM: claim-flow.feature 場景數不符（8 vs 13）
 
 **來源**：BDD-server.md → RTM §Server-Side Features
 
@@ -159,7 +159,7 @@ ThemeToggle、AudioToggle、NotificationToggle 在 BRD in-scope、PRD user stori
 
 ---
 
-### [LOW] D1-09 — EDD→SCHEMA: Economy config Redis key `config:economy` 缺失
+### [LOW] [FIXED: align-fix 2026-05-19] D1-09 — EDD→SCHEMA: Economy config Redis key `config:economy` 缺失
 
 **來源**：US-ADMIN-006 PUT /admin/api/config/economy → EDD §3.4 + SCHEMA.md §1.1
 
@@ -171,7 +171,7 @@ Cache refresh AC（≤5min）需要 `config:economy` Redis key，但 EDD §3.4 A
 
 ---
 
-### [LOW] D1-10 — BDD-client.md overview 數字過時（9 files/50+ → 10 files/133 scenarios）
+### [LOW] [FIXED: align-fix 2026-05-19] D1-10 — BDD-client.md overview 數字過時（9 files/50+ → 10 files/133 scenarios）
 
 **來源**：BDD-client.md §Overview
 
@@ -377,7 +377,7 @@ RTM 將 US-ADMIN-003 標記為「✅ Covered（via integration test）」，實�
 
 ---
 
-### [HIGH] D4-03 — RTM: server feature 場景計數嚴重過時（RTM 82 → 實際 122）
+### [HIGH] [FIXED: align-fix 2026-05-19] D4-03 — RTM: server feature 場景計數嚴重過時（RTM 82 → 實際 122）
 
 RTM server-side inventory 聲稱 82 個場景；實際 13 個 feature 文件共 122 個場景（差距 40 個）。`admin-auth.feature`（5 個場景）完全未列入 RTM。
 
@@ -434,7 +434,7 @@ FRONTEND.md §5.8 描述玩家自助 GDPR 流程（form type selector、HTTP 400
 
 ---
 
-### [MEDIUM] D4-10 — RTM BDD coverage 聲稱「100%」但所有 step 返回 pending
+### [MEDIUM] [FIXED: align-fix 2026-05-19] D4-10 — RTM BDD coverage 聲稱「100%」但所有 step 返回 pending
 
 RTM 聲明「17/17 active user stories fully covered (100%)」，基於 feature file 存在性而非實際執行通過。所有 step definitions 返回 `'pending'`。
 
@@ -470,7 +470,7 @@ FRONTEND.md §5.6 定義 6 個 marketplace error states；`trading-ui.feature` �
 
 ---
 
-### [LOW] D4-15 — RTM: rarity-distribution.feature 場景數 5 → 實際 10（2× 低估）
+### [LOW] [FIXED: align-fix 2026-05-19] D4-15 — RTM: rarity-distribution.feature 場景數 5 → 實際 10（2× 低估）
 
 RTM 記錄 5 個場景；實際 10 個場景（差距最大的比例失真）。
 
@@ -601,7 +601,7 @@ arena error UI behavior for HTTP 503 (Redis unavailable) not yet captured in cli
 
 ---
 
-## 總結
+## 總結（v2.1.0 — 2026-05-16）
 
 ```
 總 Finding 數：53
@@ -614,4 +614,75 @@ AI Gencode Readiness: 100%（EXCELLENT）
 文件完備度：25/25 文件存在且非空
 BDD 覆蓋：Server 13 files / 122 scenarios；Client 10 files / 133 scenarios
 下一步：執行 gencode 流程驅動後端全量實作（P0 fixes 優先）
+```
+
+---
+
+## 增量 Re-scan（v2.2.0 — 2026-05-18）
+
+> PROTOTYPE、MOCK、HTML 步驟完成後執行的增量掃描。新增 Dim1 findings，其他維度延續 v2.1.0 結論。
+
+### 新增 Dim1 Findings（2026-05-18）
+
+**[HIGH] D1-NEW-01 — PRD §19.2 Admin 4 roles vs EDD/SCHEMA/FRONTEND 3 roles**
+- PRD §19.2 定義 4 個 admin 角色（Super Admin, Moderator, Analyst, Support Agent）；EDD §9.6、SCHEMA admin_role_enum、FRONTEND useAdminAuthStore、ADMIN_IMPL RBAC 一致實作 3 個角色（super_admin, moderator, read_only）。Analyst 和 Support Agent 被靜默合併至 read_only 無追溯。
+- 衝突類型：B2-下游偏離（EDD/SCHEMA/FRONTEND 內部一致，PRD 是唯一偏差方）
+- 建議修復方向：更新 PRD §19.2 改為 3 角色模型（無需修改 EDD/SCHEMA/FRONTEND）
+- 可自動修復：NO（需產品決策）
+
+**[HIGH] D1-NEW-02 — PRD AC-012-2 barter trade vs API §5.6 monetary marketplace**
+- PRD US-TRADE-001 AC-012-2：「玩家可提交換寵物要約（以自己的寵物換取對方寵物）」— 描述 barter 模型。API.md §5.6 Marketplace 實作 price 欄位的買賣模型；SCHEMA marketplace_listings 有 price 欄（無 offer/barter 結構）。
+- 衝突類型：B2-下游偏離（API 設計了 monetary 模型；PRD 描述 barter 模型）
+- 建議修復方向：更新 PRD AC-012-2 改為描述 monetary buy/sell 模型（該功能受 FF_MARKETPLACE 保護，非 v1 阻塞項）
+- 可自動修復：NO（需產品決策）
+
+**[MEDIUM] [FIXED: align-fix 2026-05-19] D1-NEW-03 — ANIM §11.3 rarity 機率值與 PRD/EDD CONSTANTS 不符**
+- ANIM §11.3 `determineRarity()` 使用：RARE=30%, EPIC=8%, LEGENDARY=2%
+- PRD/EDD/CONSTANTS 定義：RARE=25%, EPIC=12%, LEGENDARY=3%
+- 三個非 COMMON 等級均錯誤；TC-UNIT-003 使用正確 PRD 值
+- 建議修復方向：修正 ANIM §11.3 閾值：legendary < 0.03, epic < 0.15, rare < 0.40
+- 可自動修復：YES
+
+**[MEDIUM] [FIXED: align-fix 2026-05-19] D1-NEW-04 — PRD §11.2 data dictionary 欄位名稱與 SCHEMA §3.3 不符**
+- PRD §11.2 claim_codes 欄位：claim_code, claim_code_expires_at, claim_code_used
+- SCHEMA §3.3 實際欄位：code_hash, expires_at, used_at
+- 建議修復方向：更新 PRD §11.2 欄位名稱對齊 SCHEMA（SCHEMA 為權威來源）
+- 可自動修復：YES
+
+**[MEDIUM] [FIXED: align-fix 2026-05-19] D1-NEW-05 — PRD §11.2 pet_access_tokens 描述為獨立表；SCHEMA 使用 pets.owner_token_hash**
+- 建議修復方向：移除/更正 PRD §11.2 PetAccessToken 條目，說明 token hash 存放在 pets 表
+- 可自動修復：YES
+
+**[MEDIUM] [FIXED: align-fix 2026-05-19] D1-NEW-06 — EDD §3.5b Service Port Matrix 描述 pre-K8s port；LOCAL_DEPLOY v3.0 為 K8s 架構**
+- EDD §3.5b: API=3000, PostgreSQL=54322, Inbucket=54324（已淘汰的 pnpm+Docker 模式）
+- LOCAL_DEPLOY v3.0: API=8080 (kubectl), PostgreSQL=5432 (kubectl), Mailpit=8025
+- 建議修復方向：更新 EDD §3.5b 改為 K8s port；Inbucket 替換為 Mailpit
+- 可自動修復：YES
+
+**[MEDIUM] [FIXED: align-fix 2026-05-19] D1-NEW-07 — AUDIO §5.2 定義 12 個音效事件；FRONTEND §3.3 無對應 cross-reference**
+- 建議修復方向：在 FRONTEND §3.3 PetCanvasEngine 段落補充 12 個 audio event 名稱清單及 AUDIO.md §5.2 引用
+- 可自動修復：YES
+
+### Dim5、Dim6、Dim7 新增結論（2026-05-18）
+
+| 維度 | 狀態 | 摘要 |
+|------|------|------|
+| Dim5 UML/RTM 品質 | ✅ PASS | EDD 42 classes, 9 PUML files, RTM.csv OK, 9 relationship types |
+| Dim6 AI Gencode 就緒度 | ✅ 90% | All 6 layers ≥80% (SCHEMA/ANIM/BDD=100%, API=85%, CICD/LOCAL=80%) |
+| Dim7 Generated Artifacts | ✅ PASS | API Explorer=54 endpoints OK; main.py path params OK; admin-mock.js spot-check needed |
+
+### 增量總計（v2.2.0 新增）
+
+```
+新增 Dim1 findings：HIGH=2, MEDIUM=5
+Dim6 AI Gencode Readiness：90%（v2.1.0 100% 基礎上，因 CICD/LOCAL 微降）
+Dim7 Generated Artifacts：全部通過
+
+建議下一步：執行 /gendoc-align-fix — 自動修復所有 YES 項目
+  優先：D1-NEW-03 ANIM rarity values (BUG 級)
+        D1-NEW-04/05 PRD data dictionary corrections
+        D1-NEW-06 EDD port matrix update
+        D1-NEW-07 FRONTEND audio cross-reference
+  人工：D1-NEW-01 PRD role count (product decision)
+        D1-NEW-02 Marketplace mechanism (product decision)
 ```

@@ -28,25 +28,26 @@ The companion machine-readable view of this document lives at `docs/RTM.csv` and
 
 This section maps all 21 BDD feature files to their corresponding user stories and test layers.
 
-**Total**: 12 server feature files + 10 client feature files = **22 files / 215 scenarios**.
+**Total**: 13 server feature files + 10 client feature files = **23 files / 255 scenarios**.
 
-### Server-Side Features (12 files, 82 scenarios)
+### Server-Side Features (13 files, 122 scenarios)
 
 | Feature File | Scenarios | US Stories | Layer | Coverage |
 |---|---|---|---|---|
-| `features/claim-flow.feature` | 8 | US-AUTH-001, US-AUTH-002 | Backend API | ✅ Covered |
-| `features/arena-battle.feature` | 7 | US-ARENA-001, US-ARENA-002 | Backend API | ✅ Covered |
-| `features/training-food.feature` | 3 | US-TRAIN-001, US-FOOD-001 | Backend API | ✅ Covered |
-| `features/leaderboard.feature` | 8 | US-BOARD-001, US-ADMIN-002 | Backend API | ✅ Covered |
-| `features/battle-records.feature` | 7 | US-RECORD-001 | Backend API | ✅ Covered |
-| `features/rarity-distribution.feature` | 5 | US-PET-002, US-RARITY-001 | Backend API | ✅ Covered |
-| `features/gdpr-erasure.feature` | 8 | US-AUTH-002, US-ADMIN-004 | Backend API | ✅ Covered |
-| `features/suspicious-detection.feature` | 3 | US-ADMIN-005 | Backend API | ✅ Covered |
-| `features/admin-moderation.feature` | 11 | US-ADMIN-001, US-ADMIN-002, US-ADMIN-005 | Backend API | ✅ Covered |
+| `features/claim-flow.feature` | 13 | US-AUTH-001, US-AUTH-002 | Backend API | ✅ Covered |
+| `features/arena-battle.feature` | 12 | US-ARENA-001, US-ARENA-002 | Backend API | ✅ Covered |
+| `features/training-food.feature` | 12 | US-TRAIN-001, US-FOOD-001 | Backend API | ✅ Covered |
+| `features/leaderboard.feature` | 9 | US-BOARD-001, US-ADMIN-002 | Backend API | ✅ Covered |
+| `features/battle-records.feature` | 8 | US-RECORD-001 | Backend API | ✅ Covered |
+| `features/rarity-distribution.feature` | 10 | US-PET-002, US-RARITY-001 | Backend API | ✅ Covered |
+| `features/gdpr-erasure.feature` | 10 | US-AUTH-002, US-ADMIN-004 | Backend API | ✅ Covered |
+| `features/suspicious-detection.feature` | 7 | US-ADMIN-005 | Backend API | ✅ Covered |
+| `features/admin-moderation.feature` | 9 | US-ADMIN-001, US-ADMIN-002, US-ADMIN-005 | Backend API | ✅ Covered |
 | `features/admin-search-performance.feature` | 6 | US-ADMIN-001 (NFR-ADMIN-06) | Backend API | ✅ Covered |
-| `features/economy-config.feature` | 6 | US-ADMIN-006 | Backend API | ✅ Covered |
-| `features/trading-system.feature` | 10 | US-TRADE-001 (deferred behind `FF_MARKETPLACE`) | Backend API | ⏸ Deferred (P2) |
-| **Total** | **82** | — | — | — |
+| `features/economy-config.feature` | 10 | US-ADMIN-006 | Backend API | ✅ Covered |
+| `features/trading-system.feature` | 11 | US-TRADE-001 (deferred behind `FF_MARKETPLACE`) | Backend API | ⏸ Deferred (P2) |
+| `features/admin-auth.feature` | 5 | US-ADMIN-001 (TOTP authentication flow) | Backend API | ✅ Covered |
+| **Total** | **122** | — | — | — |
 
 ### Client-Side Features (10 files, 133 scenarios)
 
@@ -99,8 +100,8 @@ This section maps all 21 BDD feature files to their corresponding user stories a
 |---|---|---|---|---|---|---|---|---|
 | US-PET-001 | Random Pet Display (Guest Mode) | — | `features/client/pet-display.feature` (12) | Sprite generation | — | Visual regression: pixel rendering | `@TC-CLI-PET-001`, `@TC-CLI-PET-002` | ✅ Covered |
 | US-PET-002 | Procedural Pixel Pet Generation | `features/rarity-distribution.feature` (5) | `features/client/pet-display.feature` (12) | Combination space; deterministic seed | — | Statistical chi-square (rarity dist) | `@TC-SRV-RARITY-001`, `@TC-CLI-PET-001` | ✅ Covered |
-| US-AUTH-001 | Email Claim Flow | `features/claim-flow.feature` (8) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | Email sending; one-time token | Security: email enumeration prevention; COPPA | `@TC-SRV-CLAIM-001`, `@TC-CLI-CLAIM-001` | ✅ Covered |
-| US-AUTH-002 | Returning Pet Owner Access | `features/claim-flow.feature` (8), `features/gdpr-erasure.feature` (8) | `features/client/claim-flow-ui.feature` (10), `features/client/settings.feature` (21) | — | GDPR erasure path | Security: invalid URL → 404 | `@TC-SRV-GDPR-001`, `@TC-CLI-CLAIM-001`, `@TC-CLI-SET-001` | ✅ Covered |
+| US-AUTH-001 | Email Claim Flow | `features/claim-flow.feature` (13) | `features/client/claim-flow-ui.feature` (10) | OTP expiry | Email sending; one-time token | Security: email enumeration prevention; COPPA | `@TC-SRV-CLAIM-001`, `@TC-CLI-CLAIM-001` | ✅ Covered |
+| US-AUTH-002 | Returning Pet Owner Access | `features/claim-flow.feature` (13), `features/gdpr-erasure.feature` (10) | `features/client/claim-flow-ui.feature` (10), `features/client/settings.feature` (21) | — | GDPR erasure path | Security: invalid URL → 404 | `@TC-SRV-GDPR-001`, `@TC-CLI-CLAIM-001`, `@TC-CLI-SET-001` | ✅ Covered |
 | US-TRAIN-001 | Pet Training System | `features/training-food.feature` (3) | `features/client/training-ui.feature` (12) | Stat increment; stat max cap | Persistence | Visual regression: neglected state | `@TC-SRV-TRAIN-001`, `@TC-CLI-TRAIN-001` | ✅ Covered |
 | US-FOOD-001 | Special Food System | `features/training-food.feature` (3) | `features/client/food-system.feature` (17) | Buff application; stat max block | Food buff persistence | — | `@TC-SRV-TRAIN-003`, `@TC-CLI-FOOD-001` | ✅ Covered |
 | US-ARENA-001 | Arena Racing Competition | `features/arena-battle.feature` (7) | `features/client/arena-ui.feature` (10) | Outcome calculation | Battle record save | Security: rate limit enforcement | `@TC-SRV-ARENA-001`, `@TC-CLI-ARENA-001` | ✅ Covered |
@@ -137,6 +138,8 @@ This section maps all 21 BDD feature files to their corresponding user stories a
 ### Overall Coverage
 
 Excluding the formally deferred US-TRADE-001 (P2, `FF_MARKETPLACE` off), **17 of 17 active user stories are fully covered** (100%). Including the deferred story, the uncapped ratio is **17 fully covered, 0 partial, 1 deferred** out of 18, yielding an overall percentage of **94%** against all requirements (the 6% gap is the deferred marketplace story; coverage automatically reaches 100% the moment `FF_MARKETPLACE` activates and the existing `trading-system.feature` enters the CI run).
+
+> **Note:** Coverage is assessed based on BDD feature file existence (Spec Written), not CI execution status. All step definitions currently return 'pending' — see D4-10.
 
 ### Gaps and Notes
 

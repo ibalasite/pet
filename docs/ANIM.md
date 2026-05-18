@@ -968,9 +968,9 @@ const ACCESSORIES = ['bow', 'hat', 'collar', 'none', 'wings'];
 const PATTERNS    = ['solid', 'striped', 'spotted', 'gradient'];
 
 function determineRarity(roll: number): 'common' | 'rare' | 'epic' | 'legendary' {
-  // RTP from CONSTANTS.md: legendary=2%, epic=8%, rare=30%, common=60%
-  if (roll < 0.02) return 'legendary';
-  if (roll < 0.10) return 'epic';
+  // RTP from CONSTANTS.md: legendary=3%, epic=12%, rare=25%, common=60%
+  if (roll < 0.03) return 'legendary';
+  if (roll < 0.15) return 'epic';
   if (roll < 0.40) return 'rare';
   return 'common';
 }

@@ -315,6 +315,23 @@ export class PetCanvasEngine {
 - Phaser is loaded via dynamic `import()` so it is excluded from the main bundle.
 - `ArenaScene.tsx` for battle animations follows the same pattern — a separate Phaser scene dynamically loaded when the arena route is entered.
 
+**Audio Integration (see AUDIO.md §5.2)**: `PetCanvasEngine` triggers the following 12 audio events via Phaser's sound system during gameplay interactions:
+
+| Event Key | SFX File | Trigger |
+|---|---|---|
+| `pet:tap` | pet-tap-pop.mp3 | Pet canvas click/tap |
+| `ui:button-click` | pet-tap-click.mp3 | UI button interactions |
+| `training:start` | training-start.mp3 | Training action button |
+| `training:complete` | training-success.mp3 | Stat increase confirmed |
+| `stat:display` | stat-ding.mp3 | "+X Speed" toast appears |
+| `arena:start` | arena-start.mp3 | Match animation begins |
+| `arena:victory` | arena-victory.mp3 | Victory result displayed |
+| `arena:defeat` | arena-defeat.mp3 | Defeat result displayed |
+| `leaderboard:rankup` | leaderboard-rankup.mp3 | Rank improved |
+| `claim:email-sent` | claim-success.mp3 | OTP email confirmed |
+| `rate-limit:breach` | rate-limit-warning.mp3 | Rate limit message shown |
+| `food-buff:applied` | food-buff.mp3 | Buff active badge shown |
+
 ### 2.4 State Management
 
 Four tiers of state, each with a distinct tool (EDD §8.2):

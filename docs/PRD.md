@@ -1241,10 +1241,10 @@ Every P0 feature has a kill switch. Feature flags are evaluated server-side (not
 | `stat_stamina` | pets | SMALLINT | NOT NULL, DEFAULT 10, CHECK (1-100) | Base stamina stat |
 | `level` | pets | SMALLINT | NOT NULL, DEFAULT 1, CHECK (1-100) | Derived from total training actions completed; formula: FLOOR(total_training_actions / 10) capped at 100; used in leaderboard composite score and trade price formula |
 | `owner_email_hash` | pets | VARCHAR(64) | NULLABLE | SHA-256 hash of owner email; NULL if unclaimed |
-| `access_token_hash` | pet_access_tokens | VARCHAR(64) | UNIQUE, NOT NULL | SHA-256 hash of the unique URL token |
-| `claim_code` | claim_tokens | VARCHAR(6) | NOT NULL | 6-digit numeric code |
-| `claim_code_expires_at` | claim_tokens | TIMESTAMPTZ | NOT NULL | 15 minutes from creation |
-| `claim_code_used` | claim_tokens | BOOLEAN | NOT NULL, DEFAULT FALSE | Prevents token reuse |
+| `owner_token_hash` | pets | VARCHAR(64) | UNIQUE, NOT NULL | SHA-256 hash of the pet access token; stored in pets table (not a separate table) |
+| `code_hash` | claim_codes | VARCHAR(64) | NOT NULL | SHA-256 hash of the 6-digit OTP code |
+| `expires_at` | claim_codes | TIMESTAMPTZ | NOT NULL | OTP expiry: created_at + 15 minutes |
+| `used_at` | claim_codes | TIMESTAMPTZ | NULLABLE | NULL until OTP is successfully validated; set on first successful use to prevent reuse |
 | `battle_outcome` | battle_records | ENUM | NOT NULL | 'WIN', 'LOSS', 'DRAW' |
 | `is_ai_match` | battle_records | BOOLEAN | NOT NULL, DEFAULT FALSE | True if opponent was AI |
 | `arena_mode` | battle_records | ENUM | NOT NULL | 'RACE', 'SUMO' |
