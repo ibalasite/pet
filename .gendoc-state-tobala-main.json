@@ -52,8 +52,8 @@
     "EDD",
     "LOCAL_DEPLOY",
     "CLIENT_IMPL",
-    "PROTOTYPE",
-    "DRYRUN"
+    "DRYRUN",
+    "PROTOTYPE"
   ],
   "last_completed": "DRYRUN",
   "pipeline_hash": "49f8456caade9b87",
@@ -282,6 +282,12 @@
       "terminated": true,
       "terminate_reason": "finding_total_zero",
       "quality_status": "passed"
+    },
+    "PROTOTYPE": {
+      "terminated": true,
+      "terminate_reason": "finding=0 (Round 7, exhaustive strategy)",
+      "rounds_done": 7,
+      "findings_fixed": 31
     }
   },
   "step_specifications": {
