@@ -1,9 +1,9 @@
 <!--
-  DOC-ID:  README-PIXEL-PET-ARENA-20260518
-  Version: v3.0
+  DOC-ID:  README-PIXEL-PET-ARENA-20260519
+  Version: v4.0
   Status:  DRAFT
   Author:  AI Generated (gendoc readme)
-  Date:    2026-05-18
+  Date:    2026-05-19
   Upstream docs:
     - BRD:          docs/BRD.md   (BRD-PIXEL-PET-ARENA-20260503 v1.2)
     - PRD:          docs/PRD.md   (Product Requirements)
@@ -17,6 +17,7 @@
     v1.0  2026-05-11  AI Generated (gendoc readme)  Initial draft
     v2.0  2026-05-18  AI Generated (gendoc readme)  Rebuilt — ADMIN_IMPL v2.0 RBAC update + Interactive Demos section
     v3.0  2026-05-18  AI Generated (gendoc readme)  Added Known Limitations, Changelog, gendoc declaration per gen rules §3
+    v4.0  2026-05-19  AI Generated (gendoc readme)  Post-align-fix rebuild: docker-compose worker service, FRONTEND.md audio events, ALIGN_REPORT link fix
 -->
 
 # pixel-pet-arena
@@ -396,7 +397,7 @@ pixel-pet-arena/
 │   ├── claim_flow.feature     # Email claim E2E scenarios
 │   ├── arena.feature          # Arena battle scenarios
 │   └── client/                # Client-side E2E feature files
-├── docker-compose.yml         # Local multi-service stack (API + PostgreSQL + Redis)
+├── docker-compose.yml         # Local multi-service stack (API + Worker + PostgreSQL + Redis + MailHog)
 ├── cucumber.js                # Cucumber BDD runner config
 └── .env.example               # Annotated environment variable template
 ```
@@ -524,7 +525,7 @@ The following limitations are current as of v1.0 (derived from ALIGN_REPORT.md a
 | **GDPR erasure window** — email is hashed within 24 h but full erasure pipeline completes in up to 7 days | Low — within GDPR Art. 17 requirement | GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 d; internal SLA GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24 h |
 | **SendGrid single-provider dependency** — primary email delivery via SendGrid v3; failover to Nodemailer SMTP after 3 consecutive failures | Medium — brief delivery delay if failover triggers | SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3; target CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98% |
 
-For open engineering issues see [ALIGN-REPORT.md](docs/ALIGN-REPORT.md).
+For open engineering issues see [ALIGN_REPORT.md](docs/ALIGN_REPORT.md).
 
 ---
 
