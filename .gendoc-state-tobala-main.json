@@ -19,7 +19,7 @@
     "CONTRACTS": true,
     "MOCK": true,
     "HTML": true,
-    "PROTOTYPE": true
+    "PROTOTYPE": false
   },
   "completed_steps": [
     "UML",
@@ -53,8 +53,7 @@
     "EDD",
     "LOCAL_DEPLOY",
     "CLIENT_IMPL",
-    "DRYRUN",
-    "PROTOTYPE"
+    "DRYRUN"
   ],
   "last_completed": "HTML",
   "pipeline_hash": "49f8456caade9b87",
@@ -283,12 +282,6 @@
       "terminated": true,
       "terminate_reason": "finding_total_zero",
       "quality_status": "passed"
-    },
-    "PROTOTYPE": {
-      "terminated": true,
-      "terminate_reason": "finding=0 (Round 7, exhaustive strategy)",
-      "rounds_done": 7,
-      "findings_fixed": 31
     },
     "MOCK": {
       "terminated": true,

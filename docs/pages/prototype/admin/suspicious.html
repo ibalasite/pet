@@ -58,24 +58,24 @@
     var tbody = document.getElementById('suspiciousBody');
 
     tbody.innerHTML = suspiciousList.map(function (p, idx) {
-      var danger = p.battle_count_60m >= 70 ? 'danger' : (p.battle_count_60m >= 60 ? 'warning' : '');
-      var countDisplay = '<strong style="color:' + (p.battle_count_60m >= 70 ? 'var(--admin-danger)' : p.battle_count_60m >= 60 ? 'var(--admin-warning)' : 'var(--admin-text)') + '">'
-        + escapeHtml(String(p.battle_count_60m)) + '</strong>';
+      var danger = p.battleCount60m >= 70 ? 'danger' : (p.battleCount60m >= 60 ? 'warning' : '');
+      var countDisplay = '<strong style="color:' + (p.battleCount60m >= 70 ? 'var(--admin-danger)' : p.battleCount60m >= 60 ? 'var(--admin-warning)' : 'var(--admin-text)') + '">'
+        + escapeHtml(String(p.battleCount60m)) + '</strong>';
 
       var actions = '';
       if (canMutate) {
         actions += '<button class="icon-btn danger" onclick="doBanPet(' + idx + ')">Ban Pet</button>';
-        actions += '<button class="icon-btn" onclick="viewBattles(\'' + escapeHtml(p.pet_id) + '\')">查看戰鬥</button>';
+        actions += '<button class="icon-btn" onclick="viewBattles(\'' + escapeHtml(p.petId) + '\')">查看戰鬥</button>';
         actions += '<button class="icon-btn" onclick="doDismiss(' + idx + ')">Dismiss</button>';
       }
 
       return '<tr>'
-        + '<td class="mono">' + escapeHtml(p.pet_id.slice(0, 8)) + '</td>'
-        + '<td><strong>' + escapeHtml(p.pet_name) + '</strong></td>'
+        + '<td class="mono">' + escapeHtml(p.petId.slice(0, 8)) + '</td>'
+        + '<td><strong>' + escapeHtml(p.petName) + '</strong></td>'
         + '<td>' + countDisplay + '</td>'
-        + '<td><span class="status-badge ' + (p.flagged_battles > 5 ? 'flagged' : 'warning') + '">' + escapeHtml(String(p.flagged_battles)) + '</span></td>'
-        + '<td class="mono">' + escapeHtml(p.owner_email) + '</td>'
-        + '<td>' + escapeHtml(p.detected_at) + '</td>'
+        + '<td><span class="status-badge ' + (p.flaggedBattles > 5 ? 'flagged' : 'warning') + '">' + escapeHtml(String(p.flaggedBattles)) + '</span></td>'
+        + '<td class="mono">' + escapeHtml(p.ownerEmailMasked) + '</td>'
+        + '<td>' + escapeHtml(p.detectedAt) + '</td>'
         + '<td><div class="action-cell">' + actions + '</div></td>'
         + '</tr>';
     }).join('');
@@ -88,7 +88,7 @@
   function doBanPet(idx) {
     var p = suspiciousList[idx];
     if (!p) { return; }
-    showToast('已 Ban 寵物：' + p.pet_name, 'success');
+    showToast('已 Ban 寵物：' + p.petName, 'success');
     suspiciousList.splice(idx, 1);
     renderTable();
   }
@@ -100,7 +100,7 @@
   function doDismiss(idx) {
     var p = suspiciousList[idx];
     if (!p) { return; }
-    showToast('已移出可疑佇列：' + p.pet_name, 'success');
+    showToast('已移出可疑佇列：' + p.petName, 'success');
     suspiciousList.splice(idx, 1);
     renderTable();
   }

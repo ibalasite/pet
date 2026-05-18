@@ -92,11 +92,11 @@
       var rankMedal = p.rank === 1 ? '🥇' : p.rank === 2 ? '🥈' : p.rank === 3 ? '🥉' : '#' + p.rank;
       return '<tr' + rowClass + '>'
         + '<td><strong>' + rankMedal + '</strong></td>'
-        + '<td><strong>' + escapeHtml(p.pet_name) + '</strong></td>'
+        + '<td><strong>' + escapeHtml(p.petName) + '</strong></td>'
         + '<td>' + escapeHtml(p.rarity) + '</td>'
         + '<td class="mono">' + escapeHtml(p.owner) + '</td>'
-        + '<td>' + escapeHtml(String(p.arena_score)) + '</td>'
-        + '<td>' + escapeHtml(String(p.win_rate)) + '%</td>'
+        + '<td>' + escapeHtml(String(p.arenaScore)) + '</td>'
+        + '<td>' + escapeHtml(String(Math.round(p.winRate * 100))) + '%</td>'
         + '<td>' + suspBadge + '</td>'
         + '<td><div class="action-cell">' + actions + '</div></td>'
         + '</tr>';
@@ -109,7 +109,7 @@
     removeTargetIdx = idx;
     var p = leaderboard[idx];
     var el = document.getElementById('removeTarget');
-    if (el) { el.textContent = '目標：#' + p.rank + ' ' + p.pet_name + '（Arena 分數：' + p.arena_score + '）'; }
+    if (el) { el.textContent = '目標：#' + p.rank + ' ' + p.petName + '（Arena 分數：' + p.arenaScore + '）'; }
     openModal('removeModal');
   }
 
@@ -125,7 +125,7 @@
     removeTargetIdx = null;
     closeModal('removeModal');
     renderTable();
-    showToast('已移除排名：' + p.pet_name, 'success');
+    showToast('已移除排名：' + p.petName, 'success');
   }
 
   document.addEventListener('DOMContentLoaded', init);

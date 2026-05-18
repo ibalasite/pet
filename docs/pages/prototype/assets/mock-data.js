@@ -1,152 +1,70 @@
 /* ============================================================
-   Mock data — pixel-pet-arena prototype
-   Spec: prototype-spec (updated 2026-05)
-   Exposed as window.MOCK
+   Mock Data — Pixel Pet Arena Prototype
    ============================================================ */
-(function () {
-  // Sprite emojis keyed to pet name
-  const SPRITE_BY_NAME = {
-    'Blazewing':    '🔥',
-    'Stonecrusher': '🪨',
-    'Tidecrawler':  '🌊',
-    'StormFang':    '⚡',
-    'MireWalker':   '🌿',
-    'SilverDart':   '🏹',
-    'CoralWing':    '🦋',
-    'GlacierTusk':  '❄️',
-    'EmberClaw':    '🔴',
-    'VoidSpinner':  '🕷️',
-    'AI Opponent':  '🤖',
-  };
 
-  const pets = [
-    {
-      id: 'a1b2c3d4', seed: 8472910563, rarity: 'LEGENDARY', pet_name: 'Blazewing',
-      stat_speed: 78, stat_strength: 65, stat_stamina: 82, level: 23,
-      claimed_at: '2026-04-10', color_palette: ['#FF4500', '#FFD700'], accessory: 'crown',
-      total_training_actions: 230, last_trained_at: '2026-05-17T10:20:00Z',
-      masked_email: 'to***@yahooinc.com', arena_score: 9841, wins: 82, losses: 18
-    },
-    {
-      id: 'd4e5f6a7', seed: 2910374856, rarity: 'EPIC', pet_name: 'Stonecrusher',
-      stat_speed: 45, stat_strength: 89, stat_stamina: 71, level: 18,
-      claimed_at: '2026-04-15', color_palette: ['#a29bfe', '#6c5ce7'], accessory: 'shield',
-      total_training_actions: 180, last_trained_at: '2026-05-16T14:30:00Z',
-      masked_email: 'ke***@example.com', arena_score: 8012, wins: 71, losses: 29
-    },
-    {
-      id: 'b2c3d4e5', seed: 3920174856, rarity: 'RARE', pet_name: 'Tidecrawler',
-      stat_speed: 62, stat_strength: 38, stat_stamina: 55, level: 9,
-      claimed_at: '2026-04-22', color_palette: ['#4ecdc4', '#00b894'], accessory: 'scarf',
-      total_training_actions: 90, last_trained_at: '2026-05-15T09:00:00Z',
-      masked_email: 'el***@example.com', arena_score: 5234, wins: 58, losses: 42
-    },
-    {
-      id: 'c3d4e5f6', seed: 5172938465, rarity: 'EPIC', pet_name: 'StormFang',
-      stat_speed: 74, stat_strength: 72, stat_stamina: 68, level: 20,
-      claimed_at: '2026-04-08', color_palette: ['#74b9ff', '#0984e3'], accessory: 'goggles',
-      total_training_actions: 200, last_trained_at: '2026-05-17T08:45:00Z',
-      masked_email: 'ja***@gmail.com', arena_score: 8923, wins: 76, losses: 24
-    },
-    {
-      id: 'e5f6a7b8', seed: 6284750193, rarity: 'RARE', pet_name: 'MireWalker',
-      stat_speed: 52, stat_strength: 44, stat_stamina: 66, level: 8,
-      claimed_at: '2026-04-28', color_palette: ['#55efc4', '#00b894'], accessory: 'none',
-      total_training_actions: 80, last_trained_at: '2026-05-14T12:00:00Z',
-      masked_email: 'jo***@example.com', arena_score: 4891, wins: 54, losses: 46
-    },
-    {
-      id: 'f6a7b8c9', seed: 7395861204, rarity: 'COMMON', pet_name: 'SilverDart',
-      stat_speed: 44, stat_strength: 30, stat_stamina: 38, level: 4,
-      claimed_at: '2026-05-01', color_palette: ['#b2bec3', '#dfe6e9'], accessory: 'none',
-      total_training_actions: 40, last_trained_at: '2026-05-10T16:30:00Z',
-      masked_email: 'le***@yahoo.com', arena_score: 3120, wins: 40, losses: 60
-    },
-    {
-      id: 'a7b8c9d0', seed: 8406972315, rarity: 'EPIC', pet_name: 'CoralWing',
-      stat_speed: 66, stat_strength: 58, stat_stamina: 60, level: 14,
-      claimed_at: '2026-04-12', color_palette: ['#fd79a8', '#e84393'], accessory: 'wings',
-      total_training_actions: 140, last_trained_at: '2026-05-16T19:10:00Z',
-      masked_email: 'mi***@example.com', arena_score: 7450, wins: 68, losses: 32
-    },
-    {
-      id: 'b8c9d0e1', seed: 9517083426, rarity: 'LEGENDARY', pet_name: 'GlacierTusk',
-      stat_speed: 55, stat_strength: 90, stat_stamina: 88, level: 25,
-      claimed_at: '2026-04-05', color_palette: ['#74b9ff', '#a29bfe'], accessory: 'armor',
-      total_training_actions: 250, last_trained_at: '2026-05-17T06:00:00Z',
-      masked_email: 'ya***@yahoo.com', arena_score: 9210, wins: 85, losses: 15
-    },
-    {
-      id: 'c9d0e1f2', seed: 1628194537, rarity: 'RARE', pet_name: 'EmberClaw',
-      stat_speed: 58, stat_strength: 55, stat_stamina: 48, level: 7,
-      claimed_at: '2026-04-25', color_palette: ['#e17055', '#d63031'], accessory: 'claws',
-      total_training_actions: 70, last_trained_at: '2026-05-13T22:00:00Z',
-      masked_email: 'an***@example.com', arena_score: 4200, wins: 45, losses: 55
-    },
-    {
-      id: 'd0e1f2a3', seed: 2739205648, rarity: 'EPIC', pet_name: 'VoidSpinner',
-      stat_speed: 70, stat_strength: 62, stat_stamina: 64, level: 16,
-      claimed_at: '2026-04-18', color_palette: ['#6c5ce7', '#a29bfe'], accessory: 'web',
-      total_training_actions: 160, last_trained_at: '2026-05-17T02:30:00Z',
-      masked_email: 'ko***@gmail.com', arena_score: 7890, wins: 72, losses: 28
-    },
-  ].map(p => Object.assign({}, p, { sprite: SPRITE_BY_NAME[p.pet_name] || '🐾' }));
+const MOCK_DATA = {
+  pets: [
+    { id: "d4f9a1b2-3c4e-5678-9abc-def012345678", seed: 8472918374655, rarity: "LEGENDARY", petName: "Azure Flame Dragon", statSpeed: 72, statStrength: 85, statStamina: 64, level: 15, lastTrainedAt: "2026-05-18T14:30:00Z", claimedAt: "2026-05-01T09:00:00Z", isBanned: false },
+    { id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789", seed: 1234567890123, rarity: "EPIC", petName: "Shadow Viper", statSpeed: 88, statStrength: 45, statStamina: 72, level: 22, lastTrainedAt: "2026-05-19T08:00:00Z", claimedAt: "2026-03-15T11:00:00Z", isBanned: false },
+    { id: "b2c3d4e5-f6a7-8901-bcde-f01234567890", seed: 9876543210987, rarity: "RARE", petName: "Coral Tide Turtle", statSpeed: 35, statStrength: 65, statStamina: 95, level: 8, lastTrainedAt: "2026-05-19T07:00:00Z", claimedAt: "2026-04-10T14:00:00Z", isBanned: false },
+    { id: "c3d4e5f6-a7b8-9012-cdef-123456789abc", seed: 5555555555555, rarity: "COMMON", petName: "Mossy Stone Golem", statSpeed: 20, statStrength: 90, statStamina: 100, level: 5, lastTrainedAt: "2026-05-10T12:00:00Z", claimedAt: "2026-05-05T09:00:00Z", isBanned: false },
+    { id: "e5f6a7b8-c9d0-1234-5678-90abcdef1234", seed: 1111111111111, rarity: "EPIC", petName: "Thunder Lynx", statSpeed: 95, statStrength: 78, statStamina: 52, level: 18, lastTrainedAt: "2026-05-18T22:00:00Z", claimedAt: "2026-02-20T16:00:00Z", isBanned: false }
+  ],
 
-  const battles = [
-    { id: 'm001', date: '2026-05-17', mode: 'RACE',  pet_a: 'Blazewing',    pet_b: 'Stonecrusher', winner: 'Blazewing',    duration_seconds: 12, completed_at: '2026-05-17T09:45:00Z', is_ai_opponent: false, stat_delta_a: 5, stat_delta_b: 0, outcome: 'WIN' },
-    { id: 'm002', date: '2026-05-16', mode: 'SUMO',  pet_a: 'StormFang',    pet_b: 'Blazewing',    winner: 'StormFang',    duration_seconds: 18, completed_at: '2026-05-16T18:22:00Z', is_ai_opponent: false, stat_delta_a: 3, stat_delta_b: 0, outcome: 'LOSS' },
-    { id: 'm003', date: '2026-05-16', mode: 'RACE',  pet_a: 'Blazewing',    pet_b: 'AI Opponent',  winner: 'Blazewing',    duration_seconds: 13, completed_at: '2026-05-16T14:08:00Z', is_ai_opponent: true,  stat_delta_a: 4, stat_delta_b: 0, outcome: 'WIN',  opponent_rarity: 'COMMON' },
-    { id: 'm004', date: '2026-05-15', mode: 'SUMO',  pet_a: 'Blazewing',    pet_b: 'GlacierTusk',  winner: 'GlacierTusk',  duration_seconds: 22, completed_at: '2026-05-15T20:15:00Z', is_ai_opponent: false, stat_delta_a: 0, stat_delta_b: 6, outcome: 'LOSS' },
-    { id: 'm005', date: '2026-05-15', mode: 'RACE',  pet_a: 'Blazewing',    pet_b: 'Tidecrawler',  winner: 'Blazewing',    duration_seconds: 10, completed_at: '2026-05-15T11:30:00Z', is_ai_opponent: false, stat_delta_a: 3, stat_delta_b: 0, outcome: 'WIN' },
-    { id: 'm006', date: '2026-05-14', mode: 'RACE',  pet_a: 'Blazewing',    pet_b: 'CoralWing',    winner: 'Blazewing',    duration_seconds: 15, completed_at: '2026-05-14T16:40:00Z', is_ai_opponent: false, stat_delta_a: 4, stat_delta_b: 0, outcome: 'WIN' },
-    { id: 'm007', date: '2026-05-14', mode: 'SUMO',  pet_a: 'VoidSpinner',  pet_b: 'Blazewing',    winner: 'Blazewing',    duration_seconds: 19, completed_at: '2026-05-14T09:10:00Z', is_ai_opponent: false, stat_delta_a: 2, stat_delta_b: 0, outcome: 'WIN' },
-    { id: 'm008', date: '2026-05-13', mode: 'RACE',  pet_a: 'Blazewing',    pet_b: 'StormFang',    winner: 'StormFang',    duration_seconds: 14, completed_at: '2026-05-13T21:05:00Z', is_ai_opponent: false, stat_delta_a: 0, stat_delta_b: 5, outcome: 'LOSS' },
-    { id: 'm009', date: '2026-05-13', mode: 'SUMO',  pet_a: 'Blazewing',    pet_b: 'AI Opponent',  winner: 'Blazewing',    duration_seconds: 11, completed_at: '2026-05-13T12:00:00Z', is_ai_opponent: true,  stat_delta_a: 3, stat_delta_b: 0, outcome: 'WIN',  opponent_rarity: 'COMMON' },
-    { id: 'm010', date: '2026-05-12', mode: 'RACE',  pet_a: 'Blazewing',    pet_b: 'MireWalker',   winner: 'Blazewing',    duration_seconds: 9,  completed_at: '2026-05-12T17:20:00Z', is_ai_opponent: false, stat_delta_a: 2, stat_delta_b: 0, outcome: 'WIN' },
-  ];
+  myPet: {
+    id: "d4f9a1b2-3c4e-5678-9abc-def012345678",
+    seed: 8472918374655,
+    rarity: "LEGENDARY",
+    petName: "Azure Flame Dragon",
+    statSpeed: 72,
+    statStrength: 85,
+    statStamina: 64,
+    level: 15,
+    totalTrainingActions: 150,
+    lastTrainedAt: "2026-05-18T14:30:00Z",
+    claimedAt: "2026-05-01T09:00:00Z",
+    isBanned: false,
+    actionsRemaining: 4,
+    nextResetIn: "14h 32m"
+  },
 
-  const foodInventory = [
-    { type: 'SPEED_BERRY',     id: 'speed_berry',      label: 'Speed Berry',      icon: '🫐', buff_stat: 'speed',    magnitude: 5,  duration_hours: 24, quantity: 2, owned: 2 },
-    { type: 'POWER_MUSHROOM',  id: 'power_mushroom',   label: 'Power Mushroom',   icon: '🍄', buff_stat: 'strength', magnitude: 3,  duration_hours: null, quantity: 1, owned: 1 },
-    { type: 'ENDURANCE_ROOT',  id: 'endurance_root',   label: 'Endurance Root',   icon: '🥕', buff_stat: 'stamina',  magnitude: 4,  duration_hours: 48, quantity: 3, owned: 3 },
-    { type: 'RAINBOW_TRUFFLE', id: 'rainbow_truffle',  label: 'Rainbow Truffle',  icon: '✨', buff_stat: 'all',      magnitude: 2,  duration_hours: 12, quantity: 1, owned: 1 },
-  ];
+  foodInventory: [
+    { id: "f1", foodType: "SPEED_BERRY",      buffStat: "SPEED",    magnitude: 5, isPermanent: false, durationSeconds: 86400 },
+    { id: "f2", foodType: "STRENGTH_CRYSTAL", buffStat: "STRENGTH", magnitude: 8, isPermanent: false, durationSeconds: 86400 },
+    { id: "f3", foodType: "STAMINA_MUSHROOM", buffStat: "STAMINA",  magnitude: 3, isPermanent: true,  durationSeconds: 0 }
+  ],
 
-  const leaderboard = [...pets]
-    .sort((a, b) => b.arena_score - a.arena_score)
-    .map((p, idx) => {
-      const total = (p.wins + p.losses) || 1;
-      return Object.assign({}, p, {
-        rank: idx + 1,
-        win_rate: ((p.wins / total) * 100).toFixed(1),
-      });
-    });
+  leaderboard: [
+    { rank: 1,  petId: "a1b2c3d4-e5f6-7890-abcd-ef0123456789", petName: "Shadow Viper",        rarity: "EPIC",      arenaScore: 4921, winRate: 0.84, battlesPlayed: 103, level: 22 },
+    { rank: 2,  petId: "d4f9a1b2-3c4e-5678-9abc-def012345678", petName: "Azure Flame Dragon",  rarity: "LEGENDARY", arenaScore: 4872, winRate: 0.78, battlesPlayed: 89,  level: 15 },
+    { rank: 3,  petId: "e5f6a7b8-c9d0-1234-5678-90abcdef1234", petName: "Thunder Lynx",        rarity: "EPIC",      arenaScore: 4650, winRate: 0.77, battlesPlayed: 120, level: 18 },
+    { rank: 4,  petId: "f6a7b8c9-d0e1-2345-6789-0abcdef12345", petName: "Crimson Phoenix",     rarity: "LEGENDARY", arenaScore: 4380, winRate: 0.75, battlesPlayed: 72,  level: 25 },
+    { rank: 5,  petId: "a7b8c9d0-e1f2-3456-789a-bcdef0123456", petName: "Frost Wyvern",        rarity: "RARE",      arenaScore: 4200, winRate: 0.71, battlesPlayed: 140, level: 30 },
+    { rank: 6,  petId: "b8c9d0e1-f2a3-4567-89ab-cdef01234567", petName: "Golden Koi Dragon",   rarity: "LEGENDARY", arenaScore: 4010, winRate: 0.69, battlesPlayed: 98,  level: 12 },
+    { rank: 7,  petId: "c9d0e1f2-a3b4-5678-9abc-def012345678", petName: "Magma Tortoise",      rarity: "EPIC",      arenaScore: 3880, winRate: 0.68, battlesPlayed: 85,  level: 20 },
+    { rank: 8,  petId: "d0e1f2a3-b4c5-6789-abcd-ef0123456789", petName: "Storm Hawk",          rarity: "RARE",      arenaScore: 3720, winRate: 0.65, battlesPlayed: 112, level: 16 },
+    { rank: 9,  petId: "e1f2a3b4-c5d6-789a-bcde-f01234567890", petName: "Neon Jellyfish",      rarity: "EPIC",      arenaScore: 3600, winRate: 0.63, battlesPlayed: 95,  level: 11 },
+    { rank: 10, petId: "f2a3b4c5-d6e7-89ab-cdef-012345678901", petName: "Iron Badger",         rarity: "COMMON",    arenaScore: 3450, winRate: 0.60, battlesPlayed: 200, level: 35 },
+    { rank: 11, petId: "b2c3d4e5-f6a7-8901-bcde-f01234567890", petName: "Coral Tide Turtle",   rarity: "RARE",      arenaScore: 3200, winRate: 0.58, battlesPlayed: 78,  level: 8  },
+    { rank: 12, petId: "a3b4c5d6-e7f8-9012-abcd-ef0123456789", petName: "Ember Fox",           rarity: "RARE",      arenaScore: 3100, winRate: 0.56, battlesPlayed: 90,  level: 14 },
+    { rank: 13, petId: "b4c5d6e7-f8a9-0123-bcde-f01234567890", petName: "Void Mantis",         rarity: "EPIC",      arenaScore: 2980, winRate: 0.54, battlesPlayed: 66,  level: 9  },
+    { rank: 14, petId: "c3d4e5f6-a7b8-9012-cdef-123456789abc", petName: "Mossy Stone Golem",   rarity: "COMMON",    arenaScore: 2700, winRate: 0.50, battlesPlayed: 88,  level: 5  },
+    { rank: 15, petId: "c5d6e7f8-a9b0-1234-cdef-012345678901", petName: "Pixel Bunny",         rarity: "COMMON",    arenaScore: 2500, winRate: 0.48, battlesPlayed: 102, level: 7  }
+  ],
 
-  const gdpr_requests = [
-    { id: 'gdpr-001', request_type: 'ERASURE', status: 'PENDING',   sla_deadline: '2026-05-25T08:00:00Z', submitted_at: '2026-05-18T08:00:00Z' },
-    { id: 'gdpr-002', request_type: 'ACCESS',  status: 'COMPLETED', sla_deadline: '2026-05-15T10:00:00Z', submitted_at: '2026-05-08T10:00:00Z', completed_at: '2026-05-09T11:30:00Z' },
-    { id: 'gdpr-003', request_type: 'OBJECT',  status: 'PROCESSING', sla_deadline: '2026-05-22T14:00:00Z', submitted_at: '2026-05-15T14:00:00Z' },
-  ];
+  battleHistory: [
+    { id: "e5f6a7b8-c9d0-1234-5678-90abcdef1234", petAId: "d4f9a1b2-3c4e-5678-9abc-def012345678", petBId: "a1b2c3d4-e5f6-7890-abcd-ef0123456789", mode: "RACE",  winnerPetId: "d4f9a1b2-3c4e-5678-9abc-def012345678", isAiOpponent: false, createdAt: "2026-05-18T15:00:00Z", opponentName: "Shadow Viper",       outcome: "WIN",  statDelta: { speed: 2 } },
+    { id: "f6a7b8c9-d0e1-2345-6789-0abcdef12345", petAId: "d4f9a1b2-3c4e-5678-9abc-def012345678", petBId: "e5f6a7b8-c9d0-1234-5678-90abcdef1234", mode: "SUMO",  winnerPetId: "e5f6a7b8-c9d0-1234-5678-90abcdef1234", isAiOpponent: false, createdAt: "2026-05-18T16:00:00Z", opponentName: "Thunder Lynx",       outcome: "LOSS", statDelta: {} },
+    { id: "a7b8c9d0-e1f2-3456-789a-bcdef0123456", petAId: "d4f9a1b2-3c4e-5678-9abc-def012345678", petBId: "b8c9d0e1-f2a3-4567-89ab-cdef01234567", mode: "RACE",  winnerPetId: "d4f9a1b2-3c4e-5678-9abc-def012345678", isAiOpponent: true,  createdAt: "2026-05-17T10:00:00Z", opponentName: "AI: Golden Koi Dragon", outcome: "WIN", statDelta: { speed: 1 } },
+    { id: "b8c9d0e1-f2a3-4567-89ab-cdef01234567", petAId: "d4f9a1b2-3c4e-5678-9abc-def012345678", petBId: "c9d0e1f2-a3b4-5678-9abc-def012345678", mode: "RACE",  winnerPetId: "d4f9a1b2-3c4e-5678-9abc-def012345678", isAiOpponent: false, createdAt: "2026-05-17T14:00:00Z", opponentName: "Magma Tortoise",     outcome: "WIN",  statDelta: {} },
+    { id: "c9d0e1f2-a3b4-5678-9abc-def012345678", petAId: "d4f9a1b2-3c4e-5678-9abc-def012345678", petBId: "f2a3b4c5-d6e7-89ab-cdef-012345678901", mode: "SUMO",  winnerPetId: "d4f9a1b2-3c4e-5678-9abc-def012345678", isAiOpponent: false, createdAt: "2026-05-16T09:00:00Z", opponentName: "Iron Badger",        outcome: "WIN",  statDelta: { strength: 3 } }
+  ],
 
-  const currentPet = pets[0]; // Blazewing (LEGENDARY)
+  listings: [
+    { id: "list-001", petId: "f2a3b4c5-d6e7-89ab-cdef-012345678901", petName: "Iron Badger",  rarity: "COMMON", ownerDescription: "High stamina veteran — 200 battles, rank #10!", minPrice: 0, createdAt: "2026-05-18T10:00:00Z" },
+    { id: "list-002", petId: "a3b4c5d6-e7f8-9012-abcd-ef0123456789", petName: "Ember Fox",    rarity: "RARE",   ownerDescription: "Speed specialist, level 14. Perfect for RACE mode!", minPrice: 0, createdAt: "2026-05-19T08:00:00Z" },
+    { id: "list-003", petId: "b4c5d6e7-f8a9-0123-bcde-f01234567890", petName: "Void Mantis",  rarity: "EPIC",   ownerDescription: "Rare find — EPIC tier with balanced stats.", minPrice: 0, createdAt: "2026-05-19T09:30:00Z" }
+  ],
 
-  window.MOCK = {
-    pets,
-    battles,
-    food: foodInventory,
-    foodInventory,
-    leaderboard,
-    gdpr_requests,
-    currentPet,
-    guestPet: { id: 'guest001', seed: 5678, rarity: 'COMMON', pet_name: '??', unclaimed: true, sprite: '❓' },
-    metrics: {
-      claimed_today: 14738,
-      dau: 800,
-      marketplace_unlock_dau: 1000,
-      training_streak: 7,
-      total_pets: 48291,
-    },
-    // Demo OTP — NOT a real secret. This is a static UI prototype with no backend.
-    otp_code: '847291', // nosec - mock-only demo value, no security boundary
-  };
-})();
+  socialProof: { claimedToday: 247, totalPets: 12847 }
+};

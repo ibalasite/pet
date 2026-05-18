@@ -1,57 +1,98 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Pixel Pet Arena — Interactive Prototype with 13 player-facing screens: Landing, Claim (Email→OTP→URL), My Pet, Training, Arena, Leaderboard, Battle Records, Battle Result, Marketplace (FF gate), Token Recovery, GDPR.">
-  <title>Pixel Pet Arena — Interactive Prototype</title>
+  <meta name="description" content="Pixel Pet Arena — Interactive Prototype. 14 player-facing screens: Landing, Claim (Email→OTP→URL Reveal), My Pet, Training, Arena Lobby, Battle, Leaderboard, Battle Result, Records, Marketplace, Token Recovery, GDPR.">
+  <title>Pixel Pet Arena — Prototype</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="assets/prototype.css">
 </head>
 <body>
-  <nav id="proto-nav" aria-label="Prototype navigation">
-    <a href="../index.html" class="nav-link nav-link--docs" title="返回文件站">← 文件站</a>
-    <button onclick="router.back()" class="nav-btn" title="返回上一頁">← 返回</button>
-    <span id="breadcrumb">Loading...</span>
-    <span class="nav-spacer"></span>
-    <button onclick="showFlowMap()" class="nav-btn" title="查看所有畫面">📍 流程地圖</button>
-    <a href="api-explorer/index.html" class="nav-link" title="API Explorer">🔌 API Explorer</a>
-    <a href="admin/admin-login.html" class="nav-link nav-link--admin" title="管理員後台">🛡️ Admin Portal</a>
-  </nav>
 
-  <main id="proto-content" role="main">
-    <!-- Screen content rendered here by router -->
-  </main>
+<!-- ============================================================
+     FX Canvas (fixed overlay, pointer-events: none)
+     ============================================================ -->
+<canvas id="fx-canvas" aria-hidden="true"></canvas>
 
-  <!-- Flow map modal (overlay listing all 13 screens) -->
-  <div id="flow-map-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="flow-map-title">
-    <div class="modal-card">
-      <h2 id="flow-map-title">📍 使用者流程地圖</h2>
-      <p class="text-secondary">點擊任一畫面跳轉。</p>
-      <div id="screen-grid"></div>
-      <div class="modal-actions">
-        <button onclick="hideFlowMap()" class="btn btn-secondary">關閉</button>
-      </div>
+<!-- ============================================================
+     NavBar
+     ============================================================ -->
+<nav class="proto-nav" role="navigation" aria-label="Prototype navigation">
+  <a href="../index.html" class="proto-nav-btn" title="Return to docs site" style="text-decoration:none">
+    ← Docs
+  </a>
+  <span class="proto-nav-sep">|</span>
+  <span class="proto-nav-brand">⚡ PPA</span>
+  <span class="proto-nav-sep">›</span>
+  <span class="proto-breadcrumb" id="proto-breadcrumb">Loading...</span>
+  <div class="proto-nav-actions">
+    <button class="proto-nav-btn" onclick="router.back()" title="Go back" aria-label="Go back">← Back</button>
+    <button class="proto-nav-btn" onclick="showFlowMap()" title="Screen flow map" aria-label="Open flow map">🗺️ Map</button>
+    <button class="proto-nav-btn" id="audio-toggle-btn" onclick="audioEngine.unlock();this.textContent='🔊 ON';this.style.color='var(--color-success)'" title="Enable audio" aria-label="Enable audio">🔇 Audio</button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     Main content — router mounts here
+     ============================================================ -->
+<main id="proto-content" role="main" aria-live="polite">
+  <div style="display:flex;align-items:center;justify-content:center;height:80vh">
+    <div class="font-display text-center" style="font-size:10px;color:var(--color-text-secondary)">
+      LOADING PROTOTYPE...<span class="animate-blink">▌</span>
     </div>
   </div>
+</main>
 
-  <!-- iOS audio unlock button (visible until first click) -->
-  <button id="audio-unlock-btn"
-          onclick="audioEngine.unlock(); this.style.display='none';"
-          aria-label="Enable audio">🔊 啟用音效</button>
+<!-- ============================================================
+     Audio Unlock Button (iOS / mobile)
+     ============================================================ -->
+<button id="audio-unlock-btn"
+        onclick="audioEngine.unlock();this.style.display='none'"
+        aria-label="Enable audio">
+  🔇 TAP TO ENABLE AUDIO
+</button>
 
-  <!-- Particle FX overlay -->
-  <canvas id="fx-canvas" aria-hidden="true"></canvas>
+<!-- ============================================================
+     Scripts — order matters
+     ============================================================ -->
+<script src="assets/mock-data.js"></script>
+<script src="assets/audio-engine.js"></script>
+<script src="assets/fx-engine.js"></script>
+<script src="assets/prototype.js"></script>
 
-  <!-- Toast container -->
-  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+<script>
+  // Boot sequence
+  document.addEventListener('DOMContentLoaded', function () {
+    // Init particle engine
+    fxEngine.init();
 
-  <!-- Scripts: order matters -->
-  <script src="assets/mock-data.js"></script>
-  <script src="assets/audio-engine.js"></script>
-  <script src="assets/fx-engine.js"></script>
-  <script src="assets/prototype.js"></script>
+    // Init router (reads hash or defaults to screen-01)
+    router.init();
+
+    // Handle hash changes (browser back/forward)
+    window.addEventListener('hashchange', function () {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && router.routes[hash] && hash !== router.current) {
+        router.navigate(hash, { replace: true });
+      }
+    });
+
+    // Keyboard shortcut: M = flow map, Escape = close modals
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) modal.remove();
+      }
+      if (e.key === 'm' && !e.target.matches('input,textarea,select')) {
+        showFlowMap();
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

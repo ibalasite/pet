@@ -91,66 +91,66 @@ const ADMIN_MOCK = {
 
   /* ── Pets (20 records) ─────────────────────────────────── */
   pets: [
-    { id:'pet-0001', name:'FlameWing',   rarity:'Legendary', level:45, owner_email:'alice@pixel-pet.io',  status:'active',  ban_reason:null,             created_at:'2026-01-10 08:00' },
-    { id:'pet-0002', name:'ShadowFang',  rarity:'Epic',      level:38, owner_email:'bob@pixel-pet.io',    status:'active',  ban_reason:null,             created_at:'2026-01-15 10:30' },
-    { id:'pet-0003', name:'VoidCrawler', rarity:'Epic',      level:41, owner_email:'carol@pixel-pet.io',  status:'banned',  ban_reason:'bot detected',   created_at:'2026-02-02 09:15' },
-    { id:'pet-0004', name:'TerraShell',  rarity:'Rare',      level:27, owner_email:'dave@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-02-14 14:20' },
-    { id:'pet-0005', name:'StormWing',   rarity:'Legendary', level:50, owner_email:'eve@pixel-pet.io',    status:'active',  ban_reason:null,             created_at:'2026-02-20 11:45' },
-    { id:'pet-0006', name:'GlacierBear', rarity:'Rare',      level:22, owner_email:'frank@pixel-pet.io',  status:'active',  ban_reason:null,             created_at:'2026-03-01 09:30' },
-    { id:'pet-0007', name:'NeonProwler', rarity:'Common',    level:15, owner_email:'grace@pixel-pet.io',  status:'active',  ban_reason:null,             created_at:'2026-03-10 16:00' },
-    { id:'pet-0008', name:'LavaToad',    rarity:'Uncommon',  level:18, owner_email:'henry@pixel-pet.io',  status:'banned',  ban_reason:'tos violation',  created_at:'2026-03-15 13:00' },
-    { id:'pet-0009', name:'CrystalDrake',rarity:'Epic',      level:35, owner_email:'iris@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-03-22 10:10' },
-    { id:'pet-0010', name:'ThunderBoar', rarity:'Rare',      level:30, owner_email:'jake@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-04-01 08:45' },
-    { id:'pet-0011', name:'MistRaven',   rarity:'Uncommon',  level:19, owner_email:'kate@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-04-08 12:30' },
-    { id:'pet-0012', name:'IronGolem',   rarity:'Legendary', level:48, owner_email:'leo@pixel-pet.io',    status:'active',  ban_reason:null,             created_at:'2026-04-12 15:20' },
-    { id:'pet-0013', name:'CoralSerpent',rarity:'Rare',      level:25, owner_email:'mia@pixel-pet.io',    status:'active',  ban_reason:null,             created_at:'2026-04-18 09:00' },
-    { id:'pet-0014', name:'DustWalker',  rarity:'Common',    level:12, owner_email:'noah@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-04-25 11:15' },
-    { id:'pet-0015', name:'EmberFox',    rarity:'Uncommon',  level:21, owner_email:'olivia@pixel-pet.io', status:'active',  ban_reason:null,             created_at:'2026-05-02 14:00' },
-    { id:'pet-0016', name:'TideStalker', rarity:'Epic',      level:40, owner_email:'paul@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-05-05 10:45' },
-    { id:'pet-0017', name:'BoulderBrute',rarity:'Rare',      level:28, owner_email:'quinn@pixel-pet.io',  status:'banned',  ban_reason:'suspicious win', created_at:'2026-05-08 08:30' },
-    { id:'pet-0018', name:'VenomSprite', rarity:'Uncommon',  level:16, owner_email:'rose@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-05-10 17:00' },
-    { id:'pet-0019', name:'ArcticWolf',  rarity:'Epic',      level:37, owner_email:'sam@pixel-pet.io',    status:'active',  ban_reason:null,             created_at:'2026-05-13 09:20' },
-    { id:'pet-0020', name:'SunSphinx',   rarity:'Legendary', level:46, owner_email:'tina@pixel-pet.io',   status:'active',  ban_reason:null,             created_at:'2026-05-15 11:30' }
+    { id:'pet-0001', petName:'FlameWing',   rarity:'Legendary', level:45, ownerEmailMasked:'alice@pixel-pet.io',  isBanned:false, banReason:null,             createdAt:'2026-01-10 08:00' },
+    { id:'pet-0002', petName:'ShadowFang',  rarity:'Epic',      level:38, ownerEmailMasked:'bob@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-01-15 10:30' },
+    { id:'pet-0003', petName:'VoidCrawler', rarity:'Epic',      level:41, ownerEmailMasked:'carol@pixel-pet.io',  isBanned:true,  banReason:'bot detected',   createdAt:'2026-02-02 09:15' },
+    { id:'pet-0004', petName:'TerraShell',  rarity:'Rare',      level:27, ownerEmailMasked:'dave@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-02-14 14:20' },
+    { id:'pet-0005', petName:'StormWing',   rarity:'Legendary', level:50, ownerEmailMasked:'eve@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-02-20 11:45' },
+    { id:'pet-0006', petName:'GlacierBear', rarity:'Rare',      level:22, ownerEmailMasked:'frank@pixel-pet.io',  isBanned:false, banReason:null,             createdAt:'2026-03-01 09:30' },
+    { id:'pet-0007', petName:'NeonProwler', rarity:'Common',    level:15, ownerEmailMasked:'grace@pixel-pet.io',  isBanned:false, banReason:null,             createdAt:'2026-03-10 16:00' },
+    { id:'pet-0008', petName:'LavaToad',    rarity:'Uncommon',  level:18, ownerEmailMasked:'henry@pixel-pet.io',  isBanned:true,  banReason:'tos violation',  createdAt:'2026-03-15 13:00' },
+    { id:'pet-0009', petName:'CrystalDrake',rarity:'Epic',      level:35, ownerEmailMasked:'iris@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-03-22 10:10' },
+    { id:'pet-0010', petName:'ThunderBoar', rarity:'Rare',      level:30, ownerEmailMasked:'jake@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-04-01 08:45' },
+    { id:'pet-0011', petName:'MistRaven',   rarity:'Uncommon',  level:19, ownerEmailMasked:'kate@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-04-08 12:30' },
+    { id:'pet-0012', petName:'IronGolem',   rarity:'Legendary', level:48, ownerEmailMasked:'leo@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-04-12 15:20' },
+    { id:'pet-0013', petName:'CoralSerpent',rarity:'Rare',      level:25, ownerEmailMasked:'mia@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-04-18 09:00' },
+    { id:'pet-0014', petName:'DustWalker',  rarity:'Common',    level:12, ownerEmailMasked:'noah@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-04-25 11:15' },
+    { id:'pet-0015', petName:'EmberFox',    rarity:'Uncommon',  level:21, ownerEmailMasked:'olivia@pixel-pet.io', isBanned:false, banReason:null,             createdAt:'2026-05-02 14:00' },
+    { id:'pet-0016', petName:'TideStalker', rarity:'Epic',      level:40, ownerEmailMasked:'paul@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-05-05 10:45' },
+    { id:'pet-0017', petName:'BoulderBrute',rarity:'Rare',      level:28, ownerEmailMasked:'quinn@pixel-pet.io',  isBanned:true,  banReason:'suspicious win', createdAt:'2026-05-08 08:30' },
+    { id:'pet-0018', petName:'VenomSprite', rarity:'Uncommon',  level:16, ownerEmailMasked:'rose@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-05-10 17:00' },
+    { id:'pet-0019', petName:'ArcticWolf',  rarity:'Epic',      level:37, ownerEmailMasked:'sam@pixel-pet.io',    isBanned:false, banReason:null,             createdAt:'2026-05-13 09:20' },
+    { id:'pet-0020', petName:'SunSphinx',   rarity:'Legendary', level:46, ownerEmailMasked:'tina@pixel-pet.io',   isBanned:false, banReason:null,             createdAt:'2026-05-15 11:30' }
   ],
 
   /* ── Battles (15 records) ───────────────────────────────── */
   battles: [
-    { id:'match-10921', pet_a:'FlameWing',    pet_b:'ShadowFang',    winner:'FlameWing',    mode:'RACE',    flagged:true,  flag_reason:'suspicious win rate',  created_at:'2026-05-18 08:44' },
-    { id:'match-10920', pet_a:'StormWing',    pet_b:'TerraShell',    winner:'StormWing',    mode:'BATTLE',  flagged:false, flag_reason:null,                   created_at:'2026-05-18 08:30' },
-    { id:'match-10919', pet_a:'CrystalDrake', pet_b:'ThunderBoar',   winner:'CrystalDrake', mode:'RACE',    flagged:false, flag_reason:null,                   created_at:'2026-05-18 08:15' },
-    { id:'match-10918', pet_a:'IronGolem',    pet_b:'MistRaven',     winner:'IronGolem',    mode:'BATTLE',  flagged:false, flag_reason:null,                   created_at:'2026-05-18 07:50' },
-    { id:'match-10917', pet_a:'TideStalker',  pet_b:'VoidCrawler',   winner:'TideStalker',  mode:'RACE',    flagged:true,  flag_reason:'>50 battles/60min',    created_at:'2026-05-18 07:30' },
-    { id:'match-10916', pet_a:'EmberFox',     pet_b:'DustWalker',    winner:'EmberFox',     mode:'BATTLE',  flagged:false, flag_reason:null,                   created_at:'2026-05-17 22:10' },
-    { id:'match-10915', pet_a:'ArcticWolf',   pet_b:'VenomSprite',   winner:'ArcticWolf',   mode:'RACE',    flagged:false, flag_reason:null,                   created_at:'2026-05-17 21:45' },
-    { id:'match-10914', pet_a:'SunSphinx',    pet_b:'GlacierBear',   winner:'SunSphinx',    mode:'BATTLE',  flagged:false, flag_reason:null,                   created_at:'2026-05-17 20:00' },
-    { id:'match-10913', pet_a:'CoralSerpent', pet_b:'BoulderBrute',  winner:'CoralSerpent', mode:'RACE',    flagged:false, flag_reason:null,                   created_at:'2026-05-17 18:30' },
-    { id:'match-10912', pet_a:'NeonProwler',  pet_b:'LavaToad',      winner:'NeonProwler',  mode:'BATTLE',  flagged:false, flag_reason:null,                   created_at:'2026-05-17 17:00' },
-    { id:'match-10911', pet_a:'FlameWing',    pet_b:'IronGolem',     winner:'IronGolem',    mode:'RACE',    flagged:false, flag_reason:null,                   created_at:'2026-05-17 16:00' },
-    { id:'match-10910', pet_a:'StormWing',    pet_b:'ArcticWolf',    winner:'StormWing',    mode:'BATTLE',  flagged:true,  flag_reason:'anomalous win rate',   created_at:'2026-05-17 15:20' },
-    { id:'match-10909', pet_a:'CrystalDrake', pet_b:'TideStalker',   winner:'TideStalker',  mode:'RACE',    flagged:false, flag_reason:null,                   created_at:'2026-05-17 14:40' },
-    { id:'match-10908', pet_a:'TerraShell',   pet_b:'EmberFox',      winner:'TerraShell',   mode:'BATTLE',  flagged:false, flag_reason:null,                   created_at:'2026-05-17 13:10' },
-    { id:'match-10907', pet_a:'SunSphinx',    pet_b:'MistRaven',     winner:'SunSphinx',    mode:'RACE',    flagged:false, flag_reason:null,                   created_at:'2026-05-17 12:00' }
+    { id:'match-10921', petAId:'FlameWing',    petBId:'ShadowFang',    winnerId:'FlameWing',    mode:'RACE',    isFlagged:true,  flagReason:'suspicious win rate',  createdAt:'2026-05-18 08:44' },
+    { id:'match-10920', petAId:'StormWing',    petBId:'TerraShell',    winnerId:'StormWing',    mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-18 08:30' },
+    { id:'match-10919', petAId:'CrystalDrake', petBId:'ThunderBoar',   winnerId:'CrystalDrake', mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-18 08:15' },
+    { id:'match-10918', petAId:'IronGolem',    petBId:'MistRaven',     winnerId:'IronGolem',    mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-18 07:50' },
+    { id:'match-10917', petAId:'TideStalker',  petBId:'VoidCrawler',   winnerId:'TideStalker',  mode:'RACE',    isFlagged:true,  flagReason:'>50 battles/60min',    createdAt:'2026-05-18 07:30' },
+    { id:'match-10916', petAId:'EmberFox',     petBId:'DustWalker',    winnerId:'EmberFox',     mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 22:10' },
+    { id:'match-10915', petAId:'ArcticWolf',   petBId:'VenomSprite',   winnerId:'ArcticWolf',   mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 21:45' },
+    { id:'match-10914', petAId:'SunSphinx',    petBId:'GlacierBear',   winnerId:'SunSphinx',    mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 20:00' },
+    { id:'match-10913', petAId:'CoralSerpent', petBId:'BoulderBrute',  winnerId:'CoralSerpent', mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 18:30' },
+    { id:'match-10912', petAId:'NeonProwler',  petBId:'LavaToad',      winnerId:'NeonProwler',  mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 17:00' },
+    { id:'match-10911', petAId:'FlameWing',    petBId:'IronGolem',     winnerId:'IronGolem',    mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 16:00' },
+    { id:'match-10910', petAId:'StormWing',    petBId:'ArcticWolf',    winnerId:'StormWing',    mode:'BATTLE',  isFlagged:true,  flagReason:'anomalous win rate',   createdAt:'2026-05-17 15:20' },
+    { id:'match-10909', petAId:'CrystalDrake', petBId:'TideStalker',   winnerId:'TideStalker',  mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 14:40' },
+    { id:'match-10908', petAId:'TerraShell',   petBId:'EmberFox',      winnerId:'TerraShell',   mode:'BATTLE',  isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 13:10' },
+    { id:'match-10907', petAId:'SunSphinx',    petBId:'MistRaven',     winnerId:'SunSphinx',    mode:'RACE',    isFlagged:false, flagReason:null,                   createdAt:'2026-05-17 12:00' }
   ],
 
   /* ── Leaderboard (10 records) ───────────────────────────── */
   leaderboard: [
-    { rank:1,  pet_name:'StormWing',    rarity:'Legendary', owner:'player_eve',   arena_score:9820, win_rate:91, suspicious:false },
-    { rank:2,  pet_name:'IronGolem',    rarity:'Legendary', owner:'player_leo',   arena_score:9741, win_rate:88, suspicious:false },
-    { rank:3,  pet_name:'SunSphinx',    rarity:'Legendary', owner:'player_tina',  arena_score:9655, win_rate:86, suspicious:false },
-    { rank:4,  pet_name:'FlameWing',    rarity:'Legendary', owner:'player_alice', arena_score:9480, win_rate:84, suspicious:false },
-    { rank:5,  pet_name:'TideStalker',  rarity:'Epic',      owner:'player_paul',  arena_score:9120, win_rate:82, suspicious:true  },
-    { rank:6,  pet_name:'CrystalDrake', rarity:'Epic',      owner:'player_iris',  arena_score:8990, win_rate:79, suspicious:false },
-    { rank:7,  pet_name:'ArcticWolf',   rarity:'Epic',      owner:'player_sam',   arena_score:8820, win_rate:77, suspicious:false },
-    { rank:8,  pet_name:'VoidCrawler',  rarity:'Epic',      owner:'player_carol', arena_score:8650, win_rate:75, suspicious:true  },
-    { rank:9,  pet_name:'ThunderBoar',  rarity:'Rare',      owner:'player_jake',  arena_score:8410, win_rate:72, suspicious:false },
-    { rank:10, pet_name:'ShadowFang',   rarity:'Epic',      owner:'player_bob',   arena_score:8200, win_rate:70, suspicious:false }
+    { rank:1,  petName:'StormWing',    rarity:'Legendary', owner:'player_eve',   arenaScore:9820, winRate:0.91, suspicious:false },
+    { rank:2,  petName:'IronGolem',    rarity:'Legendary', owner:'player_leo',   arenaScore:9741, winRate:0.88, suspicious:false },
+    { rank:3,  petName:'SunSphinx',    rarity:'Legendary', owner:'player_tina',  arenaScore:9655, winRate:0.86, suspicious:false },
+    { rank:4,  petName:'FlameWing',    rarity:'Legendary', owner:'player_alice', arenaScore:9480, winRate:0.84, suspicious:false },
+    { rank:5,  petName:'TideStalker',  rarity:'Epic',      owner:'player_paul',  arenaScore:9120, winRate:0.82, suspicious:true  },
+    { rank:6,  petName:'CrystalDrake', rarity:'Epic',      owner:'player_iris',  arenaScore:8990, winRate:0.79, suspicious:false },
+    { rank:7,  petName:'ArcticWolf',   rarity:'Epic',      owner:'player_sam',   arenaScore:8820, winRate:0.77, suspicious:false },
+    { rank:8,  petName:'VoidCrawler',  rarity:'Epic',      owner:'player_carol', arenaScore:8650, winRate:0.75, suspicious:true  },
+    { rank:9,  petName:'ThunderBoar',  rarity:'Rare',      owner:'player_jake',  arenaScore:8410, winRate:0.72, suspicious:false },
+    { rank:10, petName:'ShadowFang',   rarity:'Epic',      owner:'player_bob',   arenaScore:8200, winRate:0.70, suspicious:false }
   ],
 
   /* ── Suspicious Pets (3 records) ────────────────────────── */
   suspiciousPets: [
-    { pet_id:'pet-0003', pet_name:'VoidCrawler', battle_count_60m:78, flagged_battles:8, owner_email:'carol@pixel-pet.io', detected_at:'2026-05-18 07:30' },
-    { pet_id:'pet-0005', pet_name:'StormWing',   battle_count_60m:65, flagged_battles:6, owner_email:'eve@pixel-pet.io',   detected_at:'2026-05-17 22:15' },
-    { pet_id:'pet-0016', pet_name:'TideStalker', battle_count_60m:62, flagged_battles:5, owner_email:'paul@pixel-pet.io',  detected_at:'2026-05-17 20:00' }
+    { petId:'pet-0003', petName:'VoidCrawler', battleCount60m:78, flaggedBattles:8, ownerEmailMasked:'carol@pixel-pet.io', detectedAt:'2026-05-18 07:30' },
+    { petId:'pet-0005', petName:'StormWing',   battleCount60m:65, flaggedBattles:6, ownerEmailMasked:'eve@pixel-pet.io',   detectedAt:'2026-05-17 22:15' },
+    { petId:'pet-0016', petName:'TideStalker', battleCount60m:62, flaggedBattles:5, ownerEmailMasked:'paul@pixel-pet.io',  detectedAt:'2026-05-17 20:00' }
   ],
 
   /* ── Email Logs (10 records) ─────────────────────────────── */
@@ -191,13 +191,13 @@ const ADMIN_MOCK = {
 
   /* ── Dashboard Stats ────────────────────────────────────── */
   stats: {
-    total_users:        8,
-    active_users:       6,
-    locked_users:       1,
-    total_pets:         1247,
-    battles_today:      189,
-    suspicious_flags:   3,
-    email_success_rate: 92,
+    totalUsers:        8,
+    activeUsers:       6,
+    lockedUsers:       1,
+    totalPets:         1247,
+    battlesToday:      189,
+    suspiciousFlags:   3,
+    emailSuccessRate:  92,
     email_bounce_rate:  2,
     emails_today:       47
   },

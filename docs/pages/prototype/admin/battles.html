@@ -80,10 +80,10 @@
     var flagged = document.getElementById('flaggedFilter').value;
     return battles.filter(function (b) {
       var matchQ = !q || b.id.toLowerCase().indexOf(q) !== -1
-        || b.pet_a.toLowerCase().indexOf(q) !== -1
-        || b.pet_b.toLowerCase().indexOf(q) !== -1;
+        || b.petAId.toLowerCase().indexOf(q) !== -1
+        || b.petBId.toLowerCase().indexOf(q) !== -1;
       var matchM = !mode || b.mode === mode;
-      var matchF = flagged === '' ? true : (flagged === 'true' ? b.flagged : !b.flagged);
+      var matchF = flagged === '' ? true : (flagged === 'true' ? b.isFlagged : !b.isFlagged);
       return matchQ && matchM && matchF;
     });
   }
@@ -97,12 +97,12 @@
     var tbody = document.getElementById('battlesBody');
 
     tbody.innerHTML = page.map(function (b) {
-      var flaggedBadge = b.flagged
+      var flaggedBadge = b.isFlagged
         ? '<span class="status-badge flagged">⚑ Flagged</span>'
         : '<span class="status-badge inactive">—</span>';
       var actions = '';
       if (canMutate) {
-        if (!b.flagged) {
+        if (!b.isFlagged) {
           actions += '<button class="icon-btn danger" onclick="doFlag(\'' + escapeHtml(b.id) + '\')">Flag</button>';
         } else {
           actions += '<button class="icon-btn success" onclick="doUnflag(\'' + escapeHtml(b.id) + '\')">Unflag</button>';
@@ -111,12 +111,12 @@
       actions += '<button class="icon-btn" onclick="openDetail(\'' + escapeHtml(b.id) + '\')">詳情</button>';
       return '<tr>'
         + '<td class="mono">' + escapeHtml(b.id.slice(0, 8)) + '</td>'
-        + '<td>' + escapeHtml(b.pet_a) + '</td>'
-        + '<td>' + escapeHtml(b.pet_b) + '</td>'
-        + '<td><strong>' + escapeHtml(b.winner) + '</strong></td>'
+        + '<td>' + escapeHtml(b.petAId) + '</td>'
+        + '<td>' + escapeHtml(b.petBId) + '</td>'
+        + '<td><strong>' + escapeHtml(b.winnerId) + '</strong></td>'
         + '<td><span class="status-badge ' + (b.mode === 'RACE' ? 'warning' : 'inactive') + '">' + escapeHtml(b.mode) + '</span></td>'
         + '<td>' + flaggedBadge + '</td>'
-        + '<td>' + escapeHtml(b.created_at) + '</td>'
+        + '<td>' + escapeHtml(b.createdAt) + '</td>'
         + '<td><div class="action-cell">' + actions + '</div></td>'
         + '</tr>';
     }).join('');
@@ -141,8 +141,8 @@
   function doFlag(id) {
     var b = battles.find(function (x) { return x.id === id; });
     if (!b) { return; }
-    b.flagged = true;
-    b.flag_reason = '手動旗標';
+    b.isFlagged = true;
+    b.flagReason = '手動旗標';
     renderTable();
     showToast('已旗標戰鬥：' + id.slice(0, 8), 'warning');
   }
@@ -150,8 +150,8 @@
   function doUnflag(id) {
     var b = battles.find(function (x) { return x.id === id; });
     if (!b) { return; }
-    b.flagged = false;
-    b.flag_reason = null;
+    b.isFlagged = false;
+    b.flagReason = null;
     renderTable();
     showToast('已移除旗標：' + id.slice(0, 8), 'success');
   }
@@ -163,13 +163,13 @@
     if (!content) { return; }
     content.innerHTML = '<table class="data-table" style="margin-top:8px;"><tbody>'
       + row('Match ID', '<span class="mono">' + escapeHtml(b.id) + '</span>')
-      + row('Pet A', escapeHtml(b.pet_a))
-      + row('Pet B', escapeHtml(b.pet_b))
-      + row('勝者', '<strong>' + escapeHtml(b.winner) + '</strong>')
+      + row('Pet A', escapeHtml(b.petAId))
+      + row('Pet B', escapeHtml(b.petBId))
+      + row('勝者', '<strong>' + escapeHtml(b.winnerId) + '</strong>')
       + row('模式', escapeHtml(b.mode))
-      + row('旗標', b.flagged ? '⚑ Flagged' : '—')
-      + row('旗標原因', escapeHtml(b.flag_reason || '—'))
-      + row('建立時間', escapeHtml(b.created_at))
+      + row('旗標', b.isFlagged ? '⚑ Flagged' : '—')
+      + row('旗標原因', escapeHtml(b.flagReason || '—'))
+      + row('建立時間', escapeHtml(b.createdAt))
       + '</tbody></table>';
     openModal('detailModal');
   }

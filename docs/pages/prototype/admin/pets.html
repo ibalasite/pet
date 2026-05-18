@@ -107,9 +107,9 @@
     var rarity = document.getElementById('rarityFilter').value;
     var status = document.getElementById('statusFilter').value;
     return pets.filter(function (p) {
-      var matchQ = !q || p.id.toLowerCase().indexOf(q) !== -1 || p.name.toLowerCase().indexOf(q) !== -1;
+      var matchQ = !q || p.id.toLowerCase().indexOf(q) !== -1 || p.petName.toLowerCase().indexOf(q) !== -1;
       var matchR = !rarity || p.rarity === rarity;
-      var matchS = !status || p.status === status;
+      var matchS = !status || (status === 'banned' ? p.isBanned : (status === 'active' ? !p.isBanned : true));
       return matchQ && matchR && matchS;
     });
   }
@@ -123,11 +123,11 @@
     var tbody = document.getElementById('petsBody');
 
     tbody.innerHTML = page.map(function (p) {
-      var statusClass = p.status === 'active' ? 'active' : 'banned';
-      var statusLabel = p.status === 'active' ? 'Active' : 'Banned';
+      var statusClass = p.isBanned ? 'banned' : 'active';
+      var statusLabel = p.isBanned ? 'Banned' : 'Active';
       var actions = '';
       if (canMutate) {
-        if (p.status === 'active') {
+        if (!p.isBanned) {
           actions += '<button class="icon-btn danger" onclick="openBanModal(\'' + escapeHtml(p.id) + '\')">Ban</button>';
         } else {
           actions += '<button class="icon-btn success" onclick="doUnban(\'' + escapeHtml(p.id) + '\')">Unban</button>';
@@ -136,12 +136,12 @@
       actions += '<button class="icon-btn" onclick="openDetail(\'' + escapeHtml(p.id) + '\')">詳情</button>';
       return '<tr>'
         + '<td class="mono">' + escapeHtml(p.id.slice(0, 8)) + '</td>'
-        + '<td><strong>' + escapeHtml(p.name) + '</strong></td>'
+        + '<td><strong>' + escapeHtml(p.petName) + '</strong></td>'
         + '<td>' + escapeHtml(p.rarity) + '</td>'
         + '<td>' + escapeHtml(String(p.level)) + '</td>'
-        + '<td class="mono">' + escapeHtml(p.owner_email) + '</td>'
+        + '<td class="mono">' + escapeHtml(p.ownerEmailMasked) + '</td>'
         + '<td><span class="status-badge ' + statusClass + '">' + statusLabel + '</span></td>'
-        + '<td>' + escapeHtml(p.created_at) + '</td>'
+        + '<td>' + escapeHtml(p.createdAt) + '</td>'
         + '<td><div class="action-cell">' + actions + '</div></td>'
         + '</tr>';
     }).join('');
@@ -171,7 +171,7 @@
     var input = document.getElementById('banReasonInput');
     var counter = document.getElementById('banReasonCount');
     var errEl = document.getElementById('banReasonError');
-    if (info) { info.textContent = '目標：' + p.name + '（' + p.id.slice(0, 8) + '）'; }
+    if (info) { info.textContent = '目標：' + p.petName + '（' + p.id.slice(0, 8) + '）'; }
     if (input) { input.value = ''; }
     if (counter) { counter.textContent = '0'; }
     if (errEl) { errEl.style.display = 'none'; }
@@ -189,20 +189,20 @@
     if (errEl) { errEl.style.display = 'none'; }
     var p = pets.find(function (x) { return x.id === banTargetId; });
     if (!p) { return; }
-    p.status = 'banned';
-    p.ban_reason = reason;
+    p.isBanned = true;
+    p.banReason = reason;
     closeModal('banModal');
     renderTable();
-    showToast('已 Ban 寵物：' + p.name, 'success');
+    showToast('已 Ban 寵物：' + p.petName, 'success');
   }
 
   function doUnban(id) {
     var p = pets.find(function (x) { return x.id === id; });
     if (!p) { return; }
-    p.status = 'active';
-    p.ban_reason = null;
+    p.isBanned = false;
+    p.banReason = null;
     renderTable();
-    showToast('已 Unban 寵物：' + p.name, 'success');
+    showToast('已 Unban 寵物：' + p.petName, 'success');
   }
 
   function openDetail(id) {
@@ -212,13 +212,13 @@
     if (!content) { return; }
     content.innerHTML = '<table class="data-table" style="margin-top:8px;"><tbody>'
       + row('Pet ID', '<span class="mono">' + escapeHtml(p.id) + '</span>')
-      + row('名稱', escapeHtml(p.name))
+      + row('名稱', escapeHtml(p.petName))
       + row('稀有度', escapeHtml(p.rarity))
       + row('等級', escapeHtml(String(p.level)))
-      + row('擁有者 Email', '<span class="mono">' + escapeHtml(p.owner_email) + '</span>')
-      + row('狀態', escapeHtml(p.status))
-      + row('Ban 原因', escapeHtml(p.ban_reason || '—'))
-      + row('建立時間', escapeHtml(p.created_at))
+      + row('擁有者 Email', '<span class="mono">' + escapeHtml(p.ownerEmailMasked) + '</span>')
+      + row('狀態', p.isBanned ? 'Banned' : 'Active')
+      + row('Ban 原因', escapeHtml(p.banReason || '—'))
+      + row('建立時間', escapeHtml(p.createdAt))
       + '</tbody></table>';
     openModal('detailModal');
   }

@@ -164,10 +164,10 @@
   if (!s) { console.error('ADMIN_MOCK.stats missing'); return; }
 
   const statsData = [
-    { icon: '👥', label: 'Admin 使用者', value: s.total_users,                       meta: s.active_users + ' 活躍 / ' + s.locked_users + ' 鎖定' },
-    { icon: '🐾', label: '總寵物數',     value: Number(s.total_pets).toLocaleString(), meta: '累積寵物檔案' },
-    { icon: '⚔️', label: '今日戰鬥',     value: s.battles_today,                      meta: '戰鬥場次 (今日)' },
-    { icon: '⚠️', label: '可疑標記',     value: s.suspicious_flags,                   meta: '等待審查' }
+    { icon: '👥', label: 'Admin 使用者', value: s.totalUsers,                       meta: s.activeUsers + ' 活躍 / ' + s.lockedUsers + ' 鎖定' },
+    { icon: '🐾', label: '總寵物數',     value: Number(s.totalPets).toLocaleString(), meta: '累積寵物檔案' },
+    { icon: '⚔️', label: '今日戰鬥',     value: s.battlesToday,                      meta: '戰鬥場次 (今日)' },
+    { icon: '⚠️', label: '可疑標記',     value: s.suspiciousFlags,                   meta: '等待審查' }
   ];
 
   const grid = document.getElementById('statsGrid');
