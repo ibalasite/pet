@@ -513,7 +513,7 @@
 <tr><td><strong>Arena</strong></td><td><code>arena_matches</code></td><td><code>matchmaking:queue:<em></code>, <code>rl:arena:</em></code></td><td><code>ArenaMatchStarted</code>, <code>ArenaMatchCompleted</code></td></tr>
 <tr><td><strong>Leaderboard</strong></td><td><code>leaderboard_snapshots</code></td><td><code>leaderboard:global</code> (Redis sorted set 為主)</td><td><code>LeaderboardUpdated</code>, <code>LeaderboardEntryRemoved</code></td></tr>
 <tr><td><strong>Marketplace</strong> <em>(P2 / FF_MARKETPLACE)</em></td><td><code>marketplace_listings</code>, <code>marketplace_transactions</code></td><td>—</td><td><code>ListingCreated</code>, <code>ListingCancelled</code>, <code>TradeCompleted</code></td></tr>
-<tr><td><strong>Admin</strong></td><td><code>admin_users</code>, <code>audit_logs</code></td><td><code>session:admin:<em></code>, <code>rl:admin:</em></code>, <code>rl:admin_login:<em></code>, <code>token:blacklist:</em></code>, <code>config:runtime</code></td><td><code>AdminUserCreated</code>, <code>AdminActionLogged</code>, <code>SuspiciousPetFlagged</code></td></tr>
+<tr><td><strong>Admin</strong></td><td><code>admin_users</code>, <code>audit_logs</code></td><td><code>session:admin:<em></code>, <code>rl:admin:</em></code>, <code>rl:admin_login:<em></code>, <code>token:blacklist:</em></code>, <code>config:runtime</code>, <code>config:economy</code></td><td><code>AdminUserCreated</code>, <code>AdminActionLogged</code>, <code>SuspiciousPetFlagged</code></td></tr>
 </table>
 <h4 id="112-external-cross-bc-reference-auditfk--id-only-轉換">1.1.2 External Cross-BC Reference Audit（FK ↔ ID-only 轉換）</h4>
 <p><strong>判斷一個 column 是否屬於 cross-BC FK</strong>：若 column 所在 table 的 owning BC 與被引用 table 的 owning BC 不同，則該 FK 跨 BC，<strong>必須移除 DB-level FK 約束，改為 application-layer ID-only reference</strong>。所有跨 BC FK 在表 SQL 中保留 column 但移除 <code>FOREIGN KEY</code> 約束（或保留為「documented exception」並由 ADR 記錄）。</p>
@@ -2084,6 +2084,7 @@ ZCARD leaderboard:global                                                    # �
 <table>
 <tr><th>Key</th><th>TTL</th><th>Value</th><th>Notes</th></tr>
 <tr><td><code>config:runtime</code></td><td>300 s</td><td>JSON blob</td><td>Runtime 配置（arena rate limit、rarity weights 等）；refresh 每 5 min (<code>config_cache_refresh_time_minutes = 5</code>)。Mutations via <code>PUT /admin/api/config/{runtime,economy}</code> 在此 window 內生效。</td></tr>
+<tr><td><code>config:economy</code></td><td>300 s</td><td>JSON blob</td><td>Economy 配置（marketplace fee rate、food buff multiplier、credit rewards 等）；refresh 每 5 min。Mutations via <code>PUT /admin/api/config/economy</code> invalidate this key.</td></tr>
 </table>
 <p><strong>Redis CLI 命令範例</strong>：</p>
 <pre><code class="language-redis"># 寫入 runtime config（admin 修改後 + 載入時 cache）

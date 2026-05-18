@@ -782,7 +782,7 @@
 <tr><td><strong>Arena</strong></td><td><code>arena_matches</code></td><td><code>matchmaking:queue:<em></code>, <code>rl:arena:</em></code></td><td><code>ArenaMatchStarted</code>, <code>ArenaMatchCompleted</code></td></tr>
 <tr><td><strong>Leaderboard</strong></td><td><code>leaderboard_snapshots</code></td><td><code>leaderboard:global</code> (Redis sorted set 為主)</td><td><code>LeaderboardUpdated</code>, <code>LeaderboardEntryRemoved</code></td></tr>
 <tr><td><strong>Marketplace</strong> <em>(P2 / FF_MARKETPLACE)</em></td><td><code>marketplace_listings</code>, <code>marketplace_transactions</code></td><td>—</td><td><code>ListingCreated</code>, <code>ListingCancelled</code>, <code>TradeCompleted</code></td></tr>
-<tr><td><strong>Admin</strong></td><td><code>admin_users</code>, <code>audit_logs</code></td><td><code>session:admin:<em></code>, <code>rl:admin:</em></code>, <code>rl:admin_login:*</code></td><td><code>AdminUserCreated</code>, <code>AdminActionLogged</code>, <code>SuspiciousPetFlagged</code></td></tr>
+<tr><td><strong>Admin</strong></td><td><code>admin_users</code>, <code>audit_logs</code></td><td><code>session:admin:<em></code>, <code>rl:admin:</em></code>, <code>rl:admin_login:*</code>, <code>config:runtime</code>, <code>config:economy</code></td><td><code>AdminUserCreated</code>, <code>AdminActionLogged</code>, <code>SuspiciousPetFlagged</code></td></tr>
 </table>
 <h4 id="context-map">Context Map</h4>
 <div class="diagram-container"><pre class="mermaid">graph TB
@@ -809,24 +809,23 @@
 <h4 id="35-environment-matrix">§3.5 Environment Matrix</h4>
 <table>
 <tr><th>Environment</th><th>Purpose</th><th>DB</th><th>Redis</th><th>Domain</th><th>Auto-deploy</th></tr>
-<tr><td><code>development</code></td><td>Local dev</td><td>PostgreSQL Docker (port 54322)</td><td>Redis Docker (port 6379)</td><td><code>localhost</code></td><td>n/a</td></tr>
+<tr><td><code>development</code></td><td>Local dev</td><td>PostgreSQL K8s StatefulSet (port-forward :5432)</td><td>Redis K8s StatefulSet (port-forward :6379)</td><td><code>localhost</code></td><td>n/a</td></tr>
 <tr><td><code>staging</code></td><td>Pre-prod 驗證</td><td>Supabase staging</td><td>Upstash staging</td><td><code>staging.pixel-pet-arena.com</code></td><td>Yes (push to main)</td></tr>
 <tr><td><code>production</code></td><td>Live 服務</td><td>Supabase production (HA)</td><td>Upstash production (HA)</td><td><code>pixel-pet-arena.com</code></td><td>Manual approval</td></tr>
 </table>
 <h4 id="35b-service-port-matrix">§3.5b Service Port Matrix</h4>
+<blockquote><p><strong>注意</strong>：Local 環境為 K8s（k3s/Rancher Desktop），透過 <code>kubectl port-forward</code> 存取；Supabase local CLI 不再使用。詳見 LOCAL_DEPLOY §12。</p></blockquote>
 <table>
-<tr><th>Service</th><th>Local (host)</th><th>Local container</th><th>Staging</th><th>Production</th><th>k8s service port</th><th>真相來源</th></tr>
+<tr><th>Service</th><th>Local (kubectl port-forward)</th><th>K8s container port</th><th>Staging</th><th>Production</th><th>k8s service port</th><th>真相來源</th></tr>
 <tr><td>Player frontend (Vite dev)</td><td>5173</td><td>—</td><td>n/a (Vercel CDN)</td><td>n/a (Vercel CDN)</td><td>n/a</td><td>LOCAL_DEPLOY §3</td></tr>
 <tr><td>Admin frontend (Vite dev)</td><td>5174</td><td>—</td><td>n/a (Vercel CDN)</td><td>n/a (Vercel CDN)</td><td>n/a</td><td>LOCAL_DEPLOY §3</td></tr>
-<tr><td>API server (Fastify)</td><td>3000</td><td>3000</td><td>8080</td><td>8080</td><td>8080</td><td>EDD §10.1</td></tr>
-<tr><td>Worker (Fastify side process)</td><td>3001</td><td>3001</td><td>8081</td><td>8081</td><td>8081</td><td>EDD §10.1</td></tr>
-<tr><td>PostgreSQL (Supabase local)</td><td>54322</td><td>5432</td><td>n/a (managed)</td><td>n/a (managed)</td><td>5432</td><td>LOCAL_DEPLOY §6</td></tr>
-<tr><td>Supabase API gateway</td><td>54321</td><td>8000</td><td>managed</td><td>managed</td><td>n/a</td><td>LOCAL_DEPLOY §6</td></tr>
-<tr><td>Supabase Studio</td><td>54323</td><td>3000</td><td>managed</td><td>managed</td><td>n/a</td><td>LOCAL_DEPLOY §6</td></tr>
-<tr><td>Inbucket (local email)</td><td>54324</td><td>9000</td><td>n/a</td><td>n/a</td><td>n/a</td><td>LOCAL_DEPLOY §6</td></tr>
+<tr><td>API server (Fastify)</td><td>8080</td><td>8080</td><td>8080</td><td>8080</td><td>8080</td><td>LOCAL_DEPLOY §12</td></tr>
+<tr><td>Worker (Fastify side process)</td><td>8081</td><td>8081</td><td>8081</td><td>8081</td><td>8081</td><td>EDD §10.1</td></tr>
+<tr><td>PostgreSQL (K8s StatefulSet)</td><td>5432</td><td>5432</td><td>n/a (managed)</td><td>n/a (managed)</td><td>5432</td><td>LOCAL_DEPLOY §12</td></tr>
+<tr><td>Mailpit (local email)</td><td>8025</td><td>8025</td><td>n/a</td><td>n/a</td><td>n/a</td><td>LOCAL_DEPLOY §12</td></tr>
 <tr><td>Redis</td><td>6379</td><td>6379</td><td>n/a (Upstash REST)</td><td>n/a (Upstash REST)</td><td>6379</td><td>LOCAL_DEPLOY §3</td></tr>
 </table>
-<p>任何 port 變動必須同步更新 <code>docs/LOCAL_DEPLOY.md</code>、<code>docker-compose.yml</code>、helm chart <code>values.yaml</code>、CI/CD env 檔。</p>
+<p>任何 port 變動必須同步更新 <code>docs/LOCAL_DEPLOY.md</code>、helm chart <code>values.yaml</code>、CI/CD env 檔。</p>
 <h4 id="35c-k8s-資源規格hpa--pdb--resources">§3.5c K8s 資源規格（HPA / PDB / Resources）</h4>
 <p>每個工作負載的水平自動擴縮（HPA）、Pod Disruption Budget（PDB）與 CPU/Memory request/limit 規格如下；Local / Staging 為對應壓縮值，Production 為承諾規模。</p>
 <table>

@@ -737,7 +737,7 @@ npm run dev</code></pre>
 │   ├── claim_flow.feature     # Email claim E2E scenarios
 │   ├── arena.feature          # Arena battle scenarios
 │   └── client/                # Client-side E2E feature files
-├── docker-compose.yml         # Local multi-service stack (API + PostgreSQL + Redis)
+├── docker-compose.yml         # Local multi-service stack (API + Worker + PostgreSQL + Redis + MailHog)
 ├── cucumber.js                # Cucumber BDD runner config
 └── .env.example               # Annotated environment variable template</code></pre>
 <hr>
@@ -822,7 +822,7 @@ docs(readme): rebuild for ADMIN_IMPL v2.0 RBAC update</code></pre>
 <tr><td><strong>GDPR erasure window</strong> — email is hashed within 24 h but full erasure pipeline completes in up to 7 days</td><td>Low — within GDPR Art. 17 requirement</td><td>GDPR_EMAIL_DELETION_WINDOW_DAYS = 7 d; internal SLA GDPR_EMAIL_HASHING_INTERNAL_SLA_HOURS = 24 h</td></tr>
 <tr><td><strong>SendGrid single-provider dependency</strong> — primary email delivery via SendGrid v3; failover to Nodemailer SMTP after 3 consecutive failures</td><td>Medium — brief delivery delay if failover triggers</td><td>SENDGRID_FAILOVER_CONSECUTIVE_FAILURES = 3; target CLAIM_EMAIL_DELIVERY_RATE_TARGET_PERCENT = 98%</td></tr>
 </table>
-<p>For open engineering issues see <a href="align-report.html" target="_blank" rel="noopener">ALIGN-REPORT.md</a>.</p>
+<p>For open engineering issues see <a href="align_report.html" target="_blank" rel="noopener">ALIGN_REPORT.md</a>.</p>
 <hr>
 <h2 id="changelog">Changelog</h2>
 <p>Releases follow <a href="https://semver.org/" target="_blank" rel="noopener">Semantic Versioning</a>. See <a href="https://github.com/pixel-pet-arena/pixel-pet-arena/releases" target="_blank" rel="noopener">GitHub Releases</a> for the full history.</p>
