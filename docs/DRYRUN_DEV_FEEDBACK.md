@@ -16,8 +16,10 @@ generated: 2026-05-15
 | Round | CRITICAL | HIGH | MEDIUM | LOW | Total Findings |
 |-------|----------|------|--------|-----|----------------|
 | r1    | 3        | 0    | 0      | 0   | 3              |
+| r2    | 1        | 0    | 1      | 0   | 2              |
 
-Fixed in r1: R-05 (entity_count), R-07 (rest_endpoint_count), R-13 (this file created).
+Fixed in r1: R-05 (entity_count documented), R-07 (rest_endpoint_count documented), R-13 (this file created).
+Fixed in r2: MECH-001 (removed bare {{ from MANIFEST.md), R-07 consensus (API-rules min_endpoint_count updated to 34, MANIFEST §2.1 updated to 34).
 
 ---
 
@@ -46,15 +48,18 @@ Fixed in r1: R-05 (entity_count), R-07 (rest_endpoint_count), R-13 (this file cr
 | 欄位 | 內容 |
 |------|------|
 | **Track A (core) 數值** | 28（`.gendoc-rules/API-rules.json` `min_endpoint_count`；`docs/MANIFEST.md §2.1` `rest_endpoint_count`） |
-| **Track B (AI) 數值** | 33（EDD.md §5 API tables + inline refs，Python deduplicated，排除 POST /claim 流程圖縮寫） |
-| **共識值** | 33（Track B > Track A → 從嚴取高，per §0.1） |
+| **Track B (AI) 數值** | 34（EDD.md §5 API tables + inline refs，Python deduplicated，排除 POST /claim 流程圖縮寫；r2 重新驗證為 34） |
+| **共識值** | 34（Track B > Track A → 從嚴取高，per §0.1；r2 修正 r1 估算的 33 → 34） |
 | **不一致原因** | dryrun_core.py 使用的正規表達式未捕捉帶 `:param` 路徑的端點（如 `GET /api/v1/pets/:petId`）和 `| METHOD | /path |` 格式的 markdown table rows；導致低估 |
 | **AI 舉證清單（Track B 33 個端點）** | §5.1 Claim: (1) POST /api/v1/claim, (2) POST /api/v1/claim/verify, (3) POST /api/v1/claim/recover；§5.2 Pet: (4) GET /api/v1/pets/random, (5) GET /api/v1/pets/:petId, (6) POST /api/v1/pets/:petId/train, (7) POST /api/v1/pets/:petId/feed；§5.3 Arena: (8) POST /api/v1/arena/enter, (9) GET /api/v1/arena/match/:matchId, (10) GET /api/v1/arena/history/:petId；§5.4 Leaderboard: (11) GET /api/v1/leaderboard, (12) GET /api/v1/leaderboard/rank/:petId；§5.6 GDPR: (13) POST /api/v1/gdpr/request, (14) GET /api/v1/gdpr/request/status；§5.7 Marketplace: (15) GET /api/v1/marketplace/listings, (16) POST /api/v1/marketplace/listings, (17) DELETE /api/v1/marketplace/listings/:id, (18) POST /api/v1/marketplace/listings/:id/buy；Admin RBAC table (EDD.md §9.6): (19) GET /admin/api/dashboard, (20) GET /admin/api/pets, (21) POST /admin/api/pets/:id/ban, (22) GET /admin/api/leaderboard, (23) POST /admin/api/battles/:id/flag, (24) PUT /admin/api/config/runtime, (25) PUT /admin/api/config/economy, (26) POST /admin/api/gdpr/delete, (27) POST /admin/api/roles, (28) DELETE /admin/api/roles/:id, (29) GET /admin/api/audit；inline refs: (30) POST /admin/api/auth/login (EDD §5.5 text), (31) GET /health (EDD §10.7), (32) GET /health/live (EDD §2.6 probe), (33) GET /health/ready (EDD §2.6 probe)；EXCLUDED: POST /claim (line 1278, flow diagram abbreviation for POST /api/v1/claim，已計入） |
 | **建議修正** | 檔案：`dryrun_core.py`；函式：rest_endpoint_count 計算段落；現行 pattern：`grep -cE '(GET\|POST\|...) /path'`；建議：使用雙重掃描 — (1) markdown table pattern `\|\s*(METHOD)\s*\|\s*(/path)\s*\|`，(2) inline pattern `(METHOD)\s+(/path)` — 合併後 set 去重，排除流程圖縮寫（路徑不含 `/api/v1/` 或 `/admin/api/` 前綴的短路徑）；理由：全面捕捉 §5 API section 的所有端點定義 |
 
 **Cascade impact**:
-- `API-rules.json` `min_endpoint_count`: 28 → **33** ✅ fixed
-- `docs/MANIFEST.md §2.1` `rest_endpoint_count` display: 28 → **33** ✅ fixed
+- `API-rules.json` `min_endpoint_count`: 28 → **34** ✅ fixed (r2)
+- `docs/MANIFEST.md §2.1` `rest_endpoint_count` display: 28 → **34** ✅ fixed (r2)
+- `docs/MANIFEST.md §4` API row: max(28,5) → **max(34,5)** ✅ fixed (r2)
+- `docs/MANIFEST.md §4` CONTRACTS row: max(28,5) → **max(34,5)** ✅ fixed (r2)
+- `docs/MANIFEST.md §4` MOCK row: max(28,5) → **max(34,5)** ✅ fixed (r2)
 
 ---
 

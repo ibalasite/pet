@@ -33,7 +33,7 @@ description: Pipeline Execution Manifest — 流水線執行摘要，記錄本�
 2. **哪些步驟要跑？**（§2.2）— 依 pipeline.json 條件篩選，明確標示 Active / Skipped
 3. **每步驗收標準是什麼？**（§4）— gate-check 將逐步核對，不符即失敗
 
-> 修改本文件等同於修改驗收標準。若需調整某步驟的量化門檻，應在 DRYRUN 步驟重新執行，而非直接手動編輯本文件的 `{{PLACEHOLDER}}` 外的值。
+> 修改本文件等同於修改驗收標準。若需調整某步驟的量化門檻，應在 DRYRUN 步驟重新執行，而非直接手動編輯本文件的量化錨點數值。
 
 ---
 
@@ -46,7 +46,7 @@ description: Pipeline Execution Manifest — 流水線執行摘要，記錄本�
 | 參數 | 值 | 說明 |
 |------|----|------|
 | `entity_count` | 42 | EDD.md classDiagram 中的 class 數量（grep -c '^\s*class '）；影響 SCHEMA min_table_count |
-| `rest_endpoint_count` | 28 | EDD.md 中的 REST 端點數（<<REST>>、<<Interface>>、HTTP 動詞）；若計算結果 < 5，使用保守預設值 10（避免過低門檻無意義）；影響 API min_endpoint_count |
+| `rest_endpoint_count` | 34 | EDD.md 中的 REST 端點數（<<REST>>、<<Interface>>、HTTP 動詞）；若計算結果 < 5，使用保守預設值 10（避免過低門檻無意義）；影響 API min_endpoint_count |
 | `user_story_count` | 18 | PRD.md 中 US- 標題數量（grep -c '^## US-\|^### US-'）；影響 RTM min_row_count、BDD min_scenario_count |
 | `arch_layer_count` | 19 | ARCH.md §3 Tech Stack 表格非標頭列數（最小值 4）；影響 test-plan min_h2_sections |
 
@@ -107,7 +107,7 @@ description: Pipeline Execution Manifest — 流水線執行摘要，記錄本�
 
 ## §4 Per-Step Completeness Standards（逐步完整性標準）
 
-以下每行定義 gate-check 在驗收該步驟輸出時的最低要求。所有帶 `{{PLACEHOLDER}}` 的欄位在 DRYRUN 生成時由量化錨點計算填入。
+以下每行定義 gate-check 在驗收該步驟輸出時的最低要求。所有量化門檻欄位在 DRYRUN 生成時由上游文件錨點計算填入。
 
 | Step ID | Output File | Min §Sections | Quantitative Rules | Anti-Fake Rules |
 |---------|-------------|:-------------:|--------------------|-----------------|
@@ -119,7 +119,7 @@ description: Pipeline Execution Manifest — 流水線執行摘要，記錄本�
 | VDD | docs/VDD.md | 4 | 至少 5 個 Design Token；Color Palette 不得為空 | no_bare_placeholder |
 | EDD | docs/EDD.md | 8 | §3.3 不含 placeholder；§7 SCALE 含具體數字；UML 9 大圖已生成 | no_bare_placeholder；no_duplicate_paragraphs_150；min_section_words_30 |
 | ARCH | docs/ARCH.md | 6 | C4 L1/L2/L3 三圖均存在；§14 ADR ≥ 1 條目；§15 12 項 NFR 均已驗證 | no_bare_placeholder；no_duplicate_paragraphs_150 |
-| API | docs/API.md | 5 | min_endpoint_count = max(28, 5)；含 Authentication / Error Codes / Rate Limiting 章節 | no_bare_placeholder；required_keywords_per_section |
+| API | docs/API.md | 5 | min_endpoint_count = max(34, 5)；含 Authentication / Error Codes / Rate Limiting 章節 | no_bare_placeholder；required_keywords_per_section |
 | SCHEMA | docs/SCHEMA.md | 4 | min_table_count = max(42, 3)；含 Indexes / Migration 章節 | no_bare_placeholder；no_trivial_entity_names |
 | FRONTEND | docs/FRONTEND.md | 4 | 至少 3 個 Component；E2E 覆蓋範圍不得為空 | no_bare_placeholder |
 | AUDIO | docs/AUDIO.md | 3 | BGM/SFX 清單至少各 1 項；音效觸發邏輯不得為空 | no_bare_placeholder |
@@ -138,8 +138,8 @@ description: Pipeline Execution Manifest — 流水線執行摘要，記錄本�
 | DEVELOPER_GUIDE | docs/DEVELOPER_GUIDE.md | 3 | 日常操作命令 ≥ 5 條；Make targets 不得為空 | no_bare_placeholder |
 | UML-CICD | docs/diagrams/cicd-*.md | — | 5 張 CI/CD UML 圖全部存在 | no_bare_placeholder |
 | ALIGN | docs/ALIGN_REPORT.md | 3 | CRITICAL 問題數 = 0；HIGH 問題數 = 0（或已全部 FIX） | no_bare_placeholder |
-| CONTRACTS | docs/blueprint/contracts/ | — | openapi.yaml 通過 openapi-spec-validator；path 數量 ≥ max(28, 5) | no_bare_placeholder |
-| MOCK | docs/blueprint/mock/ | — | main.py --check 可成功啟動；Mock endpoint 數量 ≥ max(28, 5) | no_bare_placeholder |
+| CONTRACTS | docs/blueprint/contracts/ | — | openapi.yaml 通過 openapi-spec-validator；path 數量 ≥ max(34, 5) | no_bare_placeholder |
+| MOCK | docs/blueprint/mock/ | — | main.py --check 可成功啟動；Mock endpoint 數量 ≥ max(34, 5) | no_bare_placeholder |
 | PROTOTYPE | docs/pages/prototype/ | — | index.html 存在且可瀏覽；至少 3 個 Screen 頁面 | no_bare_placeholder |
 | HTML | docs/pages/ | — | index.html 存在；所有 docs/*.md 均有對應連結 | no_bare_placeholder |
 
@@ -151,7 +151,7 @@ gate-check 在驗收每份輸出文件時，除量化規則外，還會執行以
 
 | 規則名稱 | 觸發條件 | 說明 |
 |---------|---------|------|
-| **no_bare_placeholder** | 文件中殘留未替換的 `{{...}}` 語法 | 所有 `{{PLACEHOLDER}}` 必須在生成時替換為真實內容。殘留 placeholder 代表生成不完整，等同於「空白填表」。 |
+| **no_bare_placeholder** | 文件中殘留未替換的雙花括號語法（如 `{` + `{...}` + `}`） | 所有動態欄位必須在生成時替換為真實內容。殘留未替換欄位代表生成不完整，等同於「空白填表」。 |
 | **min_section_words_30** | 任何 `##` 或 `###` 章節的正文字數不足 30 字 | 每個非標題章節的實質內容不得少於 30 個字（中英文均計）。避免「章節標題存在但內容為空」的偽完成。 |
 | **no_duplicate_paragraphs_150** | 文件中存在兩段以上完全相同且長度 ≥ 150 字元的段落 | 禁止跨章節複製貼上。相同段落出現 ≥ 2 次代表 AI 以重複填充代替實質內容，屬偽造。 |
 | **required_keywords_per_section** | 特定章節缺少必要關鍵字（依步驟類型定義） | 例如：API.md 的 Authentication 章節必須包含 `Bearer` 或 `API Key`；Error Codes 章節必須包含 `4xx` 或 `5xx`。缺少關鍵字代表章節為空洞佔位。 |
